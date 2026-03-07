@@ -90,12 +90,25 @@ export function buildPersonaContext(persona) {
   if (!persona?.patterns) return "";
   const p = persona.patterns;
   const parts = [];
+
   if (p.topTags?.length)              parts.push(`User often works on: ${p.topTags.join(", ")}`);
-  // TODO: avgPriority is referenced here but never set by updatePersona() — potential bug.
-  //       Tracked as tech debt. Do not fix in this bolt (scope: extraction only).
-  if (p.avgPriority)                  parts.push(`Typical priority level: ${p.avgPriority}`);
+  // Bolt 2.1: avgPriority now populated by updatePersona (was phantom field before)
+  if (p.avgPriority && p.avgPriority !== "none") parts.push(`Typical task priority: ${p.avgPriority}`);
   if (p.mostActiveHour !== undefined) parts.push(`Most active around hour ${p.mostActiveHour}:00`);
   if (p.completionRate !== undefined) parts.push(`Task completion rate: ${Math.round(p.completionRate * 100)}%`);
+  // Bolt 2.1: moodTrend — direction of user's recent momentum
+  if (p.moodTrend && p.moodTrend !== "flat") {
+    const trendLabel = p.moodTrend === "up" ? "improving" : "declining";
+    parts.push(`Recent momentum: ${trendLabel}`);
+  }
+  // Bolt 2.1: lastActiveDate — helps AI understand gaps in engagement
+  if (p.lastActiveDate) {
+    const daysSince = Math.floor(
+      (Date.now() - new Date(p.lastActiveDate).getTime()) / 86_400_000
+    );
+    if (daysSince > 1) parts.push(`Last session: ${daysSince} days ago`);
+  }
+
   return parts.length ? `\n\nUser context:\n${parts.join("\n")}` : "";
 }
 
