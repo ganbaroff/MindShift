@@ -36,8 +36,9 @@ import { useDayPlan }     from "./useDayPlan.js";
 import { DayPlanDump }    from "./DayPlanDump.jsx";
 import { DayPlanReview }  from "./DayPlanReview.jsx";
 import { DayPlanTaskList } from "./DayPlanTaskList.jsx";
+import { PersonaCard }    from "../../shared/ui/PersonaCard.jsx";
 
-export function TodayScreen({ thoughts, onArchive, onToggleToday, onUpdate, lang, persona, user }) {
+export function TodayScreen({ thoughts, onArchive, onToggleToday, onUpdate, lang, persona, user, personaArchetype, personaName }) {
   const tx = T[lang] || T.en;
 
   // ── useToday: soft cap, welcome-back, decompose ─────────────────────────────
@@ -247,6 +248,17 @@ export function TodayScreen({ thoughts, onArchive, onToggleToday, onUpdate, lang
           <WelcomeBack
             lang={lang}
             onDismiss={dismissWelcome}
+          />
+        )}
+
+        {/* ── Persona Card (Bolt 3.1) — archetype avatar + level + phrase ── */}
+        {personaArchetype && (
+          <PersonaCard
+            archetype={personaArchetype}
+            name={personaName}
+            user={user}
+            lang={lang}
+            mood="active"
           />
         )}
 

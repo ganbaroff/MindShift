@@ -10,6 +10,8 @@ import {
   sbPullThoughts,
   sbSavePersona,
   sbLoadPersona,
+  sbSavePersonaArchetype,
+  sbLoadPersonaArchetype,
 } from "./shared/services/supabase.js";
 // generateEveningReview → features/evening/index.jsx (Bolt 1.5)
 // aiFocusSuggest        → features/today/index.jsx (Bolt 1.5)
@@ -34,6 +36,8 @@ import { BottomNav }                  from "./skeleton/BottomNav.jsx";
 import { CSS }                        from "./skeleton/design-system/global.css.js";
 import { AuthScreen }                 from "./features/auth/index.jsx";
 import { LangPickScreen, WelcomeScreen } from "./features/onboarding/index.jsx";
+// Bolt 3.1: archetype onboarding (shown after auth on first login)
+import { OnboardingPersona }             from "./features/onboarding/OnboardingPersona.jsx";
 // Bolt 1.2: pure utilities extracted to shared/lib/
 import { uid }                       from "./shared/lib/id.js";
 import { isToday, todayLabel }       from "./shared/lib/date.js";
@@ -216,6 +220,13 @@ export default function App() {
   } = useNotifications(lang);
   const [syncOn, setSyncOn]       = useState(false);
   const [showExport, setShowExport] = useState(false);
+  // Bolt 3.1: archetype persona state — localStorage is primary, Supabase is background sync
+  const [personaArchetype, setPersonaArchetype] = useState(() => {
+    try { return localStorage.getItem("mf_persona_archetype") || null; } catch { return null; }
+  });
+  const [personaName, setPersonaName] = useState(() => {
+    try { return localStorage.getItem("mf_persona_name") || ""; } catch { return ""; }
+  });
   const [showNotion, setShowNotion] = useState(false);
   const [showPricing, setShowPricing] = useState(false);
   const [pricingReason, setPricingReason] = useState("dumps");
@@ -272,6 +283,20 @@ export default function App() {
       // Bolt 2.6 AC1: single permission request on first login (browser enforces once-per-origin)
       if ("Notification" in window && Notification.permission === "default") {
         setTimeout(() => requestPermission(), 800);
+      }
+      // Bolt 3.1: load persona archetype from Supabase on sign-in (cross-device sync)
+      // Only runs if localStorage doesn't already have it (localStorage is primary)
+      if (!localStorage.getItem("mf_persona_archetype")) {
+        sbLoadPersonaArchetype(user.id).then(data => {
+          if (data?.persona_archetype) {
+            setPersonaArchetype(data.persona_archetype);
+            setPersonaName(data.persona_name || "");
+            try {
+              localStorage.setItem("mf_persona_archetype", data.persona_archetype);
+              if (data.persona_name) localStorage.setItem("mf_persona_name", data.persona_name);
+            } catch {}
+          }
+        }).catch(e => logError("App.loadPersonaArchetype", e));
       }
     }
     prevUserRef.current = user;
@@ -420,9 +445,13 @@ export default function App() {
   const handleSignOut = async () => {
     await authSignOut();
     setThoughts([]); setPersona(null); setSyncOn(false);
+    // Bolt 3.1: clear persona archetype on sign-out (prevents leaking to next user)
+    setPersonaArchetype(null); setPersonaName("");
     try {
       localStorage.removeItem("mf_thoughts_local");
       localStorage.removeItem("mf_persona");
+      localStorage.removeItem("mf_persona_archetype");
+      localStorage.removeItem("mf_persona_name");
     } catch {}
     notify(
       lang === "ru" ? "Вышел из аккаунта"
@@ -461,6 +490,24 @@ export default function App() {
   // Bolt 2.3: protected routes — auth required, no skip
   if (authLoading) return wrapper(<div style={{ height: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: C.bg }}><Spinner size={24} color={C.accent} /></div>);
   if (!user)       return wrapper(<AuthScreen lang={lang} onSignIn={signIn} onSignUp={signUp} />);
+
+  // Bolt 3.1 AC1: archetype onboarding — shown once after first auth, before main app
+  if (!personaArchetype) return wrapper(
+    <OnboardingPersona
+      lang={lang}
+      onDone={(archetype, name) => {
+        setPersonaArchetype(archetype);
+        setPersonaName(name);
+        try {
+          localStorage.setItem("mf_persona_archetype", archetype);
+          localStorage.setItem("mf_persona_name", name);
+        } catch {}
+        // Background sync to Supabase (AC2 — persisted to user_profiles)
+        sbSavePersonaArchetype(user.id, archetype, name)
+          .catch(e => logError("App.savePersonaArchetype", e));
+      }}
+    />
+  );
 
   return (
     <>
@@ -507,7 +554,7 @@ export default function App() {
 
         <div style={{ flex: 1, overflowY: "auto" }}>
           {screen === "dump"     && <DumpScreen thoughts={thoughts} onProcess={handleProcess} onToggleToday={toggleToday} onArchive={archive} onUpdate={handleUpdate} lang={lang} persona={persona} isPro={isProUser(user, subscription)} onShowPricing={reason => { setPricingReason(reason); setShowPricing(true); }} user={user} />}
-          {screen === "today"    && <TodayScreen thoughts={thoughts} onArchive={archive} onToggleToday={toggleToday} onUpdate={handleUpdate} lang={lang} persona={persona} user={user} />}
+          {screen === "today"    && <TodayScreen thoughts={thoughts} onArchive={archive} onToggleToday={toggleToday} onUpdate={handleUpdate} lang={lang} persona={persona} user={user} personaArchetype={personaArchetype} personaName={personaName} />}
           {screen === "evening"  && <EveningScreen lang={lang} persona={persona} user={user} />}
           {screen === "settings" && <SettingsScreen thoughts={thoughts} lang={lang} onChangeLang={setLang} onClearAll={() => { setThoughts([]); setPersona(null); try { localStorage.removeItem("mf_thoughts_local"); localStorage.removeItem("mf_persona"); } catch {} notify(lang === "ru" ? "Очищено" : "Cleared", "info"); }} user={user} syncOn={syncOn} onToggleSync={() => setSyncOn(v => !v)} onShowAuth={() => {}} onSignOut={handleSignOut} persona={persona} onExport={() => setShowExport(true)} onNotion={() => setShowNotion(true)} isPro={isProUser(user, subscription)} onShowPricing={reason => { setPricingReason(reason); setShowPricing(true); }} notifSettings={notifSettings} notifPermission={notifPermission} onUpdateNotifSettings={updateNotifSettings} onRequestNotifPermission={requestPermission} />}
         </div>
