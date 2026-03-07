@@ -28,6 +28,8 @@ import {
   requestNotifPermission, scheduleNotification,
 } from "./shared/lib/notifications.js";
 import { applyNotifSchedule }        from "./shared/lib/notif-schedule.js";
+// Bolt 1.4: centralised error logging (INVARIANT 7)
+import { logError }                  from "./shared/lib/logger.js";
 // Bolt 1.2: constants extracted to shared modules
 import { C, P_COLOR }               from "./skeleton/design-system/tokens.js";
 import { T, LANGS }                 from "./shared/i18n/translations.js";
@@ -142,7 +144,7 @@ function PricingScreen({ lang, user, onClose, onWaitlist }) {
     try {
       const sb = getSupabase();
       if (sb) await sb.from("waitlist").upsert({ email: email.trim(), source: "pricing", lang }, { onConflict: "email" });
-    } catch {}
+    } catch (e) { logError("PricingModal.waitlistUpsert", e); }
     setLoading(false);
     setSubmitted(true);
   };
@@ -252,7 +254,7 @@ function PricingScreen({ lang, user, onClose, onWaitlist }) {
 class ErrorBoundary extends Component {
   constructor(props) { super(props); this.state = { hasError: false, error: null }; }
   static getDerivedStateFromError(error) { return { hasError: true, error }; }
-  componentDidCatch(error, info) { console.error("[MindFlow ErrorBoundary]", error, info); }
+  componentDidCatch(error, info) { logError("ErrorBoundary", error, { componentStack: info?.componentStack }); }
   render() {
     if (this.state.hasError) {
       return (
@@ -1011,7 +1013,7 @@ function DumpScreen({ thoughts, onProcess, onToggleToday, onArchive, onUpdate, l
       setStatus("done");
       setTimeout(() => { setStatus("idle"); setAiMsg(""); }, 5000);
     } catch (e) {
-      console.error(e);
+      logError("DumpScreen.handleSubmit", e);
       setStatus("error");
       // FIX: specific error messages for timeout and auth failures
       if (e.message === "timeout") {
@@ -1212,7 +1214,7 @@ function TodayScreen({ thoughts, onArchive, onToggleToday, onUpdate, lang, perso
     if (!pool.length) return;
     setAiLoading(true);
     try { setAiSuggestion(await aiFocusSuggest(pool, lang, persona)); }
-    catch { setAiSuggestion(null); }
+    catch (e) { logError("TodayScreen.getSuggestions", e); setAiSuggestion(null); }
     setAiLoading(false);
   };
 
@@ -1368,7 +1370,7 @@ function EveningScreen({ thoughts, lang, persona, user }) {
   const generate = async () => {
     setLoading(true);
     try { setReview(await generateEveningReview(doneToday, missed, lang, persona)); }
-    catch { setReview(lang === "ru" ? "Ты появился сегодня. Это всегда считается." : "You showed up today. That always counts."); }
+    catch (e) { logError("EveningScreen.generate", e); setReview(lang === "ru" ? "Ты появился сегодня. Это всегда считается." : "You showed up today. That always counts."); }
     setLoading(false);
   };
 
@@ -1384,7 +1386,7 @@ function EveningScreen({ thoughts, lang, persona, user }) {
           note, ai_reflection: review,
           done_count: doneToday.length, missed_count: missed.length,
         });
-      } catch (e) { console.error("review save:", e); }
+      } catch (e) { logError("EveningScreen.save", e); }
     }
     setSaved(true);
   };
@@ -2057,7 +2059,7 @@ export default function App() {
   // Persist persona locally (supplements Supabase)
   useEffect(() => {
     if (!persona) return;
-    try { localStorage.setItem("mf_persona", JSON.stringify(persona)); } catch {}
+    try { localStorage.setItem("mf_persona", JSON.stringify(persona)); } catch (e) { logError("App.persistPersona", e); }
   }, [persona]);
 
   // FIX: auto-save thoughts to localStorage for unauthenticated users
@@ -2066,7 +2068,7 @@ export default function App() {
     if (user && syncOn) return; // Supabase handles persistence
     try {
       localStorage.setItem("mf_thoughts_local", JSON.stringify(thoughts.slice(0, 200)));
-    } catch {}
+    } catch (e) { logError("App.persistThoughtsLocal", e); }
   }, [thoughts, user, syncOn]);
 
   // Apply saved notification schedule whenever lang changes
