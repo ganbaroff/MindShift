@@ -326,3 +326,58 @@ export async function sbLoadPersona(userId) {
     .single();
   return data?.data || null;
 }
+
+// =============================================================================
+// 7. CHARACTER PROGRESS OPERATIONS
+// Bolt 2.4: Evening Review + XP system (ADR 0008).
+// One row per user in character_progress table.
+// =============================================================================
+
+/**
+ * Loads the user's character progress (total_xp, level, last_review_date).
+ * Returns null if no progress row exists yet.
+ *
+ * @param {string} userId
+ * @returns {Promise<{ total_xp: number, level: number, last_review_date: string|null }|null>}
+ */
+export async function sbGetCharacterProgress(userId) {
+  const sb = getSupabase();
+  if (!sb) return null;
+  const { data, error } = await sb
+    .from("character_progress")
+    .select("total_xp, level, last_review_date")
+    .eq("user_id", userId)
+    .single();
+  if (error) return null; // PGRST116 = no row → that's fine, first use
+  return data || null;
+}
+
+/**
+ * Upserts character progress after an evening review.
+ * Level is recomputed: floor(total_xp / 100) + 1.
+ *
+ * @param {string} userId
+ * @param {number} newTotalXp    — already-summed total (existing + earned today)
+ * @param {string} reviewDate    — 'YYYY-MM-DD' local date of the review
+ */
+export async function sbUpsertCharacterProgress(userId, newTotalXp, reviewDate) {
+  const sb = getSupabase();
+  if (!sb) return;
+  const level = Math.floor(newTotalXp / 100) + 1;
+  const { error } = await sb
+    .from("character_progress")
+    .upsert(
+      {
+        user_id:          userId,
+        total_xp:         newTotalXp,
+        level,
+        last_review_date: reviewDate,
+        updated_at:       new Date().toISOString(),
+      },
+      { onConflict: "user_id" }
+    );
+  if (error) {
+    // Import logError dynamically to avoid circular deps — log but don't crash
+    console.error("[supabase] sbUpsertCharacterProgress error:", error.message);
+  }
+}

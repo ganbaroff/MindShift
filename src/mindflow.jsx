@@ -444,6 +444,20 @@ export default function App() {
 
   const badge = thoughts.filter(t => t.isToday && !t.archived).length;
 
+  // Bolt 2.4: time-gate — evening review available from 16:00 local time (AC1)
+  const handleNavChange = (id) => {
+    if (id === "evening" && new Date().getHours() < 16) {
+      notify(
+        lang === "ru" ? "Вечерний обзор — после 16:00"
+        : lang === "az" ? "Axşam icmalı — 16:00-dan sonra"
+        : "Evening review opens at 4 PM",
+        "info"
+      );
+      return;
+    }
+    setScreen(id);
+  };
+
   const wrapper = (children) => (
     <ErrorBoundary>
       <style>{CSS}</style>
@@ -503,11 +517,11 @@ export default function App() {
         <div style={{ flex: 1, overflowY: "auto" }}>
           {screen === "dump"     && <DumpScreen thoughts={thoughts} onProcess={handleProcess} onToggleToday={toggleToday} onArchive={archive} onUpdate={handleUpdate} lang={lang} persona={persona} isPro={isProUser(user, subscription)} onShowPricing={reason => { setPricingReason(reason); setShowPricing(true); }} user={user} />}
           {screen === "today"    && <TodayScreen thoughts={thoughts} onArchive={archive} onToggleToday={toggleToday} onUpdate={handleUpdate} lang={lang} persona={persona} user={user} />}
-          {screen === "evening"  && <EveningScreen thoughts={thoughts} lang={lang} persona={persona} user={user} />}
+          {screen === "evening"  && <EveningScreen lang={lang} persona={persona} user={user} />}
           {screen === "settings" && <SettingsScreen thoughts={thoughts} lang={lang} onChangeLang={setLang} onClearAll={() => { setThoughts([]); setPersona(null); try { localStorage.removeItem("mf_thoughts_local"); localStorage.removeItem("mf_persona"); } catch {} notify(lang === "ru" ? "Очищено" : "Cleared", "info"); }} user={user} syncOn={syncOn} onToggleSync={() => setSyncOn(v => !v)} onShowAuth={() => {}} onSignOut={handleSignOut} persona={persona} onExport={() => setShowExport(true)} onNotif={() => setShowNotif(true)} onNotion={() => setShowNotion(true)} isPro={isProUser(user, subscription)} onShowPricing={reason => { setPricingReason(reason); setShowPricing(true); }} />}
         </div>
 
-        <BottomNav active={screen} onChange={setScreen} badge={badge} lang={lang} />
+        <BottomNav active={screen} onChange={handleNavChange} badge={badge} lang={lang} />
         {showExport   && <ExportPanel thoughts={thoughts} lang={lang} onClose={() => setShowExport(false)} />}
         {showPricing  && <PricingScreen lang={lang} user={user} onClose={() => setShowPricing(false)} />}
         {showNotif  && <NotifPanel lang={lang} onClose={() => setShowNotif(false)} />}

@@ -254,26 +254,75 @@ Task: ${task.text}`;
 }
 
 /**
- * Generates a compassionate ADHD evening review.
+ * Generates a compassionate ADHD evening review with XP award.
+ * Bolt 2.4: changed return type from string → { reflection, xpEarned }
+ * ADR 0008: XP formula is activity-based, not completion-based.
  *
- * @param {object[]} doneItems
- * @param {object[]} missedItems
+ * @param {object[]} doneItems   — completed tasks ({ title } or { text })
+ * @param {object[]} missedItems — incomplete tasks
  * @param {"en"|"ru"|"az"} lang
  * @param {object|null} persona
- * @returns {Promise<string>} plain text review
+ * @param {{ plannedCount?: number, noteWritten?: boolean }} activity
+ * @returns {Promise<{ reflection: string, xpEarned: number }>}
  */
-export async function generateEveningReview(doneItems, missedItems, lang, persona) {
+export async function generateEveningReview(doneItems, missedItems, lang, persona, activity = {}) {
   const name = langName(lang);
   const ctx  = buildPersonaContext(persona);
 
-  const prompt = `You are a compassionate ADHD coach. Write a short evening review in ${name} (3-4 sentences MAX).${ctx}
+  // XP computed client-side — AI cannot override the formula (ADR 0008)
+  const { plannedCount = 0, noteWritten = false } = activity;
+  const xpCalc =
+    10 +                                     // base: showed up for evening review
+    (plannedCount > 0     ? 10 : 0) +        // created a day plan
+    (doneItems.length > 0 ? 10 : 0) +        // completed at least one task
+    (noteWritten          ? 10 : 0) +        // wrote a personal note
+    10;                                      // +10 for requesting AI reflection
 
-Completed: ${JSON.stringify(doneItems.map(t => t.text))}
-Not completed: ${JSON.stringify(missedItems.map(t => t.text))}
+  const prompt = `You are a compassionate ADHD coach. Respond in ${name}.${ctx}
 
-Rules: no guilt, no shame, acknowledge wins (even tiny ones), one gentle tomorrow suggestion, end with one open reflective question. Plain text only.`;
+Today's tasks:
+- Completed (${doneItems.length}): ${JSON.stringify(doneItems.map(t => t.title || t.text))}
+- Incomplete (${missedItems.length}): ${JSON.stringify(missedItems.map(t => t.title || t.text))}
 
-  return await callClaude(prompt);
+Return ONLY valid JSON — no markdown, no backticks:
+{ "reflection": "2-3 sentences in ${name}", "xp_earned": ${xpCalc} }
+
+Reflection rules:
+- No 'good day / bad day' judgements
+- Acknowledge effort (not just outcomes)
+- Incomplete tasks mentioned neutrally if at all: 'some things wait for another time'
+- Tone: warm, calm, matter-of-fact
+- xp_earned must be exactly ${xpCalc}`;
+
+  try {
+    const raw   = await callClaude(prompt);
+    const clean = raw.replace(/```json\n?|```/g, "").trim();
+    const m     = clean.match(/\{[\s\S]*\}/);
+    if (m) {
+      const parsed     = JSON.parse(m[0]);
+      const reflection = typeof parsed.reflection === "string" && parsed.reflection.length > 10
+        ? parsed.reflection
+        : _fallbackReflection(lang, doneItems.length);
+      // Clamp to [10, 50] — AI must not accidentally award negative or extreme XP
+      const xpEarned = Math.min(50, Math.max(10, Number(parsed.xp_earned) || xpCalc));
+      return { reflection, xpEarned };
+    }
+  } catch { /* fall through */ }
+
+  return { reflection: _fallbackReflection(lang, doneItems.length), xpEarned: xpCalc };
+}
+
+/** Fallback reflection when AI parse fails */
+function _fallbackReflection(lang, doneCount) {
+  if (lang === "ru") return doneCount > 0
+    ? "Ты сделал кое-что сегодня. Это всегда считается."
+    : "Ты появился. Иногда это само по себе — работа.";
+  if (lang === "az") return doneCount > 0
+    ? "Bu gün bir şey etdin. Bu həmişə sayılır."
+    : "Gəldin. Bəzən bu özü bir işdir.";
+  return doneCount > 0
+    ? "You got some things done today. That always counts."
+    : "You showed up. Sometimes that's the work.";
 }
 
 /**
