@@ -28,6 +28,7 @@ import { isToday, todayLabel } from "../../shared/lib/date.js";
 import { getStreakData }  from "../../shared/lib/streak.js";
 import { aiFocusSuggest } from "../../shared/services/claude.js";
 import { logError }       from "../../shared/lib/logger.js";
+import { useUsageLimits } from "../../shared/hooks/useUsageLimits.js";
 import { useToday }       from "./useToday.js";
 import { WelcomeBack }    from "./WelcomeBack.jsx";
 import { TodayList }      from "./TodayList.jsx";
@@ -54,12 +55,16 @@ export function TodayScreen({ thoughts, onArchive, onToggleToday, onUpdate, lang
     dismissWelcome,
   } = useToday({ thoughts, onArchive, onUpdate, lang, persona });
 
+  // ── useUsageLimits: freemium gate (Bolt 2.5) ───────────────────────────────
+  const { checkAndIncrement } = useUsageLimits(user);
+
   // ── useDayPlan: AI-powered daily plan (Bolt 2.2) ───────────────────────────
   const [dayPlanText, setDayPlanText] = useState("");
   const {
     status:         dayPlanStatus,
     proposed:       dayPlanProposed,
     errorMsg:       dayPlanError,
+    limitMsg:       dayPlanLimitMsg,
     savedTasks:     dayPlanTasks,
     loadingTasks:   dayPlanLoading,
     submitDayPlan,
@@ -69,7 +74,7 @@ export function TodayScreen({ thoughts, onArchive, onToggleToday, onUpdate, lang
     cancelReview:   cancelDayPlanReview,
     toggleSavedTask,
     clearPlan,
-  } = useDayPlan({ lang, persona, user });
+  } = useDayPlan({ lang, persona, user, checkAndIncrement });
 
   // ── Derived lists not covered by useToday ──────────────────────────────────
   const doneToday   = useMemo(() => thoughts.filter(t => t.archived && isToday(t.archivedAt || t.updatedAt)), [thoughts]);
@@ -269,6 +274,7 @@ export function TodayScreen({ thoughts, onArchive, onToggleToday, onUpdate, lang
               onSubmit={() => submitDayPlan(dayPlanText)}
               isProcessing={dayPlanStatus === "processing"}
               errorMsg={dayPlanError}
+              limitMsg={dayPlanLimitMsg}
               lang={lang}
             />
           )}

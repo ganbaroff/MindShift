@@ -18,10 +18,11 @@ import { Spinner } from "../../shared/ui/primitives.jsx";
  * @param {Function} props.setText
  * @param {Function} props.onSubmit  — () => void
  * @param {boolean}  props.isProcessing
- * @param {string}   props.errorMsg
+ * @param {string}   props.errorMsg   — API/network error (red styling)
+ * @param {string}  [props.limitMsg]  — freemium limit banner (soft styling, Bolt 2.5)
  * @param {string}   props.lang
  */
-export function DayPlanDump({ text, setText, onSubmit, isProcessing, errorMsg, lang }) {
+export function DayPlanDump({ text, setText, onSubmit, isProcessing, errorMsg, limitMsg, lang }) {
   const taRef = useRef(null);
 
   useEffect(() => {
@@ -44,7 +45,8 @@ export function DayPlanDump({ text, setText, onSubmit, isProcessing, errorMsg, l
     if ((e.metaKey || e.ctrlKey) && e.key === "Enter") onSubmit();
   };
 
-  const isActive = text.trim().length > 0;
+  const isActive    = text.trim().length > 0;
+  const isLimited   = Boolean(limitMsg);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -92,20 +94,20 @@ export function DayPlanDump({ text, setText, onSubmit, isProcessing, errorMsg, l
       <button
         data-testid="day-plan-btn"
         onClick={onSubmit}
-        disabled={isProcessing || !isActive}
+        disabled={isProcessing || !isActive || isLimited}
         style={{
           height: 50,
-          background: isProcessing
+          background: isProcessing || isLimited
             ? C.surfaceHi
             : isActive
               ? `linear-gradient(135deg, ${C.accent}, ${C.accentLit})`
               : C.surface,
-          color: isActive && !isProcessing ? "white" : C.textSub,
+          color: isActive && !isProcessing && !isLimited ? "white" : C.textSub,
           border: "none",
           borderRadius: 14,
           fontSize: 15,
           fontWeight: 700,
-          cursor: !isActive || isProcessing ? "not-allowed" : "pointer",
+          cursor: !isActive || isProcessing || isLimited ? "not-allowed" : "pointer",
           transition: "all .2s",
           display: "flex",
           alignItems: "center",
@@ -113,7 +115,7 @@ export function DayPlanDump({ text, setText, onSubmit, isProcessing, errorMsg, l
           gap: 8,
           fontFamily: "inherit",
           letterSpacing: 0.3,
-          boxShadow: isActive && !isProcessing ? `0 4px 20px ${C.accentGlow}` : "none",
+          boxShadow: isActive && !isProcessing && !isLimited ? `0 4px 20px ${C.accentGlow}` : "none",
           minHeight: 44, // WCAG touch target
         }}
       >
@@ -121,6 +123,22 @@ export function DayPlanDump({ text, setText, onSubmit, isProcessing, errorMsg, l
           ? <><Spinner /> {lang === "ru" ? "Думаю..." : lang === "az" ? "Düşünürəm..." : "Thinking..."}</>
           : btnLabel}
       </button>
+
+      {/* Freemium limit banner — soft, non-alarming (Bolt 2.5, ADHD P1) */}
+      {limitMsg && (
+        <div style={{
+          background: `${C.surfaceHi}`,
+          border: `1px solid ${C.borderHi}`,
+          borderRadius: 10,
+          padding: "10px 14px",
+          color: C.textSub,
+          fontSize: 13,
+          fontWeight: 500,
+          lineHeight: 1.5,
+        }}>
+          {limitMsg}
+        </div>
+      )}
 
       {/* Error message */}
       {errorMsg && (

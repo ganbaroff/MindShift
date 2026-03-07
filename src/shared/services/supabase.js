@@ -10,6 +10,10 @@
  *   2. Retry queue             — offline-resilient write queue (INVARIANT 2)
  *   3. Thought operations      — sbPushThought(), sbPullThoughts()
  *   4. Persona operations      — sbSavePersona(), sbLoadPersona()
+ *   5. Dump operations         — sbSaveDump(), sbUpdateDumpResult()
+ *   6. Daily task operations   — sbGetDailyTasks(), sbSaveDailyTasks(), sbToggleDailyTask()
+ *   7. Character progress      — sbGetCharacterProgress(), sbUpsertCharacterProgress()
+ *   8. Usage limits            — sbGetUsage(), sbCheckAndIncrementUsage(), sbGetUserProfile()
  *
  * Auth operations (signInWithOtp, onAuthStateChange, signOut) are NOT here —
  * they belong to the auth/ feature slice (Sprint 2). Import getSupabase()
@@ -380,4 +384,88 @@ export async function sbUpsertCharacterProgress(userId, newTotalXp, reviewDate) 
     // Import logError dynamically to avoid circular deps — log but don't crash
     console.error("[supabase] sbUpsertCharacterProgress error:", error.message);
   }
+}
+
+// =============================================================================
+// 8. USAGE LIMITS OPERATIONS (Bolt 2.5)
+// Freemium gate — tracks per-user, per-day AI call counts.
+// Free limits (ADR 0009): 3 parseDayPlan/day, 1 generateEveningReview/day.
+// Pro users (user_profiles.is_pro = true) bypass all limits.
+// =============================================================================
+
+/**
+ * Returns today's usage row for the user (or null if no row yet).
+ *
+ * @param {string} userId
+ * @param {string} date  — 'YYYY-MM-DD' UTC
+ * @returns {Promise<{ day_plan_calls: number, evening_review_calls: number }|null>}
+ */
+export async function sbGetUsage(userId, date) {
+  const sb = getSupabase();
+  if (!sb) return null;
+  const { data } = await sb
+    .from("usage_limits")
+    .select("day_plan_calls, evening_review_calls")
+    .eq("user_id", userId)
+    .eq("date", date)
+    .single();
+  return data || null;
+}
+
+/**
+ * Checks whether the user is under the daily limit for a given feature,
+ * then increments the counter if allowed. Increment happens BEFORE the
+ * API call to protect against race conditions (ADR 0009).
+ *
+ * @param {string} userId
+ * @param {string} date    — 'YYYY-MM-DD' UTC
+ * @param {"day_plan_calls"|"evening_review_calls"} field
+ * @param {number} limit   — max allowed per day
+ * @returns {Promise<{ allowed: boolean, current: number }>}
+ */
+export async function sbCheckAndIncrementUsage(userId, date, field, limit) {
+  const sb = getSupabase();
+  if (!sb) return { allowed: true, current: 0 }; // fail-open if no client
+
+  // Upsert row so it exists, then read current count
+  await sb
+    .from("usage_limits")
+    .upsert({ user_id: userId, date }, { onConflict: "user_id,date", ignoreDuplicates: true });
+
+  const { data } = await sb
+    .from("usage_limits")
+    .select(field)
+    .eq("user_id", userId)
+    .eq("date", date)
+    .single();
+
+  const current = data?.[field] ?? 0;
+  if (current >= limit) return { allowed: false, current };
+
+  // Increment
+  await sb
+    .from("usage_limits")
+    .update({ [field]: current + 1 })
+    .eq("user_id", userId)
+    .eq("date", date);
+
+  return { allowed: true, current: current + 1 };
+}
+
+/**
+ * Returns the user's profile (is_pro flag).
+ * Returns { is_pro: false } if no row exists yet (new user = free tier).
+ *
+ * @param {string} userId
+ * @returns {Promise<{ is_pro: boolean }>}
+ */
+export async function sbGetUserProfile(userId) {
+  const sb = getSupabase();
+  if (!sb) return { is_pro: false };
+  const { data } = await sb
+    .from("user_profiles")
+    .select("is_pro")
+    .eq("user_id", userId)
+    .single();
+  return data || { is_pro: false };
 }

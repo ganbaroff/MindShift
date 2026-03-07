@@ -49,15 +49,17 @@ function todayStr() {
  * @param {object} opts
  * @param {string}      opts.lang
  * @param {object|null} opts.persona
- * @param {object|null} opts.user      — auth user (null = unauthenticated)
+ * @param {object|null} opts.user              — auth user (null = unauthenticated)
+ * @param {Function}   [opts.checkAndIncrement] — from useUsageLimits (Bolt 2.5)
  */
-export function useDayPlan({ lang, persona, user }) {
+export function useDayPlan({ lang, persona, user, checkAndIncrement }) {
   const date = todayStr();
 
   /** "idle" | "processing" | "review" | "saved" | "error" */
   const [status,       setStatus]       = useState("idle");
   const [proposed,     setProposed]     = useState(/** @type {ProposedTask[]} */ ([]));
   const [errorMsg,     setErrorMsg]     = useState("");
+  const [limitMsg,     setLimitMsg]     = useState("");
   const [savedTasks,   setSavedTasks]   = useState(/** @type {DailyTask[]} */ ([]));
   const [loadingTasks, setLoadingTasks] = useState(false);
 
@@ -81,6 +83,20 @@ export function useDayPlan({ lang, persona, user }) {
   const submitDayPlan = useCallback(async (rawText) => {
     const trimmed = rawText?.trim();
     if (!trimmed || status === "processing") return;
+
+    // Freemium gate (Bolt 2.5, ADR 0009) — increment BEFORE API call
+    if (checkAndIncrement) {
+      const { allowed } = await checkAndIncrement("day_plan");
+      if (!allowed) {
+        setLimitMsg(
+          lang === "ru" ? "Дневной лимит исчерпан. Завтра снова доступно."
+          : lang === "az" ? "Günlük limit bitdi. Sabah yenidən əlçatan."
+          : "Daily limit reached. Available again tomorrow."
+        );
+        return;
+      }
+      setLimitMsg("");
+    }
 
     setStatus("processing");
     setErrorMsg("");
@@ -108,7 +124,7 @@ export function useDayPlan({ lang, persona, user }) {
       setStatus("error");
       setTimeout(() => { setStatus("idle"); setErrorMsg(""); }, 4000);
     }
-  }, [status, lang, persona]);
+  }, [status, lang, persona, checkAndIncrement]);
 
   /** Toggle a single proposed item's accepted state. */
   const toggleItem = useCallback((index) => {
@@ -196,7 +212,8 @@ export function useDayPlan({ lang, persona, user }) {
   return {
     status,          // "idle" | "processing" | "review" | "saved" | "error"
     proposed,        // ProposedTask[]
-    errorMsg,        // string
+    errorMsg,        // string — API/network error (red banner)
+    limitMsg,        // string — freemium limit reached (soft banner)
     savedTasks,      // DailyTask[]
     loadingTasks,    // boolean
     date,            // 'YYYY-MM-DD'

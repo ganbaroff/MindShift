@@ -21,6 +21,7 @@ import { todayLabel }               from "../../shared/lib/date.js";
 import { generateEveningReview }    from "../../shared/services/claude.js";
 import { sbGetDailyTasks }          from "../../shared/services/supabase.js";
 import { logError }                 from "../../shared/lib/logger.js";
+import { useUsageLimits }           from "../../shared/hooks/useUsageLimits.js";
 import { useCharacterProgress }     from "./useCharacterProgress.js";
 import { CharacterCard }            from "./CharacterCard.jsx";
 
@@ -94,11 +95,15 @@ export function EveningScreen({ lang, persona, user }) {
   const [tasksLoading, setTasksLoading] = useState(true);
 
   // Review flow
-  const [note,       setNote]       = useState("");
-  const [reflection, setReflection] = useState(null);
-  const [xpEarned,   setXpEarned]   = useState(null);
-  const [aiLoading,  setAiLoading]  = useState(false);
-  const [saved,      setSaved]      = useState(false);
+  const [note,            setNote]            = useState("");
+  const [reflection,      setReflection]      = useState(null);
+  const [xpEarned,        setXpEarned]        = useState(null);
+  const [aiLoading,       setAiLoading]       = useState(false);
+  const [saved,           setSaved]           = useState(false);
+  const [eveningLimitMsg, setEveningLimitMsg] = useState("");
+
+  // Freemium gate (Bolt 2.5)
+  const { checkAndIncrement } = useUsageLimits(user);
 
   // Character progress
   const { totalXp, level, progressLoading, awardXp } = useCharacterProgress(user);
@@ -118,6 +123,19 @@ export function EveningScreen({ lang, persona, user }) {
   // ── Generate AI reflection ────────────────────────────────────────────────
   const handleGenerate = useCallback(async () => {
     if (aiLoading || reflection) return;
+
+    // Freemium gate (Bolt 2.5, ADR 0009) — increment BEFORE API call
+    const { allowed } = await checkAndIncrement("evening_review");
+    if (!allowed) {
+      setEveningLimitMsg(
+        lang === "ru" ? "Вечерний обзор — 1 раз в день. Завтра снова доступно."
+        : lang === "az" ? "Axşam icmalı — gündə 1 dəfə. Sabah yenidən əlçatan."
+        : "Evening review is once per day. Available again tomorrow."
+      );
+      return;
+    }
+    setEveningLimitMsg("");
+
     setAiLoading(true);
     try {
       const result = await generateEveningReview(
@@ -140,7 +158,7 @@ export function EveningScreen({ lang, persona, user }) {
       setXpEarned(10);
     }
     setAiLoading(false);
-  }, [aiLoading, reflection, doneTasks, pendingTasks, lang, persona, note, tasks.length]);
+  }, [aiLoading, reflection, doneTasks, pendingTasks, lang, persona, note, tasks.length, checkAndIncrement]);
 
   // ── Save day ──────────────────────────────────────────────────────────────
   const handleSave = useCallback(async () => {
@@ -214,25 +232,42 @@ export function EveningScreen({ lang, persona, user }) {
           }}
         />
 
+        {/* ── Freemium limit banner (Bolt 2.5) ──────────────────────────── */}
+        {eveningLimitMsg && (
+          <div style={{
+            background: C.surfaceHi,
+            border: `1px solid ${C.borderHi}`,
+            borderRadius: 10,
+            padding: "10px 14px",
+            color: C.textSub,
+            fontSize: 13,
+            fontWeight: 500,
+            lineHeight: 1.5,
+            marginBottom: 12,
+          }}>
+            {eveningLimitMsg}
+          </div>
+        )}
+
         {/* ── Generate button ────────────────────────────────────────────── */}
         <button
           onClick={handleGenerate}
-          disabled={aiLoading || !!reflection}
+          disabled={aiLoading || !!reflection || !!eveningLimitMsg}
           aria-label={tx.generateBtn}
           style={{
             width: "100%", minHeight: 48,
-            background: reflection
+            background: reflection || eveningLimitMsg
               ? C.surface
               : aiLoading
               ? C.surfaceHi
               : `linear-gradient(135deg, ${C.accent}, ${C.accentLit})`,
-            color:        reflection ? C.textSub : "white",
-            border:       reflection ? `1px solid ${C.border}` : "none",
+            color:        reflection || eveningLimitMsg ? C.textSub : "white",
+            border:       reflection || eveningLimitMsg ? `1px solid ${C.border}` : "none",
             borderRadius: 12, fontSize: 15, fontWeight: 700,
-            cursor:       reflection ? "default" : aiLoading ? "not-allowed" : "pointer",
+            cursor:       reflection || eveningLimitMsg ? "default" : aiLoading ? "not-allowed" : "pointer",
             fontFamily:   "inherit",
             display:      "flex", alignItems: "center", justifyContent: "center", gap: 8,
-            boxShadow:    reflection || aiLoading ? "none" : `0 4px 20px ${C.accentGlow}`,
+            boxShadow:    reflection || aiLoading || eveningLimitMsg ? "none" : `0 4px 20px ${C.accentGlow}`,
             transition:   "all .2s", marginBottom: 12,
           }}
         >
