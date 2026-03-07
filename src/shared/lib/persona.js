@@ -5,7 +5,27 @@
  *
  * Bolt 1.2: extracted from mindflow.jsx lines 303–319.
  * Bolt 2.1: added avgPriority, moodTrend, lastActiveDate (spec 2026-03-07).
+ * Bolt 4.1: added calcXpGain (ADR 0013).
  */
+
+// ─── XP gain table (ADR 0013) ────────────────────────────────────────────────
+
+/**
+ * Returns the fixed XP gain for a given user action.
+ * Activity-based per ADR 0008 — XP for doing, not for completing.
+ *
+ * @param {"brain_dump_submitted"|"day_plan_accepted"|"evening_review_completed"|"persona_chat_message"} action
+ * @returns {number} XP to award (0 for unknown actions)
+ */
+export function calcXpGain(action) {
+  const XP_TABLE = {
+    brain_dump_submitted:     20,
+    day_plan_accepted:        15,
+    evening_review_completed: 25,
+    persona_chat_message:      5,
+  };
+  return XP_TABLE[action] ?? 0;
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Priority helpers

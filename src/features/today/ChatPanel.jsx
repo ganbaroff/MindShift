@@ -38,6 +38,8 @@ import { personaDialogue }  from "../../shared/services/claude.js";
 import { getLimitFallback } from "../../shared/lib/dialogues.js";
 import { logError }         from "../../shared/lib/logger.js";
 import { ChatBubble }       from "./ChatBubble.jsx";
+// Bolt 4.1 — XP for persona chat messages (ADR 0013)
+import { calcXpGain }       from "../../shared/lib/persona.js";
 
 // ─── localStorage helpers ───────────────────────────────────────────────────
 
@@ -189,6 +191,7 @@ export function ChatPanel({
   totalTasks     = 0,
   checkAndIncrement,
   onClose,
+  addXp,          // Bolt 4.1 — from useCharacterProgress in TodayScreen
 }) {
   const color = archetypeColor || C.accent;
 
@@ -254,6 +257,9 @@ export function ChatPanel({
           completedTasks,
           totalTasks,
         });
+
+        // Bolt 4.1 — 5 XP per AI response received (ADR 0013, activity-based)
+        addXp?.(calcXpGain("persona_chat_message"));
       } else {
         // 4b. Limit reached — silent in-character fallback (AC7)
         replyText = getLimitFallback(archetype, lang);

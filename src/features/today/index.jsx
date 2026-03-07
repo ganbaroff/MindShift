@@ -42,6 +42,9 @@ import { ChatPanel }        from "./ChatPanel.jsx";
 import { getGreeting, getTimePeriod } from "../../shared/lib/dialogues.js";
 import { ARCHETYPE_COLORS } from "../../shared/lib/archetypes.js";
 import { useCharacterProgress } from "../../shared/hooks/useCharacterProgress.js";
+// Bolt 4.1 — XP system (ADR 0013)
+import { calcXpGain }   from "../../shared/lib/persona.js";
+import { LevelUpToast } from "../../shared/ui/LevelUpToast.jsx";
 
 export function TodayScreen({ thoughts, onArchive, onToggleToday, onUpdate, lang, persona, user, personaArchetype, personaName }) {
   const tx = T[lang] || T.en;
@@ -65,7 +68,8 @@ export function TodayScreen({ thoughts, onArchive, onToggleToday, onUpdate, lang
   const { checkAndIncrement } = useUsageLimits(user);
 
   // ── Character progress: level for persona dialogue context (Bolt 3.2) ──────
-  const { level } = useCharacterProgress(user);
+  // Bolt 4.1: also destructure addXp + levelUpPayload for XP call sites
+  const { level, addXp, levelUpPayload } = useCharacterProgress(user);
 
   // ── Persona chat state (Bolt 3.2 — AC3) ────────────────────────────────────
   const [showChat, setShowChat] = useState(false);
@@ -139,6 +143,15 @@ export function TodayScreen({ thoughts, onArchive, onToggleToday, onUpdate, lang
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+      {/* Bolt 4.1 — Level Up toast (auto-dismissed by hook after 2.5s) */}
+      {levelUpPayload && (
+        <LevelUpToast
+          newLevel={levelUpPayload.newLevel}
+          color={archetypeColor || undefined}
+          lang={lang}
+        />
+      )}
+
       {/* ── Header ── */}
       <div style={{ padding: "18px 18px 14px", flexShrink: 0 }}>
         <div style={{ color: C.textSub, fontSize: 13, marginBottom: 3 }}>{todayLabel(lang)}</div>
@@ -333,6 +346,7 @@ export function TodayScreen({ thoughts, onArchive, onToggleToday, onUpdate, lang
             totalTasks={total}
             checkAndIncrement={checkAndIncrement}
             onClose={() => setShowChat(false)}
+            addXp={addXp}
           />
         )}
 
@@ -371,7 +385,12 @@ export function TodayScreen({ thoughts, onArchive, onToggleToday, onUpdate, lang
               proposed={dayPlanProposed}
               onToggle={toggleDayPlanItem}
               onAcceptAll={acceptAllDayPlan}
-              onConfirm={async () => { await confirmPlan(); setDayPlanText(""); }}
+              onConfirm={async () => {
+                await confirmPlan();
+                setDayPlanText("");
+                // Bolt 4.1 — XP for planning activity (ADR 0013, activity-based)
+                if (user?.id) addXp(calcXpGain("day_plan_accepted"));
+              }}
               onCancel={cancelDayPlanReview}
               lang={lang}
             />

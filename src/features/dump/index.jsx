@@ -22,6 +22,10 @@ import { FREE_LIMITS, getDumpCount } from "../../shared/lib/freemium.js";
 import { greeting }       from "../../shared/lib/greeting.js";
 import { useDump }        from "./useDump.js";
 import { DumpInput }      from "./DumpInput.jsx";
+// Bolt 4.1 — XP system (ADR 0013)
+import { useCharacterProgress } from "../../shared/hooks/useCharacterProgress.js";
+import { calcXpGain }           from "../../shared/lib/persona.js";
+import { LevelUpToast }         from "../../shared/ui/LevelUpToast.jsx";
 
 // =============================================================================
 // REVIEW PANEL — human-in-the-loop item review (Bolt 2.1)
@@ -250,6 +254,9 @@ export function DumpScreen({ thoughts, onProcess, onToggleToday, onArchive, onUp
   const [tagFilter, setTagFilter] = useState(null);
   const tx = T[lang] || T.en;
 
+  // Bolt 4.1 — XP + Level Up toast for brain_dump_submitted
+  const { addXp, levelUpPayload } = useCharacterProgress(user);
+
   // ── Dump state machine ──────────────────────────────────────────────────────
   const {
     status, proposed, aiResponse, errorMsg,
@@ -274,9 +281,11 @@ export function DumpScreen({ thoughts, onProcess, onToggleToday, onArchive, onUp
   // ── Handlers ────────────────────────────────────────────────────────────────
   const handleSubmit  = () => submitDump(text);
 
-  const handleConfirm = () => {
-    confirmItems(text);  // passes rawText to useDump → onProcess
+  const handleConfirm = async () => {
+    await confirmItems(text);  // passes rawText to useDump → onProcess
     setText("");
+    // Bolt 4.1 — award XP for brain dump activity (ADR 0013, activity-based)
+    if (user?.id) addXp(calcXpGain("brain_dump_submitted"));
   };
 
   // cancelReview: text is NOT cleared so user can continue editing
@@ -284,6 +293,11 @@ export function DumpScreen({ thoughts, onProcess, onToggleToday, onArchive, onUp
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+      {/* Bolt 4.1 — Level Up toast (auto-dismissed by hook after 2.5s) */}
+      {levelUpPayload && (
+        <LevelUpToast newLevel={levelUpPayload.newLevel} lang={lang} />
+      )}
+
       {/* Ambient background glow */}
       <div style={{
         position: "absolute", top: -60, left: "50%", transform: "translateX(-50%)",
