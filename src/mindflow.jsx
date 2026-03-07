@@ -25,6 +25,12 @@ import { SettingsScreen } from "./features/settings/index.jsx";
 import { ExportPanel }    from "./features/settings/ExportPanel.jsx";
 import { NotifPanel }     from "./features/settings/NotifPanel.jsx";
 import { NotionPanel }    from "./features/settings/NotionPanel.jsx";
+// Bolt 1.7: skeleton + onboarding
+import { ErrorBoundary }              from "./skeleton/ErrorBoundary.jsx";
+import { BottomNav }                  from "./skeleton/BottomNav.jsx";
+import { CSS }                        from "./skeleton/design-system/global.css.js";
+import { AuthScreen }                 from "./features/auth/index.jsx";
+import { LangPickScreen, WelcomeScreen } from "./features/onboarding/index.jsx";
 // Bolt 1.2: pure utilities extracted to shared/lib/
 import { uid }                       from "./shared/lib/id.js";
 import { isToday, todayLabel }       from "./shared/lib/date.js";
@@ -54,27 +60,10 @@ import { TYPE_CFG }                  from "./shared/lib/thought-types.js";
 // ─────────────────────────────────────────────────────────────────────────────
 // ERROR BOUNDARY — catches render crashes silently (cto-advisor: H priority)
 // ─────────────────────────────────────────────────────────────────────────────
-class ErrorBoundary extends Component {
-  constructor(props) { super(props); this.state = { hasError: false, error: null }; }
-  static getDerivedStateFromError(error) { return { hasError: true, error }; }
-  componentDidCatch(error, info) { logError("ErrorBoundary", error, { componentStack: info?.componentStack }); }
-  render() {
-    if (this.state.hasError) {
-      return (
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100vh", background: "#07070D", padding: 32, textAlign: "center" }}>
-          <div style={{ fontSize: 48, marginBottom: 16 }}>🧠</div>
-          <div style={{ color: "#F0F0F8", fontSize: 18, fontWeight: 700, marginBottom: 8, fontFamily: "Syne, sans-serif" }}>Something went wrong</div>
-          <div style={{ color: "#6868A0", fontSize: 13, marginBottom: 24 }}>{this.state.error?.message || "Unexpected error"}</div>
-          <button onClick={() => { this.setState({ hasError: false, error: null }); window.location.reload(); }}
-            style={{ background: "#6C5CE7", color: "white", border: "none", borderRadius: 12, padding: "10px 24px", fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
-            Reload app
-          </button>
-        </div>
-      );
-    }
-    return this.props.children;
-  }
-}
+// ─────────────────────────────────────────────────────────────────────────────
+// ErrorBoundary → skeleton/ErrorBoundary.jsx (Bolt 1.7)
+// (imported above)
+// ─────────────────────────────────────────────────────────────────────────────
 
 // ─────────────────────────────────────────────────────────────────────────────
 // FREEMIUM LIMITS — moved to shared/lib/freemium.js (Bolt 1.2)
@@ -149,280 +138,12 @@ class ErrorBoundary extends Component {
 // ─────────────────────────────────────────────────────────────────────────────
 // AUTH SCREEN
 // ─────────────────────────────────────────────────────────────────────────────
-function AuthScreen({ lang, onSkip }) {
-  const tx = T[lang] || T.en;
-  const [email, setEmail] = useState("");
-  const [sent, setSent] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [err, setErr] = useState("");
-
-  const send = async () => {
-    if (!email.includes("@")) { setErr(lang === "ru" ? "Введи корректный email" : lang === "az" ? "Düzgün email daxil edin" : "Enter a valid email"); return; }
-    setLoading(true); setErr("");
-    const sb = await waitForSupabase();
-    if (!sb) { setErr("Supabase not loaded yet, try again"); setLoading(false); return; }
-    const { error } = await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.href } });
-    setLoading(false);
-    if (error) { setErr(error.message); return; }
-    setSent(true);
-  };
-
-  return (
-    <div style={{ height: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "32px 24px", background: C.bg }}>
-      <div style={{ fontSize: 52, marginBottom: 16 }}>🔐</div>
-      <div style={{ color: C.text, fontSize: 22, fontWeight: 700, marginBottom: 8, letterSpacing: -.5 }}>
-        {lang === "ru" ? "Войти / Зарегистрироваться" : lang === "az" ? "Daxil ol / Qeydiyyat" : "Sign in / Register"}
-      </div>
-      <div style={{ color: C.textSub, fontSize: 14, marginBottom: 40, textAlign: "center", lineHeight: 1.6 }}>
-        {lang === "ru" ? "Магическая ссылка — без пароля.\nДанные синхронизируются между устройствами." : lang === "az" ? "Sehrli keçid — şifrəsiz.\nMəlumatlar cihazlar arasında sinxronlaşır." : "Magic link — no password.\nData syncs across your devices."}
-      </div>
-      {!sent ? (
-        <div style={{ width: "100%", maxWidth: 320 }}>
-          <input type="email" autoComplete="email" autoFocus value={email} onChange={e => setEmail(e.target.value)}
-            onKeyDown={e => e.key === "Enter" && send()}
-            placeholder="your@email.com"
-            aria-label="Email address"
-            aria-invalid={!!err}
-            style={{ width: "100%", background: C.surface, border: `1px solid ${err ? C.high : C.border}`, borderRadius: 12, color: C.text, fontSize: 15, padding: "12px 16px", outline: "none", fontFamily: "inherit", boxSizing: "border-box", marginBottom: 8 }} />
-          {err && <div style={{ color: C.high, fontSize: 13, marginBottom: 8 }}>{err}</div>}
-          <button onClick={send} disabled={loading}
-            style={{ width: "100%", height: 48, background: C.accent, color: "white", border: "none", borderRadius: 12, fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", marginBottom: 14, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-            {loading ? <><Spinner /> {lang === "ru" ? "Отправляю..." : "Sending..."}</> : lang === "ru" ? "Отправить магическую ссылку" : lang === "az" ? "Sehrli keçid göndər" : "Send Magic Link"}
-          </button>
-          <div style={{ textAlign: "center" }}>
-            <button onClick={onSkip} style={{ background: "none", border: "none", color: C.textSub, fontSize: 13, cursor: "pointer", fontFamily: "inherit" }}>
-              {lang === "ru" ? "Продолжить без аккаунта →" : lang === "az" ? "Hesabsız davam et →" : "Continue without account →"}
-            </button>
-          </div>
-        </div>
-      ) : (
-        <div style={{ textAlign: "center" }}>
-          <div style={{ fontSize: 40, marginBottom: 12 }}>📬</div>
-          <div style={{ color: C.text, fontSize: 17, fontWeight: 600, marginBottom: 8 }}>
-            {lang === "ru" ? "Проверь почту" : lang === "az" ? "E-poçtunuzu yoxlayın" : "Check your email"}
-          </div>
-          <div style={{ color: C.textSub, fontSize: 14, marginBottom: 20 }}>
-            {lang === "ru" ? "Ссылка отправлена на " : lang === "az" ? "Keçid göndərildi: " : "Link sent to "}<strong style={{ color: C.text }}>{email}</strong>
-          </div>
-          <button onClick={onSkip} style={{ background: "none", border: "none", color: C.textSub, fontSize: 13, cursor: "pointer", fontFamily: "inherit" }}>
-            {lang === "ru" ? "Пропустить пока →" : lang === "az" ? "Hələlik keç →" : "Skip for now →"}
-          </button>
-        </div>
-      )}
-    </div>
-  );
-}
-
 // ─────────────────────────────────────────────────────────────────────────────
-// ONBOARDING
+// AuthScreen     → features/auth/index.jsx (Bolt 1.7)
+// LangPickScreen → features/onboarding/index.jsx (Bolt 1.7)
+// WelcomeScreen  → features/onboarding/index.jsx (Bolt 1.7)
+// (all imported above)
 // ─────────────────────────────────────────────────────────────────────────────
-// LANGS — moved to shared/i18n/translations.js (Bolt 1.2)
-
-function LangPickScreen({ onPick }) {
-  const [hovered, setHovered] = useState(null);
-  const [selected, setSelected] = useState(null);
-
-  const handlePick = (id) => {
-    setSelected(id);
-    setTimeout(() => onPick(id), 320);
-  };
-
-  // Detect user locale and pre-highlight matching language
-  useEffect(() => {
-    const loc = (navigator.language || "en").toLowerCase();
-    if (loc.startsWith("ru")) setHovered("ru");
-    else if (loc.startsWith("az")) setHovered("az");
-    else setHovered("en");
-    const t = setTimeout(() => setHovered(null), 1800);
-    return () => clearTimeout(t);
-  }, []);
-
-  return (
-    <div style={{
-      height: "100vh", display: "flex", flexDirection: "column",
-      alignItems: "center", justifyContent: "center",
-      padding: "32px 24px", background: C.bg,
-      position: "relative", overflow: "hidden",
-    }}>
-      {/* Background: three subtle colour blobs, one per language */}
-      <div style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
-        <div style={{ position: "absolute", top: "8%", left: "10%", width: 220, height: 220, borderRadius: "50%", background: "radial-gradient(circle, rgba(108,92,231,0.10) 0%, transparent 70%)", filter: "blur(30px)" }} />
-        <div style={{ position: "absolute", bottom: "10%", right: "8%", width: 200, height: 200, borderRadius: "50%", background: "radial-gradient(circle, rgba(0,184,148,0.08) 0%, transparent 70%)", filter: "blur(30px)" }} />
-        <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", width: 340, height: 340, borderRadius: "50%", background: `radial-gradient(circle, ${C.accentGlow} 0%, transparent 65%)`, filter: "blur(20px)" }} />
-      </div>
-
-      {/* Logo */}
-      <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 12, animation: "slideUp .55s cubic-bezier(.22,1,.36,1) both" }}>
-        <div style={{ width: 52, height: 52, borderRadius: 16, background: `linear-gradient(135deg, ${C.accent}, ${C.accentLit})`, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 8px 32px ${C.accentGlow}` }}>
-          {Icon.brain("#fff", 28)}
-        </div>
-        <div>
-          <div style={{ fontFamily: "Syne, sans-serif", color: C.text, fontSize: 34, fontWeight: 800, letterSpacing: -1.5, lineHeight: 1 }}>MindFlow</div>
-          <div style={{ color: C.accent, fontSize: 10, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", marginTop: 3, opacity: 0.7 }}>BETA</div>
-        </div>
-      </div>
-
-      {/* Tagline */}
-      <div style={{ color: C.textSub, fontSize: 14, marginBottom: 52, letterSpacing: 0.3, animation: "slideUp .55s cubic-bezier(.22,1,.36,1) .08s both", textAlign: "center", lineHeight: 1.6 }}>
-        choose your language
-      </div>
-
-      {/* Language cards — large flags, world-class touch targets */}
-      <div style={{ display: "flex", gap: 14, animation: "slideUp .55s cubic-bezier(.22,1,.36,1) .16s both" }}>
-        {LANGS.map(l => {
-          const isHovered = hovered === l.id;
-          const isSelected = selected === l.id;
-          return (
-            <button
-              key={l.id}
-              onClick={() => handlePick(l.id)}
-              onMouseEnter={() => setHovered(l.id)}
-              onMouseLeave={() => setHovered(null)}
-              onFocus={() => setHovered(l.id)}
-              onBlur={() => setHovered(null)}
-              aria-label={`Select language: ${l.name}`}
-              style={{
-                width: 100, padding: "22px 10px 18px",
-                background: isSelected
-                  ? `linear-gradient(135deg, ${C.accent}30, ${C.accentLit}20)`
-                  : isHovered ? `${C.accent}14` : C.surface,
-                border: `1.5px solid ${isSelected ? C.accent : isHovered ? C.accent : C.border}`,
-                borderRadius: 24, cursor: "pointer",
-                display: "flex", flexDirection: "column", alignItems: "center", gap: 12,
-                transition: "all .22s cubic-bezier(.34,1.56,.64,1)",
-                transform: isSelected ? "scale(0.96)" : isHovered ? "translateY(-6px) scale(1.05)" : "none",
-                boxShadow: isSelected
-                  ? `0 0 0 3px ${C.accent}44`
-                  : isHovered ? `0 12px 40px ${C.accentGlow}, 0 0 0 1px ${C.accent}33` : "none",
-                outline: "none",
-                position: "relative", overflow: "hidden",
-              }}>
-              {/* Shimmer on hover */}
-              {isHovered && (
-                <div style={{ position: "absolute", inset: 0, background: `linear-gradient(135deg, transparent 30%, ${C.accent}08 50%, transparent 70%)`, pointerEvents: "none", animation: "shimmer .6s ease" }} />
-              )}
-
-              {/* Flag — large, crisp */}
-              <div style={{
-                fontSize: 52, lineHeight: 1,
-                filter: isHovered || isSelected ? "drop-shadow(0 4px 12px rgba(108,92,231,0.3))" : "none",
-                transition: "filter .2s",
-                userSelect: "none",
-              }}>
-                {l.flag}
-              </div>
-
-              {/* Language name */}
-              <span style={{
-                fontSize: 12, fontWeight: 700,
-                color: isHovered || isSelected ? C.accentLit : C.textSub,
-                fontFamily: "Syne, sans-serif", letterSpacing: 0.4,
-                transition: "color .2s",
-              }}>
-                {l.name}
-              </span>
-
-              {/* Native hint */}
-              <span style={{
-                fontSize: 10, color: C.textDim,
-                fontWeight: 500, letterSpacing: 0.2,
-                lineHeight: 1,
-              }}>
-                {l.id === "en" ? "English" : l.id === "ru" ? "Русский" : "Azərbaycan"}
-              </span>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Bottom hint */}
-      <div style={{ position: "absolute", bottom: 32, color: C.textDim, fontSize: 11, letterSpacing: 1, textTransform: "uppercase", fontWeight: 500, animation: "slideUp .55s cubic-bezier(.22,1,.36,1) .28s both" }}>
-        choose / выбери / seçin
-      </div>
-    </div>
-  );
-}
-
-function WelcomeScreen({ lang, onDone }) {
-  const tx = T[lang] || T.en;
-  const l = LANGS.find(x => x.id === lang);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => { const t = setTimeout(() => setVisible(true), 50); return () => clearTimeout(t); }, []);
-
-  const features = {
-    en: [
-      { icon: "🧠", title: "Brain dump", text: "Dump everything — tasks, worries, random thoughts. No structure needed." },
-      { icon: "⚡", title: "AI sorts it", text: "AI categorizes and prioritizes instantly. Zero setup." },
-      { icon: "🎯", title: "Daily focus", text: "Pick 3–5 things to focus on. The rest waits." },
-      { icon: "🌙", title: "Evening review", text: "2-minute check-in to close the day without guilt." },
-    ],
-    ru: [
-      { icon: "🧠", title: "Мозговой дамп", text: "Выгружай всё — задачи, тревоги, случайные мысли. Без структуры." },
-      { icon: "⚡", title: "AI сортирует", text: "AI расставляет приоритеты мгновенно. Никаких настроек." },
-      { icon: "🎯", title: "Фокус дня", text: "Выбери 3–5 вещей. Остальное подождёт." },
-      { icon: "🌙", title: "Вечерний обзор", text: "2 минуты чтобы закрыть день без чувства вины." },
-    ],
-    az: [
-      { icon: "🧠", title: "Beyin dempinqi", text: "Hər şeyi tök — tapşırıqlar, narahatlıqlar, fikirlər." },
-      { icon: "⚡", title: "AI sıralayır", text: "AI dərhal prioritetlər qoyur. Heç bir quraşdırma yoxdur." },
-      { icon: "🎯", title: "Günün fokusu", text: "3–5 şey seç. Qalanı gözləyər." },
-      { icon: "🌙", title: "Axşam icmalı", text: "2 dəqiqəlik yoxlama ilə günü günahsız bağla." },
-    ],
-  };
-
-  const fList = features[lang] || features.en;
-
-  return (
-    <div style={{ height: "100vh", display: "flex", flexDirection: "column", background: C.bg, overflowY: "auto" }}>
-      {/* Header */}
-      <div style={{ padding: "44px 28px 0", opacity: visible ? 1 : 0, transform: visible ? "none" : "translateY(12px)", transition: "all .5s cubic-bezier(.22,1,.36,1)" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
-          <span style={{ fontSize: 28, lineHeight: 1 }}>{l?.flag}</span>
-          <div style={{ color: C.text, fontSize: 26, fontWeight: 800, letterSpacing: -0.8, fontFamily: "Syne, sans-serif" }}>{tx.onboardingTitle}</div>
-        </div>
-        <div style={{ color: C.textSub, fontSize: 15, lineHeight: 1.7, marginBottom: 36, whiteSpace: "pre-line" }}>{tx.onboardingDesc}</div>
-      </div>
-
-      {/* Feature list */}
-      <div style={{ flex: 1, padding: "0 28px", display: "flex", flexDirection: "column", gap: 10 }}>
-        {fList.map((f, i) => (
-          <div key={i} style={{
-            display: "flex", alignItems: "flex-start", gap: 14,
-            background: C.surface, borderRadius: 16, padding: "14px 16px",
-            border: `1px solid ${C.border}`,
-            opacity: visible ? 1 : 0,
-            transform: visible ? "none" : "translateY(16px)",
-            transition: `opacity .45s cubic-bezier(.22,1,.36,1) ${.1 + i * .07}s, transform .45s cubic-bezier(.22,1,.36,1) ${.1 + i * .07}s`,
-          }}>
-            <div style={{ width: 42, height: 42, borderRadius: 12, flexShrink: 0, background: `${C.accent}18`, border: `1px solid ${C.accent}22`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>{f.icon}</div>
-            <div>
-              <div style={{ color: C.text, fontSize: 14, fontWeight: 700, marginBottom: 2, letterSpacing: -0.2 }}>{f.title}</div>
-              <div style={{ color: C.textSub, fontSize: 13, lineHeight: 1.5 }}>{f.text}</div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* CTA */}
-      <div style={{ padding: "24px 28px 44px", flexShrink: 0, opacity: visible ? 1 : 0, transition: "opacity .5s .4s" }}>
-        <button onClick={onDone} style={{
-          width: "100%", height: 54,
-          background: `linear-gradient(135deg, ${C.accent}, ${C.accentLit})`,
-          color: "white", border: "none", borderRadius: 16,
-          fontSize: 16, fontWeight: 700, cursor: "pointer", fontFamily: "inherit",
-          boxShadow: `0 8px 28px ${C.accentGlow}`,
-          display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-          letterSpacing: 0.2,
-        }}>
-          {tx.continue}
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-        </button>
-        <div style={{ color: C.textDim, fontSize: 11, textAlign: "center", marginTop: 10, letterSpacing: 0.3 }}>{tx.langSub}</div>
-      </div>
-    </div>
-  );
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CLARIFY INLINE + THOUGHT CARD — moved to shared/ui/ThoughtCard.jsx (Bolt 1.3)
@@ -446,84 +167,9 @@ function WelcomeScreen({ lang, onDone }) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 // ─────────────────────────────────────────────────────────────────────────────
-// BOTTOM NAV — FIX: uses todayShort/eveningShort/settingsShort
+// BottomNav → skeleton/BottomNav.jsx (Bolt 1.7)
+// (imported above)
 // ─────────────────────────────────────────────────────────────────────────────
-function BottomNav({ active, onChange, badge, lang }) {
-  const tx = T[lang] || T.en;
-  const items = [
-    { id: "dump",     icon: Icon.dump,     label: tx.dump },
-    { id: "today",    icon: Icon.today,    label: tx.todayShort, badge },
-    { id: "evening",  icon: Icon.evening,  label: tx.eveningShort },
-    { id: "settings", icon: Icon.settings, label: tx.settingsShort },
-  ];
-  return (
-    <div style={{
-      position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)",
-      width: "100%", maxWidth: 480,
-      background: `${C.surface}F0`,
-      backdropFilter: "blur(20px)",
-      borderTop: `1px solid ${C.border}`,
-      display: "flex", zIndex: 100,
-      paddingBottom: "env(safe-area-inset-bottom, 0px)",
-    }}>
-      {items.map(it => {
-        const isActive = active === it.id;
-        return (
-          <button key={it.id} onClick={() => onChange(it.id)} onKeyDown={e => (e.key==="Enter"||e.key===" ") && onChange(it.id)} aria-label={it.label} aria-current={isActive ? "page" : undefined} style={{
-            flex: 1, background: "none", border: "none", cursor: "pointer",
-            padding: "11px 0 13px",
-            display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
-            position: "relative",
-          }}>
-            {/* Active glow pill */}
-            {isActive && (
-              <div style={{
-                position: "absolute", top: 6, left: "50%", transform: "translateX(-50%)",
-                width: 36, height: 36, borderRadius: 12,
-                background: C.accentDim,
-                animation: "navPop .2s ease",
-              }} />
-            )}
-
-            <div style={{
-              position: "relative", zIndex: 1,
-              transform: isActive ? "translateY(-1px)" : "none",
-              transition: "transform .2s",
-            }}>
-              {it.icon(isActive ? C.accentLit : C.textSub, 22)}
-            </div>
-
-            <span style={{
-              fontSize: 10, fontWeight: isActive ? 700 : 500,
-              fontFamily: "inherit",
-              color: isActive ? C.accentLit : C.textSub,
-              letterSpacing: 0.2,
-              position: "relative", zIndex: 1,
-              transition: "color .15s",
-            }}>
-              {it.label}
-            </span>
-
-            {it.badge > 0 && (
-              <span style={{
-                position: "absolute", top: 7, right: "calc(50% - 22px)",
-                background: C.accent, color: "white",
-                fontSize: 9, fontWeight: 800,
-                minWidth: 16, height: 16, borderRadius: 8,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                padding: "0 3px",
-                boxShadow: `0 0 8px ${C.accentGlow}`,
-                animation: "badgePop .3s cubic-bezier(.34,1.56,.64,1)",
-              }}>
-                {it.badge > 9 ? "9+" : it.badge}
-              </span>
-            )}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
 
 // Load Supabase CDN
 // Supabase loaded via npm import
@@ -846,73 +492,7 @@ export default function App() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// CSS
 // ─────────────────────────────────────────────────────────────────────────────
-const CSS = `
-  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap');
-  
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
-  html, body {
-    background: ${C.bg};
-    font-family: 'DM Sans', system-ui, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility;
-    scroll-behavior: smooth;
-    overscroll-behavior: none;
-  }
-
-  h1, h2, h3, .font-display {
-    font-family: 'Syne', system-ui, sans-serif;
-  }
-
-  textarea::placeholder, input::placeholder { color: ${C.textDim}; }
-
-  /* Focus-visible: only show focus ring on keyboard navigation (WCAG 2.4.11) */
-  :focus { outline: none; }
-  :focus-visible {
-    outline: 2px solid ${C.accent};
-    outline-offset: 2px;
-    border-radius: 4px;
-  }
-
-  /* Text selection */
-  ::selection { background: ${C.accent}44; color: ${C.text}; }
-
-  ::-webkit-scrollbar { width: 2px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: ${C.borderHi}; border-radius: 2px; }
-
-  /* Prevent text size adjust on orientation change (mobile) */
-  html { -webkit-text-size-adjust: 100%; }
-
-  /* Touch action optimization for swipeable cards */
-  [data-testid="thought-card"] { touch-action: pan-y; }
-
-  button { -webkit-user-select: none; user-select: none; }
-  button:active { opacity: 0.85; }
-
-  @keyframes spin       { to { transform: rotate(360deg); } }
-  @keyframes toastIn    { from { opacity:0; transform:translateX(-50%) translateY(-10px) scale(.95); } to { opacity:1; transform:translateX(-50%) translateY(0) scale(1); } }
-  @keyframes fadeIn     { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
-  @keyframes navPop     { from { opacity:0; transform:translateX(-50%) scale(.7); } to { opacity:1; transform:translateX(-50%) scale(1); } }
-  @keyframes badgePop   { 0% { transform:scale(0); } 70% { transform:scale(1.2); } 100% { transform:scale(1); } }
-  @keyframes micPulse   { 0%,100%{ box-shadow:0 0 0 0 ${C.high}66 } 50%{ box-shadow:0 0 0 8px transparent } }
-  @keyframes shimmer    { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
-  @keyframes slideUp    { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
-  @keyframes scaleIn    { from { opacity:0; transform:scale(.92); } to { opacity:1; transform:scale(1); } }
-  @keyframes pulse      { 0%,100%{ opacity:1; } 50%{ opacity:0.5; } }
-
-  input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(0.6); }
-
-  /* High contrast media query */
-  @media (prefers-contrast: high) {
-    :focus-visible { outline-width: 3px; }
-  }
-
-  /* Reduce motion */
-  @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
-  }
-`;
+// CSS → skeleton/design-system/global.css.js (Bolt 1.7)
+// (imported above)
+// ─────────────────────────────────────────────────────────────────────────────
