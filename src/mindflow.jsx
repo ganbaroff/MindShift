@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo, memo, Component } from "react";
+// Bolt 2.3: email/password auth hook
+import { useAuth }                from "./shared/hooks/useAuth.js";
 // Bolt 1.1: createClient moved to shared/services/supabase.js
 import {
   getSupabase,
@@ -206,9 +208,9 @@ export default function App() {
     } catch { return []; }
   });
   const [toast, setToast]         = useState(null);
-  const [user, setUser]           = useState(null);
+  // Bolt 2.3: auth state from useAuth hook (replaces inline user state + auth useEffect)
+  const { user, authLoading, signIn, signUp, signOut: authSignOut } = useAuth();
   const [syncOn, setSyncOn]       = useState(false);
-  const [showAuth, setShowAuth]   = useState(false);
   const [showExport, setShowExport] = useState(false);
   const [showNotif, setShowNotif]   = useState(false);
   const [showNotion, setShowNotion] = useState(false);
@@ -269,21 +271,20 @@ export default function App() {
     return () => document.removeEventListener("visibilitychange", onVisible);
   }, []);
 
-  // FIX: wait for Supabase CDN before registering auth listener
+  // Bolt 2.3: redirect to /today + notify on sign-in; useAuth manages session state
+  const prevUserRef = useRef(undefined); // undefined = first render
   useEffect(() => {
-    let sub;
-    waitForSupabase().then(sb => {
-      if (!sb) return;
-      sb.auth.getSession().then(({ data: { session } }) => setUser(session?.user ?? null));
-      const { data } = sb.auth.onAuthStateChange((_, session) => {
-        const u = session?.user ?? null;
-        setUser(u);
-        if (u) { setShowAuth(false); notify(langRef.current === "ru" ? "Вошёл в аккаунт!" : "Signed in!"); }
-      });
-      sub = data.subscription;
-    });
-    return () => sub?.unsubscribe();
-  }, []);
+    if (prevUserRef.current !== undefined && user && !prevUserRef.current) {
+      // User just signed in
+      setScreen("today");
+      notify(
+        langRef.current === "ru" ? "Вошёл в аккаунт!"
+        : langRef.current === "az" ? "Hesaba daxil oldun!"
+        : "Signed in!"
+      );
+    }
+    prevUserRef.current = user;
+  }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!user || !syncOn) return;
@@ -424,11 +425,21 @@ export default function App() {
     }
   }, [user, syncOn]);
 
+  // Bolt 2.3: clear app state + call authSignOut (Supabase session)
   const handleSignOut = async () => {
-    const sb = getSupabase();
-    if (sb) await sb.auth.signOut();
-    setUser(null); setSyncOn(false);
-    notify(lang === "ru" ? "Вышел из аккаунта" : "Signed out", "info");
+    await authSignOut();
+    setThoughts([]); setPersona(null); setSyncOn(false);
+    try {
+      localStorage.removeItem("mf_thoughts_local");
+      localStorage.removeItem("mf_persona");
+    } catch {}
+    notify(
+      lang === "ru" ? "Вышел из аккаунта"
+      : lang === "az" ? "Hesabdan çıxdın"
+      : "Signed out",
+      "info"
+    );
+    // Route guard (!user) will redirect to AuthScreen automatically
   };
 
   const badge = thoughts.filter(t => t.isToday && !t.archived).length;
@@ -442,7 +453,9 @@ export default function App() {
 
   if (step === "lang")    return wrapper(<LangPickScreen onPick={l => { setLang(l); setStep("welcome"); }} />);
   if (step === "welcome") return wrapper(<WelcomeScreen lang={lang} onDone={() => setStep("app")} />);
-  if (showAuth)           return wrapper(<AuthScreen lang={lang} onSkip={() => setShowAuth(false)} />);
+  // Bolt 2.3: protected routes — auth required, no skip
+  if (authLoading) return wrapper(<div style={{ height: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: C.bg }}><Spinner size={24} color={C.accent} /></div>);
+  if (!user)       return wrapper(<AuthScreen lang={lang} onSignIn={signIn} onSignUp={signUp} />);
 
   return (
     <>
@@ -474,11 +487,24 @@ export default function App() {
           </div>
         )}
 
+        {/* AppBar — Bolt 2.3: email + logout button */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 16px", borderBottom: `1px solid ${C.border}`, background: C.bg, flexShrink: 0 }}>
+          <span style={{ color: C.textDim, fontSize: 12, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 220 }}>
+            {user.email}
+          </span>
+          <button
+            onClick={handleSignOut}
+            style={{ background: "none", border: `1px solid ${C.border}`, color: C.textSub, borderRadius: 8, padding: "4px 12px", fontSize: 12, cursor: "pointer", fontFamily: "inherit", minHeight: 30 }}
+          >
+            {lang === "ru" ? "Выйти" : lang === "az" ? "Çıxış" : "Sign out"}
+          </button>
+        </div>
+
         <div style={{ flex: 1, overflowY: "auto" }}>
           {screen === "dump"     && <DumpScreen thoughts={thoughts} onProcess={handleProcess} onToggleToday={toggleToday} onArchive={archive} onUpdate={handleUpdate} lang={lang} persona={persona} isPro={isProUser(user, subscription)} onShowPricing={reason => { setPricingReason(reason); setShowPricing(true); }} user={user} />}
           {screen === "today"    && <TodayScreen thoughts={thoughts} onArchive={archive} onToggleToday={toggleToday} onUpdate={handleUpdate} lang={lang} persona={persona} user={user} />}
           {screen === "evening"  && <EveningScreen thoughts={thoughts} lang={lang} persona={persona} user={user} />}
-          {screen === "settings" && <SettingsScreen thoughts={thoughts} lang={lang} onChangeLang={setLang} onClearAll={() => { setThoughts([]); setPersona(null); try { localStorage.removeItem("mf_thoughts_local"); localStorage.removeItem("mf_persona"); } catch {} notify(lang === "ru" ? "Очищено" : "Cleared", "info"); }} user={user} syncOn={syncOn} onToggleSync={() => setSyncOn(v => !v)} onShowAuth={() => setShowAuth(true)} onSignOut={handleSignOut} persona={persona} onExport={() => setShowExport(true)} onNotif={() => setShowNotif(true)} onNotion={() => setShowNotion(true)} isPro={isProUser(user, subscription)} onShowPricing={reason => { setPricingReason(reason); setShowPricing(true); }} />}
+          {screen === "settings" && <SettingsScreen thoughts={thoughts} lang={lang} onChangeLang={setLang} onClearAll={() => { setThoughts([]); setPersona(null); try { localStorage.removeItem("mf_thoughts_local"); localStorage.removeItem("mf_persona"); } catch {} notify(lang === "ru" ? "Очищено" : "Cleared", "info"); }} user={user} syncOn={syncOn} onToggleSync={() => setSyncOn(v => !v)} onShowAuth={() => {}} onSignOut={handleSignOut} persona={persona} onExport={() => setShowExport(true)} onNotif={() => setShowNotif(true)} onNotion={() => setShowNotion(true)} isPro={isProUser(user, subscription)} onShowPricing={reason => { setPricingReason(reason); setShowPricing(true); }} />}
         </div>
 
         <BottomNav active={screen} onChange={setScreen} badge={badge} lang={lang} />
