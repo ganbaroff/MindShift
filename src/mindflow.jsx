@@ -1,5 +1,24 @@
 import { useState, useEffect, useRef, useCallback, useMemo, memo, Component } from "react";
-import { createClient } from "@supabase/supabase-js";
+// Bolt 1.1: createClient moved to shared/services/supabase.js
+import {
+  getSupabase,
+  waitForSupabase,
+  setupRetryListeners,
+  sbPushThought,
+  sbPullThoughts,
+  sbSavePersona,
+  sbLoadPersona,
+} from "./shared/services/supabase.js";
+import {
+  parseDump,
+  generateEveningReview,
+  aiFocusSuggest,
+  buildPersonaContext,
+} from "./shared/services/claude.js";
+// Bolt 1.2: pure utilities extracted to shared/lib/
+import { uid }                       from "./shared/lib/id.js";
+import { isToday, todayLabel }       from "./shared/lib/date.js";
+import { getStreakData, saveStreak } from "./shared/lib/streak.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PRO BANNER — shown when hitting freemium limits
@@ -271,39 +290,16 @@ function isProUser(user, subscription) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SUPABASE — via @supabase/supabase-js npm package
+// SUPABASE — client + DB ops moved to shared/services/supabase.js (Bolt 1.1)
+// getSupabase, waitForSupabase, sbPush/Pull/Save/Load imported above.
 // ─────────────────────────────────────────────────────────────────────────────
-const SUPA_URL = "https://pvzsxbyocmtjtbntilyh.supabase.co";
-const SUPA_KEY = "sb_publishable_7EN4as2jUeNDrPfweWEYyQ_LYmLf3I8";
-
-let __supaClient = null;
-function getSupabase() {
-  if (!__supaClient) {
-    try { __supaClient = createClient(SUPA_URL, SUPA_KEY); } catch { return null; }
-  }
-  return __supaClient;
-}
-
-// waitForSupabase — resolves immediately since we use npm import (no CDN delay)
-function waitForSupabase() {
-  return Promise.resolve(getSupabase());
-}
 
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PERSONA v1
+// buildPersonaContext moved to shared/services/claude.js (Bolt 1.1)
+// updatePersona stays here — it's UI state logic, not a service.
 // ─────────────────────────────────────────────────────────────────────────────
-function buildPersonaContext(persona) {
-  if (!persona?.patterns) return "";
-  const p = persona.patterns;
-  const parts = [];
-  if (p.topTags?.length)              parts.push(`User often works on: ${p.topTags.join(", ")}`);
-  if (p.avgPriority)                  parts.push(`Typical priority level: ${p.avgPriority}`);
-  if (p.mostActiveHour !== undefined) parts.push(`Most active around hour ${p.mostActiveHour}:00`);
-  if (p.completionRate !== undefined) parts.push(`Task completion rate: ${Math.round(p.completionRate * 100)}%`);
-  return parts.length ? `\n\nUser context:\n${parts.join("\n")}` : "";
-}
-
 function updatePersona(persona, newThoughts, archivedId) {
   const p = persona?.patterns || {};
   const tagFreq = { ...(p.tagFreq || {}) };
@@ -737,199 +733,26 @@ const T = {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// UTILS
+// UTILS — moved to shared/lib/ (Bolt 1.2)
+// uid        → shared/lib/id.js
+// isToday    → shared/lib/date.js
+// todayLabel → shared/lib/date.js
+// getStreakData, saveStreak → shared/lib/streak.js
+// All imported above.
+//
+// greeting(lang) — stays here: depends on T[lang] translation object.
+// TODO: move to shared/lib/i18n.js once T is extracted (Sprint 1.3+)
 // ─────────────────────────────────────────────────────────────────────────────
-function uid() {
-  return `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-}
-
-function isToday(iso) {
-  if (!iso) return false;
-  const d = new Date(iso), n = new Date();
-  return d.getFullYear() === n.getFullYear() &&
-    d.getMonth() === n.getMonth() &&
-    d.getDate() === n.getDate();
-}
-
-
-// ─────────────────────────────────────────────────────────────────────────────
-// STREAK — Duolingo-style. Loss aversion keeps users coming back.
-// A "day" = at least 1 thought dumped OR 1 task archived.
-// ─────────────────────────────────────────────────────────────────────────────
-function getStreakData(thoughts) {
-  if (!thoughts.length) return { current: 0, longest: 0, doneToday: false };
-
-  // Collect all active days (dump or archive event)
-  const days = new Set();
-  thoughts.forEach(t => {
-    if (t.createdAt) days.add(t.createdAt.slice(0, 10));
-    if (t.archivedAt) days.add(t.archivedAt.slice(0, 10));
-  });
-
-  const sorted = Array.from(days).sort().reverse(); // newest first
-  const todayStr = new Date().toISOString().slice(0, 10);
-  const yesterdayStr = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
-
-  const doneToday = days.has(todayStr);
-  const alive = doneToday || days.has(yesterdayStr); // streak still alive if used yesterday
-
-  // Count current streak
-  let current = 0;
-  if (alive) {
-    let check = new Date();
-    if (!doneToday) check = new Date(Date.now() - 86400000); // start from yesterday
-    while (true) {
-      const s = check.toISOString().slice(0, 10);
-      if (!days.has(s)) break;
-      current++;
-      check = new Date(check.getTime() - 86400000);
-    }
-  }
-
-  // Longest streak
-  let longest = 0, run = 0;
-  const allDays = Array.from(days).sort();
-  for (let i = 0; i < allDays.length; i++) {
-    if (i === 0) { run = 1; }
-    else {
-      const prev = new Date(allDays[i - 1]);
-      const curr = new Date(allDays[i]);
-      const diff = (curr - prev) / 86400000;
-      run = diff === 1 ? run + 1 : 1;
-    }
-    longest = Math.max(longest, run);
-  }
-
-  return { current, longest, doneToday, alive };
-}
-
-function saveStreak(current) {
-  try { localStorage.setItem("mf_streak_best", Math.max(current, parseInt(localStorage.getItem("mf_streak_best") || "0"))); } catch {}
-}
-
 function greeting(lang) {
   const h = new Date().getHours();
   const t = T[lang] || T.en;
   return h < 12 ? t.greeting_morning : h < 18 ? t.greeting_day : t.greeting_evening;
 }
 
-function todayLabel(lang) {
-  const locale = lang === "ru" ? "ru-RU" : lang === "az" ? "az-AZ" : "en-US";
-  return new Date().toLocaleDateString(locale, { weekday: "long", month: "long", day: "numeric" });
-}
-
 // ─────────────────────────────────────────────────────────────────────────────
-// AI
+// AI — all functions moved to shared/services/claude.js (Bolt 1.1)
+// callClaude, parseDump, generateEveningReview, aiFocusSuggest imported above.
 // ─────────────────────────────────────────────────────────────────────────────
-async function callClaude(prompt) {
-  // FIX: AbortController + 10s timeout (hooks-mindflow + performance-mindflow)
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 10000);
-  try {
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      signal: controller.signal,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
-        max_tokens: 1000,
-        messages: [{ role: "user", content: prompt }],
-      }),
-    });
-    if (!res.ok) throw new Error(`API ${res.status}${res.status === 429 ? ":rate_limit" : res.status === 401 ? ":auth" : ""}`);
-    const data = await res.json();
-    return data.content?.[0]?.text || "";
-  } catch (e) {
-    if (e.name === "AbortError") throw new Error("timeout");
-    throw e;
-  } finally {
-    clearTimeout(timer);
-  }
-}
-
-async function parseDump(rawText, lang, persona = null) {
-  const langName = lang === "ru" ? "Russian" : lang === "az" ? "Azerbaijani" : "English";
-  const personaCtx = buildPersonaContext(persona);
-  const prompt = `You are a productivity assistant for people with ADHD.
-All output text must be in ${langName}.${personaCtx}
-
-Return a JSON object with TWO keys — no markdown, no backticks:
-{
-  "items": [ array of thought objects ],
-  "response": "1-2 warm sentences acknowledging what was captured. If something is ambiguous, ask ONE clarifying question here."
-}
-
-Each item in "items":
-- "text": cleaned thought in ${langName}
-- "type": one of [task, note, idea, reminder, expense, memory]
-- "priority": one of [none, low, medium, high, critical]
-- "tags": array max 3, lowercase, no spaces
-- "reminderAt": ISO8601 datetime or null
-- "clarify": short question ONLY if that specific item is genuinely ambiguous, else omit
-
-Rules: split compound thoughts, default → task, detect urgency words, detect dates/times.
-Detect recurring patterns: "every day/каждый день", "every monday/каждый понедельник", "weekly/еженедельно" → set "recurrence" field.
-- "recurrence": one of ["daily","weekly:MON","weekly:TUE","weekly:WED","weekly:THU","weekly:FRI","weekly:SAT","weekly:SUN","monthly"] or omit if not recurring
-Today: ${new Date().toISOString()}
-
-Brain dump:
-${rawText}`;
-
-  const raw = await callClaude(prompt);
-  const clean = raw.replace(/```json|```/g, "").trim();
-  const objMatch = clean.match(/\{[\s\S]*\}/);
-  if (objMatch) {
-    try {
-      const parsed = JSON.parse(objMatch[0]);
-      return {
-        items: Array.isArray(parsed.items) ? parsed.items : [],        response: parsed.response || "",
-      };
-    } catch {}
-  }
-  const arrMatch = clean.match(/\[[\s\S]*\]/);
-  if (arrMatch) {
-    return { items: JSON.parse(arrMatch[0]) || [], response: "" };
-  }
-  throw new Error("Could not parse AI response");
-}
-
-async function generateEveningReview(doneItems, missedItems, lang, persona) {
-  const langName = lang === "ru" ? "Russian" : lang === "az" ? "Azerbaijani" : "English";
-  const ctx = buildPersonaContext(persona);
-  const prompt = `You are a compassionate ADHD coach. Write a short evening review in ${langName} (3-4 sentences MAX).${ctx}
-
-Completed: ${JSON.stringify(doneItems.map(t => t.text))}
-Not completed: ${JSON.stringify(missedItems.map(t => t.text))}
-
-Rules: no guilt, no shame, acknowledge wins (even tiny ones), one gentle tomorrow suggestion, end with one open reflective question. Plain text only.`;
-  return await callClaude(prompt);
-}
-
-async function aiFocusSuggest(tasks, lang, persona) {
-  if (!tasks.length) return { picks: [], reason: "" };
-  const langName = lang === "ru" ? "Russian" : lang === "az" ? "Azerbaijani" : "English";
-  const ctx = buildPersonaContext(persona);
-  const prompt = `You are an ADHD productivity coach. Respond in ${langName}.${ctx}
-
-From the task list below, pick the TOP 3 to focus on today.
-Return ONLY a JSON object: { "picks": [array of task texts, max 3], "reason": "1 sentence why these three" }
-No markdown, no backticks.
-
-Tasks:
-${tasks.map((t, i) => `${i + 1}. [${t.priority}] ${t.text}`).join("\n")}`;
-
-  const raw = await callClaude(prompt);
-  const clean = raw.replace(/```json|```/g, "").trim();
-  const m = clean.match(/\{[\s\S]*\}/);
-  if (!m) return { picks: [], reason: "" };
-  // FIX: wrap in try/catch — AI can return invalid JSON (tdd-mindflow safeParseAI pattern)
-  try {
-    const parsed = JSON.parse(m[0]);
-    return { picks: Array.isArray(parsed.picks) ? parsed.picks : [], reason: parsed.reason || "" };
-  } catch {
-    return { picks: [], reason: "" };
-  }
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // EXPORT
@@ -956,95 +779,10 @@ function exportToMarkdown(thoughts, lang) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SUPABASE SYNC
+// SUPABASE SYNC — all moved to shared/services/supabase.js (Bolt 1.1)
+// setupRetryListeners, sbPushThought, sbPullThoughts, sbSavePersona,
+// sbLoadPersona, getSupabase, waitForSupabase — all imported above.
 // ─────────────────────────────────────────────────────────────────────────────
-// ─────────────────────────────────────────────────────────────────────────────
-// RETRY QUEUE — failed Supabase pushes retried on next online/focus event
-// (hooks-mindflow: RETRY_QUEUE pattern)
-// ─────────────────────────────────────────────────────────────────────────────
-const RETRY_QUEUE_KEY = "mf_retry_queue";
-
-function getRetryQueue() {
-  try { return JSON.parse(localStorage.getItem(RETRY_QUEUE_KEY) || "[]"); } catch { return []; }
-}
-function saveRetryQueue(q) {
-  try { localStorage.setItem(RETRY_QUEUE_KEY, JSON.stringify(q.slice(0, 50))); } catch {}
-}
-function enqueueRetry(t, userId) {
-  const q = getRetryQueue();
-  const exists = q.some(item => item.t.id === t.id);
-  if (!exists) saveRetryQueue([...q, { t, userId, ts: Date.now() }]);
-}
-
-async function drainRetryQueue() {
-  const q = getRetryQueue();
-  if (!q.length) return;
-  const failed = [];
-  for (const item of q) {
-    const ok = await sbPushThought(item.t, item.userId);
-    if (!ok) failed.push(item);
-  }
-  saveRetryQueue(failed);
-}
-
-// Drain on online + visibilitychange (called from App useEffect)
-function setupRetryListeners() {
-  window.addEventListener("online", drainRetryQueue);
-  document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible") drainRetryQueue();
-  });
-}
-
-async function sbPushThought(t, userId) {
-  const sb = getSupabase();
-  if (!sb) { enqueueRetry(t, userId); return false; }
-  // FIX: added source field (was lost on sync)
-  const { error } = await sb.from("thoughts").upsert({
-    uid: t.id, user_id: userId,
-    raw_text: t.rawText, normalized_text: t.text,
-    type: t.type, priority: t.priority, tags: t.tags,
-    reminder_at: t.reminderAt, is_today: t.isToday,
-    is_archived: t.archived,
-    source: t.source || "app",
-    recurrence: t.recurrence || null,
-    created_at: t.createdAt, updated_at: t.updatedAt,
-  }, { onConflict: "uid" });
-  if (error) { enqueueRetry(t, userId); return false; }
-  return true;
-}
-
-async function sbPullThoughts(userId) {
-  const sb = getSupabase();
-  if (!sb) return [];
-  // FIX: specific columns (no select *), limit 100, include source field
-  const { data } = await sb.from("thoughts")
-    .select("uid, raw_text, normalized_text, type, priority, tags, reminder_at, is_today, is_archived, created_at, updated_at, source")
-    .eq("user_id", userId)
-    .eq("is_archived", false)
-    .order("created_at", { ascending: false })
-    .limit(100);
-  return (data || []).map(r => ({
-    id: r.uid, rawText: r.raw_text, text: r.normalized_text,
-    type: r.type, priority: r.priority, tags: r.tags || [],
-    reminderAt: r.reminder_at, isToday: r.is_today,
-    archived: r.is_archived, createdAt: r.created_at,
-    updatedAt: r.updated_at, synced: true,
-    source: r.source || "app",
-  }));
-}
-
-async function sbSavePersona(persona, userId) {
-  const sb = getSupabase();
-  if (!sb) return;
-  await sb.from("personas").upsert({ user_id: userId, data: persona, updated_at: new Date().toISOString() }, { onConflict: "user_id" });
-}
-
-async function sbLoadPersona(userId) {
-  const sb = getSupabase();
-  if (!sb) return null;
-  const { data } = await sb.from("personas").select("data").eq("user_id", userId).single();
-  return data?.data || null;
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SHARED UI
