@@ -125,6 +125,7 @@ function langName(lang) {
 
 /**
  * Parses a raw brain dump into structured thought items.
+ * Bolt 2.1: added step_one, steps[], energy_required for task-type items.
  *
  * @param {string} rawText
  * @param {"en"|"ru"|"az"} lang
@@ -135,52 +136,121 @@ export async function parseDump(rawText, lang, persona = null) {
   const name = langName(lang);
   const personaCtx = buildPersonaContext(persona);
 
-  const prompt = `You are a productivity assistant for people with ADHD.
+  // Defensive: very short / unreadable input → skip AI, return safe note
+  if (!rawText || rawText.trim().length < 3) {
+    return {
+      items: [{ text: rawText?.trim() || "…", type: "note", priority: "none", tags: [] }],
+      response: lang === "ru" ? "Сохранил как заметку."
+               : lang === "az" ? "Qeyd kimi saxladım."
+               : "Saved as a note.",
+    };
+  }
+
+  const prompt = `You are a calm productivity assistant for people with ADHD.
 All output text must be in ${name}.${personaCtx}
 
 Return a JSON object with TWO keys — no markdown, no backticks:
 {
   "items": [ array of thought objects ],
-  "response": "1-2 warm sentences acknowledging what was captured. If something is ambiguous, ask ONE clarifying question here."
+  "response": "1-2 warm, neutral sentences acknowledging what was captured. No judgement."
 }
 
 Each item in "items":
 - "text": cleaned thought in ${name}
 - "type": one of [task, note, idea, reminder, expense, memory]
-- "priority": one of [none, low, medium, high, critical]
+- "priority": one of [none, low, medium, high, critical] — default to none unless urgency is explicit
 - "tags": array max 3, lowercase, no spaces
 - "reminderAt": ISO8601 datetime or null
 - "clarify": short question ONLY if that specific item is genuinely ambiguous, else omit
 
-Rules: split compound thoughts, default → task, detect urgency words, detect dates/times.
-Detect recurring patterns: "every day/каждый день", "every monday/каждый понедельник", "weekly/еженедельно" → set "recurrence" field.
-- "recurrence": one of ["daily","weekly:MON","weekly:TUE","weekly:WED","weekly:THU","weekly:FRI","weekly:SAT","weekly:SUN","monthly"] or omit if not recurring
+For items where type === "task" ONLY, add these fields:
+- "step_one": the single most concrete first action (max 10 words in ${name})
+- "steps": array of 2-4 micro-steps in ${name}, each ≤ 10 words, starting with step_one
+- "energy_required": one of ["low", "medium", "high"]
+
+Rules:
+- Split compound thoughts into separate items
+- Do NOT invent tasks the user did not mention
+- Detect dates/times for reminderAt
+- Recurring patterns → "recurrence": one of ["daily","weekly:MON","weekly:TUE","weekly:WED","weekly:THU","weekly:FRI","weekly:SAT","weekly:SUN","monthly"]
 Today: ${new Date().toISOString()}
 
 Brain dump:
 ${rawText}`;
 
   const raw = await callClaude(prompt);
-  const clean = raw.replace(/```json|```/g, "").trim();
+  const clean = raw.replace(/```json\n?|```/g, "").trim();
 
+  // Primary: expect { items, response } object
   const objMatch = clean.match(/\{[\s\S]*\}/);
   if (objMatch) {
     try {
       const parsed = JSON.parse(objMatch[0]);
       return {
-        items: Array.isArray(parsed.items) ? parsed.items : [],
-        response: parsed.response || "",
+        items:    Array.isArray(parsed.items) ? parsed.items : [],
+        response: typeof parsed.response === "string" ? parsed.response : "",
       };
-    } catch {}
+    } catch { /* fall through */ }
   }
 
-  // Fallback: try bare array
+  // Fallback: bare array (legacy format)
   const arrMatch = clean.match(/\[[\s\S]*\]/);
   if (arrMatch) {
-    return { items: JSON.parse(arrMatch[0]) || [], response: "" };
+    try { return { items: JSON.parse(arrMatch[0]) || [], response: "" }; }
+    catch { /* fall through */ }
   }
 
-  throw new Error("Could not parse AI response");
+  // Last resort: save raw text as note — never crash
+  return {
+    items: [{ text: rawText.trim(), type: "note", priority: "none", tags: [] }],
+    response: lang === "ru" ? "Сохранил как заметку."
+             : lang === "az" ? "Qeyd kimi saxladım."
+             : "Saved as a note.",
+  };
+}
+
+/**
+ * Decomposes a single task into concrete micro-steps.
+ * Used by the "I don't know where to start" button in TodayList.
+ * Bolt 2.1.
+ *
+ * @param {object} task   — thought/task object with at least { text }
+ * @param {"en"|"ru"|"az"} lang
+ * @param {object|null} persona
+ * @returns {Promise<{ steps: string[], step_one: string }>}
+ */
+export async function aiDecomposeTask(task, lang, persona = null) {
+  const name = langName(lang);
+  const ctx  = buildPersonaContext(persona);
+
+  const prompt = `You are a calm ADHD coach. Respond in ${name}.${ctx}
+
+Break this task into 3-4 concrete micro-steps. Each step must be ≤ 10 words, start with an action verb, and be something actionable right now.
+
+Return ONLY a JSON object — no markdown, no prose:
+{ "steps": ["step 1", "step 2", "step 3"], "step_one": "step 1" }
+
+Task: ${task.text}`;
+
+  try {
+    const raw   = await callClaude(prompt);
+    const clean = raw.replace(/```json\n?|```/g, "").trim();
+    const m     = clean.match(/\{[\s\S]*\}/);
+    if (!m) throw new Error("No JSON in decompose response");
+    const parsed = JSON.parse(m[0]);
+    const steps  = Array.isArray(parsed.steps) ? parsed.steps.filter(Boolean) : [];
+    return {
+      steps,
+      step_one: parsed.step_one || steps[0] || "",
+    };
+  } catch {
+    // Graceful fallback — always return something actionable
+    const fallback =
+      lang === "ru" ? "Открой нужный файл или приложение"
+      : lang === "az" ? "Lazımlı faylı açın"
+      : "Open the relevant file or app";
+    return { steps: [fallback], step_one: fallback };
+  }
 }
 
 /**

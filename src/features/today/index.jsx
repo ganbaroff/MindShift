@@ -1,10 +1,17 @@
 /**
  * features/today/index.jsx
- * Today screen — focus on today's tasks, streak, AI focus suggestions.
+ * Today screen — focus on today's tasks.
  *
  * Exports: TodayScreen
  *
- * Bolt 1.5: extracted from mindflow.jsx lines 677–809.
+ * Bolt 2.1: ADHD-aware-planning compliance (Principles 2, 5, 7).
+ *   - Soft cap ≤ 5 visible tasks via useToday
+ *   - WelcomeBack shown once per session when away > 2 days
+ *   - Shame-free motiveLine: no loss-aversion streak language (⚠️ removed)
+ *   - TodayList: step_one visible, decompose button, quiet done action
+ *   - Streak badge is informational only, no warning color
+ *
+ * Bolt 1.5: originally extracted from mindflow.jsx lines 677–809.
  */
 
 import { useState, useMemo } from "react";
@@ -16,25 +23,43 @@ import { isToday, todayLabel } from "../../shared/lib/date.js";
 import { getStreakData }  from "../../shared/lib/streak.js";
 import { aiFocusSuggest } from "../../shared/services/claude.js";
 import { logError }       from "../../shared/lib/logger.js";
+import { useToday }       from "./useToday.js";
+import { WelcomeBack }    from "./WelcomeBack.jsx";
+import { TodayList }      from "./TodayList.jsx";
 
 export function TodayScreen({ thoughts, onArchive, onToggleToday, onUpdate, lang, persona }) {
   const tx = T[lang] || T.en;
 
-  // useMemo: avoid recomputing on every render
-  const active      = useMemo(() => thoughts.filter(t => t.isToday && !t.archived), [thoughts]);
+  // ── useToday: soft cap, welcome-back, decompose ─────────────────────────────
+  const {
+    activeTasks,
+    visibleTasks,
+    hiddenCount,
+    expandAll,
+    setExpandAll,
+    completeTask,
+    archiveTask,
+    decomposeTask,
+    decomposing,
+    shouldShowWelcome,
+    dismissWelcome,
+  } = useToday({ thoughts, onArchive, onUpdate, lang, persona });
+
+  // ── Derived lists not covered by useToday ──────────────────────────────────
   const doneToday   = useMemo(() => thoughts.filter(t => t.archived && isToday(t.archivedAt || t.updatedAt)), [thoughts]);
   const tgThoughts  = useMemo(() => thoughts.filter(t => !t.archived && t.source === "telegram"), [thoughts]);
   const unscheduled = useMemo(() => thoughts.filter(t => !t.isToday && !t.archived && t.type === "task"), [thoughts]);
   const streak      = useMemo(() => getStreakData(thoughts), [thoughts]);
 
-  const total = active.length + doneToday.length;
+  const total = activeTasks.length + doneToday.length;
   const pct   = total > 0 ? Math.round(doneToday.length / total * 100) : 0;
 
+  // ── AI Focus suggestion ────────────────────────────────────────────────────
   const [aiSuggestion, setAiSuggestion] = useState(null);
   const [aiLoading, setAiLoading]       = useState(false);
 
   const getSuggestions = async () => {
-    const pool = [...active, ...unscheduled];
+    const pool = [...activeTasks, ...unscheduled];
     if (!pool.length) return;
     setAiLoading(true);
     try { setAiSuggestion(await aiFocusSuggest(pool, lang, persona)); }
@@ -42,45 +67,77 @@ export function TodayScreen({ thoughts, onArchive, onToggleToday, onUpdate, lang
     setAiLoading(false);
   };
 
-  // Streak motivational line — loss aversion (Duolingo-style)
+  // ── Shame-free motivation line (Bolt 2.1: no loss-aversion streak language) ─
+  // Principle 2: no ⚠️ "don't lose your streak" warnings.
+  // Just calm, factual positive feedback when tasks are done.
   const motiveLine = () => {
-    if (!streak.doneToday && streak.current > 0) {
-      return lang === "ru"
-        ? `⚠️ Не потеряй ${streak.current}-дневную серию — сделай дамп сегодня`
-        : lang === "az"
-        ? `⚠️ ${streak.current} günlük seriyani itirmə — bu gün dump et`
-        : `⚠️ Don't lose your ${streak.current}-day streak — dump something today`;
-    }
-    if (pct === 100 && doneToday.length > 0) return lang === "ru" ? "Всё готово. Серия продолжается 🔥" : lang === "az" ? "Hər şey hazırdır. Seriya davam edir 🔥" : "All done. Streak alive 🔥";
-    if (doneToday.length > 0 && active.length > 0) return lang === "ru" ? `${doneToday.length} выполнено — серия жива 🔥` : lang === "az" ? `${doneToday.length} tamamlandı — seriya davam edir 🔥` : `${doneToday.length} done — streak alive 🔥`;
+    if (pct === 100 && doneToday.length > 0)
+      return lang === "ru" ? "Отличная работа сегодня."
+           : lang === "az" ? "Bu gün əla iş gördün."
+           : "Great work today.";
+    if (doneToday.length > 0 && activeTasks.length > 0)
+      return lang === "ru" ? `${doneToday.length} выполнено.`
+           : lang === "az" ? `${doneToday.length} tamamlandı.`
+           : `${doneToday.length} done.`;
     return null;
   };
   const motive = motiveLine();
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+      {/* ── Header ── */}
       <div style={{ padding: "18px 18px 14px", flexShrink: 0 }}>
         <div style={{ color: C.textSub, fontSize: 13, marginBottom: 3 }}>{todayLabel(lang)}</div>
+
         <div style={{ display: "flex", alignItems: "center", marginBottom: 10 }}>
-          <div style={{ color: C.text, fontSize: 24, fontWeight: 700, letterSpacing: -.5, flex: 1 }}>{tx.today}</div>
+          <div style={{ color: C.text, fontSize: 24, fontWeight: 700, letterSpacing: -.5, flex: 1 }}>
+            {tx.today}
+          </div>
+
+          {/* Streak badge — informational only, neutral color (no warning) */}
           {streak.current > 0 && (
-            <div style={{ display: "flex", alignItems: "center", gap: 5, background: streak.doneToday ? `${C.done}18` : `${C.high}18`, border: `1px solid ${streak.doneToday ? C.done : C.high}44`, borderRadius: 10, padding: "4px 10px", marginRight: 8 }}>
+            <div style={{
+              display: "flex", alignItems: "center", gap: 5,
+              background: `${C.accent}18`,
+              border: `1px solid ${C.accent}33`,
+              borderRadius: 10, padding: "4px 10px", marginRight: 8,
+            }}>
               <span style={{ fontSize: 14 }}>🔥</span>
-              <span style={{ color: streak.doneToday ? C.done : C.high, fontSize: 13, fontWeight: 700 }}>{streak.current}</span>
+              <span style={{ color: C.accent, fontSize: 13, fontWeight: 700 }}>{streak.current}</span>
             </div>
           )}
-          <button onClick={getSuggestions} disabled={aiLoading} style={{ background: C.accentDim, color: C.accent, border: `1px solid ${C.accent}44`, borderRadius: 10, padding: "6px 12px", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", gap: 6 }}>
+
+          {/* AI Focus button */}
+          <button
+            onClick={getSuggestions}
+            disabled={aiLoading}
+            style={{
+              background: C.accentDim, color: C.accent,
+              border: `1px solid ${C.accent}44`,
+              borderRadius: 10, padding: "6px 12px",
+              fontSize: 12, fontWeight: 600,
+              cursor: "pointer", fontFamily: "inherit",
+              display: "flex", alignItems: "center", gap: 6,
+            }}
+          >
             {aiLoading ? <><Spinner size={12} color={C.accent} /> AI...</> : "🎯 AI Focus"}
           </button>
         </div>
 
+        {/* Shame-free motive line — neutral text, no warning emoji */}
         {motive && (
-          <div style={{ color: streak.doneToday ? C.done : C.high, fontSize: 12, fontWeight: 600, marginBottom: 10 }}>{motive}</div>
+          <div style={{ color: C.textSub, fontSize: 12, fontWeight: 500, marginBottom: 10 }}>
+            {motive}
+          </div>
         )}
 
         {/* Telegram captured thoughts badge */}
         {tgThoughts.length > 0 && (
-          <div style={{ background: "#2AABEE15", border: "1px solid #2AABEE33", borderRadius: 10, padding: "7px 12px", marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
+          <div style={{
+            background: "#2AABEE15", border: "1px solid #2AABEE33",
+            borderRadius: 10, padding: "7px 12px", marginBottom: 12,
+            display: "flex", alignItems: "center", gap: 8,
+          }}>
             <span style={{ color: "#2AABEE", fontSize: 13 }}>✈️</span>
             <span style={{ color: "#2AABEE", fontSize: 12, fontWeight: 600, flex: 1 }}>
               {lang === "ru"
@@ -89,59 +146,125 @@ export function TodayScreen({ thoughts, onArchive, onToggleToday, onUpdate, lang
                 ? `Telegram-dan ${tgThoughts.length} fikir`
                 : `${tgThoughts.length} thought${tgThoughts.length !== 1 ? "s" : ""} from Telegram`}
             </span>
-            <button onClick={() => tgThoughts.forEach(t => onToggleToday?.(t.id))} style={{
-              background: "#2AABEE22", border: "1px solid #2AABEE44",
-              color: "#2AABEE", borderRadius: 7, padding: "3px 10px",
-              fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: "inherit",
-              flexShrink: 0,
-            }}>
+            <button
+              onClick={() => tgThoughts.forEach(t => onToggleToday?.(t.id))}
+              style={{
+                background: "#2AABEE22", border: "1px solid #2AABEE44",
+                color: "#2AABEE", borderRadius: 7, padding: "3px 10px",
+                fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: "inherit",
+                flexShrink: 0,
+              }}
+            >
               {lang === "ru" ? "+ в сегодня" : lang === "az" ? "+ bu günə" : "+ add all"}
             </button>
           </div>
         )}
 
+        {/* AI Focus suggestion panel */}
         {aiSuggestion?.picks?.length > 0 && (
-          <div style={{ background: `${C.accent}12`, border: `1px solid ${C.accent}33`, borderRadius: 12, padding: "10px 14px", marginBottom: 12 }}>
+          <div style={{
+            background: `${C.accent}12`, border: `1px solid ${C.accent}33`,
+            borderRadius: 12, padding: "10px 14px", marginBottom: 12,
+          }}>
             <div style={{ color: C.accent, fontSize: 11, fontWeight: 600, marginBottom: 6 }}>
               🤖 {lang === "ru" ? "AI рекомендует:" : lang === "az" ? "AI tövsiyə edir:" : "AI suggests focusing on:"}
             </div>
-            {aiSuggestion.picks.map((p, i) => <div key={i} style={{ color: C.text, fontSize: 13, padding: "2px 0" }}>• {p}</div>)}
-            {aiSuggestion.reason && <div style={{ color: C.textSub, fontSize: 12, marginTop: 6, fontStyle: "italic" }}>{aiSuggestion.reason}</div>}
-            <button onClick={() => setAiSuggestion(null)} style={{ background: "none", border: "none", color: C.textDim, fontSize: 11, cursor: "pointer", marginTop: 4, fontFamily: "inherit" }}>✕ dismiss</button>
+            {aiSuggestion.picks.map((p, i) => (
+              <div key={i} style={{ color: C.text, fontSize: 13, padding: "2px 0" }}>• {p}</div>
+            ))}
+            {aiSuggestion.reason && (
+              <div style={{ color: C.textSub, fontSize: 12, marginTop: 6, fontStyle: "italic" }}>
+                {aiSuggestion.reason}
+              </div>
+            )}
+            <button
+              onClick={() => setAiSuggestion(null)}
+              style={{ background: "none", border: "none", color: C.textDim, fontSize: 11, cursor: "pointer", marginTop: 4, fontFamily: "inherit" }}
+            >
+              ✕ dismiss
+            </button>
           </div>
         )}
 
+        {/* Progress bar */}
         {total > 0 && (
           <>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-              <span style={{ color: C.textSub, fontSize: 12 }}>{doneToday.length} {tx.of} {total} {tx.doneOf}</span>
-              <span style={{ color: pct === 100 ? C.done : C.accent, fontSize: 12, fontWeight: 600 }}>{pct}%</span>
+              <span style={{ color: C.textSub, fontSize: 12 }}>
+                {doneToday.length} {tx.of} {total} {tx.doneOf}
+              </span>
+              <span style={{ color: pct === 100 ? C.done : C.accent, fontSize: 12, fontWeight: 600 }}>
+                {pct}%
+              </span>
             </div>
             <div style={{ background: C.surface, borderRadius: 4, height: 4, overflow: "hidden" }}>
-              <div style={{ height: "100%", width: `${pct}%`, background: pct === 100 ? C.done : C.accent, borderRadius: 4, transition: "width .6s ease" }} />
+              <div style={{
+                height: "100%", width: `${pct}%`,
+                background: pct === 100 ? C.done : C.accent,
+                borderRadius: 4, transition: "width .6s ease",
+              }} />
             </div>
           </>
         )}
       </div>
 
+      {/* ── Scrollable content ── */}
       <div style={{ flex: 1, overflowY: "auto", padding: "0 16px 80px" }}>
-        {active.length === 0 ? (
-          <div style={{ textAlign: "center", paddingTop: 50 }}>
-            <div style={{ fontSize: 44, marginBottom: 12 }}>{doneToday.length > 0 ? "🎉" : "✅"}</div>
-            <div style={{ color: C.text, fontSize: 16, fontWeight: 600, marginBottom: 6 }}>{doneToday.length > 0 ? tx.allDone : tx.noToday}</div>
-            <div style={{ color: C.textSub, fontSize: 13 }}>{doneToday.length > 0 ? `${doneToday.length} ${tx.doneOf} 💪` : tx.noTodaySub}</div>
-          </div>
-        ) : (
-          active.map(t => <ThoughtCard key={t.id} thought={t} lang={lang} onArchive={onArchive} onToggleToday={onToggleToday} onUpdate={onUpdate} showDone />)
+
+        {/* WelcomeBack — shown once per session when away > 2 days */}
+        {shouldShowWelcome && (
+          <WelcomeBack
+            lang={lang}
+            onDismiss={dismissWelcome}
+          />
         )}
 
-        {doneToday.length > 0 && active.length > 0 && (
+        {/* Task list — soft-capped by useToday, or all-done/empty state */}
+        {activeTasks.length === 0 ? (
+          <div style={{ textAlign: "center", paddingTop: 50 }}>
+            <div style={{ fontSize: 44, marginBottom: 12 }}>
+              {doneToday.length > 0 ? "🎉" : "✅"}
+            </div>
+            <div style={{ color: C.text, fontSize: 16, fontWeight: 600, marginBottom: 6 }}>
+              {doneToday.length > 0 ? tx.allDone : tx.noToday}
+            </div>
+            <div style={{ color: C.textSub, fontSize: 13 }}>
+              {doneToday.length > 0 ? `${doneToday.length} ${tx.doneOf} 💪` : tx.noTodaySub}
+            </div>
+          </div>
+        ) : (
+          <TodayList
+            tasks={visibleTasks}
+            hiddenCount={hiddenCount}
+            expandAll={expandAll}
+            setExpandAll={setExpandAll}
+            onComplete={completeTask}
+            onArchive={archiveTask}
+            onDecompose={decomposeTask}
+            decomposing={decomposing}
+            lang={lang}
+          />
+        )}
+
+        {/* Done today — shown when some tasks remain active */}
+        {doneToday.length > 0 && activeTasks.length > 0 && (
           <div style={{ marginTop: 20 }}>
-            <div style={{ color: C.textDim, fontSize: 11, fontWeight: 600, letterSpacing: .5, textTransform: "uppercase", marginBottom: 8 }}>{tx.completedToday}</div>
+            <div style={{
+              color: C.textDim, fontSize: 11, fontWeight: 600,
+              letterSpacing: .5, textTransform: "uppercase", marginBottom: 8,
+            }}>
+              {tx.completedToday}
+            </div>
             {doneToday.map(t => (
-              <div key={t.id} style={{ background: C.surface, borderRadius: 12, padding: "9px 14px", marginBottom: 8, opacity: .4, border: `1px solid ${C.border}` }}>
+              <div key={t.id} style={{
+                background: C.surface, borderRadius: 12,
+                padding: "9px 14px", marginBottom: 8,
+                opacity: .4, border: `1px solid ${C.border}`,
+              }}>
                 <span style={{ color: C.done, fontSize: 12, marginRight: 8 }}>✓</span>
-                <span style={{ color: C.textSub, fontSize: 14, textDecoration: "line-through" }}>{t.text}</span>
+                <span style={{ color: C.textSub, fontSize: 14, textDecoration: "line-through" }}>
+                  {t.text}
+                </span>
               </div>
             ))}
           </div>

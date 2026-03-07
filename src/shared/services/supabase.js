@@ -168,7 +168,50 @@ export async function sbPullThoughts(userId) {
 }
 
 // =============================================================================
-// 4. PERSONA OPERATIONS
+// 4. DUMP OPERATIONS (Bolt 2.1)
+// dumps table — stores raw brain dump + AI result for history/analytics.
+// =============================================================================
+
+/**
+ * Saves a raw brain dump record to Supabase (before AI processing).
+ * Returns the new dump ID for later update, or null on failure.
+ *
+ * @param {string} rawText
+ * @param {string} userId
+ * @returns {Promise<string|null>} dump uuid or null
+ */
+export async function sbSaveDump(rawText, userId) {
+  const sb = getSupabase();
+  if (!sb) return null;
+  const { data, error } = await sb
+    .from("dumps")
+    .insert({ user_id: userId, raw_text: rawText, processed: false })
+    .select("id")
+    .single();
+  if (error) return null;
+  return data?.id ?? null;
+}
+
+/**
+ * Marks a dump as processed and stores the AI result.
+ * Silent on error — dump history is non-critical.
+ *
+ * @param {string} dumpId
+ * @param {object} aiResult   — full { items, response } from parseDump
+ * @param {string} userId
+ */
+export async function sbUpdateDumpResult(dumpId, aiResult, userId) {
+  const sb = getSupabase();
+  if (!sb || !dumpId) return;
+  await sb
+    .from("dumps")
+    .update({ processed: true, ai_result: aiResult })
+    .eq("id", dumpId)
+    .eq("user_id", userId); // defence-in-depth (RLS also enforces this)
+}
+
+// =============================================================================
+// 5. PERSONA OPERATIONS
 // Persona is the AI character's memory (see ADR 0006).
 // =============================================================================
 

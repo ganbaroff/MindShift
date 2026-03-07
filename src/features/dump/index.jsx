@@ -1,144 +1,296 @@
 /**
  * features/dump/index.jsx
- * Dump screen — brain dump input + thought list.
+ * Dump screen — brain dump input + human-in-the-loop review + thought list.
  *
  * Exports: DumpScreen
  *
- * Bolt 1.3: extracted from mindflow.jsx lines 906–1191.
- *   VoiceBtn     — lines 906–945 (dump-only, not shared)
- *   DumpScreen   — lines 951–1191
+ * Bolt 2.1: human-in-the-loop review panel (adhd-aware-planning Principle 11).
+ *   - useDump manages state machine (idle → processing → review → done/error)
+ *   - DumpInput provides textarea + voice button
+ *   - ReviewPanel: user accepts/rejects each AI item before commit
+ *
+ * Bolt 1.3: originally extracted from mindflow.jsx lines 906–1191.
  */
 
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo } from "react";
 import { C }              from "../../skeleton/design-system/tokens.js";
 import { T }              from "../../shared/i18n/translations.js";
 import { Icon }           from "../../shared/ui/icons.jsx";
 import { TYPE_CFG }       from "../../shared/lib/thought-types.js";
 import { ThoughtCard }    from "../../shared/ui/ThoughtCard.jsx";
-import { FREE_LIMITS, getDumpCount, incrementDumpCount } from "../../shared/lib/freemium.js";
+import { FREE_LIMITS, getDumpCount } from "../../shared/lib/freemium.js";
 import { greeting }       from "../../shared/lib/greeting.js";
-import { logError }       from "../../shared/lib/logger.js";
-import { Spinner }        from "../../shared/ui/primitives.jsx";
-import { parseDump }      from "./dump.api.js";
+import { useDump }        from "./useDump.js";
+import { DumpInput }      from "./DumpInput.jsx";
 
-// ─────────────────────────────────────────────────────────────────────────────
-// VOICE BUTTON — dump-only component (not shared across screens)
-// ─────────────────────────────────────────────────────────────────────────────
-function VoiceBtn({ onResult, disabled, lang }) {
-  const [on, setOn] = useState(false);
-  const recRef = useRef(null);
-  const supported = "SpeechRecognition" in window || "webkitSpeechRecognition" in window;
-  const sttLang = lang === "ru" ? "ru-RU" : lang === "az" ? "az-AZ" : "en-US";
+// =============================================================================
+// REVIEW PANEL — human-in-the-loop item review (Bolt 2.1)
+// =============================================================================
 
-  const toggle = () => {
-    if (!supported) { alert("Voice input not supported. Try Chrome."); return; }
-    if (on) { recRef.current?.stop(); setOn(false); return; }
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const rec = new SR();
-    rec.lang = sttLang;
-    rec.continuous = false;
-    rec.interimResults = false;
-    rec.onresult = e => { onResult(e.results[0][0].transcript); setOn(false); };
-    rec.onerror = rec.onend = () => setOn(false);
-    rec.start();
-    recRef.current = rec;
-    setOn(true);
-  };
+/**
+ * Shown after AI processes a dump. User accepts/rejects each item before commit.
+ * @param {object}   props
+ * @param {Array}    props.proposed      — ProposedItem[] from useDump
+ * @param {string}   props.aiResponse    — AI summary message
+ * @param {string}   props.lang
+ * @param {Function} props.onToggle      — (index) => void
+ * @param {Function} props.onAcceptAll
+ * @param {Function} props.onConfirm     — commits accepted items
+ * @param {Function} props.onCancel      — discards all, back to idle
+ */
+function ReviewPanel({ proposed, aiResponse, lang, onToggle, onAcceptAll, onConfirm, onCancel }) {
+  const acceptedCount = proposed.filter(p => p.accepted).length;
 
-  const ariaLabel = on
-    ? (lang === "ru" ? "Остановить запись" : lang === "az" ? "Qeydiyyatı dayandır" : "Stop recording")
-    : (lang === "ru" ? "Голосовой ввод"    : lang === "az" ? "Səs girişi"          : "Voice input");
+  const headingText =
+    lang === "ru" ? "Вот что я нашёл:"
+    : lang === "az" ? "Tapdım:"
+    : "Here's what I found:";
+
+  const acceptAllLabel =
+    lang === "ru" ? "Принять всё"
+    : lang === "az" ? "Hamısını qəbul et"
+    : "Accept all";
+
+  const confirmLabel =
+    lang === "ru" ? `Добавить выбранное (${acceptedCount})`
+    : lang === "az" ? `Seçilmişləri əlavə et (${acceptedCount})`
+    : `Add selected (${acceptedCount})`;
+
+  const cancelLabel =
+    lang === "ru" ? "Отмена"
+    : lang === "az" ? "Ləğv et"
+    : "Cancel";
 
   return (
-    <button onClick={toggle} disabled={disabled} aria-label={ariaLabel} style={{
-      width: 48, height: 48, borderRadius: 14, flexShrink: 0,
-      border: `1px solid ${on ? C.high + "88" : C.border}`,
-      background: on ? `${C.high}18` : C.surfaceHi,
-      color: on ? C.high : C.textSub,
-      cursor: "pointer",
-      display: "flex", alignItems: "center", justifyContent: "center",
-      animation: on ? "micPulse 1.4s infinite" : "none",
-      transition: "all .2s",
-      boxShadow: on ? `0 0 16px ${C.high}44` : "none",
+    <div style={{
+      background: C.surface,
+      border: `1px solid ${C.borderHi}`,
+      borderRadius: 20,
+      padding: "16px",
+      animation: "slideUp .35s cubic-bezier(.22,1,.36,1)",
     }}>
-      {on ? Icon.stop(C.high, 16) : Icon.mic(C.textSub, 18)}
-    </button>
+      {/* AI response message */}
+      {aiResponse && (
+        <div style={{
+          display: "flex", alignItems: "center", gap: 6,
+          marginBottom: 12,
+          padding: "8px 12px",
+          background: `${C.accent}10`,
+          borderRadius: 10,
+          border: `1px solid ${C.accent}22`,
+        }}>
+          {Icon.sparkle(C.accent, 13)}
+          <span style={{ color: C.accentLit, fontSize: 12, fontWeight: 700, letterSpacing: 0.3, textTransform: "uppercase" }}>MindFlow</span>
+          <span style={{ color: C.textSub, fontSize: 13 }}>{aiResponse}</span>
+        </div>
+      )}
+
+      {/* Heading */}
+      <div style={{ color: C.text, fontSize: 15, fontWeight: 700, marginBottom: 10, letterSpacing: -0.2 }}>
+        {headingText}
+      </div>
+
+      {/* Proposed items */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 14 }}>
+        {proposed.map((p, i) => (
+          <button
+            key={i}
+            onClick={() => onToggle(i)}
+            style={{
+              display: "flex", alignItems: "flex-start", gap: 10,
+              background: p.accepted ? `${C.accent}10` : "transparent",
+              border: `1px solid ${p.accepted ? C.accent + "44" : C.border}`,
+              borderRadius: 12,
+              padding: "10px 14px",
+              cursor: "pointer",
+              fontFamily: "inherit",
+              textAlign: "left",
+              transition: "all .15s",
+            }}
+          >
+            {/* Checkbox indicator */}
+            <span style={{
+              width: 20, height: 20,
+              borderRadius: 6,
+              border: `1.5px solid ${p.accepted ? C.accent : C.border}`,
+              background: p.accepted ? C.accent : "transparent",
+              flexShrink: 0,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              marginTop: 1,
+              transition: "all .15s",
+            }}>
+              {p.accepted && (
+                <span style={{ color: "white", fontSize: 11, fontWeight: 800, lineHeight: 1 }}>✓</span>
+              )}
+            </span>
+
+            <div style={{ flex: 1, minWidth: 0 }}>
+              {/* Type chip */}
+              <span style={{
+                fontSize: 10, fontWeight: 700, letterSpacing: 0.6,
+                color: p.accepted ? C.accentLit : C.textDim,
+                textTransform: "uppercase",
+                marginRight: 6,
+              }}>
+                {p.item.type}
+              </span>
+              {/* Text */}
+              <span style={{
+                color: p.accepted ? C.text : C.textDim,
+                fontSize: 14,
+                lineHeight: 1.4,
+                textDecoration: p.accepted ? "none" : "line-through",
+                transition: "color .15s",
+              }}>
+                {p.item.text}
+              </span>
+
+              {/* step_one hint — tasks only, when accepted */}
+              {p.item.step_one && p.item.type === "task" && p.accepted && (
+                <div style={{
+                  color: C.textSub,
+                  fontSize: 12,
+                  marginTop: 4,
+                  display: "flex", alignItems: "flex-start", gap: 4,
+                }}>
+                  <span style={{ color: C.accent, flexShrink: 0 }}>→</span>
+                  <span>{p.item.step_one}</span>
+                </div>
+              )}
+            </div>
+          </button>
+        ))}
+      </div>
+
+      {/* Actions */}
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+        {/* Accept all — only shown when some are deselected */}
+        {proposed.some(p => !p.accepted) && (
+          <button
+            onClick={onAcceptAll}
+            style={{
+              height: 44, padding: "0 14px",
+              background: "none",
+              border: `1px solid ${C.border}`,
+              borderRadius: 12,
+              color: C.textSub,
+              fontSize: 13, fontWeight: 600,
+              cursor: "pointer", fontFamily: "inherit",
+              transition: "border-color .15s",
+            }}
+          >
+            {acceptAllLabel}
+          </button>
+        )}
+
+        {/* Confirm — primary */}
+        <button
+          onClick={onConfirm}
+          disabled={acceptedCount === 0}
+          style={{
+            flex: 1,
+            height: 44,
+            background: acceptedCount > 0
+              ? `linear-gradient(135deg, ${C.accent}, ${C.accentLit})`
+              : C.surfaceHi,
+            color: acceptedCount > 0 ? "white" : C.textDim,
+            border: "none",
+            borderRadius: 12,
+            fontSize: 14, fontWeight: 700,
+            cursor: acceptedCount > 0 ? "pointer" : "not-allowed",
+            fontFamily: "inherit",
+            letterSpacing: 0.2,
+            boxShadow: acceptedCount > 0 ? `0 4px 16px ${C.accentGlow}` : "none",
+            transition: "all .2s",
+          }}
+        >
+          {confirmLabel}
+        </button>
+
+        {/* Cancel */}
+        <button
+          onClick={onCancel}
+          style={{
+            height: 44, padding: "0 14px",
+            background: "none",
+            border: `1px solid ${C.border}`,
+            borderRadius: 12,
+            color: C.textSub,
+            fontSize: 13, fontWeight: 500,
+            cursor: "pointer", fontFamily: "inherit",
+          }}
+        >
+          {cancelLabel}
+        </button>
+      </div>
+    </div>
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// =============================================================================
 // DUMP SCREEN
-// ─────────────────────────────────────────────────────────────────────────────
+// =============================================================================
 
-export function DumpScreen({ thoughts, onProcess, onToggleToday, onArchive, onUpdate, lang, persona, isPro, onShowPricing }) {
+/**
+ * @param {object}   props
+ * @param {object[]} props.thoughts
+ * @param {Function} props.onProcess       — (rawText, items) => void
+ * @param {Function} props.onToggleToday
+ * @param {Function} props.onArchive
+ * @param {Function} props.onUpdate
+ * @param {string}   props.lang
+ * @param {object}   props.persona
+ * @param {boolean}  props.isPro
+ * @param {Function} props.onShowPricing
+ * @param {object|null} props.user         — auth user (needed for Supabase dump record)
+ */
+export function DumpScreen({ thoughts, onProcess, onToggleToday, onArchive, onUpdate, lang, persona, isPro, onShowPricing, user }) {
   const [text, setText] = useState("");
-  const [status, setStatus] = useState("idle");
-  const [aiMsg, setAiMsg] = useState("");
   const [filter, setFilter] = useState("all");
   const [tagFilter, setTagFilter] = useState(null);
   const tx = T[lang] || T.en;
 
-  // useMemo: don't recompute on every render
+  // ── Dump state machine ──────────────────────────────────────────────────────
+  const {
+    status, proposed, aiResponse, errorMsg,
+    submitDump, toggleItem, acceptAll, confirmItems, cancelReview,
+  } = useDump({ lang, persona, isPro, thoughts, onProcess, onShowPricing, user });
+
+  // ── Derived lists for the thought list below ────────────────────────────────
   const visible = useMemo(() =>
     thoughts.filter(t => !t.archived &&
       (filter === "all" || t.type === filter) &&
       (!tagFilter || t.tags?.includes(tagFilter))
     ), [thoughts, filter, tagFilter]);
 
-  // All unique tags across active thoughts for filter UI
   const allTags = useMemo(() => {
     const s = new Set();
     thoughts.forEach(t => { if (!t.archived) t.tags?.forEach(tag => s.add(tag)); });
     return [...s].slice(0, 12);
   }, [thoughts]);
 
-  const process = async () => {
-    if (!text.trim() || text.trim().length < 2 || status === "processing") return;
+  const FILTERS = ["all", "task", "idea", "note", "reminder", "expense", "memory"];
 
-    // Freemium: check dump limit (non-pro users)
-    if (!isPro) {
-      const dumpCount = getDumpCount();
-      const activeCount = thoughts.filter(t => !t.archived).length;
-      if (dumpCount >= FREE_LIMITS.dumpsPerMonth) {
-        onShowPricing?.("dumps");
-        return;
-      }
-      if (activeCount >= FREE_LIMITS.thoughtsStored) {
-        onShowPricing?.("thoughts");
-        return;
-      }
-    }
-    incrementDumpCount();
-    setStatus("processing");
-    setAiMsg("");
-    try {
-      const { items, response } = await parseDump(text, lang, persona);
-      await onProcess(text, items);
-      setAiMsg(response);
-      setText("");
-      setStatus("done");
-      setTimeout(() => { setStatus("idle"); setAiMsg(""); }, 5000);
-    } catch (e) {
-      logError("DumpScreen.process", e);
-      setStatus("error");
-      // FIX: specific error messages for timeout and auth failures
-      if (e.message === "timeout") {
-        setAiMsg(lang === "ru" ? "⏱ Таймаут — попробуй снова" : lang === "az" ? "⏱ Vaxt bitdi — yenidən cəhd et" : "⏱ Timeout — try again");
-      } else if (e.message?.includes(":auth")) {
-        setAiMsg(lang === "ru" ? "🔑 Ошибка API ключа" : "🔑 API key error");
-      } else if (e.message?.includes(":rate_limit")) {
-        setAiMsg(lang === "ru" ? "⏳ Лимит запросов — подожди минуту" : "⏳ Rate limit — wait a moment");
-      }
-      setTimeout(() => { setStatus("idle"); setAiMsg(""); }, 4000);
-    }
+  // ── Handlers ────────────────────────────────────────────────────────────────
+  const handleSubmit  = () => submitDump(text);
+
+  const handleConfirm = () => {
+    confirmItems(text);  // passes rawText to useDump → onProcess
+    setText("");
   };
 
-  const FILTERS = ["all", "task", "idea", "note", "reminder", "expense", "memory"];
+  // cancelReview: text is NOT cleared so user can continue editing
+  const handleCancel  = () => cancelReview();
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       {/* Ambient background glow */}
-      <div style={{ position: "absolute", top: -60, left: "50%", transform: "translateX(-50%)", width: 300, height: 300, borderRadius: "50%", background: `radial-gradient(circle, ${C.accentGlow} 0%, transparent 70%)`, pointerEvents: "none", zIndex: 0 }} />
+      <div style={{
+        position: "absolute", top: -60, left: "50%", transform: "translateX(-50%)",
+        width: 300, height: 300, borderRadius: "50%",
+        background: `radial-gradient(circle, ${C.accentGlow} 0%, transparent 70%)`,
+        pointerEvents: "none", zIndex: 0,
+      }} />
 
       {/* Header */}
       <div style={{ padding: "20px 20px 14px", display: "flex", alignItems: "center", position: "relative", zIndex: 1 }}>
@@ -154,8 +306,15 @@ export function DumpScreen({ thoughts, onProcess, onToggleToday, onArchive, onUp
           {!isPro && (() => {
             const left = FREE_LIMITS.dumpsPerMonth - getDumpCount();
             if (left <= 5) return (
-              <button onClick={() => onShowPricing?.("dumps")} style={{ background: `${C.idea}15`, border: `1px solid ${C.idea}30`, color: C.idea, fontSize: 10, fontWeight: 700, padding: "3px 8px", borderRadius: 6, cursor: "pointer", fontFamily: "inherit", letterSpacing: 0.3 }}>
-                {left <= 0 ? (lang === "ru" ? "Лимит" : "Limit") : `${left} ${lang === "ru" ? "дампов" : lang === "az" ? "demp" : "dumps"}`} ⚡
+              <button onClick={() => onShowPricing?.("dumps")} style={{
+                background: `${C.idea}15`, border: `1px solid ${C.idea}30`,
+                color: C.idea, fontSize: 10, fontWeight: 700,
+                padding: "3px 8px", borderRadius: 6,
+                cursor: "pointer", fontFamily: "inherit", letterSpacing: 0.3,
+              }}>
+                {left <= 0
+                  ? (lang === "ru" ? "Лимит" : "Limit")
+                  : `${left} ${lang === "ru" ? "дампов" : lang === "az" ? "demp" : "dumps"}`} ⚡
               </button>
             );
             return null;
@@ -164,68 +323,63 @@ export function DumpScreen({ thoughts, onProcess, onToggleToday, onArchive, onUp
         </div>
       </div>
 
-      {/* Input area */}
+      {/* Input area OR review panel */}
       <div style={{ padding: "0 16px", flexShrink: 0, position: "relative", zIndex: 1 }}>
-        <div style={{
-          background: C.surface, borderRadius: 18,
-          border: `1px solid ${text.trim() ? C.borderHi : C.border}`,
-          marginBottom: 10,
-          transition: "border-color .2s, box-shadow .2s",
-          boxShadow: text.trim() ? `0 0 0 3px ${C.accentGlow}` : "none",
-        }}>
-          <textarea data-testid="dump-input" value={text} onChange={e => setText(e.target.value.slice(0, 3000))}
-            onKeyDown={e => (e.metaKey || e.ctrlKey) && e.key === "Enter" && process()}
-            placeholder={tx.dumpPlaceholder} rows={5}
-            aria-label={tx.dumpPlaceholder?.split("\n")[0]}
-            style={{ width: "100%", background: "transparent", border: "none", outline: "none", color: C.text, fontSize: 15, lineHeight: 1.65, padding: "16px 18px", resize: "none", fontFamily: "inherit", boxSizing: "border-box" }} />
-        </div>
+        {status !== "review" ? (
+          <>
+            <DumpInput
+              text={text}
+              setText={setText}
+              onSubmit={handleSubmit}
+              isProcessing={status === "processing"}
+              lang={lang}
+              status={status}
+            />
 
-        <div style={{ display: "flex", gap: 10 }}>
-          <VoiceBtn lang={lang} disabled={status === "processing"} onResult={t => setText(prev => prev ? `${prev} ${t}` : t)} />
-          <button data-testid="process-btn" onClick={process} disabled={status === "processing" || !text.trim()}
-            style={{
-              flex: 1, height: 48,
-              background: status === "processing" ? C.surfaceHi : text.trim() ? `linear-gradient(135deg, ${C.accent}, ${C.accentLit})` : C.surface,
-              color: text.trim() ? "white" : C.textSub,
-              border: "none", borderRadius: 14,
-              fontSize: 14, fontWeight: 700,
-              cursor: !text.trim() || status === "processing" ? "not-allowed" : "pointer",
-              transition: "all .2s",
-              display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-              fontFamily: "inherit", letterSpacing: 0.3,
-              boxShadow: text.trim() && status !== "processing" ? `0 4px 20px ${C.accentGlow}` : "none",
-            }}>
-            {status === "processing" && <Spinner />}
-            {status === "processing" && tx.processing}
-            {status === "idle" && text.trim() && <>{Icon.send("white", 15)}{tx.process}</>}
-            {status === "idle" && !text.trim() && tx.process}
-            {status === "done" && <>{Icon.check(C.done, 15)}<span style={{ color: C.done }}>{tx.aiResponse}</span></>}
-            {status === "error" && tx.errorRetry}
-          </button>
-        </div>
+            {/* Error message */}
+            {status === "error" && errorMsg && (
+              <div style={{
+                marginTop: 10, padding: "11px 14px",
+                background: `${C.high}10`,
+                borderRadius: 14, border: `1px solid ${C.high}22`,
+                color: C.high, fontSize: 14, lineHeight: 1.5,
+                animation: "fadeIn .3s ease",
+              }}>
+                {errorMsg}
+              </div>
+            )}
 
-        {/* char count hint — visible when typing */}
-        {text.length > 20 && status === "idle" && (
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 4, padding: "0 4px" }}>
-            <span style={{ color: C.textDim, fontSize: 11 }}>
-              {lang === "ru" ? "⌘+Enter для отправки" : lang === "az" ? "⌘+Enter göndər" : "⌘+Enter to send"}
-            </span>
-            <span style={{ color: text.length > 1500 ? C.medium : C.textDim, fontSize: 11 }}>{text.length}</span>
-          </div>
-        )}
-
-        {aiMsg && (
-          <div style={{ marginTop: 10, padding: "11px 14px", background: `${C.accent}10`, borderRadius: 14, border: `1px solid ${C.accent}22`, color: C.text, fontSize: 14, lineHeight: 1.6, animation: "fadeIn .3s ease" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 5 }}>
-              {Icon.sparkle(C.accent, 13)}
-              <span style={{ color: C.accent, fontSize: 11, fontWeight: 700, letterSpacing: 0.5, textTransform: "uppercase" }}>MindFlow</span>
-            </div>
-            {aiMsg}
-          </div>
+            {/* Done confirmation */}
+            {status === "done" && (
+              <div style={{
+                marginTop: 10, padding: "11px 14px",
+                background: `${C.done}10`,
+                borderRadius: 14, border: `1px solid ${C.done}22`,
+                color: C.done, fontSize: 14, lineHeight: 1.5,
+                animation: "fadeIn .3s ease",
+                display: "flex", alignItems: "center", gap: 8,
+              }}>
+                {Icon.check(C.done, 14)}
+                {lang === "ru" ? "Добавлено в список."
+                 : lang === "az" ? "Siyahıya əlavə edildi."
+                 : "Added to your list."}
+              </div>
+            )}
+          </>
+        ) : (
+          <ReviewPanel
+            proposed={proposed}
+            aiResponse={aiResponse}
+            lang={lang}
+            onToggle={toggleItem}
+            onAcceptAll={acceptAll}
+            onConfirm={handleConfirm}
+            onCancel={handleCancel}
+          />
         )}
       </div>
 
-      {/* Filters */}
+      {/* Type filter chips */}
       <div style={{ display: "flex", gap: 6, padding: "12px 16px 0", overflowX: "auto", flexShrink: 0, position: "relative", zIndex: 1 }}>
         {FILTERS.map(f => {
           const cfg = TYPE_CFG[f];
@@ -266,7 +420,7 @@ export function DumpScreen({ thoughts, onProcess, onToggleToday, onArchive, onUp
         </div>
       )}
 
-      {/* List */}
+      {/* Thought list */}
       <div style={{ flex: 1, overflowY: "auto", padding: "10px 16px 90px", position: "relative", zIndex: 1 }}>
         {visible.length === 0 ? (
           <div style={{ textAlign: "center", paddingTop: 60 }}>
@@ -274,7 +428,9 @@ export function DumpScreen({ thoughts, onProcess, onToggleToday, onArchive, onUp
             <div style={{ color: C.text, fontSize: 16, fontWeight: 700, marginBottom: 6, letterSpacing: -0.3 }}>
               {filter === "all" && !tagFilter ? tx.noThoughts : `No ${tagFilter ? `#${tagFilter}` : filter + "s"} yet.`}
             </div>
-            <div style={{ color: C.textSub, fontSize: 13 }}>{filter === "all" && !tagFilter ? tx.noThoughtsSub : "Try a different filter."}</div>
+            <div style={{ color: C.textSub, fontSize: 13 }}>
+              {filter === "all" && !tagFilter ? tx.noThoughtsSub : "Try a different filter."}
+            </div>
           </div>
         ) : (
           <>
@@ -287,7 +443,18 @@ export function DumpScreen({ thoughts, onProcess, onToggleToday, onArchive, onUp
                 <button onClick={() => { setFilter("all"); setTagFilter(null); }} style={{ background: "none", border: "none", color: C.textDim, fontSize: 11, cursor: "pointer", fontFamily: "inherit" }}>✕ clear</button>
               )}
             </div>
-            {visible.map(t => <ThoughtCard key={t.id} thought={t} lang={lang} onToggleToday={onToggleToday} onArchive={onArchive} onUpdate={onUpdate} onTagClick={tag => setTagFilter(tagFilter === tag ? null : tag)} showDone />)}
+            {visible.map(t => (
+              <ThoughtCard
+                key={t.id}
+                thought={t}
+                lang={lang}
+                onToggleToday={onToggleToday}
+                onArchive={onArchive}
+                onUpdate={onUpdate}
+                onTagClick={tag => setTagFilter(tagFilter === tag ? null : tag)}
+                showDone
+              />
+            ))}
           </>
         )}
       </div>
