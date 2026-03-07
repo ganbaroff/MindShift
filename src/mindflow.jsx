@@ -18,7 +18,21 @@ import {
 // Bolt 1.2: pure utilities extracted to shared/lib/
 import { uid }                       from "./shared/lib/id.js";
 import { isToday, todayLabel }       from "./shared/lib/date.js";
-import { getStreakData, saveStreak } from "./shared/lib/streak.js";
+import { getStreakData, saveStreak }  from "./shared/lib/streak.js";
+import { FREE_LIMITS, getDumpCount, incrementDumpCount, isProUser } from "./shared/lib/freemium.js";
+import { updatePersona }             from "./shared/lib/persona.js";
+import { exportToMarkdown }          from "./shared/lib/export.js";
+import { greeting }                  from "./shared/lib/greeting.js";
+import {
+  defaultNotifPrefs, loadNotifPrefs, saveNotifPrefs,
+  requestNotifPermission, scheduleNotification,
+} from "./shared/lib/notifications.js";
+import { applyNotifSchedule }        from "./shared/lib/notif-schedule.js";
+// Bolt 1.2: constants extracted to shared modules
+import { C, P_COLOR }               from "./skeleton/design-system/tokens.js";
+import { T, LANGS }                 from "./shared/i18n/translations.js";
+import { Icon }                      from "./shared/ui/icons.jsx";
+import { TYPE_CFG }                  from "./shared/lib/thought-types.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PRO BANNER — shown when hitting freemium limits
@@ -258,36 +272,9 @@ class ErrorBoundary extends Component {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// FREEMIUM LIMITS (saas-monetization skill)
+// FREEMIUM LIMITS — moved to shared/lib/freemium.js (Bolt 1.2)
+// FREE_LIMITS, getMonthKey, getDumpCount, incrementDumpCount, isProUser
 // ─────────────────────────────────────────────────────────────────────────────
-const FREE_LIMITS = {
-  dumpsPerMonth: 30,   // AI calls per month
-  thoughtsStored: 50,  // max active (non-archived) thoughts
-};
-
-function getMonthKey() {
-  const d = new Date();
-  return `mf_dumps_${d.getFullYear()}_${d.getMonth()}`;
-}
-
-function getDumpCount() {
-  try { return parseInt(localStorage.getItem(getMonthKey()) || "0", 10); } catch { return 0; }
-}
-
-function incrementDumpCount() {
-  try {
-    const key = getMonthKey();
-    const n = getDumpCount() + 1;
-    localStorage.setItem(key, String(n));
-    return n;
-  } catch { return 0; }
-}
-
-function isProUser(user, subscription) {
-  if (!user) return false;
-  if (subscription?.plan === "pro" || subscription?.plan === "coach") return true;
-  return false;
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SUPABASE — client + DB ops moved to shared/services/supabase.js (Bolt 1.1)
@@ -296,441 +283,27 @@ function isProUser(user, subscription) {
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// PERSONA v1
-// buildPersonaContext moved to shared/services/claude.js (Bolt 1.1)
-// updatePersona stays here — it's UI state logic, not a service.
+// PERSONA v1 — moved to shared/lib/persona.js (Bolt 1.2)
+// buildPersonaContext → shared/services/claude.js (Bolt 1.1)
+// updatePersona → shared/lib/persona.js (Bolt 1.2)
 // ─────────────────────────────────────────────────────────────────────────────
-function updatePersona(persona, newThoughts, archivedId) {
-  const p = persona?.patterns || {};
-  const tagFreq = { ...(p.tagFreq || {}) };
-  newThoughts.forEach(t => (t.tags || []).forEach(tag => { tagFreq[tag] = (tagFreq[tag] || 0) + 1; }));
-  const topTags = Object.entries(tagFreq).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([t]) => t);
-  const total = (p.totalTasks || 0) + newThoughts.filter(t => t.type === "task").length;
-  const done  = (p.doneTasks  || 0) + (archivedId ? 1 : 0);
-  const completionRate = total > 0 ? done / total : 0;
-  const hour = new Date().getHours();
-  const hourCounts = { ...(p.hourCounts || {}) };
-  hourCounts[hour] = (hourCounts[hour] || 0) + 1;
-  const mostActiveHour = parseInt(Object.entries(hourCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || "9");
-  return {
-    updatedAt: new Date().toISOString(),
-    patterns: { tagFreq, topTags, totalTasks: total, doneTasks: done, completionRate, hourCounts, mostActiveHour },
-  };
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DESIGN TOKENS
+// DESIGN TOKENS — moved to skeleton/design-system/tokens.js (Bolt 1.2)
+// C, P_COLOR imported above.
 // ─────────────────────────────────────────────────────────────────────────────
-const C = {
-  bg:        "#07070D",
-  surface:   "#0F0F18",
-  surfaceHi: "#171724",
-  border:    "#1E1E2E",
-  borderHi:  "#2E2E48",
-  accent:    "#6C5CE7",
-  accentLit: "#8B7FFF",
-  accentDim: "#6C5CE715",
-  accentGlow:"#6C5CE740",
-  text:      "#F0F0F8",
-  textSub:   "#6868A0",
-  textDim:   "#2E2E48",
-  task:      "#6C5CE7",
-  idea:      "#F0A500",
-  reminder:  "#9B7FE8",
-  expense:   "#FF6B6B",
-  memory:    "#00CEC9",
-  note:      "#636380",
-  done:      "#00B894",
-  high:      "#FF6B6B",
-  medium:    "#FDCB6E",
-  low:       "#00B894",
-  // glow colors for cards
-  glowTask:    "rgba(108,92,231,0.12)",
-  glowIdea:    "rgba(240,165,0,0.10)",
-  glowDone:    "rgba(0,184,148,0.10)",
-};
-
-const P_COLOR = { critical: C.high, high: C.high, medium: C.medium, low: C.low, none: "transparent" };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SVG ICONS — crisp, consistent, production-grade
+// SVG ICONS — moved to shared/ui/icons.jsx (Bolt 1.2)
+// Icon imported above.
 // ─────────────────────────────────────────────────────────────────────────────
-const Icon = {
-  // Nav
-  dump: (c,s=22) => (
-    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 2a7 7 0 0 1 7 7c0 5-7 13-7 13S5 14 5 9a7 7 0 0 1 7-7z"/>
-      <circle cx="12" cy="9" r="2.5"/>
-    </svg>
-  ),
-  today: (c,s=22) => (
-    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
-    </svg>
-  ),
-  evening: (c,s=22) => (
-    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-    </svg>
-  ),
-  settings: (c,s=22) => (
-    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="3"/>
-      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-    </svg>
-  ),
-  // Types
-  task: (c,s=14) => (
-    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="20 6 9 17 4 12"/>
-    </svg>
-  ),
-  idea: (c,s=14) => (
-    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/>
-      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-      <line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/>
-      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-      <circle cx="12" cy="12" r="4"/>
-    </svg>
-  ),
-  reminder: (c,s=14) => (
-    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="10"/>
-      <polyline points="12 6 12 12 16 14"/>
-    </svg>
-  ),
-  expense: (c,s=14) => (
-    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-    </svg>
-  ),
-  memory: (c,s=14) => (
-    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 2a5 5 0 0 1 5 5v3a5 5 0 0 1-10 0V7a5 5 0 0 1 5-5z"/>
-      <path d="M8 13.5A4 4 0 0 0 4 17v1h16v-1a4 4 0 0 0-4-3.5"/>
-    </svg>
-  ),
-  note: (c,s=14) => (
-    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-      <polyline points="14 2 14 8 20 8"/>
-      <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
-      <polyline points="10 9 9 9 8 9"/>
-    </svg>
-  ),
-  // UI
-  mic: (c,s=18) => (
-    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-      <path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>
-    </svg>
-  ),
-  stop: (c,s=18) => (
-    <svg width={s} height={s} viewBox="0 0 24 24" fill={c} stroke="none">
-      <rect x="4" y="4" width="16" height="16" rx="3"/>
-    </svg>
-  ),
-  send: (c,s=18) => (
-    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
-    </svg>
-  ),
-  check: (c,s=16) => (
-    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="20 6 9 17 4 12"/>
-    </svg>
-  ),
-  star: (c,s=16) => (
-    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-    </svg>
-  ),
-  tag: (c,s=11) => (
-    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
-      <line x1="7" y1="7" x2="7.01" y2="7"/>
-    </svg>
-  ),
-  brain: (c,s=32) => (
-    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.46 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.44-4.14A2.5 2.5 0 0 1 9.5 2"/>
-      <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.46 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.44-4.14A2.5 2.5 0 0 0 14.5 2"/>
-    </svg>
-  ),
-  sparkle: (c,s=16) => (
-    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z"/>
-      <path d="M5 3l.75 2.25L8 6l-2.25.75L5 9l-.75-2.25L2 6l2.25-.75L5 3z"/>
-      <path d="M19 15l.75 2.25L22 18l-2.25.75L19 21l-.75-2.25L16 18l2.25-.75L19 15z"/>
-    </svg>
-  ),
-  focus: (c,s=16) => (
-    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="3"/>
-      <path d="M3 9V5h4M3 15v4h4M21 9V5h-4M21 15v4h-4"/>
-    </svg>
-  ),
-  close: (c,s=16) => (
-    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2.5" strokeLinecap="round">
-      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-    </svg>
-  ),
-  export: (c,s=16) => (
-    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-      <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
-    </svg>
-  ),
-  bell: (c,s=16) => (
-    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-      <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-    </svg>
-  ),
-  user: (c,s=16) => (
-    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-      <circle cx="12" cy="7" r="4"/>
-    </svg>
-  ),
-  cloud: (c,s=16) => (
-    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>
-    </svg>
-  ),
-  trash: (c,s=16) => (
-    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="3 6 5 6 21 6"/>
-      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
-    </svg>
-  ),
-};
 
-const TYPE_CFG = {
-  task:     { color: C.task,     icon: "task",     label: { en: "task",     ru: "задача",     az: "tapşırıq"   } },
-  idea:     { color: C.idea,     icon: "idea",     label: { en: "idea",     ru: "идея",       az: "fikir"      } },
-  reminder: { color: C.reminder, icon: "reminder", label: { en: "reminder", ru: "напомни",    az: "xatırlatma" } },
-  expense:  { color: C.expense,  icon: "expense",  label: { en: "expense",  ru: "расход",     az: "xərc"       } },
-  memory:   { color: C.memory,   icon: "memory",   label: { en: "memory",   ru: "память",     az: "yaddaş"     } },
-  note:     { color: C.note,     icon: "note",     label: { en: "note",     ru: "заметка",    az: "qeyd"       } },
-};
+// TYPE_CFG — moved to shared/lib/thought-types.js (Bolt 1.2)
 
 // ─────────────────────────────────────────────────────────────────────────────
-// I18N — FIX: added todayShort for BottomNav
+// I18N — moved to shared/i18n/translations.js (Bolt 1.2)
+// T, LANGS imported above.
 // ─────────────────────────────────────────────────────────────────────────────
-const T = {
-  en: {
-    appName: "MindFlow",
-    dumpPlaceholder: "Dump everything here — tasks, worries, ideas...\n\nJust write or speak. AI will sort it out. ⌘+Enter to process.",
-    process: "Process thoughts",
-    processing: "Processing...",
-    captured: "thoughts captured",
-    errorRetry: "⚠ Error — try again",
-    today: "Today's Focus",
-    todayShort: "Today",         // FIX: nav label
-    evening: "Evening Review",
-    eveningShort: "Review",
-    settings: "Settings",
-    settingsShort: "Settings",
-    dump: "Dump",
-    noThoughts: "Your mind is clear.",
-    noThoughtsSub: "Type or speak what's on your mind.",
-    noToday: "Nothing planned yet.",
-    noTodaySub: "Go to Dump and tap + Today on tasks.",
-    allDone: "All done for today!",
-    addToday: "+ Today",
-    todayMark: "Today ✓",
-    done: "✓ Done",
-    completedToday: "Completed today",
-    doneOf: "done",
-    of: "of",
-    greeting_morning: "Good morning ☀️",
-    greeting_day: "Good afternoon",
-    greeting_evening: "Good evening 🌙",
-    howFeel: "How do you feel?",
-    aiReflection: "AI Reflection",
-    generate: "Generate ✨",
-    thinking: "Thinking...",
-    yourNote: "Your note (optional)",
-    notePlaceholder: "Anything to remember about today...",
-    saveDay: "Save & Close Day",
-    savedDay: "✓ Saved — see you tomorrow!",
-    completed: "completed",
-    carryOver: "carry over",
-    stats: "Session Stats",
-    clearAll: "Clear all thoughts",
-    clearSub: "Only clears this session",
-    clear: "Clear",
-    about: "About",
-    items: "items",
-    item: "item",
-    filterAll: "all",
-    chooseLanguage: "Choose your language",
-    langSub: "You can change this later in Settings",
-    continue: "Continue",
-    onboardingTitle: "Welcome to MindFlow",
-    onboardingDesc: "Dump everything on your mind.\nAI turns chaos into clarity.",
-    recentReviews: "Recent reviews",
-    total: "Total",
-    totalDone: "Completed",
-    todayActive: "Today active",
-    todayDone: "Today done",
-    local: "local",
-    aiResponse: "AI sorted your thoughts",
-    langLabel: "Language",
-    account: "Account",
-    signedIn: "Connected",
-    notSignedIn: "Not signed in",
-    signIn: "Sign in",
-    signOut: "Sign out",
-    cloudSync: "Cloud Sync",
-    syncThoughts: "Sync thoughts",
-    patterns: "Your patterns (AI Persona)",
-    exportData: "Export data",
-    exportThoughts: "Export thoughts",
-  },
-  ru: {
-    appName: "MindFlow",
-    dumpPlaceholder: "Выгружай всё сюда — задачи, мысли, идеи, тревоги...\n\nПросто пиши или говори. AI сам разберёт. ⌘+Enter для отправки.",
-    process: "Обработать мысли",
-    processing: "Обрабатываю...",
-    captured: "мыслей сохранено",
-    errorRetry: "⚠ Ошибка — попробуй ещё",
-    today: "Фокус на сегодня",
-    todayShort: "Сегодня",
-    evening: "Вечерний обзор",
-    eveningShort: "Обзор",
-    settings: "Настройки",
-    settingsShort: "Настройки",
-    dump: "Дамп",
-    noThoughts: "В голове чисто.",
-    noThoughtsSub: "Напиши или скажи что на уме.",
-    noToday: "Ничего не запланировано.",
-    noTodaySub: "Перейди в Дамп и отметь задачи как «Сегодня».",
-    allDone: "Всё сделано на сегодня!",
-    addToday: "+ Сегодня",
-    todayMark: "Сегодня ✓",
-    done: "✓ Готово",
-    completedToday: "Выполнено сегодня",
-    doneOf: "выполнено",
-    of: "из",
-    greeting_morning: "Доброе утро ☀️",
-    greeting_day: "Добрый день",
-    greeting_evening: "Добрый вечер 🌙",
-    howFeel: "Как ты себя чувствуешь?",
-    aiReflection: "AI Рефлексия",
-    generate: "Сгенерировать ✨",
-    thinking: "Думаю...",
-    yourNote: "Твоя заметка (необязательно)",
-    notePlaceholder: "Что хочешь запомнить об этом дне...",
-    saveDay: "Сохранить и закрыть день",
-    savedDay: "✓ Сохранено — до завтра!",
-    completed: "выполнено",
-    carryOver: "переносится",
-    stats: "Статистика сессии",
-    clearAll: "Очистить все мысли",
-    clearSub: "Только текущая сессия",
-    clear: "Очистить",
-    about: "О приложении",
-    items: "элементов",
-    item: "элемент",
-    filterAll: "все",
-    chooseLanguage: "Выбери язык",
-    langSub: "Можно изменить позже в Настройках",
-    continue: "Продолжить",
-    onboardingTitle: "Добро пожаловать в MindFlow",
-    onboardingDesc: "Выгружай всё что на уме.\nAI превращает хаос в ясность.",
-    recentReviews: "Недавние обзоры",
-    total: "Всего",
-    totalDone: "Завершено",
-    todayActive: "Активных сегодня",
-    todayDone: "Сделано сегодня",
-    local: "локально",
-    aiResponse: "AI разобрал твои мысли",
-    langLabel: "Язык",
-    account: "Аккаунт",
-    signedIn: "Подключён",
-    notSignedIn: "Не вошёл",
-    signIn: "Войти",
-    signOut: "Выйти",
-    cloudSync: "Облачная синхронизация",
-    syncThoughts: "Синхронизировать мысли",
-    patterns: "Твои паттерны (AI Персона)",
-    exportData: "Экспорт данных",
-    exportThoughts: "Экспортировать мысли",
-  },
-  az: {
-    appName: "MindFlow",
-    dumpPlaceholder: "Hər şeyi buraya yaz — tapşırıqlar, fikirlər, ideyalar...\n\nSadəcə yaz və ya danış. AI özü sıralayacaq. ⌘+Enter göndər.",
-    process: "Fikirləri emal et",
-    processing: "Emal edilir...",
-    captured: "fikir saxlanıldı",
-    errorRetry: "⚠ Xəta — yenidən cəhd et",
-    today: "Bu günün fokus",
-    todayShort: "Bu gün",
-    evening: "Axşam icmalı",
-    eveningShort: "İcmal",
-    settings: "Parametrlər",
-    settingsShort: "Parametr",
-    dump: "Dump",
-    noThoughts: "Zehin təmizdir.",
-    noThoughtsSub: "Ağlında nə varsa yaz və ya danış.",
-    noToday: "Hələ heç nə planlaşdırılmayıb.",
-    noTodaySub: "Dump-a get və tapşırıqları Bu gün kimi işarələ.",
-    allDone: "Bu gün hər şey hazırdır!",
-    addToday: "+ Bu gün",
-    todayMark: "Bu gün ✓",
-    done: "✓ Hazır",
-    completedToday: "Bu gün tamamlandı",
-    doneOf: "tamamlandı",
-    of: "/-dən",
-    greeting_morning: "Sabahınız xeyir ☀️",
-    greeting_day: "Günortanız xeyir",
-    greeting_evening: "Axşamınız xeyir 🌙",
-    howFeel: "Özünü necə hiss edirsən?",
-    aiReflection: "AI Refleksiya",
-    generate: "Yarat ✨",
-    thinking: "Düşünürəm...",
-    yourNote: "Qeydiniz (istəyə bağlı)",
-    notePlaceholder: "Bu gün yadda saxlamaq istədiklərin...",
-    saveDay: "Saxla və günü bağla",
-    savedDay: "✓ Saxlandı — sabahkı görüşə!",
-    completed: "tamamlandı",
-    carryOver: "keçirilir",
-    stats: "Sessiya statistikası",
-    clearAll: "Bütün fikirləri sil",
-    clearSub: "Yalnız bu sessiya",
-    clear: "Sil",
-    about: "Haqqında",
-    items: "element",
-    item: "element",
-    filterAll: "hamısı",
-    chooseLanguage: "Dilinizi seçin",
-    langSub: "Bunu sonra Parametrlərdə dəyişə bilərsiniz",
-    continue: "Davam et",
-    onboardingTitle: "MindFlow-a xoş gəlmisiniz",
-    onboardingDesc: "Ağlındakı hər şeyi töküb aşkar et.\nAI xaosu aydınlığa çevirir.",
-    recentReviews: "Son icmallar",
-    total: "Cəmi",
-    totalDone: "Tamamlandı",
-    todayActive: "Bu gün aktiv",
-    todayDone: "Bu gün edildi",
-    local: "yerli",
-    aiResponse: "AI fikirlərinizi sıraladı",
-    langLabel: "Dil",
-    account: "Hesab",
-    signedIn: "Qoşuldu",
-    notSignedIn: "Daxil olunmayıb",
-    signIn: "Daxil ol",
-    signOut: "Çıxış",
-    cloudSync: "Bulud sinxronizasiyası",
-    syncThoughts: "Fikirləri sinxronlaşdır",
-    patterns: "Sizin nümunələr (AI Persona)",
-    exportData: "Məlumatları ixrac et",
-    exportThoughts: "Fikirləri ixrac et",
-  },
-};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // UTILS — moved to shared/lib/ (Bolt 1.2)
@@ -740,14 +313,8 @@ const T = {
 // getStreakData, saveStreak → shared/lib/streak.js
 // All imported above.
 //
-// greeting(lang) — stays here: depends on T[lang] translation object.
-// TODO: move to shared/lib/i18n.js once T is extracted (Sprint 1.3+)
+// greeting(lang) — moved to shared/lib/greeting.js (Bolt 1.2)
 // ─────────────────────────────────────────────────────────────────────────────
-function greeting(lang) {
-  const h = new Date().getHours();
-  const t = T[lang] || T.en;
-  return h < 12 ? t.greeting_morning : h < 18 ? t.greeting_day : t.greeting_evening;
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // AI — all functions moved to shared/services/claude.js (Bolt 1.1)
@@ -755,28 +322,9 @@ function greeting(lang) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 // ─────────────────────────────────────────────────────────────────────────────
-// EXPORT
+// EXPORT — moved to shared/lib/export.js (Bolt 1.2)
+// exportToMarkdown imported above.
 // ─────────────────────────────────────────────────────────────────────────────
-function exportToMarkdown(thoughts, lang) {
-  const groups = {};
-  thoughts.filter(t => !t.archived).forEach(t => {
-    if (!groups[t.type]) groups[t.type] = [];
-    groups[t.type].push(t);
-  });
-  const date = new Date().toLocaleDateString(lang === "ru" ? "ru-RU" : "en-US");
-  let md = `# MindFlow Export — ${date}\n\n`;
-  for (const [type, items] of Object.entries(groups)) {
-    const cfg = TYPE_CFG[type];
-    md += `## ${(cfg?.label[lang] || type).toUpperCase()}\n\n`;
-    items.forEach(t => {
-      const pri = t.priority !== "none" ? ` [${t.priority}]` : "";
-      const tags = t.tags?.length ? " " + t.tags.map(x => `#${x}`).join(" ") : "";
-      md += `- ${t.text}${pri}${tags}\n`;
-    });
-    md += "\n";
-  }
-  return md;
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SUPABASE SYNC — all moved to shared/services/supabase.js (Bolt 1.1)
@@ -907,11 +455,7 @@ function AuthScreen({ lang, onSkip }) {
 // ─────────────────────────────────────────────────────────────────────────────
 // ONBOARDING
 // ─────────────────────────────────────────────────────────────────────────────
-const LANGS = [
-  { id: "en", flag: "🇬🇧", name: "English" },
-  { id: "ru", flag: "🇷🇺", name: "Русский" },
-  { id: "az", flag: "🇦🇿", name: "Azərbaycan" },
-];
+// LANGS — moved to shared/i18n/translations.js (Bolt 1.2)
 
 function LangPickScreen({ onPick }) {
   const [hovered, setHovered] = useState(null);
@@ -2252,86 +1796,10 @@ function BottomNav({ active, onChange, badge, lang }) {
 // Supabase loaded via npm import
 
 // ─────────────────────────────────────────────────────────────────────────────
-// NOTIFICATIONS
+// NOTIFICATIONS — moved to shared/lib/notifications.js + notif-schedule.js (Bolt 1.2)
+// defaultNotifPrefs, loadNotifPrefs, saveNotifPrefs, requestNotifPermission,
+// scheduleNotification, applyNotifSchedule imported above.
 // ─────────────────────────────────────────────────────────────────────────────
-const NOTIF_STORAGE_KEY = "mf_notif_prefs";
-
-function defaultNotifPrefs() {
-  return {
-    enabled: false,
-    morningTime: "09:00",
-    eveningTime: "21:00",
-    morningOn: true,
-    eveningOn: true,
-  };
-}
-
-function loadNotifPrefs() {
-  // FIX: localStorage persists across reloads (was window.__mf_notif which reset on refresh)
-  try {
-    const raw = localStorage.getItem("mf_notif_prefs");
-    return raw ? JSON.parse(raw) : defaultNotifPrefs();
-  } catch { return defaultNotifPrefs(); }
-}
-
-function saveNotifPrefs(prefs) {
-  try { localStorage.setItem("mf_notif_prefs", JSON.stringify(prefs)); } catch {}
-}
-
-async function requestNotifPermission() {
-  if (!("Notification" in window)) return "unsupported";
-  if (Notification.permission === "granted") return "granted";
-  if (Notification.permission === "denied") return "denied";
-  const result = await Notification.requestPermission();
-  return result;
-}
-
-function scheduleNotification(title, body, timeStr) {
-  if (!("Notification" in window) || Notification.permission !== "granted") return null;
-  const [h, m] = timeStr.split(":").map(Number);
-  const now = new Date();
-  const target = new Date();
-  target.setHours(h, m, 0, 0);
-  if (target <= now) target.setDate(target.getDate() + 1);
-  const delay = target.getTime() - now.getTime();
-  const timerId = setTimeout(() => {
-    new Notification(title, { body, icon: "🧠", tag: `mf_${timeStr}` });
-    // reschedule for next day
-    scheduleNotification(title, body, timeStr);
-  }, delay);
-  return timerId;
-}
-
-// Store active timer IDs so we can cancel them
-window.__mf_timers = window.__mf_timers || {};
-
-function applyNotifSchedule(prefs, lang) {
-  const tx = T[lang] || T.en;
-  // Cancel existing timers
-  Object.values(window.__mf_timers).forEach(id => clearTimeout(id));
-  window.__mf_timers = {};
-  if (!prefs.enabled || Notification.permission !== "granted") return;
-
-  const morningMessages = {
-    en: { title: "🌅 Morning Ritual", body: "Good morning! Time to dump your thoughts and plan your day." },
-    ru: { title: "🌅 Утренний ритуал", body: "Доброе утро! Время выгрузить мысли и спланировать день." },
-    az: { title: "🌅 Səhər ritualu", body: "Sabahınız xeyir! Fikirlərini tök və günü planla." },
-  };
-  const eveningMessages = {
-    en: { title: "🌙 Evening Review", body: "How did today go? Take 2 minutes for your evening check-in." },
-    ru: { title: "🌙 Вечерний обзор", body: "Как прошёл день? Потрать 2 минуты на вечерний обзор." },
-    az: { title: "🌙 Axşam icmalı", body: "Bu gün necə keçdi? Axşam yoxlaması üçün 2 dəqiqə ayır." },
-  };
-
-  if (prefs.morningOn) {
-    const msg = morningMessages[lang] || morningMessages.en;
-    window.__mf_timers.morning = scheduleNotification(msg.title, msg.body, prefs.morningTime);
-  }
-  if (prefs.eveningOn) {
-    const msg = eveningMessages[lang] || eveningMessages.en;
-    window.__mf_timers.evening = scheduleNotification(msg.title, msg.body, prefs.eveningTime);
-  }
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // NOTIFICATION SETTINGS PANEL
