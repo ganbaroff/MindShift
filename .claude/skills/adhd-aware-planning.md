@@ -1,163 +1,312 @@
-# Skill: adhd-aware-planning
-
-> Read this file when planning features, writing copy, designing flows, or making
-> product decisions that affect how users interact with their tasks and thoughts.
-> MindFocus is built **for** neurodivergent users — every design choice should reflect that.
+# Skill: ADHD-aware planning
 
 ---
 
-## Who We're Building For
+## Role
 
-Our primary users experience one or more of:
-
-- **Time blindness** — difficulty perceiving how much time has passed or will pass
-- **Working memory overload** — thoughts and tasks fall out of mind instantly
-- **Task initiation paralysis** — knowing what to do but being unable to start
-- **Shame loops** — incompletion triggers guilt, guilt prevents starting, nothing gets done
-- **Hyperfocus / context switching cost** — interruptions are disproportionately expensive
-- **Decision fatigue** — too many choices = no choice
-
-These are not character flaws. They are neurological patterns. The app's job is to reduce
-friction at every step.
+Этот skill определяет, как MindFocus проектирует ритуалы планирования, напоминания,
+ежедневные экраны и AI-советы для пользователей с ADHD-паттернами и нейроотличными
+стилями мышления. Он задаёт язык, логику потоков, правила монетизации и этические
+ограничения для любого болта, который касается планирования или захвата мыслей.
+Принципы опираются на клинические данные об ADHD, исследования цифровой зависимости,
+кросс-культурный стыд и нейроаффирмативный подход. Этот skill не заменяет терапию —
+он задаёт минимальную планку уважения к нейродивергентному пользователю.
 
 ---
 
-## Core Design Principles for ADHD Users
+## When to use
 
-### 1. The Capture-First Model
+Читать этот файл **обязательно** перед работой над любым из следующих контекстов:
 
-The brain dump is the most important feature. It must be:
-- Accessible in **one tap** from anywhere in the app
-- Accepting of **any format** (messy, unstructured, emotional, fragmentary)
-- **Never judging** — no "You haven't added anything today!" shame messages
-- Processed by AI so the user never has to organise manually
-
-Never add friction to the dump input. No required fields, no formatting requirements,
-no character limits that block submission.
-
-### 2. Small, Concrete Lists
-
-The Today screen shows **3–5 tasks maximum**. This is not a limitation — it is the
-feature. Cognitive load from a 47-item list is not motivating; it is paralyzing.
-
-Rules for the Today screen:
-- Enforce a soft cap (show first 5, hide the rest with a "show more" that expands)
-- Suggest the AI pick 3 tasks by default
-- Never auto-populate with undone items from yesterday (shame loop risk)
-
-### 3. Eliminate Decision Points
-
-Each flow should have a clear **single next action**. When a user finishes a dump,
-the natural next step should be obvious without reading any UI chrome.
-
-- "Review your 3 tasks for today →" (not "What would you like to do next?")
-- "Great, 1 thing done. Rest tomorrow?" (not "Would you like to archive more items?")
-- Pre-select the most likely option — user confirms rather than chooses
-
-### 4. No Shame Language
-
-Audit every string in `translations.js` for shame-adjacent language:
-
-```
-❌ "You haven't completed any tasks today."
-✅ "Everything's ready for tomorrow."
-
-❌ "You've missed your evening review 3 days in a row."
-✅ "Evening check-in takes 2 minutes — want to do it now?"
-
-❌ "You have 23 overdue tasks."
-✅ "3 things from today — archive or move to tomorrow?"
-```
-
-The tone is **calm, supportive coach** — not productivity app, not alarm system.
-
-### 5. The Reset Day Concept
-
-Users need to be able to hit a reset without guilt. The evening review's primary job is
-to **close the day** — not to audit failures.
-
-Evening review flow:
-1. "What did you actually do today?" (free text, optional)
-2. "What's the one thing you'd like to carry to tomorrow?" (single task, optional)
-3. "Everything else is filed away. You're done." (no list of failures shown)
-
-Never show a list of incomplete tasks in the evening review. Show only what the user
-chooses to carry forward.
+- Создание или изменение экранов Dump, Today, Evening
+- Проектирование экрана или логики календаря / расписания
+- Любые напоминания, push-уведомления, badge-счётчики
+- AI-советы, persona-подсказки, body doubling-сессии
+- Экраны «возвращения после паузы» (welcome back, re-onboarding)
+- Любая геймификация (streaks, badges, прогресс-бары, конфетти)
+- Freemium-ограничения на функции планирования
+- Тексты интерфейса (labels, empty states, error messages, AI-сообщения)
+- Любой экран, который показывает историю, статистику или «незакрытые задачи»
 
 ---
 
-## Time Blindness Accommodations
+## Sources
 
-### Deadlines
+Принципы этого skill опираются на следующие категории источников:
 
-- Show deadlines as relative time **and** absolute: `"Today 3pm · in 2 hours"`
-- For tasks with no deadline: show `"No rush"` not an empty field
-- Overdue tasks: `"Was yesterday"` not `"OVERDUE · 1 day"`
-- Time estimates from AI: always ranges (`"15–30 min"`) not point estimates
-
-### Notifications
-
-- Offer morning briefing (9am default) and evening check-in (9pm default)
-- Reminders are opt-in, easy to silence, easy to reschedule
-- No badge counts on the app icon (too stressful) — preference should be settable
-- Notification copy uses gentle future framing: `"Your morning review is ready"` not
-  `"Don't forget to check your tasks!"`
-
----
-
-## Task Paralysis Interventions
-
-When the user has tasks but the app detects inaction (e.g., moodTrend = "down",
-lastActiveDate > 2 days), use **soft nudges** not guilt:
-
-```
-"Hi — whenever you're ready, your 3 tasks are here."   ✅
-"You haven't opened the app in 3 days!"                ❌
-```
-
-The nudge should appear as a **gentle banner** (dismissible, low visual weight) not a
-modal that blocks the UI.
-
-### The "Start Anywhere" Escape Hatch
-
-When a user opens the app and seems stuck (no interaction for 10+ seconds on the Today
-screen), offer:
-
-- "Not sure where to start? → Brain dump first"
-- This routes them back to the dump screen (lowest friction action)
+- **Клинические исследования ADHD**: работы по time blindness (Barkley, Brown), executive
+  function deficits, shame и rejection sensitive dysphoria (RSD), когнитивной нагрузке.
+- **Нейроаффирмативный подход**: материалы ASAN, AANE, академические обзоры
+  neurodiversity-affirming language в клинической практике и продуктовом дизайне.
+- **Цифровая зависимость и этика дизайна**: исследования Hook Model (Eyal), critiques
+  по dark patterns в productivity-приложениях, Center for Humane Technology.
+- **Body doubling**: исследования co-working как регуляции (Nadeau, Hallowell),
+  эффекты социального присутствия на task initiation у ADHD.
+- **Кросс-культурный стыд**: кросс-культурные исследования стыда и продуктивности
+  (особенно в контекстах EN/RU/AZ), работы по коллективистским vs индивидуалистским
+  нормам вокруг «неудачи» и «лени».
 
 ---
 
-## Freemium UX for ADHD Users
-
-The freemium gate must never:
-- Appear in the middle of a task the user is doing
-- Require reading lengthy plan comparison text
-- Use countdown timers or urgency language
-
-```
-❌ "You've used 29/30 of your monthly AI dumps. Upgrade NOW before you lose access!"
-✅ "You've made great use of AI this month. Want unlimited dumps? → See Pro"
-```
-
-The `<ProBanner>` component should appear **after** the blocked action, with a clear
-"continue without AI" fallback if possible.
+## Принципы (Do / Don't)
 
 ---
 
-## Planning Feature Work
+### Принцип 1 — Без стыда и диагнозов в интерфейсе
 
-When planning a new feature, ask:
+**Do:**
+- Описывать состояние через нейтральные, внешние формулировки: «уровень ресурса сейчас»,
+  «контекст требует больше времени», «вариации внимания — это нормально».
+- Использовать язык экстернализации: «эта задача оказалась тяжёлой» вместо «ты не справился».
+- В мультиязычном контексте (RU/AZ) особо внимательно — в этих культурах стыд за
+  «несобранность» работает сильнее; тон должен быть ещё более нейтральным.
 
-1. **What decision does this feature eliminate for the user?**
-   Good features reduce choices. Features that add choices need strong justification.
+**Don't:**
+- Использовать слова «лень», «несобранность», «прокрастинация», «симптомы мешают тебе»,
+  «плохая продуктивность».
+- Упоминать ADHD, диагнозы или «расстройства» в UI-тексте — пользователь сам знает,
+  как себя называть.
+- Показывать сравнение с «нормой» или «другими пользователями».
 
-2. **What is the fastest path from "opened app" to "felt productive"?**
-   Measure in taps. Every extra tap is friction. ADHD users abandon high-friction flows.
+---
 
-3. **Could this feature become a shame loop?**
-   Streaks, counts, and percentages can motivate or shame. Default to hiding them;
-   let users opt into gamification.
+### Принцип 2 — Отказ от shame-loop и жёстких streaks
 
-4. **What happens if the user ignores this feature for 2 weeks?**
-   The app should welcome them back warmly, not confront them with accumulated debt.
+**Do:**
+- При возвращении после паузы: «Рады видеть тебя. Всё на месте, когда будешь готов.»
+- Streaks — только opt-in и только с мягким reset: «Серия прервалась. Начинается новая.»
+- Опциональная статистика прячется за «показать историю» — не на главном экране.
+- После долгого отсутствия: архивировать старые задачи автоматически, не показывать
+  «долг» — предложить свежий старт.
+
+**Don't:**
+- Показывать «сегодня ты не выполнил ни одной задачи» или «серия прервана» в лицо
+  при открытии приложения.
+- Красные счётчики просроченного на первом экране.
+- Aggressive streaks с обнулением и анимацией «потери» (огонь, сломанная цепочка).
+- Использовать статистику «успешности» для сравнения дней — это создаёт петлю стыда.
+
+---
+
+### Принцип 3 — Time blindness → внешние якоря
+
+**Do:**
+- Показывать дедлайны в двух форматах одновременно: «Сегодня, 15:00 · через 2 ч».
+- Давать подготовительное напоминание ДО события: «Через 30 мин начнётся X — время
+  завершить текущее».
+- Использовать диапазоны времени для оценок задач: «15–30 мин» вместо «20 мин».
+- Формулировки учитывают transition-cost: «Старт задачи + 5 мин на переключение».
+- Задачи без дедлайна: показывать «Без срока — можно в любое время», не пустое поле.
+
+**Don't:**
+- Абстрактные формулировки «скоро», «потом», «на этой неделе» без конкретики.
+- Единственное напоминание ровно в момент дедлайна.
+- Overdue отображать агрессивно: не «ПРОСРОЧЕНО 3 дня», а «Было вчера — перенести?».
+- Использовать точечные оценки времени («займёт ровно 45 мин») — они создают ложные ожидания.
+
+---
+
+### Принцип 4 — Brain dump сначала, структура потом
+
+**Do:**
+- Dump-экран принимает любой формат: текст, голос, смесь языков, одно слово, поток
+  сознания. Нет обязательных полей.
+- AI предлагает разбивку постфактум: «Вижу задачу, идею и беспокойство — разложить?»
+- Пользователь подтверждает или игнорирует предложение — не обязан.
+- «Сохранить как есть» — всегда валидный выбор.
+
+**Don't:**
+- Требовать выбрать тип (задача / идея / событие) до отправки.
+- Показывать форму с полями (название, приоритет, дедлайн) как первый шаг.
+- Блокировать отправку, если текст «слишком короткий» или «непонятный».
+- Автоматически структурировать без подтверждения (human-in-the-loop обязателен).
+
+---
+
+### Принцип 5 — Микро-шаги вместо монолитных задач
+
+**Do:**
+- AI автоматически предлагает декомпозицию для задач длиннее «одного действия»:
+  «Написать отчёт» → «Открыть документ / Написать заголовок / Первый абзац».
+- Показывать только шаг 1, остальные скрыты (прогрессивное раскрытие).
+- Первый шаг — максимально конкретный и короткий (≤ 5 мин).
+- «Слишком большая задача» — подсвечивать мягко: «Хочешь разбить на части?»
+
+**Don't:**
+- Показывать огромный «проект» без первого действия.
+- Заставлять пользователя самостоятельно декомпозировать задачу перед сохранением.
+- Скрывать шаги так, что пользователь не понимает, есть ли продвижение.
+- Использовать слово «проект» в интерфейсе — оно создаёт ощущение масштаба и парализует.
+
+---
+
+### Принцип 6 — Мягкие ритуалы и anchor start
+
+**Do:**
+- Утренний и вечерний ритуал — ≤ 3 шагов, ≤ 2 минут каждый.
+- Anchor start: предлагать одно якорное микродействие для входа в работу
+  («Открой документ — и всё, это уже начало»).
+- Transition-пауза между задачами: «Задача закрыта. Хочешь 60 секунд перед следующей?»
+- Ритуалы полностью опциональны — пропустить = ок, без последствий.
+
+**Don't:**
+- Требовать «ежедневное планирование» как обязательный шаг для доступа к задачам.
+- Показывать утренний ритуал как полноценный экран с 7 пунктами.
+- Transition между задачами без паузы — прямой переход создаёт cognitive overload.
+- Позиционировать ритуалы как «правильный способ» — только как опцию.
+
+---
+
+### Принцип 7 — Digital silence и защита от зависимости
+
+**Do:**
+- Режим тишины (Do Not Disturb): пользователь задаёт окна, в которые приложение молчит.
+- Мягкий nudge после длительного использования: «Ты уже 40 минут планируешь — может,
+  начать делать?» или «Пора отдохнуть».
+- Метрика успеха продукта — задачи закрыты и пользователь ушёл из приложения, не
+  time-in-app.
+- Уведомления opt-in, легко отключаются за 1 действие.
+
+**Don't:**
+- Hook-модель: variable rewards, случайные «награды», бесконечный скролл в планировщике.
+- Измерять успех через DAU/retention любой ценой — это противоречит интересам ADHD-
+  пользователя, у которого зависимость от приложения может нарушать жизнь.
+- Уведомления без возможности отключить всё разом.
+- «Чёрные паттерны»: подписки, которые сложно отменить, скрытые повторные списания.
+
+---
+
+### Принцип 8 — Body doubling как мягкое присутствие
+
+**Do:**
+- AI-компаньон в body doubling-сессии: спокойный, ненавязчивый тон; периодические
+  check-ins («Как идёт? Хочешь обновить таймер?»).
+- Создавать ощущение «кто-то рядом» — не одиноко, но и не давит.
+- Явно обозначать: «Это AI-компаньон, не живой человек».
+- Сессия заканчивается мягко: «Отличная работа. Что хочешь сохранить из этого времени?»
+
+**Don't:**
+- Позиционировать AI-body doubling как замену терапии, коучу или живому человеку.
+- Имитировать человека без раскрытия (это AI — всегда явно).
+- Прерывать фокус-сессию ненужными уведомлениями из других частей приложения.
+- Делать body doubling-сессию платной функцией в базовом сценарии — это критичный
+  для ADHD инструмент.
+
+---
+
+### Принцип 9 — Этичная монетизация в контексте планирования
+
+**Do:**
+- Базовые функции бесплатно: захват мыслей (dump), базовые напоминания, базовая
+  декомпозиция AI, body doubling, ежедневные экраны.
+- Pro — для тяжёлой автоматизации, звуковых форматов, интеграций (Notion, Google
+  Calendar), продвинутой аналитики, нескольких персон.
+- Paywall появляется после действия, не перед ним. Всегда есть «продолжить без Pro».
+- Freemium-лимиты объясняются нейтрально: «AI-дампов в месяц: 28/30 → хочешь больше?»
+
+**Don't:**
+- Блокировать за paywall функции, без которых ADHD-пользователь не может справляться
+  базово: dump, напоминания, декомпозиция.
+- Urgency-язык: «Осталось 2 дня!», «Не потеряй доступ!», таймеры обратного отсчёта.
+- Paywall посреди начатого действия (в середине dump-сессии).
+- «Бесплатный» план без реальной ценности — это не нейтрально, это манипуляция.
+
+---
+
+### Принцип 10 — Кросс-культурный нейроаффирмативный язык
+
+**Do:**
+- Экстернализация: «Эта задача оказалась сложной» — не «ты не справился».
+- Нормализация отдыха: «Иногда ничего не делать — это тоже работа» (EN/RU/AZ-эквиваленты).
+- В RU/AZ контекстах: избегать советского языка продуктивности («надо», «должен»,
+  «выполни план»); использовать мягкие приглашения.
+- Перевод всех ключевых строк проходит cultural review: не дословный перевод, а
+  адаптация под нейтральный тон конкретной культуры.
+
+**Don't:**
+- Моральные оценки: «ты опять ничего не сделал», «хороший день / плохой день».
+- Сравнения с «нормой» или «другими пользователями» на любом языке.
+- Автоматический machine translation без проверки — shame-язык по-русски и по-азербайджански
+  звучит иначе, чем по-английски.
+- Игнорировать, что RSD (rejection-sensitive dysphoria) усиливается в контекстах,
+  где исторически «лень» = моральный изъян.
+
+---
+
+### Принцип 11 — Human-in-the-loop, не тотальный автопилот
+
+**Do:**
+- AI предлагает, пользователь решает: «Это похоже на задачу — добавить в Today?»
+- Любые изменения в расписании, перенос задач, удаление — только с явным подтверждением.
+- Persona / паттерны — показывать пользователю («Я заметил, что ты активнее в 10–12»)
+  и давать возможность скорректировать.
+- «Отменить» доступна для любого AI-действия в течение сессии.
+
+**Don't:**
+- Автоматически переносить задачи, создавать события, удалять элементы без согласия.
+- «Умная» сортировка/приоритизация без объяснения логики.
+- Скрывать, что AI уже что-то сделал («задача была перемещена»).
+- Принимать решения за пользователя, ссылаясь на «персону» или «паттерны».
+
+---
+
+### Принцип 12 — Прозрачность и контроль данных
+
+**Do:**
+- Пользователь видит, что система о нём «думает»: показывать persona/паттерны в
+  Settings → «Что AI знает обо мне».
+- Экспорт всех данных (Markdown, JSON) доступен бесплатно.
+- Очистка персоны / паттернов — одна кнопка, без 5 экранов подтверждений.
+- Данные persona используются только для улучшения UX конкретного пользователя.
+
+**Don't:**
+- Скрытое профилирование для рекламы или внешней аналитики.
+- Передача текстов мыслей и задач третьим сторонам без явного согласия.
+- Делать экспорт данных Pro-функцией — это нарушает право на собственные данные.
+- Хранить «историю паузы» и показывать её при возвращении пользователя.
+
+---
+
+## Guidelines for bolts
+
+### Как использовать этот skill в болте
+
+Перед проектированием любого нового ритуала, экрана планирования, уведомлений или
+AI-советов — **прочитай этот файл полностью** и пройди чек-лист ниже. Если болт
+нарушает хотя бы один пункт, он требует явного обоснования в commit message или ADR.
+
+---
+
+### Обязательный чек-лист болта
+
+**1. Список задач на одном экране**
+> Не создаёт ли болт длинный список задач без soft cap?
+> Today-экран: максимум 5 задач видимо, остальные скрыты. Нет бесконечного скролла задач.
+
+**2. Безопасный сценарий возвращения после паузы**
+> Есть ли welcome-back поведение без стыда?
+> При `lastActiveDate > 2 дней` — мягкое приветствие, автоархив устаревших задач,
+> никакой статистики провалов.
+
+**3. Зависимые механики**
+> Не вводит ли болт aggressive streaks, конфетти-спам, variable reward или
+> другие Hook-паттерны?
+> Геймификация — только opt-in, с мягким reset, без анимации «потери».
+
+**4. Paywall на критичный функционал**
+> Не ставит ли болт за paywall dump, базовые напоминания, декомпозицию, body doubling?
+> Эти функции — базовая доступность для ADHD-пользователя, а не Pro-фича.
+
+**5. Time blindness**
+> Учитывает ли болт time blindness?
+> Дедлайны = относительное + абсолютное время. Подготовительные напоминания ДО события.
+> Диапазоны оценки («15–30 мин»). Нет абстрактных «скоро / потом».
+
+**6. Human-in-the-loop**
+> Требует ли болт подтверждения перед любым AI-действием, меняющим данные пользователя?
+> Авто-перенос задач, авто-удаление, авто-приоритизация — запрещены без явного ОК.
+
+**7. Нейроаффирмативный язык**
+> Прошли ли все новые строки интерфейса проверку на shame-язык?
+> Нет моральных оценок, нет слова «просрочено» как главного сигнала, нет сравнений с нормой.
+> Для RU/AZ — дополнительная проверка культурного тона.
