@@ -18,6 +18,7 @@ import { ThoughtCard }    from "../../shared/ui/ThoughtCard.jsx";
 import { FREE_LIMITS, getDumpCount, incrementDumpCount } from "../../shared/lib/freemium.js";
 import { greeting }       from "../../shared/lib/greeting.js";
 import { logError }       from "../../shared/lib/logger.js";
+import { Spinner }        from "../../shared/ui/primitives.jsx";
 import { parseDump }      from "./dump.api.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -68,17 +69,6 @@ function VoiceBtn({ onResult, disabled, lang }) {
 // ─────────────────────────────────────────────────────────────────────────────
 // DUMP SCREEN
 // ─────────────────────────────────────────────────────────────────────────────
-
-// Spinner — local to this file, mirrors the one in mindflow.jsx
-function Spinner({ size = 16, color = "white" }) {
-  return (
-    <div style={{
-      width: size, height: size, borderRadius: "50%",
-      border: `2px solid ${color}30`, borderTopColor: color,
-      animation: "spin .7s linear infinite",
-    }} />
-  );
-}
 
 export function DumpScreen({ thoughts, onProcess, onToggleToday, onArchive, onUpdate, lang, persona, isPro, onShowPricing }) {
   const [text, setText] = useState("");

@@ -9,14 +9,16 @@ import {
   sbSavePersona,
   sbLoadPersona,
 } from "./shared/services/supabase.js";
-import {
-  generateEveningReview,
-  aiFocusSuggest,
-  buildPersonaContext,
-} from "./shared/services/claude.js";
+// generateEveningReview → features/evening/index.jsx (Bolt 1.5)
+// aiFocusSuggest        → features/today/index.jsx (Bolt 1.5)
+// buildPersonaContext   → shared/services/claude.js (Bolt 1.1, used via persona prop)
 // Bolt 1.3: first vertical slice
-import { DumpScreen }   from "./features/dump/index.jsx";
-import { ThoughtCard }  from "./shared/ui/ThoughtCard.jsx";
+import { DumpScreen }    from "./features/dump/index.jsx";
+import { ThoughtCard }   from "./shared/ui/ThoughtCard.jsx";
+// Bolt 1.5: shared UI atoms + today/evening screens
+import { Spinner, Toast, Card, Toggle } from "./shared/ui/primitives.jsx";
+import { TodayScreen }   from "./features/today/index.jsx";
+import { EveningScreen } from "./features/evening/index.jsx";
 // Bolt 1.2: pure utilities extracted to shared/lib/
 import { uid }                       from "./shared/lib/id.js";
 import { isToday, todayLabel }       from "./shared/lib/date.js";
@@ -322,8 +324,9 @@ class ErrorBoundary extends Component {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // AI — all functions moved to shared/services/claude.js (Bolt 1.1)
-// callClaude, generateEveningReview, aiFocusSuggest imported above.
-// parseDump — moved to features/dump/dump.api.js (Bolt 1.3).
+// parseDump            — features/dump/dump.api.js (Bolt 1.3)
+// generateEveningReview — features/evening/index.jsx (Bolt 1.5)
+// aiFocusSuggest       — features/today/index.jsx (Bolt 1.5)
 // ─────────────────────────────────────────────────────────────────────────────
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -337,58 +340,12 @@ class ErrorBoundary extends Component {
 // sbLoadPersona, getSupabase, waitForSupabase — all imported above.
 // ─────────────────────────────────────────────────────────────────────────────
 
+
 // ─────────────────────────────────────────────────────────────────────────────
-// SHARED UI
+// SHARED UI — Spinner, Toast, Card, Toggle moved to shared/ui/primitives.jsx (Bolt 1.5)
+// Spinner, Toast, Card, Toggle imported above.
 // ─────────────────────────────────────────────────────────────────────────────
-function Spinner({ size = 16, color = "white" }) {
-  return (
-    <div style={{
-      width: size, height: size, flexShrink: 0,
-      border: `2px solid ${color}33`, borderTopColor: color,
-      borderRadius: "50%", animation: "spin .7s linear infinite",
-    }} />
-  );
-}
 
-// FIX: separate Toast animation from inline fadeIn
-function Toast({ msg, type = "success" }) {
-  const bg = type === "error" ? C.high : type === "info" ? C.surfaceHi : C.accent;
-  return (
-    <div role="alert" aria-live="polite" style={{
-      position: "fixed", top: 14, left: "50%", transform: "translateX(-50%)",
-      background: bg, color: "white", padding: "9px 20px", borderRadius: 11,
-      fontSize: 13, fontWeight: 600, zIndex: 9999, whiteSpace: "nowrap",
-      boxShadow: `0 4px 24px ${bg}55`, animation: "toastIn .2s ease",
-      border: type === "info" ? `1px solid ${C.border}` : "none",
-      maxWidth: "90vw", overflow: "hidden", textOverflow: "ellipsis",
-    }}>
-      {msg}
-    </div>
-  );
-}
-
-function Card({ title, children, action, icon }) {
-  return (
-    <div style={{ marginBottom: 10, background: C.surface, borderRadius: 16, padding: 16, border: `1px solid ${C.border}` }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-          {icon && <div style={{ opacity: 0.6 }}>{icon}</div>}
-          <div style={{ color: C.textSub, fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1 }}>{title}</div>
-        </div>
-        {action}
-      </div>
-      {children}
-    </div>
-  );
-}
-
-function Toggle({ on, onChange }) {
-  return (
-    <div onClick={onChange} style={{ width: 46, height: 26, borderRadius: 13, background: on ? C.accent : C.surfaceHi, border: `1px solid ${on ? C.accent : C.border}`, cursor: "pointer", position: "relative", transition: "all .2s", flexShrink: 0, boxShadow: on ? `0 0 12px ${C.accentGlow}` : "none" }}>
-      <div style={{ position: "absolute", top: 3, left: on ? 22 : 3, width: 18, height: 18, borderRadius: "50%", background: "white", transition: "left .2s cubic-bezier(.34,1.56,.64,1)", boxShadow: "0 1px 4px rgba(0,0,0,.4)" }} />
-    </div>
-  );
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // AUTH SCREEN
@@ -672,271 +629,16 @@ function WelcomeScreen({ lang, onDone }) {
 // CLARIFY INLINE + THOUGHT CARD — moved to shared/ui/ThoughtCard.jsx (Bolt 1.3)
 // ThoughtCard imported above.
 // ─────────────────────────────────────────────────────────────────────────────
-// SCREEN: TODAY
 // ─────────────────────────────────────────────────────────────────────────────
-function TodayScreen({ thoughts, onArchive, onToggleToday, onUpdate, lang, persona }) {
-  const tx = T[lang] || T.en;
-
-  // useMemo: avoid recomputing on every render
-  const active      = useMemo(() => thoughts.filter(t => t.isToday && !t.archived), [thoughts]);
-  const doneToday   = useMemo(() => thoughts.filter(t => t.archived && isToday(t.archivedAt || t.updatedAt)), [thoughts]);
-  const tgThoughts  = useMemo(() => thoughts.filter(t => !t.archived && t.source === "telegram"), [thoughts]);
-  const unscheduled = useMemo(() => thoughts.filter(t => !t.isToday && !t.archived && t.type === "task"), [thoughts]);
-  const streak      = useMemo(() => getStreakData(thoughts), [thoughts]);
-
-  const total = active.length + doneToday.length;
-  const pct   = total > 0 ? Math.round(doneToday.length / total * 100) : 0;
-
-  const [aiSuggestion, setAiSuggestion] = useState(null);
-  const [aiLoading, setAiLoading]       = useState(false);
-
-  const getSuggestions = async () => {
-    const pool = [...active, ...unscheduled];
-    if (!pool.length) return;
-    setAiLoading(true);
-    try { setAiSuggestion(await aiFocusSuggest(pool, lang, persona)); }
-    catch (e) { logError("TodayScreen.getSuggestions", e); setAiSuggestion(null); }
-    setAiLoading(false);
-  };
-
-  // Streak motivational line — loss aversion (Duolingo-style)
-  const motiveLine = () => {
-    if (!streak.doneToday && streak.current > 0) {
-      return lang === "ru"
-        ? `⚠️ Не потеряй ${streak.current}-дневную серию — сделай дамп сегодня`
-        : lang === "az"
-        ? `⚠️ ${streak.current} günlük seriyani itirmə — bu gün dump et`
-        : `⚠️ Don't lose your ${streak.current}-day streak — dump something today`;
-    }
-    if (pct === 100 && doneToday.length > 0) return lang === "ru" ? "Всё готово. Серия продолжается 🔥" : lang === "az" ? "Hər şey hazırdır. Seriya davam edir 🔥" : "All done. Streak alive 🔥";
-    if (doneToday.length > 0 && active.length > 0) return lang === "ru" ? `${doneToday.length} выполнено — серия жива 🔥` : lang === "az" ? `${doneToday.length} tamamlandı — seriya davam edir 🔥` : `${doneToday.length} done — streak alive 🔥`;
-    return null;
-  };
-  const motive = motiveLine();
-
-  return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-      <div style={{ padding: "18px 18px 14px", flexShrink: 0 }}>
-        <div style={{ color: C.textSub, fontSize: 13, marginBottom: 3 }}>{todayLabel(lang)}</div>
-        <div style={{ display: "flex", alignItems: "center", marginBottom: 10 }}>
-          <div style={{ color: C.text, fontSize: 24, fontWeight: 700, letterSpacing: -.5, flex: 1 }}>{tx.today}</div>
-          {streak.current > 0 && (
-            <div style={{ display: "flex", alignItems: "center", gap: 5, background: streak.doneToday ? `${C.done}18` : `${C.high}18`, border: `1px solid ${streak.doneToday ? C.done : C.high}44`, borderRadius: 10, padding: "4px 10px", marginRight: 8 }}>
-              <span style={{ fontSize: 14 }}>🔥</span>
-              <span style={{ color: streak.doneToday ? C.done : C.high, fontSize: 13, fontWeight: 700 }}>{streak.current}</span>
-            </div>
-          )}
-          <button onClick={getSuggestions} disabled={aiLoading} style={{ background: C.accentDim, color: C.accent, border: `1px solid ${C.accent}44`, borderRadius: 10, padding: "6px 12px", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", gap: 6 }}>
-            {aiLoading ? <><Spinner size={12} color={C.accent} /> AI...</> : "🎯 AI Focus"}
-          </button>
-        </div>
-
-        {motive && (
-          <div style={{ color: streak.doneToday ? C.done : C.high, fontSize: 12, fontWeight: 600, marginBottom: 10 }}>{motive}</div>
-        )}
-
-        {/* Telegram captured thoughts badge */}
-        {tgThoughts.length > 0 && (
-          <div style={{ background: "#2AABEE15", border: "1px solid #2AABEE33", borderRadius: 10, padding: "7px 12px", marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
-            <span style={{ color: "#2AABEE", fontSize: 13 }}>✈️</span>
-            <span style={{ color: "#2AABEE", fontSize: 12, fontWeight: 600, flex: 1 }}>
-              {lang === "ru"
-                ? `${tgThoughts.length} мысл${tgThoughts.length === 1 ? "ь" : "и"} из Telegram`
-                : lang === "az"
-                ? `Telegram-dan ${tgThoughts.length} fikir`
-                : `${tgThoughts.length} thought${tgThoughts.length !== 1 ? "s" : ""} from Telegram`}
-            </span>
-            <button onClick={() => tgThoughts.forEach(t => onToggleToday?.(t.id))} style={{
-              background: "#2AABEE22", border: "1px solid #2AABEE44",
-              color: "#2AABEE", borderRadius: 7, padding: "3px 10px",
-              fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: "inherit",
-              flexShrink: 0,
-            }}>
-              {lang === "ru" ? "+ в сегодня" : lang === "az" ? "+ bu günə" : "+ add all"}
-            </button>
-          </div>
-        )}
-
-        {aiSuggestion?.picks?.length > 0 && (
-          <div style={{ background: `${C.accent}12`, border: `1px solid ${C.accent}33`, borderRadius: 12, padding: "10px 14px", marginBottom: 12 }}>
-            <div style={{ color: C.accent, fontSize: 11, fontWeight: 600, marginBottom: 6 }}>
-              🤖 {lang === "ru" ? "AI рекомендует:" : lang === "az" ? "AI tövsiyə edir:" : "AI suggests focusing on:"}
-            </div>
-            {aiSuggestion.picks.map((p, i) => <div key={i} style={{ color: C.text, fontSize: 13, padding: "2px 0" }}>• {p}</div>)}
-            {aiSuggestion.reason && <div style={{ color: C.textSub, fontSize: 12, marginTop: 6, fontStyle: "italic" }}>{aiSuggestion.reason}</div>}
-            <button onClick={() => setAiSuggestion(null)} style={{ background: "none", border: "none", color: C.textDim, fontSize: 11, cursor: "pointer", marginTop: 4, fontFamily: "inherit" }}>✕ dismiss</button>
-          </div>
-        )}
-
-        {total > 0 && (
-          <>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-              <span style={{ color: C.textSub, fontSize: 12 }}>{doneToday.length} {tx.of} {total} {tx.doneOf}</span>
-              <span style={{ color: pct === 100 ? C.done : C.accent, fontSize: 12, fontWeight: 600 }}>{pct}%</span>
-            </div>
-            <div style={{ background: C.surface, borderRadius: 4, height: 4, overflow: "hidden" }}>
-              <div style={{ height: "100%", width: `${pct}%`, background: pct === 100 ? C.done : C.accent, borderRadius: 4, transition: "width .6s ease" }} />
-            </div>
-          </>
-        )}
-      </div>
-
-      <div style={{ flex: 1, overflowY: "auto", padding: "0 16px 80px" }}>
-        {active.length === 0 ? (
-          <div style={{ textAlign: "center", paddingTop: 50 }}>
-            <div style={{ fontSize: 44, marginBottom: 12 }}>{doneToday.length > 0 ? "🎉" : "✅"}</div>
-            <div style={{ color: C.text, fontSize: 16, fontWeight: 600, marginBottom: 6 }}>{doneToday.length > 0 ? tx.allDone : tx.noToday}</div>
-            <div style={{ color: C.textSub, fontSize: 13 }}>{doneToday.length > 0 ? `${doneToday.length} ${tx.doneOf} 💪` : tx.noTodaySub}</div>
-          </div>
-        ) : (
-          active.map(t => <ThoughtCard key={t.id} thought={t} lang={lang} onArchive={onArchive} onToggleToday={onToggleToday} onUpdate={onUpdate} showDone />)
-        )}
-
-        {doneToday.length > 0 && active.length > 0 && (
-          <div style={{ marginTop: 20 }}>
-            <div style={{ color: C.textDim, fontSize: 11, fontWeight: 600, letterSpacing: .5, textTransform: "uppercase", marginBottom: 8 }}>{tx.completedToday}</div>
-            {doneToday.map(t => (
-              <div key={t.id} style={{ background: C.surface, borderRadius: 12, padding: "9px 14px", marginBottom: 8, opacity: .4, border: `1px solid ${C.border}` }}>
-                <span style={{ color: C.done, fontSize: 12, marginRight: 8 }}>✓</span>
-                <span style={{ color: C.textSub, fontSize: 14, textDecoration: "line-through" }}>{t.text}</span>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
+// SCREEN: TODAY — moved to features/today/index.jsx (Bolt 1.5)
+// TodayScreen imported above.
+// ─────────────────────────────────────────────────────────────────────────────
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SCREEN: EVENING REVIEW — FIX: receives persona prop
+// SCREEN: EVENING — moved to features/evening/index.jsx (Bolt 1.5)
+// EveningScreen imported above.
 // ─────────────────────────────────────────────────────────────────────────────
-function EveningScreen({ thoughts, lang, persona, user }) {
-  const tx = T[lang] || T.en;
-  const [review, setReview] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [mood, setMood] = useState(null);
-  const [note, setNote] = useState("");
-  const [saved, setSaved] = useState(false);
-  const [reviews, setReviews] = useState([]);
 
-  // FIX: use archivedAt for accurate today filter
-  const doneToday = thoughts.filter(t => t.archived && isToday(t.archivedAt || t.updatedAt));
-  const missed    = thoughts.filter(t => t.isToday && !t.archived);
-
-  // FIX: load reviews from Supabase on mount (was only in-memory before)
-  useEffect(() => {
-    if (!user) return;
-    const sb = getSupabase();
-    if (!sb) return;
-    sb.from("reviews")
-      .select("id, mood, note, ai_reflection, done_count, missed_count, created_at")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-      .limit(30)
-      .then(({ data }) => {
-        if (data?.length) {
-          setReviews(data.map(r => ({
-            date: r.created_at,
-            mood: r.mood != null ? r.mood - 1 : null,
-            note: r.note,
-            review: r.ai_reflection,
-            done: r.done_count,
-            missed: r.missed_count,
-          })));
-        }
-      });
-  }, [user]);
-
-  const generate = async () => {
-    setLoading(true);
-    try { setReview(await generateEveningReview(doneToday, missed, lang, persona)); }
-    catch (e) { logError("EveningScreen.generate", e); setReview(lang === "ru" ? "Ты появился сегодня. Это всегда считается." : "You showed up today. That always counts."); }
-    setLoading(false);
-  };
-
-  const save = async () => {
-    const entry = { date: new Date().toISOString(), mood, note, review, done: doneToday.length, missed: missed.length };
-    setReviews(prev => [entry, ...prev.slice(0, 29)]);
-    // Persist to Supabase if logged in
-    if (user) {
-      try {
-        const sb = getSupabase();
-        if (sb) await sb.from("reviews").insert({
-          user_id: user.id, mood: mood !== null ? mood + 1 : null,
-          note, ai_reflection: review,
-          done_count: doneToday.length, missed_count: missed.length,
-        });
-      } catch (e) { logError("EveningScreen.save", e); }
-    }
-    setSaved(true);
-  };
-
-  const MOODS = ["😫", "😕", "😐", "🙂", "😊"];
-
-  return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-      <div style={{ padding: "18px 18px 10px", flexShrink: 0 }}>
-        <div style={{ color: C.textSub, fontSize: 13, marginBottom: 3 }}>{todayLabel(lang)}</div>
-        <div style={{ color: C.text, fontSize: 24, fontWeight: 700, letterSpacing: -.5 }}>{tx.evening} 🌙</div>
-      </div>
-
-      <div style={{ flex: 1, overflowY: "auto", padding: "0 16px 80px" }}>
-        <div style={{ display: "flex", gap: 10, marginBottom: 14 }}>
-          {[{ v: doneToday.length, l: tx.completed, c: C.done }, { v: missed.length, l: tx.carryOver, c: C.textSub }].map(s => (
-            <div key={s.l} style={{ flex: 1, background: C.surface, borderRadius: 14, padding: 16, textAlign: "center", border: `1px solid ${C.border}` }}>
-              <div style={{ fontSize: 28, fontWeight: 700, color: s.c }}>{s.v}</div>
-              <div style={{ color: C.textSub, fontSize: 12, marginTop: 2 }}>{s.l}</div>
-            </div>
-          ))}
-        </div>
-
-        <Card title={tx.howFeel}>
-          <div style={{ display: "flex", justifyContent: "space-around" }}>
-            {MOODS.map((m, i) => (
-              <button key={i} onClick={() => setMood(i)} style={{ fontSize: 28, background: "none", border: "none", cursor: "pointer", padding: 4, opacity: mood === null ? 1 : mood === i ? 1 : .25, transform: mood === i ? "scale(1.35)" : "scale(1)", transition: "all .15s" }}>{m}</button>
-            ))}
-          </div>
-        </Card>
-
-        <Card title={tx.aiReflection} action={!review && (
-          <button onClick={generate} disabled={loading} style={{ background: C.accentDim, color: C.accent, border: "none", borderRadius: 8, padding: "4px 12px", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", gap: 6 }}>
-            {loading ? <><Spinner size={12} color={C.accent} /> {tx.thinking}</> : tx.generate}
-          </button>
-        )}>
-          {review
-            ? <p style={{ color: C.text, fontSize: 14, lineHeight: 1.75, margin: 0 }}>{review}</p>
-            : <p style={{ color: C.textDim, fontSize: 14, fontStyle: "italic", margin: 0 }}>
-                {lang === "ru" ? "Нажми «Сгенерировать» для персональной рефлексии." : lang === "az" ? "Fərdi refleksiya üçün «Yarat» düyməsini bas." : "Tap Generate for your personalized reflection."}
-              </p>}
-        </Card>
-
-        <Card title={tx.yourNote}>
-          <textarea value={note} onChange={e => setNote(e.target.value)} placeholder={tx.notePlaceholder} rows={3}
-            style={{ width: "100%", background: C.surfaceHi, border: `1px solid ${C.border}`, borderRadius: 10, color: C.text, fontSize: 14, lineHeight: 1.6, padding: "10px 12px", resize: "none", outline: "none", fontFamily: "inherit", boxSizing: "border-box" }} />
-        </Card>
-
-        <button onClick={save} disabled={saved} style={{ width: "100%", height: 48, background: saved ? `${C.done}22` : C.accent, color: saved ? C.done : "white", border: "none", borderRadius: 12, fontSize: 15, fontWeight: 600, cursor: saved ? "default" : "pointer", fontFamily: "inherit", transition: "all .2s" }}>
-          {saved ? tx.savedDay : tx.saveDay}
-        </button>
-
-        {reviews.length > 0 && (
-          <div style={{ marginTop: 24 }}>
-            <div style={{ color: C.textDim, fontSize: 11, fontWeight: 600, letterSpacing: .5, textTransform: "uppercase", marginBottom: 10 }}>{tx.recentReviews}</div>
-            {reviews.slice(0, 3).map((r, i) => (
-              <div key={i} style={{ background: C.surface, borderRadius: 12, padding: "10px 14px", marginBottom: 8, border: `1px solid ${C.border}` }}>
-                <div style={{ color: C.textDim, fontSize: 11, marginBottom: 4 }}>
-                  {new Date(r.date).toLocaleDateString()} · {r.done} {tx.doneOf} {r.mood !== null ? `· ${MOODS[r.mood]}` : ""}
-                </div>
-                {r.note && <p style={{ color: C.textSub, fontSize: 13, margin: 0 }}>{r.note}</p>}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // EXPORT PANEL
