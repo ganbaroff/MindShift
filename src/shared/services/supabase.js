@@ -399,14 +399,14 @@ export async function sbUpsertCharacterProgress(userId, newTotalXp, reviewDate) 
  *
  * @param {string} userId
  * @param {string} date  — 'YYYY-MM-DD' UTC
- * @returns {Promise<{ day_plan_calls: number, evening_review_calls: number }|null>}
+ * @returns {Promise<{ day_plan_calls: number, evening_review_calls: number, persona_calls: number }|null>}
  */
 export async function sbGetUsage(userId, date) {
   const sb = getSupabase();
   if (!sb) return null;
   const { data } = await sb
     .from("usage_limits")
-    .select("day_plan_calls, evening_review_calls")
+    .select("day_plan_calls, evening_review_calls, persona_calls")
     .eq("user_id", userId)
     .eq("date", date)
     .single();

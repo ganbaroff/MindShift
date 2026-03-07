@@ -11,7 +11,7 @@
  * Layer 2 — Semantic AI Functions
  *   Knows: prompts, business concepts (parseDump, eveningReview, focusSuggest).
  *   Does NOT know: API keys, HTTP headers, retry logic.
- *   Exports: parseDump, generateEveningReview, aiFocusSuggest
+ *   Exports: parseDump, generateEveningReview, aiFocusSuggest, personaDialogue
  *
  * Prompt helpers (buildPersonaContext) live here because they are
  * prompt-construction utilities, not UI or data utilities.
@@ -36,10 +36,25 @@ const AI_TIMEOUT  = 10000; // 10s — matches INVARIANT 6 (UX: no infinite spinn
  * @param {string} prompt
  * @returns {Promise<string>} raw text response
  */
-export async function callClaude(prompt) {
+/**
+ * Low-level Claude API caller.
+ *
+ * @param {string} prompt                   — user message (used when opts.messages is omitted)
+ * @param {{ system?: string, messages?: Array<{role:string,content:string}>, maxTokens?: number }} [opts]
+ * @returns {Promise<string>} raw text response
+ */
+export async function callClaude(prompt, opts = {}) {
+  const { system, messages: customMessages, maxTokens = 1000 } = opts;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), AI_TIMEOUT);
   try {
+    const body = {
+      model:      AI_MODEL,
+      max_tokens: maxTokens,
+      messages:   customMessages || [{ role: "user", content: prompt }],
+    };
+    if (system) body.system = system;
+
     const res = await fetch(AI_ENDPOINT, {
       method: "POST",
       signal: controller.signal,
@@ -49,11 +64,7 @@ export async function callClaude(prompt) {
         "anthropic-version": "2023-06-01",
         "anthropic-dangerous-direct-browser-access": "true",
       },
-      body: JSON.stringify({
-        model: AI_MODEL,
-        max_tokens: 1000,
-        messages: [{ role: "user", content: prompt }],
-      }),
+      body: JSON.stringify(body),
     });
     if (!res.ok) {
       throw new Error(
@@ -427,4 +438,69 @@ ${tasks.map((t, i) => `${i + 1}. [${t.priority}] ${t.text}`).join("\n")}`;
   } catch {
     return { picks: [], reason: "" };
   }
+}
+
+// =============================================================================
+// LAYER 2 — PERSONA DIALOGUE (Bolt 3.2, ADR 0012)
+// RPG-style character conversation. System prompt is archetype-flavoured.
+// Messages are passed as multi-turn history (last 6 from localStorage).
+// max_tokens: 256 — responses must be 1–3 sentences per spec.
+// =============================================================================
+
+const ARCHETYPE_DESCRIPTIONS = {
+  explorer: "a curious, adaptable explorer who embraces new ideas and directions",
+  builder:  "a methodical, focused builder who finds meaning in steady progress",
+  dreamer:  "an imaginative dreamer who sees possibility in everything",
+  guardian: "a steady, reliable guardian who protects what matters most",
+};
+
+/**
+ * Sends a multi-turn persona dialogue message to Claude.
+ * The character responds in-persona based on archetype + user context.
+ *
+ * @param {Array<{role:"user"|"assistant", content:string}>} messages
+ *   - Last N messages from localStorage (already trimmed to ≤6 by caller)
+ * @param {{
+ *   archetype:        string,
+ *   archetypeName:    string,
+ *   lang:             "en"|"ru"|"az",
+ *   level:            number,
+ *   completedTasks:   number,
+ *   totalTasks:       number,
+ * }} ctx
+ * @returns {Promise<string>} — plain text reply (1–3 sentences)
+ */
+export async function personaDialogue(messages, ctx) {
+  const {
+    archetype     = "explorer",
+    archetypeName = "Explorer",
+    lang          = "en",
+    level         = 1,
+    completedTasks = 0,
+    totalTasks    = 0,
+  } = ctx;
+
+  const description = ARCHETYPE_DESCRIPTIONS[archetype] || ARCHETYPE_DESCRIPTIONS.explorer;
+  const langName_   = lang === "ru" ? "Russian" : lang === "az" ? "Azerbaijani" : "English";
+
+  const system = `You are ${archetypeName} — ${description}.
+Respond in ${langName_}.
+Keep your response to 1–3 sentences. Be warm and neuroaffirmative.
+Do not give unsolicited advice or evaluate the user's progress.
+Do not mention productivity metrics unless the user asks.
+You know about the user: Level ${level}, completed ${completedTasks} of ${totalTasks} tasks today.
+Never break character. Never reveal that you are an AI.`;
+
+  try {
+    const text = await callClaude("", { system, messages, maxTokens: 256 });
+    return text.trim() || _personaFallback(lang);
+  } catch {
+    return _personaFallback(lang);
+  }
+}
+
+function _personaFallback(lang) {
+  if (lang === "ru") return "Слышу тебя. Я здесь.";
+  if (lang === "az") return "Eşidirəm. Buradadam.";
+  return "I hear you. I'm here.";
 }

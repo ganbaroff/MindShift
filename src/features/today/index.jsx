@@ -37,6 +37,11 @@ import { DayPlanDump }    from "./DayPlanDump.jsx";
 import { DayPlanReview }  from "./DayPlanReview.jsx";
 import { DayPlanTaskList } from "./DayPlanTaskList.jsx";
 import { PersonaCard }    from "../../shared/ui/PersonaCard.jsx";
+import { ChatBubble }       from "./ChatBubble.jsx";
+import { ChatPanel }        from "./ChatPanel.jsx";
+import { getGreeting, getTimePeriod } from "../../shared/lib/dialogues.js";
+import { ARCHETYPE_COLORS } from "../../shared/lib/archetypes.js";
+import { useCharacterProgress } from "../../shared/hooks/useCharacterProgress.js";
 
 export function TodayScreen({ thoughts, onArchive, onToggleToday, onUpdate, lang, persona, user, personaArchetype, personaName }) {
   const tx = T[lang] || T.en;
@@ -58,6 +63,12 @@ export function TodayScreen({ thoughts, onArchive, onToggleToday, onUpdate, lang
 
   // ── useUsageLimits: freemium gate (Bolt 2.5) ───────────────────────────────
   const { checkAndIncrement } = useUsageLimits(user);
+
+  // ── Character progress: level for persona dialogue context (Bolt 3.2) ──────
+  const { level } = useCharacterProgress(user);
+
+  // ── Persona chat state (Bolt 3.2 — AC3) ────────────────────────────────────
+  const [showChat, setShowChat] = useState(false);
 
   // ── useDayPlan: AI-powered daily plan (Bolt 2.2) ───────────────────────────
   const [dayPlanText, setDayPlanText] = useState("");
@@ -114,6 +125,17 @@ export function TodayScreen({ thoughts, onArchive, onToggleToday, onUpdate, lang
     return null;
   };
   const motive = motiveLine();
+
+  // ── Persona: archetype color + auto-greeting (Bolt 3.2 — AC2) ─────────────
+  const archetypeColor = personaArchetype ? (ARCHETYPE_COLORS[personaArchetype] || C.accent) : null;
+  // "celebrated" when all tasks done; "active" when there are tasks in flight; "idle" otherwise
+  const chatMood = pct === 100 && total > 0 ? "celebrated"
+                 : activeTasks.length > 0   ? "active"
+                 : "idle";
+  // Greeting computed once per render — stable because getTimePeriod() uses hours (≤ 1hr drift)
+  const greeting = personaArchetype
+    ? getGreeting(personaArchetype, getTimePeriod(), chatMood, lang)
+    : null;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
@@ -258,7 +280,59 @@ export function TodayScreen({ thoughts, onArchive, onToggleToday, onUpdate, lang
             name={personaName}
             user={user}
             lang={lang}
-            mood="active"
+            mood={chatMood}
+          />
+        )}
+
+        {/* ── Auto-greeting bubble (Bolt 3.2 — AC2) ── */}
+        {personaArchetype && greeting && !showChat && (
+          <ChatBubble
+            text={greeting}
+            senderName={personaName || personaArchetype}
+            color={archetypeColor}
+          />
+        )}
+
+        {/* ── Talk button (Bolt 3.2 — AC3) ── */}
+        {personaArchetype && !showChat && (
+          <button
+            onClick={() => setShowChat(true)}
+            style={{
+              display:      "block",
+              width:        "100%",
+              background:   `${archetypeColor}18`,
+              border:       `1px solid ${archetypeColor}44`,
+              color:        archetypeColor,
+              borderRadius: 12,
+              padding:      "10px 14px",
+              fontSize:     13,
+              fontWeight:   600,
+              cursor:       "pointer",
+              fontFamily:   "inherit",
+              marginBottom: 12,
+              textAlign:    "center",
+              transition:   "background .15s",
+            }}
+          >
+            {lang === "ru" ? "Поговорить"
+           : lang === "az" ? "Danış"
+           : "Talk"}
+          </button>
+        )}
+
+        {/* ── Chat panel (Bolt 3.2 — AC3, AC5–AC9) ── */}
+        {personaArchetype && showChat && (
+          <ChatPanel
+            archetype={personaArchetype}
+            archetypeName={personaName || personaArchetype}
+            archetypeColor={archetypeColor}
+            lang={lang}
+            user={user}
+            level={level}
+            completedTasks={doneToday.length}
+            totalTasks={total}
+            checkAndIncrement={checkAndIncrement}
+            onClose={() => setShowChat(false)}
           />
         )}
 

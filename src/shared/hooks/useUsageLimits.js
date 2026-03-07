@@ -5,11 +5,13 @@
  * Free limits per UTC day:
  *   parseDayPlan:          3 calls
  *   generateEveningReview: 1 call
+ *   personaDialogue:       5 calls  (Bolt 3.2, ADR 0012)
  *
  * Pro users (user_profiles.is_pro = true) bypass all limits.
  *
  * Usage:
- *   const { canUseDayPlan, canUseEveningReview, dayPlanLeft, isPro,
+ *   const { canUseDayPlan, canUseEveningReview, canUsePersona,
+ *           dayPlanLeft, personaLeft, isPro,
  *           limitsLoading, checkAndIncrement } = useUsageLimits(user);
  *
  *   // Before calling parseDayPlan:
@@ -27,10 +29,11 @@ import {
 } from "../services/supabase.js";
 import { logError } from "../lib/logger.js";
 
-// Free-tier limits (ADR 0009)
+// Free-tier limits (ADR 0009 + ADR 0012)
 const LIMITS = {
   day_plan:       3,
   evening_review: 1,
+  persona:        5,  // Bolt 3.2 — persona dialogue messages per day
 };
 
 /** Returns today's UTC date as 'YYYY-MM-DD'. */
@@ -43,15 +46,17 @@ function utcToday() {
  * @returns {{
  *   canUseDayPlan:       boolean,
  *   canUseEveningReview: boolean,
+ *   canUsePersona:       boolean,
  *   dayPlanLeft:         number,
+ *   personaLeft:         number,
  *   isPro:               boolean,
  *   limitsLoading:       boolean,
- *   checkAndIncrement:   (feature: "day_plan"|"evening_review") => Promise<{ allowed: boolean }>,
+ *   checkAndIncrement:   (feature: "day_plan"|"evening_review"|"persona") => Promise<{ allowed: boolean }>,
  * }}
  */
 export function useUsageLimits(user) {
   const [isPro,          setIsPro]          = useState(false);
-  const [usage,          setUsage]          = useState({ day_plan_calls: 0, evening_review_calls: 0 });
+  const [usage,          setUsage]          = useState({ day_plan_calls: 0, evening_review_calls: 0, persona_calls: 0 });
   const [limitsLoading,  setLimitsLoading]  = useState(true);
 
   useEffect(() => {
@@ -81,8 +86,10 @@ export function useUsageLimits(user) {
     // Pro users always allowed — no DB write needed
     if (isPro) return { allowed: true };
 
-    const field = feature === "day_plan" ? "day_plan_calls" : "evening_review_calls";
-    const limit = LIMITS[feature];
+    const field = feature === "day_plan"       ? "day_plan_calls"
+               : feature === "evening_review" ? "evening_review_calls"
+               :                                "persona_calls";
+    const limit = LIMITS[feature] ?? LIMITS.persona;
 
     try {
       const result = await sbCheckAndIncrementUsage(user.id, utcToday(), field, limit);
@@ -98,12 +105,16 @@ export function useUsageLimits(user) {
 
   const canUseDayPlan       = isPro || (usage.day_plan_calls       < LIMITS.day_plan);
   const canUseEveningReview = isPro || (usage.evening_review_calls < LIMITS.evening_review);
+  const canUsePersona       = isPro || ((usage.persona_calls ?? 0)  < LIMITS.persona);
   const dayPlanLeft         = isPro ? Infinity : Math.max(0, LIMITS.day_plan - (usage.day_plan_calls ?? 0));
+  const personaLeft         = isPro ? Infinity : Math.max(0, LIMITS.persona  - (usage.persona_calls  ?? 0));
 
   return {
     canUseDayPlan,
     canUseEveningReview,
+    canUsePersona,
     dayPlanLeft,
+    personaLeft,
     isPro,
     limitsLoading,
     checkAndIncrement,
