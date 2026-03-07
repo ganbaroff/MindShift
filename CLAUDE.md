@@ -44,16 +44,9 @@ docs/
     └── adr/                  ← Architecture Decision Records
 
 .claude/
-├── skills/                   ← Skill files for this project (read before starting a bolt)
-│   ├── project-architecture.md
-│   ├── frontend-architecture-react-vite.md
-│   ├── design-system-and-tokens.md
-│   ├── supabase-data-layer.md
-│   ├── ai-client-and-prompts.md
-│   ├── testing-and-self-review.md
-│   ├── devops-and-deploy.md
-│   ├── adhd-aware-planning.md
-│   └── neurodivergent-ux.md
+├── skills/                   ← 31 skill files — see "Skills — когда использовать" below
+│   ├── [9 custom MindFocus skills]
+│   └── [22 external marketplace skills]
 └── worktrees/                ← Active Claude worktrees
 ```
 
@@ -95,21 +88,91 @@ Never swallow errors silently.
 
 ---
 
-## How to Use Skills
+## Before any bolt
 
-**Before starting any bolt**, identify which skills apply and read them:
-
-| Task type | Read these skills |
-|-----------|------------------|
-| New feature/screen | `project-architecture` + `frontend-architecture-react-vite` + `neurodivergent-ux` |
-| AI prompt change | `ai-client-and-prompts` |
-| DB / Supabase work | `supabase-data-layer` |
-| UI / visual work | `design-system-and-tokens` + `neurodivergent-ux` |
-| ADHD product decisions | `adhd-aware-planning` + `neurodivergent-ux` |
-| Deployment / CI | `devops-and-deploy` |
-| End of any bolt | `testing-and-self-review` |
+1. Прочитай CLAUDE.md (этот файл)
+2. Выбери релевантные скиллы из таблицы ниже
+3. Прочитай выбранные скиллы
+4. Предложи план в bullet-points → жди подтверждения перед кодом
+5. Делай только запрошенные изменения — никаких unrequested refactors
+6. Все user-visible строки: RU + EN (i18n ready)
+7. После кода: пройди `obra-verification-before-completion`
+8. Финальный commit: обнови bolt-log + ADR если нужно
 
 **Skills are constraints, not suggestions.** If a skill says "never do X", that's a hard rule for this codebase.
+
+---
+
+## Skills — когда использовать
+
+### 🧠 ADHD / Продукт (наши, кастомные)
+
+| Скилл | Использовать при |
+|---|---|
+| `adhd-aware-planning` | Любой экран планирования, dump, today, напоминания, ритуалы, монетизация |
+| `neurodivergent-ux` | Любой UI компонент, анимации, цвета, тексты интерфейса |
+
+### 🏗️ Архитектура / Код
+
+| Скилл | Использовать при |
+|---|---|
+| `project-architecture` | Новые фичи, структура папок, ADR |
+| `frontend-architecture-react-vite` | Компоненты, хуки, роутинг, vertical slices |
+| `design-system-and-tokens` | Цвета, spacing, типографика, анимации |
+| `ai-client-and-prompts` | Вызовы Claude API, промпты, defensive parsing |
+
+### 🗄️ База данных
+
+| Скилл | Использовать при |
+|---|---|
+| `supabase-data-layer` | Запросы к БД, миграции, RLS (наш кастомный) |
+| `terminalskills-skills-supabase` | Расширенные Supabase операции, pgvector |
+| `openclaw-skills-supabase` | SQL queries, storage, similarity search |
+
+### 🎨 UI / Дизайн / Анимации
+
+| Скилл | Использовать при |
+|---|---|
+| `alexsnchz-skills-wcag-design` | Новый компонент — обязательный WCAG 2.2 AA аудит |
+| `medy-gribkov-arcana-accessibility-wcag` | Pre-launch аудит, CI accessibility gate |
+| `secondsky-claude-skills-motion` | Framer Motion: drag, scroll, spring, exit анимации |
+| `julianromli-ai-skills-frontend-ui-animator` | Hover, micro-interactions, page transitions |
+
+### 🧪 Тестирование
+
+| Скилл | Использовать при |
+|---|---|
+| `testing-and-self-review` | Финальный чек перед commit (наш кастомный) |
+| `obra-test-driven-development` | Написание любой логики — сначала тест |
+| `majesticlabs-dev-majestic-marketplace-react-testing` | Unit тесты React компонентов |
+| `terminalskills-skills-testing-library` | Accessible queries, user events |
+| `kalibellion-qaskills-vitest` | Vitest конфиг, coverage |
+| `pramoddutta-qaskills-playwright-e2e` | E2E user flows, CI пайплайн |
+| `artofrawr-claude-control-code-review` | Code review перед каждым PR |
+
+### 🌐 PWA / i18n
+
+| Скилл | Использовать при |
+|---|---|
+| `agents-inc-skills-web-pwa-offline-first` | Offline sync, service workers, IndexedDB |
+| `travisjneuman-.claude-pwa-development` | PWA manifest, install prompts |
+| `agent-skills-hub-agent-skills-hub-i18n-localization` | Добавление нового языка, RTL |
+| `daymade-claude-code-skills-i18n-expert` | Автоматизация i18n, JSON locale |
+
+### 🔒 Безопасность / DevOps
+
+| Скилл | Использовать при |
+|---|---|
+| `codelably-harmony-claude-code-security-review` | Auth, secrets, API endpoints, payment |
+| `devops-and-deploy` | Сборка, Vercel, PWA, CI (наш кастомный) |
+
+### 🔧 Debugging / Workflow
+
+| Скилл | Использовать при |
+|---|---|
+| `obra-systematic-debugging` | Сложный баг, непонятное поведение |
+| `obra-root-cause-tracing` | Рекуррентная проблема, найти корень |
+| `obra-verification-before-completion` | Перед любым финальным commit |
 
 ---
 
@@ -168,3 +231,62 @@ Use for: UI mockups, icons, social assets, onboarding illustrations.
 ```bash
 nano-banana "your prompt" [--model pro] [-s 512|1K|2K|4K] [-a 16:9|9:16|1:1] [-o filename]
 ```
+
+---
+
+## Полный каталог скиллов
+
+```
+.claude/skills/
+│
+├── ── КАСТОМНЫЕ MINDFOCUS (9) ──────────────────────────────────
+│   adhd-aware-planning.md
+│   ai-client-and-prompts.md
+│   design-system-and-tokens.md
+│   devops-and-deploy.md
+│   frontend-architecture-react-vite.md
+│   neurodivergent-ux.md
+│   project-architecture.md
+│   supabase-data-layer.md
+│   testing-and-self-review.md
+│
+├── ── UI/UX PRO MAX + NANO BANANA (2 директории) ───────────────
+│   ui-ux-pro-max/
+│   nano-banana-2/
+│
+├── ── ВНЕШНИЕ МАРКЕТПЛЕЙС (20) ─────────────────────────────────
+│
+│   🎨 Дизайн / Доступность / Анимации
+│   alexsnchz-skills-wcag-design.md
+│   medy-gribkov-arcana-accessibility-wcag.md
+│   secondsky-claude-skills-motion.md
+│   julianromli-ai-skills-frontend-ui-animator.md
+│
+│   🧪 Тестирование
+│   majesticlabs-dev-majestic-marketplace-react-testing.md
+│   terminalskills-skills-testing-library.md
+│   kalibellion-qaskills-vitest.md
+│   pramoddutta-qaskills-playwright-e2e.md
+│   obra-test-driven-development.md
+│   artofrawr-claude-control-code-review.md
+│
+│   🗄️ Supabase
+│   terminalskills-skills-supabase.md
+│   openclaw-skills-supabase.md
+│
+│   🌐 PWA / i18n
+│   agents-inc-skills-web-pwa-offline-first.md
+│   travisjneuman-.claude-pwa-development.md
+│   agent-skills-hub-agent-skills-hub-i18n-localization.md
+│   daymade-claude-code-skills-i18n-expert.md
+│
+│   🔒 Безопасность
+│   codelably-harmony-claude-code-security-review.md
+│
+│   🔧 Workflow / Debugging
+│   obra-systematic-debugging.md
+│   obra-root-cause-tracing.md
+│   obra-verification-before-completion.md
+```
+
+**Итого:** 9 кастомных + 2 директории + 20 внешних = **31 файл/директория**
