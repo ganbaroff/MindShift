@@ -211,7 +211,85 @@ export async function sbUpdateDumpResult(dumpId, aiResult, userId) {
 }
 
 // =============================================================================
-// 5. PERSONA OPERATIONS
+// 5. DAILY TASK OPERATIONS (Bolt 2.2)
+// daily_tasks table — one plan per user per date.
+// RLS enforces user_id scoping; we are explicit in code as defence-in-depth.
+// =============================================================================
+
+/**
+ * Fetches all daily tasks for a user on a specific date.
+ * Returns empty array on error — caller renders empty-state.
+ *
+ * @param {string} userId
+ * @param {string} date   — 'YYYY-MM-DD'
+ * @returns {Promise<object[]>}
+ */
+export async function sbGetDailyTasks(userId, date) {
+  const sb = getSupabase();
+  if (!sb) return [];
+  const { data } = await sb
+    .from("daily_tasks")
+    .select("id, title, priority, estimated_minutes, microsteps, completed, created_at")
+    .eq("user_id", userId)
+    .eq("date", date)
+    .order("created_at", { ascending: true });
+  return data || [];
+}
+
+/**
+ * Bulk-inserts daily tasks for a user on a specific date.
+ * Caller should delete existing tasks for the date first if re-planning.
+ *
+ * @param {object[]} tasks  — { title, priority, estimated_minutes, microsteps }[]
+ * @param {string} userId
+ * @param {string} date     — 'YYYY-MM-DD'
+ * @returns {Promise<object[]>} inserted rows (with id)
+ */
+export async function sbSaveDailyTasks(tasks, userId, date) {
+  const sb = getSupabase();
+  if (!sb || !tasks.length) return [];
+
+  // Delete any existing plan for the day first (re-planning scenario)
+  await sb.from("daily_tasks").delete().eq("user_id", userId).eq("date", date);
+
+  const rows = tasks.map(t => ({
+    user_id:           userId,
+    date,
+    title:             t.title,
+    priority:          t.priority,
+    estimated_minutes: t.estimated_minutes,
+    microsteps:        t.microsteps || [],
+    completed:         false,
+  }));
+
+  const { data, error } = await sb
+    .from("daily_tasks")
+    .insert(rows)
+    .select("id, title, priority, estimated_minutes, microsteps, completed, created_at");
+  if (error) return [];
+  return data || [];
+}
+
+/**
+ * Toggles the `completed` field of a single daily task.
+ * Silent on error — optimistic UI handles the visual state.
+ *
+ * @param {string} taskId
+ * @param {boolean} completed
+ * @param {string} userId
+ */
+export async function sbToggleDailyTask(taskId, completed, userId) {
+  const sb = getSupabase();
+  if (!sb) return;
+  await sb
+    .from("daily_tasks")
+    .update({ completed })
+    .eq("id", taskId)
+    .eq("user_id", userId); // defence-in-depth
+}
+
+// =============================================================================
+// 6. PERSONA OPERATIONS
 // Persona is the AI character's memory (see ADR 0006).
 // =============================================================================
 

@@ -11,6 +11,11 @@
  *   - TodayList: step_one visible, decompose button, quiet done action
  *   - Streak badge is informational only, no warning color
  *
+ * Bolt 2.2: AI Day Plan section added (DayPlanDump → DayPlanReview → DayPlanTaskList).
+ *   - useDayPlan: idle → processing → review → saved
+ *   - daily_tasks Supabase table (separate from thoughts)
+ *   - Optimistic checkbox updates
+ *
  * Bolt 1.5: originally extracted from mindflow.jsx lines 677–809.
  */
 
@@ -26,8 +31,12 @@ import { logError }       from "../../shared/lib/logger.js";
 import { useToday }       from "./useToday.js";
 import { WelcomeBack }    from "./WelcomeBack.jsx";
 import { TodayList }      from "./TodayList.jsx";
+import { useDayPlan }     from "./useDayPlan.js";
+import { DayPlanDump }    from "./DayPlanDump.jsx";
+import { DayPlanReview }  from "./DayPlanReview.jsx";
+import { DayPlanTaskList } from "./DayPlanTaskList.jsx";
 
-export function TodayScreen({ thoughts, onArchive, onToggleToday, onUpdate, lang, persona }) {
+export function TodayScreen({ thoughts, onArchive, onToggleToday, onUpdate, lang, persona, user }) {
   const tx = T[lang] || T.en;
 
   // ── useToday: soft cap, welcome-back, decompose ─────────────────────────────
@@ -44,6 +53,23 @@ export function TodayScreen({ thoughts, onArchive, onToggleToday, onUpdate, lang
     shouldShowWelcome,
     dismissWelcome,
   } = useToday({ thoughts, onArchive, onUpdate, lang, persona });
+
+  // ── useDayPlan: AI-powered daily plan (Bolt 2.2) ───────────────────────────
+  const [dayPlanText, setDayPlanText] = useState("");
+  const {
+    status:         dayPlanStatus,
+    proposed:       dayPlanProposed,
+    errorMsg:       dayPlanError,
+    savedTasks:     dayPlanTasks,
+    loadingTasks:   dayPlanLoading,
+    submitDayPlan,
+    toggleItem:     toggleDayPlanItem,
+    acceptAll:      acceptAllDayPlan,
+    confirmPlan,
+    cancelReview:   cancelDayPlanReview,
+    toggleSavedTask,
+    clearPlan,
+  } = useDayPlan({ lang, persona, user });
 
   // ── Derived lists not covered by useToday ──────────────────────────────────
   const doneToday   = useMemo(() => thoughts.filter(t => t.archived && isToday(t.archivedAt || t.updatedAt)), [thoughts]);
@@ -217,6 +243,66 @@ export function TodayScreen({ thoughts, onArchive, onToggleToday, onUpdate, lang
             lang={lang}
             onDismiss={dismissWelcome}
           />
+        )}
+
+        {/* ── Day Plan section (Bolt 2.2) ── */}
+        <div style={{ marginBottom: 24 }}>
+          {/* Loading skeleton */}
+          {dayPlanLoading && (
+            <div style={{
+              background: C.surface, borderRadius: 14,
+              border: `1px solid ${C.border}`,
+              padding: "14px 16px",
+              display: "flex", alignItems: "center", gap: 10,
+              color: C.textSub, fontSize: 13,
+            }}>
+              <Spinner size={14} color={C.textSub} />
+              {lang === "ru" ? "Загружаю план..." : lang === "az" ? "Plan yüklənir..." : "Loading plan..."}
+            </div>
+          )}
+
+          {/* Input — shown when no saved tasks and not in review */}
+          {!dayPlanLoading && dayPlanTasks.length === 0 && dayPlanStatus !== "review" && (
+            <DayPlanDump
+              text={dayPlanText}
+              setText={setDayPlanText}
+              onSubmit={() => submitDayPlan(dayPlanText)}
+              isProcessing={dayPlanStatus === "processing"}
+              errorMsg={dayPlanError}
+              lang={lang}
+            />
+          )}
+
+          {/* Review panel — human-in-the-loop */}
+          {dayPlanStatus === "review" && (
+            <DayPlanReview
+              proposed={dayPlanProposed}
+              onToggle={toggleDayPlanItem}
+              onAcceptAll={acceptAllDayPlan}
+              onConfirm={async () => { await confirmPlan(); setDayPlanText(""); }}
+              onCancel={cancelDayPlanReview}
+              lang={lang}
+            />
+          )}
+
+          {/* Task checklist — shown once plan is saved */}
+          {!dayPlanLoading && dayPlanTasks.length > 0 && dayPlanStatus !== "review" && (
+            <DayPlanTaskList
+              tasks={dayPlanTasks}
+              onToggle={toggleSavedTask}
+              onClearPlan={clearPlan}
+              lang={lang}
+            />
+          )}
+        </div>
+
+        {/* ── Separator between day plan and thought-based tasks ── */}
+        {(activeTasks.length > 0 || dayPlanTasks.length > 0) && (
+          <div style={{
+            borderTop: `1px solid ${C.border}`,
+            marginBottom: 16,
+            opacity: 0.5,
+          }} />
         )}
 
         {/* Task list — soft-capped by useToday, or all-done/empty state */}

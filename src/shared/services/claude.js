@@ -277,6 +277,72 @@ Rules: no guilt, no shame, acknowledge wins (even tiny ones), one gentle tomorro
 }
 
 /**
+ * Parses a free-form day brain dump into a focused daily plan (max 7 tasks).
+ * Bolt 2.2 — ADR 0007.
+ *
+ * @param {string}        rawText
+ * @param {"en"|"ru"|"az"} lang
+ * @param {object|null}   persona
+ * @returns {Promise<Array<{title:string, priority:string, estimated_minutes:number, microsteps:string[]}>>}
+ */
+export async function parseDayPlan(rawText, lang, persona = null) {
+  const name = langName(lang);
+  const ctx  = buildPersonaContext(persona);
+
+  const prompt = `You are a calm ADHD productivity coach. Respond in ${name}.${ctx}
+
+A user has written their thoughts about what they want to do today. Create a focused daily plan.
+
+Return ONLY a JSON array (no markdown, no backticks, no prose) — max 7 task objects:
+[
+  {
+    "title": "Short task name in ${name} (≤ 8 words)",
+    "priority": "high" | "medium" | "low",
+    "estimated_minutes": integer (min 5, max 120),
+    "microsteps": ["action verb + object ≤ 10 words", "..."] (2-3 items)
+  }
+]
+
+Rules:
+- Only extract tasks the user explicitly mentioned. Never invent tasks.
+- Max 7 tasks. If the user wrote more, pick the most important.
+- Rank by urgency and user-stated importance.
+- microsteps[0] = the single most concrete first action (immediately doable).
+- estimated_minutes must be realistic — account for context-switching and ADHD tax.
+- Never use shame, guilt, or "you should" language in any field.
+- If input is unclear or has no tasks, return an empty array [].
+
+Today: ${new Date().toISOString()}
+
+User input:
+${rawText}`;
+
+  const raw   = await callClaude(prompt);
+  const clean = raw.replace(/```json\n?|```/g, "").trim();
+
+  // Try array parse
+  const arrMatch = clean.match(/\[[\s\S]*\]/);
+  if (arrMatch) {
+    try {
+      const parsed = JSON.parse(arrMatch[0]);
+      if (Array.isArray(parsed)) {
+        return parsed
+          .filter(t => t?.title?.trim())
+          .slice(0, 7)
+          .map(t => ({
+            title:             String(t.title).trim(),
+            priority:          ["high", "medium", "low"].includes(t.priority) ? t.priority : "medium",
+            estimated_minutes: Number.isFinite(t.estimated_minutes) ? Math.min(120, Math.max(5, t.estimated_minutes)) : 25,
+            microsteps:        Array.isArray(t.microsteps) ? t.microsteps.filter(Boolean).slice(0, 3) : [],
+          }));
+      }
+    } catch { /* fall through */ }
+  }
+
+  return []; // graceful empty — caller handles
+}
+
+/**
  * Suggests the top 3 tasks to focus on today.
  *
  * @param {object[]} tasks
