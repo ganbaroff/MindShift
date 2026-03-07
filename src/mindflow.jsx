@@ -25,8 +25,9 @@ import { EveningScreen } from "./features/evening/index.jsx";
 import { ProBanner, PricingScreen } from "./shared/ui/ProBanner.jsx";
 import { SettingsScreen } from "./features/settings/index.jsx";
 import { ExportPanel }    from "./features/settings/ExportPanel.jsx";
-import { NotifPanel }     from "./features/settings/NotifPanel.jsx";
 import { NotionPanel }    from "./features/settings/NotionPanel.jsx";
+// Bolt 2.6: centralized notification hook (replaces inline effects + NotifPanel modal)
+import { useNotifications } from "./shared/hooks/useNotifications.js";
 // Bolt 1.7: skeleton + onboarding
 import { ErrorBoundary }              from "./skeleton/ErrorBoundary.jsx";
 import { BottomNav }                  from "./skeleton/BottomNav.jsx";
@@ -41,11 +42,7 @@ import { FREE_LIMITS, getDumpCount, incrementDumpCount, isProUser } from "./shar
 import { updatePersona }             from "./shared/lib/persona.js";
 import { exportToMarkdown }          from "./shared/lib/export.js";
 import { greeting }                  from "./shared/lib/greeting.js";
-import {
-  defaultNotifPrefs, loadNotifPrefs, saveNotifPrefs,
-  requestNotifPermission, scheduleNotification,
-} from "./shared/lib/notifications.js";
-import { applyNotifSchedule }        from "./shared/lib/notif-schedule.js";
+// Bolt 2.6: notifications.js + notif-schedule.js now managed by useNotifications hook
 // Bolt 1.4: centralised error logging (INVARIANT 7)
 import { logError }                  from "./shared/lib/logger.js";
 // Bolt 1.2: constants extracted to shared modules
@@ -210,9 +207,15 @@ export default function App() {
   const [toast, setToast]         = useState(null);
   // Bolt 2.3: auth state from useAuth hook (replaces inline user state + auth useEffect)
   const { user, authLoading, signIn, signUp, signOut: authSignOut } = useAuth();
+  // Bolt 2.6: notification state + scheduling (replaces two useEffects + NotifPanel modal)
+  const {
+    requestPermission,
+    settings:       notifSettings,
+    permissionState: notifPermission,
+    updateSettings: updateNotifSettings,
+  } = useNotifications(lang);
   const [syncOn, setSyncOn]       = useState(false);
   const [showExport, setShowExport] = useState(false);
-  const [showNotif, setShowNotif]   = useState(false);
   const [showNotion, setShowNotion] = useState(false);
   const [showPricing, setShowPricing] = useState(false);
   const [pricingReason, setPricingReason] = useState("dumps");
@@ -253,23 +256,7 @@ export default function App() {
     } catch (e) { logError("App.persistThoughtsLocal", e); }
   }, [thoughts, user, syncOn]);
 
-  // Apply saved notification schedule whenever lang changes
-  useEffect(() => {
-    const prefs = loadNotifPrefs();
-    if (prefs.enabled) applyNotifSchedule(prefs, lang);
-  }, [lang]);
-
-  // FIX: re-apply notif schedule when app comes to foreground (hooks-mindflow)
-  useEffect(() => {
-    const onVisible = () => {
-      if (document.visibilityState === "visible") {
-        const prefs = loadNotifPrefs();
-        if (prefs.enabled) applyNotifSchedule(prefs, langRef.current);
-      }
-    };
-    document.addEventListener("visibilitychange", onVisible);
-    return () => document.removeEventListener("visibilitychange", onVisible);
-  }, []);
+  // Bolt 2.6: notification scheduling + visibilitychange now in useNotifications hook
 
   // Bolt 2.3: redirect to /today + notify on sign-in; useAuth manages session state
   const prevUserRef = useRef(undefined); // undefined = first render
@@ -282,6 +269,10 @@ export default function App() {
         : langRef.current === "az" ? "Hesaba daxil oldun!"
         : "Signed in!"
       );
+      // Bolt 2.6 AC1: single permission request on first login (browser enforces once-per-origin)
+      if ("Notification" in window && Notification.permission === "default") {
+        setTimeout(() => requestPermission(), 800);
+      }
     }
     prevUserRef.current = user;
   }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -518,13 +509,12 @@ export default function App() {
           {screen === "dump"     && <DumpScreen thoughts={thoughts} onProcess={handleProcess} onToggleToday={toggleToday} onArchive={archive} onUpdate={handleUpdate} lang={lang} persona={persona} isPro={isProUser(user, subscription)} onShowPricing={reason => { setPricingReason(reason); setShowPricing(true); }} user={user} />}
           {screen === "today"    && <TodayScreen thoughts={thoughts} onArchive={archive} onToggleToday={toggleToday} onUpdate={handleUpdate} lang={lang} persona={persona} user={user} />}
           {screen === "evening"  && <EveningScreen lang={lang} persona={persona} user={user} />}
-          {screen === "settings" && <SettingsScreen thoughts={thoughts} lang={lang} onChangeLang={setLang} onClearAll={() => { setThoughts([]); setPersona(null); try { localStorage.removeItem("mf_thoughts_local"); localStorage.removeItem("mf_persona"); } catch {} notify(lang === "ru" ? "Очищено" : "Cleared", "info"); }} user={user} syncOn={syncOn} onToggleSync={() => setSyncOn(v => !v)} onShowAuth={() => {}} onSignOut={handleSignOut} persona={persona} onExport={() => setShowExport(true)} onNotif={() => setShowNotif(true)} onNotion={() => setShowNotion(true)} isPro={isProUser(user, subscription)} onShowPricing={reason => { setPricingReason(reason); setShowPricing(true); }} />}
+          {screen === "settings" && <SettingsScreen thoughts={thoughts} lang={lang} onChangeLang={setLang} onClearAll={() => { setThoughts([]); setPersona(null); try { localStorage.removeItem("mf_thoughts_local"); localStorage.removeItem("mf_persona"); } catch {} notify(lang === "ru" ? "Очищено" : "Cleared", "info"); }} user={user} syncOn={syncOn} onToggleSync={() => setSyncOn(v => !v)} onShowAuth={() => {}} onSignOut={handleSignOut} persona={persona} onExport={() => setShowExport(true)} onNotion={() => setShowNotion(true)} isPro={isProUser(user, subscription)} onShowPricing={reason => { setPricingReason(reason); setShowPricing(true); }} notifSettings={notifSettings} notifPermission={notifPermission} onUpdateNotifSettings={updateNotifSettings} onRequestNotifPermission={requestPermission} />}
         </div>
 
         <BottomNav active={screen} onChange={handleNavChange} badge={badge} lang={lang} />
         {showExport   && <ExportPanel thoughts={thoughts} lang={lang} onClose={() => setShowExport(false)} />}
         {showPricing  && <PricingScreen lang={lang} user={user} onClose={() => setShowPricing(false)} />}
-        {showNotif  && <NotifPanel lang={lang} onClose={() => setShowNotif(false)} />}
         {showNotion && <NotionPanel thoughts={thoughts} lang={lang} onClose={() => setShowNotion(false)} />}
       </div>
     </>
