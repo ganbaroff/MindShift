@@ -1,0 +1,41 @@
+{
+  "_comment": "Golden master fixture for parseDump() — Bolt 1.1 (2026-03-07)",
+  "_purpose": "Verify that extraction from mindflow.jsx → claude.js did not change response STRUCTURE. AI output is non-deterministic so we validate schema, not exact content.",
+  "_howToUse": "When Vitest is set up (Sprint 5), write a schema-validation test that calls parseDump() with 'input' and asserts the response matches 'expectedSchema'.",
+
+  "input": {
+    "rawText": "Call mom today, buy groceries, need to launch the website this week, write 500 words for the blog, set reminder to pay rent on friday",
+    "lang": "en",
+    "persona": null
+  },
+
+  "expectedSchema": {
+    "topLevelKeys": ["items", "response"],
+    "items": {
+      "type": "array",
+      "minLength": 3,
+      "maxLength": 8,
+      "itemSchema": {
+        "requiredFields": ["text", "type", "priority", "tags"],
+        "text": { "type": "string", "minLength": 1 },
+        "type": { "enum": ["task", "note", "idea", "reminder", "expense", "memory"] },
+        "priority": { "enum": ["none", "low", "medium", "high", "critical"] },
+        "tags": { "type": "array", "maxItems": 3 },
+        "reminderAt": { "type": "string_or_null" },
+        "recurrence": { "type": "string_or_undefined" }
+      }
+    },
+    "response": { "type": "string", "minLength": 10 }
+  },
+
+  "knownExpectations": {
+    "itemCount": "≥ 4 (call mom, groceries, website launch, blog writing, rent reminder = 5 items)",
+    "reminderPresent": "At least one item should have reminderAt set (rent on friday)",
+    "taskType": "Most items should be type=task",
+    "callMomPriority": "Call mom + today keyword → priority should be medium or high"
+  },
+
+  "capturedAt": "2026-03-07",
+  "capturedBy": "Bolt 1.1 pre-extraction baseline",
+  "note": "Run parseDump() manually before and after extraction to confirm output structure is unchanged. Full automated testing in Sprint 5 (Vitest setup)."
+}
