@@ -14,6 +14,7 @@
  *   6. Daily task operations   — sbGetDailyTasks(), sbSaveDailyTasks(), sbToggleDailyTask()
  *   7. Character progress      — sbGetCharacterProgress(), sbUpsertCharacterProgress()
  *   8. Usage limits            — sbGetUsage(), sbCheckAndIncrementUsage(), sbGetUserProfile()
+ *   9. Persona archetype       — sbSavePersonaArchetype(), sbLoadPersonaArchetype()
  *
  * Auth operations (signInWithOtp, onAuthStateChange, signOut) are NOT here —
  * they belong to the auth/ feature slice (Sprint 2). Import getSupabase()
@@ -468,4 +469,48 @@ export async function sbGetUserProfile(userId) {
     .eq("user_id", userId)
     .single();
   return data || { is_pro: false };
+}
+
+// =============================================================================
+// 9. PERSONA ARCHETYPE OPERATIONS (Bolt 3.1)
+// Persists the user's chosen archetype (explorer/builder/dreamer/guardian)
+// and display name to user_profiles (Migration 005).
+// localStorage is the primary store — Supabase is background sync.
+// =============================================================================
+
+/**
+ * Upserts persona_archetype and persona_name on user_profiles.
+ * Silent on error — localStorage is the source of truth for persona state.
+ *
+ * @param {string} userId
+ * @param {string} archetype   — "explorer" | "builder" | "dreamer" | "guardian"
+ * @param {string} name        — user-chosen display name
+ */
+export async function sbSavePersonaArchetype(userId, archetype, name) {
+  const sb = getSupabase();
+  if (!sb) return;
+  await sb
+    .from("user_profiles")
+    .upsert(
+      { user_id: userId, persona_archetype: archetype, persona_name: name },
+      { onConflict: "user_id" }
+    );
+}
+
+/**
+ * Loads persona_archetype and persona_name from user_profiles.
+ * Returns null if no row exists or on error.
+ *
+ * @param {string} userId
+ * @returns {Promise<{ persona_archetype: string, persona_name: string }|null>}
+ */
+export async function sbLoadPersonaArchetype(userId) {
+  const sb = getSupabase();
+  if (!sb) return null;
+  const { data } = await sb
+    .from("user_profiles")
+    .select("persona_archetype, persona_name")
+    .eq("user_id", userId)
+    .single();
+  return data?.persona_archetype ? data : null;
 }
