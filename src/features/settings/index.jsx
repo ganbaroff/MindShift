@@ -5,8 +5,12 @@
  * Exports: SettingsScreen
  *
  * Bolt 1.6: extracted from mindflow.jsx lines 704–898.
+ * Bolt 2.6: Reminders card replaced with inline NotifInline component.
+ *           Accepts notifSettings, notifPermission, onUpdateNotifSettings,
+ *           onRequestNotifPermission props from useNotifications hook.
  */
 
+import { useState } from "react";
 import { C }             from "../../skeleton/design-system/tokens.js";
 import { T, LANGS }      from "../../shared/i18n/translations.js";
 import { Icon }          from "../../shared/ui/icons.jsx";
@@ -15,7 +19,7 @@ import { FREE_LIMITS, getDumpCount } from "../../shared/lib/freemium.js";
 import { getStreakData } from "../../shared/lib/streak.js";
 import { isToday }       from "../../shared/lib/date.js";
 
-export function SettingsScreen({ thoughts, lang, onChangeLang, onClearAll, user, syncOn, onToggleSync, onShowAuth, onSignOut, persona, onExport, onNotif, onNotion, isPro, onShowPricing }) {
+export function SettingsScreen({ thoughts, lang, onChangeLang, onClearAll, user, syncOn, onToggleSync, onShowAuth, onSignOut, persona, onExport, onNotion, isPro, onShowPricing, notifSettings, notifPermission, onUpdateNotifSettings, onRequestNotifPermission }) {
   const tx = T[lang] || T.en;
   const total       = thoughts.length;
   const archived    = thoughts.filter(t => t.archived).length;
@@ -170,13 +174,13 @@ export function SettingsScreen({ thoughts, lang, onChangeLang, onClearAll, user,
       </Card>
 
       <Card title={lang === "ru" ? "Напоминания" : lang === "az" ? "Xatırlatmalar" : "Reminders"} icon={Icon.bell(C.textSub, 14)}>
-        <div style={{ color: C.textSub, fontSize: 13, marginBottom: 12, lineHeight: 1.6 }}>
-          {lang === "ru" ? "Утренний ритуал и вечерний обзор по расписанию." : lang === "az" ? "Səhər ritualu və axşam icmalı." : "Morning ritual and evening review on schedule."}
-        </div>
-        <button onClick={onNotif} style={{ width: "100%", height: 44, background: C.accentDim, color: C.accentLit, border: `1px solid ${C.accent}33`, borderRadius: 11, fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, letterSpacing: 0.2 }}>
-          {Icon.bell(C.accentLit, 15)}
-          {lang === "ru" ? "Настроить напоминания" : lang === "az" ? "Xatırlatmaları tənzimləyin" : "Set up reminders"}
-        </button>
+        <NotifInline
+          settings={notifSettings}
+          permission={notifPermission}
+          onUpdate={onUpdateNotifSettings}
+          onRequest={onRequestNotifPermission}
+          lang={lang}
+        />
       </Card>
 
       <Card title={tx.exportData} icon={Icon.export(C.textSub, 14)}>
@@ -204,6 +208,205 @@ export function SettingsScreen({ thoughts, lang, onChangeLang, onClearAll, user,
           {tx.clearAll}
         </button>
       </Card>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// NotifInline — Bolt 2.6
+// Inline notification settings inside the Reminders Card.
+// No modal, no redirect — ADHD P7 (no dark patterns).
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * @param {{ settings, permission, onUpdate, onRequest, lang }} props
+ * settings  — from useNotifications hook (loaded from localStorage)
+ * permission — "granted"|"denied"|"default"|"unsupported"
+ * onUpdate  — (patch) => void  saves + re-applies schedule
+ * onRequest — async () => void  requests browser permission
+ */
+function NotifInline({ settings, permission, onUpdate, onRequest, lang }) {
+  const [draft, setDraft] = useState({
+    enabled:     settings?.enabled     ?? false,
+    morningOn:   settings?.morningOn   ?? true,
+    morningTime: settings?.morningTime ?? "09:00",
+    eveningOn:   settings?.eveningOn   ?? true,
+    eveningTime: settings?.eveningTime ?? "21:00",
+  });
+  const [saved, setSaved] = useState(false);
+
+  const handleSave = () => {
+    onUpdate(draft);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 1800);
+  };
+
+  if (permission === "unsupported") {
+    return (
+      <div style={{ color: C.textDim, fontSize: 13, lineHeight: 1.6 }}>
+        {lang === "ru" ? "Уведомления не поддерживаются в этом браузере."
+         : lang === "az" ? "Bu brauzer bildirişləri dəstəkləmir."
+         : "Notifications aren't supported in this browser."}
+      </div>
+    );
+  }
+
+  if (permission === "denied") {
+    return (
+      <>
+        <div style={{ color: C.textSub, fontSize: 13, lineHeight: 1.6, marginBottom: 8 }}>
+          {lang === "ru" ? "Уведомления заблокированы. Разрешите их в настройках браузера."
+           : lang === "az" ? "Bildirişlər bloklanıb. Brauzer parametrlərindən icazə verin."
+           : "Notifications are blocked. Enable them in your browser settings."}
+        </div>
+        <NotifDisclosure lang={lang} />
+      </>
+    );
+  }
+
+  if (permission === "default") {
+    return (
+      <>
+        <div style={{ color: C.textSub, fontSize: 13, lineHeight: 1.6, marginBottom: 10 }}>
+          {lang === "ru" ? "Разреши уведомления для утреннего и вечернего напоминания."
+           : lang === "az" ? "Səhər və axşam xatırlatmaları üçün bildirişlərə icazə ver."
+           : "Allow notifications to get morning and evening reminders."}
+        </div>
+        <button
+          onClick={onRequest}
+          aria-label={lang === "ru" ? "Разрешить уведомления" : lang === "az" ? "Bildirişlərə icazə ver" : "Allow notifications"}
+          style={{
+            width: "100%", height: 44,
+            background: `linear-gradient(135deg, ${C.accent}, ${C.accentLit})`,
+            color: "white", border: "none", borderRadius: 11,
+            fontSize: 13, fontWeight: 700, cursor: "pointer",
+            fontFamily: "inherit", marginBottom: 10,
+          }}
+        >
+          {lang === "ru" ? "Разрешить уведомления"
+           : lang === "az" ? "Bildirişlərə icazə ver"
+           : "Allow notifications"}
+        </button>
+        <NotifDisclosure lang={lang} />
+      </>
+    );
+  }
+
+  // permission === "granted" — show full settings UI
+  return (
+    <>
+      <NotifDisclosure lang={lang} />
+
+      {/* Master enable/disable toggle */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+        <span style={{ color: C.text, fontSize: 14 }}>
+          {lang === "ru" ? "Включить напоминания"
+           : lang === "az" ? "Xatırlatmaları aktiv et"
+           : "Enable reminders"}
+        </span>
+        <Toggle on={draft.enabled} onChange={v => setDraft(d => ({ ...d, enabled: v }))} />
+      </div>
+
+      {draft.enabled && (
+        <>
+          {/* Morning reminder row */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ fontSize: 16 }}>🌅</span>
+              <span style={{ color: C.text, fontSize: 14 }}>
+                {lang === "ru" ? "Утро" : lang === "az" ? "Səhər" : "Morning"}
+              </span>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <input
+                type="time"
+                value={draft.morningTime}
+                onChange={e => setDraft(d => ({ ...d, morningTime: e.target.value }))}
+                disabled={!draft.morningOn}
+                aria-label={lang === "ru" ? "Время утреннего напоминания" : lang === "az" ? "Səhər xatırlatma vaxtı" : "Morning reminder time"}
+                style={{
+                  background: C.surfaceHi, border: `1px solid ${C.border}`,
+                  borderRadius: 8, color: C.text, fontSize: 13,
+                  padding: "5px 8px", fontFamily: "inherit",
+                  opacity: draft.morningOn ? 1 : 0.4,
+                  minHeight: 34,
+                }}
+              />
+              <Toggle on={draft.morningOn} onChange={v => setDraft(d => ({ ...d, morningOn: v }))} />
+            </div>
+          </div>
+
+          {/* Evening reminder row */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ fontSize: 16 }}>🌙</span>
+              <span style={{ color: C.text, fontSize: 14 }}>
+                {lang === "ru" ? "Вечер" : lang === "az" ? "Axşam" : "Evening"}
+              </span>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <input
+                type="time"
+                value={draft.eveningTime}
+                onChange={e => setDraft(d => ({ ...d, eveningTime: e.target.value }))}
+                disabled={!draft.eveningOn}
+                aria-label={lang === "ru" ? "Время вечернего напоминания" : lang === "az" ? "Axşam xatırlatma vaxtı" : "Evening reminder time"}
+                style={{
+                  background: C.surfaceHi, border: `1px solid ${C.border}`,
+                  borderRadius: 8, color: C.text, fontSize: 13,
+                  padding: "5px 8px", fontFamily: "inherit",
+                  opacity: draft.eveningOn ? 1 : 0.4,
+                  minHeight: 34,
+                }}
+              />
+              <Toggle on={draft.eveningOn} onChange={v => setDraft(d => ({ ...d, eveningOn: v }))} />
+            </div>
+          </div>
+
+          <button
+            onClick={handleSave}
+            aria-label={saved
+              ? (lang === "ru" ? "Сохранено" : lang === "az" ? "Saxlanıldı" : "Saved")
+              : (lang === "ru" ? "Сохранить настройки" : lang === "az" ? "Parametrləri saxla" : "Save preferences")}
+            style={{
+              width: "100%", height: 44,
+              background: saved ? `${C.done}18` : C.accentDim,
+              color: saved ? C.done : C.accentLit,
+              border: `1px solid ${saved ? `${C.done}44` : `${C.accent}33`}`,
+              borderRadius: 11, fontSize: 13, fontWeight: 700,
+              cursor: "pointer", fontFamily: "inherit", transition: "all .2s",
+            }}
+          >
+            {saved
+              ? (lang === "ru" ? "Сохранено ✓" : lang === "az" ? "Saxlanıldı ✓" : "Saved ✓")
+              : (lang === "ru" ? "Сохранить настройки" : lang === "az" ? "Parametrləri saxla" : "Save preferences")}
+          </button>
+        </>
+      )}
+    </>
+  );
+}
+
+/**
+ * Bolt 2.6 CRITICAL: disclose that notifications are foreground-only.
+ * Never promise background delivery (ADR 0010, AC user requirement).
+ */
+function NotifDisclosure({ lang }) {
+  return (
+    <div style={{
+      display: "flex", alignItems: "flex-start", gap: 6,
+      background: C.surfaceHi, borderRadius: 8,
+      padding: "8px 12px", marginBottom: 12,
+      border: `1px solid ${C.border}`,
+    }}>
+      <span style={{ fontSize: 12, flexShrink: 0, marginTop: 1 }}>ℹ️</span>
+      <span style={{ color: C.textDim, fontSize: 12, lineHeight: 1.5 }}>
+        {lang === "ru"
+          ? "Уведомления работают, пока приложение открыто в браузере."
+          : lang === "az"
+          ? "Bildirişlər yalnız proqram brauzerdə açıq olduğunda işləyir."
+          : "Notifications only work while the app is open in your browser."}
+      </span>
     </div>
   );
 }
