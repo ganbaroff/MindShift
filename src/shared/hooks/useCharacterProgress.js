@@ -9,32 +9,39 @@
  * Single responsibility:
  *   - On mount: fetch existing progress for the authed user
  *   - expose awardXp(earned, reviewDate) → upserts new total to Supabase
+ *   - Bolt 4.1: expose addXp(xpGain) → optimistic update + sbAddXp persist
+ *               expose levelUpPayload → { newLevel } for LevelUpToast, or null
  *
  * level formula: floor(total_xp / 100) + 1  (ADR 0008)
  *
  * Exports: useCharacterProgress
  */
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   sbGetCharacterProgress,
   sbUpsertCharacterProgress,
+  sbAddXp,
 } from "../services/supabase.js";
 import { logError } from "../lib/logger.js";
 
 /**
  * @param {import("@supabase/supabase-js").User|null} user
  * @returns {{
- *   totalXp: number,
- *   level: number,
+ *   totalXp:        number,
+ *   level:          number,
  *   progressLoading: boolean,
- *   awardXp: (earned: number, reviewDate: string) => Promise<number>,
+ *   awardXp:        (earned: number, reviewDate: string) => Promise<number>,
+ *   addXp:          (xpGain: number) => Promise<{ leveledUp: boolean, newLevel: number }>,
+ *   levelUpPayload: { newLevel: number } | null,
  * }}
  */
 export function useCharacterProgress(user) {
   const [totalXp,         setTotalXp]         = useState(0);
   const [level,           setLevel]           = useState(1);
   const [progressLoading, setProgressLoading] = useState(true);
+  const [levelUpPayload,  setLevelUpPayload]  = useState(null);
+  const levelUpTimer = useRef(null);
 
   useEffect(() => {
     if (!user?.id) { setProgressLoading(false); return; }
@@ -78,5 +85,49 @@ export function useCharacterProgress(user) {
     return newTotal;
   }, [totalXp, user?.id]);
 
-  return { totalXp, level, progressLoading, awardXp };
+  /**
+   * Bolt 4.1 — awards XP for any activity (AC1–AC4, ADR 0013).
+   *
+   * 1. Optimistic update: immediately updates local totalXp + level.
+   * 2. If a level-up occurred, sets levelUpPayload for LevelUpToast (auto-clears in 2.5s).
+   * 3. Persists via sbAddXp (read-modify-write on character_progress).
+   * 4. Reconciles local state with DB result (handles multi-device scenarios).
+   *
+   * @param {number} xpGain — from calcXpGain(action)
+   * @returns {Promise<{ leveledUp: boolean, newLevel: number }>}
+   */
+  const addXp = useCallback(async (xpGain) => {
+    const newTotal  = totalXp + xpGain;
+    const newLevel  = Math.floor(newTotal / 100) + 1;
+    const leveledUp = newLevel > level;
+
+    // 1. Optimistic local update (immediate UI feedback)
+    setTotalXp(newTotal);
+    setLevel(newLevel);
+
+    // 2. Level Up toast (auto-clears after 2.5s)
+    if (leveledUp) {
+      clearTimeout(levelUpTimer.current);
+      setLevelUpPayload({ newLevel });
+      levelUpTimer.current = setTimeout(() => setLevelUpPayload(null), 2500);
+    }
+
+    // 3. Persist + reconcile with DB
+    if (user?.id) {
+      sbAddXp(user.id, xpGain)
+        .then(({ newXp: dbXp, newLevel: dbLevel }) => {
+          // Reconcile in case another device also awarded XP
+          setTotalXp(dbXp);
+          setLevel(dbLevel);
+        })
+        .catch(e => logError("useCharacterProgress.addXp", e));
+    }
+
+    return { leveledUp, newLevel };
+  }, [totalXp, level, user?.id]);
+
+  // Cleanup level-up timer on unmount
+  useEffect(() => () => clearTimeout(levelUpTimer.current), []);
+
+  return { totalXp, level, progressLoading, awardXp, addXp, levelUpPayload };
 }
