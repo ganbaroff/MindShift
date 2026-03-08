@@ -11,6 +11,7 @@ import { RecoveryProtocol } from '@/features/tasks/RecoveryProtocol'
 import { CookieBanner } from '@/shared/ui/CookieBanner'
 import { RECOVERY_THRESHOLD_HOURS } from '@/shared/lib/constants'
 import { useOfflineSync } from '@/shared/hooks/useOfflineSync'
+import { logError } from '@/shared/lib/logger'
 
 // Key that AuthScreen writes before sending the magic link
 const CONSENT_PENDING_KEY = 'ms_consent_pending'
@@ -62,7 +63,7 @@ export default function App() {
               .eq('id', session.user.id)
               .then(({ error }) => {
                 if (error) {
-                  console.warn('[consent] Failed to persist consent to Supabase:', error.message)
+                  logError('App.consentPersist', new Error(error.message))
                 } else {
                   // Clean up only after successful write
                   localStorage.removeItem(CONSENT_PENDING_KEY)

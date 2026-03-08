@@ -253,7 +253,7 @@ export default function SettingsScreen() {
         <button
           onClick={() => void handleSignOut()}
           className="w-full py-3.5 rounded-2xl text-sm font-medium transition-all duration-200"
-          style={{ background: '#1A1D2E', border: '1.5px solid #2D3150', color: '#FF6B6B' }}
+          style={{ background: '#1A1D2E', border: '1.5px solid #2D3150', color: '#E8976B' }}
         >
           Sign out
         </button>

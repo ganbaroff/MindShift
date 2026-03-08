@@ -8,9 +8,10 @@
  */
 
 import { useEffect } from 'react'
+import { toast } from 'sonner'
 import { useStore } from '@/store'
 import { supabase } from '@/shared/lib/supabase'
-import { flushQueue } from '@/shared/lib/offlineQueue'
+import { flushQueue, setOnItemsDropped, migrateLegacyQueue } from '@/shared/lib/offlineQueue'
 import { logError } from '@/shared/lib/logger'
 
 export function useOfflineSync(): void {
@@ -19,9 +20,20 @@ export function useOfflineSync(): void {
   useEffect(() => {
     if (!userId) return
 
+    // Migrate any legacy non-namespaced queue items
+    migrateLegacyQueue(userId)
+
+    // Wire up drop notification — never lose data silently (ADHD users can't afford lost tasks)
+    setOnItemsDropped((count) => {
+      toast.error(
+        `${count} offline change${count > 1 ? 's' : ''} could not be saved after multiple retries.`,
+        { duration: 8000 }
+      )
+    })
+
     async function flush() {
       try {
-        await flushQueue(supabase)
+        await flushQueue(supabase, userId!)
       } catch (err) {
         logError('useOfflineSync.flush', err)
       }
@@ -46,6 +58,7 @@ export function useOfflineSync(): void {
     return () => {
       window.removeEventListener('online', handleOnline)
       document.removeEventListener('visibilitychange', handleVisibility)
+      setOnItemsDropped(null)
     }
   }, [userId])
 }

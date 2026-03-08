@@ -140,12 +140,12 @@ export default function FocusScreen() {
     elapsedMs: number,
     phaseReached: SessionPhase,
   ) => {
-    if (sessionSavedRef.current || !activeSession) return
+    if (sessionSavedRef.current || !activeSession || !userId) return
     sessionSavedRef.current = true
     try {
       const row: FocusSessionInsert = {
         task_id:       activeSession.taskId,
-        user_id:       '',  // filled by RLS / trigger
+        user_id:       userId,
         started_at:    activeSession.startedAt,
         audio_preset:  activePreset,
         duration_ms:   elapsedMs,
@@ -158,7 +158,7 @@ export default function FocusScreen() {
       // Non-blocking: offline sessions are acceptable; log for monitoring
       logError('FocusScreen.handleSessionEnd.insert', err)
     }
-  }, [activeSession, activePreset, updateLastSession])
+  }, [activeSession, activePreset, updateLastSession, userId])
 
   // ── Start nature buffer ─────────────────────────────────────────────────────
   const startNatureBuffer = useCallback(() => {

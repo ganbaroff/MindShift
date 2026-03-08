@@ -360,7 +360,7 @@ export function AddTaskModal({ open, onClose }: Props) {
                       color: difficulty === d ? '#6C63FF' : '#8B8BA7',
                     }}
                   >
-                    {d === 1 ? '🟢 Easy' : d === 2 ? '🟡 Medium' : '🔴 Hard'}
+                    {d === 1 ? '🟢 Easy' : d === 2 ? '🟡 Medium' : '🟠 Hard'}
                   </button>
                 ))}
               </div>

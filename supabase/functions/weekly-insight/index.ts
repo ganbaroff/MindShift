@@ -19,6 +19,7 @@ import { checkDbRateLimit } from '../_shared/rateLimit.ts'
 
 const ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages'
 const MODEL = 'claude-sonnet-4-5'
+const API_TIMEOUT_MS = 15_000 // 15s timeout
 
 const PRESET_NAMES: Record<string, string> = {
   brown:  'brown noise (Deep Focus)',
@@ -88,24 +89,19 @@ Deno.serve(async (req: Request) => {
       )
     }
 
-    // ── Input ──────────────────────────────────────────────────────────────────
-    const {
-      totalSessions = 0,
-      avgDurationMinutes = 0,
-      tasksCompleted = 0,
-      mostUsedPreset = null,
-      peakHour = null,
-      activeDays = 0,
-      energyTrend = null,
-    } = await req.json() as {
-      totalSessions?: number
-      avgDurationMinutes?: number
-      tasksCompleted?: number
-      mostUsedPreset?: string | null
-      peakHour?: number | null
-      activeDays?: number
-      energyTrend?: 'improving' | 'stable' | 'declining' | null
-    }
+    // ── Input (with bounds validation) ──────────────────────────────────────────
+    const raw = await req.json() as Record<string, unknown>
+
+    // Coerce + bound all numeric inputs to prevent abuse
+    const totalSessions    = Math.min(9999, Math.max(0, Math.floor(Number(raw.totalSessions ?? 0))))
+    const avgDurationMinutes = Math.min(600, Math.max(0, Number(raw.avgDurationMinutes ?? 0)))
+    const tasksCompleted   = Math.min(9999, Math.max(0, Math.floor(Number(raw.tasksCompleted ?? 0))))
+    const activeDays       = Math.min(7, Math.max(0, Math.floor(Number(raw.activeDays ?? 0))))
+    const peakHour         = raw.peakHour != null ? Math.min(23, Math.max(0, Math.floor(Number(raw.peakHour)))) : null
+    const mostUsedPreset   = typeof raw.mostUsedPreset === 'string' ? raw.mostUsedPreset.slice(0, 50) : null
+    const energyTrend      = ['improving', 'stable', 'declining'].includes(raw.energyTrend as string)
+      ? (raw.energyTrend as 'improving' | 'stable' | 'declining')
+      : null
 
     // ── Build context ──────────────────────────────────────────────────────────
     const stats = [
@@ -133,8 +129,12 @@ Write exactly 3 short insights. Rules:
 
 Respond ONLY with the 3 insights, one per line. No headers, no JSON, no extra text.`
 
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT_MS)
+
     const claudeResp = await fetch(ANTHROPIC_URL, {
       method: 'POST',
+      signal: controller.signal,
       headers: {
         'x-api-key': Deno.env.get('ANTHROPIC_API_KEY')!,
         'anthropic-version': '2023-06-01',
@@ -146,6 +146,8 @@ Respond ONLY with the 3 insights, one per line. No headers, no JSON, no extra te
         messages: [{ role: 'user', content: prompt }],
       }),
     })
+
+    clearTimeout(timeoutId)
 
     if (!claudeResp.ok) {
       throw new Error(`Anthropic API error: ${claudeResp.status}`)

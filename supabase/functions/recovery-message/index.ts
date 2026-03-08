@@ -13,6 +13,7 @@ import { checkDbRateLimit } from '../_shared/rateLimit.ts'
 
 const ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages'
 const MODEL = 'claude-sonnet-4-5'
+const API_TIMEOUT_MS = 15_000 // 15s timeout
 
 Deno.serve(async (req: Request) => {
   const cors = getCorsHeaders(req)
@@ -73,8 +74,8 @@ Deno.serve(async (req: Request) => {
       incompleteCount?: unknown
     }
 
-    const days  = Math.max(0, Math.floor(Number(body.daysAbsent  ?? 0)))
-    const tasks = Math.max(0, Math.floor(Number(body.incompleteCount ?? 0)))
+    const days  = Math.min(365, Math.max(0, Math.floor(Number(body.daysAbsent  ?? 0))))
+    const tasks = Math.min(999, Math.max(0, Math.floor(Number(body.incompleteCount ?? 0))))
 
     // ── Claude call ────────────────────────────────────────────────────────────
     const prompt = `You are a compassionate ADHD productivity coach writing a welcome-back message.
@@ -92,8 +93,12 @@ Write exactly 2 sentences. Rules:
 
 Respond ONLY with the 2-sentence message. No quotes, no JSON, no labels.`
 
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT_MS)
+
     const claudeResp = await fetch(ANTHROPIC_URL, {
       method: 'POST',
+      signal: controller.signal,
       headers: {
         'x-api-key': Deno.env.get('ANTHROPIC_API_KEY')!,
         'anthropic-version': '2023-06-01',
@@ -105,6 +110,8 @@ Respond ONLY with the 2-sentence message. No quotes, no JSON, no labels.`
         messages: [{ role: 'user', content: prompt }],
       }),
     })
+
+    clearTimeout(timeoutId)
 
     if (!claudeResp.ok) {
       throw new Error(`Anthropic API error: ${claudeResp.status}`)

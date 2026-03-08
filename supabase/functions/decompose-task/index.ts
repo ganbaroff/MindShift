@@ -12,6 +12,9 @@ import { checkDbRateLimit } from '../_shared/rateLimit.ts'
 
 const ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages'
 const MODEL = 'claude-sonnet-4-5'
+const API_TIMEOUT_MS = 15_000 // 15s — fail fast, don't hang the user
+const MAX_TITLE_LEN = 500
+const MAX_DESC_LEN = 1000
 
 Deno.serve(async (req: Request) => {
   const cors = getCorsHeaders(req)
@@ -67,7 +70,7 @@ Deno.serve(async (req: Request) => {
       )
     }
 
-    // ── Input ──────────────────────────────────────────────────────────────────
+    // ── Input (with size validation) ──────────────────────────────────────────
     const { taskTitle, taskDescription } = await req.json() as {
       taskTitle: string
       taskDescription?: string
@@ -80,12 +83,29 @@ Deno.serve(async (req: Request) => {
       )
     }
 
-    // ── Claude call ────────────────────────────────────────────────────────────
+    if (taskTitle.length > MAX_TITLE_LEN) {
+      return new Response(
+        JSON.stringify({ error: `taskTitle must be under ${MAX_TITLE_LEN} characters` }),
+        { status: 400, headers: { ...cors, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    if (taskDescription && taskDescription.length > MAX_DESC_LEN) {
+      return new Response(
+        JSON.stringify({ error: `taskDescription must be under ${MAX_DESC_LEN} characters` }),
+        { status: 400, headers: { ...cors, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // ── Claude call (with AbortController timeout) ───────────────────────────
+    const title = taskTitle.trim().slice(0, MAX_TITLE_LEN)
+    const desc = taskDescription?.trim().slice(0, MAX_DESC_LEN)
+
     const prompt = `You are an ADHD task coach. Break this task into 3-5 concrete micro-steps, each under 10 minutes.
 Each step must be specific and immediately actionable — no vague language.
 Keep language warm and encouraging.
 
-Task: "${taskTitle}"${taskDescription ? `\nContext: "${taskDescription}"` : ''}
+Task: "${title}"${desc ? `\nContext: "${desc}"` : ''}
 
 Respond ONLY with valid JSON in this exact shape:
 {
@@ -95,8 +115,12 @@ Respond ONLY with valid JSON in this exact shape:
 
 No explanation, no markdown fences. Pure JSON only.`
 
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT_MS)
+
     const claudeResp = await fetch(ANTHROPIC_URL, {
       method: 'POST',
+      signal: controller.signal,
       headers: {
         'x-api-key': Deno.env.get('ANTHROPIC_API_KEY')!,
         'anthropic-version': '2023-06-01',
@@ -108,6 +132,8 @@ No explanation, no markdown fences. Pure JSON only.`
         messages: [{ role: 'user', content: prompt }],
       }),
     })
+
+    clearTimeout(timeoutId)
 
     if (!claudeResp.ok) {
       throw new Error(`Anthropic API error: ${claudeResp.status}`)
@@ -144,8 +170,9 @@ No explanation, no markdown fences. Pure JSON only.`
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Unknown error'
     console.error('[decompose-task]', msg)
+    // Never leak internal details to client — log server-side only
     return new Response(
-      JSON.stringify({ error: 'Internal error', details: msg }),
+      JSON.stringify({ error: 'Internal error' }),
       { status: 500, headers: { ...cors, 'Content-Type': 'application/json' } }
     )
   }

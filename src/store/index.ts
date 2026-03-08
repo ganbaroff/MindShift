@@ -142,9 +142,24 @@ export const useStore = create<AppStore>()(
         setRecoveryShown: () => set({ recoveryShown: true }),
         updateLastSession: () => set({ lastSessionAt: new Date().toISOString() }),
         signOut: () => set({
-          userId: null, email: null, nowPool: [], nextPool: [], somedayPool: [],
-          xpTotal: 0, onboardingCompleted: false, recoveryShown: false,
-          lastSessionAt: null, achievements: initAchievements(),
+          // User slice
+          userId: null, email: null, xpTotal: 0,
+          onboardingCompleted: false, recoveryShown: false, lastSessionAt: null,
+          // Task slice
+          nowPool: [], nextPool: [], somedayPool: [],
+          // Session slice — prevent stale focus sessions from persisting
+          activeSession: null, sessionPhase: 'idle' as const,
+          timerSeconds: 0, timerRunning: false,
+          // Audio slice
+          activePreset: null, audioPlaying: false, audioVolume: 0.47,
+          focusAnchor: null, transitionBufferActive: false,
+          // Progress slice
+          achievements: initAchievements(), weeklyStats: null,
+          // Preferences slice — prevent Pro state leaking between users
+          reducedStimulation: false,
+          subscriptionTier: 'free' as const, trialEndsAt: null,
+          // Grid slice
+          gridWidgets: WIDGET_DEFAULTS_GENERIC,
         }),
 
         // ── Tasks ───────────────────────────────────────────────────────────

@@ -4,7 +4,7 @@ import type { EnergyLevel } from '@/types'
 // ── Energy level options ───────────────────────────────────────────────────────
 
 const ENERGY_OPTIONS: { level: EnergyLevel; emoji: string; label: string }[] = [
-  { level: 1, emoji: '💀', label: 'Empty' },
+  { level: 1, emoji: '🫠', label: 'Low battery' },
   { level: 2, emoji: '😓', label: 'Low' },
   { level: 3, emoji: '😐', label: 'OK' },
   { level: 4, emoji: '🙂', label: 'Good' },
