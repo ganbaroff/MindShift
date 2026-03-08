@@ -55,6 +55,17 @@ import { T, LANGS }                 from "./shared/i18n/translations.js";
 import { Icon }                      from "./shared/ui/icons.jsx";
 import { TYPE_CFG }                  from "./shared/lib/thought-types.js";
 
+// ─────────────────────────────────────────────────────────────────────────────
+// SERVICE WORKER — PWA offline support (Bolt 4.2)
+// ─────────────────────────────────────────────────────────────────────────────
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker
+      .register("/sw.js", { scope: "/" })
+      .catch((err) => logError("mindflow.registerSW", err));
+  });
+}
+
 // ProBanner → shared/ui/ProBanner.jsx (Bolt 1.6)
 // PricingScreen → shared/ui/ProBanner.jsx (Bolt 1.6)
 // (imported above)

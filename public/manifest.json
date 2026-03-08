@@ -1,12 +1,12 @@
 {
-  "name": "MindFlow",
-  "short_name": "MindFlow",
-  "description": "AI-powered focus assistant for brain dumps, daily focus and evening reviews.",
+  "name": "MindFocus",
+  "short_name": "MindFocus",
+  "description": "ADHD-friendly AI productivity assistant — brain dump, daily focus, evening review.",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#07070D",
-  "theme_color": "#07070D",
+  "theme_color": "#6C5CE7",
   "lang": "en",
   "categories": ["productivity", "utilities"],
   "icons": [

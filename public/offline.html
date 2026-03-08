@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+    <meta name="theme-color" content="#07070D" />
+    <title>MindFocus — Offline</title>
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+      body {
+        background: #07070D;
+        color: #F0F0F8;
+        font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+        min-height: 100dvh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .card {
+        background: #0F0F18;
+        border: 1px solid #1E1E2E;
+        border-radius: 20px;
+        padding: 40px 32px;
+        text-align: center;
+        max-width: 320px;
+        width: 100%;
+      }
+
+      .icon {
+        font-size: 52px;
+        margin-bottom: 20px;
+        display: block;
+      }
+
+      h1 {
+        font-size: 22px;
+        font-weight: 700;
+        margin-bottom: 10px;
+        letter-spacing: -0.3px;
+      }
+
+      p {
+        color: #6868A0;
+        font-size: 15px;
+        line-height: 1.6;
+        margin-bottom: 28px;
+      }
+
+      button {
+        background: #6C5CE7;
+        color: #F0F0F8;
+        border: none;
+        border-radius: 12px;
+        padding: 14px 24px;
+        font-size: 15px;
+        font-weight: 500;
+        cursor: pointer;
+        width: 100%;
+        min-height: 48px;
+        transition: opacity 0.15s;
+        -webkit-user-select: none;
+        user-select: none;
+      }
+
+      button:active { opacity: 0.82; }
+
+      @media (prefers-reduced-motion: reduce) {
+        button { transition: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card" role="main">
+      <span class="icon" aria-hidden="true">🧠</span>
+      <h1>You're offline</h1>
+      <p>MindFocus needs a connection to sync your thoughts. Check your network and try again.</p>
+      <button onclick="window.location.reload()" aria-label="Retry connection">
+        Try again
+      </button>
+    </div>
+  </body>
+</html>
