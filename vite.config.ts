@@ -20,10 +20,15 @@ export default defineConfig({
         theme_color: '#6C63FF',
         background_color: '#0F1117',
         display: 'standalone',
-        start_url: '/',
+        scope: '/',
+        start_url: '/?source=pwa',
+        orientation: 'portrait',
+        categories: ['productivity', 'health'],
         icons: [
-          { src: 'icon-192.png', sizes: '192x192', type: 'image/png' },
-          { src: 'icon-512.png', sizes: '512x512', type: 'image/png' },
+          { src: 'icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: 'icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+          // maskable: Android adaptive icon — content sits within the 80% safe zone
+          { src: 'icon-512-maskable.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
       },
       injectManifest: {

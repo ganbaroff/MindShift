@@ -15,6 +15,7 @@ import { useReducedMotion } from '@/shared/hooks/useReducedMotion'
 import { useStore } from '@/store'
 import { Confetti } from '@/shared/ui/Confetti'
 import { notifyXP, notifyAchievement, notifyTaskDone } from '@/shared/lib/notify'
+import { hapticDone } from '@/shared/lib/haptic'
 import type { Task } from '@/types'
 import { ACHIEVEMENT_DEFINITIONS } from '@/types'
 
@@ -60,6 +61,7 @@ export function TaskCard({ task, index = 0, onComplete, onSnooze }: Props) {
     if (isDone) return
     setIsDone(true)
     setConfettiActive(true)
+    hapticDone()  // [80ms, 40ms gap, 120ms] — satisfying confirmation pattern
 
     // XP: base × difficulty × energy multiplier
     const energyMultiplier = energyLevel <= 2 ? 1.2 : energyLevel >= 4 ? 0.8 : 1.0

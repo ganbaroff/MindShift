@@ -1,6 +1,7 @@
 import { Outlet } from 'react-router-dom'
 import { BottomNav } from './BottomNav'
 import { useStore } from '@/store'
+import { InstallBanner } from '@/shared/ui/InstallBanner'
 
 export function AppShell() {
   const sessionPhase = useStore(s => s.sessionPhase)
@@ -19,8 +20,9 @@ export function AppShell() {
       <main id="main-content" className="flex-1 overflow-y-auto pb-20">
         <Outlet />
       </main>
-      {/* Hide bottom nav during deep focus phases */}
+      {/* Hide bottom nav + install nudge during deep focus phases */}
       {!isInFocus && <BottomNav />}
+      {!isInFocus && <InstallBanner />}
     </div>
   )
 }
