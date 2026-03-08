@@ -209,9 +209,7 @@ export const useStore = create<AppStore>()(
             .filter(t => t.status === 'active')
           const ids = allActive.map(t => t.id)
           set((s) => ({
-            nowPool: s.nowPool
-              .filter(t => t.status !== 'active')
-              .concat(allActive.map(t => ({ ...t, pool: 'someday' as const }))),
+            nowPool: s.nowPool.filter(t => t.status !== 'active'),
             nextPool: s.nextPool.filter(t => t.status !== 'active'),
             somedayPool: [...s.somedayPool, ...allActive.map(t => ({ ...t, pool: 'someday' as const }))],
           }))
