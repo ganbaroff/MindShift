@@ -24,6 +24,9 @@ import { logError }                 from "../../shared/lib/logger.js";
 import { useUsageLimits }           from "../../shared/hooks/useUsageLimits.js";
 import { useCharacterProgress }     from "./useCharacterProgress.js";
 import { CharacterCard }            from "./CharacterCard.jsx";
+// Bolt 4.1 — XP system (ADR 0013)
+import { calcXpGain }   from "../../shared/lib/persona.js";
+import { LevelUpToast } from "../../shared/ui/LevelUpToast.jsx";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Strings
@@ -105,8 +108,8 @@ export function EveningScreen({ lang, persona, user }) {
   // Freemium gate (Bolt 2.5)
   const { checkAndIncrement } = useUsageLimits(user);
 
-  // Character progress
-  const { totalXp, level, progressLoading, awardXp } = useCharacterProgress(user);
+  // Character progress — Bolt 4.1: use addXp + levelUpPayload (replaces awardXp)
+  const { totalXp, level, progressLoading, addXp, levelUpPayload } = useCharacterProgress(user);
 
   // ── Load today's tasks ────────────────────────────────────────────────────
   useEffect(() => {
@@ -164,14 +167,21 @@ export function EveningScreen({ lang, persona, user }) {
   const handleSave = useCallback(async () => {
     if (saved) return;
     setSaved(true);
-    if (xpEarned && user) {
-      await awardXp(xpEarned, todayStr());
+    // Bolt 4.1 — fixed 25 XP for evening review completion (ADR 0013)
+    // Replaces variable xpEarned from AI (which is still displayed in UI for flavor)
+    if (user?.id) {
+      await addXp(calcXpGain("evening_review_completed"));
     }
-  }, [saved, xpEarned, user, awardXp]);
+  }, [saved, user?.id, addXp]);
 
   // ─────────────────────────────────────────────────────────────────────────
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+      {/* Bolt 4.1 — Level Up toast (auto-dismissed by hook after 2.5s) */}
+      {levelUpPayload && (
+        <LevelUpToast newLevel={levelUpPayload.newLevel} lang={lang} />
+      )}
+
       {/* Header */}
       <div style={{ padding: "18px 18px 10px", flexShrink: 0 }}>
         <div style={{ color: C.textSub, fontSize: 13, marginBottom: 3 }}>{todayLabel(lang)}</div>
