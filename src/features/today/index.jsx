@@ -39,6 +39,8 @@ import { DayPlanTaskList } from "./DayPlanTaskList.jsx";
 import { PersonaCard }    from "../../shared/ui/PersonaCard.jsx";
 import { ChatBubble }       from "./ChatBubble.jsx";
 import { ChatPanel }        from "./ChatPanel.jsx";
+// Bolt 5.1 — Timeline View (ADR 0017)
+import { TimelineView }     from "./TimelineView.jsx";
 import { getGreeting, getTimePeriod } from "../../shared/lib/dialogues.js";
 import { ARCHETYPE_COLORS } from "../../shared/lib/archetypes.js";
 import { useCharacterProgress } from "../../shared/hooks/useCharacterProgress.js";
@@ -407,10 +409,20 @@ export function TodayScreen({ thoughts, onArchive, onToggleToday, onUpdate, lang
           )}
         </div>
 
+        {/* ── Timeline View — Bolt 5.1 (ADR 0017) ── */}
+        {/* Renders below the DayPlan section, receives saved tasks from useDayPlan. */}
+        {/* onGoToDump intentionally omitted for MVP — see ADR 0017 note on navigation. */}
+        <TimelineView
+          tasks={dayPlanTasks}
+          lang={lang}
+          onToggle={toggleSavedTask}
+        />
+
         {/* ── Separator between day plan and thought-based tasks ── */}
         {(activeTasks.length > 0 || dayPlanTasks.length > 0) && (
           <div style={{
             borderTop: `1px solid ${C.border}`,
+            marginTop: 20,
             marginBottom: 16,
             opacity: 0.5,
           }} />
