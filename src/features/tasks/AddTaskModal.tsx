@@ -5,6 +5,7 @@ import { X, Mic, MicOff } from 'lucide-react'
 import { useStore } from '@/store'
 import { supabase } from '@/shared/lib/supabase'
 import { notifyAchievement } from '@/shared/lib/notify'
+import { enqueue } from '@/shared/lib/offlineQueue'
 import { ACHIEVEMENT_DEFINITIONS } from '@/types'
 import type { Task } from '@/types'
 import { NOW_POOL_MAX } from '@/shared/lib/constants'
@@ -126,13 +127,17 @@ export function AddTaskModal({ open, onClose }: Props) {
       }
       addTask(stepTask)
       if (userId) {
+        const taskRow = {
+          id: stepTask.id, user_id: userId, title: stepTask.title,
+          pool: stepTask.pool, status: stepTask.status, difficulty: stepTask.difficulty,
+          estimated_minutes: stepTask.estimatedMinutes, parent_task_id: null, position: stepTask.position,
+        }
         try {
-          await supabase.from('tasks').insert({
-            id: stepTask.id, user_id: userId, title: stepTask.title,
-            pool: stepTask.pool, status: stepTask.status, difficulty: stepTask.difficulty,
-            estimated_minutes: stepTask.estimatedMinutes, parent_task_id: null, position: stepTask.position,
-          } as never)
-        } catch { /* non-blocking */ }
+          await supabase.from('tasks').insert(taskRow as never)
+        } catch {
+          // Queue for offline retry
+          enqueue('tasks', taskRow as Record<string, unknown>, userId)
+        }
       }
     }
     resetAndClose()
@@ -161,22 +166,24 @@ export function AddTaskModal({ open, onClose }: Props) {
 
     addTask(newTask)
 
-    // Persist to Supabase
+    // Persist to Supabase (with offline retry)
     if (userId) {
+      const taskRow = {
+        id: newTask.id,
+        user_id: userId,
+        title: newTask.title,
+        pool: newTask.pool,
+        status: newTask.status,
+        difficulty: newTask.difficulty,
+        estimated_minutes: newTask.estimatedMinutes,
+        parent_task_id: null,
+        position: newTask.position,
+      }
       try {
-        await supabase.from('tasks').insert({
-          id: newTask.id,
-          user_id: userId,
-          title: newTask.title,
-          pool: newTask.pool,
-          status: newTask.status,
-          difficulty: newTask.difficulty,
-          estimated_minutes: newTask.estimatedMinutes,
-          parent_task_id: null,
-          position: newTask.position,
-        } as never)
+        await supabase.from('tasks').insert(taskRow as never)
       } catch {
-        // Local store already updated — Supabase failure is non-blocking
+        // Local store already updated — queue for offline retry
+        enqueue('tasks', taskRow as Record<string, unknown>, userId)
       }
     }
 

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useStore } from '@/store'
 import { supabase } from '@/shared/lib/supabase'
 import { toast } from 'sonner'
@@ -259,8 +259,27 @@ export default function SettingsScreen() {
         </button>
       </div>
 
+      {/* Legal links */}
+      <div className="flex justify-center gap-4 mt-4">
+        <Link
+          to="/privacy"
+          className="text-xs transition-colors duration-200 hover:underline"
+          style={{ color: '#3D405B' }}
+        >
+          Privacy Policy
+        </Link>
+        <span className="text-xs" style={{ color: '#2D3150' }}>·</span>
+        <Link
+          to="/terms"
+          className="text-xs transition-colors duration-200 hover:underline"
+          style={{ color: '#3D405B' }}
+        >
+          Terms of Service
+        </Link>
+      </div>
+
       {/* Version */}
-      <p className="text-center text-xs mt-6" style={{ color: '#3D405B' }}>
+      <p className="text-center text-xs mt-3 mb-2" style={{ color: '#3D405B' }}>
         MindShift v1.0.0 — Built with 💜 for ADHD minds
       </p>
     </div>

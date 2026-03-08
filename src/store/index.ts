@@ -3,6 +3,16 @@ import { persist, subscribeWithSelector } from 'zustand/middleware'
 import type { Task, AudioPreset, SessionPhase, EnergyLevel, CognitiveMode, AppMode, Psychotype, ActiveSession, WeeklyStats, Achievement } from '@/types'
 import { ACHIEVEMENT_DEFINITIONS } from '@/types'
 
+// ── Psychotype derivation ─────────────────────────────────────────────────────
+// Derives a personality profile from onboarding choices.
+// system → planner | habit → connector | minimal+focused → achiever | minimal+overview → explorer
+function derivePsychotype(mode: AppMode, cognitive: CognitiveMode): Psychotype {
+  if (mode === 'system')  return 'planner'
+  if (mode === 'habit')   return 'connector'
+  if (cognitive === 'focused') return 'achiever'
+  return 'explorer'
+}
+
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 interface UserSlice {
@@ -110,8 +120,14 @@ export const useStore = create<AppStore>()(
 
         setUser: (userId, email) => set({ userId, email }),
         setEnergyLevel: (level) => set({ energyLevel: level }),
-        setCognitiveMode: (mode) => set({ cognitiveMode: mode }),
-        setAppMode: (mode) => set({ appMode: mode }),
+        setCognitiveMode: (mode) => set((s) => ({
+          cognitiveMode: mode,
+          psychotype: derivePsychotype(s.appMode, mode),
+        })),
+        setAppMode: (mode) => set((s) => ({
+          appMode: mode,
+          psychotype: derivePsychotype(mode, s.cognitiveMode),
+        })),
         setAvatarId: (id) => set({ avatarId: id }),
         addXP: (amount) => set((s) => ({ xpTotal: s.xpTotal + amount })),
         setOnboardingCompleted: () => set({ onboardingCompleted: true }),

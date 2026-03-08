@@ -9,6 +9,7 @@ import { AuthGuard } from './AuthGuard'
 import { ErrorBoundary } from '@/shared/ui/ErrorBoundary'
 import { RecoveryProtocol } from '@/features/tasks/RecoveryProtocol'
 import { RECOVERY_THRESHOLD_HOURS } from '@/shared/lib/constants'
+import { useOfflineSync } from '@/shared/hooks/useOfflineSync'
 
 // Lazy-loaded routes for code splitting
 const AuthScreen       = lazy(() => import('@/features/auth/AuthScreen'))
@@ -19,6 +20,8 @@ const TasksScreen      = lazy(() => import('@/features/tasks/TasksScreen'))
 const AudioScreen      = lazy(() => import('@/features/audio/AudioScreen'))
 const ProgressScreen   = lazy(() => import('@/features/progress/ProgressScreen'))
 const SettingsScreen   = lazy(() => import('@/features/settings/SettingsScreen'))
+const PrivacyPage      = lazy(() => import('@/features/legal/PrivacyPage'))
+const TermsPage        = lazy(() => import('@/features/legal/TermsPage'))
 
 export default function App() {
   const { setUser, updateLastSession, lastSessionAt, recoveryShown, setRecoveryShown, onboardingCompleted } = useStore()
@@ -33,6 +36,9 @@ export default function App() {
     })
     return () => subscription.unsubscribe()
   }, [setUser, updateLastSession])
+
+  // ── Offline queue sync ──────────────────────────────────────────────────────
+  useOfflineSync()
 
   // ── Recovery protocol detection ─────────────────────────────────────────────
   const showRecovery = (() => {
@@ -62,7 +68,11 @@ export default function App() {
             <RecoveryProtocol onDismiss={setRecoveryShown} />
           )}
           <Routes>
-            <Route path="/auth" element={<AuthScreen />} />
+            {/* Public routes — no auth required */}
+            <Route path="/auth"    element={<AuthScreen />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path="/terms"   element={<TermsPage />} />
+
             <Route element={<AuthGuard />}>
               <Route path="/onboarding" element={<OnboardingFlow />} />
               <Route element={<AppShell />}>
