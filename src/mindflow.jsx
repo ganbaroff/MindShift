@@ -30,6 +30,8 @@ import { ExportPanel }    from "./features/settings/ExportPanel.jsx";
 import { NotionPanel }    from "./features/settings/NotionPanel.jsx";
 // Bolt 2.6: centralized notification hook (replaces inline effects + NotifPanel modal)
 import { useNotifications } from "./shared/hooks/useNotifications.js";
+// Bolt 5.2: Focus Mode (ADR 0018)
+import { FocusScreen }               from "./features/focus/index.jsx";
 // Bolt 1.7: skeleton + onboarding
 import { ErrorBoundary }              from "./skeleton/ErrorBoundary.jsx";
 import { BottomNav }                  from "./skeleton/BottomNav.jsx";
@@ -212,6 +214,8 @@ export default function App() {
     try { return localStorage.getItem("mf_lang") || "en"; } catch { return "en"; }
   });
   const [screen, setScreen]       = useState("dump");
+  // Bolt 5.2: Focus Mode state
+  const [focusTask, setFocusTask] = useState(null); // null | task object
   // FIX: persist thoughts to localStorage for unauthenticated users (cto-advisor: offline-capable)
   const [thoughts, setThoughts]   = useState(() => {
     try {
@@ -565,15 +569,28 @@ export default function App() {
 
         <div style={{ flex: 1, overflowY: "auto" }}>
           {screen === "dump"     && <DumpScreen thoughts={thoughts} onProcess={handleProcess} onToggleToday={toggleToday} onArchive={archive} onUpdate={handleUpdate} lang={lang} persona={persona} isPro={isProUser(user, subscription)} onShowPricing={reason => { setPricingReason(reason); setShowPricing(true); }} user={user} />}
-          {screen === "today"    && <TodayScreen thoughts={thoughts} onArchive={archive} onToggleToday={toggleToday} onUpdate={handleUpdate} lang={lang} persona={persona} user={user} personaArchetype={personaArchetype} personaName={personaName} />}
+          {screen === "today"    && <TodayScreen thoughts={thoughts} onArchive={archive} onToggleToday={toggleToday} onUpdate={handleUpdate} lang={lang} persona={persona} user={user} personaArchetype={personaArchetype} personaName={personaName} onStartFocus={task => setFocusTask(task || true)} />}
           {screen === "evening"  && <EveningScreen lang={lang} persona={persona} user={user} />}
           {screen === "settings" && <SettingsScreen thoughts={thoughts} lang={lang} onChangeLang={setLang} onClearAll={() => { setThoughts([]); setPersona(null); try { localStorage.removeItem("mf_thoughts_local"); localStorage.removeItem("mf_persona"); } catch {} notify(lang === "ru" ? "Очищено" : "Cleared", "info"); }} user={user} syncOn={syncOn} onToggleSync={() => setSyncOn(v => !v)} onShowAuth={() => {}} onSignOut={handleSignOut} persona={persona} onExport={() => setShowExport(true)} onNotion={() => setShowNotion(true)} isPro={isProUser(user, subscription)} onShowPricing={reason => { setPricingReason(reason); setShowPricing(true); }} notifSettings={notifSettings} notifPermission={notifPermission} onUpdateNotifSettings={updateNotifSettings} onRequestNotifPermission={requestPermission} />}
         </div>
 
-        <BottomNav active={screen} onChange={handleNavChange} badge={badge} lang={lang} />
+        {/* Bolt 5.2: BottomNav hidden during Focus Mode (zero-distraction) */}
+        {!focusTask && <BottomNav active={screen} onChange={handleNavChange} badge={badge} lang={lang} />}
+
         {showExport   && <ExportPanel thoughts={thoughts} lang={lang} onClose={() => setShowExport(false)} />}
         {showPricing  && <PricingScreen lang={lang} user={user} onClose={() => setShowPricing(false)} />}
         {showNotion && <NotionPanel thoughts={thoughts} lang={lang} onClose={() => setShowNotion(false)} />}
+
+        {/* Bolt 5.2: Focus Screen overlay */}
+        {focusTask && (
+          <FocusScreen
+            task={focusTask === true ? null : focusTask}
+            lang={lang}
+            personaArchetype={personaArchetype}
+            personaName={personaName}
+            onClose={() => setFocusTask(null)}
+          />
+        )}
       </div>
     </>
   );

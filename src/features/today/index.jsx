@@ -48,7 +48,7 @@ import { useCharacterProgress } from "../../shared/hooks/useCharacterProgress.js
 import { calcXpGain }   from "../../shared/lib/persona.js";
 import { LevelUpToast } from "../../shared/ui/LevelUpToast.jsx";
 
-export function TodayScreen({ thoughts, onArchive, onToggleToday, onUpdate, lang, persona, user, personaArchetype, personaName }) {
+export function TodayScreen({ thoughts, onArchive, onToggleToday, onUpdate, lang, persona, user, personaArchetype, personaName, onStartFocus }) {
   const tx = T[lang] || T.en;
 
   // ── useToday: soft cap, welcome-back, decompose ─────────────────────────────
@@ -417,6 +417,46 @@ export function TodayScreen({ thoughts, onArchive, onToggleToday, onUpdate, lang
           lang={lang}
           onToggle={toggleSavedTask}
         />
+
+        {/* ── Focus Mode launch — Bolt 5.2 (ADR 0018) ── */}
+        {/* Visible when there are any tasks (day plan or thought-based). */}
+        {/* ADHD design: prominent, single call-to-action, no modal friction. */}
+        {(dayPlanTasks.length > 0 || activeTasks.length > 0) && onStartFocus && (
+          <div style={{ marginTop: 16, marginBottom: 8 }}>
+            <button
+              onClick={() => {
+                // Prefer first incomplete day-plan task; fall back to null (free focus)
+                const firstIncomplete = dayPlanTasks.find(t => !t.completed) ?? null;
+                onStartFocus(firstIncomplete);
+              }}
+              style={{
+                display:      "flex",
+                alignItems:   "center",
+                justifyContent: "center",
+                gap:           10,
+                width:        "100%",
+                height:        52,
+                background:   archetypeColor
+                  ? `${archetypeColor}15`
+                  : `${C.accent}15`,
+                border:       `1.5px solid ${archetypeColor || C.accent}55`,
+                borderRadius:  14,
+                color:         archetypeColor || C.accent,
+                fontSize:      15,
+                fontWeight:    700,
+                cursor:        "pointer",
+                fontFamily:    "inherit",
+                letterSpacing: 0.3,
+                transition:   "background .15s",
+              }}
+            >
+              <span style={{ fontSize: 20 }}>⏱</span>
+              {lang === "ru" ? "Режим фокуса"
+             : lang === "az" ? "Fokus rejimi"
+             : "Focus Mode"}
+            </button>
+          </div>
+        )}
 
         {/* ── Separator between day plan and thought-based tasks ── */}
         {(activeTasks.length > 0 || dayPlanTasks.length > 0) && (
