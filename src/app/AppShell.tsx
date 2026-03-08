@@ -8,7 +8,15 @@ export function AppShell() {
 
   return (
     <div className="flex flex-col h-full max-w-[480px] mx-auto relative">
-      <main className="flex-1 overflow-y-auto pb-20">
+      {/* Skip navigation link — keyboard users jump past bottom nav to main content */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:rounded-lg focus:text-sm focus:font-medium"
+        style={{ background: '#6C63FF', color: '#fff' }}
+      >
+        Skip to main content
+      </a>
+      <main id="main-content" className="flex-1 overflow-y-auto pb-20">
         <Outlet />
       </main>
       {/* Hide bottom nav during deep focus phases */}

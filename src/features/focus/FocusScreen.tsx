@@ -6,6 +6,7 @@ import { useStore } from '@/store'
 import { ArcTimer } from './ArcTimer'
 import { useAudioEngine } from '@/shared/hooks/useAudioEngine'
 import { supabase } from '@/shared/lib/supabase'
+import { logError } from '@/shared/lib/logger'
 import { notifyFocusEnd, notifyAchievement } from '@/shared/lib/notify'
 import { hapticDone } from '@/shared/lib/haptic'
 import { ACHIEVEMENT_DEFINITIONS } from '@/types'
@@ -117,7 +118,9 @@ export default function FocusScreen() {
           pool: task.pool, status: task.status, difficulty: task.difficulty,
           estimated_minutes: task.estimatedMinutes, parent_task_id: null, position: 0,
         } as never)
-      } catch { /* non-blocking */ }
+      } catch (err) {
+        logError('FocusScreen.parkThought.insert', err, { taskId: task.id })
+      }
     }
     setParkText('')
     setParkOpen(false)
@@ -151,7 +154,10 @@ export default function FocusScreen() {
       }
       await supabase.from('focus_sessions').insert(row as never)
       updateLastSession()
-    } catch { /* non-critical — offline or unauthenticated */ }
+    } catch (err) {
+      // Non-blocking: offline sessions are acceptable; log for monitoring
+      logError('FocusScreen.handleSessionEnd.insert', err)
+    }
   }, [activeSession, activePreset, updateLastSession])
 
   // ── Start nature buffer ─────────────────────────────────────────────────────

@@ -4,31 +4,14 @@
 // Returns: { steps: string[], estimatedMinutes: number }
 //
 // Auth: JWT required — user must be signed in
-// Rate limit: 20 calls/hour per user (free), unlimited (pro)
+// Rate limit: 20 calls/hour per user (free), unlimited (pro) — DB-backed
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { getCorsHeaders } from '../_shared/cors.ts'
+import { checkDbRateLimit } from '../_shared/rateLimit.ts'
 
 const ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages'
 const MODEL = 'claude-sonnet-4-5'
-const RATE_LIMIT_FREE = 20     // calls per hour for free users
-const RATE_LIMIT_WINDOW_MS = 3_600_000 // 1 hour
-
-// Simple in-memory rate limiter (per Deno isolate — good enough for MVP)
-const rateLimits = new Map<string, { count: number; resetAt: number }>()
-
-function checkRateLimit(userId: string, isPro: boolean): boolean {
-  if (isPro) return true
-  const now = Date.now()
-  const entry = rateLimits.get(userId)
-  if (!entry || now > entry.resetAt) {
-    rateLimits.set(userId, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS })
-    return true
-  }
-  if (entry.count >= RATE_LIMIT_FREE) return false
-  entry.count++
-  return true
-}
 
 Deno.serve(async (req: Request) => {
   const cors = getCorsHeaders(req)
@@ -54,7 +37,7 @@ Deno.serve(async (req: Request) => {
       )
     }
 
-    // ── Rate limit ────────────────────────────────────────────────────────────
+    // ── Rate limit (DB-backed — persists across cold starts + isolates) ─────────
     const { data: userRow } = await supabase
       .from('users')
       .select('subscription_tier')
@@ -64,10 +47,23 @@ Deno.serve(async (req: Request) => {
     const isPro = userRow?.subscription_tier === 'pro' ||
       userRow?.subscription_tier === 'pro_trial'
 
-    if (!checkRateLimit(user.id, isPro)) {
+    const rl = await checkDbRateLimit(supabase, user.id, isPro, {
+      fnName:    'decompose-task',
+      limitFree: 20,
+      windowMs:  3_600_000, // 20 calls per hour
+    })
+
+    if (!rl.allowed) {
       return new Response(
         JSON.stringify({ error: 'Rate limit exceeded. Try again later.' }),
-        { status: 429, headers: { ...cors, 'Content-Type': 'application/json' } }
+        {
+          status: 429,
+          headers: {
+            ...cors,
+            'Content-Type': 'application/json',
+            'Retry-After': String(rl.retryAfterSeconds ?? 3600),
+          },
+        }
       )
     }
 

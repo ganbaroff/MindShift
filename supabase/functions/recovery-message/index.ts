@@ -5,9 +5,11 @@
 //
 // Returns a warm, shame-free 2-sentence welcome-back message.
 // Auth: JWT required
+// Rate limit: 5 calls/day per user (free), unlimited (pro) — DB-backed
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { getCorsHeaders } from '../_shared/cors.ts'
+import { checkDbRateLimit } from '../_shared/rateLimit.ts'
 
 const ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages'
 const MODEL = 'claude-sonnet-4-5'
@@ -35,14 +37,44 @@ Deno.serve(async (req: Request) => {
       )
     }
 
-    // ── Input ──────────────────────────────────────────────────────────────────
-    const { daysAbsent, incompleteCount } = await req.json() as {
-      daysAbsent: number
-      incompleteCount: number
+    // ── Rate limit (DB-backed — 5/day free, unlimited pro) ────────────────────
+    const { data: userRow } = await supabase
+      .from('users')
+      .select('subscription_tier')
+      .eq('id', user.id)
+      .single()
+
+    const isPro = userRow?.subscription_tier === 'pro' ||
+      userRow?.subscription_tier === 'pro_trial'
+
+    const rl = await checkDbRateLimit(supabase, user.id, isPro, {
+      fnName:    'recovery-message',
+      limitFree: 5,
+      windowMs:  86_400_000, // 5 calls per day
+    })
+
+    if (!rl.allowed) {
+      return new Response(
+        JSON.stringify({ error: 'Rate limit exceeded. Try again tomorrow.' }),
+        {
+          status: 429,
+          headers: {
+            ...cors,
+            'Content-Type': 'application/json',
+            'Retry-After': String(rl.retryAfterSeconds ?? 86400),
+          },
+        }
+      )
     }
 
-    const days    = Math.max(0, Math.floor(daysAbsent))
-    const tasks   = Math.max(0, Math.floor(incompleteCount))
+    // ── Input ──────────────────────────────────────────────────────────────────
+    const body = await req.json() as {
+      daysAbsent?: unknown
+      incompleteCount?: unknown
+    }
+
+    const days  = Math.max(0, Math.floor(Number(body.daysAbsent  ?? 0)))
+    const tasks = Math.max(0, Math.floor(Number(body.incompleteCount ?? 0)))
 
     // ── Claude call ────────────────────────────────────────────────────────────
     const prompt = `You are a compassionate ADHD productivity coach writing a welcome-back message.

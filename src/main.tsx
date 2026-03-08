@@ -1,9 +1,9 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { Toaster } from 'sonner'
 import './index.css'
 import App from './app/App'
+import { logError } from '@/shared/lib/logger'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -14,21 +14,24 @@ const queryClient = new QueryClient({
   },
 })
 
+// ── Global error handlers — capture what React's ErrorBoundary misses ─────────
+// Unhandled promise rejections: offline Supabase writes, audio API, SW messages
+window.addEventListener('unhandledrejection', (event) => {
+  logError('window.unhandledrejection', event.reason, { type: 'unhandledrejection' })
+  // NOTE: do NOT preventDefault() — DevTools still surfaces these in dev
+})
+// Synchronous JS errors outside React tree (e.g. SW registration failures)
+window.addEventListener('error', (event) => {
+  if (event.error) {
+    logError('window.error', event.error, { type: 'globalError', filename: event.filename })
+  }
+})
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <App />
-      <Toaster
-        position="top-center"
-        toastOptions={{
-          style: {
-            background: '#1A1D2E',
-            color: '#E8E8F0',
-            border: '1px solid #2D3150',
-            borderRadius: '12px',
-          },
-        }}
-      />
+      {/* <Toaster> lives in App.tsx — single instance only */}
     </QueryClientProvider>
   </StrictMode>,
 )

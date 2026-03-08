@@ -30,7 +30,7 @@ export default function TasksScreen() {
       </div>
 
       {/* NOW Pool */}
-      <section className="px-5 mb-6">
+      <section className="px-5 mb-6" aria-label="Now — active tasks (up to 3)"  aria-live="polite">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-xs font-medium tracking-widest uppercase" style={{ color: '#6C63FF' }}>
             Now
@@ -51,7 +51,7 @@ export default function TasksScreen() {
       </section>
 
       {/* NEXT Pool */}
-      <section className="px-5 mb-6">
+      <section className="px-5 mb-6" aria-label="Next — upcoming tasks">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-xs font-medium tracking-widest uppercase" style={{ color: '#8B8BA7' }}>
             Next
@@ -72,7 +72,7 @@ export default function TasksScreen() {
       </section>
 
       {/* SOMEDAY Pool */}
-      <section className="px-5">
+      <section className="px-5" aria-label="Someday — parked tasks">
         <button
           onClick={() => setSomedayExpanded(v => !v)}
           className="flex items-center justify-between w-full mb-3"

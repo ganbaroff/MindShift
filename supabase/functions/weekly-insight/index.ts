@@ -11,9 +11,11 @@
 // }
 // Returns: { insights: string[] }  — exactly 3 personalized insights
 // Auth: JWT required
+// Rate limit: 3 calls/day per user (free), unlimited (pro) — DB-backed
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { getCorsHeaders } from '../_shared/cors.ts'
+import { checkDbRateLimit } from '../_shared/rateLimit.ts'
 
 const ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages'
 const MODEL = 'claude-sonnet-4-5'
@@ -53,6 +55,36 @@ Deno.serve(async (req: Request) => {
       return new Response(
         JSON.stringify({ error: 'Unauthorized' }),
         { status: 401, headers: { ...cors, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // ── Rate limit (DB-backed — 3/day free, unlimited pro) ────────────────────
+    const { data: userRow } = await supabase
+      .from('users')
+      .select('subscription_tier')
+      .eq('id', user.id)
+      .single()
+
+    const isPro = userRow?.subscription_tier === 'pro' ||
+      userRow?.subscription_tier === 'pro_trial'
+
+    const rl = await checkDbRateLimit(supabase, user.id, isPro, {
+      fnName:    'weekly-insight',
+      limitFree: 3,
+      windowMs:  86_400_000, // 3 calls per day
+    })
+
+    if (!rl.allowed) {
+      return new Response(
+        JSON.stringify({ error: 'Rate limit exceeded. Try again tomorrow.' }),
+        {
+          status: 429,
+          headers: {
+            ...cors,
+            'Content-Type': 'application/json',
+            'Retry-After': String(rl.retryAfterSeconds ?? 86400),
+          },
+        }
       )
     }
 

@@ -40,11 +40,14 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-          'vendor-motion': ['framer-motion'],
+          'vendor-react':    ['react', 'react-dom', 'react-router-dom'],
+          'vendor-motion':   ['framer-motion'],
           'vendor-supabase': ['@supabase/supabase-js'],
-          'vendor-query': ['@tanstack/react-query'],
-          'vendor-ui': ['zustand', 'sonner', 'lucide-react'],
+          'vendor-query':    ['@tanstack/react-query'],
+          'vendor-ui':       ['zustand', 'sonner', 'lucide-react'],
+          // dnd-kit only used in BentoGrid (HomeScreen) — split to prevent
+          // polluting the main bundle for users who never visit HomeScreen
+          'vendor-dnd':      ['@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities'],
         },
       },
     },

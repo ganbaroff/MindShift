@@ -4,6 +4,7 @@ import { useStore } from '@/store'
 import { supabase } from '@/shared/lib/supabase'
 import type { Task } from '@/types'
 import { RECOVERY_THRESHOLD_HOURS } from '@/shared/lib/constants'
+import { logError } from '@/shared/lib/logger'
 
 // ── Fallback messages (no shame, no guilt) ────────────────────────────────────
 
@@ -87,13 +88,18 @@ export function RecoveryProtocol({ onDismiss }: Props) {
                 pool: stepTask.pool, status: stepTask.status, difficulty: stepTask.difficulty,
                 estimated_minutes: stepTask.estimatedMinutes, parent_task_id: null, position: stepTask.position,
               } as never)
-            } catch { /* non-blocking */ }
+            } catch (err) {
+              logError('RecoveryProtocol.submitStep.insert', err)
+            }
           }
         }
         onDismiss()
         return
       }
-    } catch { /* AI failed — fall back to manual task */ }
+    } catch (err) {
+      logError('RecoveryProtocol.submit.decompose', err)
+      // Fall through to manual task creation below
+    }
 
     // Fallback: add as single task
     const newTask: Task = {
@@ -120,7 +126,9 @@ export function RecoveryProtocol({ onDismiss }: Props) {
           pool: newTask.pool, status: newTask.status, difficulty: newTask.difficulty,
           estimated_minutes: newTask.estimatedMinutes, parent_task_id: null, position: newTask.position,
         } as never)
-      } catch { /* non-blocking */ }
+      } catch (err) {
+        logError('RecoveryProtocol.submit.insertFallback', err)
+      }
     }
 
     onDismiss()
