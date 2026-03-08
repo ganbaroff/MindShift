@@ -7,7 +7,7 @@ export type Database = {
       users: {
         Row: UserRow
         Insert: UserInsert
-        Update: Partial<UserInsert>
+        Update: UserUpdate
         Relationships: []
       }
       tasks: {
@@ -56,6 +56,10 @@ export type Database = {
   }
 }
 
+// dashboard_config shape — kept local to avoid circular imports
+export type DashboardConfig = { widgets?: WidgetConfigLike[] } | null
+interface WidgetConfigLike { id: string; type: string; visible: boolean }
+
 export interface UserRow {
   id: string
   email: string
@@ -67,8 +71,19 @@ export interface UserRow {
   created_at: string
   last_session_at: string | null
   onboarding_completed: boolean
+  // Migration 002
+  subscription_tier: 'free' | 'pro_trial' | 'pro'
+  trial_ends_at: string | null
+  reduced_stimulation: boolean
+  // Migration 003 — bento grid widget layout
+  dashboard_config: DashboardConfig
 }
-export type UserInsert = Omit<UserRow, 'created_at' | 'xp_total' | 'psychotype' | 'last_session_at'>
+
+// Insert: minimal required fields (server fills the rest with defaults)
+export type UserInsert = Pick<UserRow, 'id' | 'email'>
+
+// Update: any subset of user-owned mutable fields
+export type UserUpdate = Partial<Omit<UserRow, 'id' | 'created_at'>>
 
 export interface TaskRow {
   id: string

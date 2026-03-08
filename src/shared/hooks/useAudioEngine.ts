@@ -133,12 +133,23 @@ function fillNatureNoise(data: Float32Array, sampleRate: number): void {
   }
 }
 
-function fillLofiNoise(data: Float32Array): void {
-  // Pink noise base for lo-fi: LPF at 3 kHz applied in graph (vintage warmth).
-  // Rare amplitude spikes (~every 0.27s on average) simulate vinyl crackle texture.
-  // (60-90 BPM procedural lo-fi via Tone.js is a future enhancement — see roadmap)
+function fillLofiNoise(data: Float32Array, sampleRate: number): void {
+  /**
+   * Lo-fi "cassette tape" texture — three layered effects baked into the buffer:
+   *
+   * WOW  (0.27 Hz, ±8% AM): slow tape-speed drift — the gentle swell of vintage cassettes.
+   * FLUTTER (1.1 Hz, ±4% AM): capstan/roller imperfection — the characteristic "warble".
+   * CRACKLE (1-in-12000 per sample ≈ 1 per 0.27s): vinyl groove dust hit.
+   *
+   * The audible "warmth" comes from:
+   *   • WaveShaper (tape saturation) applied in the audio graph
+   *   • LPF at 3 kHz applied in graph — rolls off bright treble → "recorded on cassette"
+   *   • Resonant peak at 200 Hz applied in graph → bass body
+   */
   let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0
   for (let i = 0; i < data.length; i++) {
+    const t = i / sampleRate
+
     const w = Math.random() * 2 - 1
     b0 = 0.99886 * b0 + w * 0.0555179
     b1 = 0.99332 * b1 + w * 0.0750759
@@ -146,10 +157,17 @@ function fillLofiNoise(data: Float32Array): void {
     b3 = 0.86650 * b3 + w * 0.3104856
     b4 = 0.55000 * b4 + w * 0.5329522
     b5 = -0.7616 * b5 - w * 0.0168980
-    // Crackle: 1-in-12000 chance ≈ once every ~0.27s at 44.1 kHz
-    const crackle = Math.random() < 0.000083 ? Math.random() * 0.18 : 0
-    data[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + w * 0.5362) * 0.11 + crackle
+    const pink = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + w * 0.5362) * 0.11
     b6 = w * 0.115926
+
+    // Wow: slow tape speed drift (0.27 Hz) → gentle amplitude swell
+    const wow     = 1.0 + 0.08 * Math.sin(2 * Math.PI * 0.27 * t)
+    // Flutter: capstan irregularity (1.1 Hz) → audible warble
+    const flutter = 1.0 + 0.04 * Math.sin(2 * Math.PI * 1.1  * t)
+    // Crackle: random dust impulse ~1 per 0.27s at 44.1 kHz
+    const crackle = Math.random() < 0.000083 ? Math.random() * 0.18 : 0
+
+    data[i] = pink * wow * flutter + crackle
   }
 }
 
@@ -170,7 +188,7 @@ function createNoiseBuffer(ctx: AudioContext, preset: AudioPreset): AudioBuffer 
   switch (preset) {
     case 'pink':   fillPinkNoise(data);               break
     case 'nature': fillNatureNoise(data, ctx.sampleRate); break
-    case 'lofi':   fillLofiNoise(data);               break
+    case 'lofi':   fillLofiNoise(data, ctx.sampleRate); break
     default:       fillBrownFallback(data)  // 'brown' buffer fallback only
   }
   return buf
@@ -292,12 +310,43 @@ export function useAudioEngine() {
     hpf.frequency.value = HPF_CUTOFF_HZ
     hpf.Q.value = 0.5
 
-    // ── LPF for lo-fi (3 kHz cutoff = vintage warmth) ────────────────────
+    // ── Lo-fi signal chain: LPF + resonant bass boost + tape saturation ──
+    //
+    //  source → [tapeSat] → [bassShelf] → [lofiLpf] → HPF → master
+    //
+    //  tapeSat: WaveShaper arctanh soft-clip — "bakes in" tape saturation warmth
+    //  bassShelf: peaking EQ at 200 Hz, +4 dB — body/warmth of cassette recording
+    //  lofiLpf: lowpass 3 kHz — rolls off bright treble, the definitive lo-fi sound
+
+    let tapeSat: WaveShaperNode | null = null
+    let bassShelf: BiquadFilterNode | null = null
     const lofiLpf = preset === 'lofi' ? ctx.createBiquadFilter() : null
-    if (lofiLpf) {
-      lofiLpf.type = 'lowpass'
-      lofiLpf.frequency.value = 3000
-      lofiLpf.Q.value = 0.7
+
+    if (preset === 'lofi') {
+      // Tape saturation: arctanh soft-clip, amount=1.5 (subtle, not harsh)
+      tapeSat = ctx.createWaveShaper()
+      const CURVE_SIZE = 256
+      const curve = new Float32Array(CURVE_SIZE)
+      const amount = 1.5
+      for (let i = 0; i < CURVE_SIZE; i++) {
+        const x = (2 * i / (CURVE_SIZE - 1)) - 1
+        // Normalized arctanh: gentle saturation with no hard clips
+        curve[i] = Math.tanh(x * amount) / Math.tanh(amount)
+      }
+      tapeSat.curve = curve
+      tapeSat.oversample = '2x'    // reduces aliasing at near-clip levels
+
+      // Bass shelf: resonant peak at 200 Hz, Q=1.5, +4 dB → cassette body
+      bassShelf = ctx.createBiquadFilter()
+      bassShelf.type = 'peaking'
+      bassShelf.frequency.value = 200
+      bassShelf.Q.value = 1.5
+      bassShelf.gain.value = 4
+
+      // LPF: 3 kHz — vinyl/cassette treble rolloff
+      lofiLpf!.type = 'lowpass'
+      lofiLpf!.frequency.value = 3000
+      lofiLpf!.Q.value = 0.7
     }
 
     // ── Master gain — logarithmic mapping (safe 40–70 dBA range) ─────────
@@ -331,15 +380,19 @@ export function useAudioEngine() {
 
     sourceRef.current = source
 
-    // ── Connect graph: source → fade → HPF → [LPF] → master → speakers ──
+    // ── Connect graph ─────────────────────────────────────────────────────
+    // Default:  source → fade → HPF → master → out
+    // Lo-fi:    source → fade → tapeSat → bassShelf → lofiLpf → HPF → master → out
     source.connect(fade)
-    fade.connect(hpf)
-    if (lofiLpf) {
-      hpf.connect(lofiLpf)
-      lofiLpf.connect(master)
+    if (tapeSat && bassShelf && lofiLpf) {
+      fade.connect(tapeSat)
+      tapeSat.connect(bassShelf)
+      bassShelf.connect(lofiLpf)
+      lofiLpf.connect(hpf)
     } else {
-      hpf.connect(master)
+      fade.connect(hpf)
     }
+    hpf.connect(master)
     master.connect(ctx.destination)
 
     // Constant power sine fade-in

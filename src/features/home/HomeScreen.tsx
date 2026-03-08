@@ -19,6 +19,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useReducedMotion } from '@/shared/hooks/useReducedMotion'
+import { useGridSync } from '@/shared/hooks/useGridSync'
 import { Plus } from 'lucide-react'
 import { useStore } from '@/store'
 import { AddTaskModal } from '@/features/tasks/AddTaskModal'
@@ -135,6 +136,7 @@ export default function HomeScreen() {
     onboardingCompleted, gridWidgets, setGridWidgets,
   } = useStore()
   const reducedMotion = useReducedMotion()
+  useGridSync()   // two-tier persistence: IndexedDB (offline) + Supabase (cross-device)
 
   const [setupDone, setSetupDone]     = useState(false)
   const [addOpen,   setAddOpen]       = useState(false)
