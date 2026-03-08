@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls /c/Users/user/Downloads/mindflow-ready/.claude/worktrees/romantic-archimedes/vite.config.*)",
+      "Bash(npm install)",
+      "Bash(npx @_davideast/stitch-mcp --version)",
+      "Bash(npm run build)",
+      "Bash(timeout 8 npx vite --host)",
+      "Bash(git add .ai/ .env.example .mcp.json ARCHITECTURE.md CHANGELOG.md CLAUDE.md DECISIONS.md README.md SKILL.md docs/ files.zip index.html mnt/ obsidian-workflow.md public/manifest.json src/features/ src/shared/README.md src/shared/lib/date.js src/shared/lib/id.js src/shared/lib/streak.js src/shared/services/ src/skeleton/README.md supabase-setup.sql package-lock.json .claude/skills/)",
+      "Bash(git commit:*)",
+      "Bash(git add src/mindflow.jsx src/shared/lib/freemium.js src/shared/lib/persona.js src/shared/lib/notifications.js src/shared/lib/notif-schedule.js src/shared/lib/thought-types.js src/shared/lib/export.js src/shared/lib/greeting.js src/skeleton/design-system/tokens.js src/shared/i18n/translations.js src/shared/ui/icons.jsx)",
+      "Bash(python3 -c \":*)",
+      "Bash(node -e \":*)",
+      "Bash(git add src/shared/ui/primitives.jsx src/features/today/ src/features/evening/ src/features/dump/index.jsx src/mindflow.jsx)",
+      "Bash(git push)"
+    ]
+  }
+}
