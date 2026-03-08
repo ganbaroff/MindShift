@@ -1,0 +1,109 @@
+// ── recovery-message Edge Function ────────────────────────────────────────────
+// POST /functions/v1/recovery-message
+// Body: { daysAbsent: number, incompleteCount: number }
+// Returns: { message: string }
+//
+// Returns a warm, shame-free 2-sentence welcome-back message.
+// Auth: JWT required
+
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { corsHeaders } from '../_shared/cors.ts'
+
+const ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages'
+const MODEL = 'claude-sonnet-4-5'
+
+Deno.serve(async (req: Request) => {
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders })
+  }
+
+  try {
+    // ── Auth ───────────────────────────────────────────────────────────────────
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_ANON_KEY')!,
+      { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
+    )
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // ── Input ──────────────────────────────────────────────────────────────────
+    const { daysAbsent, incompleteCount } = await req.json() as {
+      daysAbsent: number
+      incompleteCount: number
+    }
+
+    const days    = Math.max(0, Math.floor(daysAbsent))
+    const tasks   = Math.max(0, Math.floor(incompleteCount))
+
+    // ── Claude call ────────────────────────────────────────────────────────────
+    const prompt = `You are a compassionate ADHD productivity coach writing a welcome-back message.
+
+The user has been away for ${days} day${days !== 1 ? 's' : ''}.
+They have ${tasks} incomplete task${tasks !== 1 ? 's' : ''} waiting.
+
+Write exactly 2 sentences. Rules:
+- ZERO shame, guilt, or disappointment — this is ADHD-safe
+- Acknowledge the return warmly, like greeting a friend
+- Do NOT mention the number of incomplete tasks or the number of days
+- Focus on the present moment and what's possible right now
+- Use gentle, grounded language — not toxic positivity
+- Second sentence can suggest one small first step
+
+Respond ONLY with the 2-sentence message. No quotes, no JSON, no labels.`
+
+    const claudeResp = await fetch(ANTHROPIC_URL, {
+      method: 'POST',
+      headers: {
+        'x-api-key': Deno.env.get('ANTHROPIC_API_KEY')!,
+        'anthropic-version': '2023-06-01',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        max_tokens: 150,
+        messages: [{ role: 'user', content: prompt }],
+      }),
+    })
+
+    if (!claudeResp.ok) {
+      throw new Error(`Anthropic API error: ${claudeResp.status}`)
+    }
+
+    const claudeData = await claudeResp.json() as {
+      content: { type: string; text: string }[]
+    }
+
+    const message = (claudeData.content[0]?.text ?? '').trim()
+
+    if (!message) throw new Error('Empty message from Claude')
+
+    return new Response(
+      JSON.stringify({ message }),
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
+
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Unknown error'
+    console.error('[recovery-message]', msg)
+
+    // Fallback — never return empty on error
+    const fallbacks = [
+      "Welcome back — you showed up, and that's what matters. Let's start with just one small thing.",
+      "Good to see you again. Pick anything from your list and begin — even 5 minutes counts.",
+      "You're here, and that's the hardest part. Let's find one thing that feels doable right now.",
+    ]
+    const message = fallbacks[Math.floor(Math.random() * fallbacks.length)]
+
+    return new Response(
+      JSON.stringify({ message }),
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
+  }
+})

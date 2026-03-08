@@ -25,8 +25,65 @@ export function AddTaskModal({ open, onClose }: Props) {
   const [minutes, setMinutes] = useState(25)
   const [customMinutes, setCustomMinutes] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [aiSteps, setAiSteps] = useState<string[] | null>(null)
+  const [loadingAi, setLoadingAi] = useState(false)
 
   const nowFull = nowPool.filter(t => t.status === 'active').length >= NOW_POOL_MAX
+
+  // ── AI decomposition ─────────────────────────────────────────────────────────
+  const handleDecompose = async () => {
+    if (!title.trim() || loadingAi) return
+    setLoadingAi(true)
+    setAiSteps(null)
+    try {
+      const { data } = await supabase.functions.invoke('decompose-task', {
+        body: { taskTitle: title.trim() },
+      })
+      if (data?.steps && Array.isArray(data.steps)) {
+        setAiSteps(data.steps as string[])
+        // Auto-set estimated time if returned
+        if (typeof data.estimatedMinutes === 'number') {
+          setMinutes(data.estimatedMinutes)
+          setCustomMinutes('')
+        }
+      }
+    } catch { /* show nothing — user can still add manually */ } finally {
+      setLoadingAi(false)
+    }
+  }
+
+  const handleAddSteps = async () => {
+    if (!aiSteps || isSubmitting) return
+    setIsSubmitting(true)
+    const pool = nowFull ? 'next' : 'now'
+    for (let i = 0; i < aiSteps.length; i++) {
+      const step = aiSteps[i]
+      const stepTask: Task = {
+        id: crypto.randomUUID(),
+        title: step,
+        pool: i === 0 ? pool : 'next',   // first step → now/next; rest → next
+        status: 'active',
+        difficulty,
+        estimatedMinutes: Math.max(5, Math.round(minutes / aiSteps.length)),
+        createdAt: new Date().toISOString(),
+        completedAt: null,
+        snoozeCount: 0,
+        parentTaskId: null,
+        position: i,
+      }
+      addTask(stepTask)
+      if (userId) {
+        try {
+          await supabase.from('tasks').insert({
+            id: stepTask.id, user_id: userId, title: stepTask.title,
+            pool: stepTask.pool, status: stepTask.status, difficulty: stepTask.difficulty,
+            estimated_minutes: stepTask.estimatedMinutes, parent_task_id: null, position: stepTask.position,
+          } as never)
+        } catch { /* non-blocking */ }
+      }
+    }
+    resetAndClose()
+  }
 
   const handleSubmit = async () => {
     const trimmed = title.trim()
@@ -70,18 +127,21 @@ export function AddTaskModal({ open, onClose }: Props) {
       }
     }
 
+    resetAndClose()
+  }
+
+  const resetAndClose = () => {
     setTitle('')
     setDifficulty(2)
     setMinutes(25)
     setCustomMinutes('')
     setIsSubmitting(false)
+    setAiSteps(null)
+    setLoadingAi(false)
     onClose()
   }
 
-  const handleClose = () => {
-    setTitle('')
-    onClose()
-  }
+  const handleClose = () => resetAndClose()
 
   return (
     <AnimatePresence>
@@ -127,23 +187,76 @@ export function AddTaskModal({ open, onClose }: Props) {
               </button>
             </div>
 
-            {/* Title input */}
-            <input
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Enter') void handleSubmit() }}
-              placeholder="What needs to be done?"
-              autoFocus
-              className="w-full rounded-2xl px-4 py-3 text-base outline-none"
-              style={{
-                background: '#252840',
-                border: '1.5px solid #2D3150',
-                color: '#E8E8F0',
-                caretColor: '#6C63FF',
-              }}
-              onFocus={(e) => { e.currentTarget.style.borderColor = '#6C63FF' }}
-              onBlur={(e) => { e.currentTarget.style.borderColor = '#2D3150' }}
-            />
+            {/* Title input + AI button */}
+            <div className="flex flex-col gap-2">
+              <input
+                value={title}
+                onChange={(e) => { setTitle(e.target.value); setAiSteps(null) }}
+                onKeyDown={(e) => { if (e.key === 'Enter') void handleSubmit() }}
+                placeholder="What needs to be done?"
+                autoFocus
+                className="w-full rounded-2xl px-4 py-3 text-base outline-none"
+                style={{
+                  background: '#252840',
+                  border: '1.5px solid #2D3150',
+                  color: '#E8E8F0',
+                  caretColor: '#6C63FF',
+                }}
+                onFocus={(e) => { e.currentTarget.style.borderColor = '#6C63FF' }}
+                onBlur={(e) => { e.currentTarget.style.borderColor = '#2D3150' }}
+              />
+
+              {/* AI Decompose button */}
+              {title.trim().length > 3 && !aiSteps && (
+                <button
+                  onClick={() => void handleDecompose()}
+                  disabled={loadingAi}
+                  className="self-start flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-medium transition-all duration-200"
+                  style={{
+                    background: 'rgba(108,99,255,0.12)',
+                    border: '1px solid rgba(108,99,255,0.4)',
+                    color: '#6C63FF',
+                  }}
+                >
+                  {loadingAi ? (
+                    <>
+                      <span className="w-3 h-3 border border-current border-t-transparent rounded-full animate-spin" />
+                      Breaking down...
+                    </>
+                  ) : '✨ Break it down for me'}
+                </button>
+              )}
+            </div>
+
+            {/* AI Steps */}
+            {aiSteps && (
+              <div
+                className="flex flex-col gap-2 p-3 rounded-2xl"
+                style={{ background: '#252840', border: '1px solid rgba(108,99,255,0.3)' }}
+              >
+                <p className="text-xs font-medium" style={{ color: '#6C63FF' }}>
+                  ✨ AI micro-steps
+                </p>
+                {aiSteps.map((step, i) => (
+                  <div key={i} className="flex items-start gap-2">
+                    <span className="text-xs mt-0.5" style={{ color: '#6C63FF' }}>
+                      {i + 1}.
+                    </span>
+                    <span className="text-sm leading-snug" style={{ color: '#E8E8F0' }}>
+                      {step}
+                    </span>
+                  </div>
+                ))}
+                <button
+                  onClick={() => void handleAddSteps()}
+                  disabled={isSubmitting}
+                  className="mt-1 w-full py-2.5 rounded-xl text-sm font-semibold transition-all duration-200"
+                  style={{ background: '#6C63FF', color: 'white' }}
+                >
+                  {isSubmitting ? 'Adding...' : `Add ${aiSteps.length} steps to my list →`}
+                </button>
+              </div>
+            )}
 
             {/* Difficulty */}
             <div className="flex flex-col gap-2">

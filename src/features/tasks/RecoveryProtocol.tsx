@@ -3,10 +3,11 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useStore } from '@/store'
 import { supabase } from '@/shared/lib/supabase'
 import type { Task } from '@/types'
+import { RECOVERY_THRESHOLD_HOURS } from '@/shared/lib/constants'
 
-// ── Warm welcome messages (no shame, no guilt) ────────────────────────────────
+// ── Fallback messages (no shame, no guilt) ────────────────────────────────────
 
-const WELCOME_MESSAGES = [
+const FALLBACK_MESSAGES = [
   "Welcome back 🌱 Your tasks have been moved to Someday — no pressure.",
   "Hey, you're here. That's what matters. 🌿 Fresh start, right now.",
   "Good to see you 💙 Everything's been saved. Let's take it one step at a time.",
@@ -18,19 +19,36 @@ interface Props {
 }
 
 export function RecoveryProtocol({ onDismiss }: Props) {
-  const { archiveAllOverdue, addTask, nowPool, userId } = useStore()
+  const { archiveAllOverdue, addTask, nowPool, userId, lastSessionAt } = useStore()
   const [taskInput, setTaskInput] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [archivedCount, setArchivedCount] = useState(0)
-  const [welcomeMsg] = useState(
-    () => WELCOME_MESSAGES[Math.floor(Math.random() * WELCOME_MESSAGES.length)]
+  const [welcomeMsg, setWelcomeMsg] = useState(
+    () => FALLBACK_MESSAGES[Math.floor(Math.random() * FALLBACK_MESSAGES.length)]
   )
+  const [loadingAi, setLoadingAi] = useState(false)
 
-  // Archive overdue tasks on mount
+  // Archive overdue tasks + fetch AI welcome on mount
   useEffect(() => {
     const ids = archiveAllOverdue()
     setArchivedCount(ids.length)
-  }, [archiveAllOverdue])
+
+    // Calculate days absent
+    const daysAbsent = lastSessionAt
+      ? Math.floor((Date.now() - new Date(lastSessionAt).getTime()) / (1000 * 60 * 60 * 24))
+      : Math.ceil(RECOVERY_THRESHOLD_HOURS / 24)
+
+    // Fetch personalized recovery message (non-blocking)
+    setLoadingAi(true)
+    supabase.functions.invoke('recovery-message', {
+      body: { daysAbsent, incompleteCount: ids.length },
+    }).then(({ data }) => {
+      if (data?.message) setWelcomeMsg(data.message as string)
+    }).catch(() => { /* fallback already set */ }).finally(() => {
+      setLoadingAi(false)
+    })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const handleSubmit = async () => {
     const title = taskInput.trim()
@@ -111,12 +129,18 @@ export function RecoveryProtocol({ onDismiss }: Props) {
             className="flex flex-col gap-3"
           >
             <div className="text-5xl text-center">🌱</div>
-            <p
-              className="text-lg leading-relaxed text-center font-medium"
-              style={{ color: '#E8E8F0' }}
-            >
-              {welcomeMsg}
-            </p>
+            {loadingAi ? (
+              <div className="flex justify-center">
+                <span className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" style={{ color: '#6C63FF' }} />
+              </div>
+            ) : (
+              <p
+                className="text-lg leading-relaxed text-center font-medium"
+                style={{ color: '#E8E8F0' }}
+              >
+                {welcomeMsg}
+              </p>
+            )}
             {archivedCount > 0 && (
               <p className="text-sm text-center" style={{ color: '#8B8BA7' }}>
                 {archivedCount} task{archivedCount !== 1 ? 's' : ''} moved to Someday — no guilt, just options.
