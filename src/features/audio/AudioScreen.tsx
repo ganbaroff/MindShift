@@ -1,17 +1,118 @@
-// Phase 7 — Audio Engine (coming in next phase)
-// Will include: brown noise default, 4 presets, Sound Anchor, 2-min nature buffer
-
+import { motion, useReducedMotion } from 'framer-motion'
 import { useStore } from '@/store'
+import { useAudioEngine } from '@/shared/hooks/useAudioEngine'
+import { AUDIO_WARNING_VOLUME, AUDIO_HARD_LIMIT } from '@/shared/lib/constants'
+import type { AudioPreset } from '@/types'
 
-const PRESETS = [
-  { id: 'brown', emoji: '🟤', name: 'Deep Focus', subtitle: 'Brown noise — ADHD default', color: '#8B6F47' },
-  { id: 'lofi',  emoji: '🎵', name: 'Flow State',  subtitle: 'Lo-fi 60–70 BPM',          color: '#6C63FF' },
-  { id: 'nature',emoji: '🌿', name: 'Nature Restore', subtitle: '1/f nature sounds',     color: '#4ECDC4' },
-  { id: 'pink',  emoji: '🩷', name: 'Light Masking',  subtitle: 'Pink noise — reading',  color: '#FFB5C8' },
-] as const
+// ── Preset config ──────────────────────────────────────────────────────────────
+
+const PRESETS: { id: AudioPreset; emoji: string; name: string; subtitle: string; color: string }[] = [
+  { id: 'brown',  emoji: '🟤', name: 'Deep Focus',     subtitle: 'Brown noise — ADHD default',  color: '#8B6F47' },
+  { id: 'lofi',   emoji: '🎵', name: 'Flow State',     subtitle: 'Lo-fi ambiance, 60–70 BPM',  color: '#6C63FF' },
+  { id: 'nature', emoji: '🌿', name: 'Nature Restore', subtitle: 'Organic pink noise',          color: '#4ECDC4' },
+  { id: 'pink',   emoji: '🩷', name: 'Light Masking',  subtitle: 'Pink noise — reading mode',  color: '#FFB5C8' },
+]
+
+// ── Animated equalizer bars ────────────────────────────────────────────────────
+
+const BAR_HEIGHTS = [4, 8, 6, 10, 5, 9, 6]
+
+function EqBars({ color }: { color: string }) {
+  return (
+    <div className="flex items-end gap-0.5" style={{ height: 12 }}>
+      {BAR_HEIGHTS.map((h, i) => (
+        <motion.div
+          key={i}
+          animate={{ scaleY: [1, 1 + h * 0.05, 0.8, 1 + h * 0.03, 1] }}
+          transition={{
+            duration: 0.5 + i * 0.08,
+            repeat: Infinity,
+            ease: 'easeInOut',
+            delay: i * 0.06,
+          }}
+          style={{
+            width: 2,
+            height: h,
+            background: color,
+            borderRadius: 1,
+            transformOrigin: 'bottom',
+          }}
+        />
+      ))}
+    </div>
+  )
+}
+
+// ── Volume bar ─────────────────────────────────────────────────────────────────
+
+function VolumeBar({
+  volume,
+  onChange,
+}: {
+  volume: number
+  onChange: (v: number) => void
+}) {
+  const pct = Math.round((volume / AUDIO_HARD_LIMIT) * 100)
+  const isWarning = volume > AUDIO_WARNING_VOLUME
+
+  return (
+    <div className="flex flex-col gap-2.5">
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-medium" style={{ color: '#8B8BA7' }}>VOLUME</span>
+        <span className="text-xs font-mono" style={{ color: isWarning ? '#FFE66D' : '#8B8BA7' }}>
+          {pct}%{isWarning ? '  ⚠️ getting loud' : ''}
+        </span>
+      </div>
+
+      <input
+        type="range"
+        min={0.001}
+        max={AUDIO_HARD_LIMIT}
+        step={0.005}
+        value={volume}
+        onChange={e => onChange(parseFloat(e.target.value))}
+        className="w-full h-1.5 rounded-full appearance-none cursor-pointer"
+        style={{
+          background: `linear-gradient(to right,
+            ${isWarning ? '#FFE66D' : '#6C63FF'} ${pct}%,
+            #2D3150 ${pct}%)`,
+          accentColor: isWarning ? '#FFE66D' : '#6C63FF',
+        }}
+      />
+
+      <p className="text-xs" style={{ color: '#8B8BA7' }}>
+        Hard limit: 70 dBA — safe for all-day listening 🎧
+      </p>
+    </div>
+  )
+}
+
+// ── Screen ─────────────────────────────────────────────────────────────────────
 
 export default function AudioScreen() {
-  const { activePreset, focusAnchor, setPreset, setFocusAnchor } = useStore()
+  const {
+    activePreset, audioVolume, focusAnchor,
+    setPreset, setFocusAnchor, setVolume,
+  } = useStore()
+
+  const { play, stop: stopAudio, setVolume: setEngineVolume, isPlaying } = useAudioEngine()
+  const reducedMotion = useReducedMotion()
+
+  // Click a preset card: toggle if same, switch if different
+  const handlePresetClick = (presetId: AudioPreset) => {
+    if (isPlaying && activePreset === presetId) {
+      stopAudio()
+      setPreset(null)
+    } else {
+      play(presetId)
+      setPreset(presetId)
+    }
+  }
+
+  const handleVolume = (v: number) => {
+    setVolume(v)
+    setEngineVolume(v)
+  }
 
   return (
     <div className="flex flex-col pb-28">
@@ -28,76 +129,115 @@ export default function AudioScreen() {
       {/* Preset cards */}
       <div className="px-5 grid grid-cols-2 gap-3 mb-6">
         {PRESETS.map(preset => {
-          const isActive = activePreset === preset.id
+          const isActive = isPlaying && activePreset === preset.id
           const isAnchor = focusAnchor === preset.id
+
           return (
-            <button
+            <motion.button
               key={preset.id}
-              onClick={() => setPreset(isActive ? null : preset.id)}
+              whileTap={reducedMotion ? {} : { scale: 0.97 }}
+              onClick={() => handlePresetClick(preset.id)}
               className="flex flex-col gap-2 p-4 rounded-2xl text-left transition-all duration-200"
               style={{
                 background: isActive ? `${preset.color}20` : '#1A1D2E',
                 border: `1.5px solid ${isActive ? preset.color : '#2D3150'}`,
               }}
             >
+              {/* Top row */}
               <div className="flex items-start justify-between">
                 <span className="text-2xl">{preset.emoji}</span>
                 {isAnchor && (
-                  <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: '#FFE66D20', color: '#FFE66D' }}>
-                    🎯 Anchor
+                  <span
+                    className="text-xs px-2 py-0.5 rounded-full"
+                    style={{ background: '#FFE66D20', color: '#FFE66D' }}
+                  >
+                    🎯
                   </span>
                 )}
               </div>
+
+              {/* Label */}
               <div>
-                <p className="text-sm font-semibold" style={{ color: '#E8E8F0' }}>{preset.name}</p>
-                <p className="text-xs mt-0.5" style={{ color: '#8B8BA7' }}>{preset.subtitle}</p>
+                <p className="text-sm font-semibold" style={{ color: '#E8E8F0' }}>
+                  {preset.name}
+                </p>
+                <p className="text-xs mt-0.5" style={{ color: '#8B8BA7' }}>
+                  {preset.subtitle}
+                </p>
               </div>
-              {isActive && (
-                <div className="flex items-center gap-1.5">
-                  <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: preset.color }} />
+
+              {/* Playing indicator */}
+              {isActive ? (
+                <div className="flex items-center gap-2">
+                  {!reducedMotion && <EqBars color={preset.color} />}
                   <span className="text-xs" style={{ color: preset.color }}>Playing</span>
                 </div>
+              ) : (
+                <span className="text-xs" style={{ color: '#8B8BA7' }}>Tap to play</span>
               )}
-            </button>
+            </motion.button>
           )
         })}
       </div>
 
+      {/* Volume control */}
+      <div
+        className="mx-5 p-4 rounded-2xl mb-4"
+        style={{ background: '#1A1D2E', border: '1.5px solid #2D3150' }}
+      >
+        <VolumeBar volume={audioVolume} onChange={handleVolume} />
+      </div>
+
       {/* Sound Anchor */}
-      <div className="mx-5 p-4 rounded-2xl mb-4" style={{ background: '#1A1D2E', border: '1.5px solid #2D3150' }}>
-        <div className="flex items-start justify-between mb-2">
-          <div>
-            <p className="text-sm font-semibold" style={{ color: '#E8E8F0' }}>🎯 Sound Anchor</p>
-            <p className="text-xs mt-0.5" style={{ color: '#8B8BA7' }}>
-              Train your brain to focus on demand (1–2 weeks)
-            </p>
-          </div>
+      <div
+        className="mx-5 p-4 rounded-2xl mb-4"
+        style={{ background: '#1A1D2E', border: '1.5px solid #2D3150' }}
+      >
+        <div className="mb-3">
+          <p className="text-sm font-semibold" style={{ color: '#E8E8F0' }}>
+            🎯 Sound Anchor
+          </p>
+          <p className="text-xs mt-0.5" style={{ color: '#8B8BA7' }}>
+            Consistent use trains your brain to focus on demand (1–2 weeks)
+          </p>
         </div>
-        <div className="flex flex-col gap-2">
-          {PRESETS.map(preset => (
-            <button
-              key={preset.id}
-              onClick={() => setFocusAnchor(focusAnchor === preset.id ? null : preset.id)}
-              className="flex items-center gap-3 p-2 rounded-xl transition-all duration-200"
-              style={{
-                background: focusAnchor === preset.id ? `${preset.color}15` : 'transparent',
-                border: `1px solid ${focusAnchor === preset.id ? preset.color : 'transparent'}`,
-              }}
-            >
-              <span>{preset.emoji}</span>
-              <span className="text-sm flex-1 text-left" style={{ color: '#E8E8F0' }}>{preset.name}</span>
-              {focusAnchor === preset.id && (
-                <span className="text-xs" style={{ color: '#FFE66D' }}>★ Set as anchor</span>
-              )}
-            </button>
-          ))}
+
+        <div className="flex flex-col gap-1.5">
+          {PRESETS.map(preset => {
+            const isSelected = focusAnchor === preset.id
+            return (
+              <button
+                key={preset.id}
+                onClick={() => setFocusAnchor(isSelected ? null : preset.id)}
+                className="flex items-center gap-3 p-2.5 rounded-xl text-left transition-all duration-200"
+                style={{
+                  background: isSelected ? `${preset.color}15` : 'transparent',
+                  border: `1px solid ${isSelected ? preset.color : 'transparent'}`,
+                }}
+              >
+                <span>{preset.emoji}</span>
+                <span className="text-sm flex-1" style={{ color: '#E8E8F0' }}>
+                  {preset.name}
+                </span>
+                {isSelected && (
+                  <span className="text-xs" style={{ color: '#FFE66D' }}>★ Anchor</span>
+                )}
+              </button>
+            )
+          })}
         </div>
       </div>
 
-      {/* Full audio engine note */}
-      <div className="mx-5 p-4 rounded-2xl" style={{ background: '#1A1D2E', border: '1.5px dashed #2D3150' }}>
-        <p className="text-xs text-center" style={{ color: '#8B8BA7' }}>
-          🔧 Full Web Audio API engine (brown/pink noise generation, volume control, 2-min nature buffer) coming in Phase 7
+      {/* Science note */}
+      <div
+        className="mx-5 p-4 rounded-2xl"
+        style={{ background: '#1A1D2E', border: '1.5px dashed #2D3150' }}
+      >
+        <p className="text-xs leading-relaxed" style={{ color: '#8B8BA7' }}>
+          🧬{' '}
+          <strong style={{ color: '#E8E8F0' }}>Why brown noise?</strong>
+          {' '}Brown noise (1/f² spectrum) reduces mind-wandering and supports sustained attention in ADHD.
+          Pink noise (1/f) is ideal for reading. Nature sounds activate the parasympathetic system for calm focus.
         </p>
       </div>
     </div>
