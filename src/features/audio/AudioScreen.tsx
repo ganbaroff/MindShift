@@ -2,7 +2,7 @@ import { motion } from 'framer-motion'
 import { useReducedMotion } from '@/shared/hooks/useReducedMotion'
 import { useStore } from '@/store'
 import { useAudioEngine } from '@/shared/hooks/useAudioEngine'
-import { AUDIO_WARNING_VOLUME, AUDIO_HARD_LIMIT } from '@/shared/lib/constants'
+import { AUDIO_WARNING_VOLUME } from '@/shared/lib/constants'
 import type { AudioPreset } from '@/types'
 
 // ── Preset config ──────────────────────────────────────────────────────────────
@@ -53,7 +53,8 @@ function VolumeBar({
   volume: number
   onChange: (v: number) => void
 }) {
-  const pct = Math.round((volume / AUDIO_HARD_LIMIT) * 100)
+  // volume is a 0–1 normalized value; engine maps it logarithmically to safe gain
+  const pct = Math.round(volume * 100)
   const isWarning = volume > AUDIO_WARNING_VOLUME
 
   return (
@@ -67,9 +68,9 @@ function VolumeBar({
 
       <input
         type="range"
-        min={0.001}
-        max={AUDIO_HARD_LIMIT}
-        step={0.005}
+        min={0}
+        max={1}
+        step={0.01}
         value={volume}
         onChange={e => onChange(parseFloat(e.target.value))}
         className="w-full h-1.5 rounded-full appearance-none cursor-pointer"
@@ -82,7 +83,7 @@ function VolumeBar({
       />
 
       <p className="text-xs" style={{ color: '#8B8BA7' }}>
-        Hard limit: 70 dBA — safe for all-day listening 🎧
+        Volume mapped logarithmically — 47% ≈ 50 dBA (all-day safe) 🎧
       </p>
     </div>
   )
@@ -236,9 +237,11 @@ export default function AudioScreen() {
       >
         <p className="text-xs leading-relaxed" style={{ color: '#8B8BA7' }}>
           🧬{' '}
-          <strong style={{ color: '#E8E8F0' }}>Why brown noise?</strong>
-          {' '}Brown noise (1/f² spectrum) reduces mind-wandering and supports sustained attention in ADHD.
-          Pink noise (1/f) is ideal for reading. Nature sounds activate the parasympathetic system for calm focus.
+          <strong style={{ color: '#E8E8F0' }}>Research-backed sound.</strong>
+          {' '}Pink noise is the most validated for ADHD focus (meta-analysis, g=0.249).
+          Brown noise (1/f²) is popular for mind-wandering reduction. Nature sounds
+          activate the parasympathetic system — great for recovery. Lo-fi uses a gentle
+          low-pass filter for a warm, vintage texture without binaural gimmicks.
         </p>
       </div>
     </div>

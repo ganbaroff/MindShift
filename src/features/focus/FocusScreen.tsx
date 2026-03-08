@@ -56,7 +56,7 @@ export default function FocusScreen() {
   } = useStore()
 
   const reducedMotion = useReducedMotion()
-  const { play, stop: stopAudio, isPlaying } = useAudioEngine()
+  const { play, stop: stopAudio, playAnchor, isPlaying } = useAudioEngine()
   const [searchParams] = useSearchParams()
 
   // ── Smart defaults ─────────────────────────────────────────────────────────
@@ -278,6 +278,12 @@ export default function FocusScreen() {
     sessionSavedRef.current = false
 
     startSession(selectedTask?.id ?? null, duration, focusAnchor ?? null)
+
+    // Sonic Anchor: Cmaj9 chord as Pavlovian focus cue (50ms attack, 1.5s release)
+    // Consistent use conditions the brain to enter focus faster over 1–2 weeks.
+    // Plays even on quick-start (no anchor set) — always signals "focus begins now".
+    playAnchor()
+
     if (focusAnchor) play(focusAnchor)
 
     setRemaining(durationSec)
@@ -288,7 +294,7 @@ export default function FocusScreen() {
 
     startInterval()
   }, [showCustom, customDuration, selectedDuration, selectedTask, focusAnchor,
-      play, startSession, setPhase, startInterval])
+      play, playAnchor, startSession, setPhase, startInterval])
 
   // ── Quick-start auto detection ─────────────────────────────────────────────
   useEffect(() => {
