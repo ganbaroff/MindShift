@@ -23,21 +23,24 @@
  */
 
 // =============================================================================
-// LAYER 1 — HTTP CLIENT
-// Knows about: API key, endpoint, timeout, HTTP error codes
+// LAYER 1 — HTTP CLIENT (Bolt 4.3, ADR 0015)
+// Knows about: proxy URL, session token, timeout, HTTP error codes.
+// The ANTHROPIC_API_KEY lives in Supabase Secrets (server-side only).
+// It never appears in this file or any client bundle.
 // =============================================================================
 
-const AI_ENDPOINT = "https://api.anthropic.com/v1/messages";
-const AI_MODEL    = "claude-sonnet-4-20250514";
-const AI_TIMEOUT  = 10000; // 10s — matches INVARIANT 6 (UX: no infinite spinners)
+import { getSupabase } from "./supabase.js";
+
+// All AI calls route through the Supabase Edge Function proxy.
+// VITE_SUPABASE_URL is a public, non-secret value (safe in VITE_*).
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL ?? "";
+const AI_PROXY     = `${SUPABASE_URL}/functions/v1/ai-proxy`;
+const AI_MODEL     = "claude-sonnet-4-20250514";
+const AI_TIMEOUT   = 10000; // 10s — INVARIANT 6 (UX: no infinite spinners)
 
 /**
- * Low-level Claude API caller.
- * @param {string} prompt
- * @returns {Promise<string>} raw text response
- */
-/**
- * Low-level Claude API caller.
+ * Low-level AI caller — routes through Edge Function proxy (Bolt 4.3, ADR 0015).
+ * The ANTHROPIC_API_KEY is injected server-side; never reaches the browser.
  *
  * @param {string} prompt                   — user message (used when opts.messages is omitted)
  * @param {{ system?: string, messages?: Array<{role:string,content:string}>, maxTokens?: number }} [opts]
@@ -45,8 +48,18 @@ const AI_TIMEOUT  = 10000; // 10s — matches INVARIANT 6 (UX: no infinite spinn
  */
 export async function callClaude(prompt, opts = {}) {
   const { system, messages: customMessages, maxTokens = 1000 } = opts;
+
+  // Retrieve the current Supabase session JWT for Edge Function auth (AC4).
+  // getSupabase() may return null before init; session stays null in that case
+  // and the Edge Function rejects with 401 — correct: AI requires signed-in user.
+  const sb = getSupabase();
+  const { data: { session } } =
+    (await sb?.auth.getSession()) ?? { data: { session: null } };
+  const token = session?.access_token ?? "";
+
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), AI_TIMEOUT);
+
   try {
     const body = {
       model:      AI_MODEL,
@@ -55,17 +68,16 @@ export async function callClaude(prompt, opts = {}) {
     };
     if (system) body.system = system;
 
-    const res = await fetch(AI_ENDPOINT, {
+    const res = await fetch(AI_PROXY, {
       method: "POST",
       signal: controller.signal,
       headers: {
-        "Content-Type": "application/json",
-        "x-api-key": import.meta.env.VITE_ANTHROPIC_API_KEY || "",
-        "anthropic-version": "2023-06-01",
-        "anthropic-dangerous-direct-browser-access": "true",
+        "Content-Type":  "application/json",
+        "Authorization": `Bearer ${token}`,   // Supabase JWT — no API key in browser
       },
       body: JSON.stringify(body),
     });
+
     if (!res.ok) {
       throw new Error(
         `API ${res.status}` +
