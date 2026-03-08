@@ -13,7 +13,7 @@
 // Auth: JWT required
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { corsHeaders } from '../_shared/cors.ts'
+import { getCorsHeaders } from '../_shared/cors.ts'
 
 const ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages'
 const MODEL = 'claude-sonnet-4-5'
@@ -34,8 +34,10 @@ function hourLabel(h: number): string {
 }
 
 Deno.serve(async (req: Request) => {
+  const cors = getCorsHeaders(req)
+
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response('ok', { headers: cors })
   }
 
   try {
@@ -50,7 +52,7 @@ Deno.serve(async (req: Request) => {
     if (authError || !user) {
       return new Response(
         JSON.stringify({ error: 'Unauthorized' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 401, headers: { ...cors, 'Content-Type': 'application/json' } }
       )
     }
 
@@ -128,7 +130,7 @@ Respond ONLY with the 3 insights, one per line. No headers, no JSON, no extra te
 
     return new Response(
       JSON.stringify({ insights }),
-      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { status: 200, headers: { ...cors, 'Content-Type': 'application/json' } }
     )
 
   } catch (err) {
@@ -144,7 +146,7 @@ Respond ONLY with the 3 insights, one per line. No headers, no JSON, no extra te
           'Try picking your hardest task right after your first focus session next week.',
         ],
       }),
-      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { status: 200, headers: { ...cors, 'Content-Type': 'application/json' } }
     )
   }
 })
