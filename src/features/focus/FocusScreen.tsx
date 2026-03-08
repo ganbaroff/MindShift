@@ -1,16 +1,22 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import { useStore } from '@/store'
 import { ArcTimer } from './ArcTimer'
 import { useAudioEngine } from '@/shared/hooks/useAudioEngine'
 import { supabase } from '@/shared/lib/supabase'
+import { notifyFocusEnd, notifyAchievement } from '@/shared/lib/notify'
+import { hapticDone } from '@/shared/lib/haptic'
+import { ACHIEVEMENT_DEFINITIONS } from '@/types'
 import {
   TIMER_PRESETS,
   PHASE_RELEASE_MINUTES,
   MAX_SESSION_MINUTES,
   RECOVERY_LOCK_MINUTES,
+  NATURE_BUFFER_SECONDS,
 } from '@/shared/lib/constants'
-import type { SessionPhase, AudioPreset, Task } from '@/types'
+import type { SessionPhase, AudioPreset, Task, EnergyLevel } from '@/types'
+import type { FocusSessionInsert } from '@/types/database'
 
 // ── Phase helpers ──────────────────────────────────────────────────────────────
 
@@ -26,16 +32,23 @@ function getPhase(elapsedMinutes: number): SessionPhase {
   return 'flow'
 }
 
+/** Smart default duration based on energy — less energy = shorter session */
+function getSmartDuration(energy: EnergyLevel): number {
+  if (energy <= 2) return 5     // low battery → just 5 minutes
+  if (energy === 3) return 25   // medium → classic pomodoro
+  return 52                     // high energy → deep work
+}
+
 // ── Screen states ──────────────────────────────────────────────────────────────
 
-type ScreenState = 'setup' | 'session' | 'interrupt-confirm' | 'recovery-lock'
+type ScreenState = 'setup' | 'session' | 'interrupt-confirm' | 'recovery-lock' | 'nature-buffer'
 
 // ── Component ──────────────────────────────────────────────────────────────────
 
 export default function FocusScreen() {
   const {
     nowPool, nextPool,
-    activeSession, sessionPhase,
+    activeSession, sessionPhase, energyLevel,
     startSession, endSession, setPhase, updateLastSession,
     hasAchievement, unlockAchievement,
     focusAnchor, activePreset, setPreset,
@@ -43,10 +56,15 @@ export default function FocusScreen() {
 
   const reducedMotion = useReducedMotion()
   const { play, stop: stopAudio, isPlaying } = useAudioEngine()
+  const [searchParams] = useSearchParams()
+
+  // ── Smart defaults ─────────────────────────────────────────────────────────
+  const smartDuration = useMemo(() => getSmartDuration(energyLevel), [energyLevel])
+  const isQuickStart = searchParams.get('quick') === '1'
 
   // ── Setup state ──────────────────────────────────────────────────────────────
   const [selectedTask, setSelectedTask]       = useState<Task | null>(null)
-  const [selectedDuration, setSelectedDuration] = useState(25)
+  const [selectedDuration, setSelectedDuration] = useState(smartDuration)
   const [customDuration, setCustomDuration]   = useState('')
   const [showCustom, setShowCustom]           = useState(false)
 
@@ -56,6 +74,7 @@ export default function FocusScreen() {
   const [elapsedSeconds, setElapsed]      = useState(0)
   const [showDigits, setShowDigits]       = useState(false)
   const [recoverySeconds, setRecovery]    = useState(RECOVERY_LOCK_MINUTES * 60)
+  const [bufferSeconds, setBufferSeconds] = useState(NATURE_BUFFER_SECONDS)
 
   // ── Refs (timer) ─────────────────────────────────────────────────────────────
   const startTimeRef        = useRef(0)          // epoch ms of session start
@@ -64,7 +83,9 @@ export default function FocusScreen() {
   const durationSecRef      = useRef(0)          // session duration in seconds
   const intervalRef         = useRef<ReturnType<typeof setInterval> | null>(null)
   const recoveryIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const bufferIntervalRef   = useRef<ReturnType<typeof setInterval> | null>(null)
   const sessionSavedRef     = useRef(false)
+  const quickStartedRef     = useRef(false)
 
   const allTasks = [...nowPool, ...nextPool].filter(t => t.status === 'active')
 
@@ -72,6 +93,7 @@ export default function FocusScreen() {
   useEffect(() => () => {
     if (intervalRef.current)         clearInterval(intervalRef.current)
     if (recoveryIntervalRef.current) clearInterval(recoveryIntervalRef.current)
+    if (bufferIntervalRef.current)   clearInterval(bufferIntervalRef.current)
   }, [])
 
   // ── Save session to DB (non-blocking) ────────────────────────────────────────
@@ -82,31 +104,69 @@ export default function FocusScreen() {
     if (sessionSavedRef.current || !activeSession) return
     sessionSavedRef.current = true
     try {
-      // Insert with available fields; duration_ms / phase_reached via cast (not in Insert type)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await supabase.from('focus_sessions').insert({
+      const row: FocusSessionInsert = {
         task_id:       activeSession.taskId,
+        user_id:       '',  // filled by RLS / trigger
         started_at:    activeSession.startedAt,
         audio_preset:  activePreset,
         duration_ms:   elapsedMs,
-        phase_reached: phaseReached,
+        phase_reached: phaseReached === 'idle' ? null : phaseReached,
         energy_before: null,
-      } as any)
+      }
+      await supabase.from('focus_sessions').insert(row as never)
       updateLastSession()
     } catch { /* non-critical — offline or unauthenticated */ }
   }, [activeSession, activePreset, updateLastSession])
+
+  // ── Start nature buffer ─────────────────────────────────────────────────────
+  const startNatureBuffer = useCallback(() => {
+    setBufferSeconds(NATURE_BUFFER_SECONDS)
+    setScreen('nature-buffer')
+    // Play nature audio during buffer
+    play('nature')
+    setPreset('nature')
+
+    bufferIntervalRef.current = setInterval(() => {
+      setBufferSeconds(s => {
+        if (s <= 1) {
+          clearInterval(bufferIntervalRef.current!)
+          stopAudio()
+          setPreset(null)
+          setScreen('setup')
+          return 0
+        }
+        return s - 1
+      })
+    }, 1000)
+  }, [play, stopAudio, setPreset])
 
   // ── Session end handler ───────────────────────────────────────────────────────
   const handleSessionEnd = useCallback((wasCompleted: boolean) => {
     if (intervalRef.current) clearInterval(intervalRef.current)
 
     const elapsedMs = Date.now() - startTimeRef.current - pausedMsRef.current
+    const elapsedMin = Math.floor(elapsedMs / 60_000)
     void saveSession(elapsedMs, sessionPhase)
+
+    // Toast + haptic
+    if (elapsedMin >= 1) {
+      notifyFocusEnd(elapsedMin)
+      hapticDone()
+    }
 
     // Achievements
     if (wasCompleted) {
-      if (!hasAchievement('flow_rider')  && durationSecRef.current >= 52 * 60) unlockAchievement('flow_rider')
-      if (!hasAchievement('full_cycle')  && sessionPhase === 'flow')            unlockAchievement('full_cycle')
+      const tryUnlock = (key: string) => {
+        if (!hasAchievement(key)) {
+          unlockAchievement(key)
+          const def = ACHIEVEMENT_DEFINITIONS.find(a => a.key === key)
+          if (def) notifyAchievement(def.name, def.emoji, def.description)
+        }
+      }
+
+      if (durationSecRef.current >= 52 * 60) tryUnlock('flow_rider')
+      if (sessionPhase === 'flow') tryUnlock('full_cycle')
+      if (durationSecRef.current === 5 * 60)  tryUnlock('five_min_hero')
     }
 
     stopAudio()
@@ -128,10 +188,14 @@ export default function FocusScreen() {
           return s - 1
         })
       }, 1000)
+    } else if (wasCompleted) {
+      // Nature buffer between sessions
+      startNatureBuffer()
     } else {
       setScreen('setup')
     }
-  }, [sessionPhase, saveSession, stopAudio, setPreset, endSession, hasAchievement, unlockAchievement])
+  }, [sessionPhase, saveSession, stopAudio, setPreset, endSession,
+      hasAchievement, unlockAchievement, startNatureBuffer])
 
   // ── Interval runner (shared between start & resume) ───────────────────────────
   const startInterval = useCallback(() => {
@@ -150,8 +214,9 @@ export default function FocusScreen() {
   }, [setPhase, handleSessionEnd])
 
   // ── Start ────────────────────────────────────────────────────────────────────
-  const handleStart = useCallback(() => {
-    const duration = showCustom ? (parseInt(customDuration) || 25) : selectedDuration
+  const handleStart = useCallback((overrideDuration?: number) => {
+    const duration = overrideDuration
+      ?? (showCustom ? (parseInt(customDuration) || 25) : selectedDuration)
     const durationSec = duration * 60
 
     durationSecRef.current = durationSec
@@ -172,6 +237,15 @@ export default function FocusScreen() {
   }, [showCustom, customDuration, selectedDuration, selectedTask, focusAnchor,
       play, startSession, setPhase, startInterval])
 
+  // ── Quick-start auto detection ─────────────────────────────────────────────
+  useEffect(() => {
+    if (isQuickStart && !quickStartedRef.current && screen === 'setup') {
+      quickStartedRef.current = true
+      // Auto-start with 5 minutes, no task, sound anchor or brown noise
+      handleStart(5)
+    }
+  }, [isQuickStart, screen, handleStart])
+
   // ── Stop → interrupt confirm ───────────────────────────────────────────────
   const handleStop = useCallback(() => {
     if (intervalRef.current) clearInterval(intervalRef.current)
@@ -191,6 +265,14 @@ export default function FocusScreen() {
     handleSessionEnd(false)
   }, [handleSessionEnd])
 
+  // ── Skip nature buffer ─────────────────────────────────────────────────────
+  const handleSkipBuffer = useCallback(() => {
+    if (bufferIntervalRef.current) clearInterval(bufferIntervalRef.current)
+    stopAudio()
+    setPreset(null)
+    setScreen('setup')
+  }, [stopAudio, setPreset])
+
   // ── Audio toggle during session ───────────────────────────────────────────────
   const handleAudioToggle = useCallback(() => {
     if (isPlaying) {
@@ -206,6 +288,66 @@ export default function FocusScreen() {
   const isFlow    = sessionPhase === 'flow'
   const elapsedMin = Math.floor(elapsedSeconds / 60)
 
+  // ── Energy label for setup screen ─────────────────────────────────────────
+  const energyLabel = useMemo(() => {
+    if (energyLevel <= 2) return { text: 'Low energy — starting small 🌱', color: '#4ECDC4' }
+    if (energyLevel === 3) return { text: 'Steady energy — classic focus 🎯', color: '#6C63FF' }
+    return { text: 'High energy — deep work time 🚀', color: '#FFE66D' }
+  }, [energyLevel])
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // NATURE BUFFER SCREEN (2 min between sessions)
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  if (screen === 'nature-buffer') {
+    const bm = Math.floor(bufferSeconds / 60)
+    const bs = bufferSeconds % 60
+    return (
+      <div
+        className="flex flex-col items-center justify-center min-h-screen px-6 text-center"
+        style={{ background: '#0F1117' }}
+      >
+        <motion.div
+          initial={reducedMotion ? {} : { opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+          className="flex flex-col items-center"
+        >
+          <div className="text-5xl mb-6">🌿</div>
+          <h2 className="text-2xl font-bold mb-2" style={{ color: '#4ECDC4' }}>
+            Nature Buffer
+          </h2>
+          <p className="text-sm mb-8 max-w-xs leading-relaxed" style={{ color: '#8B8BA7' }}>
+            Let your mind settle. Nature sounds are playing softly to ease the transition.
+          </p>
+
+          <div
+            className="px-8 py-4 rounded-2xl mb-6"
+            style={{ background: '#1A1D2E', border: '1.5px solid #2D3150' }}
+          >
+            <p className="font-mono text-3xl font-bold" style={{ color: '#4ECDC4' }}>
+              {bm}:{bs.toString().padStart(2, '0')}
+            </p>
+            <p className="text-xs mt-1" style={{ color: '#8B8BA7' }}>transition time</p>
+          </div>
+
+          {/* Volume down is fine, skip too */}
+          <button
+            onClick={handleSkipBuffer}
+            className="px-6 py-2.5 rounded-xl text-sm font-medium transition-all duration-200"
+            style={{
+              background: 'transparent',
+              border: '1.5px solid #2D3150',
+              color: '#8B8BA7',
+            }}
+          >
+            Skip → Ready for more
+          </button>
+        </motion.div>
+      </div>
+    )
+  }
+
   // ─────────────────────────────────────────────────────────────────────────────
   // SETUP SCREEN
   // ─────────────────────────────────────────────────────────────────────────────
@@ -217,8 +359,8 @@ export default function FocusScreen() {
           <h1 className="text-2xl font-bold" style={{ color: '#E8E8F0' }}>
             Focus Session ⏱️
           </h1>
-          <p className="text-sm mt-1" style={{ color: '#8B8BA7' }}>
-            Pick a task and dive in.
+          <p className="text-sm mt-1" style={{ color: energyLabel.color }}>
+            {energyLabel.text}
           </p>
         </div>
 
@@ -273,15 +415,21 @@ export default function FocusScreen() {
 
         {/* Duration presets */}
         <div className="px-5 mb-6">
-          <p className="text-xs font-medium mb-2" style={{ color: '#8B8BA7' }}>DURATION</p>
+          <p className="text-xs font-medium mb-2" style={{ color: '#8B8BA7' }}>
+            DURATION
+            <span className="ml-2 font-normal" style={{ color: '#6C63FF' }}>
+              (smart: {smartDuration}m)
+            </span>
+          </p>
           <div className="flex gap-2">
             {TIMER_PRESETS.map(min => {
               const isActive = selectedDuration === min && !showCustom
+              const isRecommended = min === smartDuration
               return (
                 <button
                   key={min}
                   onClick={() => { setSelectedDuration(min); setShowCustom(false) }}
-                  className="flex-1 py-3 rounded-xl font-semibold text-sm transition-all duration-200"
+                  className="flex-1 py-3 rounded-xl font-semibold text-sm transition-all duration-200 relative"
                   style={{
                     background:  isActive ? 'rgba(108,99,255,0.15)' : '#1A1D2E',
                     border:      `1.5px solid ${isActive ? '#6C63FF' : '#2D3150'}`,
@@ -289,6 +437,14 @@ export default function FocusScreen() {
                   }}
                 >
                   {min}m
+                  {isRecommended && (
+                    <span
+                      className="absolute -top-1.5 -right-1.5 text-xs w-4 h-4 flex items-center justify-center rounded-full"
+                      style={{ background: '#6C63FF', color: 'white', fontSize: '8px' }}
+                    >
+                      ✦
+                    </span>
+                  )}
                 </button>
               )
             })}
@@ -342,7 +498,7 @@ export default function FocusScreen() {
         {/* Start button */}
         <div className="px-5">
           <button
-            onClick={handleStart}
+            onClick={() => handleStart()}
             className="w-full py-4 rounded-2xl font-bold text-base transition-all duration-200"
             style={{
               background: 'linear-gradient(135deg, #6C63FF, #8B7FF7)',

@@ -3,7 +3,9 @@ import { motion } from 'framer-motion'
 import { useReducedMotion } from 'framer-motion'
 import { useStore } from '@/store'
 import { Confetti } from '@/shared/ui/Confetti'
+import { notifyXP, notifyAchievement, notifyTaskDone } from '@/shared/lib/notify'
 import type { Task } from '@/types'
+import { ACHIEVEMENT_DEFINITIONS } from '@/types'
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -66,13 +68,22 @@ export function TaskCard({ task, index = 0, onComplete, onSnooze }: Props) {
     const energyMultiplier = energyLevel <= 2 ? 1.2 : energyLevel >= 4 ? 0.8 : 1.0
     const xp = Math.round(10 * task.difficulty * energyMultiplier)
     addXP(xp)
+    notifyXP(xp)
+    notifyTaskDone(task.title)
 
-    // Achievements
-    if (!hasAchievement('first_seed')) unlockAchievement('first_seed')
-    if (energyLevel <= 2 && !hasAchievement('gentle_start')) unlockAchievement('gentle_start')
+    // Achievements (with toast)
+    const tryUnlock = (key: string) => {
+      if (!hasAchievement(key)) {
+        unlockAchievement(key)
+        const def = ACHIEVEMENT_DEFINITIONS.find(a => a.key === key)
+        if (def) notifyAchievement(def.name, def.emoji, def.description)
+      }
+    }
+    tryUnlock('first_seed')
+    if (energyLevel <= 2) tryUnlock('gentle_start')
     const hour = new Date().getHours()
-    if (hour >= 21 && !hasAchievement('night_owl')) unlockAchievement('night_owl')
-    if (hour < 9 && !hasAchievement('morning_mind')) unlockAchievement('morning_mind')
+    if (hour >= 21) tryUnlock('night_owl')
+    if (hour < 9) tryUnlock('morning_mind')
 
     setTimeout(() => {
       completeTask(task.id)

@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { Toaster } from 'sonner'
 import { useStore } from '@/store'
 import { supabase } from '@/shared/lib/supabase'
 import { AppShell } from './AppShell'
@@ -41,6 +42,19 @@ export default function App() {
 
   return (
     <BrowserRouter>
+      <Toaster
+        theme="dark"
+        position="top-center"
+        toastOptions={{
+          style: {
+            background: '#1A1D2E',
+            border: '1px solid #2D3150',
+            color: '#E8E8F0',
+            fontSize: '14px',
+          },
+        }}
+        offset={16}
+      />
       <Suspense fallback={<LoadingScreen />}>
         {showRecovery && (
           <RecoveryProtocol onDismiss={setRecoveryShown} />

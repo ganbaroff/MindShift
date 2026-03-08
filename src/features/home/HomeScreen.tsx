@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useReducedMotion } from 'framer-motion'
 import { Plus } from 'lucide-react'
@@ -6,6 +7,7 @@ import { useStore } from '@/store'
 import { EnergyCheckin } from './EnergyCheckin'
 import { TaskCard } from '@/features/tasks/TaskCard'
 import { AddTaskModal } from '@/features/tasks/AddTaskModal'
+import { hapticTap } from '@/shared/lib/haptic'
 import type { EnergyLevel } from '@/types'
 import { NOW_POOL_MAX } from '@/shared/lib/constants'
 
@@ -14,13 +16,23 @@ import { NOW_POOL_MAX } from '@/shared/lib/constants'
 export default function HomeScreen() {
   const {
     nowPool, nextPool, energyLevel, setEnergyLevel,
-    cognitiveMode, appMode,
+    cognitiveMode, appMode, focusAnchor,
+    startSession, setPhase,
   } = useStore()
   const reducedMotion = useReducedMotion()
+  const navigate = useNavigate()
 
   const [energySet, setEnergySet] = useState(false)
   const [nextExpanded, setNextExpanded] = useState(false)
   const [addOpen, setAddOpen] = useState(false)
+
+  // ── "Just 5 Minutes" — one-tap focus ────────────────────────────────────────
+  const handleQuickFocus = () => {
+    hapticTap()
+    startSession(null, 5, focusAnchor ?? 'brown')
+    setPhase('struggle')
+    navigate('/focus?quick=1')
+  }
 
   // Active tasks only
   const activeTasks = nowPool.filter(t => t.status === 'active')
@@ -85,6 +97,37 @@ export default function HomeScreen() {
           compact={energySet}
         />
       </motion.div>
+
+      {/* ── JUST 5 MINUTES — the ADHD gateway ─────────────────────────────────── */}
+      <motion.button
+        initial={reducedMotion ? {} : { opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2, type: 'spring', stiffness: 300 }}
+        whileTap={reducedMotion ? {} : { scale: 0.97 }}
+        onClick={handleQuickFocus}
+        className="mx-5 mb-5 flex items-center gap-4 p-4 rounded-2xl text-left"
+        style={{
+          background: 'linear-gradient(135deg, rgba(78,205,196,0.12), rgba(108,99,255,0.08))',
+          border: '1.5px solid #4ECDC4',
+          boxShadow: '0 4px 24px rgba(78,205,196,0.10)',
+        }}
+      >
+        <div
+          className="w-12 h-12 rounded-xl flex items-center justify-center text-xl shrink-0"
+          style={{ background: 'rgba(78,205,196,0.2)' }}
+        >
+          ⚡
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-base font-bold" style={{ color: '#4ECDC4' }}>
+            Just 5 minutes
+          </p>
+          <p className="text-xs mt-0.5" style={{ color: '#8B8BA7' }}>
+            Can't start? One tap. No decisions. Just begin.
+          </p>
+        </div>
+        <span className="text-lg" style={{ color: '#4ECDC4' }}>→</span>
+      </motion.button>
 
       {/* NOW Pool */}
       <div className="px-5 flex flex-col gap-3">

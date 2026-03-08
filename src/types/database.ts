@@ -1,15 +1,57 @@
 // ── Database types ────────────────────────────────────────────────────────────
-// Auto-generated from Supabase schema. Update with: supabase gen types typescript
+// Structured to match Supabase PostgREST v12 expected format.
 
-export interface Database {
+export type Database = {
   public: {
     Tables: {
-      users: { Row: UserRow; Insert: UserInsert; Update: Partial<UserInsert> }
-      tasks: { Row: TaskRow; Insert: TaskInsert; Update: Partial<TaskInsert> }
-      focus_sessions: { Row: FocusSessionRow; Insert: FocusSessionInsert; Update: Partial<FocusSessionInsert> }
-      user_behavior: { Row: UserBehaviorRow; Insert: UserBehaviorInsert; Update: Partial<UserBehaviorInsert> }
-      achievements: { Row: AchievementRow; Insert: AchievementInsert; Update: Partial<AchievementInsert> }
-      energy_logs: { Row: EnergyLogRow; Insert: EnergyLogInsert; Update: Partial<EnergyLogInsert> }
+      users: {
+        Row: UserRow
+        Insert: UserInsert
+        Update: Partial<UserInsert>
+        Relationships: []
+      }
+      tasks: {
+        Row: TaskRow
+        Insert: TaskInsert
+        Update: Partial<TaskInsert>
+        Relationships: []
+      }
+      focus_sessions: {
+        Row: FocusSessionRow
+        Insert: FocusSessionInsert
+        Update: Partial<FocusSessionInsert>
+        Relationships: []
+      }
+      user_behavior: {
+        Row: UserBehaviorRow
+        Insert: UserBehaviorInsert
+        Update: Partial<UserBehaviorInsert>
+        Relationships: []
+      }
+      achievements: {
+        Row: AchievementRow
+        Insert: AchievementInsert
+        Update: Partial<AchievementInsert>
+        Relationships: []
+      }
+      energy_logs: {
+        Row: EnergyLogRow
+        Insert: EnergyLogInsert
+        Update: Partial<EnergyLogInsert>
+        Relationships: []
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      [_ in never]: never
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
     }
   }
 }
@@ -56,7 +98,15 @@ export interface FocusSessionRow {
   energy_before: number | null
   energy_after: number | null
 }
-export type FocusSessionInsert = Omit<FocusSessionRow, 'id' | 'ended_at' | 'duration_ms' | 'phase_reached' | 'energy_after'>
+export interface FocusSessionInsert {
+  user_id: string
+  started_at: string
+  duration_ms: number | null
+  phase_reached: 'struggle' | 'release' | 'flow' | 'recovery' | null
+  audio_preset: string | null
+  task_id: string | null
+  energy_before: number | null
+}
 
 export interface UserBehaviorRow {
   id: string

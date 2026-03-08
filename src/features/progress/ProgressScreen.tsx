@@ -1,5 +1,9 @@
+import { useState, useEffect, useMemo, useCallback } from 'react'
+import { motion, useReducedMotion } from 'framer-motion'
 import { useStore } from '@/store'
 import { ACHIEVEMENT_DEFINITIONS } from '@/types'
+import { supabase } from '@/shared/lib/supabase'
+import type { FocusSessionRow } from '@/types'
 
 // ── XP helpers ─────────────────────────────────────────────────────────────────
 
@@ -11,40 +15,181 @@ function xpToLevel(xp: number): { level: number; progress: number; needed: numbe
 }
 
 const AVATARS = ['🌱', '🌿', '🍀', '🌸', '🌻', '🌳']
+const AVATAR_LEVELS = ['Seedling', 'Sprout', 'Clover', 'Blossom', 'Sunflower', 'Oak']
+
+// ── 7-day consistency data ──────────────────────────────────────────────────────
+
+function getLast7Days(): { label: string; key: string }[] {
+  const days = []
+  const now = new Date()
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(now)
+    d.setDate(d.getDate() - i)
+    days.push({
+      label: d.toLocaleDateString('en-US', { weekday: 'short' }).slice(0, 2),
+      key: d.toISOString().slice(0, 10),
+    })
+  }
+  return days
+}
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function ProgressScreen() {
-  const { xpTotal, avatarId, achievements } = useStore()
+  const {
+    xpTotal, achievements,
+    weeklyStats, setWeeklyStats,
+    userId,
+  } = useStore()
+
+  const reducedMotion = useReducedMotion()
   const { level, progress, needed } = xpToLevel(xpTotal)
-  const avatar = AVATARS[(avatarId - 1) % AVATARS.length] ?? '🌱'
+  const avatarIndex = Math.min(level - 1, AVATARS.length - 1)
+  const avatar = AVATARS[avatarIndex] ?? '🌱'
+  const avatarName = AVATAR_LEVELS[avatarIndex] ?? 'Seedling'
 
   const unlocked = achievements.filter(a => a.unlockedAt !== null)
+  const [consistencyData, setConsistencyData] = useState<Record<string, number>>({})
+  const [insightLoading, setInsightLoading] = useState(false)
+  const [insights, setInsights] = useState<string[]>([])
+
+  const last7Days = useMemo(() => getLast7Days(), [])
+
+  // ── Load consistency data (sessions per day for last 7 days) ────────────────
+  useEffect(() => {
+    if (!userId) return
+    const loadConsistency = async () => {
+      try {
+        const sevenDaysAgo = new Date()
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+        const { data } = await supabase
+          .from('focus_sessions')
+          .select('started_at, duration_ms')
+          .gte('started_at', sevenDaysAgo.toISOString())
+          .order('started_at', { ascending: true })
+
+        if (data) {
+          const rows = data as Pick<FocusSessionRow, 'started_at' | 'duration_ms'>[]
+          const byDay: Record<string, number> = {}
+          rows.forEach(row => {
+            const day = new Date(row.started_at).toISOString().slice(0, 10)
+            const minutes = Math.round((row.duration_ms || 0) / 60_000)
+            byDay[day] = (byDay[day] || 0) + minutes
+          })
+          setConsistencyData(byDay)
+        }
+      } catch { /* offline fallback — show empty */ }
+    }
+    loadConsistency()
+  }, [userId])
+
+  // ── Derived consistency stats ──────────────────────────────────────────────
+  const activeDays = last7Days.filter(d => (consistencyData[d.key] || 0) > 0).length
+  const consistencyMessage = useMemo(() => {
+    if (activeDays === 7) return 'Perfect week! 🌟'
+    if (activeDays >= 5) return 'Great week 💪'
+    if (activeDays >= 3) return 'Solid progress 🎯'
+    if (activeDays >= 1) return 'You showed up! 🌱'
+    return 'Fresh start ahead ✨'
+  }, [activeDays])
+
+  // Max minutes in a day (for bar scaling)
+  const maxMinutes = Math.max(1, ...last7Days.map(d => consistencyData[d.key] || 0))
+
+  // ── Fetch weekly insight ────────────────────────────────────────────────────
+  const fetchInsight = useCallback(async () => {
+    if (insightLoading || !userId) return
+    setInsightLoading(true)
+    try {
+      const { data: sessions } = await supabase
+        .from('focus_sessions')
+        .select('started_at, duration_ms, phase_reached, audio_preset')
+        .gte('started_at', new Date(Date.now() - 7 * 86_400_000).toISOString())
+
+      const sessionData = (sessions ?? []) as Pick<FocusSessionRow, 'started_at' | 'duration_ms' | 'phase_reached' | 'audio_preset'>[]
+      const totalMinutes = Math.round(sessionData.reduce((sum, r) => sum + (r.duration_ms || 0), 0) / 60_000)
+
+      // Call edge function for AI insights
+      const { data } = await supabase.functions.invoke('weekly-insight', {
+        body: {
+          sessions: sessionData.map(s => ({
+            started_at: s.started_at,
+            duration_minutes: Math.round((s.duration_ms || 0) / 60_000),
+            phase_reached: s.phase_reached,
+            audio_preset: s.audio_preset,
+          })),
+          tasks_completed: unlocked.length,
+          total_focus_minutes: totalMinutes,
+        },
+      })
+
+      if (data?.insights && Array.isArray(data.insights)) {
+        setInsights(data.insights)
+      } else {
+        setInsights(getFallbackInsights(totalMinutes, activeDays))
+      }
+
+      setWeeklyStats({
+        peakFocusTime: 'afternoon',
+        tasksCompleted: unlocked.length,
+        mostUsedPreset: null,
+        peakEnergyLevel: 3,
+        consistencyScore: activeDays / 7,
+        totalFocusMinutes: totalMinutes,
+      })
+    } catch {
+      setInsights(getFallbackInsights(0, activeDays))
+    }
+    setInsightLoading(false)
+  }, [insightLoading, userId, unlocked.length, activeDays, setWeeklyStats])
 
   return (
     <div className="flex flex-col pb-28">
       {/* Header */}
       <div className="px-5 pt-10 pb-6">
-        <h1 className="text-2xl font-bold" style={{ color: '#E8E8F0' }}>
-          Progress 🌱
-        </h1>
-        <p className="text-sm mt-1" style={{ color: '#8B8BA7' }}>
+        <motion.h1
+          initial={reducedMotion ? {} : { opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-2xl font-bold"
+          style={{ color: '#E8E8F0' }}
+        >
+          Your Garden 🌱
+        </motion.h1>
+        <motion.p
+          initial={reducedMotion ? {} : { opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.1 }}
+          className="text-sm mt-1"
+          style={{ color: '#8B8BA7' }}
+        >
           Every step counts, no matter how small.
-        </p>
+        </motion.p>
       </div>
 
-      {/* Avatar + XP card */}
-      <div className="mx-5 p-5 rounded-2xl mb-4" style={{ background: '#1A1D2E', border: '1.5px solid #2D3150' }}>
+      {/* ── Avatar + XP card ──────────────────────────────────────────────────── */}
+      <motion.div
+        initial={reducedMotion ? {} : { opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.15 }}
+        className="mx-5 p-5 rounded-2xl mb-4"
+        style={{ background: '#1A1D2E', border: '1.5px solid #2D3150' }}
+      >
         <div className="flex items-center gap-4 mb-4">
-          <div
+          <motion.div
+            initial={reducedMotion ? {} : { scale: 0.8 }}
+            animate={{ scale: 1 }}
+            transition={{ type: 'spring', stiffness: 200, delay: 0.2 }}
             className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl"
-            style={{ background: '#252840' }}
+            style={{
+              background: 'linear-gradient(135deg, rgba(108,99,255,0.15), rgba(78,205,196,0.1))',
+              border: '1.5px solid rgba(108,99,255,0.3)',
+            }}
           >
             {avatar}
-          </div>
-          <div>
+          </motion.div>
+          <div className="flex-1">
             <p className="text-lg font-bold" style={{ color: '#E8E8F0' }}>
-              Level {level}
+              Level {level} — {avatarName}
             </p>
             <p className="text-sm" style={{ color: '#8B8BA7' }}>
               {xpTotal} XP total
@@ -58,49 +203,183 @@ export default function ProgressScreen() {
             <span>{progress} / {needed} XP to Level {level + 1}</span>
             <span>{Math.round((progress / needed) * 100)}%</span>
           </div>
-          <div className="h-2 rounded-full overflow-hidden" style={{ background: '#252840' }}>
-            <div
-              className="h-full rounded-full transition-all duration-700"
+          <div className="h-2.5 rounded-full overflow-hidden" style={{ background: '#252840' }}>
+            <motion.div
+              initial={reducedMotion ? {} : { width: 0 }}
+              animate={{ width: `${(progress / needed) * 100}%` }}
+              transition={{ duration: 0.8, ease: 'easeOut', delay: 0.3 }}
+              className="h-full rounded-full"
               style={{
-                width: `${(progress / needed) * 100}%`,
                 background: 'linear-gradient(90deg, #6C63FF, #4ECDC4)',
               }}
             />
           </div>
         </div>
-      </div>
 
-      {/* Stats */}
-      <div className="mx-5 grid grid-cols-2 gap-3 mb-6">
+        {/* Avatar evolution hint */}
+        {avatarIndex < AVATARS.length - 1 && (
+          <p className="text-xs mt-3 text-center" style={{ color: '#8B8BA7' }}>
+            {AVATARS[avatarIndex + 1]} Next: {AVATAR_LEVELS[avatarIndex + 1]} at Level {(avatarIndex + 2)}
+          </p>
+        )}
+      </motion.div>
+
+      {/* ── 7-Day Consistency Flow ─────────────────────────────────────────────── */}
+      <motion.div
+        initial={reducedMotion ? {} : { opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.25 }}
+        className="mx-5 p-5 rounded-2xl mb-4"
+        style={{ background: '#1A1D2E', border: '1.5px solid #2D3150' }}
+      >
+        <div className="flex items-center justify-between mb-4">
+          <p className="text-xs font-medium tracking-widest uppercase" style={{ color: '#6C63FF' }}>
+            This Week
+          </p>
+          <p className="text-xs font-medium" style={{ color: '#4ECDC4' }}>
+            {consistencyMessage}
+          </p>
+        </div>
+
+        {/* Bar chart — NOT a streak counter */}
+        <div className="flex items-end justify-between gap-1.5" style={{ height: 80 }}>
+          {last7Days.map((day, i) => {
+            const minutes = consistencyData[day.key] || 0
+            const height = minutes > 0 ? Math.max(8, (minutes / maxMinutes) * 64) : 4
+            const isActive = minutes > 0
+            const isToday = i === 6
+
+            return (
+              <div key={day.key} className="flex-1 flex flex-col items-center gap-1.5">
+                <motion.div
+                  initial={reducedMotion ? {} : { height: 0 }}
+                  animate={{ height }}
+                  transition={{ duration: 0.5, delay: 0.3 + i * 0.05 }}
+                  className="w-full rounded-t-md"
+                  style={{
+                    background: isActive
+                      ? isToday
+                        ? 'linear-gradient(180deg, #6C63FF, #4ECDC4)'
+                        : 'linear-gradient(180deg, rgba(108,99,255,0.6), rgba(78,205,196,0.4))'
+                      : '#252840',
+                    minHeight: 4,
+                  }}
+                  title={`${minutes}m`}
+                />
+                <span
+                  className="text-xs font-medium"
+                  style={{ color: isToday ? '#E8E8F0' : '#8B8BA7', fontSize: '10px' }}
+                >
+                  {day.label}
+                </span>
+              </div>
+            )
+          })}
+        </div>
+
+        {/* Summary */}
+        <p className="text-xs mt-3 text-center" style={{ color: '#8B8BA7' }}>
+          {activeDays} of 7 days active
+          {weeklyStats?.totalFocusMinutes ? ` · ${weeklyStats.totalFocusMinutes}m total focus` : ''}
+        </p>
+      </motion.div>
+
+      {/* ── Stats Grid ─────────────────────────────────────────────────────────── */}
+      <div className="mx-5 grid grid-cols-3 gap-3 mb-4">
         {[
-          { label: 'Achievements', value: `${unlocked.length}/${ACHIEVEMENT_DEFINITIONS.length}`, emoji: '🏆' },
-          { label: 'XP Earned', value: xpTotal.toString(), emoji: '⚡' },
-        ].map(stat => (
-          <div
+          { label: 'Achievements', value: `${unlocked.length}/${ACHIEVEMENT_DEFINITIONS.length}`, emoji: '🏆', color: '#FFE66D' },
+          { label: 'XP Earned', value: xpTotal.toString(), emoji: '⚡', color: '#6C63FF' },
+          { label: 'Active Days', value: `${activeDays}/7`, emoji: '📅', color: '#4ECDC4' },
+        ].map((stat, i) => (
+          <motion.div
             key={stat.label}
-            className="p-4 rounded-2xl"
+            initial={reducedMotion ? {} : { opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35 + i * 0.05 }}
+            className="p-3 rounded-2xl text-center"
             style={{ background: '#1A1D2E', border: '1.5px solid #2D3150' }}
           >
-            <p className="text-2xl mb-1">{stat.emoji}</p>
-            <p className="text-xl font-bold" style={{ color: '#E8E8F0' }}>{stat.value}</p>
-            <p className="text-xs" style={{ color: '#8B8BA7' }}>{stat.label}</p>
-          </div>
+            <p className="text-xl mb-1">{stat.emoji}</p>
+            <p className="text-lg font-bold" style={{ color: stat.color }}>{stat.value}</p>
+            <p className="text-xs mt-0.5" style={{ color: '#8B8BA7' }}>{stat.label}</p>
+          </motion.div>
         ))}
       </div>
 
-      {/* Achievements */}
+      {/* ── Weekly Insight ──────────────────────────────────────────────────────── */}
+      <motion.div
+        initial={reducedMotion ? {} : { opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+        className="mx-5 p-5 rounded-2xl mb-4"
+        style={{ background: '#1A1D2E', border: '1.5px solid #2D3150' }}
+      >
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-xs font-medium tracking-widest uppercase" style={{ color: '#FFE66D' }}>
+            ✨ Weekly Insight
+          </p>
+          {insights.length === 0 && (
+            <button
+              onClick={fetchInsight}
+              disabled={insightLoading}
+              className="text-xs px-3 py-1 rounded-lg transition-all duration-200"
+              style={{
+                background: 'rgba(108,99,255,0.15)',
+                color: '#6C63FF',
+                opacity: insightLoading ? 0.5 : 1,
+              }}
+            >
+              {insightLoading ? 'Loading...' : 'Generate'}
+            </button>
+          )}
+        </div>
+
+        {insights.length > 0 ? (
+          <div className="flex flex-col gap-3">
+            {insights.map((insight, i) => (
+              <div
+                key={i}
+                className="flex items-start gap-3 p-3 rounded-xl"
+                style={{ background: 'rgba(255,230,109,0.05)' }}
+              >
+                <span className="text-sm mt-0.5">
+                  {i === 0 ? '🧠' : i === 1 ? '💡' : '🎯'}
+                </span>
+                <p className="text-sm leading-relaxed" style={{ color: '#E8E8F0' }}>
+                  {insight}
+                </p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm leading-relaxed" style={{ color: '#8B8BA7' }}>
+            Tap "Generate" to get personalized insights based on your focus patterns this week.
+          </p>
+        )}
+      </motion.div>
+
+      {/* ── Achievements ──────────────────────────────────────────────────────── */}
       <div className="px-5">
-        <h2 className="text-xs font-medium tracking-widest uppercase mb-3" style={{ color: '#8B8BA7' }}>
-          Achievements
-        </h2>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-xs font-medium tracking-widest uppercase" style={{ color: '#8B8BA7' }}>
+            Achievements
+          </h2>
+          <span className="text-xs" style={{ color: '#6C63FF' }}>
+            {unlocked.length}/{ACHIEVEMENT_DEFINITIONS.length}
+          </span>
+        </div>
+
         <div className="grid grid-cols-3 gap-3">
-          {ACHIEVEMENT_DEFINITIONS.map(def => {
+          {ACHIEVEMENT_DEFINITIONS.map((def, i) => {
             const achievement = achievements.find(a => a.key === def.key)
             const isUnlocked = !!achievement?.unlockedAt
             return (
-              <div
+              <motion.div
                 key={def.key}
-                className="flex flex-col items-center gap-1 p-3 rounded-2xl text-center"
+                initial={reducedMotion ? {} : { opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.6 + i * 0.03 }}
+                className="flex flex-col items-center gap-1.5 p-3 rounded-2xl text-center"
                 style={{
                   background: isUnlocked ? 'rgba(108, 99, 255, 0.12)' : '#1A1D2E',
                   border: `1.5px solid ${isUnlocked ? 'rgba(108, 99, 255, 0.4)' : '#2D3150'}`,
@@ -114,11 +393,41 @@ export default function ProgressScreen() {
                 <span className="text-xs font-medium leading-tight" style={{ color: isUnlocked ? '#E8E8F0' : '#8B8BA7' }}>
                   {def.name}
                 </span>
-              </div>
+                {isUnlocked && achievement?.unlockedAt && (
+                  <span className="text-xs" style={{ color: '#6C63FF', fontSize: '9px' }}>
+                    {new Date(achievement.unlockedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  </span>
+                )}
+              </motion.div>
             )
           })}
         </div>
       </div>
     </div>
   )
+}
+
+// ── Fallback insights (no AI) ────────────────────────────────────────────────
+
+function getFallbackInsights(totalMinutes: number, activeDays: number): string[] {
+  const insights: string[] = []
+  if (totalMinutes > 120) {
+    insights.push(`You focused for ${totalMinutes} minutes this week. That's real progress!`)
+  } else if (totalMinutes > 0) {
+    insights.push(`${totalMinutes} minutes of focus this week. Every minute counts.`)
+  } else {
+    insights.push("A fresh week ahead. Start with just 5 minutes — that's all it takes.")
+  }
+
+  if (activeDays >= 5) {
+    insights.push("You showed up consistently. Your brain is building stronger focus pathways.")
+  } else if (activeDays >= 2) {
+    insights.push("You showed up multiple days. Consistency builds naturally over time.")
+  } else {
+    insights.push("Try starting each session with your Sound Anchor to build a focus habit.")
+  }
+
+  insights.push("Remember: ADHD brains thrive on novelty. Try switching your audio preset next session.")
+
+  return insights
 }
