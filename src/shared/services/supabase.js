@@ -387,6 +387,40 @@ export async function sbUpsertCharacterProgress(userId, newTotalXp, reviewDate) 
   }
 }
 
+/**
+ * sbAddXp(userId, xpGain) — Bolt 4.1 (ADR 0013)
+ *
+ * Atomically adds XP to character_progress:
+ *   1. Reads current total_xp from DB (or 0 if first use).
+ *   2. Adds xpGain.
+ *   3. Recalculates level: floor(newXp / 100) + 1  (ADR 0008).
+ *   4. Upserts back.
+ *   5. Returns { newXp, newLevel, leveledUp }.
+ *
+ * Uses character_progress table (not usage_limits) per ADR 0013 —
+ * resolves AC2 vs AC7 conflict (no new migration needed).
+ *
+ * @param {string} userId
+ * @param {number} xpGain — positive integer
+ * @returns {Promise<{ newXp: number, newLevel: number, leveledUp: boolean }>}
+ */
+export async function sbAddXp(userId, xpGain) {
+  const sb = getSupabase();
+  if (!sb) return { newXp: 0, newLevel: 1, leveledUp: false };
+
+  const data     = await sbGetCharacterProgress(userId);
+  const oldXp    = data?.total_xp ?? 0;
+  const oldLevel = data?.level    ?? 1;
+  const newXp    = oldXp + xpGain;
+  const newLevel = Math.floor(newXp / 100) + 1;
+  const leveledUp = newLevel > oldLevel;
+
+  const today = new Date().toISOString().slice(0, 10);
+  await sbUpsertCharacterProgress(userId, newXp, today);
+
+  return { newXp, newLevel, leveledUp };
+}
+
 // =============================================================================
 // 8. USAGE LIMITS OPERATIONS (Bolt 2.5)
 // Freemium gate — tracks per-user, per-day AI call counts.
