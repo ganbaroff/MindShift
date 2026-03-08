@@ -66,6 +66,12 @@ export const CSS = `
   @keyframes scaleIn    { from { opacity:0; transform:scale(.92); } to { opacity:1; transform:scale(1); } }
   @keyframes pulse      { 0%,100%{ opacity:1; } 50%{ opacity:0.5; } }
 
+  /* Bolt 5.2: Focus Mode animations */
+  @keyframes focusDoneRing    { from { opacity:0; transform:scale(.7); } to { opacity:1; transform:scale(1); } }
+  @keyframes bodyDoublePulse  { 0%,100%{ opacity:.3; } 50%{ opacity:.7; } }
+  @keyframes bodyDoubleBreath { 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.25); } }
+  @keyframes focusSlideUp     { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+
   input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(0.6); }
 
   /* High contrast media query */
