@@ -23,7 +23,7 @@
  */
 
 // =============================================================================
-// LAYER 1 — HTTP CLIENT (Bolt 4.3, ADR 0015)
+// LAYER 1 — HTTP CLIENT (Bolt 4.3, ADR 0015 · Bolt 4.4, ADR 0016)
 // Knows about: proxy URL, session token, timeout, HTTP error codes.
 // The ANTHROPIC_API_KEY lives in Supabase Secrets (server-side only).
 // It never appears in this file or any client bundle.
@@ -42,14 +42,18 @@ const AI_TIMEOUT   = 10000; // 10s — INVARIANT 6 (UX: no infinite spinners)
  * Low-level AI caller — routes through Edge Function proxy (Bolt 4.3, ADR 0015).
  * The ANTHROPIC_API_KEY is injected server-side; never reaches the browser.
  *
+ * Bolt 4.4 (ADR 0016): `action` is forwarded to the Edge Function to enable
+ * server-side per-user rate limiting. The proxy strips it before calling
+ * Anthropic. Layer 2 functions that are rate-limited must pass their action name.
+ *
  * @param {string} prompt                   — user message (used when opts.messages is omitted)
- * @param {{ system?: string, messages?: Array<{role:string,content:string}>, maxTokens?: number }} [opts]
+ * @param {{ system?: string, messages?: Array<{role:string,content:string}>, maxTokens?: number, action?: string }} [opts]
  * @returns {Promise<string>} raw text response
  */
 export async function callClaude(prompt, opts = {}) {
-  const { system, messages: customMessages, maxTokens = 1000 } = opts;
+  const { system, messages: customMessages, maxTokens = 1000, action } = opts;
 
-  // Retrieve the current Supabase session JWT for Edge Function auth (AC4).
+  // Retrieve the current Supabase session JWT for Edge Function auth.
   // getSupabase() may return null before init; session stays null in that case
   // and the Edge Function rejects with 401 — correct: AI requires signed-in user.
   const sb = getSupabase();
@@ -67,6 +71,9 @@ export async function callClaude(prompt, opts = {}) {
       messages:   customMessages || [{ role: "user", content: prompt }],
     };
     if (system) body.system = system;
+    // Bolt 4.4: action tells Edge Function which usage_limits counter to check.
+    // The proxy strips this field before forwarding to Anthropic.
+    if (action) body.action = action;
 
     const res = await fetch(AI_PROXY, {
       method: "POST",
@@ -79,9 +86,18 @@ export async function callClaude(prompt, opts = {}) {
     });
 
     if (!res.ok) {
+      // Bolt 4.4: on 429 read the response body to get the action that was
+      // limited — gives callers and UI more context for the error message.
+      if (res.status === 429) {
+        let limitedAction = "";
+        try {
+          const errBody = await res.json();
+          limitedAction = errBody?.action || "";
+        } catch { /* ignore parse errors */ }
+        throw new Error(`API 429:rate_limit${limitedAction ? ":" + limitedAction : ""}`);
+      }
       throw new Error(
-        `API ${res.status}` +
-        (res.status === 429 ? ":rate_limit" : res.status === 401 ? ":auth" : "")
+        `API ${res.status}` + (res.status === 401 ? ":auth" : "")
       );
     }
     const data = await res.json();
@@ -201,7 +217,7 @@ Today: ${new Date().toISOString()}
 Brain dump:
 ${rawText}`;
 
-  const raw = await callClaude(prompt);
+  const raw = await callClaude(prompt, { action: "parseDump" });
   const clean = raw.replace(/```json\n?|```/g, "").trim();
 
   // Primary: expect { items, response } object
@@ -318,7 +334,7 @@ Reflection rules:
 - xp_earned must be exactly ${xpCalc}`;
 
   try {
-    const raw   = await callClaude(prompt);
+    const raw   = await callClaude(prompt, { action: "generateEveningReview" });
     const clean = raw.replace(/```json\n?|```/g, "").trim();
     const m     = clean.match(/\{[\s\S]*\}/);
     if (m) {
@@ -436,7 +452,7 @@ No markdown, no backticks.
 Tasks:
 ${tasks.map((t, i) => `${i + 1}. [${t.priority}] ${t.text}`).join("\n")}`;
 
-  const raw   = await callClaude(prompt);
+  const raw   = await callClaude(prompt, { action: "aiFocusSuggest" });
   const clean = raw.replace(/```json|```/g, "").trim();
   const m     = clean.match(/\{[\s\S]*\}/);
   if (!m) return { picks: [], reason: "" };
@@ -504,7 +520,7 @@ You know about the user: Level ${level}, completed ${completedTasks} of ${totalT
 Never break character. Never reveal that you are an AI.`;
 
   try {
-    const text = await callClaude("", { system, messages, maxTokens: 256 });
+    const text = await callClaude("", { system, messages, maxTokens: 256, action: "personaDialogue" });
     return text.trim() || _personaFallback(lang);
   } catch {
     return _personaFallback(lang);
