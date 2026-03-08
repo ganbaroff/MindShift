@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
+import { useReducedMotion } from '@/shared/hooks/useReducedMotion'
 import { useStore } from '@/store'
 import { ArcTimer } from './ArcTimer'
 import { useAudioEngine } from '@/shared/hooks/useAudioEngine'

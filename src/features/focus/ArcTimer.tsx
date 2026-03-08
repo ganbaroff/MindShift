@@ -1,4 +1,5 @@
-import { motion, useReducedMotion } from 'framer-motion'
+import { motion } from 'framer-motion'
+import { useReducedMotion } from '@/shared/hooks/useReducedMotion'
 import type { SessionPhase } from '@/types'
 
 // ── Arc geometry ───────────────────────────────────────────────────────────────

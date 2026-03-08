@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
-import { motion, useReducedMotion } from 'framer-motion'
+import { motion } from 'framer-motion'
+import { useReducedMotion } from '@/shared/hooks/useReducedMotion'
 
 const COLORS = ['#6C63FF', '#4ECDC4', '#FFE66D', '#FF6B6B', '#A8EDEA']
 const PARTICLE_COUNT = 20

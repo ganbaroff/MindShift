@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useReducedMotion } from 'framer-motion'
+import { useReducedMotion } from '@/shared/hooks/useReducedMotion'
 import { Plus } from 'lucide-react'
 import { useStore } from '@/store'
 import { EnergyCheckin } from './EnergyCheckin'

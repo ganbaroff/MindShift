@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { useReducedMotion } from 'framer-motion'
+import { useReducedMotion } from '@/shared/hooks/useReducedMotion'
 import { useStore } from '@/store'
 import { Confetti } from '@/shared/ui/Confetti'
 import { notifyXP, notifyAchievement, notifyTaskDone } from '@/shared/lib/notify'

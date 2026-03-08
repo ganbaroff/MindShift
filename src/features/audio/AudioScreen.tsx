@@ -1,4 +1,5 @@
-import { motion, useReducedMotion } from 'framer-motion'
+import { motion } from 'framer-motion'
+import { useReducedMotion } from '@/shared/hooks/useReducedMotion'
 import { useStore } from '@/store'
 import { useAudioEngine } from '@/shared/hooks/useAudioEngine'
 import { AUDIO_WARNING_VOLUME, AUDIO_HARD_LIMIT } from '@/shared/lib/constants'
