@@ -1,9 +1,11 @@
-import { useState } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useReducedMotion } from 'framer-motion'
-import { X } from 'lucide-react'
+import { X, Mic, MicOff } from 'lucide-react'
 import { useStore } from '@/store'
 import { supabase } from '@/shared/lib/supabase'
+import { notifyAchievement } from '@/shared/lib/notify'
+import { ACHIEVEMENT_DEFINITIONS } from '@/types'
 import type { Task } from '@/types'
 import { NOW_POOL_MAX } from '@/shared/lib/constants'
 
@@ -17,7 +19,7 @@ interface Props {
 const PRESET_DURATIONS = [5, 15, 25, 45, 60]
 
 export function AddTaskModal({ open, onClose }: Props) {
-  const { addTask, nowPool, nextPool, userId } = useStore()
+  const { addTask, nowPool, nextPool, userId, hasAchievement, unlockAchievement } = useStore()
   const reducedMotion = useReducedMotion()
 
   const [title, setTitle] = useState('')
@@ -27,6 +29,57 @@ export function AddTaskModal({ open, onClose }: Props) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [aiSteps, setAiSteps] = useState<string[] | null>(null)
   const [loadingAi, setLoadingAi] = useState(false)
+
+  // ── Voice input (Web Speech API) ──────────────────────────────────────────
+  const [isListening, setIsListening] = useState(false)
+  const [voiceSupported] = useState(() =>
+    typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)
+  )
+  const recognitionRef = useRef<ReturnType<typeof createRecognition> | null>(null)
+
+  const handleVoiceToggle = useCallback(() => {
+    if (!voiceSupported) return
+
+    if (isListening && recognitionRef.current) {
+      recognitionRef.current.stop()
+      setIsListening(false)
+      return
+    }
+
+    const recognition = createRecognition()
+    if (!recognition) return
+    recognitionRef.current = recognition
+
+    recognition.onresult = (event: Event & { results?: SpeechRecognitionResultList }) => {
+      const results = event.results
+      if (!results?.length) return
+      const transcript = Array.from(results)
+        .map(r => r[0]?.transcript ?? '')
+        .join(' ')
+        .trim()
+      if (transcript) {
+        setTitle(prev => prev ? `${prev} ${transcript}` : transcript)
+        setAiSteps(null)
+        // Achievement
+        if (!hasAchievement('voice_input')) {
+          unlockAchievement('voice_input')
+          const def = ACHIEVEMENT_DEFINITIONS.find(a => a.key === 'voice_input')
+          if (def) notifyAchievement(def.name, def.emoji, def.description)
+        }
+      }
+    }
+
+    recognition.onerror = () => {
+      setIsListening(false)
+    }
+
+    recognition.onend = () => {
+      setIsListening(false)
+    }
+
+    recognition.start()
+    setIsListening(true)
+  }, [isListening, voiceSupported, hasAchievement, unlockAchievement])
 
   const nowFull = nowPool.filter(t => t.status === 'active').length >= NOW_POOL_MAX
 
@@ -131,6 +184,11 @@ export function AddTaskModal({ open, onClose }: Props) {
   }
 
   const resetAndClose = () => {
+    // Stop voice if active
+    if (recognitionRef.current) {
+      recognitionRef.current.stop()
+      setIsListening(false)
+    }
     setTitle('')
     setDifficulty(2)
     setMinutes(25)
@@ -187,24 +245,44 @@ export function AddTaskModal({ open, onClose }: Props) {
               </button>
             </div>
 
-            {/* Title input + AI button */}
+            {/* Title input + Voice + AI button */}
             <div className="flex flex-col gap-2">
-              <input
-                value={title}
-                onChange={(e) => { setTitle(e.target.value); setAiSteps(null) }}
-                onKeyDown={(e) => { if (e.key === 'Enter') void handleSubmit() }}
-                placeholder="What needs to be done?"
-                autoFocus
-                className="w-full rounded-2xl px-4 py-3 text-base outline-none"
-                style={{
-                  background: '#252840',
-                  border: '1.5px solid #2D3150',
-                  color: '#E8E8F0',
-                  caretColor: '#6C63FF',
-                }}
-                onFocus={(e) => { e.currentTarget.style.borderColor = '#6C63FF' }}
-                onBlur={(e) => { e.currentTarget.style.borderColor = '#2D3150' }}
-              />
+              <div className="flex gap-2">
+                <input
+                  value={title}
+                  onChange={(e) => { setTitle(e.target.value); setAiSteps(null) }}
+                  onKeyDown={(e) => { if (e.key === 'Enter') void handleSubmit() }}
+                  placeholder={isListening ? 'Listening...' : 'What needs to be done?'}
+                  autoFocus
+                  className="flex-1 rounded-2xl px-4 py-3 text-base outline-none"
+                  style={{
+                    background: '#252840',
+                    border: `1.5px solid ${isListening ? '#4ECDC4' : '#2D3150'}`,
+                    color: '#E8E8F0',
+                    caretColor: '#6C63FF',
+                  }}
+                  onFocus={(e) => { if (!isListening) e.currentTarget.style.borderColor = '#6C63FF' }}
+                  onBlur={(e) => { if (!isListening) e.currentTarget.style.borderColor = '#2D3150' }}
+                />
+                {/* Voice input button */}
+                {voiceSupported && (
+                  <button
+                    onClick={handleVoiceToggle}
+                    className="w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-200"
+                    style={{
+                      background: isListening ? 'rgba(78,205,196,0.2)' : '#252840',
+                      border: `1.5px solid ${isListening ? '#4ECDC4' : '#2D3150'}`,
+                    }}
+                    aria-label={isListening ? 'Stop voice input' : 'Start voice input'}
+                  >
+                    {isListening ? (
+                      <MicOff size={18} color="#4ECDC4" />
+                    ) : (
+                      <Mic size={18} color="#8B8BA7" />
+                    )}
+                  </button>
+                )}
+              </div>
 
               {/* AI Decompose button */}
               {title.trim().length > 3 && !aiSteps && (
@@ -347,4 +425,34 @@ export function AddTaskModal({ open, onClose }: Props) {
       )}
     </AnimatePresence>
   )
+}
+
+// ── Web Speech API factory ──────────────────────────────────────────────────
+
+interface SpeechRecognitionResultList {
+  readonly length: number
+  [index: number]: { readonly [0]?: { readonly transcript: string } }
+}
+
+function createRecognition() {
+  const SpeechRecognition =
+    (window as unknown as { SpeechRecognition?: new () => SpeechRecognitionInstance }).SpeechRecognition ??
+    (window as unknown as { webkitSpeechRecognition?: new () => SpeechRecognitionInstance }).webkitSpeechRecognition
+  if (!SpeechRecognition) return null
+  const r = new SpeechRecognition()
+  r.continuous = false
+  r.interimResults = false
+  r.lang = 'en-US'
+  return r
+}
+
+interface SpeechRecognitionInstance {
+  continuous: boolean
+  interimResults: boolean
+  lang: string
+  start(): void
+  stop(): void
+  onresult: ((event: Event & { results?: SpeechRecognitionResultList }) => void) | null
+  onerror: ((event: Event) => void) | null
+  onend: (() => void) | null
 }

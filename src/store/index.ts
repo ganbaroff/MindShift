@@ -77,7 +77,17 @@ interface ProgressSlice {
   hasAchievement: (key: string) => boolean
 }
 
-export type AppStore = UserSlice & TaskSlice & SessionSlice & AudioSlice & ProgressSlice
+interface PreferencesSlice {
+  reducedStimulation: boolean
+  setReducedStimulation: (val: boolean) => void
+  // Subscription state (trial mode — no actual charges)
+  subscriptionTier: 'free' | 'pro_trial' | 'pro'
+  trialEndsAt: string | null        // ISO timestamp
+  setSubscription: (tier: 'free' | 'pro_trial' | 'pro', trialEnd?: string | null) => void
+  isProActive: () => boolean
+}
+
+export type AppStore = UserSlice & TaskSlice & SessionSlice & AudioSlice & ProgressSlice & PreferencesSlice
 
 // ── Store ─────────────────────────────────────────────────────────────────────
 
@@ -254,6 +264,25 @@ export const useStore = create<AppStore>()(
 
         setWeeklyStats: (stats) => set({ weeklyStats: stats }),
         hasAchievement: (key) => !!get().achievements.find(a => a.key === key)?.unlockedAt,
+
+        // ── Preferences ────────────────────────────────────────────────────
+        reducedStimulation: false,
+        setReducedStimulation: (val) => set({ reducedStimulation: val }),
+
+        subscriptionTier: 'free',
+        trialEndsAt: null,
+        setSubscription: (tier, trialEnd) => set({
+          subscriptionTier: tier,
+          trialEndsAt: trialEnd ?? null,
+        }),
+        isProActive: () => {
+          const s = get()
+          if (s.subscriptionTier === 'pro') return true
+          if (s.subscriptionTier === 'pro_trial' && s.trialEndsAt) {
+            return new Date(s.trialEndsAt).getTime() > Date.now()
+          }
+          return false
+        },
       }),
       {
         name: 'mindshift-store',
@@ -269,6 +298,9 @@ export const useStore = create<AppStore>()(
           focusAnchor: s.focusAnchor,
           achievements: s.achievements,
           audioVolume: s.audioVolume,
+          reducedStimulation: s.reducedStimulation,
+          subscriptionTier: s.subscriptionTier,
+          trialEndsAt: s.trialEndsAt,
         }),
       }
     )

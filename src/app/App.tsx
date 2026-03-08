@@ -6,6 +6,7 @@ import { supabase } from '@/shared/lib/supabase'
 import { AppShell } from './AppShell'
 import { LoadingScreen } from '@/shared/ui/LoadingScreen'
 import { AuthGuard } from './AuthGuard'
+import { ErrorBoundary } from '@/shared/ui/ErrorBoundary'
 import { RecoveryProtocol } from '@/features/tasks/RecoveryProtocol'
 import { RECOVERY_THRESHOLD_HOURS } from '@/shared/lib/constants'
 
@@ -55,30 +56,32 @@ export default function App() {
         }}
         offset={16}
       />
-      <Suspense fallback={<LoadingScreen />}>
-        {showRecovery && (
-          <RecoveryProtocol onDismiss={setRecoveryShown} />
-        )}
-        <Routes>
-          <Route path="/auth" element={<AuthScreen />} />
-          <Route element={<AuthGuard />}>
-            <Route path="/onboarding" element={<OnboardingFlow />} />
-            <Route element={<AppShell />}>
-              <Route index element={
-                onboardingCompleted
-                  ? <HomeScreen />
-                  : <Navigate to="/onboarding" replace />
-              } />
-              <Route path="/focus"    element={<FocusScreen />} />
-              <Route path="/tasks"    element={<TasksScreen />} />
-              <Route path="/audio"    element={<AudioScreen />} />
-              <Route path="/progress" element={<ProgressScreen />} />
-              <Route path="/settings" element={<SettingsScreen />} />
+      <ErrorBoundary>
+        <Suspense fallback={<LoadingScreen />}>
+          {showRecovery && (
+            <RecoveryProtocol onDismiss={setRecoveryShown} />
+          )}
+          <Routes>
+            <Route path="/auth" element={<AuthScreen />} />
+            <Route element={<AuthGuard />}>
+              <Route path="/onboarding" element={<OnboardingFlow />} />
+              <Route element={<AppShell />}>
+                <Route index element={
+                  onboardingCompleted
+                    ? <HomeScreen />
+                    : <Navigate to="/onboarding" replace />
+                } />
+                <Route path="/focus"    element={<FocusScreen />} />
+                <Route path="/tasks"    element={<TasksScreen />} />
+                <Route path="/audio"    element={<AudioScreen />} />
+                <Route path="/progress" element={<ProgressScreen />} />
+                <Route path="/settings" element={<SettingsScreen />} />
+              </Route>
             </Route>
-          </Route>
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </Suspense>
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Suspense>
+      </ErrorBoundary>
     </BrowserRouter>
   )
 }

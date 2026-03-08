@@ -87,6 +87,41 @@ export default function FocusScreen() {
   const sessionSavedRef     = useRef(false)
   const quickStartedRef     = useRef(false)
 
+  // ── "Park the thought" quick-capture ──────────────────────────────────────
+  const [parkOpen, setParkOpen] = useState(false)
+  const [parkText, setParkText] = useState('')
+  const { addTask, userId } = useStore()
+
+  const handleParkThought = useCallback(async () => {
+    const text = parkText.trim()
+    if (!text) return
+    const task: Task = {
+      id: crypto.randomUUID(),
+      title: text,
+      pool: 'someday',
+      status: 'active',
+      difficulty: 1,
+      estimatedMinutes: 15,
+      createdAt: new Date().toISOString(),
+      completedAt: null,
+      snoozeCount: 0,
+      parentTaskId: null,
+      position: 0,
+    }
+    addTask(task)
+    if (userId) {
+      try {
+        await supabase.from('tasks').insert({
+          id: task.id, user_id: userId, title: task.title,
+          pool: task.pool, status: task.status, difficulty: task.difficulty,
+          estimated_minutes: task.estimatedMinutes, parent_task_id: null, position: 0,
+        } as never)
+      } catch { /* non-blocking */ }
+    }
+    setParkText('')
+    setParkOpen(false)
+  }, [parkText, addTask, userId])
+
   const allTasks = [...nowPool, ...nextPool].filter(t => t.status === 'active')
 
   // Cleanup on unmount
@@ -196,6 +231,23 @@ export default function FocusScreen() {
     }
   }, [sessionPhase, saveSession, stopAudio, setPreset, endSession,
       hasAchievement, unlockAchievement, startNatureBuffer])
+
+  // ── visibilitychange: correct timer when returning from background ──────
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible' && screen === 'session' && startTimeRef.current > 0) {
+        const netElapsedMs = Date.now() - startTimeRef.current - pausedMsRef.current
+        const elapsed = Math.floor(netElapsedMs / 1000)
+        const remaining = Math.max(0, durationSecRef.current - elapsed)
+        setElapsed(elapsed)
+        setRemaining(remaining)
+        setPhase(getPhase(elapsed / 60))
+        if (remaining <= 0) handleSessionEnd(true)
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibility)
+    return () => document.removeEventListener('visibilitychange', handleVisibility)
+  }, [screen, handleSessionEnd, setPhase])
 
   // ── Interval runner (shared between start & resume) ───────────────────────────
   const startInterval = useCallback(() => {
@@ -678,6 +730,62 @@ export default function FocusScreen() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* ── "Park the thought" — quick capture without leaving focus ────── */}
+      <div className="fixed bottom-8 right-5 z-30">
+        <AnimatePresence>
+          {parkOpen && (
+            <motion.div
+              initial={reducedMotion ? {} : { opacity: 0, y: 10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 10, scale: 0.95 }}
+              className="mb-3 p-3 rounded-2xl w-64"
+              style={{ background: '#1A1D2E', border: '1.5px solid #2D3150' }}
+            >
+              <p className="text-xs font-medium mb-2" style={{ color: '#8B8BA7' }}>
+                💭 Park a thought (goes to Someday)
+              </p>
+              <input
+                value={parkText}
+                onChange={e => setParkText(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') void handleParkThought() }}
+                placeholder="Quick note..."
+                autoFocus
+                className="w-full px-3 py-2 rounded-xl text-sm outline-none mb-2"
+                style={{ background: '#252840', border: '1px solid #2D3150', color: '#E8E8F0' }}
+              />
+              <div className="flex gap-2">
+                <button
+                  onClick={() => void handleParkThought()}
+                  disabled={!parkText.trim()}
+                  className="flex-1 py-1.5 rounded-lg text-xs font-medium"
+                  style={{ background: parkText.trim() ? '#6C63FF' : '#2D3150', color: 'white' }}
+                >
+                  Save
+                </button>
+                <button
+                  onClick={() => { setParkOpen(false); setParkText('') }}
+                  className="py-1.5 px-3 rounded-lg text-xs"
+                  style={{ color: '#8B8BA7' }}
+                >
+                  ✕
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        <button
+          onClick={() => setParkOpen(p => !p)}
+          className="w-11 h-11 rounded-full flex items-center justify-center text-lg shadow-lg"
+          style={{
+            background: parkOpen ? '#6C63FF' : '#1A1D2E',
+            border: `1.5px solid ${parkOpen ? '#6C63FF' : '#2D3150'}`,
+          }}
+          aria-label="Park a thought"
+        >
+          💭
+        </button>
+      </div>
     </div>
   )
 }

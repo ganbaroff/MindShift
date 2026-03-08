@@ -56,6 +56,46 @@ export function RecoveryProtocol({ onDismiss }: Props) {
 
     setIsSubmitting(true)
 
+    // Try AI decomposition first — break the ONE thing into micro-steps
+    try {
+      const { data } = await supabase.functions.invoke('decompose-task', {
+        body: { taskTitle: title },
+      })
+      if (data?.steps && Array.isArray(data.steps) && data.steps.length > 0) {
+        // AI decomposed — add each step as a task
+        const steps = data.steps as string[]
+        const estMinutes = typeof data.estimatedMinutes === 'number' ? data.estimatedMinutes : 25
+        for (let i = 0; i < steps.length; i++) {
+          const stepTask: Task = {
+            id: crypto.randomUUID(),
+            title: steps[i],
+            pool: i === 0 ? 'now' : 'next',
+            status: 'active',
+            difficulty: 2,
+            estimatedMinutes: Math.max(5, Math.round(estMinutes / steps.length)),
+            createdAt: new Date().toISOString(),
+            completedAt: null,
+            snoozeCount: 0,
+            parentTaskId: null,
+            position: i,
+          }
+          addTask(stepTask)
+          if (userId) {
+            try {
+              await supabase.from('tasks').insert({
+                id: stepTask.id, user_id: userId, title: stepTask.title,
+                pool: stepTask.pool, status: stepTask.status, difficulty: stepTask.difficulty,
+                estimated_minutes: stepTask.estimatedMinutes, parent_task_id: null, position: stepTask.position,
+              } as never)
+            } catch { /* non-blocking */ }
+          }
+        }
+        onDismiss()
+        return
+      }
+    } catch { /* AI failed — fall back to manual task */ }
+
+    // Fallback: add as single task
     const newTask: Task = {
       id: crypto.randomUUID(),
       title,
@@ -76,19 +116,11 @@ export function RecoveryProtocol({ onDismiss }: Props) {
     if (userId) {
       try {
         await supabase.from('tasks').insert({
-          id: newTask.id,
-          user_id: userId,
-          title: newTask.title,
-          pool: newTask.pool,
-          status: newTask.status,
-          difficulty: newTask.difficulty,
-          estimated_minutes: newTask.estimatedMinutes,
-          parent_task_id: null,
-          position: newTask.position,
+          id: newTask.id, user_id: userId, title: newTask.title,
+          pool: newTask.pool, status: newTask.status, difficulty: newTask.difficulty,
+          estimated_minutes: newTask.estimatedMinutes, parent_task_id: null, position: newTask.position,
         } as never)
-      } catch {
-        // Store already has the task — Supabase error is non-blocking
-      }
+      } catch { /* non-blocking */ }
     }
 
     onDismiss()
