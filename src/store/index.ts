@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { persist, subscribeWithSelector } from 'zustand/middleware'
-import type { Task, AudioPreset, SessionPhase, EnergyLevel, CognitiveMode, AppMode, Psychotype, ActiveSession, WeeklyStats, Achievement } from '@/types'
-import { ACHIEVEMENT_DEFINITIONS } from '@/types'
+import type { Task, AudioPreset, SessionPhase, EnergyLevel, CognitiveMode, AppMode, Psychotype, ActiveSession, WeeklyStats, Achievement, WidgetConfig } from '@/types'
+import { ACHIEVEMENT_DEFINITIONS, WIDGET_DEFAULTS, WIDGET_DEFAULTS_GENERIC } from '@/types'
 
 // ── Psychotype derivation ─────────────────────────────────────────────────────
 // Derives a personality profile from onboarding choices.
@@ -97,7 +97,15 @@ interface PreferencesSlice {
   isProActive: () => boolean
 }
 
-export type AppStore = UserSlice & TaskSlice & SessionSlice & AudioSlice & ProgressSlice & PreferencesSlice
+interface GridSlice {
+  /** Ordered list of widget configs — drives BentoGrid layout */
+  gridWidgets: WidgetConfig[]
+  setGridWidgets: (widgets: WidgetConfig[]) => void
+  /** Reset to psychotype-driven defaults (called after onboarding or psychotype change) */
+  resetGridToDefaults: () => void
+}
+
+export type AppStore = UserSlice & TaskSlice & SessionSlice & AudioSlice & ProgressSlice & PreferencesSlice & GridSlice
 
 // ── Store ─────────────────────────────────────────────────────────────────────
 
@@ -261,7 +269,7 @@ export const useStore = create<AppStore>()(
         transitionBufferActive: false,
 
         setPreset: (preset) => set({ activePreset: preset }),
-        setVolume: (volume) => set({ audioVolume: Math.min(0.70, Math.max(0, volume)) }),
+        setVolume: (volume) => set({ audioVolume: Math.min(1.0, Math.max(0, volume)) }),
         setPlaying: (playing) => set({ audioPlaying: playing }),
         setFocusAnchor: (preset) => set({ focusAnchor: preset }),
         setTransitionBuffer: (active) => set({ transitionBufferActive: active }),
@@ -280,6 +288,17 @@ export const useStore = create<AppStore>()(
 
         setWeeklyStats: (stats) => set({ weeklyStats: stats }),
         hasAchievement: (key) => !!get().achievements.find(a => a.key === key)?.unlockedAt,
+
+        // ── Grid ─────────────────────────────────────────────────────────
+        gridWidgets: WIDGET_DEFAULTS_GENERIC,
+
+        setGridWidgets: (widgets) => set({ gridWidgets: widgets }),
+
+        resetGridToDefaults: () => {
+          const psychotype = get().psychotype
+          const defaults = psychotype ? WIDGET_DEFAULTS[psychotype] : WIDGET_DEFAULTS_GENERIC
+          set({ gridWidgets: defaults })
+        },
 
         // ── Preferences ────────────────────────────────────────────────────
         reducedStimulation: false,
@@ -317,6 +336,8 @@ export const useStore = create<AppStore>()(
           reducedStimulation: s.reducedStimulation,
           subscriptionTier: s.subscriptionTier,
           trialEndsAt: s.trialEndsAt,
+          gridWidgets: s.gridWidgets,
+          psychotype: s.psychotype,
         }),
       }
     )

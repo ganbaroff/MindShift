@@ -50,6 +50,70 @@ export interface Achievement {
   unlockedAt: string | null
 }
 
+// ── Bento grid widget system ───────────────────────────────────────────────────
+
+/**
+ * Widget types available in the home screen bento grid.
+ * Research: 3–5 widgets = optimal cognitive load for ADHD (Cognitive Load Theory).
+ */
+export type WidgetType =
+  | 'energy_check'   // Energy check-in (5 emoji)
+  | 'quick_focus'    // "Just 5 minutes" CBT activation
+  | 'now_pool'       // Current tasks (NOW pool)
+  | 'progress'       // XP + level overview
+  | 'audio_quick'    // Compact audio control
+
+export interface WidgetConfig {
+  id: string         // Stable unique identifier (type-based — one per type)
+  type: WidgetType
+  visible: boolean   // Can be hidden by user
+}
+
+/** Default widget orders by psychotype (Research: psychotype-driven progressive disclosure) */
+export const WIDGET_DEFAULTS: Record<Psychotype, WidgetConfig[]> = {
+  // Achiever: progress-forward, immediate task focus
+  achiever: [
+    { id: 'quick_focus', type: 'quick_focus', visible: true },
+    { id: 'now_pool',    type: 'now_pool',    visible: true },
+    { id: 'progress',   type: 'progress',    visible: true },
+    { id: 'energy_check', type: 'energy_check', visible: true },
+    { id: 'audio_quick', type: 'audio_quick', visible: false },
+  ],
+  // Explorer: novelty-first, flexible flow
+  explorer: [
+    { id: 'now_pool',    type: 'now_pool',    visible: true },
+    { id: 'energy_check', type: 'energy_check', visible: true },
+    { id: 'quick_focus', type: 'quick_focus', visible: true },
+    { id: 'audio_quick', type: 'audio_quick', visible: true },
+    { id: 'progress',   type: 'progress',    visible: false },
+  ],
+  // Connector: emotional baseline first, then tasks
+  connector: [
+    { id: 'energy_check', type: 'energy_check', visible: true },
+    { id: 'now_pool',    type: 'now_pool',    visible: true },
+    { id: 'progress',   type: 'progress',    visible: true },
+    { id: 'quick_focus', type: 'quick_focus', visible: true },
+    { id: 'audio_quick', type: 'audio_quick', visible: true },
+  ],
+  // Planner: structure-first, time-aware
+  planner: [
+    { id: 'energy_check', type: 'energy_check', visible: true },
+    { id: 'now_pool',    type: 'now_pool',    visible: true },
+    { id: 'audio_quick', type: 'audio_quick', visible: true },
+    { id: 'quick_focus', type: 'quick_focus', visible: true },
+    { id: 'progress',   type: 'progress',    visible: true },
+  ],
+}
+
+/** Default layout used before psychotype is determined */
+export const WIDGET_DEFAULTS_GENERIC: WidgetConfig[] = [
+  { id: 'energy_check', type: 'energy_check', visible: true },
+  { id: 'quick_focus',  type: 'quick_focus',  visible: true },
+  { id: 'now_pool',     type: 'now_pool',     visible: true },
+  { id: 'progress',    type: 'progress',    visible: true },
+  { id: 'audio_quick', type: 'audio_quick', visible: false },
+]
+
 export const ACHIEVEMENT_DEFINITIONS: Omit<Achievement, 'unlockedAt'>[] = [
   { key: 'first_seed',    name: 'First Seed',     emoji: '🌱', description: 'Complete your first task' },
   { key: 'five_min_hero', name: '5-Minute Hero',  emoji: '⚡', description: 'Start a task using the 5-minute rule' },

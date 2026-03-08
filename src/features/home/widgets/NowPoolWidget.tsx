@@ -1,0 +1,77 @@
+/**
+ * NowPoolWidget — compact NOW pool within the bento grid.
+ * Shows tasks + inline Add button. No NEXT pool here (separate widget later).
+ */
+import { motion, AnimatePresence } from 'framer-motion'
+import { Plus } from 'lucide-react'
+import { useState } from 'react'
+import { useStore } from '@/store'
+import { TaskCard } from '@/features/tasks/TaskCard'
+import { AddTaskModal } from '@/features/tasks/AddTaskModal'
+import { NOW_POOL_MAX } from '@/shared/lib/constants'
+
+export function NowPoolWidget() {
+  const { nowPool, cognitiveMode } = useStore()
+  const [addOpen, setAddOpen] = useState(false)
+
+  const activeTasks = nowPool.filter(t => t.status === 'active')
+  const visibleTasks = cognitiveMode === 'focused'
+    ? activeTasks.slice(0, 1)
+    : activeTasks.slice(0, NOW_POOL_MAX)
+
+  return (
+    <div className="flex flex-col gap-3">
+      {/* Header row */}
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-medium tracking-widest uppercase" style={{ color: '#8B8BA7' }}>
+          Now
+        </p>
+        <div className="flex items-center gap-2">
+          <span className="text-xs" style={{ color: '#6C63FF' }}>
+            {activeTasks.length}/{NOW_POOL_MAX}
+          </span>
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setAddOpen(true)}
+            className="w-6 h-6 rounded-full flex items-center justify-center"
+            style={{ background: '#6C63FF' }}
+            aria-label="Add task"
+          >
+            <Plus size={13} color="white" />
+          </motion.button>
+        </div>
+      </div>
+
+      {/* Task list */}
+      <AnimatePresence mode="popLayout">
+        {visibleTasks.length === 0 ? (
+          <motion.div
+            key="empty"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="py-5 text-center rounded-xl"
+            style={{ background: 'rgba(45,49,80,0.5)', border: '1.5px dashed #2D3150' }}
+          >
+            <p className="text-lg mb-1">🎉</p>
+            <p className="text-xs font-medium" style={{ color: '#E8E8F0' }}>Pool clear!</p>
+            <p className="text-xs mt-0.5" style={{ color: '#8B8BA7' }}>Tap + to add a task</p>
+          </motion.div>
+        ) : (
+          visibleTasks.map((task, i) => (
+            <TaskCard key={task.id} task={task} index={i} />
+          ))
+        )}
+      </AnimatePresence>
+
+      {/* Focused mode overflow hint */}
+      {cognitiveMode === 'focused' && activeTasks.length > 1 && (
+        <p className="text-xs text-center" style={{ color: '#8B8BA7' }}>
+          +{activeTasks.length - 1} more in queue — finish this first 🎯
+        </p>
+      )}
+
+      <AddTaskModal open={addOpen} onClose={() => setAddOpen(false)} />
+    </div>
+  )
+}
