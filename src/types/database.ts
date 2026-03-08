@@ -77,6 +77,11 @@ export interface UserRow {
   reduced_stimulation: boolean
   // Migration 003 — bento grid widget layout
   dashboard_config: DashboardConfig
+  // Migration 005 — legal consent tracking
+  terms_accepted_at:  string | null
+  terms_version:      string | null
+  age_confirmed:      boolean
+  cookie_accepted_at: string | null
 }
 
 // Insert: minimal required fields (server fills the rest with defaults)

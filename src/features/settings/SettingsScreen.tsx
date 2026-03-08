@@ -260,7 +260,7 @@ export default function SettingsScreen() {
       </div>
 
       {/* Legal links */}
-      <div className="flex justify-center gap-4 mt-4">
+      <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 mt-4">
         <Link
           to="/privacy"
           className="text-xs transition-colors duration-200 hover:underline"
@@ -275,6 +275,14 @@ export default function SettingsScreen() {
           style={{ color: '#3D405B' }}
         >
           Terms of Service
+        </Link>
+        <span className="text-xs" style={{ color: '#2D3150' }}>·</span>
+        <Link
+          to="/cookie-policy"
+          className="text-xs transition-colors duration-200 hover:underline"
+          style={{ color: '#3D405B' }}
+        >
+          Cookie Policy
         </Link>
       </div>
 
