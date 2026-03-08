@@ -574,29 +574,67 @@ export default function FocusScreen() {
     const rm = Math.floor(recoverySeconds / 60)
     const rs = recoverySeconds % 60
     return (
+      // ── Soft recovery suggestion (NOT a hard lock) ────────────────────────────
+      // Research (March 2025): forcibly interrupting ADHD hyperfocus causes irritation
+      // and makes re-entry much harder. We strongly suggest a break, but let the user
+      // bypass if they're in a hyperfocus state. The countdown is an encouragement, not a gate.
       <div
         className="flex flex-col items-center justify-center min-h-screen px-6 text-center"
         style={{ background: '#0F1117' }}
       >
-        <div className="text-5xl mb-6">🌿</div>
-        <h2 className="text-2xl font-bold mb-2" style={{ color: '#FFE66D' }}>
-          Recovery Time
-        </h2>
-        <p className="text-sm mb-8 max-w-xs leading-relaxed" style={{ color: '#8B8BA7' }}>
-          You completed 90 minutes of deep focus. Your brain needs a real break — step away, breathe, stretch.
-        </p>
-        <div
-          className="px-8 py-4 rounded-2xl mb-4"
-          style={{ background: '#1A1D2E', border: '1.5px solid #2D3150' }}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.4 }}
+          className="flex flex-col items-center"
         >
-          <p className="font-mono text-3xl font-bold" style={{ color: '#FFE66D' }}>
-            {rm}:{rs.toString().padStart(2, '0')}
+          <div className="text-5xl mb-6">🌿</div>
+          <h2 className="text-2xl font-bold mb-2" style={{ color: '#4ECDC4' }}>
+            90 minutes! Amazing 🌊
+          </h2>
+          <p className="text-sm mb-6 max-w-xs leading-relaxed" style={{ color: '#8B8BA7' }}>
+            You just did 90 minutes of deep focus. Your brain consolidates learning during rest —
+            even a short break helps.
           </p>
-          <p className="text-xs mt-1" style={{ color: '#8B8BA7' }}>until next session</p>
-        </div>
-        <p className="text-xs" style={{ color: '#8B8BA7' }}>
-          Skipping recovery reduces future focus quality 🧠
-        </p>
+
+          {/* Gentle suggestions */}
+          <div
+            className="w-full max-w-xs mb-6 p-4 rounded-2xl text-left"
+            style={{ background: '#1A1D2E', border: '1.5px solid #2D3150' }}
+          >
+            <p className="text-xs font-medium mb-3" style={{ color: '#8B8BA7' }}>Try one of these 🌱</p>
+            {['Drink a glass of water', 'Look away from the screen', 'Take 5 deep breaths', 'Stretch your neck and shoulders'].map(s => (
+              <p key={s} className="text-sm mb-1.5" style={{ color: '#E8E8F0' }}>· {s}</p>
+            ))}
+          </div>
+
+          {/* Timer — informational, not a gate */}
+          <div
+            className="px-8 py-3 rounded-2xl mb-6"
+            style={{ background: '#1A1D2E', border: '1.5px solid #2D3150' }}
+          >
+            <p className="font-mono text-2xl font-bold" style={{ color: '#4ECDC4' }}>
+              {rm}:{rs.toString().padStart(2, '0')}
+            </p>
+            <p className="text-xs mt-1" style={{ color: '#8B8BA7' }}>suggested rest time</p>
+          </div>
+
+          {/* Continue anyway — hyperfocus support */}
+          <button
+            onClick={() => {
+              if (recoveryIntervalRef.current) clearInterval(recoveryIntervalRef.current)
+              setScreen('setup')
+            }}
+            className="text-xs px-5 py-2 rounded-xl transition-all duration-200"
+            style={{
+              background: 'transparent',
+              border: '1.5px solid #2D3150',
+              color: '#8B8BA7',
+            }}
+          >
+            I'm in hyperfocus — continue →
+          </button>
+        </motion.div>
       </div>
     )
   }

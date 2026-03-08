@@ -24,7 +24,7 @@ const PrivacyPage      = lazy(() => import('@/features/legal/PrivacyPage'))
 const TermsPage        = lazy(() => import('@/features/legal/TermsPage'))
 
 export default function App() {
-  const { setUser, updateLastSession, lastSessionAt, recoveryShown, setRecoveryShown, onboardingCompleted } = useStore()
+  const { setUser, updateLastSession, lastSessionAt, recoveryShown, setRecoveryShown } = useStore()
 
   // ── Auth listener ───────────────────────────────────────────────────────────
   useEffect(() => {
@@ -74,13 +74,17 @@ export default function App() {
             <Route path="/terms"   element={<TermsPage />} />
 
             <Route element={<AuthGuard />}>
+              {/* /onboarding — optional deep-setup, accessible from Settings */}
               <Route path="/onboarding" element={<OnboardingFlow />} />
+
               <Route element={<AppShell />}>
-                <Route index element={
-                  onboardingCompleted
-                    ? <HomeScreen />
-                    : <Navigate to="/onboarding" replace />
-                } />
+                {/*
+                  Progressive disclosure: HomeScreen is ALWAYS the entry point.
+                  New users see a QuickSetupCard embedded in HomeScreen —
+                  no forced tutorial redirect (per ADHD UX research: progressive
+                  disclosure beats wizard flows for neurodivergent users).
+                */}
+                <Route index          element={<HomeScreen />} />
                 <Route path="/focus"    element={<FocusScreen />} />
                 <Route path="/tasks"    element={<TasksScreen />} />
                 <Route path="/audio"    element={<AudioScreen />} />

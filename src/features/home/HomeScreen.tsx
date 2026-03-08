@@ -1,3 +1,14 @@
+/**
+ * HomeScreen
+ *
+ * Progressive disclosure redesign (March 2025):
+ * - New users see a QuickSetupCard instead of being redirected to forced /onboarding tutorial
+ * - App is immediately usable: tasks, energy check-in, pools all work without setup
+ * - QuickSetupCard is dismissible ("Start exploring" skips setup)
+ * - Behaviorally activated: users learn by doing, not by reading wizard steps
+ * - /onboarding route still exists for explicit deep-setup (accessible from Settings)
+ */
+
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -8,25 +19,141 @@ import { EnergyCheckin } from './EnergyCheckin'
 import { TaskCard } from '@/features/tasks/TaskCard'
 import { AddTaskModal } from '@/features/tasks/AddTaskModal'
 import { hapticTap } from '@/shared/lib/haptic'
-import type { EnergyLevel } from '@/types'
+import type { EnergyLevel, AppMode } from '@/types'
 import { NOW_POOL_MAX } from '@/shared/lib/constants'
 
-// ── Component ─────────────────────────────────────────────────────────────────
+// ── Quick Setup Card (progressive disclosure — replaces forced onboarding) ─────
+
+const MODE_OPTIONS: { mode: AppMode; emoji: string; label: string; sub: string }[] = [
+  { mode: 'minimal', emoji: '🎯', label: 'One thing at a time',    sub: 'I just need to focus on one task right now' },
+  { mode: 'habit',   emoji: '🌱', label: 'Build daily habits',     sub: 'I want consistency without overwhelm' },
+  { mode: 'system',  emoji: '🗂️', label: 'Manage everything',      sub: 'I want full visibility over my projects' },
+]
+
+interface QuickSetupCardProps {
+  onDone: () => void
+}
+
+function QuickSetupCard({ onDone }: QuickSetupCardProps) {
+  const { setAppMode, setCognitiveMode, setOnboardingCompleted, userId } = useStore()
+  const [selected, setSelected] = useState<AppMode | null>(null)
+  const [saving, setSaving] = useState(false)
+
+  const handleSelect = async (mode: AppMode) => {
+    setSelected(mode)
+    setSaving(true)
+
+    setAppMode(mode)
+    // Sensible default: minimal+habit → focused mode; system → overview
+    setCognitiveMode(mode === 'system' ? 'overview' : 'focused')
+    setOnboardingCompleted()
+
+    // Non-blocking Supabase persist
+    if (userId) {
+      const { supabase } = await import('@/shared/lib/supabase')
+      await supabase.from('users').upsert({
+        id: userId,
+        app_mode: mode,
+        cognitive_mode: mode === 'system' ? 'overview' : 'focused',
+        onboarding_completed: true,
+      } as never).then(() => { /* non-blocking */ })
+    }
+
+    setSaving(false)
+    onDone()
+  }
+
+  const handleSkip = () => {
+    // Sensible defaults — user can change in Settings anytime
+    setOnboardingCompleted()
+    onDone()
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 24 }}
+      transition={{ duration: 0.35 }}
+      className="mx-5 mb-6 rounded-2xl overflow-hidden"
+      style={{ background: '#1A1D2E', border: '1.5px solid #2D3150' }}
+    >
+      {/* Header */}
+      <div className="p-4 pb-3">
+        <div className="flex items-center gap-2 mb-1">
+          <span>👋</span>
+          <h2 className="text-base font-bold" style={{ color: '#E8E8F0' }}>
+            Welcome to MindShift
+          </h2>
+        </div>
+        <p className="text-xs leading-relaxed" style={{ color: '#8B8BA7' }}>
+          The app is ready to use. Pick a style to personalise your experience — or skip and explore.
+        </p>
+      </div>
+
+      {/* Mode options */}
+      <div className="px-4 flex flex-col gap-2 pb-3">
+        {MODE_OPTIONS.map(({ mode, emoji, label, sub }) => {
+          const isSelected = selected === mode
+          return (
+            <button
+              key={mode}
+              onClick={() => void handleSelect(mode)}
+              disabled={saving}
+              className="flex items-start gap-3 p-3 rounded-xl text-left transition-all duration-150"
+              style={{
+                background: isSelected ? 'rgba(108,99,255,0.15)' : '#252840',
+                border: `1.5px solid ${isSelected ? '#6C63FF' : 'transparent'}`,
+              }}
+            >
+              <span className="text-lg mt-0.5 shrink-0">{emoji}</span>
+              <div>
+                <p className="text-sm font-semibold" style={{ color: isSelected ? '#6C63FF' : '#E8E8F0' }}>
+                  {label}
+                </p>
+                <p className="text-xs mt-0.5" style={{ color: '#8B8BA7' }}>{sub}</p>
+              </div>
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Skip */}
+      <div className="px-4 pb-4">
+        <button
+          onClick={handleSkip}
+          className="w-full py-2 text-xs text-center transition-colors duration-200"
+          style={{ color: '#8B8BA7' }}
+        >
+          Skip — I'll explore on my own →
+        </button>
+      </div>
+    </motion.div>
+  )
+}
+
+// ── Main component ─────────────────────────────────────────────────────────────
 
 export default function HomeScreen() {
   const {
     nowPool, nextPool, energyLevel, setEnergyLevel,
     cognitiveMode, appMode, focusAnchor,
     startSession, setPhase,
+    onboardingCompleted,
   } = useStore()
   const reducedMotion = useReducedMotion()
   const navigate = useNavigate()
 
-  const [energySet, setEnergySet] = useState(false)
+  const [energySet, setEnergySet]       = useState(false)
   const [nextExpanded, setNextExpanded] = useState(false)
-  const [addOpen, setAddOpen] = useState(false)
+  const [addOpen, setAddOpen]           = useState(false)
+  // Local state to animate away the QuickSetupCard after completion
+  const [setupDone, setSetupDone]       = useState(false)
 
-  // ── "Just 5 Minutes" — one-tap focus ────────────────────────────────────────
+  // Show setup card for users who haven't completed setup yet
+  const showQuickSetup = !onboardingCompleted && !setupDone
+
+  // ── "Just 5 Minutes" — behavioural activation (CBT-backed) ─────────────────
   const handleQuickFocus = () => {
     hapticTap()
     startSession(null, 5, focusAnchor ?? 'brown')
@@ -38,7 +165,7 @@ export default function HomeScreen() {
   const activeTasks = nowPool.filter(t => t.status === 'active')
   const nextTasks   = nextPool.filter(t => t.status === 'active')
 
-  // Focused mode: show one task at a time; system mode: all
+  // Focused mode: show one task at a time; overview/system: all
   const visibleNow = cognitiveMode === 'focused' ? activeTasks.slice(0, 1) : activeTasks.slice(0, NOW_POOL_MAX)
 
   const handleEnergySelect = (level: EnergyLevel) => {
@@ -51,7 +178,7 @@ export default function HomeScreen() {
   const greeting =
     hour < 12 ? 'Good morning ☀️' :
     hour < 17 ? 'Good afternoon 🌤️' :
-    '  Good evening 🌙'
+    'Good evening 🌙'
 
   return (
     <div className="flex flex-col min-h-full pb-28">
@@ -80,6 +207,13 @@ export default function HomeScreen() {
         </motion.p>
       </div>
 
+      {/* ── Quick Setup Card — progressive disclosure for new users ──────────── */}
+      <AnimatePresence>
+        {showQuickSetup && (
+          <QuickSetupCard onDone={() => setSetupDone(true)} />
+        )}
+      </AnimatePresence>
+
       {/* Energy Check-in */}
       <motion.div
         initial={reducedMotion ? {} : { opacity: 0, y: 10 }}
@@ -98,7 +232,7 @@ export default function HomeScreen() {
         />
       </motion.div>
 
-      {/* ── JUST 5 MINUTES — the ADHD gateway ─────────────────────────────────── */}
+      {/* ── JUST 5 MINUTES — behavioural activation (CBT-backed, Gemini research) */}
       <motion.button
         initial={reducedMotion ? {} : { opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
