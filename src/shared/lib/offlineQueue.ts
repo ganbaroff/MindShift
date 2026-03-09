@@ -43,6 +43,8 @@ function getQueue(userId?: string): QueueItem[] {
     const parsed = JSON.parse(raw)
     return Array.isArray(parsed) ? (parsed as QueueItem[]) : []
   } catch {
+    // Self-heal corrupted JSON — clear the key so next enqueue can start fresh
+    try { localStorage.removeItem(queueKey(userId)) } catch { /* ignore */ }
     return []
   }
 }
