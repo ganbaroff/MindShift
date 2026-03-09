@@ -6,9 +6,9 @@ import type { SessionPhase } from '@/types'
 
 const RADIUS = 90
 const STROKE = 10
-const SIZE = (RADIUS + STROKE + 2) * 2
-const CX = SIZE / 2
-const CY = SIZE / 2
+export const ARC_SIZE = (RADIUS + STROKE + 2) * 2
+const CX = ARC_SIZE / 2
+const CY = ARC_SIZE / 2
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS
 
 const PHASE_COLORS: Record<SessionPhase, string> = {
@@ -35,23 +35,29 @@ interface Props {
   phase: SessionPhase
   showDigits: boolean
   onToggleDigits: () => void
+  disableToggle?: boolean // Bolt 6.16: in flow phase, disable tap-to-show
   size?: number
 }
 
-export function ArcTimer({ progress, remainingSeconds, phase, showDigits, onToggleDigits, size = SIZE }: Props) {
+export function ArcTimer({ progress, remainingSeconds, phase, showDigits, onToggleDigits, disableToggle = false, size = ARC_SIZE }: Props) {
   const { shouldAnimate } = useMotion()
-  const scale = size / SIZE
+  const scale = size / ARC_SIZE
 
   const offset = CIRCUMFERENCE * (1 - Math.max(0, Math.min(1, progress)))
   const arcColor = PHASE_COLORS[phase]
   const isPulsing = phase === 'struggle' && shouldAnimate
 
+  const handleClick = disableToggle ? undefined : onToggleDigits
+
   return (
-    <button
-      onClick={onToggleDigits}
+    <motion.button
+      onClick={handleClick}
+      // Bolt 6.16: smooth size transition between phases
+      animate={{ width: size, height: size }}
+      transition={shouldAnimate ? { duration: 1.2, ease: 'easeInOut' } : { duration: 0 }}
       className="relative flex items-center justify-center focus:outline-none"
-      style={{ width: size, height: size }}
-      aria-label={showDigits ? 'Hide time' : 'Show remaining time'}
+      style={{ cursor: disableToggle ? 'default' : 'pointer' }}
+      aria-label={disableToggle ? 'Focus timer' : showDigits ? 'Hide time' : 'Show remaining time'}
     >
       {/* Struggle phase pulsing glow */}
       {isPulsing && (
@@ -66,7 +72,7 @@ export function ArcTimer({ progress, remainingSeconds, phase, showDigits, onTogg
       <svg
         width={size}
         height={size}
-        viewBox={`0 0 ${SIZE} ${SIZE}`}
+        viewBox={`0 0 ${ARC_SIZE} ${ARC_SIZE}`}
         style={{ transform: 'rotate(-90deg)' }}
         aria-hidden="true"
       >
@@ -93,12 +99,11 @@ export function ArcTimer({ progress, remainingSeconds, phase, showDigits, onTogg
         />
       </svg>
 
-      {/* Center content — shows when tapped */}
+      {/* Center content — shows when tapped (hidden in flow phase) */}
       <div
         className="absolute inset-0 flex flex-col items-center justify-center"
-        style={{ transform: 'scale(1)' }}
       >
-        {showDigits ? (
+        {showDigits && !disableToggle ? (
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -107,7 +112,7 @@ export function ArcTimer({ progress, remainingSeconds, phase, showDigits, onTogg
             <span
               className="font-mono font-bold tabular-nums"
               style={{
-                fontSize: size * 0.18 * scale,
+                fontSize: ARC_SIZE * 0.18 * scale,
                 color: arcColor,
                 letterSpacing: '0.02em',
               }}
@@ -115,7 +120,7 @@ export function ArcTimer({ progress, remainingSeconds, phase, showDigits, onTogg
               {formatTime(remainingSeconds)}
             </span>
           </motion.div>
-        ) : (
+        ) : !disableToggle ? (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.3 }}
@@ -124,8 +129,8 @@ export function ArcTimer({ progress, remainingSeconds, phase, showDigits, onTogg
           >
             tap
           </motion.div>
-        )}
+        ) : null}
       </div>
-    </button>
+    </motion.button>
   )
 }

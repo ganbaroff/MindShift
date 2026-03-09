@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'motion/react'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { useStore } from '@/store'
-import { ArcTimer } from './ArcTimer'
+import { ArcTimer, ARC_SIZE } from './ArcTimer'
 import { useAudioEngine } from '@/shared/hooks/useAudioEngine'
 import { supabase } from '@/shared/lib/supabase'
 import { logError } from '@/shared/lib/logger'
@@ -12,7 +12,8 @@ import { hapticDone } from '@/shared/lib/haptic'
 import { ACHIEVEMENT_DEFINITIONS } from '@/types'
 import {
   TIMER_PRESETS,
-  PHASE_RELEASE_MINUTES,
+  PHASE_STRUGGLE_MINUTES,
+  PHASE_FLOW_MINUTES,
   MAX_SESSION_MINUTES,
   RECOVERY_LOCK_MINUTES,
   NATURE_BUFFER_SECONDS,
@@ -29,9 +30,9 @@ const PHASE_LABELS: Partial<Record<SessionPhase, string>> = {
 }
 
 function getPhase(elapsedMinutes: number): SessionPhase {
-  if (elapsedMinutes < PHASE_RELEASE_MINUTES) return 'struggle'
-  if (elapsedMinutes < PHASE_RELEASE_MINUTES + 5) return 'release'   // 5-min transition window
-  return 'flow'
+  if (elapsedMinutes < PHASE_STRUGGLE_MINUTES) return 'struggle'   // 0–7 min: high-contrast, large timer
+  if (elapsedMinutes < PHASE_FLOW_MINUTES) return 'release'        // 7–15 min: timer shrinks, slows
+  return 'flow'                                                     // 15+ min: digits vanish, ambient arc
 }
 
 /** Smart default duration based on energy — less energy = shorter session */
@@ -43,7 +44,44 @@ function getSmartDuration(energy: EnergyLevel): number {
 
 // ── Screen states ──────────────────────────────────────────────────────────────
 
-type ScreenState = 'setup' | 'session' | 'interrupt-confirm' | 'recovery-lock' | 'nature-buffer'
+type ScreenState = 'setup' | 'session' | 'interrupt-confirm' | 'bookmark-capture' | 'recovery-lock' | 'nature-buffer'
+
+// ── Interrupt bookmark (localStorage) ─────────────────────────────────────────
+
+interface InterruptBookmark {
+  text: string
+  taskId: string | null
+  taskTitle: string | null
+  timestamp: string
+}
+
+const BOOKMARK_KEY = 'ms_interrupt_bookmark'
+
+function loadBookmark(): InterruptBookmark | null {
+  try {
+    const raw = localStorage.getItem(BOOKMARK_KEY)
+    return raw ? JSON.parse(raw) : null
+  } catch { return null }
+}
+
+function saveBookmark(bookmark: InterruptBookmark): void {
+  try { localStorage.setItem(BOOKMARK_KEY, JSON.stringify(bookmark)) } catch { /* silent */ }
+}
+
+function clearBookmark(): void {
+  try { localStorage.removeItem(BOOKMARK_KEY) } catch { /* silent */ }
+}
+
+// ── Phase-based timer scale ───────────────────────────────────────────────────
+
+function getTimerSize(phase: SessionPhase): number {
+  switch (phase) {
+    case 'struggle': return ARC_SIZE          // 100% — large, high-contrast
+    case 'release':  return Math.round(ARC_SIZE * 0.85)  // 85% — shrinking
+    case 'flow':     return Math.round(ARC_SIZE * 0.75)  // 75% — ambient
+    default:         return ARC_SIZE
+  }
+}
 
 // ── Component ──────────────────────────────────────────────────────────────────
 
@@ -88,6 +126,10 @@ export default function FocusScreen() {
   const bufferIntervalRef   = useRef<ReturnType<typeof setInterval> | null>(null)
   const sessionSavedRef     = useRef(false)
   const quickStartedRef     = useRef(false)
+
+  // ── Interrupt bookmark ──────────────────────────────────────────────────────
+  const [bookmarkText, setBookmarkText] = useState('')
+  const [savedBookmark] = useState<InterruptBookmark | null>(() => loadBookmark())
 
   // ── "Park the thought" quick-capture ──────────────────────────────────────
   const [parkOpen, setParkOpen] = useState(false)
@@ -325,8 +367,27 @@ export default function FocusScreen() {
     startInterval()
   }, [startInterval])
 
-  // ── Confirm end from interrupt screen ─────────────────────────────────────────
+  // ── Confirm end from interrupt screen → bookmark capture ────────────────────
   const handleConfirmStop = useCallback(() => {
+    setBookmarkText('')
+    setScreen('bookmark-capture')
+  }, [])
+
+  // ── Save bookmark and end session ──────────────────────────────────────────
+  const handleBookmarkSave = useCallback(() => {
+    const text = bookmarkText.trim()
+    if (text) {
+      saveBookmark({
+        text,
+        taskId: selectedTask?.id ?? null,
+        taskTitle: selectedTask?.title ?? null,
+        timestamp: new Date().toISOString(),
+      })
+    }
+    handleSessionEnd(false)
+  }, [bookmarkText, selectedTask, handleSessionEnd])
+
+  const handleBookmarkSkip = useCallback(() => {
     handleSessionEnd(false)
   }, [handleSessionEnd])
 
@@ -352,6 +413,7 @@ export default function FocusScreen() {
   const progress  = durationSecRef.current > 0 ? 1 - remainingSeconds / durationSecRef.current : 0
   const isFlow    = sessionPhase === 'flow'
   const elapsedMin = Math.floor(elapsedSeconds / 60)
+  const timerSize = getTimerSize(sessionPhase)
 
   // ── Energy label for setup screen ─────────────────────────────────────────
   const energyLabel = useMemo(() => {
@@ -428,6 +490,46 @@ export default function FocusScreen() {
             {energyLabel.text}
           </p>
         </div>
+
+        {/* Interrupt bookmark anchor (Bolt 6.16) */}
+        {savedBookmark && (
+          <div
+            className="mx-5 mb-5 p-4 rounded-2xl"
+            style={{ background: '#1A1D2E', border: '1.5px solid #6C63FF33' }}
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <span>📌</span>
+              <p className="text-xs font-medium" style={{ color: '#8B8BA7' }}>
+                PICK UP WHERE YOU LEFT OFF
+              </p>
+            </div>
+            <p className="text-sm font-medium mb-3" style={{ color: '#E8E8F0' }}>
+              {savedBookmark.text}
+            </p>
+            <div className="flex gap-2">
+              {savedBookmark.taskId && allTasks.find(t => t.id === savedBookmark.taskId) && (
+                <button
+                  onClick={() => {
+                    const task = allTasks.find(t => t.id === savedBookmark.taskId)
+                    if (task) setSelectedTask(task)
+                    clearBookmark()
+                  }}
+                  className="flex-1 py-2 rounded-xl text-xs font-semibold"
+                  style={{ background: 'rgba(108,99,255,0.15)', border: '1.5px solid #6C63FF', color: '#6C63FF' }}
+                >
+                  Continue task →
+                </button>
+              )}
+              <button
+                onClick={clearBookmark}
+                className="py-2 px-4 rounded-xl text-xs"
+                style={{ color: '#8B8BA7', border: '1.5px solid #2D3150' }}
+              >
+                Dismiss
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Task picker */}
         {allTasks.length > 0 && (
@@ -697,6 +799,70 @@ export default function FocusScreen() {
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
+  // BOOKMARK CAPTURE SCREEN (Bolt 6.16)
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  if (screen === 'bookmark-capture') {
+    return (
+      <div
+        className="flex flex-col items-center justify-center min-h-screen px-6 text-center"
+        style={{ background: '#0F1117' }}
+      >
+        <motion.div
+          initial={shouldAnimate ? { opacity: 0, scale: 0.95 } : {}}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={t()}
+          className="flex flex-col items-center w-full max-w-xs"
+        >
+          <div className="text-4xl mb-4">📌</div>
+          <h2 className="text-xl font-bold mb-2" style={{ color: '#E8E8F0' }}>
+            Park your progress
+          </h2>
+          <p className="text-sm mb-6 leading-relaxed" style={{ color: '#8B8BA7' }}>
+            What were you working on? We'll remind you next time.
+          </p>
+
+          <input
+            value={bookmarkText}
+            onChange={e => setBookmarkText(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter' && bookmarkText.trim()) handleBookmarkSave() }}
+            placeholder="e.g. Finishing the header layout..."
+            autoFocus
+            className="w-full px-4 py-3 rounded-xl text-sm outline-none mb-4"
+            style={{ background: '#1A1D2E', border: '1.5px solid #2D3150', color: '#E8E8F0' }}
+          />
+
+          <div className="flex flex-col gap-3 w-full">
+            <button
+              onClick={handleBookmarkSave}
+              disabled={!bookmarkText.trim()}
+              className="w-full py-3.5 rounded-2xl font-semibold text-sm transition-all duration-200"
+              style={{
+                background: bookmarkText.trim() ? 'rgba(108,99,255,0.15)' : '#1A1D2E',
+                border: `1.5px solid ${bookmarkText.trim() ? '#6C63FF' : '#2D3150'}`,
+                color: bookmarkText.trim() ? '#6C63FF' : '#8B8BA7',
+              }}
+            >
+              Save & Exit 📌
+            </button>
+            <button
+              onClick={handleBookmarkSkip}
+              className="w-full py-3 rounded-2xl font-medium text-sm transition-all duration-200"
+              style={{
+                background: 'transparent',
+                border: '1.5px solid #2D3150',
+                color: '#8B8BA7',
+              }}
+            >
+              Skip
+            </button>
+          </div>
+        </motion.div>
+      </div>
+    )
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
   // ACTIVE SESSION SCREEN
   // ─────────────────────────────────────────────────────────────────────────────
 
@@ -722,19 +888,21 @@ export default function FocusScreen() {
         )}
       </AnimatePresence>
 
-      {/* Arc timer */}
+      {/* Arc timer — phase-based sizing (Bolt 6.16) */}
       <ArcTimer
         progress={progress}
         remainingSeconds={remainingSeconds}
         phase={sessionPhase}
-        showDigits={showDigits}
+        showDigits={isFlow ? false : showDigits}
         onToggleDigits={() => setShowDigits(d => !d)}
+        disableToggle={isFlow}
+        size={timerSize}
       />
 
-      {/* Task title */}
+      {/* Task title — fades to 30% in flow */}
       {selectedTask && (
         <motion.p
-          animate={{ opacity: isFlow ? 0.5 : 1 }}
+          animate={{ opacity: isFlow ? 0.3 : 1 }}
           transition={t()}
           className="text-base font-semibold mt-6 text-center max-w-xs leading-snug"
           style={{ color: '#E8E8F0' }}

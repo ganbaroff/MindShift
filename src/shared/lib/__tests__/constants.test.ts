@@ -3,6 +3,7 @@ import {
   RECOVERY_THRESHOLD_HOURS,
   NOW_POOL_MAX,
   NEXT_POOL_MAX,
+  PHASE_STRUGGLE_MINUTES,
   PHASE_RELEASE_MINUTES,
   MAX_SESSION_MINUTES,
   RECOVERY_LOCK_MINUTES,
@@ -32,9 +33,17 @@ describe('constants — invariant sanity checks', () => {
     expect(NEXT_POOL_MAX).toBeGreaterThan(NOW_POOL_MAX)
   })
 
-  // ── Focus phases
-  it('release phase is after 15 minutes — struggle-to-flow threshold', () => {
+  // ── Focus phases (Research #2: neuroscience three-phase model)
+  it('struggle phase ends at 7 minutes — attention ramp-up period', () => {
+    expect(PHASE_STRUGGLE_MINUTES).toBe(7)
+  })
+
+  it('release/flow threshold is at 15 minutes', () => {
     expect(PHASE_RELEASE_MINUTES).toBe(15)
+  })
+
+  it('struggle < release — phases are ordered correctly', () => {
+    expect(PHASE_STRUGGLE_MINUTES).toBeLessThan(PHASE_RELEASE_MINUTES)
   })
 
   it('max session is capped at 90 minutes (mandatory recovery after)', () => {

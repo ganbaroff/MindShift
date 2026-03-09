@@ -4,9 +4,11 @@ export const RECOVERY_THRESHOLD_HOURS = 72  // Research #7: RSD spiral peaks at 
 export const NOW_POOL_MAX = 3
 export const NEXT_POOL_MAX = 6
 
-// Focus session phase thresholds (minutes)
-export const PHASE_RELEASE_MINUTES = 15
-export const PHASE_FLOW_MINUTES = 15
+// Focus session phase thresholds (minutes) — Research #2: neuroscience
+// Struggle → Release → Flow progression matches ADHD attention ramp-up
+export const PHASE_STRUGGLE_MINUTES = 7   // 0–7 min: high-contrast, large timer
+export const PHASE_RELEASE_MINUTES = 15   // 7–15 min: timer shrinks, animations slow
+export const PHASE_FLOW_MINUTES = 15      // 15+ min: digits vanish, ambient arc only
 export const MAX_SESSION_MINUTES = 90
 export const RECOVERY_LOCK_MINUTES = 10
 
@@ -28,7 +30,7 @@ export const XP_ENERGY_MULTIPLIER_LOW = 1.2   // energy 1-2 → bonus
 export const XP_ENERGY_MULTIPLIER_HIGH = 0.8  // energy 4-5 → baseline
 
 // Timer presets (minutes)
-export const TIMER_PRESETS = [5, 25, 52] as const
+export const TIMER_PRESETS = [5, 25, 52, 90] as const
 
 // Psychotype detection (day 7+)
 export const PSYCHOTYPE_DETECTION_DAYS = 7
