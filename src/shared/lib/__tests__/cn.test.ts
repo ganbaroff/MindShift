@@ -7,6 +7,7 @@ describe('cn — classname utility', () => {
   })
 
   it('filters out false values', () => {
+    // eslint-disable-next-line no-constant-binary-expression
     expect(cn('a', false && 'b', 'c')).toBe('a c')
   })
 
