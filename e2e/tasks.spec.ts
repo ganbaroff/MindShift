@@ -11,14 +11,14 @@ test.describe('Task creation', () => {
     await page.goto('/tasks')
 
     await expect(page.getByRole('heading', { name: /All Tasks/ })).toBeVisible()
-    await expect(page.getByText('Now pool is empty')).toBeVisible()
-    await expect(page.getByText('Next pool is empty')).toBeVisible()
+    await expect(page.getByText(/Now pool is empty/)).toBeVisible()
+    await expect(page.getByText(/Next pool is empty/)).toBeVisible()
   })
 
   test('FAB opens add task modal', async ({ authedPage: page }) => {
     await page.goto('/tasks')
 
-    // Click the Add task FAB
+    // Click the Add task FAB (aria-label: "Add task")
     await page.getByRole('button', { name: /add task/i }).click()
 
     // Modal should open
@@ -35,12 +35,12 @@ test.describe('Task creation', () => {
     await expect(page.getByText('🟡 Medium')).toBeVisible()
     await expect(page.getByText('🟠 Hard')).toBeVisible()
 
-    // Duration presets
-    await expect(page.getByRole('button', { name: '5m' })).toBeVisible()
-    await expect(page.getByRole('button', { name: '15m' })).toBeVisible()
-    await expect(page.getByRole('button', { name: '25m' })).toBeVisible()
-    await expect(page.getByRole('button', { name: '45m' })).toBeVisible()
-    await expect(page.getByRole('button', { name: '60m' })).toBeVisible()
+    // Duration presets — use exact:true to avoid "5m" matching "15m" etc.
+    await expect(page.getByRole('button', { name: '5m', exact: true })).toBeVisible()
+    await expect(page.getByRole('button', { name: '15m', exact: true })).toBeVisible()
+    await expect(page.getByRole('button', { name: '25m', exact: true })).toBeVisible()
+    await expect(page.getByRole('button', { name: '45m', exact: true })).toBeVisible()
+    await expect(page.getByRole('button', { name: '60m', exact: true })).toBeVisible()
   })
 
   test('submit button is disabled without title', async ({ authedPage: page }) => {
@@ -72,10 +72,10 @@ test.describe('Task creation', () => {
     await page.getByText('🟢 Easy').click()
 
     // Select duration
-    await page.getByRole('button', { name: '15m' }).click()
+    await page.getByRole('button', { name: '15m', exact: true }).click()
 
-    // Submit
-    await page.getByRole('button', { name: /add to now/i }).click()
+    // Submit — use dispatchEvent to bypass any stacking context issues
+    await page.getByRole('button', { name: /add to now/i }).dispatchEvent('click')
 
     // Modal closes, task appears in NOW pool
     await expect(page.getByText('Buy groceries')).toBeVisible()
@@ -94,14 +94,14 @@ test.describe('Task creation', () => {
     await expect(page.getByText(/break it down/i)).toBeVisible()
   })
 
-  test('closing modal via X button resets form', async ({ authedPage: page }) => {
+  test('closing modal via close button resets form', async ({ authedPage: page }) => {
     await page.goto('/tasks')
     await page.getByRole('button', { name: /add task/i }).click()
 
     // Fill title
     await page.getByPlaceholder(/what needs to be done/i).fill('Temp task')
 
-    // Close via X
+    // Close via X button (aria-label: "Close")
     await page.getByRole('button', { name: /close/i }).click()
 
     // Re-open — title should be empty

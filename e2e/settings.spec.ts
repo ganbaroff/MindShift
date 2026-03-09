@@ -22,13 +22,14 @@ test.describe('Settings screen', () => {
     await expect(page.getByText('App Mode')).toBeVisible()
     await expect(page.getByText('Focus Style')).toBeVisible()
     await expect(page.getByText('Accessibility')).toBeVisible()
-    await expect(page.getByText('Your Data')).toBeVisible()
+    await expect(page.getByText('Your Data', { exact: true })).toBeVisible()
   })
 
   test('avatar selection shows 6 emoji options', async ({ authedPage: page }) => {
     const avatars = ['🌱', '🌿', '🍀', '🌸', '🌻', '🌳']
     for (const emoji of avatars) {
-      await expect(page.getByRole('button', { name: emoji })).toBeVisible()
+      // Use exact:true to avoid matching app mode buttons (e.g. "🌱 Habit...")
+      await expect(page.getByRole('button', { name: emoji, exact: true })).toBeVisible()
     }
   })
 
@@ -105,8 +106,8 @@ test.describe('GDPR controls', () => {
     // Click delete button
     await page.getByRole('button', { name: /delete my account/i }).click()
 
-    // Confirmation form appears
-    await expect(page.getByText(/permanently delete all your tasks/)).toBeVisible()
+    // Confirmation form appears — check the warning message
+    await expect(page.getByText(/this action cannot be undone/i)).toBeVisible()
     await expect(page.getByText(/type your email to confirm/i)).toBeVisible()
 
     // Delete button is disabled until email matches
@@ -166,16 +167,46 @@ test.describe('Legal links', () => {
 
 test.describe('Legal pages (public)', () => {
   test('privacy page loads without auth', async ({ page }) => {
+    // Dismiss cookie banner
+    await page.addInitScript(() => {
+      localStorage.setItem('ms_cookie_consent', JSON.stringify({
+        accepted: true, version: '2026-03', at: new Date().toISOString(),
+      }))
+    })
+
+    // Intercept auth endpoints (prevent real API calls on public pages)
+    await page.route('**/auth/v1/**', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({}) })
+    )
+
     await page.goto('/privacy')
     await expect(page.getByText(/privacy/i).first()).toBeVisible()
   })
 
   test('terms page loads without auth', async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem('ms_cookie_consent', JSON.stringify({
+        accepted: true, version: '2026-03', at: new Date().toISOString(),
+      }))
+    })
+    await page.route('**/auth/v1/**', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({}) })
+    )
+
     await page.goto('/terms')
     await expect(page.getByText(/terms/i).first()).toBeVisible()
   })
 
   test('cookie policy page loads without auth', async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem('ms_cookie_consent', JSON.stringify({
+        accepted: true, version: '2026-03', at: new Date().toISOString(),
+      }))
+    })
+    await page.route('**/auth/v1/**', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({}) })
+    )
+
     await page.goto('/cookie-policy')
     await expect(page.getByText(/cookie/i).first()).toBeVisible()
   })

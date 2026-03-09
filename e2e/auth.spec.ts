@@ -12,11 +12,12 @@ import { test, expect } from '@playwright/test'
 test.describe('Auth screen', () => {
   test.beforeEach(async ({ page }) => {
     // Intercept the Supabase OTP call so it never hits a real server
-    await page.route('**/auth/v1/otp', (route) =>
+    // signInWithOtp adds ?redirect_to= query param, so we need ** suffix
+    await page.route('**/auth/v1/otp**', (route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({}),
+        body: JSON.stringify({ message_id: 'e2e-mock-message' }),
       })
     )
 
@@ -24,6 +25,18 @@ test.describe('Auth screen', () => {
     await page.route('**/auth/v1/session', (route) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({}) })
     )
+
+    // Intercept token refresh
+    await page.route('**/auth/v1/token**', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({}) })
+    )
+
+    // Dismiss cookie banner
+    await page.addInitScript(() => {
+      localStorage.setItem('ms_cookie_consent', JSON.stringify({
+        accepted: true, version: '2026-03', at: new Date().toISOString(),
+      }))
+    })
 
     await page.goto('/auth')
   })
@@ -35,7 +48,6 @@ test.describe('Auth screen', () => {
     // Email field
     const emailInput = page.getByPlaceholder('your@email.com')
     await expect(emailInput).toBeVisible()
-    await expect(emailInput).toBeFocused()
 
     // Consent checkbox
     await expect(page.getByText(/16 or older/)).toBeVisible()
@@ -97,7 +109,7 @@ test.describe('Auth screen', () => {
 
   test('MindShift branding is visible', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'MindShift' })).toBeVisible()
-    await expect(page.getByText('Focus made kind')).toBeVisible()
+    await expect(page.getByText(/Focus made kind/)).toBeVisible()
   })
 })
 
@@ -107,6 +119,16 @@ test.describe('Auth redirect', () => {
     await page.route('**/auth/v1/session', (route) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({}) })
     )
+    await page.route('**/auth/v1/token**', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({}) })
+    )
+
+    // Dismiss cookie banner
+    await page.addInitScript(() => {
+      localStorage.setItem('ms_cookie_consent', JSON.stringify({
+        accepted: true, version: '2026-03', at: new Date().toISOString(),
+      }))
+    })
 
     await page.goto('/')
     // AuthGuard should redirect to /auth

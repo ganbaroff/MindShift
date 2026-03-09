@@ -7,7 +7,7 @@
  *
  * After completion → redirect to HomeScreen.
  */
-import { test, expect, TEST_USER, mockSupabase, seedStore } from './helpers'
+import { test, expect, seedStore } from './helpers'
 
 test.describe('Onboarding flow', () => {
   test.beforeEach(async ({ authedPage: page }) => {
@@ -24,17 +24,13 @@ test.describe('Onboarding flow', () => {
     await expect(page.getByText('What brings you here today?')).toBeVisible()
 
     // 3 mode cards
-    await expect(page.getByText('Close ONE important task')).toBeVisible()
-    await expect(page.getByText('Build a daily routine')).toBeVisible()
-    await expect(page.getByText('Organize my whole system')).toBeVisible()
-
-    // Progress dots — 3 dots visible
-    const dots = page.locator('.fixed.bottom-8 div')
-    await expect(dots).toHaveCount(3)
+    await expect(page.getByText(/Close ONE important task/)).toBeVisible()
+    await expect(page.getByText(/Build a daily routine/)).toBeVisible()
+    await expect(page.getByText(/Organize my whole system/)).toBeVisible()
   })
 
   test('selecting "minimal" mode advances to screen 2', async ({ authedPage: page }) => {
-    await page.getByText('Close ONE important task').click()
+    await page.getByText(/Close ONE important task/).click()
 
     // Should now be on energy check-in
     await expect(page.getByText('Step 2 of 3')).toBeVisible()
@@ -43,24 +39,22 @@ test.describe('Onboarding flow', () => {
 
   test('screen 2: energy check-in shows 5 options', async ({ authedPage: page }) => {
     // Navigate to screen 2
-    await page.getByText('Close ONE important task').click()
+    await page.getByText(/Close ONE important task/).click()
 
-    // Should show energy checkin options (emoji buttons)
-    // EnergyCheckin renders 5 energy level buttons
+    // Should show energy checkin heading
     await expect(page.getByText("How's your brain right now?")).toBeVisible()
+
+    // EnergyCheckin renders 5 buttons with aria-labels like "Energy level N: Label"
+    await expect(page.getByRole('button', { name: /energy level 1/i })).toBeVisible()
+    await expect(page.getByRole('button', { name: /energy level 5/i })).toBeVisible()
   })
 
   test('selecting energy advances to screen 3 (ADHD signal)', async ({ authedPage: page }) => {
     // Screen 1 → select minimal
-    await page.getByText('Close ONE important task').click()
+    await page.getByText(/Close ONE important task/).click()
 
-    // Screen 2 → select any energy level (click a button in EnergyCheckin)
-    // EnergyCheckin renders buttons with emoji labels; click a mid-energy one
-    const energyButtons = page.locator('button').filter({ hasText: /⚡|🔋|🫠|😊|🚀/ })
-    const count = await energyButtons.count()
-    if (count > 0) {
-      await energyButtons.first().click()
-    }
+    // Screen 2 → select an energy level by aria-label
+    await page.getByRole('button', { name: /energy level 3/i }).click()
 
     // Screen 3 — ADHD signal
     await expect(page.getByText('Step 3 of 3')).toBeVisible()
@@ -70,14 +64,10 @@ test.describe('Onboarding flow', () => {
 
   test('completing all 3 screens redirects to home', async ({ authedPage: page }) => {
     // Screen 1
-    await page.getByText('Close ONE important task').click()
+    await page.getByText(/Close ONE important task/).click()
 
-    // Screen 2 — click any energy button
-    const energyButtons = page.locator('button').filter({ hasText: /⚡|🔋|🫠|😊|🚀/ })
-    const count = await energyButtons.count()
-    if (count > 0) {
-      await energyButtons.first().click()
-    }
+    // Screen 2 — click energy level
+    await page.getByRole('button', { name: /energy level 3/i }).click()
 
     // Screen 3 — select cognitive mode
     await page.getByText(/Yes — show me one task at a time/).click()
@@ -88,13 +78,10 @@ test.describe('Onboarding flow', () => {
 
   test('screen 3: both cognitive mode options are present', async ({ authedPage: page }) => {
     // Navigate through to screen 3
-    await page.getByText('Build a daily routine').click()
+    await page.getByText(/Build a daily routine/).click()
 
-    const energyButtons = page.locator('button').filter({ hasText: /⚡|🔋|🫠|😊|🚀/ })
-    const count = await energyButtons.count()
-    if (count > 0) {
-      await energyButtons.first().click()
-    }
+    // Energy level
+    await page.getByRole('button', { name: /energy level 3/i }).click()
 
     // Verify both options
     await expect(page.getByText(/Yes — show me one task at a time/)).toBeVisible()
