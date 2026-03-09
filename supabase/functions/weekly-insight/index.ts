@@ -12,13 +12,14 @@
 // Returns: { insights: string[] }  — exactly 3 personalized insights
 // Auth: JWT required
 // Rate limit: 3 calls/day per user (free), unlimited (pro) — DB-backed
+// AI: Google Gemini 2.5 Flash
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { getCorsHeaders } from '../_shared/cors.ts'
 import { checkDbRateLimit } from '../_shared/rateLimit.ts'
 
-const ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages'
-const MODEL = 'claude-sonnet-4-5'
+const GEMINI_MODEL = 'gemini-2.5-flash'
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`
 const API_TIMEOUT_MS = 15_000 // 15s timeout
 
 const PRESET_NAMES: Record<string, string> = {
@@ -129,38 +130,37 @@ Write exactly 3 short insights. Rules:
 
 Respond ONLY with the 3 insights, one per line. No headers, no JSON, no extra text.`
 
+    const apiKey = Deno.env.get('GEMINI_API_KEY')!
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT_MS)
 
-    const claudeResp = await fetch(ANTHROPIC_URL, {
+    const geminiResp = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
       method: 'POST',
       signal: controller.signal,
-      headers: {
-        'x-api-key': Deno.env.get('ANTHROPIC_API_KEY')!,
-        'anthropic-version': '2023-06-01',
-        'content-type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: MODEL,
-        max_tokens: 300,
-        messages: [{ role: 'user', content: prompt }],
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+          maxOutputTokens: 300,
+          temperature: 0.8,
+        },
       }),
     })
 
     clearTimeout(timeoutId)
 
-    if (!claudeResp.ok) {
-      throw new Error(`Anthropic API error: ${claudeResp.status}`)
+    if (!geminiResp.ok) {
+      throw new Error(`Gemini API error: ${geminiResp.status}`)
     }
 
-    const claudeData = await claudeResp.json() as {
-      content: { type: string; text: string }[]
+    const geminiData = await geminiResp.json() as {
+      candidates: { content: { parts: { text: string }[] } }[]
     }
 
-    const rawText  = (claudeData.content[0]?.text ?? '').trim()
+    const rawText  = (geminiData.candidates?.[0]?.content?.parts?.[0]?.text ?? '').trim()
     const insights = rawText.split('\n').map(s => s.trim()).filter(Boolean).slice(0, 3)
 
-    if (insights.length === 0) throw new Error('Empty insights from Claude')
+    if (insights.length === 0) throw new Error('Empty insights from Gemini')
 
     return new Response(
       JSON.stringify({ insights }),

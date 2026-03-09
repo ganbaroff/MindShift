@@ -5,13 +5,14 @@
 //
 // Auth: JWT required — user must be signed in
 // Rate limit: 20 calls/hour per user (free), unlimited (pro) — DB-backed
+// AI: Google Gemini 2.5 Flash
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { getCorsHeaders } from '../_shared/cors.ts'
 import { checkDbRateLimit } from '../_shared/rateLimit.ts'
 
-const ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages'
-const MODEL = 'claude-sonnet-4-5'
+const GEMINI_MODEL = 'gemini-2.5-flash'
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`
 const API_TIMEOUT_MS = 15_000 // 15s — fail fast, don't hang the user
 const MAX_TITLE_LEN = 500
 const MAX_DESC_LEN = 1000
@@ -97,7 +98,7 @@ Deno.serve(async (req: Request) => {
       )
     }
 
-    // ── Claude call (with AbortController timeout) ───────────────────────────
+    // ── Gemini call (with AbortController timeout) ──────────────────────────
     const title = taskTitle.trim().slice(0, MAX_TITLE_LEN)
     const desc = taskDescription?.trim().slice(0, MAX_DESC_LEN)
 
@@ -115,35 +116,34 @@ Respond ONLY with valid JSON in this exact shape:
 
 No explanation, no markdown fences. Pure JSON only.`
 
+    const apiKey = Deno.env.get('GEMINI_API_KEY')!
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT_MS)
 
-    const claudeResp = await fetch(ANTHROPIC_URL, {
+    const geminiResp = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
       method: 'POST',
       signal: controller.signal,
-      headers: {
-        'x-api-key': Deno.env.get('ANTHROPIC_API_KEY')!,
-        'anthropic-version': '2023-06-01',
-        'content-type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: MODEL,
-        max_tokens: 512,
-        messages: [{ role: 'user', content: prompt }],
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+          maxOutputTokens: 512,
+          temperature: 0.7,
+        },
       }),
     })
 
     clearTimeout(timeoutId)
 
-    if (!claudeResp.ok) {
-      throw new Error(`Anthropic API error: ${claudeResp.status}`)
+    if (!geminiResp.ok) {
+      throw new Error(`Gemini API error: ${geminiResp.status}`)
     }
 
-    const claudeData = await claudeResp.json() as {
-      content: { type: string; text: string }[]
+    const geminiData = await geminiResp.json() as {
+      candidates: { content: { parts: { text: string }[] } }[]
     }
 
-    const rawText = claudeData.content[0]?.text ?? ''
+    const rawText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text ?? ''
 
     // Defensive parse — strip any accidental markdown fences
     const jsonText = rawText.replace(/^```json\s*/i, '').replace(/\s*```$/i, '').trim()
@@ -154,7 +154,7 @@ No explanation, no markdown fences. Pure JSON only.`
 
     // Validate shape
     if (!Array.isArray(parsed.steps) || parsed.steps.length === 0) {
-      throw new Error('Invalid steps array from Claude')
+      throw new Error('Invalid steps array from Gemini')
     }
 
     return new Response(

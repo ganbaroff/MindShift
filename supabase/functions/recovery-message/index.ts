@@ -6,13 +6,14 @@
 // Returns a warm, shame-free 2-sentence welcome-back message.
 // Auth: JWT required
 // Rate limit: 5 calls/day per user (free), unlimited (pro) — DB-backed
+// AI: Google Gemini 2.5 Flash
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { getCorsHeaders } from '../_shared/cors.ts'
 import { checkDbRateLimit } from '../_shared/rateLimit.ts'
 
-const ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages'
-const MODEL = 'claude-sonnet-4-5'
+const GEMINI_MODEL = 'gemini-2.5-flash'
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`
 const API_TIMEOUT_MS = 15_000 // 15s timeout
 
 Deno.serve(async (req: Request) => {
@@ -77,7 +78,7 @@ Deno.serve(async (req: Request) => {
     const days  = Math.min(365, Math.max(0, Math.floor(Number(body.daysAbsent  ?? 0))))
     const tasks = Math.min(999, Math.max(0, Math.floor(Number(body.incompleteCount ?? 0))))
 
-    // ── Claude call ────────────────────────────────────────────────────────────
+    // ── Gemini call ──────────────────────────────────────────────────────────
     const prompt = `You are a compassionate ADHD productivity coach writing a welcome-back message.
 
 The user has been away for ${days} day${days !== 1 ? 's' : ''}.
@@ -93,37 +94,36 @@ Write exactly 2 sentences. Rules:
 
 Respond ONLY with the 2-sentence message. No quotes, no JSON, no labels.`
 
+    const apiKey = Deno.env.get('GEMINI_API_KEY')!
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT_MS)
 
-    const claudeResp = await fetch(ANTHROPIC_URL, {
+    const geminiResp = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
       method: 'POST',
       signal: controller.signal,
-      headers: {
-        'x-api-key': Deno.env.get('ANTHROPIC_API_KEY')!,
-        'anthropic-version': '2023-06-01',
-        'content-type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: MODEL,
-        max_tokens: 150,
-        messages: [{ role: 'user', content: prompt }],
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+          maxOutputTokens: 150,
+          temperature: 0.8,
+        },
       }),
     })
 
     clearTimeout(timeoutId)
 
-    if (!claudeResp.ok) {
-      throw new Error(`Anthropic API error: ${claudeResp.status}`)
+    if (!geminiResp.ok) {
+      throw new Error(`Gemini API error: ${geminiResp.status}`)
     }
 
-    const claudeData = await claudeResp.json() as {
-      content: { type: string; text: string }[]
+    const geminiData = await geminiResp.json() as {
+      candidates: { content: { parts: { text: string }[] } }[]
     }
 
-    const message = (claudeData.content[0]?.text ?? '').trim()
+    const message = (geminiData.candidates?.[0]?.content?.parts?.[0]?.text ?? '').trim()
 
-    if (!message) throw new Error('Empty message from Claude')
+    if (!message) throw new Error('Empty message from Gemini')
 
     return new Response(
       JSON.stringify({ message }),
