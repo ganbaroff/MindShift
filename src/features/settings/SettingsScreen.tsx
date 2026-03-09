@@ -95,7 +95,7 @@ export default function SettingsScreen() {
       toast.success('Your data has been downloaded')
     } catch (err) {
       logError('Settings.handleExport', err)
-      toast.error('Export failed — please try again')
+      toast.error("Couldn't download your data. Check your connection and try again.")
     } finally {
       setExporting(false)
     }
@@ -159,7 +159,7 @@ export default function SettingsScreen() {
       {/* Header */}
       <div className="px-5 pt-10 pb-6">
         <h1 className="text-2xl font-bold" style={{ color: '#E8E8F0' }}>
-          Settings ⚙️
+          Settings
         </h1>
         <p className="text-sm mt-1" style={{ color: '#8B8BA7' }}>{email}</p>
       </div>
@@ -229,7 +229,7 @@ export default function SettingsScreen() {
                     className="px-4 py-3 rounded-xl text-sm transition-all duration-200 min-h-[44px]"
                     style={{ background: '#252840', color: '#8B8BA7' }}
                   >
-                    Later
+                    Maybe later
                   </button>
                 </div>
               </div>
@@ -254,6 +254,7 @@ export default function SettingsScreen() {
                 border: `2px solid ${avatarId === i + 1 ? '#7B72FF' : 'transparent'}`,
               }}
               title={name}
+              aria-label={`Select ${name} avatar`}
             >
               <Avatar level={i + 1} size={32} />
             </button>

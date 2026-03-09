@@ -142,7 +142,7 @@ export default function ProgressScreen() {
   }, [insightLoading, userId, unlocked.length, activeDays, setWeeklyStats])
 
   return (
-    <div className="flex flex-col pb-28">
+    <div className="flex flex-col pb-[calc(112px+env(safe-area-inset-bottom))]">
       {/* Header */}
       <div className="px-5 pt-10 pb-6">
         <motion.h1
@@ -219,7 +219,7 @@ export default function ProgressScreen() {
         {/* Avatar evolution hint */}
         {stage < STAGE_NAMES.length - 1 && (
           <p className="text-xs mt-3 text-center" style={{ color: '#8B8BA7' }}>
-            Next stage: {STAGE_NAMES[stage + 1]} at Level {stage + 2}
+            Next level: {STAGE_NAMES[stage + 1]} at Level {stage + 2}
           </p>
         )}
       </motion.div>

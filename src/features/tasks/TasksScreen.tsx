@@ -22,7 +22,7 @@ export default function TasksScreen() {
   if (allEmpty) {
     return (
       <div
-        className="flex flex-col items-center justify-center min-h-screen pb-28 px-8 text-center"
+        className="flex flex-col items-center justify-center min-h-screen pb-[calc(112px+env(safe-area-inset-bottom))] px-8 text-center"
         style={{ background: '#0F1117' }}
       >
         <div
@@ -56,14 +56,14 @@ export default function TasksScreen() {
   }
 
   return (
-    <div className="flex flex-col pb-28">
+    <div className="flex flex-col pb-[calc(112px+env(safe-area-inset-bottom))]">
       {/* Header */}
       <div className="px-5 pt-10 pb-4">
         <h1 className="text-2xl font-bold" style={{ color: '#E8E8F0' }}>
-          All Tasks 🗂️
+          Your Tasks
         </h1>
         <p className="text-sm mt-1" style={{ color: '#8B8BA7' }}>
-          {activeTasks.length + nextTasks.length + somedayTasks.length} active across all pools
+          {activeTasks.length + nextTasks.length + somedayTasks.length} tasks in play
         </p>
       </div>
 
