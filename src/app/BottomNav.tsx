@@ -1,6 +1,7 @@
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Home, Timer, ListTodo, Music, TrendingUp } from 'lucide-react'
 import { motion } from 'motion/react'
+import { useMotion } from '@/shared/hooks/useMotion'
 import { cn } from '@/shared/lib/cn'
 
 const NAV_ITEMS = [
@@ -14,6 +15,7 @@ const NAV_ITEMS = [
 export function BottomNav() {
   const location = useLocation()
   const navigate = useNavigate()
+  const { shouldAnimate, t } = useMotion()
 
   return (
     <nav
@@ -34,7 +36,7 @@ export function BottomNav() {
               key={path}
               onClick={() => navigate(path)}
               className={cn(
-                'flex flex-col items-center gap-0.5 min-w-[44px] min-h-[44px] px-3 py-1.5 rounded-xl transition-all duration-150',
+                'relative flex flex-col items-center gap-0.5 min-w-[44px] min-h-[44px] px-3 py-1.5 rounded-xl transition-all duration-150',
                 active
                   ? 'text-primary'
                   : 'text-muted hover:text-text'
@@ -46,8 +48,11 @@ export function BottomNav() {
                 <motion.div
                   layoutId="nav-indicator"
                   className="absolute inset-0 rounded-xl"
-                  style={{ background: 'rgba(108, 99, 255, 0.12)' }}
-                  transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                  style={{
+                    background: 'rgba(108, 99, 255, 0.12)',
+                    boxShadow: '0 0 12px rgba(108, 99, 255, 0.15)',
+                  }}
+                  transition={shouldAnimate ? t() : { duration: 0 }}
                 />
               )}
               <Icon size={20} strokeWidth={active ? 2.5 : 1.8} />

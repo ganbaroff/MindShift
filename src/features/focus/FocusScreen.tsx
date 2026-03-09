@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'motion/react'
-import { useReducedMotion } from '@/shared/hooks/useReducedMotion'
+import { useMotion } from '@/shared/hooks/useMotion'
 import { useStore } from '@/store'
 import { ArcTimer } from './ArcTimer'
 import { useAudioEngine } from '@/shared/hooks/useAudioEngine'
@@ -56,7 +56,7 @@ export default function FocusScreen() {
     focusAnchor, activePreset, setPreset,
   } = useStore()
 
-  const reducedMotion = useReducedMotion()
+  const { shouldAnimate, t } = useMotion()
   const { play, stop: stopAudio, playAnchor, isPlaying } = useAudioEngine()
   const [searchParams] = useSearchParams()
 
@@ -373,9 +373,9 @@ export default function FocusScreen() {
         style={{ background: '#0F1117' }}
       >
         <motion.div
-          initial={reducedMotion ? {} : { opacity: 0, scale: 0.9 }}
+          initial={shouldAnimate ? { opacity: 0, scale: 0.9 } : {}}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
+          transition={t()}
           className="flex flex-col items-center"
         >
           <div className="text-5xl mb-6">🌿</div>
@@ -595,9 +595,9 @@ export default function FocusScreen() {
         style={{ background: '#0F1117' }}
       >
         <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
+          initial={shouldAnimate ? { opacity: 0, scale: 0.9 } : {}}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.4 }}
+          transition={t()}
           className="flex flex-col items-center"
         >
           <div className="text-5xl mb-6">🌿</div>
@@ -710,10 +710,10 @@ export default function FocusScreen() {
         {!isFlow && PHASE_LABELS[sessionPhase] && (
           <motion.p
             key={sessionPhase}
-            initial={reducedMotion ? {} : { opacity: 0, y: -8 }}
+            initial={shouldAnimate ? { opacity: 0, y: -8 } : {}}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.3 }}
+            transition={t()}
             className="text-sm mb-6 text-center"
             style={{ color: '#8B8BA7' }}
           >
@@ -735,7 +735,7 @@ export default function FocusScreen() {
       {selectedTask && (
         <motion.p
           animate={{ opacity: isFlow ? 0.5 : 1 }}
-          transition={{ duration: 0.5 }}
+          transition={t()}
           className="text-base font-semibold mt-6 text-center max-w-xs leading-snug"
           style={{ color: '#E8E8F0' }}
         >
@@ -747,10 +747,10 @@ export default function FocusScreen() {
       <AnimatePresence>
         {!isFlow && (
           <motion.div
-            initial={reducedMotion ? {} : { opacity: 0, y: 16 }}
+            initial={shouldAnimate ? { opacity: 0, y: 16 } : {}}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 16 }}
-            transition={{ duration: 0.3 }}
+            transition={t()}
             className="flex flex-col items-center gap-4 mt-8"
           >
             {/* Audio toggle */}
@@ -787,7 +787,7 @@ export default function FocusScreen() {
         <AnimatePresence>
           {parkOpen && (
             <motion.div
-              initial={reducedMotion ? {} : { opacity: 0, y: 10, scale: 0.95 }}
+              initial={shouldAnimate ? { opacity: 0, y: 10, scale: 0.95 } : {}}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 10, scale: 0.95 }}
               className="mb-3 p-3 rounded-2xl w-64"

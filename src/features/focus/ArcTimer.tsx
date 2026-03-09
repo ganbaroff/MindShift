@@ -1,5 +1,5 @@
 import { motion } from 'motion/react'
-import { useReducedMotion } from '@/shared/hooks/useReducedMotion'
+import { useMotion } from '@/shared/hooks/useMotion'
 import type { SessionPhase } from '@/types'
 
 // ── Arc geometry ───────────────────────────────────────────────────────────────
@@ -39,12 +39,12 @@ interface Props {
 }
 
 export function ArcTimer({ progress, remainingSeconds, phase, showDigits, onToggleDigits, size = SIZE }: Props) {
-  const prefersReduced = useReducedMotion()
+  const { shouldAnimate } = useMotion()
   const scale = size / SIZE
 
   const offset = CIRCUMFERENCE * (1 - Math.max(0, Math.min(1, progress)))
   const arcColor = PHASE_COLORS[phase]
-  const isPulsing = phase === 'struggle' && !prefersReduced
+  const isPulsing = phase === 'struggle' && shouldAnimate
 
   return (
     <button
@@ -88,7 +88,7 @@ export function ArcTimer({ progress, remainingSeconds, phase, showDigits, onTogg
           strokeDasharray={CIRCUMFERENCE}
           strokeDashoffset={offset}
           style={{
-            transition: prefersReduced ? 'none' : 'stroke-dashoffset 0.8s linear, stroke 0.5s ease',
+            transition: !shouldAnimate ? 'none' : 'stroke-dashoffset 0.8s linear, stroke 0.5s ease',
           }}
         />
       </svg>
