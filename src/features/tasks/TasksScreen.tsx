@@ -80,7 +80,7 @@ export default function TasksScreen() {
         <div className="flex flex-col gap-3">
           {activeTasks.length === 0 ? (
             <p className="text-sm py-4 text-center" style={{ color: '#8B8BA7' }}>
-              Now pool is empty — add a task!
+              Nothing here yet — what do you want to work on first?
             </p>
           ) : (
             activeTasks.map((task, i) => <TaskCard key={task.id} task={task} index={i} />)
@@ -101,7 +101,7 @@ export default function TasksScreen() {
         <div className="flex flex-col gap-3">
           {nextTasks.length === 0 ? (
             <p className="text-sm py-4 text-center" style={{ color: '#8B8BA7' }}>
-              Next pool is empty
+              Queued tasks will appear here. No rush.
             </p>
           ) : (
             nextTasks.map((task, i) => <TaskCard key={task.id} task={task} index={i} />)
@@ -139,7 +139,7 @@ export default function TasksScreen() {
             >
               {somedayTasks.length === 0 ? (
                 <p className="text-sm py-4 text-center" style={{ color: '#8B8BA7' }}>
-                  Someday pool is empty
+                  Ideas parked here will wait patiently until you're ready.
                 </p>
               ) : (
                 somedayTasks.map((task, i) => <TaskCard key={task.id} task={task} index={i} />)

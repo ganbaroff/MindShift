@@ -230,6 +230,9 @@ export function AddTaskModal({ open, onClose }: Props) {
             animate={!shouldAnimate ? { opacity: 1 } : { y: 0 }}
             exit={!shouldAnimate ? { opacity: 0 } : { y: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="add-task-dialog-title"
             className="fixed bottom-0 left-0 right-0 z-50 flex flex-col gap-5 px-5 pt-5 pb-10 rounded-t-3xl"
             style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)' }}
           >
@@ -239,7 +242,7 @@ export function AddTaskModal({ open, onClose }: Props) {
                 className="absolute top-3 left-1/2 -translate-x-1/2 w-10 h-1 rounded-full"
                 style={{ background: '#252840' }}
               />
-              <h2 className="text-lg font-bold" style={{ color: '#E8E8F0' }}>
+              <h2 id="add-task-dialog-title" className="text-lg font-bold" style={{ color: '#E8E8F0' }}>
                 Add task
               </h2>
               <button
@@ -320,7 +323,7 @@ export function AddTaskModal({ open, onClose }: Props) {
                 style={{ background: '#252840', border: '1px solid rgba(123,114,255,0.3)' }}
               >
                 <p className="text-xs font-medium" style={{ color: '#7B72FF' }}>
-                  ✨ AI micro-steps
+                  ✨ Here's a plan:
                 </p>
                 {aiSteps.map((step, i) => (
                   <div key={i} className="flex items-start gap-2">
@@ -344,15 +347,16 @@ export function AddTaskModal({ open, onClose }: Props) {
             )}
 
             {/* Difficulty */}
-            <div className="flex flex-col gap-2">
-              <label className="text-xs font-medium tracking-wide uppercase" style={{ color: '#8B8BA7' }}>
+            <div role="group" aria-labelledby="difficulty-label" className="flex flex-col gap-2">
+              <span id="difficulty-label" className="text-xs font-medium tracking-wide uppercase" style={{ color: '#8B8BA7' }}>
                 Difficulty
-              </label>
+              </span>
               <div className="flex gap-2">
                 {([1, 2, 3] as const).map(d => (
                   <button
                     key={d}
                     onClick={() => setDifficulty(d)}
+                    aria-pressed={difficulty === d}
                     className="flex-1 py-2 rounded-xl text-sm font-medium transition-all duration-200"
                     style={{
                       background: difficulty === d ? 'rgba(123, 114, 255, 0.18)' : '#252840',
@@ -367,15 +371,16 @@ export function AddTaskModal({ open, onClose }: Props) {
             </div>
 
             {/* Duration */}
-            <div className="flex flex-col gap-2">
-              <label className="text-xs font-medium tracking-wide uppercase" style={{ color: '#8B8BA7' }}>
+            <div role="group" aria-labelledby="duration-label" className="flex flex-col gap-2">
+              <span id="duration-label" className="text-xs font-medium tracking-wide uppercase" style={{ color: '#8B8BA7' }}>
                 Estimated time
-              </label>
+              </span>
               <div className="flex gap-2 flex-wrap">
                 {PRESET_DURATIONS.map(d => (
                   <button
                     key={d}
                     onClick={() => { setMinutes(d); setCustomMinutes('') }}
+                    aria-pressed={minutes === d && !customMinutes}
                     className="px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200"
                     style={{
                       background: minutes === d && !customMinutes ? 'rgba(123, 114, 255, 0.18)' : '#252840',
@@ -388,6 +393,7 @@ export function AddTaskModal({ open, onClose }: Props) {
                 ))}
                 <input
                   type="number"
+                  aria-label="Custom duration in minutes"
                   placeholder="Custom"
                   min={1}
                   max={480}
@@ -410,7 +416,7 @@ export function AddTaskModal({ open, onClose }: Props) {
             {/* Pool hint when NOW is full */}
             {nowFull && (
               <p className="text-xs" style={{ color: '#8B8BA7' }}>
-                ℹ️ NOW pool is full (3/3) — task will go to NEXT
+                💙 NOW is full — this will land in NEXT, ready when you are.
               </p>
             )}
 

@@ -65,8 +65,8 @@ export function CookieBanner() {
         >
           <div className="flex-1 min-w-0">
             <p className="text-[11px] leading-relaxed" style={{ color: '#7B7B95' }}>
-              We use localStorage &{' '}
-              <strong style={{ color: '#9B9BB0' }}>cookieless</strong> analytics.{' '}
+              We save your preferences on-device.{' '}
+              <strong style={{ color: '#9B9BB0' }}>No cookies, no tracking.</strong>{' '}
               <Link
                 to="/cookie-policy"
                 className="underline decoration-dotted"

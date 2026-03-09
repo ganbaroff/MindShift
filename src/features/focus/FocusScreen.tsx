@@ -442,10 +442,10 @@ export default function FocusScreen() {
         >
           <div className="text-5xl mb-6">🌿</div>
           <h2 className="text-2xl font-bold mb-2" style={{ color: '#4ECDC4' }}>
-            Nature Buffer
+            Time to breathe 🌿
           </h2>
           <p className="text-sm mb-8 max-w-xs leading-relaxed" style={{ color: '#8B8BA7' }}>
-            Let your mind settle. Nature sounds are playing softly to ease the transition.
+            Great session. Let your mind settle before the next one.
           </p>
 
           <div
@@ -455,10 +455,9 @@ export default function FocusScreen() {
             <p className="font-mono text-3xl font-bold" style={{ color: '#4ECDC4' }}>
               {bm}:{bs.toString().padStart(2, '0')}
             </p>
-            <p className="text-xs mt-1" style={{ color: '#8B8BA7' }}>transition time</p>
+            <p className="text-xs mt-1" style={{ color: '#8B8BA7' }}>until next session</p>
           </div>
 
-          {/* Volume down is fine, skip too */}
           <button
             onClick={handleSkipBuffer}
             className="px-6 py-2.5 rounded-xl text-sm font-medium transition-all duration-200"
@@ -468,7 +467,7 @@ export default function FocusScreen() {
               color: '#8B8BA7',
             }}
           >
-            Skip → Ready for more
+            Skip rest
           </button>
         </motion.div>
       </div>
