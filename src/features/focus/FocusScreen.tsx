@@ -481,7 +481,7 @@ export default function FocusScreen() {
 
   if (screen === 'setup') {
     return (
-      <div className="flex flex-col min-h-screen pb-28" style={{ background: '#0F1117' }}>
+      <div className="flex flex-col pb-28" style={{ background: '#0F1117' }}>
         <div className="px-5 pt-10 pb-4">
           <h1 className="text-2xl font-bold" style={{ color: '#E8E8F0' }}>
             Focus Session ⏱️

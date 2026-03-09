@@ -91,7 +91,7 @@ function BackBtn({ onBack }: { onBack: () => void }) {
   return (
     <button
       onClick={onBack}
-      className="flex items-center gap-1 text-xs mt-2 ml-1 transition-opacity hover:opacity-80"
+      className="flex items-center gap-1 text-xs mt-2 ml-1 transition-opacity hover:opacity-80 min-h-[44px] px-2"
       style={{ color: '#5A5B72' }}
     >
       <ChevronLeft size={14} />

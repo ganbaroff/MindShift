@@ -18,7 +18,7 @@ function Toggle({ checked, onChange, label }: {
       role="switch"
       aria-checked={checked}
       onClick={() => onChange(!checked)}
-      className="flex items-center justify-between w-full py-2"
+      className="flex items-center justify-between w-full py-3 min-h-[44px]"
     >
       <span className="text-sm" style={{ color: '#E8E8F0' }}>{label}</span>
       <div
@@ -219,14 +219,14 @@ export default function SettingsScreen() {
                 <div className="flex gap-2">
                   <button
                     onClick={handleStartTrial}
-                    className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200"
+                    className="flex-1 py-3 rounded-xl text-sm font-semibold transition-all duration-200 min-h-[44px]"
                     style={{ background: '#6C63FF', color: '#FFFFFF' }}
                   >
                     Activate trial
                   </button>
                   <button
                     onClick={() => setShowTrialActivation(false)}
-                    className="px-4 py-2.5 rounded-xl text-sm transition-all duration-200"
+                    className="px-4 py-3 rounded-xl text-sm transition-all duration-200 min-h-[44px]"
                     style={{ background: '#252840', color: '#8B8BA7' }}
                   >
                     Later
@@ -275,7 +275,7 @@ export default function SettingsScreen() {
             <button
               key={mode}
               onClick={() => setAppMode(mode)}
-              className="text-left px-3 py-2.5 rounded-xl text-sm transition-all duration-200"
+              className="text-left px-3 py-3 rounded-xl text-sm transition-all duration-200 min-h-[44px]"
               style={{
                 background: appMode === mode ? 'rgba(108, 99, 255, 0.15)' : 'transparent',
                 border: `1.5px solid ${appMode === mode ? '#6C63FF' : '#2D3150'}`,
@@ -301,7 +301,7 @@ export default function SettingsScreen() {
             <button
               key={mode}
               onClick={() => setCognitiveMode(mode)}
-              className="flex-1 py-2.5 rounded-xl text-sm font-medium transition-all duration-200"
+              className="flex-1 py-3 rounded-xl text-sm font-medium transition-all duration-200 min-h-[44px]"
               style={{
                 background: cognitiveMode === mode ? 'rgba(108, 99, 255, 0.18)' : '#252840',
                 border: `1.5px solid ${cognitiveMode === mode ? '#6C63FF' : '#2D3150'}`,
@@ -395,7 +395,7 @@ export default function SettingsScreen() {
               <button
                 onClick={() => void handleDelete()}
                 disabled={deleting || deleteEmail.toLowerCase() !== email?.toLowerCase()}
-                className="flex-1 py-2.5 rounded-xl text-sm font-medium transition-all duration-200"
+                className="flex-1 py-3 rounded-xl text-sm font-medium transition-all duration-200 min-h-[44px]"
                 style={{
                   background: deleteEmail.toLowerCase() === email?.toLowerCase()
                     ? 'rgba(232, 151, 107, 0.15)' : '#252840',
@@ -409,7 +409,7 @@ export default function SettingsScreen() {
               </button>
               <button
                 onClick={() => { setShowDeleteConfirm(false); setDeleteEmail('') }}
-                className="px-4 py-2.5 rounded-xl text-sm transition-all duration-200"
+                className="px-4 py-3 rounded-xl text-sm transition-all duration-200 min-h-[44px]"
                 style={{ background: '#1A1D2E', border: '1.5px solid #2D3150', color: '#8B8BA7' }}
               >
                 Cancel

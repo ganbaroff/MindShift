@@ -35,8 +35,7 @@ export function InstallBanner() {
           transition={{ type: 'spring', damping: 24, stiffness: 260 }}
           role="banner"
           aria-label="Install MindShift as an app"
-          className="fixed left-0 right-0 z-40 px-4 pointer-events-none"
-          style={{ bottom: 'calc(64px + env(safe-area-inset-bottom))' }}
+          className="fixed left-0 right-0 z-40 px-4 pointer-events-none bottom-[calc(64px+env(safe-area-inset-bottom))]"
         >
           <div
             className="max-w-[480px] mx-auto rounded-2xl px-4 py-3 flex items-start gap-3 pointer-events-auto"

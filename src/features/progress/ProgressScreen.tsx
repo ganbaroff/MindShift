@@ -323,7 +323,7 @@ export default function ProgressScreen() {
             <button
               onClick={fetchInsight}
               disabled={insightLoading}
-              className="text-xs px-3 py-1 rounded-lg transition-all duration-200"
+              className="text-xs px-4 py-2.5 rounded-lg transition-all duration-200 min-h-[44px]"
               style={{
                 background: 'rgba(108,99,255,0.15)',
                 color: '#6C63FF',

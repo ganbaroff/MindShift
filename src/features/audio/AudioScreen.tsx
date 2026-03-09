@@ -253,7 +253,7 @@ export default function AudioScreen() {
               <button
                 key={preset.id}
                 onClick={() => setFocusAnchor(isSelected ? null : preset.id)}
-                className="flex items-center gap-3 p-2.5 rounded-xl text-left transition-all duration-200"
+                className="flex items-center gap-3 py-3 px-2.5 rounded-xl text-left transition-all duration-200 min-h-[44px]"
                 style={{
                   background: isSelected ? `${preset.color}15` : 'transparent',
                   border: `1px solid ${isSelected ? preset.color : 'transparent'}`,
