@@ -1,84 +1,220 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'motion/react'
+import { ChevronLeft } from 'lucide-react'
 import { useStore } from '@/store'
 import { supabase } from '@/shared/lib/supabase'
 import type { AppMode, EnergyLevel, CognitiveMode } from '@/types'
 import { EnergyCheckin } from '@/features/home/EnergyCheckin'
 
-// ── Screen 1: Intent / App Mode ───────────────────────────────────────────────
-
-const MODE_CARDS: { mode: AppMode; emoji: string; title: string; subtitle: string }[] = [
-  {
-    mode: 'minimal',
-    emoji: '🎯',
-    title: 'Close ONE important task',
-    subtitle: 'I need to focus on a single thing right now',
-  },
-  {
-    mode: 'habit',
-    emoji: '🌱',
-    title: 'Build a daily routine',
-    subtitle: "I want consistent habits that don't overwhelm me",
-  },
-  {
-    mode: 'system',
-    emoji: '🗂️',
-    title: 'Organize my whole system',
-    subtitle: 'I want full visibility and control over my projects',
-  },
-]
-
-function IntentScreen({ onNext }: { onNext: (mode: AppMode) => void }) {
+// ── Progress bar ──────────────────────────────────────────────────────────────
+function ProgressBar({ step, total }: { step: number; total: number }) {
   return (
-    <div className="flex flex-col gap-4 px-5 pt-12 pb-6">
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-        <p className="text-xs font-medium tracking-widest uppercase mb-2" style={{ color: '#6C63FF' }}>
-          Step 1 of 3
+    <div className="px-5 pt-safe pt-10">
+      {/* Step label */}
+      <div className="flex items-center justify-between mb-3">
+        <motion.p
+          key={step}
+          initial={{ opacity: 0, x: -8 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="text-xs font-semibold tracking-widest uppercase"
+          style={{ color: '#6C63FF' }}
+        >
+          Step {step + 1} of {total}
+        </motion.p>
+        <p className="text-xs" style={{ color: '#3D3F56' }}>
+          {Math.round(((step + 1) / total) * 100)}% complete
         </p>
-        <h1 className="text-2xl font-bold mb-1.5" style={{ color: '#E8E8F0' }}>
-          What brings you here today?
-        </h1>
-        <p className="text-sm" style={{ color: '#8B8BA7' }}>
-          Choose your mental mode — you can change this anytime.
-        </p>
-      </motion.div>
-
-      <div className="flex flex-col gap-3 mt-2">
-        {MODE_CARDS.map(({ mode, emoji, title, subtitle }, i) => (
-          <motion.button
-            key={mode}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: i * 0.08 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => onNext(mode)}
-            className="text-left p-5 rounded-2xl transition-all duration-200 hover:border-primary"
-            style={{
-              background: '#1A1D2E',
-              border: '1.5px solid #2D3150',
-            }}
-          >
-            <div className="text-3xl mb-2">{emoji}</div>
-            <div className="font-semibold text-base mb-0.5" style={{ color: '#E8E8F0' }}>{title}</div>
-            <div className="text-sm" style={{ color: '#8B8BA7' }}>{subtitle}</div>
-          </motion.button>
+      </div>
+      {/* Segmented bar */}
+      <div className="flex gap-1.5">
+        {Array.from({ length: total }).map((_, i) => (
+          <div key={i} className="flex-1 h-1 rounded-full overflow-hidden" style={{ background: '#2D3150' }}>
+            <motion.div
+              className="h-full rounded-full"
+              style={{ background: i <= step ? '#6C63FF' : 'transparent' }}
+              initial={false}
+              animate={{ width: i <= step ? '100%' : '0%' }}
+              transition={{ duration: 0.35, ease: 'easeOut' }}
+            />
+          </div>
         ))}
       </div>
     </div>
   )
 }
 
-// ── Screen 3: ADHD Signal ─────────────────────────────────────────────────────
-
-function ADHDSignalScreen({ onNext }: { onNext: (mode: CognitiveMode) => void }) {
+// ── Back button ───────────────────────────────────────────────────────────────
+function BackBtn({ onBack }: { onBack: () => void }) {
   return (
-    <div className="flex flex-col gap-6 px-5 pt-12 pb-6">
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-        <p className="text-xs font-medium tracking-widest uppercase mb-2" style={{ color: '#6C63FF' }}>
-          Step 3 of 3
-        </p>
+    <button
+      onClick={onBack}
+      className="flex items-center gap-1 text-xs mt-2 ml-1 transition-opacity hover:opacity-80"
+      style={{ color: '#5A5B72' }}
+    >
+      <ChevronLeft size={14} />
+      Back
+    </button>
+  )
+}
+
+// ── Screen 1: Intent ──────────────────────────────────────────────────────────
+const MODE_CARDS: {
+  mode: AppMode
+  emoji: string
+  title: string
+  subtitle: string
+  accent: string
+}[] = [
+  {
+    mode: 'minimal',
+    emoji: '🎯',
+    title: 'Close ONE important task',
+    subtitle: 'I need to focus on a single thing right now',
+    accent: '#6C63FF',
+  },
+  {
+    mode: 'habit',
+    emoji: '🌱',
+    title: 'Build a daily routine',
+    subtitle: "I want consistent habits that don't overwhelm me",
+    accent: '#4ECDC4',
+  },
+  {
+    mode: 'system',
+    emoji: '🗂️',
+    title: 'Organize my whole system',
+    subtitle: 'I want full visibility and control over my projects',
+    accent: '#FFE66D',
+  },
+]
+
+function IntentScreen({ onNext }: { onNext: (mode: AppMode) => void }) {
+  const [hovered, setHovered] = useState<AppMode | null>(null)
+
+  return (
+    <div className="flex flex-col gap-3 px-5 pt-8 pb-6">
+      <motion.div
+        initial={{ opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="mb-2"
+      >
         <h1 className="text-2xl font-bold mb-1.5" style={{ color: '#E8E8F0' }}>
+          What brings you here today?
+        </h1>
+        <p className="text-sm leading-relaxed" style={{ color: '#8B8BA7' }}>
+          Choose your mental mode — you can change this anytime.
+        </p>
+      </motion.div>
+
+      <div className="flex flex-col gap-2.5">
+        {MODE_CARDS.map(({ mode, emoji, title, subtitle, accent }, i) => {
+          const isHovered = hovered === mode
+          return (
+            <motion.button
+              key={mode}
+              initial={{ opacity: 0, x: -16 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.06 + i * 0.07, duration: 0.3 }}
+              whileTap={{ scale: 0.985 }}
+              onClick={() => onNext(mode)}
+              onHoverStart={() => setHovered(mode)}
+              onHoverEnd={() => setHovered(null)}
+              className="text-left p-5 rounded-2xl transition-all duration-200 relative overflow-hidden"
+              style={{
+                background: isHovered
+                  ? `linear-gradient(135deg, ${accent}18 0%, ${accent}08 100%)`
+                  : '#1A1D2E',
+                border: `1.5px solid ${isHovered ? `${accent}60` : '#2D3150'}`,
+                boxShadow: isHovered ? `0 4px 20px ${accent}18` : 'none',
+              }}
+            >
+              {/* Glow spot */}
+              {isHovered && (
+                <motion.div
+                  className="absolute -top-8 -right-8 w-24 h-24 rounded-full pointer-events-none"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  style={{ background: `radial-gradient(circle, ${accent}25 0%, transparent 70%)` }}
+                />
+              )}
+              <div className="text-3xl mb-2">{emoji}</div>
+              <div
+                className="font-semibold text-base mb-0.5 transition-colors duration-200"
+                style={{ color: isHovered ? '#F0F0F8' : '#E8E8F0' }}
+              >
+                {title}
+              </div>
+              <div className="text-sm" style={{ color: '#8B8BA7' }}>{subtitle}</div>
+            </motion.button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+// ── Screen 2: Energy check-in (wrapper) ──────────────────────────────────────
+function EnergyScreen({ onNext, onBack }: { onNext: (e: EnergyLevel) => void; onBack: () => void }) {
+  return (
+    <div className="flex flex-col px-5 pt-8 pb-6">
+      <motion.div
+        initial={{ opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="mb-6"
+      >
+        <h1 className="text-2xl font-bold mb-1.5" style={{ color: '#E8E8F0' }}>
+          How's your brain right now?
+        </h1>
+        <p className="text-sm leading-relaxed" style={{ color: '#8B8BA7' }}>
+          No wrong answer — this helps us show tasks at the right pace.
+        </p>
+      </motion.div>
+      <EnergyCheckin onSelect={onNext} />
+      <div className="mt-6">
+        <BackBtn onBack={onBack} />
+      </div>
+    </div>
+  )
+}
+
+// ── Screen 3: ADHD Signal ─────────────────────────────────────────────────────
+function ADHDSignalScreen({
+  onNext,
+  onBack,
+}: {
+  onNext: (mode: CognitiveMode) => void
+  onBack: () => void
+}) {
+  const [hovered, setHovered] = useState<CognitiveMode | null>(null)
+
+  const options: { mode: CognitiveMode; emoji: string; title: string; subtitle: string; accent: string }[] = [
+    {
+      mode: 'focused',
+      emoji: '🎯',
+      title: 'Yes — show me one task at a time',
+      subtitle: 'Focused mode: zero distractions, one thing at a time',
+      accent: '#6C63FF',
+    },
+    {
+      mode: 'overview',
+      emoji: '🗺️',
+      title: 'No — I like seeing the full picture',
+      subtitle: 'Overview mode: all pools visible at once',
+      accent: '#4ECDC4',
+    },
+  ]
+
+  return (
+    <div className="flex flex-col gap-5 px-5 pt-8 pb-6">
+      <motion.div
+        initial={{ opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <h1 className="text-2xl font-bold mb-2" style={{ color: '#E8E8F0' }}>
           One last question 🧠
         </h1>
         <p className="text-base leading-relaxed" style={{ color: '#8B8BA7' }}>
@@ -87,63 +223,79 @@ function ADHDSignalScreen({ onNext }: { onNext: (mode: CognitiveMode) => void })
         </p>
       </motion.div>
 
-      <div className="flex flex-col gap-3">
-        <motion.button
-          whileTap={{ scale: 0.97 }}
-          onClick={() => onNext('focused')}
-          className="p-5 rounded-2xl text-left"
-          style={{ background: 'rgba(108, 99, 255, 0.12)', border: '1.5px solid rgba(108, 99, 255, 0.35)' }}
-        >
-          <div className="font-semibold mb-0.5" style={{ color: '#E8E8F0' }}>
-            Yes — show me one task at a time 🎯
-          </div>
-          <div className="text-sm" style={{ color: '#8B8BA7' }}>
-            Focused mode: one thing, no distractions
-          </div>
-        </motion.button>
-
-        <motion.button
-          whileTap={{ scale: 0.97 }}
-          onClick={() => onNext('overview')}
-          className="p-5 rounded-2xl text-left"
-          style={{ background: '#1A1D2E', border: '1.5px solid #2D3150' }}
-        >
-          <div className="font-semibold mb-0.5" style={{ color: '#E8E8F0' }}>
-            No — I like seeing the full picture 🗺️
-          </div>
-          <div className="text-sm" style={{ color: '#8B8BA7' }}>
-            Overview mode: all pools visible
-          </div>
-        </motion.button>
+      <div className="flex flex-col gap-2.5">
+        {options.map(({ mode, emoji, title, subtitle, accent }, i) => {
+          const isHovered = hovered === mode
+          return (
+            <motion.button
+              key={mode}
+              initial={{ opacity: 0, x: -16 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.06 + i * 0.07 }}
+              whileTap={{ scale: 0.985 }}
+              onClick={() => onNext(mode)}
+              onHoverStart={() => setHovered(mode)}
+              onHoverEnd={() => setHovered(null)}
+              className="p-5 rounded-2xl text-left relative overflow-hidden transition-all duration-200"
+              style={{
+                background: isHovered
+                  ? `linear-gradient(135deg, ${accent}18 0%, ${accent}06 100%)`
+                  : '#1A1D2E',
+                border: `1.5px solid ${isHovered ? `${accent}60` : '#2D3150'}`,
+                boxShadow: isHovered ? `0 4px 20px ${accent}18` : 'none',
+              }}
+            >
+              {isHovered && (
+                <motion.div
+                  className="absolute -top-6 -right-6 w-20 h-20 rounded-full pointer-events-none"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  style={{ background: `radial-gradient(circle, ${accent}25 0%, transparent 70%)` }}
+                />
+              )}
+              <div className="text-3xl mb-2">{emoji}</div>
+              <div className="font-semibold mb-0.5" style={{ color: '#E8E8F0' }}>{title}</div>
+              <div className="text-sm" style={{ color: '#8B8BA7' }}>{subtitle}</div>
+            </motion.button>
+          )
+        })}
       </div>
+
+      <BackBtn onBack={onBack} />
     </div>
   )
 }
 
 // ── Main flow ─────────────────────────────────────────────────────────────────
+const TOTAL_STEPS = 3
 
 export default function OnboardingFlow() {
   const navigate = useNavigate()
   const { setAppMode, setEnergyLevel, setCognitiveMode, setOnboardingCompleted, userId } = useStore()
   const [step, setStep] = useState(0)
   const [appMode, setLocalMode] = useState<AppMode>('minimal')
+  const [prevStep, setPrevStep] = useState(0)
+
+  const goTo = (next: number) => {
+    setPrevStep(step)
+    setStep(next)
+  }
 
   const handleIntent = (mode: AppMode) => {
     setLocalMode(mode)
     setAppMode(mode)
-    setStep(1)
+    goTo(1)
   }
 
   const handleEnergy = (level: EnergyLevel) => {
     setEnergyLevel(level)
-    setStep(2)
+    goTo(2)
   }
 
   const handleCognitive = async (mode: CognitiveMode) => {
     setCognitiveMode(mode)
     setOnboardingCompleted()
 
-    // Persist to Supabase
     if (userId) {
       await supabase.from('users').upsert({
         id: userId,
@@ -155,40 +307,32 @@ export default function OnboardingFlow() {
     navigate('/', { replace: true })
   }
 
+  const direction = step > prevStep ? 1 : -1
   const screens = [
-    <IntentScreen onNext={handleIntent} />,
-    <div className="px-5 pt-12">
-      <p className="text-xs font-medium tracking-widest uppercase mb-2" style={{ color: '#6C63FF' }}>
-        Step 2 of 3
-      </p>
-      <h1 className="text-2xl font-bold mb-6" style={{ color: '#E8E8F0' }}>
-        How's your brain right now?
-      </h1>
-      <EnergyCheckin onSelect={handleEnergy} />
-    </div>,
-    <ADHDSignalScreen onNext={handleCognitive} />,
+    <IntentScreen key="intent" onNext={handleIntent} />,
+    <EnergyScreen key="energy" onNext={handleEnergy} onBack={() => goTo(0)} />,
+    <ADHDSignalScreen key="adhd" onNext={handleCognitive} onBack={() => goTo(1)} />,
   ]
 
   return (
-    <div className="min-h-screen" style={{ background: '#0F1117' }}>
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={step}
-          initial={{ opacity: 0, x: 30 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -30 }}
-          transition={{ duration: 0.25 }}
-        >
-          {screens[step]}
-        </motion.div>
-      </AnimatePresence>
+    <div className="min-h-screen flex flex-col" style={{ background: '#0F1117' }}>
+      {/* Progress */}
+      <ProgressBar step={step} total={TOTAL_STEPS} />
 
-      {/* Progress dots */}
-      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 flex gap-2">
-        {[0, 1, 2].map(i => (
-          <div key={i} className="w-2 h-2 rounded-full transition-all duration-300"
-               style={{ background: i === step ? '#6C63FF' : '#2D3150' }} />
-        ))}
+      {/* Screen */}
+      <div className="flex-1 relative overflow-hidden">
+        <AnimatePresence mode="wait" custom={direction}>
+          <motion.div
+            key={step}
+            custom={direction}
+            initial={{ opacity: 0, x: direction * 32 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: direction * -24 }}
+            transition={{ duration: 0.25, ease: 'easeInOut' }}
+          >
+            {screens[step]}
+          </motion.div>
+        </AnimatePresence>
       </div>
     </div>
   )
