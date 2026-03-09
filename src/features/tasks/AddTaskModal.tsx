@@ -244,7 +244,7 @@ export function AddTaskModal({ open, onClose }: Props) {
               </h2>
               <button
                 onClick={handleClose}
-                className="p-2 rounded-xl transition-colors duration-200"
+                className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl transition-colors duration-200"
                 style={{ color: '#8B8BA7' }}
                 aria-label="Close"
               >

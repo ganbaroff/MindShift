@@ -113,7 +113,7 @@ export default function TasksScreen() {
       <section className="px-5" aria-label="Someday — parked tasks">
         <button
           onClick={() => setSomedayExpanded(v => !v)}
-          className="flex items-center justify-between w-full mb-3"
+          className="flex items-center justify-between w-full mb-3 min-h-[44px]"
           aria-expanded={somedayExpanded}
         >
           <h2 className="text-xs font-medium tracking-widest uppercase" style={{ color: '#8B8BA7' }}>

@@ -112,7 +112,7 @@ function SortableCard({ config, editMode, onToggleVisible }: SortableCardProps) 
           {/* Toggle visibility */}
           <button
             onClick={() => onToggleVisible(config.id)}
-            className="p-1 rounded-lg"
+            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg"
             aria-label={config.visible ? 'Hide widget' : 'Show widget'}
           >
             {config.visible

@@ -17,7 +17,7 @@ export function AppShell() {
       >
         Skip to main content
       </a>
-      <main id="main-content" className="flex-1 overflow-y-auto pb-20">
+      <main id="main-content" className="flex-1 overflow-y-auto pb-[calc(64px+env(safe-area-inset-bottom))]">
         <Outlet />
       </main>
       {/* Hide bottom nav + install nudge during deep focus phases */}
