@@ -19,8 +19,8 @@ import {
 
 describe('constants — invariant sanity checks', () => {
   // ── Recovery
-  it('recovery threshold is exactly 48 hours', () => {
-    expect(RECOVERY_THRESHOLD_HOURS).toBe(48)
+  it('recovery threshold is 72 hours — Research #7: RSD peaks at 3+ days', () => {
+    expect(RECOVERY_THRESHOLD_HOURS).toBe(72)
   })
 
   // ── Task pools (ADHD capacity limits)

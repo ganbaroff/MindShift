@@ -8,13 +8,27 @@ import type { Task } from '@/types'
 import { RECOVERY_THRESHOLD_HOURS } from '@/shared/lib/constants'
 import { logError } from '@/shared/lib/logger'
 
-// ── Fallback messages (no shame, no guilt) ────────────────────────────────────
+// ── Fallback messages (Research #7: identity-reinforcing, shame-free) ────────
+// Rules: no quantifying absence, no streaks, forward-looking, persona-voiced.
+// Fifth message explicitly reinforces resilient identity ("consistent returner").
 
 const FALLBACK_MESSAGES = [
-  "Welcome back 🌱 Your tasks have been moved to Someday — no pressure.",
+  "Welcome back 🌱 Your old tasks are safely stored — no pressure, no backlog.",
   "Hey, you're here. That's what matters. 🌿 Fresh start, right now.",
-  "Good to see you 💙 Everything's been saved. Let's take it one step at a time.",
-  "Back again 🌸 Your old tasks are waiting patiently. What matters most today?",
+  "Good to see you 💙 Everything waited for you. Let's take it one step at a time.",
+  "Back again 🌸 Opening this app took courage. What's one thing we can do together?",
+  "You always come back. 💫 That's who you are — a consistent returner, not a perfect one.",
+]
+
+// ── Micro-win suggestion chips (Research #7: pre-populated options lower barrier) ──
+// Low-stakes, achievable in minutes — generate immediate dopamine burst before backlog.
+
+const MICRO_WIN_SUGGESTIONS = [
+  "Drink a glass of water 💧",
+  "Clear my desk for 5 minutes 🗂️",
+  "Write down 3 things on my mind 📝",
+  "Take 5 slow breaths 🌬️",
+  "Reply to one message 📨",
 ]
 
 interface Props {
@@ -192,7 +206,7 @@ export function RecoveryProtocol({ onDismiss }: Props) {
             )}
             {archivedCount > 0 && (
               <p className="text-sm text-center" style={{ color: '#8B8BA7' }}>
-                {archivedCount} task{archivedCount !== 1 ? 's' : ''} moved to Someday — no guilt, just options.
+                🗃️ {archivedCount} old task{archivedCount !== 1 ? 's' : ''} tucked into your time capsule — they waited patiently. You can review them anytime.
               </p>
             )}
           </motion.div>
@@ -238,6 +252,28 @@ export function RecoveryProtocol({ onDismiss }: Props) {
                 e.currentTarget.style.borderColor = '#2D3150'
               }}
             />
+
+            {/* Micro-win suggestion chips — Research #7: lower blank-slate barrier */}
+            <div className="flex flex-wrap gap-2 mt-1">
+              <p className="w-full text-xs mb-0.5" style={{ color: '#5A5B72' }}>
+                Or pick a micro-win to start:
+              </p>
+              {MICRO_WIN_SUGGESTIONS.map(s => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => setTaskInput(s)}
+                  className="text-xs px-3 py-1.5 rounded-xl transition-all duration-150"
+                  style={{
+                    background: taskInput === s ? 'rgba(108,99,255,0.18)' : '#1A1D2E',
+                    border: `1px solid ${taskInput === s ? '#6C63FF' : '#2D3150'}`,
+                    color: taskInput === s ? '#C8C0FF' : '#8B8BA7',
+                  }}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
           </motion.div>
 
           {/* Actions */}

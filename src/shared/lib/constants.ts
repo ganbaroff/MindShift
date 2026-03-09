@@ -1,6 +1,6 @@
 // ── App constants ─────────────────────────────────────────────────────────────
 
-export const RECOVERY_THRESHOLD_HOURS = 48
+export const RECOVERY_THRESHOLD_HOURS = 72  // Research #7: RSD spiral peaks at 3+ days absence
 export const NOW_POOL_MAX = 3
 export const NEXT_POOL_MAX = 6
 
