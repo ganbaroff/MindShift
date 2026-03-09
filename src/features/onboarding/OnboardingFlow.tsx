@@ -136,12 +136,12 @@ function IntentScreen({ onNext }: { onNext: (mode: AppMode) => void }) {
   const [hovered, setHovered] = useState<AppMode | null>(null)
 
   return (
-    <div className="flex flex-col gap-3 px-5 pt-8 pb-6">
+    <div className="flex flex-col px-4 pt-8 pb-6 min-h-full">
       <motion.div
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={t()}
-        className="mb-2"
+        className="mb-5"
       >
         <h1 className="text-2xl font-bold mb-1.5" style={{ color: '#E8E8F0' }}>
           What brings you here today?
@@ -151,7 +151,7 @@ function IntentScreen({ onNext }: { onNext: (mode: AppMode) => void }) {
         </p>
       </motion.div>
 
-      <div className="flex flex-col gap-2.5">
+      <div className="flex flex-col gap-3">
         {MODE_CARDS.map(({ mode, emoji, title, subtitle, accent }, i) => {
           const isHovered = hovered === mode
           return (
@@ -369,7 +369,7 @@ export default function OnboardingFlow() {
       <ProgressBar step={step} total={TOTAL_STEPS} />
 
       {/* Screen */}
-      <div className="flex-1 relative overflow-hidden">
+      <div className="flex-1 relative overflow-hidden flex flex-col">
         <AnimatePresence mode="wait" custom={direction}>
           <motion.div
             key={step}
@@ -378,6 +378,7 @@ export default function OnboardingFlow() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: direction * -24 }}
             transition={t()}
+            className="flex-1 flex flex-col"
           >
             {screens[step]}
           </motion.div>

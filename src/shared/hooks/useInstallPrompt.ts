@@ -24,6 +24,7 @@ export type InstallState =
   | 'installed'  // already running as standalone PWA
 
 const DISMISSED_KEY = 'mindshift_install_dismissed'
+const SESSION_KEY   = 'mindshift_install_session_shown'
 
 function isRunningStandalone(): boolean {
   return (
@@ -57,8 +58,12 @@ export function useInstallPrompt() {
     // Already dismissed by user — respect that forever
     if (dismissed) return
 
+    // Only show once per browser session
+    if (sessionStorage.getItem(SESSION_KEY)) return
+
     // iOS: check once (no event — just UA detection)
     if (isIosSafari()) {
+      sessionStorage.setItem(SESSION_KEY, '1')
       setState('ios')
       return
     }
@@ -66,6 +71,7 @@ export function useInstallPrompt() {
     // Android/Chrome: wait for browser event
     const handler = (e: Event) => {
       e.preventDefault()
+      sessionStorage.setItem(SESSION_KEY, '1')
       setPrompt(e as BeforeInstallPromptEvent)
       setState('android')
     }

@@ -17,6 +17,43 @@ export default function TasksScreen() {
   const activeTasks = nowPool.filter(t => t.status === 'active')
   const nextTasks = nextPool.filter(t => t.status === 'active')
   const somedayTasks = somedayPool.filter(t => t.status === 'active')
+  const allEmpty = activeTasks.length === 0 && nextTasks.length === 0 && somedayTasks.length === 0
+
+  if (allEmpty) {
+    return (
+      <div
+        className="flex flex-col items-center justify-center min-h-screen pb-28 px-8 text-center"
+        style={{ background: '#0F1117' }}
+      >
+        <div
+          className="w-24 h-24 rounded-3xl flex items-center justify-center mb-6"
+          style={{ background: 'rgba(108,99,255,0.12)', border: '1.5px solid rgba(108,99,255,0.25)' }}
+        >
+          <span style={{ fontSize: 44 }}>🧠</span>
+        </div>
+        <h2 className="text-xl font-bold mb-2" style={{ color: '#E8E8F0' }}>
+          Your mind is clear.
+        </h2>
+        <p className="text-sm leading-relaxed mb-8" style={{ color: '#8B8BA7' }}>
+          Add your first task and let's get moving.
+        </p>
+        <motion.button
+          whileTap={{ scale: 0.96 }}
+          onClick={() => setAddOpen(true)}
+          className="flex items-center gap-2.5 px-8 py-4 rounded-2xl font-semibold text-base"
+          style={{
+            background: 'linear-gradient(135deg, #6C63FF 0%, #5B52E8 100%)',
+            color: '#fff',
+            boxShadow: '0 4px 24px rgba(108,99,255,0.4)',
+          }}
+        >
+          <Plus size={22} />
+          Add your first task
+        </motion.button>
+        <AddTaskModal open={addOpen} onClose={() => setAddOpen(false)} />
+      </div>
+    )
+  }
 
   return (
     <div className="flex flex-col pb-28">

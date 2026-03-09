@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'motion/react'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { useStore } from '@/store'
@@ -531,8 +531,25 @@ export default function FocusScreen() {
           </div>
         )}
 
-        {/* Task picker */}
-        {allTasks.length > 0 && (
+        {/* Task picker / empty state */}
+        {allTasks.length === 0 ? (
+          <div className="mx-5 mb-6 p-6 rounded-2xl flex flex-col items-center text-center"
+            style={{ background: '#1A1D2E', border: '1.5px solid #2D3150' }}
+          >
+            <span style={{ fontSize: 40 }} className="mb-3">🎯</span>
+            <p className="text-sm font-medium mb-1" style={{ color: '#E8E8F0' }}>No tasks yet</p>
+            <p className="text-xs mb-4 leading-relaxed" style={{ color: '#8B8BA7' }}>
+              Pick a task to focus on — it gives your session direction.
+            </p>
+            <Link
+              to="/tasks"
+              className="px-5 py-2.5 rounded-xl text-xs font-semibold transition-all"
+              style={{ background: 'rgba(108,99,255,0.15)', border: '1.5px solid #6C63FF', color: '#6C63FF' }}
+            >
+              Go to Tasks →
+            </Link>
+          </div>
+        ) : (
           <div className="px-5 mb-6">
             <p className="text-xs font-medium mb-2" style={{ color: '#8B8BA7' }}>TASK (OPTIONAL)</p>
             <div className="flex flex-col gap-2">
