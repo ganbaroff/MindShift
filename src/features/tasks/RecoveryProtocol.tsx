@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
+import { useMotion } from '@/shared/hooks/useMotion'
 import { useStore } from '@/store'
 import { supabase } from '@/shared/lib/supabase'
+import Avatar from '@/features/progress/Avatar'
 import type { Task } from '@/types'
 import { RECOVERY_THRESHOLD_HOURS } from '@/shared/lib/constants'
 import { logError } from '@/shared/lib/logger'
@@ -20,7 +22,8 @@ interface Props {
 }
 
 export function RecoveryProtocol({ onDismiss }: Props) {
-  const { archiveAllOverdue, addTask, nowPool, userId, lastSessionAt } = useStore()
+  const { archiveAllOverdue, addTask, nowPool, userId, lastSessionAt, xpTotal } = useStore()
+  const { t } = useMotion()
   const [taskInput, setTaskInput] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [archivedCount, setArchivedCount] = useState(0)
@@ -146,29 +149,35 @@ export function RecoveryProtocol({ onDismiss }: Props) {
         exit={{ opacity: 0 }}
         className="fixed inset-0 z-50 flex flex-col justify-center px-6"
         style={{
-          background: 'linear-gradient(180deg, #0F1117 0%, #1A1D2E 100%)',
+          background: 'linear-gradient(180deg, #0F1117 0%, #1A1B30 50%, #1E1A2E 100%)',
         }}
       >
-        {/* Soft glow accent */}
+        {/* Warm glow accent — deep blue → warm purple (feels like a hug) */}
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 0.15, scale: 1 }}
-          transition={{ duration: 1, ease: 'easeOut' }}
+          animate={{ opacity: 0.18, scale: 1 }}
+          transition={{ duration: 1.2, ease: 'easeOut' }}
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: 'radial-gradient(ellipse 60% 40% at 50% 30%, #6C63FF, transparent)',
+            background: 'radial-gradient(ellipse 70% 45% at 50% 35%, #6C63FF, #4ECDC420, transparent)',
           }}
         />
 
         <div className="relative max-w-sm mx-auto w-full flex flex-col gap-8">
-          {/* Welcome section */}
+          {/* Welcome section — Avatar + empathetic message */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="flex flex-col gap-3"
+            transition={{ ...t(), delay: 0.2 }}
+            className="flex flex-col items-center gap-4"
           >
-            <div className="text-5xl text-center">🌱</div>
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ ...t('expressive'), delay: 0.3 }}
+            >
+              <Avatar level={Math.floor(xpTotal / 100) + 1} size={80} />
+            </motion.div>
             {loadingAi ? (
               <div className="flex justify-center">
                 <span className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" style={{ color: '#6C63FF' }} />
@@ -192,7 +201,7 @@ export function RecoveryProtocol({ onDismiss }: Props) {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
+            transition={{ ...t(), delay: 0.45 }}
             className="flex flex-col gap-3"
           >
             <label
@@ -235,7 +244,7 @@ export function RecoveryProtocol({ onDismiss }: Props) {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
+            transition={{ ...t(), delay: 0.55 }}
             className="flex flex-col gap-3"
           >
             <button

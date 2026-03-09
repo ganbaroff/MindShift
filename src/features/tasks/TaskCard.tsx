@@ -11,7 +11,7 @@
 
 import { useState } from 'react'
 import { motion } from 'motion/react'
-import { useReducedMotion } from '@/shared/hooks/useReducedMotion'
+import { useMotion } from '@/shared/hooks/useMotion'
 import { useStore } from '@/store'
 import { Confetti } from '@/shared/ui/Confetti'
 import { notifyXP, notifyAchievement, notifyTaskDone } from '@/shared/lib/notify'
@@ -49,7 +49,7 @@ interface Props {
 
 export function TaskCard({ task, index = 0, onComplete, onSnooze }: Props) {
   const { completeTask, snoozeTask, addXP, energyLevel, unlockAchievement, hasAchievement } = useStore()
-  const reducedMotion = useReducedMotion()
+  const { shouldAnimate, t } = useMotion()
 
   const [confettiActive, setConfettiActive] = useState(false)
   const [isDone, setIsDone] = useState(false)
@@ -97,9 +97,14 @@ export function TaskCard({ task, index = 0, onComplete, onSnooze }: Props) {
 
   return (
     <motion.div
-      initial={reducedMotion ? {} : { opacity: 0, y: 16 }}
-      animate={{ opacity: isDone ? 0 : 1, y: 0, scale: isDone ? 0.96 : 1 }}
-      transition={{ delay: index * 0.07, duration: 0.25 }}
+      initial={shouldAnimate ? { opacity: 0, y: 16 } : {}}
+      animate={{
+        opacity: isDone ? 0 : 1,
+        y: 0,
+        x: isDone ? -40 : 0,
+        scale: isDone ? 0.96 : 1,
+      }}
+      transition={{ ...t(), delay: index * 0.06 }}
       className="relative overflow-hidden rounded-2xl"
       style={{
         background: '#1A1D2E',
@@ -133,16 +138,16 @@ export function TaskCard({ task, index = 0, onComplete, onSnooze }: Props) {
             ~{task.estimatedMinutes}m
           </span>
 
-          {/* Carry-over badge — calm, non-shaming */}
+          {/* Carry-over badge — warm amber glow, non-shaming */}
           {ageBadge && (
             <span
-              className="ml-auto text-xs px-2 py-0.5 rounded-lg"
+              className="ml-auto text-xs px-2 py-0.5 rounded-lg font-medium"
               style={{
-                background: 'rgba(139,139,167,0.12)',
-                color: '#8B8BA7',
+                background: 'rgba(255,230,109,0.12)',
+                color: '#FFE66D',
               }}
             >
-              {ageBadge}
+              carry-over
             </span>
           )}
         </div>
@@ -159,7 +164,7 @@ export function TaskCard({ task, index = 0, onComplete, onSnooze }: Props) {
         <div className="flex items-center gap-3">
           {/* Complete button */}
           <motion.button
-            whileTap={reducedMotion ? {} : { scale: 0.94 }}
+            whileTap={shouldAnimate ? { scale: 0.94 } : {}}
             onClick={handleComplete}
             disabled={isDone}
             className="flex-1 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200"
@@ -176,7 +181,7 @@ export function TaskCard({ task, index = 0, onComplete, onSnooze }: Props) {
           {/* Guilt-free snooze — park for later, no penalty, calming copy */}
           {task.pool === 'now' && (
             <motion.button
-              whileTap={reducedMotion ? {} : { scale: 0.94 }}
+              whileTap={shouldAnimate ? { scale: 0.94 } : {}}
               onClick={handleSnooze}
               className="px-4 py-2.5 rounded-xl text-sm transition-all duration-200"
               style={{
