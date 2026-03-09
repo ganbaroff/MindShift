@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
-import { useReducedMotion } from '@/shared/hooks/useReducedMotion'
+import { useMotion } from '@/shared/hooks/useMotion'
 import { X, Mic, MicOff } from 'lucide-react'
 import { useStore } from '@/store'
 import { supabase } from '@/shared/lib/supabase'
@@ -21,7 +21,7 @@ const PRESET_DURATIONS = [5, 15, 25, 45, 60]
 
 export function AddTaskModal({ open, onClose }: Props) {
   const { addTask, nowPool, nextPool, userId, hasAchievement, unlockAchievement } = useStore()
-  const reducedMotion = useReducedMotion()
+  const { shouldAnimate } = useMotion()
 
   const [title, setTitle] = useState('')
   const [difficulty, setDifficulty] = useState<1 | 2 | 3>(2)
@@ -226,9 +226,9 @@ export function AddTaskModal({ open, onClose }: Props) {
           {/* Sheet */}
           <motion.div
             key="sheet"
-            initial={reducedMotion ? { opacity: 0 } : { y: '100%' }}
-            animate={reducedMotion ? { opacity: 1 } : { y: 0 }}
-            exit={reducedMotion ? { opacity: 0 } : { y: '100%' }}
+            initial={!shouldAnimate ? { opacity: 0 } : { y: '100%' }}
+            animate={!shouldAnimate ? { opacity: 1 } : { y: 0 }}
+            exit={!shouldAnimate ? { opacity: 0 } : { y: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
             className="fixed bottom-0 left-0 right-0 z-50 flex flex-col gap-5 px-5 pt-5 pb-10 rounded-t-3xl"
             style={{ background: '#1A1D2E', border: '1px solid #2D3150' }}

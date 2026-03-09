@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { motion } from 'motion/react'
-import { useReducedMotion } from '@/shared/hooks/useReducedMotion'
+import { useMotion } from '@/shared/hooks/useMotion'
 
 const COLORS = ['#6C63FF', '#4ECDC4', '#FFE66D', '#FF6B6B', '#A8EDEA']
 const PARTICLE_COUNT = 20
@@ -21,11 +21,11 @@ interface ConfettiProps {
 }
 
 export function Confetti({ active, onComplete }: ConfettiProps) {
-  const prefersReduced = useReducedMotion()
+  const { shouldAnimate } = useMotion()
   const particles = useRef<Particle[]>([])
 
   useEffect(() => {
-    if (active && !prefersReduced) {
+    if (active && shouldAnimate) {
       particles.current = Array.from({ length: PARTICLE_COUNT }, (_, i) => ({
         id: i,
         x: 50 + (Math.random() - 0.5) * 40,
@@ -36,9 +36,9 @@ export function Confetti({ active, onComplete }: ConfettiProps) {
         speed: 0.5 + Math.random() * 1.5,
       }))
     }
-  }, [active, prefersReduced])
+  }, [active, shouldAnimate])
 
-  if (!active || prefersReduced) return null
+  if (!active || !shouldAnimate) return null
 
   return (
     <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden">

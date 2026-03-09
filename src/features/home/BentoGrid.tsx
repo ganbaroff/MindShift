@@ -32,7 +32,7 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import { motion, AnimatePresence } from 'motion/react'
 import { Settings2, EyeOff, Eye, GripVertical } from 'lucide-react'
-import { useReducedMotion } from '@/shared/hooks/useReducedMotion'
+import { useMotion } from '@/shared/hooks/useMotion'
 import { WIDGET_REGISTRY, WIDGET_LABELS, WIDGET_ICONS } from './widgets'
 import type { WidgetConfig, WidgetType } from '@/types'
 
@@ -55,7 +55,7 @@ interface SortableCardProps {
 }
 
 function SortableCard({ config, editMode, onToggleVisible }: SortableCardProps) {
-  const reducedMotion = useReducedMotion()
+  const { shouldAnimate } = useMotion()
   const {
     attributes,
     listeners,
@@ -79,8 +79,8 @@ function SortableCard({ config, editMode, onToggleVisible }: SortableCardProps) 
     <motion.div
       ref={setNodeRef}
       style={cardStyle}
-      layout={!reducedMotion}
-      initial={reducedMotion ? {} : { opacity: 0, y: 12 }}
+      layout={!!shouldAnimate}
+      initial={!shouldAnimate ? {} : { opacity: 0, y: 12 }}
       animate={{
         opacity: config.visible ? 1 : 0.45,
         y: 0,

@@ -14,7 +14,7 @@
  */
 
 import { motion, AnimatePresence } from 'motion/react'
-import { useReducedMotion } from '@/shared/hooks/useReducedMotion'
+import { useMotion } from '@/shared/hooks/useMotion'
 
 export type MascotState = 'idle' | 'focused' | 'celebrating' | 'resting' | 'low-energy'
 
@@ -161,11 +161,11 @@ function Eyes({ state }: { state: MascotState }) {
 // ── Main component ─────────────────────────────────────────────────────────────
 
 export function Mascot({ state = 'idle', size = 80, label, className }: MascotProps) {
-  const reducedMotion = useReducedMotion()
+  const { shouldAnimate } = useMotion()
   const cfg = STATE_CONFIG[state]
 
   // Body animate targets (keyframes only — no transition embedded)
-  const mascotAnimate = reducedMotion ? {} : state === 'idle'
+  const mascotAnimate = !shouldAnimate ? {} : state === 'idle'
     ? { y: [0, -5, 0] }
     : state === 'celebrating'
     ? { y: [0, -10, 0, -7, 0], scale: [1, 1.05, 1, 1.03, 1] }
@@ -174,7 +174,7 @@ export function Mascot({ state = 'idle', size = 80, label, className }: MascotPr
     : {}
 
   // Body transition config (kept separate to satisfy Framer Motion v12 Easing types)
-  const mascotTransition = reducedMotion ? {} : state === 'idle'
+  const mascotTransition = !shouldAnimate ? {} : state === 'idle'
     ? { duration: 2.5, repeat: Infinity, ease: 'easeInOut' as const }
     : state === 'celebrating'
     ? { duration: 0.8, repeat: Infinity }
@@ -190,7 +190,7 @@ export function Mascot({ state = 'idle', size = 80, label, className }: MascotPr
       aria-label={label ?? `Mochi is ${state}`}
     >
       {/* Glow ring — focused/celebrating only */}
-      {cfg.glowColor !== 'transparent' && !reducedMotion && (
+      {cfg.glowColor !== 'transparent' && shouldAnimate && (
         <motion.div
           animate={{ scale: [1, 1.15, 1], opacity: [0.6, 1, 0.6] }}
           transition={{ duration: 2, repeat: Infinity }}
@@ -219,7 +219,7 @@ export function Mascot({ state = 'idle', size = 80, label, className }: MascotPr
         </defs>
 
         {/* Shadow (grounding) */}
-        {!reducedMotion && (
+        {shouldAnimate && (
           <ellipse cx="40" cy="76" rx="16" ry="4" fill="rgba(0,0,0,0.15)" />
         )}
 
@@ -257,7 +257,7 @@ export function Mascot({ state = 'idle', size = 80, label, className }: MascotPr
 
       {/* Sparkles (celebrating) */}
       <AnimatePresence>
-        {state === 'celebrating' && !reducedMotion && (
+        {state === 'celebrating' && shouldAnimate && (
           <motion.svg
             key="sparkles"
             style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}
@@ -278,7 +278,7 @@ export function Mascot({ state = 'idle', size = 80, label, className }: MascotPr
 
       {/* ZZZ (resting) */}
       <AnimatePresence>
-        {state === 'resting' && !reducedMotion && (
+        {state === 'resting' && shouldAnimate && (
           <motion.svg
             key="zzz"
             style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}
