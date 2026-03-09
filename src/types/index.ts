@@ -120,7 +120,7 @@ export const ACHIEVEMENT_DEFINITIONS: Omit<Achievement, 'unlockedAt'>[] = [
   { key: 'flow_rider',    name: 'Flow Rider',     emoji: '🌊', description: 'Complete a 52-minute focus session' },
   { key: 'comeback_kid',  name: 'Comeback Kid',   emoji: '🦋', description: 'Return after 3+ days and complete a task' },
   { key: 'deep_diver',    name: 'Deep Diver',     emoji: '🌊', description: 'Complete 5 focus sessions' },
-  { key: 'quiet_mind',    name: 'Quiet Mind',     emoji: '🧘', description: 'Use audio for 3 sessions in a row' },
+  { key: 'quiet_mind',    name: 'Quiet Mind',     emoji: '🧘', description: 'Use audio for 3 focus sessions' },
   { key: 'task_sniper',   name: 'Task Sniper',    emoji: '🎯', description: 'Complete 10 tasks' },
   { key: 'sonic_anchor',  name: 'Sonic Anchor',   emoji: '🎵', description: 'Set a focus anchor sound' },
   { key: 'week_warrior',  name: 'Week Warrior',   emoji: '💪', description: 'Active 5 out of 7 days' },

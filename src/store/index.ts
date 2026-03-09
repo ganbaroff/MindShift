@@ -82,6 +82,8 @@ interface AudioSlice {
 interface ProgressSlice {
   achievements: Achievement[]
   weeklyStats: WeeklyStats | null
+  /** Lifetime total of completed tasks — incremented on each completeTask call */
+  completedTotal: number
   unlockAchievement: (key: string) => void
   setWeeklyStats: (stats: WeeklyStats) => void
   hasAchievement: (key: string) => boolean
@@ -154,7 +156,7 @@ export const useStore = create<AppStore>()(
           activePreset: null, audioPlaying: false, audioVolume: 0.47,
           focusAnchor: null, transitionBufferActive: false,
           // Progress slice
-          achievements: initAchievements(), weeklyStats: null,
+          achievements: initAchievements(), weeklyStats: null, completedTotal: 0,
           // Preferences slice — prevent Pro state leaking between users
           reducedStimulation: false,
           subscriptionTier: 'free' as const, trialEndsAt: null,
@@ -177,10 +179,14 @@ export const useStore = create<AppStore>()(
           const now = new Date().toISOString()
           const complete = (tasks: Task[]) =>
             tasks.map(t => t.id === taskId ? { ...t, status: 'completed' as const, completedAt: now } : t)
+          const wasActive = [...s.nowPool, ...s.nextPool, ...s.somedayPool]
+            .some(t => t.id === taskId && t.status === 'active')
           return {
             nowPool: complete(s.nowPool),
             nextPool: complete(s.nextPool),
             somedayPool: complete(s.somedayPool),
+            // Research #5: track cumulative effort (task total), never consecutive
+            completedTotal: wasActive ? s.completedTotal + 1 : s.completedTotal,
           }
         }),
 
@@ -290,6 +296,7 @@ export const useStore = create<AppStore>()(
         // ── Progress ─────────────────────────────────────────────────────────
         achievements: initAchievements(),
         weeklyStats: null,
+        completedTotal: 0,
 
         unlockAchievement: (key) => set((s) => ({
           achievements: s.achievements.map(a =>

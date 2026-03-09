@@ -18,7 +18,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
-import { useReducedMotion } from '@/shared/hooks/useReducedMotion'
+import { useMotion } from '@/shared/hooks/useMotion'
 import { useGridSync } from '@/shared/hooks/useGridSync'
 import { Plus } from 'lucide-react'
 import { useStore } from '@/store'
@@ -128,21 +128,79 @@ function QuickSetupCard({ onDone }: QuickSetupCardProps) {
   )
 }
 
+// ── First-task prompt (Research #4: blank slate prevention, TTFV < 3 min) ─────
+// Shows when the NOW pool is empty after onboarding. One tap → AddTaskModal.
+// Dismissible so it never becomes a nagging obligation.
+function FirstTaskPrompt({ onAdd, onDismiss }: { onAdd: () => void; onDismiss: () => void }) {
+  const { t } = useMotion()
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 8 }}
+      transition={t()}
+      className="mx-5 mb-4 rounded-2xl p-4"
+      style={{
+        background: 'linear-gradient(135deg, rgba(108,99,255,0.12) 0%, rgba(108,99,255,0.04) 100%)',
+        border: '1.5px solid rgba(108,99,255,0.35)',
+      }}
+    >
+      <div className="flex items-start justify-between gap-2 mb-1">
+        <p className="text-sm font-semibold" style={{ color: '#E8E8F0' }}>
+          🧠 What's one thing on your mind right now?
+        </p>
+        <button
+          onClick={onDismiss}
+          className="text-xs shrink-0 transition-opacity hover:opacity-70"
+          style={{ color: '#5A5B72' }}
+          aria-label="Dismiss"
+        >
+          ✕
+        </button>
+      </div>
+      <p className="text-xs mb-3" style={{ color: '#8B8BA7' }}>
+        Capture it — we'll help you break it down into steps.
+      </p>
+      <motion.button
+        whileTap={{ scale: 0.97 }}
+        onClick={onAdd}
+        className="w-full py-3 rounded-xl text-sm font-semibold"
+        style={{
+          background: 'linear-gradient(135deg, #6C63FF 0%, #5B52E8 100%)',
+          color: '#fff',
+          boxShadow: '0 4px 20px rgba(108,99,255,0.3)',
+        }}
+      >
+        ✨ Add my first task →
+      </motion.button>
+    </motion.div>
+  )
+}
+
 // ── Main HomeScreen ────────────────────────────────────────────────────────────
 
 export default function HomeScreen() {
   const {
     energyLevel, appMode, activeSession,
-    onboardingCompleted, gridWidgets, setGridWidgets,
+    onboardingCompleted, nowPool, gridWidgets, setGridWidgets,
   } = useStore()
-  const reducedMotion = useReducedMotion()
+  const { t, shouldAnimate } = useMotion()
   useGridSync()   // two-tier persistence: IndexedDB (offline) + Supabase (cross-device)
 
-  const [setupDone, setSetupDone]     = useState(false)
-  const [addOpen,   setAddOpen]       = useState(false)
-  const [mascotState, setMascotState] = useState<MascotState>('idle')
+  const [setupDone,             setSetupDone]             = useState(false)
+  const [addOpen,               setAddOpen]               = useState(false)
+  const [mascotState,           setMascotState]           = useState<MascotState>('idle')
+  const [firstTaskDismissed,    setFirstTaskDismissed]    = useState(false)
 
   const showQuickSetup = !onboardingCompleted && !setupDone
+
+  // Research #4: blank slate prevention — show when NOW pool is empty post-onboarding
+  const activeNowTasks = nowPool.filter(t => t.status === 'active')
+  const showFirstTaskPrompt =
+    onboardingCompleted &&
+    !showQuickSetup &&
+    activeNowTasks.length === 0 &&
+    !firstTaskDismissed
 
   // ── Mochi: driven by energy level + active session ──────────────────────────
   useEffect(() => {
@@ -174,17 +232,18 @@ export default function HomeScreen() {
       <div className="px-5 pt-10 pb-2 flex items-end justify-between gap-4">
         <div className="flex-1 min-w-0">
           <motion.h1
-            initial={reducedMotion ? {} : { opacity: 0, y: -8 }}
+            initial={shouldAnimate ? { opacity: 0, y: -8 } : {}}
             animate={{ opacity: 1, y: 0 }}
+            transition={t()}
             className="text-2xl font-bold mb-0.5"
             style={{ color: '#E8E8F0' }}
           >
             {greeting}
           </motion.h1>
           <motion.p
-            initial={reducedMotion ? {} : { opacity: 0 }}
+            initial={shouldAnimate ? { opacity: 0 } : {}}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.1 }}
+            transition={{ ...t(), delay: 0.1 }}
             className="text-sm"
             style={{ color: '#8B8BA7' }}
           >
@@ -194,9 +253,9 @@ export default function HomeScreen() {
 
         {/* Mochi — emotional anchor, body double concept (Finch model) */}
         <motion.div
-          initial={reducedMotion ? {} : { opacity: 0, scale: 0.8 }}
+          initial={shouldAnimate ? { opacity: 0, scale: 0.8 } : {}}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.15, type: 'spring', stiffness: 300 }}
+          transition={{ ...t(), delay: 0.15 }}
           className="shrink-0"
         >
           <Mascot
@@ -214,11 +273,21 @@ export default function HomeScreen() {
         )}
       </AnimatePresence>
 
+      {/* ── First-task prompt (Research #4: blank slate prevention) ─────── */}
+      <AnimatePresence>
+        {showFirstTaskPrompt && (
+          <FirstTaskPrompt
+            onAdd={() => { hapticTap(); setAddOpen(true) }}
+            onDismiss={() => setFirstTaskDismissed(true)}
+          />
+        )}
+      </AnimatePresence>
+
       {/* ── Bento Grid (sortable, psychotype-driven, dnd-kit) ───────────── */}
       <motion.div
-        initial={reducedMotion ? {} : { opacity: 0, y: 10 }}
+        initial={shouldAnimate ? { opacity: 0, y: 10 } : {}}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
+        transition={{ ...t(), delay: 0.2 }}
         className="mt-2"
       >
         <BentoGrid
@@ -229,10 +298,10 @@ export default function HomeScreen() {
 
       {/* ── Add Task FAB ────────────────────────────────────────────────── */}
       <motion.button
-        initial={reducedMotion ? {} : { scale: 0.8, opacity: 0 }}
+        initial={shouldAnimate ? { scale: 0.8, opacity: 0 } : {}}
         animate={{ scale: 1, opacity: 1 }}
-        transition={{ delay: 0.3 }}
-        whileTap={reducedMotion ? {} : { scale: 0.94 }}
+        transition={{ ...t(), delay: 0.3 }}
+        whileTap={shouldAnimate ? { scale: 0.94 } : {}}
         onClick={() => { hapticTap(); setAddOpen(true) }}
         className="fixed bottom-24 right-5 flex items-center gap-2 px-5 py-3.5 rounded-full shadow-lg z-30"
         style={{ background: '#6C63FF' }}

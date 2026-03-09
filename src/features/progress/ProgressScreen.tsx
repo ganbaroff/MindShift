@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { motion } from 'motion/react'
-import { useReducedMotion } from '@/shared/hooks/useReducedMotion'
+import { useMotion } from '@/shared/hooks/useMotion'
 import { useStore } from '@/store'
 import { ACHIEVEMENT_DEFINITIONS } from '@/types'
 import { supabase } from '@/shared/lib/supabase'
@@ -38,12 +38,12 @@ function getLast7Days(): { label: string; key: string }[] {
 
 export default function ProgressScreen() {
   const {
-    xpTotal, achievements,
+    xpTotal, achievements, completedTotal,
     weeklyStats, setWeeklyStats,
     userId,
   } = useStore()
 
-  const reducedMotion = useReducedMotion()
+  const { t, shouldAnimate } = useMotion()
   const { level, progress, needed } = xpToLevel(xpTotal)
   const avatarIndex = Math.min(level - 1, AVATARS.length - 1)
   const avatar = AVATARS[avatarIndex] ?? '🌱'
@@ -149,7 +149,7 @@ export default function ProgressScreen() {
       {/* Header */}
       <div className="px-5 pt-10 pb-6">
         <motion.h1
-          initial={reducedMotion ? {} : { opacity: 0, y: -8 }}
+          initial={shouldAnimate ? { opacity: 0, y: -8 } : {}}
           animate={{ opacity: 1, y: 0 }}
           className="text-2xl font-bold"
           style={{ color: '#E8E8F0' }}
@@ -157,9 +157,9 @@ export default function ProgressScreen() {
           Your Garden 🌱
         </motion.h1>
         <motion.p
-          initial={reducedMotion ? {} : { opacity: 0 }}
+          initial={shouldAnimate ? { opacity: 0 } : {}}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.1 }}
+          transition={{ ...t(), delay: 0.1 }}
           className="text-sm mt-1"
           style={{ color: '#8B8BA7' }}
         >
@@ -169,17 +169,17 @@ export default function ProgressScreen() {
 
       {/* ── Avatar + XP card ──────────────────────────────────────────────────── */}
       <motion.div
-        initial={reducedMotion ? {} : { opacity: 0, y: 10 }}
+        initial={shouldAnimate ? { opacity: 0, y: 10 } : {}}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.15 }}
+        transition={{ ...t(), delay: 0.15 }}
         className="mx-5 p-5 rounded-2xl mb-4"
         style={{ background: '#1A1D2E', border: '1.5px solid #2D3150' }}
       >
         <div className="flex items-center gap-4 mb-4">
           <motion.div
-            initial={reducedMotion ? {} : { scale: 0.8 }}
+            initial={shouldAnimate ? { scale: 0.8 } : {}}
             animate={{ scale: 1 }}
-            transition={{ type: 'spring', stiffness: 200, delay: 0.2 }}
+            transition={{ ...t('expressive'), delay: 0.2 }}
             className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl"
             style={{
               background: 'linear-gradient(135deg, rgba(108,99,255,0.15), rgba(78,205,196,0.1))',
@@ -206,9 +206,9 @@ export default function ProgressScreen() {
           </div>
           <div className="h-2.5 rounded-full overflow-hidden" style={{ background: '#252840' }}>
             <motion.div
-              initial={reducedMotion ? {} : { width: 0 }}
+              initial={shouldAnimate ? { width: 0 } : {}}
               animate={{ width: `${(progress / needed) * 100}%` }}
-              transition={{ duration: 0.8, ease: 'easeOut', delay: 0.3 }}
+              transition={{ ...t(), delay: 0.3 }}
               className="h-full rounded-full"
               style={{
                 background: 'linear-gradient(90deg, #6C63FF, #4ECDC4)',
@@ -227,9 +227,9 @@ export default function ProgressScreen() {
 
       {/* ── 7-Day Consistency Flow ─────────────────────────────────────────────── */}
       <motion.div
-        initial={reducedMotion ? {} : { opacity: 0, y: 10 }}
+        initial={shouldAnimate ? { opacity: 0, y: 10 } : {}}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.25 }}
+        transition={{ ...t(), delay: 0.25 }}
         className="mx-5 p-5 rounded-2xl mb-4"
         style={{ background: '#1A1D2E', border: '1.5px solid #2D3150' }}
       >
@@ -253,9 +253,9 @@ export default function ProgressScreen() {
             return (
               <div key={day.key} className="flex-1 flex flex-col items-center gap-1.5">
                 <motion.div
-                  initial={reducedMotion ? {} : { height: 0 }}
+                  initial={shouldAnimate ? { height: 0 } : {}}
                   animate={{ height }}
-                  transition={{ duration: 0.5, delay: 0.3 + i * 0.05 }}
+                  transition={{ ...t(), delay: 0.3 + i * 0.05 }}
                   className="w-full rounded-t-md"
                   style={{
                     background: isActive
@@ -286,17 +286,18 @@ export default function ProgressScreen() {
       </motion.div>
 
       {/* ── Stats Grid ─────────────────────────────────────────────────────────── */}
+      {/* Research #5: Show cumulative effort (task totals), not consecutive streaks */}
       <div className="mx-5 grid grid-cols-3 gap-3 mb-4">
         {[
           { label: 'Achievements', value: `${unlocked.length}/${ACHIEVEMENT_DEFINITIONS.length}`, emoji: '🏆', color: '#FFE66D' },
-          { label: 'XP Earned', value: xpTotal.toString(), emoji: '⚡', color: '#6C63FF' },
-          { label: 'Active Days', value: `${activeDays}/7`, emoji: '📅', color: '#4ECDC4' },
+          { label: 'Tasks Done', value: completedTotal.toString(), emoji: '✅', color: '#4ECDC4' },
+          { label: 'Active Days', value: `${activeDays}/7`, emoji: '📅', color: '#6C63FF' },
         ].map((stat, i) => (
           <motion.div
             key={stat.label}
-            initial={reducedMotion ? {} : { opacity: 0, y: 10 }}
+            initial={shouldAnimate ? { opacity: 0, y: 10 } : {}}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.35 + i * 0.05 }}
+            transition={{ ...t(), delay: 0.35 + i * 0.05 }}
             className="p-3 rounded-2xl text-center"
             style={{ background: '#1A1D2E', border: '1.5px solid #2D3150' }}
           >
@@ -309,9 +310,9 @@ export default function ProgressScreen() {
 
       {/* ── Weekly Insight ──────────────────────────────────────────────────────── */}
       <motion.div
-        initial={reducedMotion ? {} : { opacity: 0, y: 10 }}
+        initial={shouldAnimate ? { opacity: 0, y: 10 } : {}}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
+        transition={{ ...t(), delay: 0.5 }}
         className="mx-5 p-5 rounded-2xl mb-4"
         style={{ background: '#1A1D2E', border: '1.5px solid #2D3150' }}
       >
@@ -377,9 +378,9 @@ export default function ProgressScreen() {
             return (
               <motion.div
                 key={def.key}
-                initial={reducedMotion ? {} : { opacity: 0, scale: 0.9 }}
+                initial={shouldAnimate ? { opacity: 0, scale: 0.9 } : {}}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.6 + i * 0.03 }}
+                transition={{ ...t(), delay: 0.6 + i * 0.03 }}
                 className="flex flex-col items-center gap-1.5 p-3 rounded-2xl text-center"
                 style={{
                   background: isUnlocked ? 'rgba(108, 99, 255, 0.12)' : '#1A1D2E',
