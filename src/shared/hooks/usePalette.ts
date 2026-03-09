@@ -12,7 +12,11 @@
  * Normal Mode uses the full ADHD-optimized palette:
  *   - Teal  (#4ECDC4) — easy, calm, primary CTA
  *   - Indigo (#6C63FF) — medium, steady, navigation
- *   - Gold  (#FFE66D) — hard, achievement (never red)
+ *   - Gold  (#F59E0B) — hard tasks, carry-over (APCA amber — warmer than #FFE66D, safer for RSD)
+ *
+ * Note: #FFE66D (neon yellow) is kept ONLY for festive/celebration contexts
+ * (confetti, level-up stars, XP burst) where excitement is intentional.
+ * Task-context colors use #F59E0B (amber) to avoid luminance-induced eye strain.
  */
 
 import { useStore } from '@/store'
@@ -32,7 +36,7 @@ export interface Palette {
 const NORMAL: Palette = {
   primary:   '#6C63FF',
   teal:      '#4ECDC4',
-  gold:      '#FFE66D',
+  gold:      '#F59E0B',   // Research #8: amber replaces neon yellow #FFE66D — APCA Lc ~68
   glowAlpha: 1.0,
   flatMode:  false,
 }
@@ -43,7 +47,7 @@ const NORMAL: Palette = {
 const CALM: Palette = {
   primary:   '#6060A0',   // muted indigo-slate
   teal:      '#4A8A87',   // muted teal-sage
-  gold:      '#B8A04A',   // muted warm amber
+  gold:      '#8C6A10',   // muted amber (desaturated #F59E0B)
   glowAlpha: 0.0,         // no glows in calm mode — pure shape signal
   flatMode:  true,
 }

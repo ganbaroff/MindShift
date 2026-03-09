@@ -154,13 +154,13 @@ export function TaskCard({ task, index = 0, onComplete, onSnooze }: Props) {
             ~{task.estimatedMinutes}m
           </span>
 
-          {/* Carry-over badge — warm amber glow, non-shaming */}
+          {/* Carry-over badge — warm amber, non-shaming (Research #8: amber not neon yellow) */}
           {ageBadge && (
             <span
               className="ml-auto text-xs px-2 py-0.5 rounded-lg font-medium"
               style={{
-                background: 'rgba(255,230,109,0.12)',
-                color: '#FFE66D',
+                background: `${palette.gold}20`,
+                color: palette.gold,
               }}
             >
               carry-over

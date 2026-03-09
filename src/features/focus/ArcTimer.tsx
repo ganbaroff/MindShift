@@ -16,7 +16,7 @@ const PHASE_COLORS: Record<SessionPhase, string> = {
   struggle: '#6C63FF',   // indigo — getting into it
   release:  '#4ECDC4',   // teal — releasing resistance
   flow:     '#4ECDC4',   // teal — deep flow
-  recovery: '#FFE66D',   // yellow — recovery
+  recovery: '#F59E0B',   // amber — recovery (Research #8: #F59E0B not neon #FFE66D)
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
