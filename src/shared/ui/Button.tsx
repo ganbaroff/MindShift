@@ -1,5 +1,6 @@
 import { motion } from 'motion/react'
 import { cn } from '@/shared/lib/cn'
+import { useMotion } from '@/shared/hooks/useMotion'
 import type { ReactNode, MouseEventHandler } from 'react'
 
 // ── Explicit, conflict-free Button props ──────────────────────────────────────
@@ -34,7 +35,10 @@ export function Button({
   onClick,
   ...ariaProps
 }: ButtonProps) {
-  const base = 'relative inline-flex items-center justify-center font-medium rounded-xl transition-all duration-150 select-none disabled:opacity-50 disabled:cursor-not-allowed'
+  // Use centralized motion system (Research #2)
+  const { t, shouldAnimate } = useMotion()
+
+  const base = 'relative inline-flex items-center justify-center font-medium rounded-xl transition-colors duration-150 select-none disabled:opacity-50 disabled:cursor-not-allowed'
 
   const variants = {
     primary:   'bg-primary text-white hover:opacity-90 shadow-lg shadow-primary/20',
@@ -51,8 +55,10 @@ export function Button({
 
   return (
     <motion.button
-      whileTap={{ scale: 0.96 }}
-      transition={{ duration: 0.15 }}
+      // Research #2: tap feedback at micro (150ms) speed, scale 0.96
+      // Disabled when reducedStimulation or prefers-reduced-motion
+      whileTap={shouldAnimate && !disabled && !loading ? { scale: 0.96 } : undefined}
+      transition={t()}
       className={cn(base, variants[variant], sizes[size], className)}
       disabled={disabled || loading}
       type={type}

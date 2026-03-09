@@ -6,9 +6,11 @@ import { useStore } from '@/store'
 import { supabase } from '@/shared/lib/supabase'
 import type { AppMode, EnergyLevel, CognitiveMode } from '@/types'
 import { EnergyCheckin } from '@/features/home/EnergyCheckin'
+import { useMotion } from '@/shared/hooks/useMotion'
 
 // ── Progress bar ──────────────────────────────────────────────────────────────
 function ProgressBar({ step, total }: { step: number; total: number }) {
+  const { t } = useMotion()
   return (
     <div className="px-5 pt-safe pt-10">
       {/* Step label */}
@@ -17,6 +19,7 @@ function ProgressBar({ step, total }: { step: number; total: number }) {
           key={step}
           initial={{ opacity: 0, x: -8 }}
           animate={{ opacity: 1, x: 0 }}
+          transition={t()}
           className="text-xs font-semibold tracking-widest uppercase"
           style={{ color: '#6C63FF' }}
         >
@@ -35,7 +38,7 @@ function ProgressBar({ step, total }: { step: number; total: number }) {
               style={{ background: i <= step ? '#6C63FF' : 'transparent' }}
               initial={false}
               animate={{ width: i <= step ? '100%' : '0%' }}
-              transition={{ duration: 0.35, ease: 'easeOut' }}
+              transition={t()}
             />
           </div>
         ))}
@@ -90,6 +93,7 @@ const MODE_CARDS: {
 ]
 
 function IntentScreen({ onNext }: { onNext: (mode: AppMode) => void }) {
+  const { t } = useMotion()
   const [hovered, setHovered] = useState<AppMode | null>(null)
 
   return (
@@ -97,7 +101,7 @@ function IntentScreen({ onNext }: { onNext: (mode: AppMode) => void }) {
       <motion.div
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
+        transition={t()}
         className="mb-2"
       >
         <h1 className="text-2xl font-bold mb-1.5" style={{ color: '#E8E8F0' }}>
@@ -116,7 +120,7 @@ function IntentScreen({ onNext }: { onNext: (mode: AppMode) => void }) {
               key={mode}
               initial={{ opacity: 0, x: -16 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.06 + i * 0.07, duration: 0.3 }}
+              transition={{ ...t(), delay: 0.06 + i * 0.07 }}
               whileTap={{ scale: 0.985 }}
               onClick={() => onNext(mode)}
               onHoverStart={() => setHovered(mode)}
@@ -157,12 +161,13 @@ function IntentScreen({ onNext }: { onNext: (mode: AppMode) => void }) {
 
 // ── Screen 2: Energy check-in (wrapper) ──────────────────────────────────────
 function EnergyScreen({ onNext, onBack }: { onNext: (e: EnergyLevel) => void; onBack: () => void }) {
+  const { t } = useMotion()
   return (
     <div className="flex flex-col px-5 pt-8 pb-6">
       <motion.div
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
+        transition={t()}
         className="mb-6"
       >
         <h1 className="text-2xl font-bold mb-1.5" style={{ color: '#E8E8F0' }}>
@@ -188,6 +193,7 @@ function ADHDSignalScreen({
   onNext: (mode: CognitiveMode) => void
   onBack: () => void
 }) {
+  const { t } = useMotion()
   const [hovered, setHovered] = useState<CognitiveMode | null>(null)
 
   const options: { mode: CognitiveMode; emoji: string; title: string; subtitle: string; accent: string }[] = [
@@ -212,7 +218,7 @@ function ADHDSignalScreen({
       <motion.div
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
+        transition={t()}
       >
         <h1 className="text-2xl font-bold mb-2" style={{ color: '#E8E8F0' }}>
           One last question 🧠
@@ -231,7 +237,7 @@ function ADHDSignalScreen({
               key={mode}
               initial={{ opacity: 0, x: -16 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.06 + i * 0.07 }}
+              transition={{ ...t(), delay: 0.06 + i * 0.07 }}
               whileTap={{ scale: 0.985 }}
               onClick={() => onNext(mode)}
               onHoverStart={() => setHovered(mode)}
@@ -271,6 +277,7 @@ const TOTAL_STEPS = 3
 
 export default function OnboardingFlow() {
   const navigate = useNavigate()
+  const { t } = useMotion()
   const { setAppMode, setEnergyLevel, setCognitiveMode, setOnboardingCompleted, userId } = useStore()
   const [step, setStep] = useState(0)
   const [appMode, setLocalMode] = useState<AppMode>('minimal')
@@ -328,7 +335,7 @@ export default function OnboardingFlow() {
             initial={{ opacity: 0, x: direction * 32 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: direction * -24 }}
-            transition={{ duration: 0.25, ease: 'easeInOut' }}
+            transition={t()}
           >
             {screens[step]}
           </motion.div>

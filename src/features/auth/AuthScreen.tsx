@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'motion/react'
 import { Mail, ArrowRight, CheckCircle2 } from 'lucide-react'
 import { supabase } from '@/shared/lib/supabase'
 import { toast } from 'sonner'
+import { useMotion } from '@/shared/hooks/useMotion'
 
 // Must match TERMS_VERSION in TermsPage.tsx
 const TERMS_VERSION = '2026-03'
@@ -15,19 +16,20 @@ type Step = 'email' | 'check'
 
 // ── Mochi SVG Logo ────────────────────────────────────────────────────────────
 function MochiLogo() {
+  const { t, shouldAnimate } = useMotion()
   return (
     <motion.div
       className="relative w-24 h-24 mx-auto"
       initial={{ scale: 0.7, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
-      transition={{ type: 'spring', stiffness: 260, damping: 20, delay: 0.05 }}
+      transition={{ ...t('expressive'), delay: 0.05 }}
     >
-      {/* Outer glow ring */}
+      {/* Outer glow ring — only animates when motion is allowed (Research #2: no looping without user control) */}
       <motion.div
         className="absolute inset-0 rounded-full"
         style={{ background: 'radial-gradient(circle, rgba(108,99,255,0.35) 0%, transparent 70%)' }}
-        animate={{ scale: [1, 1.08, 1] }}
-        transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
+        animate={shouldAnimate ? { scale: [1, 1.08, 1] } : {}}
+        transition={{ duration: 3.5, repeat: shouldAnimate ? Infinity : 0, ease: 'easeInOut' }}
       />
       {/* Icon container */}
       <div
@@ -99,6 +101,7 @@ function EmailStep({
   loading: boolean
   onSubmit: () => void
 }) {
+  const { t } = useMotion()
   const inputRef = useRef<HTMLInputElement>(null)
   const [inputFocused, setInputFocused] = useState(false)
   const canSubmit = email.trim().length > 0 && consented
@@ -109,7 +112,7 @@ function EmailStep({
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -12 }}
-      transition={{ duration: 0.3 }}
+      transition={t()}
     >
       <h2 className="text-xl font-bold mb-1.5" style={{ color: '#E8E8F0' }}>
         Welcome — let's get you in
@@ -232,6 +235,7 @@ function EmailStep({
 
 // ── Check email step ──────────────────────────────────────────────────────────
 function CheckStep({ email, onBack }: { email: string; onBack: () => void }) {
+  const { t } = useMotion()
   return (
     <motion.div
       key="check-step"
@@ -239,7 +243,7 @@ function CheckStep({ email, onBack }: { email: string; onBack: () => void }) {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -12 }}
-      transition={{ duration: 0.3 }}
+      transition={t()}
     >
       {/* Animated checkmark */}
       <motion.div
@@ -247,7 +251,7 @@ function CheckStep({ email, onBack }: { email: string; onBack: () => void }) {
         style={{ background: 'rgba(78,205,196,0.12)', border: '1.5px solid rgba(78,205,196,0.35)' }}
         initial={{ scale: 0.5, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        transition={{ type: 'spring', stiffness: 280, damping: 22 }}
+        transition={t('expressive')}
       >
         <CheckCircle2 size={38} color="#4ECDC4" strokeWidth={1.5} />
       </motion.div>
@@ -280,6 +284,7 @@ function CheckStep({ email, onBack }: { email: string; onBack: () => void }) {
 
 // ── Main component ────────────────────────────────────────────────────────────
 export default function AuthScreen() {
+  const { t } = useMotion()
   const [step, setStep]           = useState<Step>('email')
   const [email, setEmail]         = useState('')
   const [loading, setLoading]     = useState(false)
@@ -333,7 +338,7 @@ export default function AuthScreen() {
           className="text-center mb-8"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15, duration: 0.4 }}
+          transition={{ ...t(), delay: 0.15 }}
         >
           <h1 className="text-3xl font-bold tracking-tight" style={{ color: '#E8E8F0' }}>
             MindShift
@@ -355,7 +360,7 @@ export default function AuthScreen() {
           }}
           initial={{ opacity: 0, y: 24, scale: 0.97 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ delay: 0.2, duration: 0.4, type: 'spring', stiffness: 200, damping: 22 }}
+          transition={{ ...t(), delay: 0.2 }}
         >
           <AnimatePresence mode="wait">
             {step === 'email' ? (
@@ -384,7 +389,7 @@ export default function AuthScreen() {
           style={{ color: '#3D3F56' }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
+          transition={{ ...t(), delay: 0.5 }}
         >
           By continuing you agree to our{' '}
           <Link to="/privacy" target="_blank" style={{ color: '#5A5B72' }} className="underline decoration-dotted">
