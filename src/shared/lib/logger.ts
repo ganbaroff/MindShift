@@ -2,32 +2,16 @@
  * Centralized logger — no silent failures (INVARIANT 7).
  *
  * Architecture:
- *   logError → console.error (always) + Sentry.captureException (if DSN set)
+ *   logError → console.error (always) + Sentry.captureException (if init'd)
  *   logInfo  → console.info  (dev)    + Sentry breadcrumb (prod w/ Sentry)
  *   logEvent → Plausible custom event (prod, privacy-first, no PII)
  *
- * Sentry is opt-in: set VITE_SENTRY_DSN in .env.local to enable.
- * Without it the app works identically — console only, zero external requests.
+ * Sentry.init() is called in main.tsx BEFORE rendering — this file only
+ * uses the already-initialized Sentry client. Sentry.captureException is
+ * a safe no-op when Sentry has not been initialized (no VITE_SENTRY_DSN).
  */
 
 import * as Sentry from '@sentry/react'
-
-const SENTRY_DSN = import.meta.env.VITE_SENTRY_DSN as string | undefined
-
-if (SENTRY_DSN) {
-  Sentry.init({
-    dsn: SENTRY_DSN,
-    environment: import.meta.env.MODE,
-    tracesSampleRate: 0.1,       // 10% of transactions — low overhead
-    replaysSessionSampleRate: 0, // no session replay (privacy-first)
-    replaysOnErrorSampleRate: 0,
-    beforeSend(event) {
-      // Strip PII before transmission
-      if (event.user) delete event.user.email
-      return event
-    },
-  })
-}
 
 interface ErrorMeta { [key: string]: unknown }
 
@@ -45,14 +29,13 @@ export function logError(context: string, error: unknown, meta: ErrorMeta = {}):
 
   console.error(`[MindShift] ${context}:`, message, { ...meta, stack })
 
-  if (SENTRY_DSN) {
-    Sentry.withScope((scope) => {
-      scope.setTag('context', context)
-      scope.setExtras(meta)
-      scope.setLevel('error')
-      Sentry.captureException(error instanceof Error ? error : new Error(message))
-    })
-  }
+  // Sentry.captureException is a safe no-op if Sentry.init() was not called
+  Sentry.withScope((scope) => {
+    scope.setTag('context', context)
+    scope.setExtras(meta)
+    scope.setLevel('error')
+    Sentry.captureException(error instanceof Error ? error : new Error(message))
+  })
 }
 
 /**
@@ -65,9 +48,7 @@ export function logInfo(context: string, data: ErrorMeta = {}): void {
     console.info(`[MindShift] ${context}`, data)
   }
 
-  if (SENTRY_DSN) {
-    Sentry.addBreadcrumb({ category: context, data, level: 'info' })
-  }
+  Sentry.addBreadcrumb({ category: context, data, level: 'info' })
 }
 
 /**
