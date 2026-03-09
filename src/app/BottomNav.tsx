@@ -2,6 +2,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { Home, Timer, ListTodo, Music, TrendingUp } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useMotion } from '@/shared/hooks/useMotion'
+import { usePalette } from '@/shared/hooks/usePalette'
 import { cn } from '@/shared/lib/cn'
 
 const NAV_ITEMS = [
@@ -16,6 +17,7 @@ export function BottomNav() {
   const location = useLocation()
   const navigate = useNavigate()
   const { shouldAnimate, t } = useMotion()
+  const palette = usePalette()
 
   return (
     <nav
@@ -49,8 +51,11 @@ export function BottomNav() {
                   layoutId="nav-indicator"
                   className="absolute inset-0 rounded-xl"
                   style={{
-                    background: 'rgba(108, 99, 255, 0.12)',
-                    boxShadow: '0 0 12px rgba(108, 99, 255, 0.15)',
+                    background: `${palette.primary}1E`,   // 12% alpha
+                    // Research #8: no glow in calm mode (glowAlpha = 0)
+                    boxShadow: palette.glowAlpha > 0
+                      ? `0 0 12px ${palette.primary}26`   // 15% alpha glow
+                      : 'none',
                   }}
                   transition={shouldAnimate ? t() : { duration: 0 }}
                 />

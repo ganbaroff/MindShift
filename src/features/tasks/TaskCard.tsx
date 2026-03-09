@@ -12,6 +12,7 @@
 import { useState } from 'react'
 import { motion } from 'motion/react'
 import { useMotion } from '@/shared/hooks/useMotion'
+import { usePalette } from '@/shared/hooks/usePalette'
 import { useStore } from '@/store'
 import { Confetti } from '@/shared/ui/Confetti'
 import { notifyXP, notifyXPBonus, notifyAchievement, notifyTaskDone } from '@/shared/lib/notify'
@@ -19,15 +20,16 @@ import { hapticDone } from '@/shared/lib/haptic'
 import type { Task } from '@/types'
 import { ACHIEVEMENT_DEFINITIONS } from '@/types'
 
-// ── Difficulty accent colors (never red — per ADHD UX research) ───────────────
-
-const DIFFICULTY_ACCENT: Record<number, string> = {
-  1: '#4ECDC4',   // teal  — easy, calm
-  2: '#6C63FF',   // indigo — medium, steady
-  3: '#FFE66D',   // gold  — hard (warm, NOT red/coral)
-}
+// ── Difficulty accent color labels (Research #8: teal/indigo/gold — never red) ─
 
 const DIFFICULTY_LABELS: Record<number, string> = { 1: 'Easy', 2: 'Medium', 3: 'Hard' }
+
+// getDifficultyAccent: returns palette-aware color (desaturated in calm mode)
+function getDifficultyAccent(difficulty: number, palette: ReturnType<typeof usePalette>): string {
+  if (difficulty === 1) return palette.teal
+  if (difficulty === 3) return palette.gold
+  return palette.primary   // difficulty 2 — medium, steady
+}
 
 // ── Task age helper (non-urgency, non-shaming) ────────────────────────────────
 
@@ -50,11 +52,13 @@ interface Props {
 export function TaskCard({ task, index = 0, onComplete, onSnooze }: Props) {
   const { completeTask, snoozeTask, addXP, energyLevel, unlockAchievement, hasAchievement } = useStore()
   const { shouldAnimate, t } = useMotion()
+  const palette = usePalette()
 
   const [confettiActive, setConfettiActive] = useState(false)
   const [isDone, setIsDone] = useState(false)
 
-  const difficultyAccent = DIFFICULTY_ACCENT[task.difficulty] ?? '#6C63FF'
+  // Research #8: palette-aware accent — desaturated in calm mode
+  const difficultyAccent = getDifficultyAccent(task.difficulty, palette)
   const ageBadge = getTaskAgeBadge(task)
 
   const handleComplete = () => {
@@ -181,10 +185,10 @@ export function TaskCard({ task, index = 0, onComplete, onSnooze }: Props) {
             disabled={isDone}
             className="flex-1 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200"
             style={{
-              background:   isDone ? '#2D3150' : 'rgba(78, 205, 196, 0.15)',
+              background:   isDone ? '#2D3150' : `${palette.teal}26`,   // 15% alpha
               border:       '1.5px solid',
-              borderColor:  isDone ? '#2D3150' : '#4ECDC4',
-              color:        isDone ? '#8B8BA7' : '#4ECDC4',
+              borderColor:  isDone ? '#2D3150' : palette.teal,
+              color:        isDone ? '#8B8BA7' : palette.teal,
             }}
           >
             {isDone ? '✓ Done!' : '✓ Complete'}
