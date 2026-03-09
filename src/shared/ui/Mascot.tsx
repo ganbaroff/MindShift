@@ -35,7 +35,7 @@ const STATE_CONFIG: Record<MascotState, {
   smile: string
 }> = {
   idle: {
-    bodyColor1: '#6C63FF',
+    bodyColor1: '#7B72FF',
     bodyColor2: '#4ECDC4',
     glowColor: 'transparent',
     cheeks: true,
@@ -44,7 +44,7 @@ const STATE_CONFIG: Record<MascotState, {
   focused: {
     bodyColor1: '#5A53D4',
     bodyColor2: '#3DBDB5',
-    glowColor: 'rgba(108,99,255,0.25)',
+    glowColor: 'rgba(123,114,255,0.25)',
     cheeks: false,
     smile: 'M34 51 Q40 54 46 51',
   },

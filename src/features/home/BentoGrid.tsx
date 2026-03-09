@@ -70,9 +70,9 @@ function SortableCard({ config, editMode, onToggleVisible }: SortableCardProps) 
   const cardStyle: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition: isDragging ? 'none' : transition ?? undefined,
-    background: '#1A1D2E',
-    border: `1.5px solid ${isDragging ? '#6C63FF' : '#2D3150'}`,
-    boxShadow: isDragging ? '0 8px 32px rgba(108,99,255,0.25)' : 'none',
+    background: '#1E2136',
+    border: isDragging ? '1.5px solid #7B72FF' : '1px solid rgba(255,255,255,0.06)',
+    boxShadow: isDragging ? '0 8px 32px rgba(123,114,255,0.25)' : 'none',
   }
 
   return (
@@ -94,7 +94,7 @@ function SortableCard({ config, editMode, onToggleVisible }: SortableCardProps) 
       {editMode && (
         <div
           className="flex items-center justify-between px-3 pt-2 pb-0"
-          style={{ borderBottom: '1px solid #2D3150' }}
+          style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
         >
           {/* Grip handle — attached to drag listeners */}
           <div
@@ -116,7 +116,7 @@ function SortableCard({ config, editMode, onToggleVisible }: SortableCardProps) 
             aria-label={config.visible ? 'Hide widget' : 'Show widget'}
           >
             {config.visible
-              ? <Eye size={14} style={{ color: '#6C63FF' }} />
+              ? <Eye size={14} style={{ color: '#7B72FF' }} />
               : <EyeOff size={14} style={{ color: '#8B8BA7' }} />
             }
           </button>
@@ -124,7 +124,7 @@ function SortableCard({ config, editMode, onToggleVisible }: SortableCardProps) 
       )}
 
       {/* Widget content */}
-      <div className={editMode ? 'p-4 pt-3 pointer-events-none' : 'p-4'}>
+      <div className={editMode ? 'p-5 pt-3 pointer-events-none' : 'p-5'}>
         <Component />
       </div>
     </motion.div>
@@ -173,16 +173,16 @@ export function BentoGrid({ widgets, onReorder }: BentoGridProps) {
   const ids = renderedWidgets.map(w => w.id)
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       {/* Edit mode toggle */}
       <div className="flex items-center justify-end px-5">
         <button
           onClick={() => setEditMode(v => !v)}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs transition-all duration-200"
           style={{
-            background: editMode ? 'rgba(108,99,255,0.15)' : 'transparent',
-            border: `1px solid ${editMode ? '#6C63FF' : '#2D3150'}`,
-            color: editMode ? '#6C63FF' : '#8B8BA7',
+            background: editMode ? 'rgba(123,114,255,0.15)' : 'transparent',
+            border: `1px solid ${editMode ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
+            color: editMode ? '#7B72FF' : '#8B8BA7',
           }}
         >
           <Settings2 size={11} />
@@ -191,7 +191,7 @@ export function BentoGrid({ widgets, onReorder }: BentoGridProps) {
       </div>
 
       {/* Sortable grid */}
-      <div className="px-5 flex flex-col gap-3">
+      <div className="px-5 flex flex-col gap-4">
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}

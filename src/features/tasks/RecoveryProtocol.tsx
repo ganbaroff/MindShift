@@ -173,7 +173,7 @@ export function RecoveryProtocol({ onDismiss }: Props) {
           transition={{ duration: 1.2, ease: 'easeOut' }}
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: 'radial-gradient(ellipse 70% 45% at 50% 35%, #6C63FF, #4ECDC420, transparent)',
+            background: 'radial-gradient(ellipse 70% 45% at 50% 35%, #7B72FF, #4ECDC420, transparent)',
           }}
         />
 
@@ -194,7 +194,7 @@ export function RecoveryProtocol({ onDismiss }: Props) {
             </motion.div>
             {loadingAi ? (
               <div className="flex justify-center">
-                <span className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" style={{ color: '#6C63FF' }} />
+                <span className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" style={{ color: '#7B72FF' }} />
               </div>
             ) : (
               <p
@@ -240,16 +240,16 @@ export function RecoveryProtocol({ onDismiss }: Props) {
               autoFocus
               className="w-full resize-none rounded-2xl px-4 py-3 text-base outline-none transition-all duration-200"
               style={{
-                background: '#1A1D2E',
-                border: '1.5px solid #2D3150',
+                background: '#1E2136',
+                border: '1px solid rgba(255,255,255,0.06)',
                 color: '#E8E8F0',
-                caretColor: '#6C63FF',
+                caretColor: '#7B72FF',
               }}
               onFocus={(e) => {
-                e.currentTarget.style.borderColor = '#6C63FF'
+                e.currentTarget.style.borderColor = '#7B72FF'
               }}
               onBlur={(e) => {
-                e.currentTarget.style.borderColor = '#2D3150'
+                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'
               }}
             />
 
@@ -265,8 +265,8 @@ export function RecoveryProtocol({ onDismiss }: Props) {
                   onClick={() => setTaskInput(s)}
                   className="text-xs px-3 py-1.5 rounded-xl transition-all duration-150"
                   style={{
-                    background: taskInput === s ? 'rgba(108,99,255,0.18)' : '#1A1D2E',
-                    border: `1px solid ${taskInput === s ? '#6C63FF' : '#2D3150'}`,
+                    background: taskInput === s ? 'rgba(123,114,255,0.18)' : '#1E2136',
+                    border: `1px solid ${taskInput === s ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
                     color: taskInput === s ? '#C8C0FF' : '#8B8BA7',
                   }}
                 >
@@ -288,7 +288,7 @@ export function RecoveryProtocol({ onDismiss }: Props) {
               disabled={!taskInput.trim() || isSubmitting}
               className="w-full py-4 rounded-2xl font-semibold text-base transition-all duration-200"
               style={{
-                background: taskInput.trim() ? '#6C63FF' : '#2D3150',
+                background: taskInput.trim() ? '#7B72FF' : '#252840',
                 color: taskInput.trim() ? '#FFFFFF' : '#8B8BA7',
                 cursor: taskInput.trim() ? 'pointer' : 'not-allowed',
               }}

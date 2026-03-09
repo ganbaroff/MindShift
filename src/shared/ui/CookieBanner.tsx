@@ -46,28 +46,29 @@ export function CookieBanner() {
         <motion.div
           role="region"
           aria-label="Cookie notice"
-          className="fixed bottom-20 left-4 right-4 z-50 rounded-2xl px-4 py-3 flex items-start gap-3"
+          className="fixed bottom-3 left-3 right-3 z-50 rounded-xl px-3.5 py-2.5 flex items-center gap-2.5"
           style={{
-            background: '#1A1D2E',
-            border: '1px solid #2D3150',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
-            maxWidth: 480,
+            background: 'rgba(22,25,40,0.95)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+            border: '1px solid rgba(45,49,80,0.6)',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
+            maxWidth: 400,
             margin: '0 auto',
           }}
-          initial={{ y: 80, opacity: 0 }}
+          initial={{ y: 40, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          exit={{ y: 80, opacity: 0 }}
-          transition={{ type: 'spring', damping: 20, stiffness: 200 }}
+          exit={{ y: 40, opacity: 0 }}
+          transition={{ type: 'spring', damping: 22, stiffness: 200 }}
         >
           <div className="flex-1 min-w-0">
-            <p className="text-xs leading-relaxed" style={{ color: '#8B8BA7' }}>
-              We use localStorage for app functionality and{' '}
-              <strong style={{ color: '#E8E8F0' }}>cookieless</strong> analytics that never
-              identify you.{' '}
+            <p className="text-[11px] leading-relaxed" style={{ color: '#7B7B95' }}>
+              We use localStorage &{' '}
+              <strong style={{ color: '#9B9BB0' }}>cookieless</strong> analytics.{' '}
               <Link
                 to="/cookie-policy"
-                className="underline"
-                style={{ color: '#6C63FF' }}
+                className="underline decoration-dotted"
+                style={{ color: '#7B72FF' }}
                 onClick={dismiss}
               >
                 Learn more
@@ -77,10 +78,10 @@ export function CookieBanner() {
           <button
             onClick={dismiss}
             aria-label="Dismiss cookie notice"
-            className="shrink-0 p-1 rounded-lg transition-colors"
-            style={{ color: '#8B8BA7' }}
+            className="shrink-0 p-1 rounded-lg transition-colors hover:bg-white/5"
+            style={{ color: '#6B7280' }}
           >
-            <X size={16} />
+            <X size={14} />
           </button>
         </motion.div>
       )}

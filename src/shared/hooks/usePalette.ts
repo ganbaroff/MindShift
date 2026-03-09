@@ -34,7 +34,7 @@ export interface Palette {
 
 // ── Full saturation (normal mode) ─────────────────────────────────────────────
 const NORMAL: Palette = {
-  primary:   '#6C63FF',
+  primary:   '#7B72FF',   // WCAG AA: 5.0:1 on #0F1117 (was #6C63FF — 4.37:1)
   teal:      '#4ECDC4',
   gold:      '#F59E0B',   // Research #8: amber replaces neon yellow #FFE66D — APCA Lc ~68
   glowAlpha: 1.0,
@@ -45,7 +45,7 @@ const NORMAL: Palette = {
 // Hue preserved, saturation reduced ~50%, lightness slightly lowered
 // to maintain legibility while reducing arousal.
 const CALM: Palette = {
-  primary:   '#6060A0',   // muted indigo-slate
+  primary:   '#7878B8',   // muted indigo-slate — WCAG AA: 4.63:1 on #0F1117 (was #6060A0 — 3.31:1)
   teal:      '#4A8A87',   // muted teal-sage
   gold:      '#8C6A10',   // muted amber (desaturated #F59E0B)
   glowAlpha: 0.0,         // no glows in calm mode — pure shape signal

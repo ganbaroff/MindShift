@@ -23,10 +23,10 @@ export function BottomNav() {
     <nav
       className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] z-30"
       style={{
-        background: 'rgba(26, 29, 46, 0.95)',
+        background: 'rgba(23, 26, 43, 0.95)',
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
-        borderTop: '1px solid rgba(108, 99, 255, 0.15)',
+        borderTop: '1px solid rgba(123, 114, 255, 0.15)',
         paddingBottom: 'env(safe-area-inset-bottom)',
       }}
     >

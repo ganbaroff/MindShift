@@ -26,25 +26,25 @@ export default function TermsPage() {
         <button
           onClick={() => navigate(-1)}
           className="p-2 rounded-xl"
-          style={{ background: '#1A1D2E', color: '#8B8BA7' }}
+          style={{ background: '#1E2136', color: '#8B8BA7' }}
           aria-label="Go back"
         >
           <ArrowLeft size={18} />
         </button>
         <div>
           <h1 className="text-xl font-bold" style={{ color: '#E8E8F0' }}>Terms of Service</h1>
-          <p className="text-xs mt-0.5" style={{ color: '#6C63FF' }}>Version {TERMS_VERSION} · Last updated: March 9, 2026</p>
+          <p className="text-xs mt-0.5" style={{ color: '#7B72FF' }}>Version {TERMS_VERSION} · Last updated: March 9, 2026</p>
         </div>
       </div>
 
       <div className="flex flex-col gap-7 max-w-2xl">
 
         {/* Intro */}
-        <p className="text-sm leading-relaxed p-4 rounded-xl" style={{ color: '#8B8BA7', background: '#1A1D2E', border: '1px solid #2D3150' }}>
+        <p className="text-sm leading-relaxed p-4 rounded-xl" style={{ color: '#8B8BA7', background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)' }}>
           Please read these Terms carefully before using MindShift. By creating an account or
           using the service, you confirm that you have read, understood, and agree to be bound
           by these Terms and our{' '}
-          <a href="/privacy" style={{ color: '#6C63FF' }}>Privacy Policy</a>.
+          <a href="/privacy" style={{ color: '#7B72FF' }}>Privacy Policy</a>.
           If you do not agree, do not use MindShift.
         </p>
 
@@ -86,7 +86,7 @@ export default function TermsPage() {
             You agree to provide accurate and complete registration information and to update it
             promptly if it changes. You agree not to share your magic links with anyone. If you
             suspect unauthorised access to your account, contact us immediately at{' '}
-            <a href="mailto:hello@mindshift.app" style={{ color: '#6C63FF' }}>hello@mindshift.app</a>.
+            <a href="mailto:hello@mindshift.app" style={{ color: '#7B72FF' }}>hello@mindshift.app</a>.
           </p>
           <p>
             We reserve the right to suspend or terminate accounts that violate these Terms,
@@ -120,7 +120,7 @@ export default function TermsPage() {
             Your subscription will automatically renew at the end of each billing period unless you
             cancel before the renewal date. You can cancel at any time through Settings → Subscription
             or by emailing{' '}
-            <a href="mailto:billing@mindshift.app" style={{ color: '#6C63FF' }}>billing@mindshift.app</a>.
+            <a href="mailto:billing@mindshift.app" style={{ color: '#7B72FF' }}>billing@mindshift.app</a>.
             Cancellation takes effect at the end of the current billing period — you retain access
             until then.
           </p>
@@ -147,7 +147,7 @@ export default function TermsPage() {
             If you are not satisfied with MindShift Pro, you may request a full refund within
             <strong style={{ color: '#E8E8F0' }}> 14 days</strong> of your initial payment by
             contacting{' '}
-            <a href="mailto:billing@mindshift.app" style={{ color: '#6C63FF' }}>billing@mindshift.app</a>.
+            <a href="mailto:billing@mindshift.app" style={{ color: '#7B72FF' }}>billing@mindshift.app</a>.
             Refunds for subsequent billing periods are at our discretion and are not generally
             provided for partial months.
           </p>
@@ -174,7 +174,7 @@ export default function TermsPage() {
             Your task titles and relevant context are sent to our backend and processed by Anthropic's
             API to generate responses. Please review{' '}
             <a href="https://www.anthropic.com/legal/privacy" target="_blank" rel="noopener noreferrer"
-               style={{ color: '#6C63FF' }}>Anthropic's Privacy Policy</a>{' '}
+               style={{ color: '#7B72FF' }}>Anthropic's Privacy Policy</a>{' '}
             for information on how they handle data.
           </p>
         </Section>
@@ -243,13 +243,13 @@ export default function TermsPage() {
           </p>
           <p>
             We encourage you to contact us at{' '}
-            <a href="mailto:hello@mindshift.app" style={{ color: '#6C63FF' }}>hello@mindshift.app</a>{' '}
+            <a href="mailto:hello@mindshift.app" style={{ color: '#7B72FF' }}>hello@mindshift.app</a>{' '}
             to resolve any dispute informally before initiating formal proceedings.
           </p>
           <p>
             If you are an EU/EEA consumer, you may also use the European Commission's{' '}
             <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer"
-               style={{ color: '#6C63FF' }}>Online Dispute Resolution platform</a>.
+               style={{ color: '#7B72FF' }}>Online Dispute Resolution platform</a>.
           </p>
         </Section>
 
@@ -290,15 +290,15 @@ export default function TermsPage() {
         <Section title="17. Contact">
           <p>
             For general questions:{' '}
-            <a href="mailto:hello@mindshift.app" style={{ color: '#6C63FF' }}>hello@mindshift.app</a>
+            <a href="mailto:hello@mindshift.app" style={{ color: '#7B72FF' }}>hello@mindshift.app</a>
           </p>
           <p>
             For privacy or data requests:{' '}
-            <a href="mailto:privacy@mindshift.app" style={{ color: '#6C63FF' }}>privacy@mindshift.app</a>
+            <a href="mailto:privacy@mindshift.app" style={{ color: '#7B72FF' }}>privacy@mindshift.app</a>
           </p>
           <p>
             For billing questions:{' '}
-            <a href="mailto:billing@mindshift.app" style={{ color: '#6C63FF' }}>billing@mindshift.app</a>
+            <a href="mailto:billing@mindshift.app" style={{ color: '#7B72FF' }}>billing@mindshift.app</a>
           </p>
         </Section>
 

@@ -3,14 +3,15 @@
 @theme {
   /* ── MindShift Design Tokens ───────────────────────────── */
   --color-bg:        #0F1117;
-  --color-surface:   #1A1D2E;
+  --color-surface:   #171A2B;   /* nav/sheet bg (was #1A1D2E) */
+  --color-card:      #1E2136;   /* main cards, panels — depth without borders */
   --color-elevated:  #252840;
-  --color-primary:   #6C63FF;
+  --color-primary:   #7B72FF;  /* WCAG AA: 5.0:1 on #0F1117 (was #6C63FF 4.37:1) */
   --color-secondary: #4ECDC4;
-  --color-accent:    #FFE66D;
+  --color-accent:    #F59E0B;  /* Research #8: amber replaces #FFE66D for task contexts */
   --color-text:      #E8E8F0;
   --color-muted:     #8B8BA7;
-  --color-warning:   #FF6B6B;
+  --color-warning:   #F59E0B;  /* Research #8: amber — #FF6B6B (coral) is RSD trigger */
   --color-success:   #4ECDC4;
   --color-border:    #2D3150;
 
@@ -65,10 +66,10 @@ html, body, #root {
 
 /* ── Utility classes ───────────────────────────────────────── */
 .glass {
-  background: rgba(26, 29, 46, 0.7);
+  background: rgba(23, 26, 43, 0.8);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(108, 99, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 /* ── Task time bar animation ───────────────────────────────── */
@@ -91,6 +92,6 @@ html, body, #root {
 
 /* ── Session phase pulse ───────────────────────────────────── */
 @keyframes phasePulse {
-  0%,100% { box-shadow: 0 0 0 0 rgba(108, 99, 255, 0.4); }
-  50%      { box-shadow: 0 0 0 12px rgba(108, 99, 255, 0); }
+  0%,100% { box-shadow: 0 0 0 0 rgba(123, 114, 255, 0.4); }
+  50%      { box-shadow: 0 0 0 12px rgba(123, 114, 255, 0); }
 }

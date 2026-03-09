@@ -38,7 +38,7 @@ export function ProgressWidget() {
         <p className="text-xs font-medium tracking-widest uppercase" style={{ color: '#8B8BA7' }}>
           Progress
         </p>
-        <span className="text-xs" style={{ color: '#FFE66D' }}>
+        <span className="text-xs" style={{ color: '#F59E0B' }}>
           🏆 {unlocked} unlocked
         </span>
       </div>
@@ -47,7 +47,7 @@ export function ProgressWidget() {
       <div className="flex items-center gap-3">
         <div
           className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold shrink-0"
-          style={{ background: 'rgba(108,99,255,0.2)', color: '#6C63FF' }}
+          style={{ background: 'rgba(123,114,255,0.2)', color: '#7B72FF' }}
         >
           {level}
         </div>
@@ -62,14 +62,14 @@ export function ProgressWidget() {
       </div>
 
       {/* XP bar */}
-      <div className="h-2 rounded-full overflow-hidden" style={{ background: '#2D3150' }}>
+      <div className="h-2 rounded-full overflow-hidden" style={{ background: '#252840' }}>
         <motion.div
           initial={{ width: 0 }}
           animate={{ width: `${pct}%` }}
           transition={{ duration: 0.8, ease: 'easeOut' }}
           className="h-full rounded-full"
           style={{
-            background: 'linear-gradient(to right, #6C63FF, #4ECDC4)',
+            background: 'linear-gradient(to right, #7B72FF, #4ECDC4)',
           }}
         />
       </div>

@@ -27,7 +27,7 @@ export default function TasksScreen() {
       >
         <div
           className="w-24 h-24 rounded-3xl flex items-center justify-center mb-6"
-          style={{ background: 'rgba(108,99,255,0.12)', border: '1.5px solid rgba(108,99,255,0.25)' }}
+          style={{ background: 'rgba(123,114,255,0.12)', border: '1.5px solid rgba(123,114,255,0.25)' }}
         >
           <span style={{ fontSize: 44 }}>🧠</span>
         </div>
@@ -42,9 +42,9 @@ export default function TasksScreen() {
           onClick={() => setAddOpen(true)}
           className="flex items-center gap-2.5 px-8 py-4 rounded-2xl font-semibold text-base"
           style={{
-            background: 'linear-gradient(135deg, #6C63FF 0%, #5B52E8 100%)',
+            background: 'linear-gradient(135deg, #7B72FF 0%, #5B52E8 100%)',
             color: '#fff',
-            boxShadow: '0 4px 24px rgba(108,99,255,0.4)',
+            boxShadow: '0 4px 24px rgba(123,114,255,0.4)',
           }}
         >
           <Plus size={22} />
@@ -70,7 +70,7 @@ export default function TasksScreen() {
       {/* NOW Pool */}
       <section className="px-5 mb-6" aria-label="Now — active tasks (up to 3)"  aria-live="polite">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-xs font-medium tracking-widest uppercase" style={{ color: '#6C63FF' }}>
+          <h2 className="text-xs font-medium tracking-widest uppercase" style={{ color: '#7B72FF' }}>
             Now
           </h2>
           <span className="text-xs" style={{ color: '#8B8BA7' }}>
@@ -154,7 +154,7 @@ export default function TasksScreen() {
         whileTap={{ scale: 0.94 }}
         onClick={() => setAddOpen(true)}
         className="fixed bottom-24 right-5 flex items-center gap-2 px-5 py-3.5 rounded-full shadow-lg z-30"
-        style={{ background: '#6C63FF' }}
+        style={{ background: '#7B72FF' }}
         aria-label="Add task"
       >
         <Plus size={20} color="white" />

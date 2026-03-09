@@ -60,21 +60,21 @@ function ProgressBar({ step, total }: { step: number; total: number }) {
           animate={{ opacity: 1, x: 0 }}
           transition={t()}
           className="text-xs font-semibold tracking-widest uppercase"
-          style={{ color: '#6C63FF' }}
+          style={{ color: '#7B72FF' }}
         >
           Step {step + 1} of {total}
         </motion.p>
-        <p className="text-xs" style={{ color: '#3D3F56' }}>
+        <p className="text-xs" style={{ color: '#6B7280' }}>
           {Math.round(((step + 1) / total) * 100)}% complete
         </p>
       </div>
       {/* Segmented bar */}
       <div className="flex gap-1.5">
         {Array.from({ length: total }).map((_, i) => (
-          <div key={i} className="flex-1 h-1 rounded-full overflow-hidden" style={{ background: '#2D3150' }}>
+          <div key={i} className="flex-1 h-1 rounded-full overflow-hidden" style={{ background: '#252840' }}>
             <motion.div
               className="h-full rounded-full"
-              style={{ background: i <= step ? '#6C63FF' : 'transparent' }}
+              style={{ background: i <= step ? '#7B72FF' : 'transparent' }}
               initial={false}
               animate={{ width: i <= step ? '100%' : '0%' }}
               transition={t()}
@@ -113,7 +113,7 @@ const MODE_CARDS: {
     emoji: '🎯',
     title: 'Close ONE important task',
     subtitle: 'I need to focus on a single thing right now',
-    accent: '#6C63FF',
+    accent: '#7B72FF',
   },
   {
     mode: 'habit',
@@ -127,7 +127,7 @@ const MODE_CARDS: {
     emoji: '🗂️',
     title: 'Organize my whole system',
     subtitle: 'I want full visibility and control over my projects',
-    accent: '#FFE66D',
+    accent: '#F59E0B',
   },
 ]
 
@@ -168,8 +168,8 @@ function IntentScreen({ onNext }: { onNext: (mode: AppMode) => void }) {
               style={{
                 background: isHovered
                   ? `linear-gradient(135deg, ${accent}18 0%, ${accent}08 100%)`
-                  : '#1A1D2E',
-                border: `1.5px solid ${isHovered ? `${accent}60` : '#2D3150'}`,
+                  : '#1E2136',
+                border: `1.5px solid ${isHovered ? `${accent}60` : 'rgba(255,255,255,0.06)'}`,
                 boxShadow: isHovered ? `0 4px 20px ${accent}18` : 'none',
               }}
             >
@@ -241,7 +241,7 @@ function ADHDSignalScreen({
       emoji: '🎯',
       title: 'Yes — show me one task at a time',
       subtitle: 'Focused mode: zero distractions, one thing at a time',
-      accent: '#6C63FF',
+      accent: '#7B72FF',
     },
     {
       mode: 'overview',
@@ -285,8 +285,8 @@ function ADHDSignalScreen({
               style={{
                 background: isHovered
                   ? `linear-gradient(135deg, ${accent}18 0%, ${accent}06 100%)`
-                  : '#1A1D2E',
-                border: `1.5px solid ${isHovered ? `${accent}60` : '#2D3150'}`,
+                  : '#1E2136',
+                border: `1.5px solid ${isHovered ? `${accent}60` : 'rgba(255,255,255,0.06)'}`,
                 boxShadow: isHovered ? `0 4px 20px ${accent}18` : 'none',
               }}
             >

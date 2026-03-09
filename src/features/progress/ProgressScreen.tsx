@@ -170,7 +170,7 @@ export default function ProgressScreen() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ ...t(), delay: 0.15 }}
         className="mx-5 p-5 rounded-2xl mb-4"
-        style={{ background: '#1A1D2E', border: '1.5px solid #2D3150' }}
+        style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)' }}
       >
         <div className="flex items-center gap-4 mb-4">
           <motion.div
@@ -181,8 +181,8 @@ export default function ProgressScreen() {
             style={{
               width: 72,
               height: 72,
-              background: 'linear-gradient(135deg, rgba(108,99,255,0.12), rgba(78,205,196,0.08))',
-              border: '1.5px solid rgba(108,99,255,0.25)',
+              background: 'linear-gradient(135deg, rgba(123,114,255,0.12), rgba(78,205,196,0.08))',
+              border: '1.5px solid rgba(123,114,255,0.25)',
             }}
           >
             <Avatar level={level} size={56} />
@@ -210,7 +210,7 @@ export default function ProgressScreen() {
               transition={{ ...t(), delay: 0.3 }}
               className="h-full rounded-full"
               style={{
-                background: 'linear-gradient(90deg, #6C63FF, #4ECDC4)',
+                background: 'linear-gradient(90deg, #7B72FF, #4ECDC4)',
               }}
             />
           </div>
@@ -230,10 +230,10 @@ export default function ProgressScreen() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ ...t(), delay: 0.25 }}
         className="mx-5 p-5 rounded-2xl mb-4"
-        style={{ background: '#1A1D2E', border: '1.5px solid #2D3150' }}
+        style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)' }}
       >
         <div className="flex items-center justify-between mb-4">
-          <p className="text-xs font-medium tracking-widest uppercase" style={{ color: '#6C63FF' }}>
+          <p className="text-xs font-medium tracking-widest uppercase" style={{ color: '#7B72FF' }}>
             This Week
           </p>
           <p className="text-xs font-medium" style={{ color: '#4ECDC4' }}>
@@ -259,8 +259,8 @@ export default function ProgressScreen() {
                   style={{
                     background: isActive
                       ? isToday
-                        ? 'linear-gradient(180deg, #6C63FF, #4ECDC4)'
-                        : 'linear-gradient(180deg, rgba(108,99,255,0.6), rgba(78,205,196,0.4))'
+                        ? 'linear-gradient(180deg, #7B72FF, #4ECDC4)'
+                        : 'linear-gradient(180deg, rgba(123,114,255,0.6), rgba(78,205,196,0.4))'
                       : '#252840',
                     minHeight: 4,
                   }}
@@ -288,9 +288,9 @@ export default function ProgressScreen() {
       {/* Research #5: Show cumulative effort (task totals), not consecutive streaks */}
       <div className="mx-5 grid grid-cols-3 gap-3 mb-4">
         {[
-          { label: 'Achievements', value: `${unlocked.length}/${ACHIEVEMENT_DEFINITIONS.length}`, emoji: '🏆', color: '#FFE66D' },
+          { label: 'Achievements', value: `${unlocked.length}/${ACHIEVEMENT_DEFINITIONS.length}`, emoji: '🏆', color: '#F59E0B' },
           { label: 'Tasks Done', value: completedTotal.toString(), emoji: '✅', color: '#4ECDC4' },
-          { label: 'Active Days', value: `${activeDays}/7`, emoji: '📅', color: '#6C63FF' },
+          { label: 'Active Days', value: `${activeDays}/7`, emoji: '📅', color: '#7B72FF' },
         ].map((stat, i) => (
           <motion.div
             key={stat.label}
@@ -298,7 +298,7 @@ export default function ProgressScreen() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ ...t(), delay: 0.35 + i * 0.05 }}
             className="p-3 rounded-2xl text-center"
-            style={{ background: '#1A1D2E', border: '1.5px solid #2D3150' }}
+            style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)' }}
           >
             <p className="text-xl mb-1">{stat.emoji}</p>
             <p className="text-lg font-bold" style={{ color: stat.color }}>{stat.value}</p>
@@ -313,10 +313,10 @@ export default function ProgressScreen() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ ...t(), delay: 0.5 }}
         className="mx-5 p-5 rounded-2xl mb-4"
-        style={{ background: '#1A1D2E', border: '1.5px solid #2D3150' }}
+        style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)' }}
       >
         <div className="flex items-center justify-between mb-3">
-          <p className="text-xs font-medium tracking-widest uppercase" style={{ color: '#FFE66D' }}>
+          <p className="text-xs font-medium tracking-widest uppercase" style={{ color: '#F59E0B' }}>
             ✨ Weekly Insight
           </p>
           {insights.length === 0 && (
@@ -325,8 +325,8 @@ export default function ProgressScreen() {
               disabled={insightLoading}
               className="text-xs px-4 py-2.5 rounded-lg transition-all duration-200 min-h-[44px]"
               style={{
-                background: 'rgba(108,99,255,0.15)',
-                color: '#6C63FF',
+                background: 'rgba(123,114,255,0.15)',
+                color: '#7B72FF',
                 opacity: insightLoading ? 0.5 : 1,
               }}
             >
@@ -365,7 +365,7 @@ export default function ProgressScreen() {
           <h2 className="text-xs font-medium tracking-widest uppercase" style={{ color: '#8B8BA7' }}>
             Achievements
           </h2>
-          <span className="text-xs" style={{ color: '#6C63FF' }}>
+          <span className="text-xs" style={{ color: '#7B72FF' }}>
             {unlocked.length}/{ACHIEVEMENT_DEFINITIONS.length}
           </span>
         </div>
@@ -382,8 +382,8 @@ export default function ProgressScreen() {
                 transition={{ ...t(), delay: 0.6 + i * 0.03 }}
                 className="flex flex-col items-center gap-1.5 p-3 rounded-2xl text-center"
                 style={{
-                  background: isUnlocked ? 'rgba(108, 99, 255, 0.12)' : '#1A1D2E',
-                  border: `1.5px solid ${isUnlocked ? 'rgba(108, 99, 255, 0.4)' : '#2D3150'}`,
+                  background: isUnlocked ? 'rgba(123, 114, 255, 0.12)' : '#1E2136',
+                  border: `1.5px solid ${isUnlocked ? 'rgba(123, 114, 255, 0.4)' : 'rgba(255,255,255,0.06)'}`,
                   opacity: isUnlocked ? 1 : 0.45,
                 }}
                 title={def.description}
@@ -395,7 +395,7 @@ export default function ProgressScreen() {
                   {def.name}
                 </span>
                 {isUnlocked && achievement?.unlockedAt && (
-                  <span className="text-xs" style={{ color: '#6C63FF', fontSize: '9px' }}>
+                  <span className="text-xs" style={{ color: '#7B72FF', fontSize: '9px' }}>
                     {new Date(achievement.unlockedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                   </span>
                 )}

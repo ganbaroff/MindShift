@@ -231,13 +231,13 @@ export function AddTaskModal({ open, onClose }: Props) {
             exit={!shouldAnimate ? { opacity: 0 } : { y: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
             className="fixed bottom-0 left-0 right-0 z-50 flex flex-col gap-5 px-5 pt-5 pb-10 rounded-t-3xl"
-            style={{ background: '#1A1D2E', border: '1px solid #2D3150' }}
+            style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)' }}
           >
             {/* Handle + header */}
             <div className="flex items-center justify-between">
               <div
                 className="absolute top-3 left-1/2 -translate-x-1/2 w-10 h-1 rounded-full"
-                style={{ background: '#2D3150' }}
+                style={{ background: '#252840' }}
               />
               <h2 className="text-lg font-bold" style={{ color: '#E8E8F0' }}>
                 Add task
@@ -264,12 +264,12 @@ export function AddTaskModal({ open, onClose }: Props) {
                   className="flex-1 rounded-2xl px-4 py-3 text-base outline-none"
                   style={{
                     background: '#252840',
-                    border: `1.5px solid ${isListening ? '#4ECDC4' : '#2D3150'}`,
+                    border: `1.5px solid ${isListening ? '#4ECDC4' : 'rgba(255,255,255,0.06)'}`,
                     color: '#E8E8F0',
-                    caretColor: '#6C63FF',
+                    caretColor: '#7B72FF',
                   }}
-                  onFocus={(e) => { if (!isListening) e.currentTarget.style.borderColor = '#6C63FF' }}
-                  onBlur={(e) => { if (!isListening) e.currentTarget.style.borderColor = '#2D3150' }}
+                  onFocus={(e) => { if (!isListening) e.currentTarget.style.borderColor = '#7B72FF' }}
+                  onBlur={(e) => { if (!isListening) e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)' }}
                 />
                 {/* Voice input button */}
                 {voiceSupported && (
@@ -278,7 +278,7 @@ export function AddTaskModal({ open, onClose }: Props) {
                     className="w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-200"
                     style={{
                       background: isListening ? 'rgba(78,205,196,0.2)' : '#252840',
-                      border: `1.5px solid ${isListening ? '#4ECDC4' : '#2D3150'}`,
+                      border: `1.5px solid ${isListening ? '#4ECDC4' : 'rgba(255,255,255,0.06)'}`,
                     }}
                     aria-label={isListening ? 'Stop voice input' : 'Start voice input'}
                   >
@@ -298,9 +298,9 @@ export function AddTaskModal({ open, onClose }: Props) {
                   disabled={loadingAi}
                   className="self-start flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-medium transition-all duration-200"
                   style={{
-                    background: 'rgba(108,99,255,0.12)',
-                    border: '1px solid rgba(108,99,255,0.4)',
-                    color: '#6C63FF',
+                    background: 'rgba(123,114,255,0.12)',
+                    border: '1px solid rgba(123,114,255,0.4)',
+                    color: '#7B72FF',
                   }}
                 >
                   {loadingAi ? (
@@ -317,14 +317,14 @@ export function AddTaskModal({ open, onClose }: Props) {
             {aiSteps && (
               <div
                 className="flex flex-col gap-2 p-3 rounded-2xl"
-                style={{ background: '#252840', border: '1px solid rgba(108,99,255,0.3)' }}
+                style={{ background: '#252840', border: '1px solid rgba(123,114,255,0.3)' }}
               >
-                <p className="text-xs font-medium" style={{ color: '#6C63FF' }}>
+                <p className="text-xs font-medium" style={{ color: '#7B72FF' }}>
                   ✨ AI micro-steps
                 </p>
                 {aiSteps.map((step, i) => (
                   <div key={i} className="flex items-start gap-2">
-                    <span className="text-xs mt-0.5" style={{ color: '#6C63FF' }}>
+                    <span className="text-xs mt-0.5" style={{ color: '#7B72FF' }}>
                       {i + 1}.
                     </span>
                     <span className="text-sm leading-snug" style={{ color: '#E8E8F0' }}>
@@ -336,7 +336,7 @@ export function AddTaskModal({ open, onClose }: Props) {
                   onClick={() => void handleAddSteps()}
                   disabled={isSubmitting}
                   className="mt-1 w-full py-2.5 rounded-xl text-sm font-semibold transition-all duration-200"
-                  style={{ background: '#6C63FF', color: 'white' }}
+                  style={{ background: '#7B72FF', color: 'white' }}
                 >
                   {isSubmitting ? 'Adding...' : `Add ${aiSteps.length} steps to my list →`}
                 </button>
@@ -355,9 +355,9 @@ export function AddTaskModal({ open, onClose }: Props) {
                     onClick={() => setDifficulty(d)}
                     className="flex-1 py-2 rounded-xl text-sm font-medium transition-all duration-200"
                     style={{
-                      background: difficulty === d ? 'rgba(108, 99, 255, 0.18)' : '#252840',
-                      border: `1.5px solid ${difficulty === d ? '#6C63FF' : '#2D3150'}`,
-                      color: difficulty === d ? '#6C63FF' : '#8B8BA7',
+                      background: difficulty === d ? 'rgba(123, 114, 255, 0.18)' : '#252840',
+                      border: `1.5px solid ${difficulty === d ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
+                      color: difficulty === d ? '#7B72FF' : '#8B8BA7',
                     }}
                   >
                     {d === 1 ? '🟢 Easy' : d === 2 ? '🟡 Medium' : '🟠 Hard'}
@@ -378,9 +378,9 @@ export function AddTaskModal({ open, onClose }: Props) {
                     onClick={() => { setMinutes(d); setCustomMinutes('') }}
                     className="px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200"
                     style={{
-                      background: minutes === d && !customMinutes ? 'rgba(108, 99, 255, 0.18)' : '#252840',
-                      border: `1.5px solid ${minutes === d && !customMinutes ? '#6C63FF' : '#2D3150'}`,
-                      color: minutes === d && !customMinutes ? '#6C63FF' : '#8B8BA7',
+                      background: minutes === d && !customMinutes ? 'rgba(123, 114, 255, 0.18)' : '#252840',
+                      border: `1.5px solid ${minutes === d && !customMinutes ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
+                      color: minutes === d && !customMinutes ? '#7B72FF' : '#8B8BA7',
                     }}
                   >
                     {d}m
@@ -399,8 +399,8 @@ export function AddTaskModal({ open, onClose }: Props) {
                   }}
                   className="w-20 px-3 py-2 rounded-xl text-sm outline-none"
                   style={{
-                    background: customMinutes ? 'rgba(108, 99, 255, 0.18)' : '#252840',
-                    border: `1.5px solid ${customMinutes ? '#6C63FF' : '#2D3150'}`,
+                    background: customMinutes ? 'rgba(123, 114, 255, 0.18)' : '#252840',
+                    border: `1.5px solid ${customMinutes ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
                     color: '#E8E8F0',
                   }}
                 />
@@ -420,7 +420,7 @@ export function AddTaskModal({ open, onClose }: Props) {
               disabled={!title.trim() || isSubmitting}
               className="w-full py-4 rounded-2xl font-semibold text-base transition-all duration-200"
               style={{
-                background: title.trim() ? '#6C63FF' : '#2D3150',
+                background: title.trim() ? '#7B72FF' : '#252840',
                 color: title.trim() ? '#FFFFFF' : '#8B8BA7',
                 cursor: title.trim() ? 'pointer' : 'not-allowed',
               }}

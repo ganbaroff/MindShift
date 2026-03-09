@@ -9,9 +9,9 @@ import type { EnergyLevel } from '@/types'
 const LEVELS: { level: EnergyLevel; emoji: string; label: string; color: string }[] = [
   { level: 1, emoji: '😴', label: 'Drained',  color: '#4A4580' },
   { level: 2, emoji: '😌', label: 'Low',      color: '#5B5499' },
-  { level: 3, emoji: '😊', label: 'OK',       color: '#6C63FF' },
+  { level: 3, emoji: '😊', label: 'OK',       color: '#7B72FF' },
   { level: 4, emoji: '😄', label: 'Good',     color: '#4ECDC4' },
-  { level: 5, emoji: '🔥', label: 'Charged',  color: '#FFE66D' },
+  { level: 5, emoji: '🔥', label: 'Charged',  color: '#F59E0B' },  // Research #8: amber (not neon yellow)
 ]
 
 export function EnergyWidget() {
@@ -48,7 +48,7 @@ export function EnergyWidget() {
               <span className="text-xl leading-none">{emoji}</span>
               <span
                 className="text-xs font-bold"
-                style={{ color: isSelected ? color : '#2D3150' }}
+                style={{ color: isSelected ? color : '#8B8BA7' }}
               >
                 {level}
               </span>

@@ -77,7 +77,7 @@ function QuickSetupCard({ onDone }: QuickSetupCardProps) {
       exit={{ opacity: 0, y: 24 }}
       transition={{ duration: 0.35 }}
       className="mx-5 mb-4 rounded-2xl overflow-hidden"
-      style={{ background: '#1A1D2E', border: '1.5px solid #2D3150' }}
+      style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)' }}
     >
       <div className="p-4 pb-3">
         <div className="flex items-center gap-2 mb-1">
@@ -99,13 +99,13 @@ function QuickSetupCard({ onDone }: QuickSetupCardProps) {
               disabled={saving}
               className="flex items-start gap-3 p-3 rounded-xl text-left transition-all duration-150"
               style={{
-                background: isSelected ? 'rgba(108,99,255,0.15)' : '#252840',
-                border: `1.5px solid ${isSelected ? '#6C63FF' : 'transparent'}`,
+                background: isSelected ? 'rgba(123,114,255,0.15)' : '#252840',
+                border: `1.5px solid ${isSelected ? '#7B72FF' : 'transparent'}`,
               }}
             >
               <span className="text-lg mt-0.5 shrink-0">{emoji}</span>
               <div>
-                <p className="text-sm font-semibold" style={{ color: isSelected ? '#6C63FF' : '#E8E8F0' }}>
+                <p className="text-sm font-semibold" style={{ color: isSelected ? '#7B72FF' : '#E8E8F0' }}>
                   {label}
                 </p>
                 <p className="text-xs mt-0.5" style={{ color: '#8B8BA7' }}>{sub}</p>
@@ -141,8 +141,8 @@ function FirstTaskPrompt({ onAdd, onDismiss }: { onAdd: () => void; onDismiss: (
       transition={t()}
       className="mx-5 mb-4 rounded-2xl p-4"
       style={{
-        background: 'linear-gradient(135deg, rgba(108,99,255,0.12) 0%, rgba(108,99,255,0.04) 100%)',
-        border: '1.5px solid rgba(108,99,255,0.35)',
+        background: 'linear-gradient(135deg, rgba(123,114,255,0.12) 0%, rgba(123,114,255,0.04) 100%)',
+        border: '1.5px solid rgba(123,114,255,0.35)',
       }}
     >
       <div className="flex items-start justify-between gap-2 mb-1">
@@ -166,9 +166,9 @@ function FirstTaskPrompt({ onAdd, onDismiss }: { onAdd: () => void; onDismiss: (
         onClick={onAdd}
         className="w-full py-3 rounded-xl text-sm font-semibold"
         style={{
-          background: 'linear-gradient(135deg, #6C63FF 0%, #5B52E8 100%)',
+          background: 'linear-gradient(135deg, #7B72FF 0%, #5B52E8 100%)',
           color: '#fff',
-          boxShadow: '0 4px 20px rgba(108,99,255,0.3)',
+          boxShadow: '0 4px 20px rgba(123,114,255,0.3)',
         }}
       >
         ✨ Add my first task →
@@ -304,7 +304,7 @@ export default function HomeScreen() {
         whileTap={shouldAnimate ? { scale: 0.94 } : {}}
         onClick={() => { hapticTap(); setAddOpen(true) }}
         className="fixed bottom-24 right-5 flex items-center gap-2 px-5 py-3.5 rounded-full shadow-lg z-30"
-        style={{ background: '#6C63FF' }}
+        style={{ background: '#7B72FF' }}
         aria-label="Add task"
       >
         <Plus size={20} color="white" />

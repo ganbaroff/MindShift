@@ -11,7 +11,7 @@ const PRESETS: { id: AudioPreset; emoji: string; label: string; color: string }[
   { id: 'brown',  emoji: '🟤', label: 'Deep',   color: '#8B6F47' },
   { id: 'pink',   emoji: '🩷', label: 'Light',  color: '#FFB5C8' },
   { id: 'nature', emoji: '🌿', label: 'Nature', color: '#4ECDC4' },
-  { id: 'lofi',   emoji: '🎵', label: 'Lo-fi',  color: '#6C63FF' },
+  { id: 'lofi',   emoji: '🎵', label: 'Lo-fi',  color: '#7B72FF' },
 ]
 
 // Minimal animated bars for playing indicator

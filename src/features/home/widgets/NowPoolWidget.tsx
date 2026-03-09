@@ -27,14 +27,14 @@ export function NowPoolWidget() {
           Now
         </p>
         <div className="flex items-center gap-2">
-          <span className="text-xs" style={{ color: '#6C63FF' }}>
+          <span className="text-xs" style={{ color: '#7B72FF' }}>
             {activeTasks.length}/{NOW_POOL_MAX}
           </span>
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={() => setAddOpen(true)}
             className="w-6 h-6 rounded-full flex items-center justify-center"
-            style={{ background: '#6C63FF' }}
+            style={{ background: '#7B72FF' }}
             aria-label="Add task"
           >
             <Plus size={13} color="white" />
@@ -51,7 +51,7 @@ export function NowPoolWidget() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="py-5 text-center rounded-xl"
-            style={{ background: 'rgba(45,49,80,0.5)', border: '1.5px dashed #2D3150' }}
+            style={{ background: 'rgba(45,49,80,0.5)', border: '1px dashed rgba(255,255,255,0.08)' }}
           >
             <p className="text-lg mb-1">🎉</p>
             <p className="text-xs font-medium" style={{ color: '#E8E8F0' }}>Pool clear!</p>

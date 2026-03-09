@@ -12,8 +12,8 @@ const CY = ARC_SIZE / 2
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS
 
 const PHASE_COLORS: Record<SessionPhase, string> = {
-  idle:     '#2D3150',
-  struggle: '#6C63FF',   // indigo — getting into it
+  idle:     '#252840',
+  struggle: '#7B72FF',   // indigo — getting into it
   release:  '#4ECDC4',   // teal — releasing resistance
   flow:     '#4ECDC4',   // teal — deep flow
   recovery: '#F59E0B',   // amber — recovery (Research #8: #F59E0B not neon #FFE66D)
@@ -80,7 +80,7 @@ export function ArcTimer({ progress, remainingSeconds, phase, showDigits, onTogg
         <circle
           cx={CX} cy={CY} r={RADIUS}
           fill="none"
-          stroke="#2D3150"
+          stroke="#252840"
           strokeWidth={STROKE}
         />
 

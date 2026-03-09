@@ -12,12 +12,12 @@ export function LoadingScreen() {
       >
         {/* Logo mark */}
         <div className="w-16 h-16 rounded-2xl flex items-center justify-center"
-             style={{ background: 'rgba(108, 99, 255, 0.15)', border: '1px solid rgba(108, 99, 255, 0.3)' }}>
+             style={{ background: 'rgba(123, 114, 255, 0.15)', border: '1px solid rgba(123, 114, 255, 0.3)' }}>
           <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-            <circle cx="16" cy="16" r="12" stroke="#6C63FF" strokeWidth="2"/>
+            <circle cx="16" cy="16" r="12" stroke="#7B72FF" strokeWidth="2"/>
             <motion.path
               d="M16 4 A12 12 0 0 1 28 16"
-              stroke="#6C63FF" strokeWidth="2.5" strokeLinecap="round"
+              stroke="#7B72FF" strokeWidth="2.5" strokeLinecap="round"
               animate={{ rotate: 360 }}
               transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
               style={{ transformOrigin: '16px 16px' }}

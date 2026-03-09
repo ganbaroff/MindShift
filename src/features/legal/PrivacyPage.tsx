@@ -22,21 +22,21 @@ export default function PrivacyPage() {
         <button
           onClick={() => navigate(-1)}
           className="p-2 rounded-xl"
-          style={{ background: '#1A1D2E', color: '#8B8BA7' }}
+          style={{ background: '#1E2136', color: '#8B8BA7' }}
           aria-label="Go back"
         >
           <ArrowLeft size={18} />
         </button>
         <div>
           <h1 className="text-xl font-bold" style={{ color: '#E8E8F0' }}>Privacy Policy</h1>
-          <p className="text-xs mt-0.5" style={{ color: '#6C63FF' }}>Last updated: March 9, 2026</p>
+          <p className="text-xs mt-0.5" style={{ color: '#7B72FF' }}>Last updated: March 9, 2026</p>
         </div>
       </div>
 
       <div className="flex flex-col gap-7 max-w-2xl">
 
         {/* Summary box */}
-        <div className="p-4 rounded-xl flex flex-col gap-2" style={{ background: '#1A1D2E', border: '1px solid #2D3150' }}>
+        <div className="p-4 rounded-xl flex flex-col gap-2" style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)' }}>
           <p className="text-sm font-semibold" style={{ color: '#E8E8F0' }}>The short version</p>
           <ul className="text-sm flex flex-col gap-1" style={{ color: '#8B8BA7' }}>
             <li>✅ We collect only what's needed to run the app</li>
@@ -50,7 +50,7 @@ export default function PrivacyPage() {
         <Section title="1. Who We Are">
           <p>
             MindShift is operated by its founding team. For privacy matters, contact us at{' '}
-            <a href="mailto:privacy@mindshift.app" style={{ color: '#6C63FF' }}>privacy@mindshift.app</a>.
+            <a href="mailto:privacy@mindshift.app" style={{ color: '#7B72FF' }}>privacy@mindshift.app</a>.
             We act as the <strong style={{ color: '#E8E8F0' }}>data controller</strong> for personal
             data processed in connection with your use of MindShift.
           </p>
@@ -124,7 +124,7 @@ export default function PrivacyPage() {
           <p>
             Anthropic processes this data subject to their{' '}
             <a href="https://www.anthropic.com/legal/privacy" target="_blank" rel="noopener noreferrer"
-               style={{ color: '#6C63FF' }}>Privacy Policy</a>.
+               style={{ color: '#7B72FF' }}>Privacy Policy</a>.
             API responses are ephemeral — we do not store the raw AI outputs long-term.
           </p>
         </Section>
@@ -199,7 +199,7 @@ export default function PrivacyPage() {
           <p>
             No security system is perfect. If you discover a security vulnerability, please
             disclose it responsibly to{' '}
-            <a href="mailto:security@mindshift.app" style={{ color: '#6C63FF' }}>security@mindshift.app</a>.
+            <a href="mailto:security@mindshift.app" style={{ color: '#7B72FF' }}>security@mindshift.app</a>.
           </p>
         </Section>
 
@@ -231,7 +231,7 @@ export default function PrivacyPage() {
           </div>
           <p>
             To exercise any of these rights, email{' '}
-            <a href="mailto:privacy@mindshift.app" style={{ color: '#6C63FF' }}>privacy@mindshift.app</a>.
+            <a href="mailto:privacy@mindshift.app" style={{ color: '#7B72FF' }}>privacy@mindshift.app</a>.
             We will respond within 30 days. You may also delete your account directly from
             Settings → Delete account, which triggers immediate data deletion.
           </p>
@@ -251,7 +251,7 @@ export default function PrivacyPage() {
           <p>
             You can clear all localStorage data at any time via Settings → Clear local data,
             or through your browser's developer tools. See our{' '}
-            <a href="/cookie-policy" style={{ color: '#6C63FF' }}>Cookie Policy</a> for details.
+            <a href="/cookie-policy" style={{ color: '#7B72FF' }}>Cookie Policy</a> for details.
           </p>
         </Section>
 
@@ -265,7 +265,7 @@ export default function PrivacyPage() {
           <p>
             If you believe a minor under 16 has provided us with personal data, please contact
             us at{' '}
-            <a href="mailto:privacy@mindshift.app" style={{ color: '#6C63FF' }}>privacy@mindshift.app</a>.
+            <a href="mailto:privacy@mindshift.app" style={{ color: '#7B72FF' }}>privacy@mindshift.app</a>.
           </p>
         </Section>
 
@@ -292,14 +292,14 @@ export default function PrivacyPage() {
         <Section title="14. Contact and Complaints">
           <p>
             For privacy questions or to exercise your rights:{' '}
-            <a href="mailto:privacy@mindshift.app" style={{ color: '#6C63FF' }}>privacy@mindshift.app</a>
+            <a href="mailto:privacy@mindshift.app" style={{ color: '#7B72FF' }}>privacy@mindshift.app</a>
           </p>
           <p>
             If you are an EU/EEA resident and are not satisfied with our response, you have
             the right to lodge a complaint with your local data protection supervisory authority.
             A list of EU data protection authorities is available at{' '}
             <a href="https://edpb.europa.eu/about-edpb/about-edpb/members_en"
-               target="_blank" rel="noopener noreferrer" style={{ color: '#6C63FF' }}>
+               target="_blank" rel="noopener noreferrer" style={{ color: '#7B72FF' }}>
               edpb.europa.eu
             </a>.
           </p>

@@ -11,9 +11,9 @@ import type { AudioPreset } from '@/types'
 const PRESETS: { id: AudioPreset; emoji: string; name: string; subtitle: string; color: string; tag?: string }[] = [
   { id: 'brown',  emoji: '🟤', name: 'Calm Focus',     subtitle: 'Brown noise — silences racing thoughts', color: '#8B6F47', tag: 'ADHD default' },
   { id: 'pink',   emoji: '🩷', name: 'Deep Work',      subtitle: 'Pink noise — strongest clinical evidence', color: '#E879A0', tag: 'Validated' },
-  { id: 'lofi',   emoji: '🎵', name: 'Flow State',     subtitle: 'Lo-fi beats — 70-90 BPM, no lyrics',     color: '#6C63FF' },
+  { id: 'lofi',   emoji: '🎵', name: 'Flow State',     subtitle: 'Lo-fi beats — 70-90 BPM, no lyrics',     color: '#7B72FF' },
   { id: 'nature', emoji: '🌿', name: 'Nature Restore', subtitle: 'Organic soundscape — parasympathetic calm', color: '#4ECDC4' },
-  { id: 'gamma',  emoji: '⚡', name: 'Gamma Focus',    subtitle: '40 Hz binaural — narrows attention spotlight', color: '#FFE66D', tag: 'Headphones' },
+  { id: 'gamma',  emoji: '⚡', name: 'Gamma Focus',    subtitle: '40 Hz binaural — narrows attention spotlight', color: '#F59E0B', tag: 'Headphones' },
 ]
 
 // ── Animated equalizer bars ────────────────────────────────────────────────────
@@ -65,7 +65,7 @@ function VolumeBar({
     <div className="flex flex-col gap-2.5">
       <div className="flex items-center justify-between">
         <span className="text-xs font-medium" style={{ color: '#8B8BA7' }}>VOLUME</span>
-        <span className="text-xs font-mono" style={{ color: isWarning ? '#FFE66D' : '#8B8BA7' }}>
+        <span className="text-xs font-mono" style={{ color: isWarning ? '#F59E0B' : '#8B8BA7' }}>
           {pct}%{isWarning ? '  — getting loud' : ''}
         </span>
       </div>
@@ -80,9 +80,9 @@ function VolumeBar({
         className="w-full h-1.5 rounded-full appearance-none cursor-pointer"
         style={{
           background: `linear-gradient(to right,
-            ${isWarning ? '#FFE66D' : '#6C63FF'} ${pct}%,
-            #2D3150 ${pct}%)`,
-          accentColor: isWarning ? '#FFE66D' : '#6C63FF',
+            ${isWarning ? '#F59E0B' : '#7B72FF'} ${pct}%,
+            #252840 ${pct}%)`,
+          accentColor: isWarning ? '#F59E0B' : '#7B72FF',
         }}
       />
 
@@ -153,8 +153,8 @@ export default function AudioScreen() {
               onClick={() => handlePresetClick(preset.id)}
               className={`flex flex-col gap-2 p-4 rounded-2xl text-left relative overflow-hidden ${isWide ? 'col-span-2' : ''}`}
               style={{
-                background: isActive ? `${preset.color}18` : '#1A1D2E',
-                border: `1.5px solid ${isActive ? preset.color : '#2D3150'}`,
+                background: isActive ? `${preset.color}18` : '#1E2136',
+                border: `1.5px solid ${isActive ? preset.color : 'rgba(255,255,255,0.06)'}`,
                 boxShadow: isActive ? `0 0 20px ${preset.color}20` : 'none',
               }}
             >
@@ -186,7 +186,7 @@ export default function AudioScreen() {
                   {isAnchor && (
                     <span
                       className="text-[10px] px-2 py-0.5 rounded-full"
-                      style={{ background: '#FFE66D20', color: '#FFE66D' }}
+                      style={{ background: '#F59E0B20', color: '#F59E0B' }}
                     >
                       🎯
                     </span>
@@ -221,7 +221,7 @@ export default function AudioScreen() {
       {/* Volume control */}
       <motion.div
         className="mx-5 p-4 rounded-2xl mb-4"
-        style={{ background: '#1A1D2E', border: '1.5px solid #2D3150' }}
+        style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)' }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ ...t(), delay: 0.3 }}
@@ -232,7 +232,7 @@ export default function AudioScreen() {
       {/* Sound Anchor */}
       <motion.div
         className="mx-5 p-4 rounded-2xl mb-4"
-        style={{ background: '#1A1D2E', border: '1.5px solid #2D3150' }}
+        style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)' }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ ...t(), delay: 0.35 }}
@@ -264,7 +264,7 @@ export default function AudioScreen() {
                   {preset.name}
                 </span>
                 {isSelected && (
-                  <span className="text-xs" style={{ color: '#FFE66D' }}>★ Anchor</span>
+                  <span className="text-xs" style={{ color: '#F59E0B' }}>★ Anchor</span>
                 )}
               </button>
             )
@@ -282,7 +282,7 @@ export default function AudioScreen() {
       {/* Science note */}
       <motion.div
         className="mx-5 p-4 rounded-2xl"
-        style={{ background: '#1A1D2E', border: '1.5px dashed #2D3150' }}
+        style={{ background: '#1E2136', border: '1px dashed rgba(255,255,255,0.08)' }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ ...t(), delay: 0.4 }}

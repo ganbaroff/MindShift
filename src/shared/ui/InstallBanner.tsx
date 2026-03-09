@@ -40,8 +40,8 @@ export function InstallBanner() {
           <div
             className="max-w-[480px] mx-auto rounded-2xl px-4 py-3 flex items-start gap-3 pointer-events-auto"
             style={{
-              background: 'linear-gradient(135deg, #252840 0%, #1A1D2E 100%)',
-              border: '1px solid rgba(108,99,255,0.35)',
+              background: 'linear-gradient(135deg, #252840 0%, #1E2136 100%)',
+              border: '1px solid rgba(123,114,255,0.35)',
               boxShadow: '0 8px 32px rgba(0,0,0,0.45)',
             }}
           >
@@ -68,7 +68,7 @@ export function InstallBanner() {
                   <button
                     onClick={handleInstall}
                     className="mt-2 flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all active:scale-95"
-                    style={{ background: '#6C63FF', color: '#fff' }}
+                    style={{ background: '#7B72FF', color: '#fff' }}
                   >
                     <Download size={13} />
                     Install app
@@ -83,7 +83,7 @@ export function InstallBanner() {
                     Tap{' '}
                     <span
                       className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded"
-                      style={{ background: '#2D3150', color: '#E8E8F0' }}
+                      style={{ background: '#252840', color: '#E8E8F0' }}
                     >
                       <Share size={10} />
                       Share
@@ -91,7 +91,7 @@ export function InstallBanner() {
                     , then{' '}
                     <span
                       className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded"
-                      style={{ background: '#2D3150', color: '#E8E8F0' }}
+                      style={{ background: '#252840', color: '#E8E8F0' }}
                     >
                       <Plus size={10} />
                       Add to Home Screen

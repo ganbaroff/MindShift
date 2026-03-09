@@ -66,14 +66,14 @@ export function ContextRestore({ onDismiss }: Props) {
           onClick={e => e.stopPropagation()}
           className="rounded-3xl p-5"
           style={{
-            background: '#1A1D2E',
-            border: '1.5px solid #2D3150',
-            boxShadow: '0 -8px 40px rgba(108, 99, 255, 0.08)',
+            background: '#1E2136',
+            border: '1px solid rgba(255,255,255,0.06)',
+            boxShadow: '0 -8px 40px rgba(123, 114, 255, 0.08)',
           }}
         >
           {/* Header */}
           <div className="mb-4">
-            <p className="text-xs font-semibold tracking-widest uppercase mb-1" style={{ color: '#6C63FF' }}>
+            <p className="text-xs font-semibold tracking-widest uppercase mb-1" style={{ color: '#7B72FF' }}>
               Where were we?
             </p>
             <p className="text-base font-bold" style={{ color: '#E8E8F0' }}>
@@ -90,7 +90,7 @@ export function ContextRestore({ onDismiss }: Props) {
                 <div
                   key={task.id}
                   className="flex items-center gap-3 px-3 py-2.5 rounded-xl"
-                  style={{ background: '#252840', border: '1px solid #2D3150' }}
+                  style={{ background: '#252840', border: '1px solid rgba(255,255,255,0.06)' }}
                 >
                   <span className="text-sm font-medium flex-1 leading-snug" style={{ color: '#E8E8F0' }}>
                     {task.title}
@@ -108,14 +108,14 @@ export function ContextRestore({ onDismiss }: Props) {
             <button
               onClick={onDismiss}
               className="flex-1 py-3 rounded-2xl font-semibold text-sm"
-              style={{ background: '#6C63FF', color: '#FFFFFF' }}
+              style={{ background: '#7B72FF', color: '#FFFFFF' }}
             >
               {activeTasks.length > 0 ? 'Dive back in →' : 'Let\'s go →'}
             </button>
             <button
               onClick={onDismiss}
               className="px-4 py-3 rounded-2xl text-sm"
-              style={{ background: '#252840', border: '1px solid #2D3150', color: '#8B8BA7' }}
+              style={{ background: '#252840', border: '1px solid rgba(255,255,255,0.06)', color: '#8B8BA7' }}
             >
               Later
             </button>

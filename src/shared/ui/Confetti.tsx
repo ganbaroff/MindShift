@@ -4,7 +4,7 @@ import { useMotion } from '@/shared/hooks/useMotion'
 
 // Research #8: #FF6B6B (coral) removed — red spectrum triggers RSD even in celebrations
 // Replaced with #F59E0B amber + soft indigo variant — still festive, zero anxiety
-const COLORS = ['#6C63FF', '#4ECDC4', '#F59E0B', '#A8EDEA', '#8B85FF']
+const COLORS = ['#7B72FF', '#4ECDC4', '#F59E0B', '#A8EDEA', '#8B85FF']
 const PARTICLE_COUNT = 20
 
 interface Particle {

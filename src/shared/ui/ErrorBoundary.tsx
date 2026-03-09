@@ -53,9 +53,9 @@ export class ErrorBoundary extends Component<Props, State> {
               onClick={this.handleReset}
               className="w-full py-3.5 rounded-2xl font-semibold text-sm"
               style={{
-                background: 'rgba(108,99,255,0.15)',
-                border: '1.5px solid #6C63FF',
-                color: '#6C63FF',
+                background: 'rgba(123,114,255,0.15)',
+                border: '1.5px solid #7B72FF',
+                color: '#7B72FF',
               }}
             >
               Try again
@@ -65,7 +65,7 @@ export class ErrorBoundary extends Component<Props, State> {
               className="w-full py-3 rounded-2xl font-medium text-sm"
               style={{
                 background: 'transparent',
-                border: '1.5px solid #2D3150',
+                border: '1px solid rgba(255,255,255,0.06)',
                 color: '#8B8BA7',
               }}
             >

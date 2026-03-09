@@ -23,7 +23,7 @@ function Toggle({ checked, onChange, label }: {
       <span className="text-sm" style={{ color: '#E8E8F0' }}>{label}</span>
       <div
         className="w-11 h-6 rounded-full relative transition-colors duration-200"
-        style={{ background: checked ? '#6C63FF' : '#2D3150' }}
+        style={{ background: checked ? '#7B72FF' : '#252840' }}
       >
         <div
           className="absolute top-0.5 w-5 h-5 rounded-full transition-transform duration-200"
@@ -167,9 +167,9 @@ export default function SettingsScreen() {
       {/* ── Subscription ─────────────────────────────────────────────────── */}
       <section className="mx-5 p-4 rounded-2xl mb-4" style={{
         background: proActive
-          ? 'linear-gradient(135deg, rgba(108,99,255,0.15) 0%, rgba(78,205,196,0.10) 100%)'
-          : '#1A1D2E',
-        border: `1.5px solid ${proActive ? '#6C63FF' : '#2D3150'}`,
+          ? 'linear-gradient(135deg, rgba(123,114,255,0.15) 0%, rgba(78,205,196,0.10) 100%)'
+          : '#1E2136',
+        border: `1.5px solid ${proActive ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
       }}>
         <p className="text-xs font-medium tracking-widest uppercase mb-3" style={{ color: '#8B8BA7' }}>
           Plan
@@ -207,7 +207,7 @@ export default function SettingsScreen() {
               <button
                 onClick={() => setShowTrialActivation(true)}
                 className="w-full py-3 rounded-xl text-sm font-semibold transition-all duration-200"
-                style={{ background: '#6C63FF', color: '#FFFFFF' }}
+                style={{ background: '#7B72FF', color: '#FFFFFF' }}
               >
                 Start 30-day free trial
               </button>
@@ -220,7 +220,7 @@ export default function SettingsScreen() {
                   <button
                     onClick={handleStartTrial}
                     className="flex-1 py-3 rounded-xl text-sm font-semibold transition-all duration-200 min-h-[44px]"
-                    style={{ background: '#6C63FF', color: '#FFFFFF' }}
+                    style={{ background: '#7B72FF', color: '#FFFFFF' }}
                   >
                     Activate trial
                   </button>
@@ -239,7 +239,7 @@ export default function SettingsScreen() {
       </section>
 
       {/* ── Avatar ────────────────────────────────────────────────────────── */}
-      <section className="mx-5 p-4 rounded-2xl mb-4" style={{ background: '#1A1D2E', border: '1.5px solid #2D3150' }}>
+      <section className="mx-5 p-4 rounded-2xl mb-4" style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)' }}>
         <p className="text-xs font-medium tracking-widest uppercase mb-3" style={{ color: '#8B8BA7' }}>
           Avatar
         </p>
@@ -250,8 +250,8 @@ export default function SettingsScreen() {
               onClick={() => setAvatarId(i + 1)}
               className="w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-200"
               style={{
-                background: avatarId === i + 1 ? 'rgba(108, 99, 255, 0.18)' : '#252840',
-                border: `2px solid ${avatarId === i + 1 ? '#6C63FF' : 'transparent'}`,
+                background: avatarId === i + 1 ? 'rgba(123, 114, 255, 0.18)' : '#252840',
+                border: `2px solid ${avatarId === i + 1 ? '#7B72FF' : 'transparent'}`,
               }}
               title={name}
             >
@@ -262,7 +262,7 @@ export default function SettingsScreen() {
       </section>
 
       {/* ── App mode ──────────────────────────────────────────────────────── */}
-      <section className="mx-5 p-4 rounded-2xl mb-4" style={{ background: '#1A1D2E', border: '1.5px solid #2D3150' }}>
+      <section className="mx-5 p-4 rounded-2xl mb-4" style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)' }}>
         <p className="text-xs font-medium tracking-widest uppercase mb-3" style={{ color: '#8B8BA7' }}>
           App Mode
         </p>
@@ -277,8 +277,8 @@ export default function SettingsScreen() {
               onClick={() => setAppMode(mode)}
               className="text-left px-3 py-3 rounded-xl text-sm transition-all duration-200 min-h-[44px]"
               style={{
-                background: appMode === mode ? 'rgba(108, 99, 255, 0.15)' : 'transparent',
-                border: `1.5px solid ${appMode === mode ? '#6C63FF' : '#2D3150'}`,
+                background: appMode === mode ? 'rgba(123, 114, 255, 0.15)' : 'transparent',
+                border: `1.5px solid ${appMode === mode ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
                 color: appMode === mode ? '#E8E8F0' : '#8B8BA7',
               }}
             >
@@ -289,7 +289,7 @@ export default function SettingsScreen() {
       </section>
 
       {/* ── Focus Style ───────────────────────────────────────────────────── */}
-      <section className="mx-5 p-4 rounded-2xl mb-4" style={{ background: '#1A1D2E', border: '1.5px solid #2D3150' }}>
+      <section className="mx-5 p-4 rounded-2xl mb-4" style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)' }}>
         <p className="text-xs font-medium tracking-widest uppercase mb-3" style={{ color: '#8B8BA7' }}>
           Focus Style
         </p>
@@ -303,9 +303,9 @@ export default function SettingsScreen() {
               onClick={() => setCognitiveMode(mode)}
               className="flex-1 py-3 rounded-xl text-sm font-medium transition-all duration-200 min-h-[44px]"
               style={{
-                background: cognitiveMode === mode ? 'rgba(108, 99, 255, 0.18)' : '#252840',
-                border: `1.5px solid ${cognitiveMode === mode ? '#6C63FF' : '#2D3150'}`,
-                color: cognitiveMode === mode ? '#6C63FF' : '#8B8BA7',
+                background: cognitiveMode === mode ? 'rgba(123, 114, 255, 0.18)' : '#252840',
+                border: `1.5px solid ${cognitiveMode === mode ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
+                color: cognitiveMode === mode ? '#7B72FF' : '#8B8BA7',
               }}
             >
               {label}
@@ -315,7 +315,7 @@ export default function SettingsScreen() {
       </section>
 
       {/* ── Accessibility ─────────────────────────────────────────────────── */}
-      <section className="mx-5 p-4 rounded-2xl mb-4" style={{ background: '#1A1D2E', border: '1.5px solid #2D3150' }}>
+      <section className="mx-5 p-4 rounded-2xl mb-4" style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)' }}>
         <p className="text-xs font-medium tracking-widest uppercase mb-3" style={{ color: '#8B8BA7' }}>
           Accessibility
         </p>
@@ -333,7 +333,7 @@ export default function SettingsScreen() {
       </section>
 
       {/* ── Your Data (GDPR) ──────────────────────────────────────────────── */}
-      <section className="mx-5 p-4 rounded-2xl mb-4" style={{ background: '#1A1D2E', border: '1.5px solid #2D3150' }}>
+      <section className="mx-5 p-4 rounded-2xl mb-4" style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)' }}>
         <p className="text-xs font-medium tracking-widest uppercase mb-3" style={{ color: '#8B8BA7' }}>
           Your Data
         </p>
@@ -348,7 +348,7 @@ export default function SettingsScreen() {
           className="w-full py-3 rounded-xl text-sm font-medium transition-all duration-200 mb-3"
           style={{
             background: exporting ? '#252840' : 'rgba(78, 205, 196, 0.12)',
-            border: '1.5px solid #2D3150',
+            border: '1px solid rgba(255,255,255,0.06)',
             color: exporting ? '#8B8BA7' : '#4ECDC4',
             opacity: exporting ? 0.7 : 1,
           }}
@@ -363,7 +363,7 @@ export default function SettingsScreen() {
             className="w-full py-3 rounded-xl text-sm font-medium transition-all duration-200"
             style={{
               background: 'transparent',
-              border: '1.5px solid #2D3150',
+              border: '1px solid rgba(255,255,255,0.06)',
               color: '#8B8BA7',
             }}
           >
@@ -385,8 +385,8 @@ export default function SettingsScreen() {
               placeholder={email ?? 'your@email.com'}
               className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
               style={{
-                background: '#1A1D2E',
-                border: '1.5px solid #2D3150',
+                background: '#1E2136',
+                border: '1px solid rgba(255,255,255,0.06)',
                 color: '#E8E8F0',
               }}
               autoComplete="off"
@@ -399,7 +399,7 @@ export default function SettingsScreen() {
                 style={{
                   background: deleteEmail.toLowerCase() === email?.toLowerCase()
                     ? 'rgba(232, 151, 107, 0.15)' : '#252840',
-                  border: '1.5px solid #2D3150',
+                  border: '1px solid rgba(255,255,255,0.06)',
                   color: deleteEmail.toLowerCase() === email?.toLowerCase()
                     ? '#E8976B' : '#8B8BA7',
                   opacity: deleting ? 0.5 : 1,
@@ -410,7 +410,7 @@ export default function SettingsScreen() {
               <button
                 onClick={() => { setShowDeleteConfirm(false); setDeleteEmail('') }}
                 className="px-4 py-3 rounded-xl text-sm transition-all duration-200 min-h-[44px]"
-                style={{ background: '#1A1D2E', border: '1.5px solid #2D3150', color: '#8B8BA7' }}
+                style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)', color: '#8B8BA7' }}
               >
                 Cancel
               </button>
@@ -424,7 +424,7 @@ export default function SettingsScreen() {
         <button
           onClick={() => void handleSignOut()}
           className="w-full py-3.5 rounded-2xl text-sm font-medium transition-all duration-200"
-          style={{ background: '#1A1D2E', border: '1.5px solid #2D3150', color: '#E8976B' }}
+          style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)', color: '#E8976B' }}
         >
           Sign out
         </button>
@@ -435,30 +435,30 @@ export default function SettingsScreen() {
         <Link
           to="/privacy"
           className="text-xs transition-colors duration-200 hover:underline"
-          style={{ color: '#3D405B' }}
+          style={{ color: '#8B8BA7' }}
         >
           Privacy Policy
         </Link>
-        <span className="text-xs" style={{ color: '#2D3150' }}>·</span>
+        <span className="text-xs" style={{ color: '#4A4E5A' }}>·</span>
         <Link
           to="/terms"
           className="text-xs transition-colors duration-200 hover:underline"
-          style={{ color: '#3D405B' }}
+          style={{ color: '#8B8BA7' }}
         >
           Terms of Service
         </Link>
-        <span className="text-xs" style={{ color: '#2D3150' }}>·</span>
+        <span className="text-xs" style={{ color: '#4A4E5A' }}>·</span>
         <Link
           to="/cookie-policy"
           className="text-xs transition-colors duration-200 hover:underline"
-          style={{ color: '#3D405B' }}
+          style={{ color: '#8B8BA7' }}
         >
           Cookie Policy
         </Link>
       </div>
 
       {/* Version */}
-      <p className="text-center text-xs mt-3 mb-2" style={{ color: '#3D405B' }}>
+      <p className="text-center text-xs mt-3 mb-2" style={{ color: '#8B8BA7' }}>
         MindShift v1.0.0 — Built with 💜 for ADHD minds
       </p>
     </div>

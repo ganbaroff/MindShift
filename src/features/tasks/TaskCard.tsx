@@ -123,11 +123,11 @@ export function TaskCard({ task, index = 0, onComplete, onSnooze }: Props) {
       transition={{ ...t(), delay: index * 0.06 }}
       className="relative overflow-hidden rounded-2xl"
       style={{
-        background: '#1A1D2E',
+        background: '#1E2136',
         // Calm left accent strip = difficulty indicator (no countdown, no urgency)
-        borderTop:    '1.5px solid #2D3150',
-        borderRight:  '1.5px solid #2D3150',
-        borderBottom: '1.5px solid #2D3150',
+        borderTop:    '1px solid rgba(255,255,255,0.06)',
+        borderRight:  '1px solid rgba(255,255,255,0.06)',
+        borderBottom: '1px solid rgba(255,255,255,0.06)',
         borderLeft:   `3px solid ${difficultyAccent}`,
       }}
     >
@@ -143,7 +143,7 @@ export function TaskCard({ task, index = 0, onComplete, onSnooze }: Props) {
                 key={dot}
                 className="w-1.5 h-1.5 rounded-full"
                 style={{
-                  background: dot <= task.difficulty ? difficultyAccent : '#2D3150',
+                  background: dot <= task.difficulty ? difficultyAccent : '#252840',
                 }}
               />
             ))}
@@ -185,9 +185,9 @@ export function TaskCard({ task, index = 0, onComplete, onSnooze }: Props) {
             disabled={isDone}
             className="flex-1 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200"
             style={{
-              background:   isDone ? '#2D3150' : `${palette.teal}26`,   // 15% alpha
-              border:       '1.5px solid',
-              borderColor:  isDone ? '#2D3150' : palette.teal,
+              background:   isDone ? '#252840' : `${palette.teal}26`,   // 15% alpha
+              border:       '1px solid',
+              borderColor:  isDone ? 'rgba(255,255,255,0.06)' : palette.teal,
               color:        isDone ? '#8B8BA7' : palette.teal,
             }}
           >
@@ -202,7 +202,7 @@ export function TaskCard({ task, index = 0, onComplete, onSnooze }: Props) {
               className="px-4 py-2.5 rounded-xl text-sm transition-all duration-200"
               style={{
                 background: '#252840',
-                border: '1.5px solid #2D3150',
+                border: '1px solid rgba(255,255,255,0.06)',
                 color: '#8B8BA7',
               }}
               title="Parked for later. No rush."

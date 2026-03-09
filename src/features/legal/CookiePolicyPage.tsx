@@ -18,8 +18,8 @@ function StorageRow({ name, purpose, duration, type }: {
   return (
     <div className="p-3 rounded-lg flex flex-col gap-1" style={{ background: '#252840' }}>
       <div className="flex items-center justify-between">
-        <code className="text-xs px-2 py-0.5 rounded" style={{ background: '#1A1D2E', color: '#6C63FF' }}>{name}</code>
-        <span className="text-xs px-2 py-0.5 rounded" style={{ background: '#1A1D2E', color: '#4ECDC4' }}>{type}</span>
+        <code className="text-xs px-2 py-0.5 rounded" style={{ background: '#1E2136', color: '#7B72FF' }}>{name}</code>
+        <span className="text-xs px-2 py-0.5 rounded" style={{ background: '#1E2136', color: '#4ECDC4' }}>{type}</span>
       </div>
       <p className="text-xs" style={{ color: '#8B8BA7' }}>{purpose}</p>
       <p className="text-xs" style={{ color: '#6B6B8A' }}>Expires: {duration}</p>
@@ -37,21 +37,21 @@ export default function CookiePolicyPage() {
         <button
           onClick={() => navigate(-1)}
           className="p-2 rounded-xl"
-          style={{ background: '#1A1D2E', color: '#8B8BA7' }}
+          style={{ background: '#1E2136', color: '#8B8BA7' }}
           aria-label="Go back"
         >
           <ArrowLeft size={18} />
         </button>
         <div>
           <h1 className="text-xl font-bold" style={{ color: '#E8E8F0' }}>Cookie Policy</h1>
-          <p className="text-xs mt-0.5" style={{ color: '#6C63FF' }}>Last updated: March 9, 2026</p>
+          <p className="text-xs mt-0.5" style={{ color: '#7B72FF' }}>Last updated: March 9, 2026</p>
         </div>
       </div>
 
       <div className="flex flex-col gap-7 max-w-2xl">
 
         {/* Quick summary */}
-        <div className="p-4 rounded-xl" style={{ background: '#1A1D2E', border: '1px solid #2D3150' }}>
+        <div className="p-4 rounded-xl" style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)' }}>
           <p className="text-sm font-semibold mb-2" style={{ color: '#E8E8F0' }}>The short version</p>
           <p className="text-sm" style={{ color: '#8B8BA7' }}>
             MindShift does <strong style={{ color: '#4ECDC4' }}>not use tracking cookies</strong>.
@@ -186,7 +186,7 @@ export default function CookiePolicyPage() {
         <Section title="7. Contact">
           <p>
             Questions about cookies or data storage?{' '}
-            <a href="mailto:privacy@mindshift.app" style={{ color: '#6C63FF' }}>
+            <a href="mailto:privacy@mindshift.app" style={{ color: '#7B72FF' }}>
               privacy@mindshift.app
             </a>
           </p>

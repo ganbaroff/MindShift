@@ -27,7 +27,7 @@ function MochiLogo() {
       {/* Subtle glow — only animates when motion is allowed */}
       <motion.div
         className="absolute -inset-3 rounded-full pointer-events-none"
-        style={{ background: 'radial-gradient(circle, rgba(108,99,255,0.25) 0%, transparent 70%)' }}
+        style={{ background: 'radial-gradient(circle, rgba(123,114,255,0.25) 0%, transparent 70%)' }}
         animate={shouldAnimate ? { scale: [1, 1.06, 1] } : {}}
         transition={{ duration: 4, repeat: shouldAnimate ? Infinity : 0, ease: 'easeInOut' }}
       />
@@ -35,20 +35,20 @@ function MochiLogo() {
       <div
         className="relative w-16 h-16 rounded-2xl flex items-center justify-center"
         style={{
-          background: 'linear-gradient(135deg, rgba(108,99,255,0.25) 0%, rgba(108,99,255,0.08) 100%)',
-          border: '1.5px solid rgba(108,99,255,0.5)',
-          boxShadow: '0 0 40px rgba(108,99,255,0.25), inset 0 1px 0 rgba(255,255,255,0.08)',
+          background: 'linear-gradient(135deg, rgba(123,114,255,0.25) 0%, rgba(123,114,255,0.08) 100%)',
+          border: '1.5px solid rgba(123,114,255,0.5)',
+          boxShadow: '0 0 40px rgba(123,114,255,0.25), inset 0 1px 0 rgba(255,255,255,0.08)',
         }}
       >
         <svg width="32" height="32" viewBox="0 0 44 44" fill="none">
           <path
             d="M8 22C8 14.268 14.268 8 22 8C29.732 8 36 14.268 36 22"
-            stroke="#6C63FF"
+            stroke="#7B72FF"
             strokeWidth="2.5"
             strokeLinecap="round"
           />
-          <circle cx="22" cy="22" r="7" stroke="#6C63FF" strokeWidth="2" opacity="0.6" />
-          <circle cx="22" cy="22" r="2.5" fill="#6C63FF" />
+          <circle cx="22" cy="22" r="7" stroke="#7B72FF" strokeWidth="2" opacity="0.6" />
+          <circle cx="22" cy="22" r="2.5" fill="#7B72FF" />
           <path d="M33 10L33.8 12L36 12L34.2 13.4L35 15.4L33 14L31 15.4L31.8 13.4L30 12L32.2 12Z"
             fill="#FFE66D" opacity="0.85" />
         </svg>
@@ -67,7 +67,7 @@ function BgOrbs() {
           top: '-20%', right: '-25%',
           width: 500, height: 500,
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(108,99,255,0.10) 0%, transparent 60%)',
+          background: 'radial-gradient(circle, rgba(123,114,255,0.10) 0%, transparent 60%)',
           filter: 'blur(60px)',
         }}
       />
@@ -122,7 +122,7 @@ function EmailStep({
         <Mail
           className="absolute left-3.5 top-1/2 -translate-y-1/2 transition-colors duration-200 pointer-events-none"
           size={16}
-          color={inputFocused ? '#6C63FF' : '#505370'}
+          color={inputFocused ? '#7B72FF' : '#505370'}
           strokeWidth={2}
         />
         <input
@@ -138,8 +138,8 @@ function EmailStep({
           style={{
             background: inputFocused ? '#1C1F38' : '#191C30',
             color: '#E8E8F0',
-            border: `1.5px solid ${inputFocused ? 'rgba(108,99,255,0.5)' : 'rgba(40,43,70,0.8)'}`,
-            boxShadow: inputFocused ? '0 0 12px rgba(108,99,255,0.15)' : 'none',
+            border: `1.5px solid ${inputFocused ? 'rgba(123,114,255,0.5)' : 'rgba(40,43,70,0.8)'}`,
+            boxShadow: inputFocused ? '0 0 12px rgba(123,114,255,0.15)' : 'none',
             height: 46,
           }}
           autoFocus
@@ -153,8 +153,8 @@ function EmailStep({
           <motion.div
             className="w-5 h-5 rounded-md flex items-center justify-center"
             animate={{
-              background: consented ? '#6C63FF' : 'rgba(25,28,48,0.8)',
-              borderColor: consented ? '#6C63FF' : '#3D4060',
+              background: consented ? '#7B72FF' : 'rgba(25,28,48,0.8)',
+              borderColor: consented ? '#7B72FF' : '#3D4060',
               scale: consented ? [1, 1.15, 1] : 1,
             }}
             transition={{ duration: 0.2 }}
@@ -179,14 +179,14 @@ function EmailStep({
           I'm <strong style={{ color: '#C4C4D4' }}>16 or older</strong> and agree to MindShift's{' '}
           <Link to="/terms" target="_blank" rel="noopener noreferrer"
             className="underline decoration-dotted hover:no-underline transition-all"
-            style={{ color: '#6C63FF' }}
+            style={{ color: '#7B72FF' }}
             onClick={e => e.stopPropagation()}>
             Terms
           </Link>
           {' '}&{' '}
           <Link to="/privacy" target="_blank" rel="noopener noreferrer"
             className="underline decoration-dotted hover:no-underline transition-all"
-            style={{ color: '#6C63FF' }}
+            style={{ color: '#7B72FF' }}
             onClick={e => e.stopPropagation()}>
             Privacy Policy
           </Link>
@@ -202,10 +202,10 @@ function EmailStep({
         style={{
           height: 48,
           background: canSubmit
-            ? 'linear-gradient(135deg, #6C63FF 0%, #5B52E8 100%)'
-            : 'linear-gradient(135deg, rgba(108,99,255,0.15) 0%, rgba(91,82,232,0.08) 100%)',
+            ? 'linear-gradient(135deg, #7B72FF 0%, #5B52E8 100%)'
+            : 'linear-gradient(135deg, rgba(123,114,255,0.15) 0%, rgba(91,82,232,0.08) 100%)',
           color: canSubmit ? '#fff' : '#5A5B72',
-          boxShadow: canSubmit ? '0 4px 24px rgba(108,99,255,0.4), 0 0 0 1px rgba(108,99,255,0.3)' : '0 0 0 1px rgba(45,49,80,0.6)',
+          boxShadow: canSubmit ? '0 4px 24px rgba(123,114,255,0.4), 0 0 0 1px rgba(123,114,255,0.3)' : '0 0 0 1px rgba(45,49,80,0.6)',
           cursor: canSubmit && !loading ? 'pointer' : 'not-allowed',
         }}
       >
@@ -266,7 +266,7 @@ function CheckStep({ email, onBack }: { email: string; onBack: () => void }) {
 
       <button
         className="text-xs underline decoration-dotted hover:no-underline transition-all min-h-[44px] px-4"
-        style={{ color: '#6C63FF' }}
+        style={{ color: '#7B72FF' }}
         onClick={onBack}
       >
         ← Use a different email
@@ -335,7 +335,7 @@ export default function AuthScreen() {
           <h1 className="text-2xl font-bold tracking-tight mt-3" style={{ color: '#E8E8F0' }}>
             MindShift
           </h1>
-          <p className="text-xs mt-0.5" style={{ color: '#6C63FF', letterSpacing: '0.08em' }}>
+          <p className="text-xs mt-0.5" style={{ color: '#7B72FF', letterSpacing: '0.08em' }}>
             Focus made kind
           </p>
         </motion.div>
@@ -384,7 +384,7 @@ export default function AuthScreen() {
           transition={{ ...t(), delay: 0.4 }}
         >
           By continuing you agree to our{' '}
-          <Link to="/privacy" target="_blank" style={{ color: '#6C63FF' }} className="underline decoration-dotted opacity-60 hover:opacity-100 transition-opacity">
+          <Link to="/privacy" target="_blank" style={{ color: '#7B72FF' }} className="underline decoration-dotted opacity-60 hover:opacity-100 transition-opacity">
             Privacy Policy
           </Link>
         </motion.p>
