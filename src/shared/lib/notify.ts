@@ -9,6 +9,15 @@ export function notifyXP(amount: number): void {
   toast.success(`+${amount} XP earned!`, { duration: 2500 })
 }
 
+// Variable Ratio bonus notification — fired on lucky phasic burst (~25% chance)
+export function notifyXPBonus(amount: number): void {
+  hapticWow()
+  toast.success(`⚡ Lucky burst! +${amount} XP`, {
+    duration: 3000,
+    description: 'Bonus dopamine 🎉',
+  })
+}
+
 export function notifyAchievement(name: string, emoji: string, description: string): void {
   hapticWow()
   toast(`${emoji} ${name}`, {

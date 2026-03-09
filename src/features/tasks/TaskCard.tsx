@@ -14,7 +14,7 @@ import { motion } from 'motion/react'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { useStore } from '@/store'
 import { Confetti } from '@/shared/ui/Confetti'
-import { notifyXP, notifyAchievement, notifyTaskDone } from '@/shared/lib/notify'
+import { notifyXP, notifyXPBonus, notifyAchievement, notifyTaskDone } from '@/shared/lib/notify'
 import { hapticDone } from '@/shared/lib/haptic'
 import type { Task } from '@/types'
 import { ACHIEVEMENT_DEFINITIONS } from '@/types'
@@ -65,9 +65,21 @@ export function TaskCard({ task, index = 0, onComplete, onSnooze }: Props) {
 
     // XP: base × difficulty × energy multiplier
     const energyMultiplier = energyLevel <= 2 ? 1.2 : energyLevel >= 4 ? 0.8 : 1.0
-    const xp = Math.round(10 * task.difficulty * energyMultiplier)
+    const baseXp = Math.round(10 * task.difficulty * energyMultiplier)
+
+    // Variable Ratio bonus — Research #5: VR schedule bridges Dopamine Transfer Deficit
+    // 8% = double burst, 17% = 1.5× burst, 75% = normal (slot-machine effect, no punishment)
+    const roll = Math.random()
+    const vrMultiplier = roll < 0.08 ? 2.0 : roll < 0.25 ? 1.5 : 1.0
+    const xp = Math.round(baseXp * vrMultiplier)
+    const isBonus = vrMultiplier > 1.0
+
     addXP(xp)
-    notifyXP(xp)
+    if (isBonus) {
+      notifyXPBonus(xp)
+    } else {
+      notifyXP(xp)
+    }
     notifyTaskDone(task.title)
 
     // Achievements (with toast)
