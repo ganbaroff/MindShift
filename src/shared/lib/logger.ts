@@ -6,32 +6,28 @@
  *   logInfo  → console.info  (dev)    + Sentry breadcrumb (prod w/ Sentry)
  *   logEvent → Plausible custom event (prod, privacy-first, no PII)
  *
- * To enable Sentry observability:
- *   1. npm install @sentry/react
- *   2. Set VITE_SENTRY_DSN in .env.local
- *   3. Uncomment the Sentry blocks below
- *
- * Without VITE_SENTRY_DSN the app works identically — console only, zero
- * external requests. Sentry is purely opt-in.
+ * Sentry is opt-in: set VITE_SENTRY_DSN in .env.local to enable.
+ * Without it the app works identically — console only, zero external requests.
  */
 
-// ── Sentry (opt-in — uncomment when @sentry/react is installed) ──────────────
-// import * as Sentry from '@sentry/react'
-// const SENTRY_DSN = import.meta.env.VITE_SENTRY_DSN as string | undefined
-// if (SENTRY_DSN) {
-//   Sentry.init({
-//     dsn: SENTRY_DSN,
-//     environment: import.meta.env.MODE,
-//     tracesSampleRate: 0.1,       // 10% of transactions — low overhead
-//     replaysSessionSampleRate: 0, // no session replay (privacy-first)
-//     replaysOnErrorSampleRate: 0,
-//     beforeSend(event) {
-//       // Strip PII before transmission
-//       delete event.user?.email
-//       return event
-//     },
-//   })
-// }
+import * as Sentry from '@sentry/react'
+
+const SENTRY_DSN = import.meta.env.VITE_SENTRY_DSN as string | undefined
+
+if (SENTRY_DSN) {
+  Sentry.init({
+    dsn: SENTRY_DSN,
+    environment: import.meta.env.MODE,
+    tracesSampleRate: 0.1,       // 10% of transactions — low overhead
+    replaysSessionSampleRate: 0, // no session replay (privacy-first)
+    replaysOnErrorSampleRate: 0,
+    beforeSend(event) {
+      // Strip PII before transmission
+      if (event.user) delete event.user.email
+      return event
+    },
+  })
+}
 
 interface ErrorMeta { [key: string]: unknown }
 
@@ -49,15 +45,14 @@ export function logError(context: string, error: unknown, meta: ErrorMeta = {}):
 
   console.error(`[MindShift] ${context}:`, message, { ...meta, stack })
 
-  // Sentry: uncomment when @sentry/react is installed + VITE_SENTRY_DSN is set
-  // if (SENTRY_DSN) {
-  //   Sentry.withScope((scope) => {
-  //     scope.setTag('context', context)
-  //     scope.setExtras(meta)
-  //     scope.setLevel('error')
-  //     Sentry.captureException(error instanceof Error ? error : new Error(message))
-  //   })
-  // }
+  if (SENTRY_DSN) {
+    Sentry.withScope((scope) => {
+      scope.setTag('context', context)
+      scope.setExtras(meta)
+      scope.setLevel('error')
+      Sentry.captureException(error instanceof Error ? error : new Error(message))
+    })
+  }
 }
 
 /**
@@ -70,8 +65,9 @@ export function logInfo(context: string, data: ErrorMeta = {}): void {
     console.info(`[MindShift] ${context}`, data)
   }
 
-  // Sentry breadcrumb for prod correlation:
-  // if (SENTRY_DSN) Sentry.addBreadcrumb({ category: context, data, level: 'info' })
+  if (SENTRY_DSN) {
+    Sentry.addBreadcrumb({ category: context, data, level: 'info' })
+  }
 }
 
 /**
