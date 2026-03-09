@@ -4,6 +4,7 @@ import { useMotion } from '@/shared/hooks/useMotion'
 import { useStore } from '@/store'
 import { ACHIEVEMENT_DEFINITIONS } from '@/types'
 import { supabase } from '@/shared/lib/supabase'
+import Avatar, { STAGE_NAMES, stageFromLevel } from './Avatar'
 import type { FocusSessionRow } from '@/types'
 
 // ── XP helpers ─────────────────────────────────────────────────────────────────
@@ -14,9 +15,6 @@ function xpToLevel(xp: number): { level: number; progress: number; needed: numbe
   const needed = 100
   return { level, progress, needed }
 }
-
-const AVATARS = ['🌱', '🌿', '🍀', '🌸', '🌻', '🌳']
-const AVATAR_LEVELS = ['Seedling', 'Sprout', 'Clover', 'Blossom', 'Sunflower', 'Oak']
 
 // ── 7-day consistency data ──────────────────────────────────────────────────────
 
@@ -45,9 +43,8 @@ export default function ProgressScreen() {
 
   const { t, shouldAnimate } = useMotion()
   const { level, progress, needed } = xpToLevel(xpTotal)
-  const avatarIndex = Math.min(level - 1, AVATARS.length - 1)
-  const avatar = AVATARS[avatarIndex] ?? '🌱'
-  const avatarName = AVATAR_LEVELS[avatarIndex] ?? 'Seedling'
+  const stage = stageFromLevel(level)
+  const avatarName = STAGE_NAMES[stage] ?? 'Seedling'
 
   const unlocked = achievements.filter(a => a.unlockedAt !== null)
   const [consistencyData, setConsistencyData] = useState<Record<string, number>>({})
@@ -180,13 +177,15 @@ export default function ProgressScreen() {
             initial={shouldAnimate ? { scale: 0.8 } : {}}
             animate={{ scale: 1 }}
             transition={{ ...t('expressive'), delay: 0.2 }}
-            className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl"
+            className="rounded-2xl flex items-center justify-center"
             style={{
-              background: 'linear-gradient(135deg, rgba(108,99,255,0.15), rgba(78,205,196,0.1))',
-              border: '1.5px solid rgba(108,99,255,0.3)',
+              width: 72,
+              height: 72,
+              background: 'linear-gradient(135deg, rgba(108,99,255,0.12), rgba(78,205,196,0.08))',
+              border: '1.5px solid rgba(108,99,255,0.25)',
             }}
           >
-            {avatar}
+            <Avatar level={level} size={56} />
           </motion.div>
           <div className="flex-1">
             <p className="text-lg font-bold" style={{ color: '#E8E8F0' }}>
@@ -218,9 +217,9 @@ export default function ProgressScreen() {
         </div>
 
         {/* Avatar evolution hint */}
-        {avatarIndex < AVATARS.length - 1 && (
+        {stage < STAGE_NAMES.length - 1 && (
           <p className="text-xs mt-3 text-center" style={{ color: '#8B8BA7' }}>
-            {AVATARS[avatarIndex + 1]} Next: {AVATAR_LEVELS[avatarIndex + 1]} at Level {(avatarIndex + 2)}
+            Next stage: {STAGE_NAMES[stage + 1]} at Level {stage + 2}
           </p>
         )}
       </motion.div>

@@ -4,8 +4,7 @@ import { useStore } from '@/store'
 import { supabase } from '@/shared/lib/supabase'
 import { toast } from 'sonner'
 import { logError } from '@/shared/lib/logger'
-
-const AVATAR_EMOJIS = ['🌱', '🌿', '🍀', '🌸', '🌻', '🌳']
+import Avatar, { STAGE_NAMES } from '@/features/progress/Avatar'
 
 // ── Toggle switch ─────────────────────────────────────────────────────────────
 
@@ -245,17 +244,18 @@ export default function SettingsScreen() {
           Avatar
         </p>
         <div className="flex gap-3 flex-wrap">
-          {AVATAR_EMOJIS.map((emoji, i) => (
+          {STAGE_NAMES.map((name, i) => (
             <button
               key={i}
               onClick={() => setAvatarId(i + 1)}
-              className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl transition-all duration-200"
+              className="w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-200"
               style={{
                 background: avatarId === i + 1 ? 'rgba(108, 99, 255, 0.18)' : '#252840',
                 border: `2px solid ${avatarId === i + 1 ? '#6C63FF' : 'transparent'}`,
               }}
+              title={name}
             >
-              {emoji}
+              <Avatar level={i + 1} size={32} />
             </button>
           ))}
         </div>
