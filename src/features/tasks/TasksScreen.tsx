@@ -3,13 +3,14 @@ import { motion, AnimatePresence } from 'motion/react'
 import { useStore } from '@/store'
 import { TaskCard } from './TaskCard'
 import { AddTaskModal } from './AddTaskModal'
+import { CoachMark } from '@/shared/ui/CoachMark'
 import { Plus } from 'lucide-react'
 import { NOW_POOL_MAX } from '@/shared/lib/constants'
 
 // ── Tasks screen — all pools visible ─────────────────────────────────────────
 
 export default function TasksScreen() {
-  const { nowPool, nextPool, somedayPool } = useStore()
+  const { nowPool, nextPool, somedayPool, completedTotal } = useStore()
   const [addOpen, setAddOpen] = useState(false)
   const [somedayExpanded, setSomedayExpanded] = useState(false)
 
@@ -124,6 +125,15 @@ export default function TasksScreen() {
       </motion.button>
 
       <AddTaskModal open={addOpen} onClose={() => setAddOpen(false)} />
+
+      {/* Progressive disclosure: Focus Mode hint after first task completion */}
+      {completedTotal >= 1 && (
+        <CoachMark
+          hintId="focus_mode_hint"
+          emoji="⏱️"
+          message="Tap Focus for a distraction-free session — it's designed for exactly this."
+        />
+      )}
     </div>
   )
 }

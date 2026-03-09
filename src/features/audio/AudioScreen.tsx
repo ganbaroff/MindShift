@@ -2,6 +2,7 @@ import { motion } from 'motion/react'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { useStore } from '@/store'
 import { useAudioEngine } from '@/shared/hooks/useAudioEngine'
+import { CoachMark } from '@/shared/ui/CoachMark'
 import { AUDIO_WARNING_VOLUME } from '@/shared/lib/constants'
 import type { AudioPreset } from '@/types'
 
@@ -270,6 +271,13 @@ export default function AudioScreen() {
           })}
         </div>
       </motion.div>
+
+      {/* Progressive disclosure: Sound Anchor hint on first visit */}
+      <CoachMark
+        hintId="audio_anchor_hint"
+        emoji="🎯"
+        message="Set a Sound Anchor below — your brain learns this sound = focus time in 1-2 weeks."
+      />
 
       {/* Science note */}
       <motion.div

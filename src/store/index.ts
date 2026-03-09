@@ -92,6 +92,9 @@ interface ProgressSlice {
 interface PreferencesSlice {
   reducedStimulation: boolean
   setReducedStimulation: (val: boolean) => void
+  // Progressive disclosure — tracks which coach marks have been seen
+  seenHints: string[]
+  markHintSeen: (id: string) => void
   // Subscription state (trial mode — no actual charges)
   subscriptionTier: 'free' | 'pro_trial' | 'pro'
   trialEndsAt: string | null        // ISO timestamp
@@ -158,7 +161,7 @@ export const useStore = create<AppStore>()(
           // Progress slice
           achievements: initAchievements(), weeklyStats: null, completedTotal: 0,
           // Preferences slice — prevent Pro state leaking between users
-          reducedStimulation: false,
+          reducedStimulation: false, seenHints: [],
           subscriptionTier: 'free' as const, trialEndsAt: null,
           // Grid slice
           gridWidgets: WIDGET_DEFAULTS_GENERIC,
@@ -324,6 +327,11 @@ export const useStore = create<AppStore>()(
         reducedStimulation: false,
         setReducedStimulation: (val) => set({ reducedStimulation: val }),
 
+        seenHints: [],
+        markHintSeen: (id) => set((s) => ({
+          seenHints: s.seenHints.includes(id) ? s.seenHints : [...s.seenHints, id],
+        })),
+
         subscriptionTier: 'free',
         trialEndsAt: null,
         setSubscription: (tier, trialEnd) => set({
@@ -354,6 +362,7 @@ export const useStore = create<AppStore>()(
           achievements: s.achievements,
           audioVolume: s.audioVolume,
           reducedStimulation: s.reducedStimulation,
+          seenHints: s.seenHints,
           subscriptionTier: s.subscriptionTier,
           trialEndsAt: s.trialEndsAt,
           gridWidgets: s.gridWidgets,
