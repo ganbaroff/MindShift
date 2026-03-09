@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from 'sonner'
 import { useStore } from '@/store'
@@ -8,6 +8,7 @@ import { LoadingScreen } from '@/shared/ui/LoadingScreen'
 import { AuthGuard } from './AuthGuard'
 import { ErrorBoundary } from '@/shared/ui/ErrorBoundary'
 import { RecoveryProtocol } from '@/features/tasks/RecoveryProtocol'
+import { ContextRestore, writeLastActive, shouldShowContextRestore } from '@/features/tasks/ContextRestore'
 import { CookieBanner } from '@/shared/ui/CookieBanner'
 import { RECOVERY_THRESHOLD_HOURS } from '@/shared/lib/constants'
 import { useOfflineSync } from '@/shared/hooks/useOfflineSync'
@@ -30,7 +31,8 @@ const TermsPage        = lazy(() => import('@/features/legal/TermsPage'))
 const CookiePolicyPage = lazy(() => import('@/features/legal/CookiePolicyPage'))
 
 export default function App() {
-  const { setUser, updateLastSession, lastSessionAt, recoveryShown, setRecoveryShown } = useStore()
+  const { setUser, updateLastSession, lastSessionAt, recoveryShown, setRecoveryShown, nowPool, onboardingCompleted } = useStore()
+  const [showContextRestore, setShowContextRestore] = useState(false)
 
   // ── Auth listener ───────────────────────────────────────────────────────────
   useEffect(() => {
@@ -78,6 +80,27 @@ export default function App() {
     return () => subscription.unsubscribe()
   }, [setUser, updateLastSession])
 
+  // ── "Where Was I?" context restoration ────────────────────────────────────
+  // Write timestamp when page becomes hidden; check on show (return from background).
+  // Only shown when user has onboarded + has active NOW tasks + returned after 30–72h absence.
+  useEffect(() => {
+    const hasActiveTasks = nowPool.some(t => t.status === 'active')
+
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        writeLastActive()
+      } else if (document.visibilityState === 'visible') {
+        if (onboardingCompleted && hasActiveTasks && shouldShowContextRestore()) {
+          setShowContextRestore(true)
+        }
+        writeLastActive()
+      }
+    }
+
+    document.addEventListener('visibilitychange', onVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', onVisibilityChange)
+  }, [nowPool, onboardingCompleted])
+
   // ── Offline queue sync ──────────────────────────────────────────────────────
   useOfflineSync()
 
@@ -107,6 +130,11 @@ export default function App() {
         <Suspense fallback={<LoadingScreen />}>
           {showRecovery && (
             <RecoveryProtocol onDismiss={setRecoveryShown} />
+          )}
+
+          {/* "Where Was I?" — context restore after 30–72h absence, non-blocking */}
+          {!showRecovery && showContextRestore && (
+            <ContextRestore onDismiss={() => setShowContextRestore(false)} />
           )}
 
           {/* Cookie notice — shown once on first visit, purely informational */}
