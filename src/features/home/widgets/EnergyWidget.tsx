@@ -2,7 +2,7 @@
  * EnergyWidget — Bento grid version of the energy check-in.
  * Compact card: shows current level + quick re-select.
  */
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { useStore } from '@/store'
 import type { EnergyLevel } from '@/types'
 

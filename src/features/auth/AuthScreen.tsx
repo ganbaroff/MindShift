@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { Mail, Sparkles } from 'lucide-react'
 import { supabase } from '@/shared/lib/supabase'
 import { Button } from '@/shared/ui/Button'

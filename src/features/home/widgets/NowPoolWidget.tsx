@@ -2,7 +2,7 @@
  * NowPoolWidget — compact NOW pool within the bento grid.
  * Shows tasks + inline Add button. No NEXT pool here (separate widget later).
  */
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence } from 'motion/react'
 import { Plus } from 'lucide-react'
 import { useState } from 'react'
 import { useStore } from '@/store'

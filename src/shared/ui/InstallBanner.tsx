@@ -5,7 +5,7 @@
 // iOS/Safari     → step-by-step Share → Add to Home Screen instructions.
 // Already installed or dismissed → renders nothing.
 
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence } from 'motion/react'
 import { X, Share, Plus, Download } from 'lucide-react'
 import { useInstallPrompt } from '@/shared/hooks/useInstallPrompt'
 import { hapticTap } from '@/shared/lib/haptic'

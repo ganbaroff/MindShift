@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence } from 'motion/react'
 import { useStore } from '@/store'
 import { supabase } from '@/shared/lib/supabase'
 import type { AppMode, EnergyLevel, CognitiveMode } from '@/types'

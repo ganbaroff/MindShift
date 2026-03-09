@@ -13,7 +13,7 @@
  *   low-energy  — slightly droopy, softer palette
  */
 
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence } from 'motion/react'
 import { useReducedMotion } from '@/shared/hooks/useReducedMotion'
 
 export type MascotState = 'idle' | 'focused' | 'celebrating' | 'resting' | 'low-energy'

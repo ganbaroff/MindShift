@@ -17,7 +17,7 @@
  */
 
 import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence } from 'motion/react'
 import { useReducedMotion } from '@/shared/hooks/useReducedMotion'
 import { useGridSync } from '@/shared/hooks/useGridSync'
 import { Plus } from 'lucide-react'

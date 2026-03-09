@@ -2,7 +2,7 @@
  * QuickFocusWidget — CBT behavioural activation ("Just 5 Minutes").
  * Research: Task initiation paradox — lowest-resistance entry reduces Primode.
  */
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '@/store'
 import { hapticTap } from '@/shared/lib/haptic'

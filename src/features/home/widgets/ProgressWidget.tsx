@@ -3,7 +3,7 @@
  * Non-punitive: shows positive momentum only.
  * Research: Gamification without punishment → dopamine without shame loops.
  */
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { useStore } from '@/store'
 
 /** XP needed to reach next level */

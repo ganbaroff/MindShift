@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Home, Timer, ListTodo, Music, TrendingUp } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { cn } from '@/shared/lib/cn'
 
 const NAV_ITEMS = [

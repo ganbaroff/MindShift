@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence } from 'motion/react'
 import { useReducedMotion } from '@/shared/hooks/useReducedMotion'
 import { X, Mic, MicOff } from 'lucide-react'
 import { useStore } from '@/store'

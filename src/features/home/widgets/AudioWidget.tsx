@@ -2,7 +2,7 @@
  * AudioWidget — compact audio control for the bento grid.
  * Play/stop + preset selector in a single card row.
  */
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { useStore } from '@/store'
 import { useAudioEngine } from '@/shared/hooks/useAudioEngine'
 import type { AudioPreset } from '@/types'

@@ -8,7 +8,7 @@
  * Returns true if EITHER source requests reduced motion.
  * Use this instead of Framer Motion's useReducedMotion() directly.
  */
-import { useReducedMotion as useFramerReducedMotion } from 'framer-motion'
+import { useReducedMotion as useFramerReducedMotion } from 'motion/react'
 import { useStore } from '@/store'
 
 export function useReducedMotion(): boolean {
