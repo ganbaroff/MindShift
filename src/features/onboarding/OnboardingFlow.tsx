@@ -4,9 +4,48 @@ import { motion, AnimatePresence } from 'motion/react'
 import { ChevronLeft } from 'lucide-react'
 import { useStore } from '@/store'
 import { supabase } from '@/shared/lib/supabase'
-import type { AppMode, EnergyLevel, CognitiveMode } from '@/types'
+import type { AppMode, EnergyLevel, CognitiveMode, Task } from '@/types'
 import { EnergyCheckin } from '@/features/home/EnergyCheckin'
 import { useMotion } from '@/shared/hooks/useMotion'
+
+// ── Sample tasks (Research #4: blank-slate anxiety prevention) ────────────────
+// Pre-populated per AppMode so first-timers see a meaningful starting point.
+// 1 task in 'now' (actionable today), 1 in 'next' (low pressure queue).
+// All difficulty=1, short estimates — avoid intimidating new users.
+
+const SAMPLE_TASKS: Record<AppMode, { title: string; pool: Task['pool']; difficulty: Task['difficulty']; estimatedMinutes: number }[]> = {
+  minimal: [
+    { title: 'Pick ONE thing that matters today', pool: 'now',  difficulty: 1, estimatedMinutes: 5  },
+    { title: 'Write down anything stuck in your head', pool: 'next', difficulty: 1, estimatedMinutes: 10 },
+  ],
+  habit: [
+    { title: 'Do 2 minutes of your top habit', pool: 'now',  difficulty: 1, estimatedMinutes: 2  },
+    { title: 'Review your routine for tomorrow', pool: 'next', difficulty: 1, estimatedMinutes: 5  },
+  ],
+  system: [
+    { title: 'Brain dump: list everything on your mind', pool: 'now',  difficulty: 1, estimatedMinutes: 10 },
+    { title: 'Pick 3 priorities for this week', pool: 'next', difficulty: 2, estimatedMinutes: 15 },
+  ],
+}
+
+function makeSampleTask(
+  fields: { title: string; pool: Task['pool']; difficulty: Task['difficulty']; estimatedMinutes: number },
+  index: number,
+): Task {
+  return {
+    id: `sample-${Date.now()}-${index}`,
+    title: fields.title,
+    pool: fields.pool,
+    status: 'active',
+    difficulty: fields.difficulty,
+    estimatedMinutes: fields.estimatedMinutes,
+    createdAt: new Date().toISOString(),
+    completedAt: null,
+    snoozeCount: 0,
+    parentTaskId: null,
+    position: index,
+  }
+}
 
 // ── Progress bar ──────────────────────────────────────────────────────────────
 function ProgressBar({ step, total }: { step: number; total: number }) {
@@ -278,7 +317,7 @@ const TOTAL_STEPS = 3
 export default function OnboardingFlow() {
   const navigate = useNavigate()
   const { t } = useMotion()
-  const { setAppMode, setEnergyLevel, setCognitiveMode, setOnboardingCompleted, userId } = useStore()
+  const { setAppMode, setEnergyLevel, setCognitiveMode, setOnboardingCompleted, addTask, userId } = useStore()
   const [step, setStep] = useState(0)
   const [appMode, setLocalMode] = useState<AppMode>('minimal')
   const [prevStep, setPrevStep] = useState(0)
@@ -302,6 +341,9 @@ export default function OnboardingFlow() {
   const handleCognitive = async (mode: CognitiveMode) => {
     setCognitiveMode(mode)
     setOnboardingCompleted()
+
+    // Seed sample tasks — Research #4: prevent blank-slate anxiety on first launch
+    SAMPLE_TASKS[appMode].forEach((fields, i) => addTask(makeSampleTask(fields, i)))
 
     if (userId) {
       await supabase.from('users').upsert({
