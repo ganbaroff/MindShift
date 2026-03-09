@@ -6,7 +6,7 @@ export type Pool = 'now' | 'next' | 'someday'
 export type CognitiveMode = 'focused' | 'overview'
 export type AppMode = 'minimal' | 'habit' | 'system'
 export type Psychotype = 'achiever' | 'explorer' | 'connector' | 'planner'
-export type AudioPreset = 'brown' | 'lofi' | 'nature' | 'pink'
+export type AudioPreset = 'brown' | 'lofi' | 'nature' | 'pink' | 'gamma'
 export type SessionPhase = 'idle' | 'struggle' | 'release' | 'flow' | 'recovery'
 export type EnergyLevel = 1 | 2 | 3 | 4 | 5
 

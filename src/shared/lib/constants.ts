@@ -16,10 +16,11 @@ export const RECOVERY_LOCK_MINUTES = 10
 //   (≈ 40–70 dBA for typical earbuds; physiologically safe for all-day use).
 export const AUDIO_FADE_DURATION_S = 1.5      // Constant power crossfade duration (seconds)
 export const AUDIO_HARD_LIMIT = 1.0           // Slider max (0–1 normalized; gain limit is internal)
-export const AUDIO_DEFAULT_VOLUME = 0.47      // 47% slider → ~50 dBA (research optimal: 45–60 dBA)
+export const AUDIO_DEFAULT_VOLUME = 0.55      // 55% slider → ~58 dBA (research optimal: 65–75 dBA)
 export const AUDIO_WARNING_VOLUME = 0.80      // >80% → warn user (maps to ~65 dBA internally)
 export const NATURE_BUFFER_SECONDS = 120      // 2-minute between-session buffer
 export const HPF_CUTOFF_HZ = 60               // Sub-bass protection (mandatory on all noise)
+export const PINK_LPF_CUTOFF_HZ = 285         // Pink/nature HF fatigue cutoff (Research #3: eliminate HF strain)
 
 // XP
 export const XP_BASE = 10

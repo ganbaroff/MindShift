@@ -153,7 +153,7 @@ export const useStore = create<AppStore>()(
           activeSession: null, sessionPhase: 'idle' as const,
           timerSeconds: 0, timerRunning: false,
           // Audio slice
-          activePreset: null, audioPlaying: false, audioVolume: 0.47,
+          activePreset: null, audioPlaying: false, audioVolume: 0.55,
           focusAnchor: null, transitionBufferActive: false,
           // Progress slice
           achievements: initAchievements(), weeklyStats: null, completedTotal: 0,
@@ -282,7 +282,7 @@ export const useStore = create<AppStore>()(
 
         // ── Audio ───────────────────────────────────────────────────────────
         activePreset: null,
-        audioVolume: 0.47,
+        audioVolume: 0.55,
         audioPlaying: false,
         focusAnchor: null,
         transitionBufferActive: false,

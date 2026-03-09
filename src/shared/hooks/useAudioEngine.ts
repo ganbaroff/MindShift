@@ -26,7 +26,7 @@
 
 import { useRef, useCallback, useEffect } from 'react'
 import { useStore } from '@/store'
-import { HPF_CUTOFF_HZ, AUDIO_FADE_DURATION_S } from '@/shared/lib/constants'
+import { HPF_CUTOFF_HZ, PINK_LPF_CUTOFF_HZ, AUDIO_FADE_DURATION_S } from '@/shared/lib/constants'
 import type { AudioPreset } from '@/types'
 
 // ── Volume: logarithmic mapping ───────────────────────────────────────────────
@@ -181,6 +181,26 @@ function fillBrownFallback(data: Float32Array): void {
   }
 }
 
+/**
+ * 40 Hz gamma binaural beat — stereo buffer (L: 400 Hz, R: 440 Hz).
+ * Research: narrows attentional spotlight, enhances visual working memory.
+ * Leiden Institute study: reduced global-precedence effect after 3 min exposure.
+ * MIT (Tsai lab): 40 Hz stimulation triggers brain-wide cellular responses.
+ * Best used in 45–90 min bursts due to high cognitive energy demand.
+ */
+function createGammaBuffer(ctx: AudioContext): AudioBuffer {
+  const size = ctx.sampleRate * BUFFER_SECONDS
+  const buf  = ctx.createBuffer(2, size, ctx.sampleRate) // stereo
+  const dataL = buf.getChannelData(0)
+  const dataR = buf.getChannelData(1)
+  for (let i = 0; i < size; i++) {
+    const t = i / ctx.sampleRate
+    dataL[i] = Math.sin(2 * Math.PI * 400 * t) * 0.25  // 400 Hz left ear
+    dataR[i] = Math.sin(2 * Math.PI * 440 * t) * 0.25  // 440 Hz right ear → 40 Hz phantom beat
+  }
+  return buf
+}
+
 function createNoiseBuffer(ctx: AudioContext, preset: AudioPreset): AudioBuffer {
   const size = ctx.sampleRate * BUFFER_SECONDS
   const buf  = ctx.createBuffer(1, size, ctx.sampleRate)
@@ -318,6 +338,16 @@ export function useAudioEngine() {
     //  bassShelf: peaking EQ at 200 Hz, +4 dB — body/warmth of cassette recording
     //  lofiLpf: lowpass 3 kHz — rolls off bright treble, the definitive lo-fi sound
 
+    // ── Pink/nature LPF at 285 Hz — eliminates high-frequency fatigue ────
+    //  Research #3: pink noise filtered at 285 Hz creates optimal "sonic floor"
+    //  that helps the ADHD brain settle into deep concentration without HF exhaustion
+    const pinkLpf = (preset === 'pink' || preset === 'nature') ? ctx.createBiquadFilter() : null
+    if (pinkLpf) {
+      pinkLpf.type = 'lowpass'
+      pinkLpf.frequency.value = PINK_LPF_CUTOFF_HZ
+      pinkLpf.Q.value = 0.7
+    }
+
     let tapeSat: WaveShaperNode | null = null
     let bassShelf: BiquadFilterNode | null = null
     const lofiLpf = preset === 'lofi' ? ctx.createBiquadFilter() : null
@@ -354,22 +384,27 @@ export function useAudioEngine() {
     master.gain.value = volumeToGain(audioVolume)
     masterRef.current = master
 
-    // ── Source: AudioWorklet for brown (seam-free), buffer for others ─────
+    // ── Source: AudioWorklet for brown (seam-free), stereo buffer for gamma, mono buffer for others
     let source: AudioBufferSourceNode | AudioWorkletNode
 
     if (preset === 'brown') {
       try {
         await ensureWorklet(ctx)
         source = new AudioWorkletNode(ctx, 'brown-noise')
-        // AudioWorkletNode doesn't need .start() — it runs continuously
       } catch {
-        // Fallback: 15s buffer loop (Safari / very old Chrome)
         const node = ctx.createBufferSource()
         node.buffer = createNoiseBuffer(ctx, 'brown')
         node.loop = true
         node.start()
         source = node
       }
+    } else if (preset === 'gamma') {
+      // Stereo binaural beat: L=400Hz, R=440Hz → 40Hz gamma phantom
+      const node = ctx.createBufferSource()
+      node.buffer = createGammaBuffer(ctx)
+      node.loop = true
+      node.start()
+      source = node
     } else {
       const node = ctx.createBufferSource()
       node.buffer = createNoiseBuffer(ctx, preset)
@@ -382,13 +417,18 @@ export function useAudioEngine() {
 
     // ── Connect graph ─────────────────────────────────────────────────────
     // Default:  source → fade → HPF → master → out
+    // Pink/Nature: source → fade → pinkLpf(285Hz) → HPF → master → out
     // Lo-fi:    source → fade → tapeSat → bassShelf → lofiLpf → HPF → master → out
+    // Gamma:    source → fade → HPF → master → out (stereo preserved)
     source.connect(fade)
     if (tapeSat && bassShelf && lofiLpf) {
       fade.connect(tapeSat)
       tapeSat.connect(bassShelf)
       bassShelf.connect(lofiLpf)
       lofiLpf.connect(hpf)
+    } else if (pinkLpf) {
+      fade.connect(pinkLpf)
+      pinkLpf.connect(hpf)
     } else {
       fade.connect(hpf)
     }
