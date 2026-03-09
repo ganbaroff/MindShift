@@ -7,12 +7,19 @@ const ALLOWED_ORIGINS = [
   'https://mindshift.vercel.app',
   'http://localhost:5173',  // Vite dev server
   'http://localhost:4173',  // Vite preview
+  // ngrok static domain for mobile testing
+  'https://chordamesodermal-bette-inconstant.ngrok-free.dev',
 ]
+
+/** Allow any *.ngrok-free.dev origin for local mobile testing. Remove in production. */
+function isNgrokOrigin(origin: string): boolean {
+  return /^https:\/\/[a-z0-9-]+\.ngrok-free\.dev$/.test(origin)
+}
 
 export function getCorsHeaders(req: Request): Record<string, string> {
   const origin = req.headers.get('origin') ?? ''
   // Only reflect the origin if it's allowed — never default to a valid origin
-  const allowedOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ''
+  const allowedOrigin = ALLOWED_ORIGINS.includes(origin) || isNgrokOrigin(origin) ? origin : ''
 
   return {
     'Access-Control-Allow-Origin': allowedOrigin,
