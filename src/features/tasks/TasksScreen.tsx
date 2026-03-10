@@ -22,7 +22,7 @@ export default function TasksScreen() {
   if (allEmpty) {
     return (
       <div
-        className="flex flex-col items-center justify-center min-h-screen pb-28 px-8 text-center"
+        className="flex flex-col items-center justify-center min-h-screen pb-[calc(112px+env(safe-area-inset-bottom))] px-8 text-center"
         style={{ background: '#0F1117' }}
       >
         <div
@@ -56,14 +56,14 @@ export default function TasksScreen() {
   }
 
   return (
-    <div className="flex flex-col pb-28">
+    <div className="flex flex-col pb-[calc(112px+env(safe-area-inset-bottom))]">
       {/* Header */}
       <div className="px-5 pt-10 pb-4">
         <h1 className="text-2xl font-bold" style={{ color: '#E8E8F0' }}>
-          All Tasks 🗂️
+          Your Tasks
         </h1>
         <p className="text-sm mt-1" style={{ color: '#8B8BA7' }}>
-          {activeTasks.length + nextTasks.length + somedayTasks.length} active across all pools
+          {activeTasks.length + nextTasks.length + somedayTasks.length} tasks in play
         </p>
       </div>
 
@@ -80,7 +80,7 @@ export default function TasksScreen() {
         <div className="flex flex-col gap-3">
           {activeTasks.length === 0 ? (
             <p className="text-sm py-4 text-center" style={{ color: '#8B8BA7' }}>
-              Now pool is empty — add a task!
+              Nothing here yet — what do you want to work on first?
             </p>
           ) : (
             activeTasks.map((task, i) => <TaskCard key={task.id} task={task} index={i} />)
@@ -101,7 +101,7 @@ export default function TasksScreen() {
         <div className="flex flex-col gap-3">
           {nextTasks.length === 0 ? (
             <p className="text-sm py-4 text-center" style={{ color: '#8B8BA7' }}>
-              Next pool is empty
+              Queued tasks will appear here. No rush.
             </p>
           ) : (
             nextTasks.map((task, i) => <TaskCard key={task.id} task={task} index={i} />)
@@ -113,7 +113,7 @@ export default function TasksScreen() {
       <section className="px-5" aria-label="Someday — parked tasks">
         <button
           onClick={() => setSomedayExpanded(v => !v)}
-          className="flex items-center justify-between w-full mb-3"
+          className="flex items-center justify-between w-full mb-3 min-h-[44px]"
           aria-expanded={somedayExpanded}
         >
           <h2 className="text-xs font-medium tracking-widest uppercase" style={{ color: '#8B8BA7' }}>
@@ -139,7 +139,7 @@ export default function TasksScreen() {
             >
               {somedayTasks.length === 0 ? (
                 <p className="text-sm py-4 text-center" style={{ color: '#8B8BA7' }}>
-                  Someday pool is empty
+                  Ideas parked here will wait patiently until you're ready.
                 </p>
               ) : (
                 somedayTasks.map((task, i) => <TaskCard key={task.id} task={task} index={i} />)
@@ -153,8 +153,8 @@ export default function TasksScreen() {
       <motion.button
         whileTap={{ scale: 0.94 }}
         onClick={() => setAddOpen(true)}
-        className="fixed bottom-24 right-5 flex items-center gap-2 px-5 py-3.5 rounded-full shadow-lg z-30"
-        style={{ background: '#7B72FF' }}
+        className="fixed bottom-24 flex items-center gap-2 px-5 py-3.5 rounded-full shadow-lg z-30"
+        style={{ background: '#7B72FF', right: 'calc(max(0px, (100vw - 480px) / 2) + 20px)' }}
         aria-label="Add task"
       >
         <Plus size={20} color="white" />

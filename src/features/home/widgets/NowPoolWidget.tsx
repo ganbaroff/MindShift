@@ -33,11 +33,15 @@ export function NowPoolWidget() {
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={() => setAddOpen(true)}
-            className="w-6 h-6 rounded-full flex items-center justify-center"
-            style={{ background: '#7B72FF' }}
+            className="min-w-[44px] min-h-[44px] flex items-center justify-center -mr-2"
             aria-label="Add task"
           >
-            <Plus size={13} color="white" />
+            <div
+              className="w-6 h-6 rounded-full flex items-center justify-center"
+              style={{ background: '#7B72FF' }}
+            >
+              <Plus size={13} color="white" />
+            </div>
           </motion.button>
         </div>
       </div>

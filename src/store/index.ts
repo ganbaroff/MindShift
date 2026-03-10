@@ -367,6 +367,7 @@ export const useStore = create<AppStore>()(
           trialEndsAt: s.trialEndsAt,
           gridWidgets: s.gridWidgets,
           psychotype: s.psychotype,
+          completedTotal: s.completedTotal,
         }),
       }
     )

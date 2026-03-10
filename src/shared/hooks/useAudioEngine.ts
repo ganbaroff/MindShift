@@ -317,6 +317,14 @@ export function useAudioEngine() {
     }
 
     const ctx = getCtx()
+
+    // iOS Safari fix: AudioContext starts in "suspended" state and requires an
+    // explicit resume() *awaited* after a user gesture to actually produce sound.
+    // Without this, play() silently succeeds but outputs nothing on iOS.
+    if (ctx.state === 'suspended') {
+      try { await ctx.resume() } catch { /* will fail gracefully — no audio */ }
+    }
+
     const now = ctx.currentTime
 
     // ── Fade gain (constant power fade-in) ──────────────────────────────

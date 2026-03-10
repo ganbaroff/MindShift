@@ -151,9 +151,9 @@ function FirstTaskPrompt({ onAdd, onDismiss }: { onAdd: () => void; onDismiss: (
         </p>
         <button
           onClick={onDismiss}
-          className="text-xs shrink-0 transition-opacity hover:opacity-70"
+          className="shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center -mr-2 -mt-1 rounded-lg text-xs transition-opacity hover:opacity-70"
           style={{ color: '#5A5B72' }}
-          aria-label="Dismiss"
+          aria-label="Dismiss suggestion"
         >
           ✕
         </button>
@@ -223,10 +223,10 @@ export default function HomeScreen() {
   const subtitle =
     appMode === 'minimal' ? 'One task at a time. What matters most?' :
     appMode === 'habit'   ? "Let's build your routine, one step at a time." :
-    'Full system view — your pools are ready.'
+    'Everything visible at once. What needs attention first?'
 
   return (
-    <div className="flex flex-col min-h-full pb-32">
+    <div className="flex flex-col min-h-full pb-[calc(128px+env(safe-area-inset-bottom))]">
 
       {/* ── Header + Mochi ──────────────────────────────────────────────── */}
       <div className="px-5 pt-10 pb-2 flex items-end justify-between gap-4">
@@ -303,8 +303,8 @@ export default function HomeScreen() {
         transition={{ ...t(), delay: 0.3 }}
         whileTap={shouldAnimate ? { scale: 0.94 } : {}}
         onClick={() => { hapticTap(); setAddOpen(true) }}
-        className="fixed bottom-24 right-5 flex items-center gap-2 px-5 py-3.5 rounded-full shadow-lg z-30"
-        style={{ background: '#7B72FF' }}
+        className="fixed bottom-24 flex items-center gap-2 px-5 py-3.5 rounded-full shadow-lg z-30"
+        style={{ background: '#7B72FF', right: 'calc(max(0px, (100vw - 480px) / 2) + 20px)' }}
         aria-label="Add task"
       >
         <Plus size={20} color="white" />

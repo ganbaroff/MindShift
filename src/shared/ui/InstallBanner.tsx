@@ -106,7 +106,7 @@ export function InstallBanner() {
             <button
               onClick={handleDismiss}
               aria-label="Dismiss install banner"
-              className="flex-shrink-0 p-1 rounded-lg transition-colors mt-0.5"
+              className="flex-shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg transition-colors"
               style={{ color: '#8B8BA7' }}
             >
               <X size={16} />

@@ -117,7 +117,7 @@ export function ContextRestore({ onDismiss }: Props) {
               className="px-4 py-3 rounded-2xl text-sm"
               style={{ background: '#252840', border: '1px solid rgba(255,255,255,0.06)', color: '#8B8BA7' }}
             >
-              Later
+              Maybe later
             </button>
           </div>
         </motion.div>

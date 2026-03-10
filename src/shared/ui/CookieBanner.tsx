@@ -46,8 +46,10 @@ export function CookieBanner() {
         <motion.div
           role="region"
           aria-label="Cookie notice"
-          className="fixed bottom-3 left-3 right-3 z-50 rounded-xl px-3.5 py-2.5 flex items-center gap-2.5"
+          className="fixed left-3 right-3 z-50 rounded-xl px-3.5 py-2.5 flex items-center gap-2.5"
           style={{
+            // Sit above the BottomNav (≈64 px) + iOS safe area + 8 px breathing room
+            bottom: 'calc(64px + env(safe-area-inset-bottom) + 8px)',
             background: 'rgba(22,25,40,0.95)',
             backdropFilter: 'blur(12px)',
             WebkitBackdropFilter: 'blur(12px)',
@@ -63,8 +65,8 @@ export function CookieBanner() {
         >
           <div className="flex-1 min-w-0">
             <p className="text-[11px] leading-relaxed" style={{ color: '#7B7B95' }}>
-              We use localStorage &{' '}
-              <strong style={{ color: '#9B9BB0' }}>cookieless</strong> analytics.{' '}
+              We save your preferences on-device.{' '}
+              <strong style={{ color: '#9B9BB0' }}>No cookies, no tracking.</strong>{' '}
               <Link
                 to="/cookie-policy"
                 className="underline decoration-dotted"

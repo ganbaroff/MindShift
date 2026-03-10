@@ -183,7 +183,7 @@ export function TaskCard({ task, index = 0, onComplete, onSnooze }: Props) {
             whileTap={shouldAnimate ? { scale: 0.94 } : {}}
             onClick={handleComplete}
             disabled={isDone}
-            className="flex-1 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200"
+            className="flex-1 py-3 rounded-xl font-semibold text-sm transition-all duration-200"
             style={{
               background:   isDone ? '#252840' : `${palette.teal}26`,   // 15% alpha
               border:       '1px solid',
@@ -199,7 +199,7 @@ export function TaskCard({ task, index = 0, onComplete, onSnooze }: Props) {
             <motion.button
               whileTap={shouldAnimate ? { scale: 0.94 } : {}}
               onClick={handleSnooze}
-              className="px-4 py-2.5 rounded-xl text-sm transition-all duration-200"
+              className="px-4 py-3 rounded-xl text-sm transition-all duration-200"
               style={{
                 background: '#252840',
                 border: '1px solid rgba(255,255,255,0.06)',

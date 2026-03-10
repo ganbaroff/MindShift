@@ -35,15 +35,26 @@ export default function App() {
   const [showContextRestore, setShowContextRestore] = useState(false)
 
   // ── Auth listener ───────────────────────────────────────────────────────────
+  // Handles both Google OAuth (coming soon) and the legacy magic-link flow.
+  // In bypass mode, this sets a persistent guest ID so all local features work.
   useEffect(() => {
+    // Guest mode: set a stable local ID so tasks, sessions, XP all persist across reloads
+    supabase.auth.getSession().then(({ data }) => {
+      if (!data.session) {
+        const guestId = localStorage.getItem('ms_guest_id') ?? `guest_${crypto.randomUUID()}`
+        localStorage.setItem('ms_guest_id', guestId)
+        setUser(guestId, '')
+        updateLastSession()
+      }
+    })
+
+    // Real session (Google OAuth, magic link) takes priority over guest
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session?.user) {
         setUser(session.user.id, session.user.email ?? '')
         updateLastSession()
 
         // ── Persist pending consent to Supabase ──────────────────────────────
-        // AuthScreen stores consent in localStorage before sending the magic link.
-        // We pick it up here after the user clicks the link and is authenticated.
         try {
           const raw = localStorage.getItem(CONSENT_PENDING_KEY)
           if (raw) {
@@ -52,9 +63,6 @@ export default function App() {
               terms_version:     string
               age_confirmed:     boolean
             }
-            // Fire-and-forget upsert — non-critical path, failing open
-            // `as never` matches the existing codebase pattern for Supabase payloads
-            // (columns added in migration 005, types updated in database.ts)
             supabase
               .from('users')
               .update({
@@ -67,13 +75,12 @@ export default function App() {
                 if (error) {
                   logError('App.consentPersist', new Error(error.message))
                 } else {
-                  // Clean up only after successful write
                   localStorage.removeItem(CONSENT_PENDING_KEY)
                 }
               })
           }
         } catch {
-          // localStorage or JSON parse failure — ignore, not critical
+          // localStorage or JSON parse failure — ignore
         }
       }
     })

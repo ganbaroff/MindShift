@@ -119,6 +119,7 @@ function EmailStep({
 
       {/* Email input */}
       <div className="relative mb-4">
+        <label htmlFor="auth-email" className="sr-only">Email address</label>
         <Mail
           className="absolute left-3.5 top-1/2 -translate-y-1/2 transition-colors duration-200 pointer-events-none"
           size={16}
@@ -126,6 +127,7 @@ function EmailStep({
           strokeWidth={2}
         />
         <input
+          id="auth-email"
           ref={inputRef}
           type="email"
           placeholder="your@email.com"
@@ -305,7 +307,7 @@ export default function AuthScreen() {
     setLoading(false)
 
     if (error) {
-      toast.error('Something went wrong. Please try again.')
+      toast.error("Couldn't send your link. Check the email address and try again.")
       return
     }
 

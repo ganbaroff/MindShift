@@ -1,16 +1,18 @@
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Home, Timer, ListTodo, Music, TrendingUp } from 'lucide-react'
+import { Home, Timer, ListTodo, TrendingUp, Settings } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { usePalette } from '@/shared/hooks/usePalette'
 import { cn } from '@/shared/lib/cn'
 
+// Audio removed from primary nav — accessible within FocusScreen (already implemented).
+// Settings added: users need to find Account, GDPR, Subscription, Reduced Stimulation.
 const NAV_ITEMS = [
-  { path: '/',         icon: Home,       label: 'Home'     },
-  { path: '/tasks',    icon: ListTodo,   label: 'Tasks'    },
-  { path: '/focus',    icon: Timer,      label: 'Focus'    },
-  { path: '/audio',    icon: Music,      label: 'Audio'    },
-  { path: '/progress', icon: TrendingUp, label: 'Progress' },
+  { path: '/',          icon: Home,       label: 'Home'     },
+  { path: '/tasks',     icon: ListTodo,   label: 'Tasks'    },
+  { path: '/focus',     icon: Timer,      label: 'Focus'    },
+  { path: '/progress',  icon: TrendingUp, label: 'Progress' },
+  { path: '/settings',  icon: Settings,   label: 'Settings' },
 ] as const
 
 export function BottomNav() {
@@ -61,7 +63,7 @@ export function BottomNav() {
                 />
               )}
               <Icon size={20} strokeWidth={active ? 2.5 : 1.8} />
-              <span className="text-[10px] font-medium leading-none">{label}</span>
+              <span className="text-[11px] font-medium leading-none">{label}</span>
             </button>
           )
         })}

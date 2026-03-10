@@ -90,29 +90,35 @@ function SortableCard({ config, editMode, onToggleVisible }: SortableCardProps) 
       transition={{ duration: 0.2 }}
       className="relative rounded-2xl overflow-hidden"
     >
-      {/* Drag handle + visibility toggle (edit mode) */}
-      {editMode && (
+      {/* Card header — grip always visible, visibility toggle in edit mode */}
+      <div
+        className="flex items-center justify-between px-3 pt-2 pb-0"
+        style={editMode ? { borderBottom: '1px solid rgba(255,255,255,0.06)' } : undefined}
+      >
+        {/* Grip handle — always draggable, listeners always attached */}
         <div
-          className="flex items-center justify-between px-3 pt-2 pb-0"
-          style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
+          {...attributes}
+          {...listeners}
+          className="flex items-center gap-1.5 cursor-grab active:cursor-grabbing py-1.5 pr-3"
+          aria-label={`Drag to reorder ${WIDGET_LABELS[config.type]}`}
+          style={{ touchAction: 'none' }}
         >
-          {/* Grip handle — attached to drag listeners */}
-          <div
-            {...attributes}
-            {...listeners}
-            className="flex items-center gap-1.5 cursor-grab active:cursor-grabbing py-1"
-            aria-label={`Drag to reorder ${WIDGET_LABELS[config.type]}`}
-          >
-            <GripVertical size={14} style={{ color: '#8B8BA7' }} />
+          <GripVertical
+            size={editMode ? 14 : 12}
+            style={{ color: editMode ? '#8B8BA7' : 'rgba(139,139,167,0.35)' }}
+          />
+          {editMode && (
             <span className="text-xs" style={{ color: '#8B8BA7' }}>
               {WIDGET_ICONS[config.type]} {WIDGET_LABELS[config.type]}
             </span>
-          </div>
+          )}
+        </div>
 
-          {/* Toggle visibility */}
+        {/* Toggle visibility — only in edit mode */}
+        {editMode && (
           <button
             onClick={() => onToggleVisible(config.id)}
-            className="p-1 rounded-lg"
+            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg"
             aria-label={config.visible ? 'Hide widget' : 'Show widget'}
           >
             {config.visible
@@ -120,11 +126,11 @@ function SortableCard({ config, editMode, onToggleVisible }: SortableCardProps) 
               : <EyeOff size={14} style={{ color: '#8B8BA7' }} />
             }
           </button>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Widget content */}
-      <div className={editMode ? 'p-5 pt-3 pointer-events-none' : 'p-5'}>
+      <div className={editMode ? 'px-5 pb-5 pt-2 pointer-events-none' : 'p-5 pt-2'}>
         <Component />
       </div>
     </motion.div>
@@ -147,7 +153,7 @@ export function BentoGrid({ widgets, onReorder }: BentoGridProps) {
   // - KeyboardSensor: accessibility keyboard reorder
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
-    useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 8 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 6 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   )
 
