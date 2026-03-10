@@ -7,7 +7,7 @@ import { ArcTimer, ARC_SIZE } from './ArcTimer'
 import { useAudioEngine } from '@/shared/hooks/useAudioEngine'
 import { supabase } from '@/shared/lib/supabase'
 import { logError } from '@/shared/lib/logger'
-import { notifyFocusEnd, notifyAchievement } from '@/shared/lib/notify'
+import { notifyFocusEnd, notifyAchievement, requestNotificationPermission, pushFocusComplete, pushRecoveryEnd } from '@/shared/lib/notify'
 import { hapticDone } from '@/shared/lib/haptic'
 import { ACHIEVEMENT_DEFINITIONS } from '@/types'
 import {
@@ -232,11 +232,13 @@ export default function FocusScreen() {
     const elapsedMin = Math.floor(elapsedMs / 60_000)
     void saveSession(elapsedMs, sessionPhase)
 
-    // Toast + haptic
+    // Toast + haptic (always shown in-app)
     if (elapsedMin >= 1) {
       notifyFocusEnd(elapsedMin)
       hapticDone()
     }
+    // Native push (shown even when app is backgrounded)
+    if (elapsedMin >= 1) pushFocusComplete(elapsedMin)
 
     // Achievements
     if (wasCompleted) {
@@ -266,6 +268,7 @@ export default function FocusScreen() {
         setRecovery(s => {
           if (s <= 1) {
             clearInterval(recoveryIntervalRef.current!)
+            pushRecoveryEnd()
             setScreen('setup')
             return 0
           }
@@ -324,6 +327,9 @@ export default function FocusScreen() {
     startTimeRef.current   = Date.now()
     pausedMsRef.current    = 0
     sessionSavedRef.current = false
+
+    // Request notification permission lazily on first session start — non-intrusive timing
+    void requestNotificationPermission()
 
     startSession(selectedTask?.id ?? null, duration, focusAnchor ?? null)
 

@@ -26,6 +26,26 @@ if (SENTRY_DSN) {
   })
 }
 
+// ── Vercel Analytics — GDPR-compliant, no cookies, 50k events/month free ─────
+// Loaded dynamically so the app still works during local dev before npm install.
+// Inject once; collects page views + custom events via `track()` from anywhere.
+// TODO: run `npm install` after pulling — @vercel/analytics and web-vitals will resolve.
+import('@vercel/analytics').then(({ inject }) => {
+  inject({ mode: import.meta.env.PROD ? 'production' : 'development' })
+}).catch(() => { /* not yet installed — no-op */ })
+
+// ── Core Web Vitals — reported to Sentry as measurements ─────────────────────
+// CLS, FCP, INP, LCP, TTFB: tracks rendering performance in real user sessions.
+import('web-vitals').then(({ onCLS, onFCP, onINP, onLCP, onTTFB }) => {
+  const report = (metric: { name: string; value: number }) => {
+    if (SENTRY_DSN) {
+      Sentry.setMeasurement(metric.name, metric.value, metric.name === 'CLS' ? '' : 'millisecond')
+    }
+    if (import.meta.env.DEV) console.debug(`[web-vitals] ${metric.name}: ${metric.value}`)
+  }
+  onCLS(report); onFCP(report); onINP(report); onLCP(report); onTTFB(report)
+}).catch(() => { /* not yet installed — no-op */ })
+
 // ── TanStack Query client ─────────────────────────────────────────────────────
 const queryClient = new QueryClient({
   defaultOptions: {

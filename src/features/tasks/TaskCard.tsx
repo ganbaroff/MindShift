@@ -19,6 +19,10 @@ import { notifyXP, notifyXPBonus, notifyAchievement, notifyTaskDone } from '@/sh
 import { hapticDone } from '@/shared/lib/haptic'
 import type { Task } from '@/types'
 import { ACHIEVEMENT_DEFINITIONS } from '@/types'
+import {
+  VR_BUCKET_SIZE, VR_JACKPOT_THRESHOLD, VR_BONUS_THRESHOLD,
+  VR_MULTIPLIER_JACKPOT, VR_MULTIPLIER_BONUS,
+} from '@/shared/lib/constants'
 
 // ── Difficulty accent color labels (Research #8: teal/indigo/gold — never red) ─
 
@@ -50,7 +54,7 @@ interface Props {
 }
 
 export function TaskCard({ task, index = 0, onComplete, onSnooze }: Props) {
-  const { completeTask, snoozeTask, addXP, energyLevel, unlockAchievement, hasAchievement } = useStore()
+  const { completeTask, snoozeTask, addXP, energyLevel, unlockAchievement, hasAchievement, completedTotal } = useStore()
   const { shouldAnimate, t } = useMotion()
   const palette = usePalette()
 
@@ -71,18 +75,21 @@ export function TaskCard({ task, index = 0, onComplete, onSnooze }: Props) {
     const energyMultiplier = energyLevel <= 2 ? 1.2 : energyLevel >= 4 ? 0.8 : 1.0
     const baseXp = Math.round(10 * task.difficulty * energyMultiplier)
 
-    // Variable Ratio bonus — Research #5: VR schedule bridges Dopamine Transfer Deficit
-    // 8% = double burst, 17% = 1.5× burst, 75% = normal (slot-machine effect, no punishment)
-    const roll = Math.random()
-    const vrMultiplier = roll < 0.08 ? 2.0 : roll < 0.25 ? 1.5 : 1.0
-    const xp = Math.round(baseXp * vrMultiplier)
-    const isBonus = vrMultiplier > 1.0
+    // Research #5: Deterministic VR schedule — store applies multiplier based on completedTotal.
+    // We preview the tier here (same bucket logic) to show the right notification.
+    const bucket = completedTotal % VR_BUCKET_SIZE
+    const vrMultiplier =
+      bucket < VR_JACKPOT_THRESHOLD ? VR_MULTIPLIER_JACKPOT :
+      bucket < VR_BONUS_THRESHOLD   ? VR_MULTIPLIER_BONUS :
+                                      1
+    const isBonus = vrMultiplier > 1
+    const displayXp = Math.round(baseXp * vrMultiplier)
 
-    addXP(xp)
+    addXP(baseXp)  // store applies its own deterministic VR multiplier (same bucket → same result)
     if (isBonus) {
-      notifyXPBonus(xp)
+      notifyXPBonus(displayXp)
     } else {
-      notifyXP(xp)
+      notifyXP(displayXp)
     }
     notifyTaskDone(task.title)
 

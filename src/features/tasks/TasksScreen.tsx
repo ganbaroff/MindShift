@@ -6,6 +6,84 @@ import { AddTaskModal } from './AddTaskModal'
 import { CoachMark } from '@/shared/ui/CoachMark'
 import { Plus } from 'lucide-react'
 import { NOW_POOL_MAX } from '@/shared/lib/constants'
+import type { Task } from '@/types'
+
+// ── Subtask grouping helpers ──────────────────────────────────────────────────
+
+/**
+ * Separates a flat task list into:
+ * - `parents`: top-level tasks (parentTaskId === null), in original order
+ * - `subtaskMap`: parentTaskId → subtasks (ordered by createdAt ascending)
+ * - `orphans`: subtasks whose parent is NOT in the pool (shown standalone)
+ */
+function groupByParent(tasks: Task[]): {
+  parents: Task[]
+  subtaskMap: Map<string, Task[]>
+  orphans: Task[]
+} {
+  const idSet = new Set(tasks.map(t => t.id))
+  const parents: Task[] = []
+  const subtaskMap = new Map<string, Task[]>()
+  const orphans: Task[] = []
+
+  for (const task of tasks) {
+    if (!task.parentTaskId) {
+      parents.push(task)
+    } else if (idSet.has(task.parentTaskId)) {
+      const arr = subtaskMap.get(task.parentTaskId) ?? []
+      arr.push(task)
+      subtaskMap.set(task.parentTaskId, arr)
+    } else {
+      orphans.push(task)  // parent completed / not in this pool
+    }
+  }
+  return { parents, subtaskMap, orphans }
+}
+
+/** Render a parent task + its subtasks (indented) */
+function TaskGroup({ task, index, subtasks }: { task: Task; index: number; subtasks: Task[] }) {
+  return (
+    <div>
+      <TaskCard task={task} index={index} />
+      {subtasks.length > 0 && (
+        <div className="ml-4 mt-1.5 flex flex-col gap-1.5 pl-3"
+          style={{ borderLeft: '2px solid rgba(123,114,255,0.2)' }}
+        >
+          {subtasks.map((sub, si) => (
+            <div key={sub.id} className="relative">
+              {/* connector dot */}
+              <div className="absolute -left-[15px] top-[14px] w-2 h-2 rounded-full"
+                style={{ background: 'rgba(123,114,255,0.35)' }}
+              />
+              <TaskCard task={sub} index={si} />
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+/** Render a grouped task list for a pool */
+function TaskList({ tasks }: { tasks: Task[] }) {
+  if (tasks.length === 0) return null
+  const { parents, subtaskMap, orphans } = groupByParent(tasks)
+  return (
+    <>
+      {parents.map((task, i) => (
+        <TaskGroup
+          key={task.id}
+          task={task}
+          index={i}
+          subtasks={subtaskMap.get(task.id) ?? []}
+        />
+      ))}
+      {orphans.map((task, i) => (
+        <TaskCard key={task.id} task={task} index={parents.length + i} />
+      ))}
+    </>
+  )
+}
 
 // ── Tasks screen — all pools visible ─────────────────────────────────────────
 
@@ -83,7 +161,7 @@ export default function TasksScreen() {
               Nothing here yet — what do you want to work on first?
             </p>
           ) : (
-            activeTasks.map((task, i) => <TaskCard key={task.id} task={task} index={i} />)
+            <TaskList tasks={activeTasks} />
           )}
         </div>
       </section>
@@ -104,7 +182,7 @@ export default function TasksScreen() {
               Queued tasks will appear here. No rush.
             </p>
           ) : (
-            nextTasks.map((task, i) => <TaskCard key={task.id} task={task} index={i} />)
+            <TaskList tasks={nextTasks} />
           )}
         </div>
       </section>
@@ -142,7 +220,7 @@ export default function TasksScreen() {
                   Ideas parked here will wait patiently until you're ready.
                 </p>
               ) : (
-                somedayTasks.map((task, i) => <TaskCard key={task.id} task={task} index={i} />)
+                <TaskList tasks={somedayTasks} />
               )}
             </motion.div>
           )}

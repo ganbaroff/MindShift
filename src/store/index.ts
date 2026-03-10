@@ -2,6 +2,10 @@ import { create } from 'zustand'
 import { persist, subscribeWithSelector } from 'zustand/middleware'
 import type { Task, AudioPreset, SessionPhase, EnergyLevel, CognitiveMode, AppMode, Psychotype, ActiveSession, WeeklyStats, Achievement, WidgetConfig } from '@/types'
 import { ACHIEVEMENT_DEFINITIONS, WIDGET_DEFAULTS, WIDGET_DEFAULTS_GENERIC } from '@/types'
+import {
+  VR_BUCKET_SIZE, VR_JACKPOT_THRESHOLD, VR_BONUS_THRESHOLD,
+  VR_MULTIPLIER_JACKPOT, VR_MULTIPLIER_BONUS, VR_MULTIPLIER_BASE,
+} from '@/shared/lib/constants'
 
 // ── Psychotype derivation ─────────────────────────────────────────────────────
 // Derives a personality profile from onboarding choices.
@@ -142,7 +146,16 @@ export const useStore = create<AppStore>()(
           psychotype: derivePsychotype(mode, s.cognitiveMode),
         })),
         setAvatarId: (id) => set({ avatarId: id }),
-        addXP: (amount) => set((s) => ({ xpTotal: s.xpTotal + amount })),
+        addXP: (amount) => set((s) => {
+          // Research #5: Variable Ratio XP schedule — unpredictable rewards sustain ADHD motivation
+          // 8% jackpot (2×) | 17% bonus (1.5×) | 75% base (1×) — rolling per VR_BUCKET_SIZE
+          const bucket = s.completedTotal % VR_BUCKET_SIZE
+          const multiplier =
+            bucket < VR_JACKPOT_THRESHOLD ? VR_MULTIPLIER_JACKPOT :
+            bucket < VR_BONUS_THRESHOLD   ? VR_MULTIPLIER_BONUS :
+                                            VR_MULTIPLIER_BASE
+          return { xpTotal: s.xpTotal + Math.round(amount * multiplier) }
+        }),
         setOnboardingCompleted: () => set({ onboardingCompleted: true }),
         setRecoveryShown: () => set({ recoveryShown: true }),
         updateLastSession: () => set({ lastSessionAt: new Date().toISOString() }),

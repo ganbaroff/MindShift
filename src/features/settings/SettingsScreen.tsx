@@ -42,8 +42,8 @@ function Toggle({ checked, onChange, label }: {
 export default function SettingsScreen() {
   const navigate = useNavigate()
   const {
-    email, cognitiveMode, appMode, avatarId,
-    setAvatarId, setCognitiveMode, setAppMode, signOut,
+    email, cognitiveMode, appMode, avatarId, energyLevel,
+    setAvatarId, setCognitiveMode, setAppMode, setEnergyLevel, signOut,
     reducedStimulation, setReducedStimulation,
     subscriptionTier, trialEndsAt, setSubscription, isProActive,
   } = useStore()
@@ -310,6 +310,44 @@ export default function SettingsScreen() {
               }}
             >
               {label}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Energy Level ──────────────────────────────────────────────────── */}
+      <section className="mx-5 p-4 rounded-2xl mb-4" style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)' }}>
+        <p className="text-xs font-medium tracking-widest uppercase mb-1" style={{ color: '#8B8BA7' }}>
+          Energy Level
+        </p>
+        <p className="text-xs mb-3" style={{ color: '#8B8BA7' }}>
+          How's your energy right now? Affects XP multipliers.
+        </p>
+        <div className="flex gap-2">
+          {([
+            { level: 1 as const, label: '😴', title: 'Low' },
+            { level: 2 as const, label: '😌', title: 'Calm' },
+            { level: 3 as const, label: '🙂', title: 'Good' },
+            { level: 4 as const, label: '😄', title: 'High' },
+            { level: 5 as const, label: '⚡', title: 'Peak' },
+          ]).map(({ level, label, title }) => (
+            <button
+              key={level}
+              onClick={() => {
+                setEnergyLevel(level)
+                toast.success(`Energy set to ${title}`)
+              }}
+              className="flex-1 flex flex-col items-center gap-1 py-2.5 rounded-xl text-sm transition-all duration-200 min-h-[48px]"
+              aria-label={`Set energy to ${title}`}
+              style={{
+                background: energyLevel === level ? 'rgba(123, 114, 255, 0.18)' : '#252840',
+                border: `1.5px solid ${energyLevel === level ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
+              }}
+            >
+              <span className="text-base leading-none">{label}</span>
+              <span className="text-[10px] font-medium" style={{ color: energyLevel === level ? '#7B72FF' : '#8B8BA7' }}>
+                {title}
+              </span>
             </button>
           ))}
         </div>

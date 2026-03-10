@@ -29,6 +29,16 @@ export const XP_BASE = 10
 export const XP_ENERGY_MULTIPLIER_LOW = 1.2   // energy 1-2 → bonus
 export const XP_ENERGY_MULTIPLIER_HIGH = 0.8  // energy 4-5 → baseline
 
+// Variable Ratio XP schedule — Research #5: dopamine transfer deficit in ADHD
+// Unpredictable reward distribution sustains motivation better than fixed rewards.
+// Schedule (per 100 completions): 8%=2× | 17%=1.5× | 75%=1×
+export const VR_BUCKET_SIZE = 100              // rolling window
+export const VR_JACKPOT_THRESHOLD = 8          // completedTotal % 100 < 8  → 2× multiplier
+export const VR_BONUS_THRESHOLD = 25           // completedTotal % 100 < 25 → 1.5× multiplier
+export const VR_MULTIPLIER_JACKPOT = 2
+export const VR_MULTIPLIER_BONUS = 1.5
+export const VR_MULTIPLIER_BASE = 1
+
 // Timer presets (minutes)
 export const TIMER_PRESETS = [5, 25, 52, 90] as const
 
