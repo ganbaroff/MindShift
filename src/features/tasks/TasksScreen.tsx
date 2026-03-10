@@ -153,8 +153,8 @@ export default function TasksScreen() {
       <motion.button
         whileTap={{ scale: 0.94 }}
         onClick={() => setAddOpen(true)}
-        className="fixed bottom-24 right-5 flex items-center gap-2 px-5 py-3.5 rounded-full shadow-lg z-30"
-        style={{ background: '#7B72FF' }}
+        className="fixed bottom-24 flex items-center gap-2 px-5 py-3.5 rounded-full shadow-lg z-30"
+        style={{ background: '#7B72FF', right: 'calc(max(0px, (100vw - 480px) / 2) + 20px)' }}
         aria-label="Add task"
       >
         <Plus size={20} color="white" />

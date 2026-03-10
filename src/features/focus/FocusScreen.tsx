@@ -967,7 +967,7 @@ export default function FocusScreen() {
       </AnimatePresence>
 
       {/* ── "Park the thought" — quick capture without leaving focus ────── */}
-      <div className="fixed bottom-8 right-5 z-30">
+      <div className="fixed bottom-8 z-30" style={{ right: 'calc(max(0px, (100vw - 480px) / 2) + 20px)' }}>
         <AnimatePresence>
           {parkOpen && (
             <motion.div

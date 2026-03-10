@@ -238,7 +238,7 @@ export function AddTaskModal({ open, onClose }: Props) {
             role="dialog"
             aria-modal="true"
             aria-labelledby="add-task-dialog-title"
-            className="fixed bottom-0 left-0 right-0 z-50 flex flex-col rounded-t-3xl"
+            className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] z-50 flex flex-col rounded-t-3xl"
             style={{
               background: '#1E2136',
               border: '1px solid rgba(255,255,255,0.06)',
@@ -420,7 +420,7 @@ export function AddTaskModal({ open, onClose }: Props) {
                       const v = parseInt(e.target.value, 10)
                       if (!isNaN(v) && v > 0) setMinutes(v)
                     }}
-                    className="w-20 px-3 py-2 rounded-xl text-sm outline-none"
+                    className="w-24 px-3 py-2 rounded-xl text-sm outline-none"
                     style={{
                       background: customMinutes ? 'rgba(123, 114, 255, 0.18)' : '#252840',
                       border: `1.5px solid ${customMinutes ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
