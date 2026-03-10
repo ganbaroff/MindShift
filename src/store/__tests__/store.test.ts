@@ -15,6 +15,10 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { useStore, selectActiveTasks, selectSessionProgress } from '../index'
 import type { Task } from '@/types'
+import {
+  VR_BUCKET_SIZE, VR_JACKPOT_THRESHOLD, VR_BONUS_THRESHOLD,
+  VR_MULTIPLIER_JACKPOT, VR_MULTIPLIER_BONUS,
+} from '@/shared/lib/constants'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -37,10 +41,13 @@ function makeTask(overrides: Partial<Task> = {}): Task {
 
 function resetStore() {
   useStore.setState({
-    nowPool:     [],
-    nextPool:    [],
-    somedayPool: [],
-    xpTotal:     0,
+    nowPool:        [],
+    nextPool:       [],
+    somedayPool:    [],
+    xpTotal:        0,
+    // completedTotal=75 puts bucket at 75 % 100 = 75 (≥ VR_BONUS_THRESHOLD=25) → base multiplier 1×
+    // This keeps existing flat-addition tests deterministic while VR tests use explicit buckets.
+    completedTotal: 75,
     subscriptionTier: 'free',
     trialEndsAt: null,
     activeSession: null,
@@ -230,13 +237,14 @@ describe('Store — archiveAllOverdue (guilt-free recovery)', () => {
 
 describe('Store — addXP', () => {
   beforeEach(resetStore)
+  // Note: resetStore sets completedTotal=75, so bucket=75%100=75 → base multiplier 1× in all tests below.
 
-  it('increments xpTotal', () => {
+  it('increments xpTotal (base multiplier)', () => {
     useStore.getState().addXP(10)
     expect(useStore.getState().xpTotal).toBe(10)
   })
 
-  it('accumulates multiple gains', () => {
+  it('accumulates multiple gains (base multiplier)', () => {
     useStore.getState().addXP(10)
     useStore.getState().addXP(15)
     useStore.getState().addXP(5)
@@ -251,6 +259,42 @@ describe('Store — addXP', () => {
     expect(xpLow).toBeGreaterThan(xpHigh)
     expect(xpLow).toBe(24)   // rewards effort when energy is low
     expect(xpHigh).toBe(16)
+  })
+
+  // ── Research #5: Variable Ratio XP schedule ─────────────────────────────────
+
+  it('VR: bucket < VR_JACKPOT_THRESHOLD → jackpot multiplier (2×)', () => {
+    // Set completedTotal so bucket = VR_JACKPOT_THRESHOLD - 1 (last slot of jackpot range)
+    useStore.setState({ completedTotal: VR_JACKPOT_THRESHOLD - 1, xpTotal: 0 })
+    useStore.getState().addXP(10)
+    expect(useStore.getState().xpTotal).toBe(Math.round(10 * VR_MULTIPLIER_JACKPOT))
+  })
+
+  it('VR: bucket in [VR_JACKPOT_THRESHOLD, VR_BONUS_THRESHOLD) → bonus multiplier (1.5×)', () => {
+    // Set completedTotal so bucket = VR_JACKPOT_THRESHOLD (first slot of bonus range)
+    useStore.setState({ completedTotal: VR_JACKPOT_THRESHOLD + VR_BUCKET_SIZE, xpTotal: 0 })
+    useStore.getState().addXP(10)
+    expect(useStore.getState().xpTotal).toBe(Math.round(10 * VR_MULTIPLIER_BONUS))
+  })
+
+  it('VR: bucket >= VR_BONUS_THRESHOLD → base multiplier (1×)', () => {
+    // Set completedTotal so bucket = VR_BONUS_THRESHOLD (base range)
+    useStore.setState({ completedTotal: VR_BONUS_THRESHOLD + VR_BUCKET_SIZE, xpTotal: 0 })
+    useStore.getState().addXP(10)
+    expect(useStore.getState().xpTotal).toBe(10)
+  })
+
+  it('VR: full 100-slot cycle has correct distribution (8 jackpot, 17 bonus, 75 base)', () => {
+    let jackpot = 0, bonus = 0, base = 0
+    for (let i = 0; i < VR_BUCKET_SIZE; i++) {
+      const bucket = i % VR_BUCKET_SIZE
+      if (bucket < VR_JACKPOT_THRESHOLD) jackpot++
+      else if (bucket < VR_BONUS_THRESHOLD) bonus++
+      else base++
+    }
+    expect(jackpot).toBe(8)
+    expect(bonus).toBe(17)
+    expect(base).toBe(75)
   })
 })
 
