@@ -22,6 +22,10 @@ export interface Task {
   snoozeCount: number
   parentTaskId: string | null
   position: number
+  dueDate: string | null          // ISO date string: "2026-03-15"
+  dueTime: string | null          // "HH:MM" or null
+  taskType: 'task' | 'idea' | 'reminder'
+  reminderSentAt: string | null   // when reminder notification was sent
 }
 
 export interface ActiveSession {

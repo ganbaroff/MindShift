@@ -151,6 +151,10 @@ export default function FocusScreen() {
       snoozeCount: 0,
       parentTaskId: null,
       position: 0,
+      dueDate: null,
+      dueTime: null,
+      taskType: 'task',
+      reminderSentAt: null,
     }
     addTask(task)
     if (userId) {

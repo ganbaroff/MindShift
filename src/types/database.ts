@@ -103,6 +103,10 @@ export interface TaskRow {
   snooze_count: number
   parent_task_id: string | null
   position: number
+  due_date: string | null
+  due_time: string | null
+  task_type: string | null
+  reminder_sent_at: string | null
 }
 export type TaskInsert = Omit<TaskRow, 'id' | 'created_at' | 'completed_at' | 'snooze_count'>
 

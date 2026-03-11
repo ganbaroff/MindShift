@@ -54,6 +54,8 @@ interface TaskSlice {
   removeTask: (taskId: string) => void
   setTasks: (tasks: Task[]) => void
   archiveAllOverdue: () => string[]     // returns archived ids
+  setTaskDueDate: (id: string, dueDate: string | null, dueTime: string | null) => void
+  setTaskType: (id: string, type: 'task' | 'idea' | 'reminder') => void
 }
 
 interface SessionSlice {
@@ -253,6 +255,26 @@ export const useStore = create<AppStore>()(
           return ids
         },
 
+        setTaskDueDate: (id, dueDate, dueTime) => set((s) => {
+          const update = (tasks: Task[]) =>
+            tasks.map(t => t.id === id ? { ...t, dueDate, dueTime } : t)
+          return {
+            nowPool: update(s.nowPool),
+            nextPool: update(s.nextPool),
+            somedayPool: update(s.somedayPool),
+          }
+        }),
+
+        setTaskType: (id, type) => set((s) => {
+          const update = (tasks: Task[]) =>
+            tasks.map(t => t.id === id ? { ...t, taskType: type } : t)
+          return {
+            nowPool: update(s.nowPool),
+            nextPool: update(s.nextPool),
+            somedayPool: update(s.somedayPool),
+          }
+        }),
+
         // ── Session ─────────────────────────────────────────────────────────
         activeSession: null,
         sessionPhase: 'idle',
@@ -381,6 +403,10 @@ export const useStore = create<AppStore>()(
           gridWidgets: s.gridWidgets,
           psychotype: s.psychotype,
           completedTotal: s.completedTotal,
+          // Persist task pools so tasks survive page reload in guest mode
+          nowPool: s.nowPool,
+          nextPool: s.nextPool,
+          somedayPool: s.somedayPool,
         }),
       }
     )

@@ -35,6 +35,10 @@ function makeTask(overrides: Partial<Task> = {}): Task {
     snoozeCount: 0,
     parentTaskId: null,
     position: 0,
+    dueDate: null,
+    dueTime: null,
+    taskType: 'task',
+    reminderSentAt: null,
     ...overrides,
   }
 }

@@ -1,15 +1,89 @@
 import { useState, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useMotion } from '@/shared/hooks/useMotion'
-import { X, Mic, MicOff } from 'lucide-react'
+import { X, Mic, MicOff, Calendar, Clock } from 'lucide-react'
 import { toast } from 'sonner'
 import { useStore } from '@/store'
 import { supabase } from '@/shared/lib/supabase'
 import { notifyAchievement } from '@/shared/lib/notify'
 import { enqueue } from '@/shared/lib/offlineQueue'
+import { hapticDone } from '@/shared/lib/haptic'
 import { ACHIEVEMENT_DEFINITIONS } from '@/types'
 import type { Task } from '@/types'
 import { NOW_POOL_MAX } from '@/shared/lib/constants'
+
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+interface ClassifyResult {
+  type: 'task' | 'idea' | 'reminder'
+  title: string
+  pool: 'now' | 'next' | 'someday'
+  difficulty: 1 | 2 | 3
+  estimatedMinutes: number
+  dueDate: string | null
+  dueTime: string | null
+  reminderMinutesBefore: number | null
+  notes: string | null
+}
+
+// ── ICS export helpers ────────────────────────────────────────────────────────
+
+function formatForICS(date: string, time: string | null, offsetMinutes = 0): string {
+  const base = time ? `${date}T${time}:00` : `${date}T09:00:00`
+  const d = new Date(base)
+  d.setMinutes(d.getMinutes() + offsetMinutes)
+  return d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z')
+}
+
+function generateICS(task: Task): string {
+  const start = formatForICS(task.dueDate!, task.dueTime)
+  const end   = formatForICS(task.dueDate!, task.dueTime, task.estimatedMinutes)
+  const diff  = task.difficulty === 1 ? 'Easy' : task.difficulty === 2 ? 'Medium' : 'Hard'
+  return [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//MindShift//ADHD Planner//EN',
+    'BEGIN:VEVENT',
+    `UID:${task.id}@mindshift`,
+    `DTSTART:${start}`,
+    `DTEND:${end}`,
+    `SUMMARY:${task.title}`,
+    `DESCRIPTION:MindShift task - ${diff}`,
+    'STATUS:NEEDS-ACTION',
+    'END:VEVENT',
+    'END:VCALENDAR',
+  ].join('\r\n')
+}
+
+export function downloadICS(task: Task): void {
+  const ics = generateICS(task)
+  const blob = new Blob([ics], { type: 'text/calendar' })
+  const url  = URL.createObjectURL(blob)
+  const a    = document.createElement('a')
+  a.href     = url
+  a.download = `${task.title.slice(0, 30).replace(/[^a-z0-9]/gi, '-')}.ics`
+  a.click()
+  URL.revokeObjectURL(url)
+  toast.success('📅 Opening in your calendar app...')
+}
+
+// ── Due-date badge helper (used also in CalendarScreen) ───────────────────────
+
+export function getDueDateLabel(dueDate: string, dueTime: string | null): {
+  label: string; color: string
+} {
+  const today     = new Date(); today.setHours(0,0,0,0)
+  const tomorrow  = new Date(today); tomorrow.setDate(today.getDate() + 1)
+  const due       = new Date(dueDate); due.setHours(0,0,0,0)
+  const timeStr   = dueTime ? ` ${dueTime}` : ''
+
+  if (due < today)     return { label: `${dueDate.slice(5).replace('-', '/')}${timeStr}`, color: '#F59E0B' }
+  if (due.getTime() === today.getTime())    return { label: `Today${timeStr}`,    color: '#7B72FF' }
+  if (due.getTime() === tomorrow.getTime()) return { label: `Tomorrow${timeStr}`, color: '#4ECDC4' }
+  const mon = due.toLocaleString('en', { month: 'short' })
+  const day = due.getDate()
+  return { label: `${mon} ${day}${timeStr}`, color: '#8B8BA7' }
+}
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
@@ -24,13 +98,22 @@ export function AddTaskModal({ open, onClose }: Props) {
   const { addTask, nowPool, nextPool, userId, hasAchievement, unlockAchievement } = useStore()
   const { shouldAnimate } = useMotion()
 
-  const [title, setTitle] = useState('')
-  const [difficulty, setDifficulty] = useState<1 | 2 | 3>(2)
-  const [minutes, setMinutes] = useState(25)
+  const [title, setTitle]             = useState('')
+  const [difficulty, setDifficulty]   = useState<1 | 2 | 3>(2)
+  const [minutes, setMinutes]         = useState(25)
   const [customMinutes, setCustomMinutes] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [aiSteps, setAiSteps] = useState<string[] | null>(null)
-  const [loadingAi, setLoadingAi] = useState(false)
+  const [isSubmitting, setIsSubmitting]   = useState(false)
+  const [aiSteps, setAiSteps]         = useState<string[] | null>(null)
+  const [loadingAi, setLoadingAi]     = useState(false)
+
+  // Due date
+  const [dueDate, setDueDate]         = useState('')
+  const [dueTime, setDueTime]         = useState('')
+  const [showDatePicker, setShowDatePicker] = useState(false)
+
+  // Voice AI classify
+  const [voiceResult, setVoiceResult] = useState<ClassifyResult | null>(null)
+  const [classifying, setClassifying] = useState(false)
 
   // ── Voice input (Web Speech API) ──────────────────────────────────────────
   const [isListening, setIsListening] = useState(false)
@@ -38,6 +121,58 @@ export function AddTaskModal({ open, onClose }: Props) {
     typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)
   )
   const recognitionRef = useRef<ReturnType<typeof createRecognition> | null>(null)
+
+  const classifyVoice = useCallback(async (text: string) => {
+    setClassifying(true)
+    setVoiceResult(null)
+    try {
+      const { data, error } = await supabase.functions.invoke('classify-voice-input', {
+        body: { text, language: navigator.language || 'en' },
+      })
+      if (error) throw error
+      const result = data as ClassifyResult
+
+      // For ideas: auto-save immediately, show toast, close
+      if (result.type === 'idea') {
+        const ideaTask: Task = {
+          id: crypto.randomUUID(),
+          title: result.title,
+          pool: 'someday',
+          status: 'active',
+          difficulty: 1,
+          estimatedMinutes: result.estimatedMinutes,
+          createdAt: new Date().toISOString(),
+          completedAt: null,
+          snoozeCount: 0,
+          parentTaskId: null,
+          position: 0,
+          dueDate: null,
+          dueTime: null,
+          taskType: 'idea',
+          reminderSentAt: null,
+        }
+        addTask(ideaTask)
+        hapticDone()
+        toast.success('💡 Idea saved to Someday!')
+        resetAndClose()
+        return
+      }
+
+      setVoiceResult(result)
+      // Pre-fill form fields from AI result
+      setTitle(result.title)
+      setDifficulty(result.difficulty)
+      setMinutes(result.estimatedMinutes)
+      if (result.dueDate) { setDueDate(result.dueDate); setShowDatePicker(true) }
+      if (result.dueTime) setDueTime(result.dueTime)
+    } catch {
+      // Fallback: just populate title
+      setTitle(text)
+      toast.error("AI couldn't classify this — you can edit it manually.")
+    } finally {
+      setClassifying(false)
+    }
+  }, [addTask]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleVoiceToggle = useCallback(() => {
     if (!voiceSupported) return
@@ -60,28 +195,22 @@ export function AddTaskModal({ open, onClose }: Props) {
         .join(' ')
         .trim()
       if (transcript) {
-        setTitle(prev => prev ? `${prev} ${transcript}` : transcript)
-        setAiSteps(null)
         // Achievement
         if (!hasAchievement('voice_input')) {
           unlockAchievement('voice_input')
           const def = ACHIEVEMENT_DEFINITIONS.find(a => a.key === 'voice_input')
           if (def) notifyAchievement(def.name, def.emoji, def.description)
         }
+        // Classify via AI
+        void classifyVoice(transcript)
       }
     }
 
-    recognition.onerror = () => {
-      setIsListening(false)
-    }
-
-    recognition.onend = () => {
-      setIsListening(false)
-    }
-
+    recognition.onerror = () => { setIsListening(false) }
+    recognition.onend   = () => { setIsListening(false) }
     recognition.start()
     setIsListening(true)
-  }, [isListening, voiceSupported, hasAchievement, unlockAchievement])
+  }, [isListening, voiceSupported, hasAchievement, unlockAchievement, classifyVoice])
 
   const nowFull = nowPool.filter(t => t.status === 'active').length >= NOW_POOL_MAX
 
@@ -111,40 +240,130 @@ export function AddTaskModal({ open, onClose }: Props) {
     }
   }
 
+  // Block 6 fix: create parent task first, then subtasks with parentTaskId
   const handleAddSteps = async () => {
     if (!aiSteps || isSubmitting) return
     setIsSubmitting(true)
     const pool = nowFull ? 'next' : 'now'
+
+    // 1. Create the parent task (the original title)
+    const parentTask: Task = {
+      id: crypto.randomUUID(),
+      title: title.trim(),
+      pool,
+      status: 'active',
+      difficulty,
+      estimatedMinutes: minutes,
+      createdAt: new Date().toISOString(),
+      completedAt: null,
+      snoozeCount: 0,
+      parentTaskId: null,
+      position: pool === 'now' ? nowPool.length : nextPool.length,
+      dueDate: dueDate || null,
+      dueTime: dueTime || null,
+      taskType: 'task',
+      reminderSentAt: null,
+    }
+    addTask(parentTask)
+    if (userId) {
+      try {
+        await supabase.from('tasks').insert({
+          id: parentTask.id, user_id: userId, title: parentTask.title,
+          pool: parentTask.pool, status: parentTask.status, difficulty: parentTask.difficulty,
+          estimated_minutes: parentTask.estimatedMinutes, parent_task_id: null,
+          position: parentTask.position,
+          due_date: parentTask.dueDate, due_time: parentTask.dueTime,
+          task_type: parentTask.taskType,
+        } as never)
+      } catch {
+        enqueue('tasks', { id: parentTask.id, user_id: userId, title: parentTask.title,
+          pool: parentTask.pool, status: parentTask.status, difficulty: parentTask.difficulty,
+          estimated_minutes: parentTask.estimatedMinutes, parent_task_id: null,
+          position: parentTask.position } as Record<string, unknown>, userId)
+      }
+    }
+
+    // 2. Create subtasks with parentTaskId = parent.id
     for (let i = 0; i < aiSteps.length; i++) {
       const step = aiSteps[i]
       const stepTask: Task = {
         id: crypto.randomUUID(),
         title: step,
-        pool: i === 0 ? pool : 'next',   // first step → now/next; rest → next
+        pool: 'next',   // subtasks go to NEXT (parent is in NOW/NEXT)
         status: 'active',
         difficulty,
         estimatedMinutes: Math.max(5, Math.round(minutes / aiSteps.length)),
         createdAt: new Date().toISOString(),
         completedAt: null,
         snoozeCount: 0,
-        parentTaskId: null,
+        parentTaskId: parentTask.id,  // ✅ Block 6 fix
         position: i,
+        dueDate: null,
+        dueTime: null,
+        taskType: 'task',
+        reminderSentAt: null,
       }
       addTask(stepTask)
       if (userId) {
         const taskRow = {
           id: stepTask.id, user_id: userId, title: stepTask.title,
           pool: stepTask.pool, status: stepTask.status, difficulty: stepTask.difficulty,
-          estimated_minutes: stepTask.estimatedMinutes, parent_task_id: null, position: stepTask.position,
+          estimated_minutes: stepTask.estimatedMinutes,
+          parent_task_id: parentTask.id,  // ✅ Block 6 fix
+          position: stepTask.position,
         }
         try {
           await supabase.from('tasks').insert(taskRow as never)
         } catch {
-          // Queue for offline retry
           enqueue('tasks', taskRow as Record<string, unknown>, userId)
         }
       }
     }
+    resetAndClose()
+  }
+
+  // ── Save voice AI result directly ─────────────────────────────────────────
+  const handleSaveVoiceResult = async () => {
+    if (!voiceResult || isSubmitting) return
+    setIsSubmitting(true)
+    const pool = voiceResult.pool === 'now' && nowFull ? 'next' : voiceResult.pool
+
+    const newTask: Task = {
+      id: crypto.randomUUID(),
+      title: voiceResult.title,
+      pool,
+      status: 'active',
+      difficulty: voiceResult.difficulty,
+      estimatedMinutes: voiceResult.estimatedMinutes,
+      createdAt: new Date().toISOString(),
+      completedAt: null,
+      snoozeCount: 0,
+      parentTaskId: null,
+      position: pool === 'now' ? nowPool.length : nextPool.length,
+      dueDate: voiceResult.dueDate,
+      dueTime: voiceResult.dueTime,
+      taskType: voiceResult.type,
+      reminderSentAt: null,
+    }
+
+    addTask(newTask)
+    if (userId) {
+      const taskRow = {
+        id: newTask.id, user_id: userId, title: newTask.title, pool: newTask.pool,
+        status: newTask.status, difficulty: newTask.difficulty,
+        estimated_minutes: newTask.estimatedMinutes, parent_task_id: null,
+        position: newTask.position, due_date: newTask.dueDate, due_time: newTask.dueTime,
+        task_type: newTask.taskType,
+      }
+      try {
+        await supabase.from('tasks').insert(taskRow as never)
+      } catch {
+        enqueue('tasks', taskRow as Record<string, unknown>, userId)
+      }
+    }
+
+    hapticDone()
+    toast.success(`✓ ${voiceResult.type === 'reminder' ? '⏰ Reminder' : '✓ Task'} added!`)
     resetAndClose()
   }
 
@@ -167,27 +386,25 @@ export function AddTaskModal({ open, onClose }: Props) {
       snoozeCount: 0,
       parentTaskId: null,
       position: pool === 'now' ? nowPool.length : nextPool.length,
+      dueDate: dueDate || null,
+      dueTime: dueTime || null,
+      taskType: 'task',
+      reminderSentAt: null,
     }
 
     addTask(newTask)
 
-    // Persist to Supabase (with offline retry)
     if (userId) {
       const taskRow = {
-        id: newTask.id,
-        user_id: userId,
-        title: newTask.title,
-        pool: newTask.pool,
-        status: newTask.status,
-        difficulty: newTask.difficulty,
-        estimated_minutes: newTask.estimatedMinutes,
-        parent_task_id: null,
-        position: newTask.position,
+        id: newTask.id, user_id: userId, title: newTask.title, pool: newTask.pool,
+        status: newTask.status, difficulty: newTask.difficulty,
+        estimated_minutes: newTask.estimatedMinutes, parent_task_id: null,
+        position: newTask.position, due_date: newTask.dueDate, due_time: newTask.dueTime,
+        task_type: newTask.taskType,
       }
       try {
         await supabase.from('tasks').insert(taskRow as never)
       } catch {
-        // Local store already updated — queue for offline retry
         enqueue('tasks', taskRow as Record<string, unknown>, userId)
       }
     }
@@ -196,7 +413,6 @@ export function AddTaskModal({ open, onClose }: Props) {
   }
 
   const resetAndClose = () => {
-    // Stop voice if active
     if (recognitionRef.current) {
       recognitionRef.current.stop()
       setIsListening(false)
@@ -208,6 +424,11 @@ export function AddTaskModal({ open, onClose }: Props) {
     setIsSubmitting(false)
     setAiSteps(null)
     setLoadingAi(false)
+    setDueDate('')
+    setDueTime('')
+    setShowDatePicker(false)
+    setVoiceResult(null)
+    setClassifying(false)
     onClose()
   }
 
@@ -245,7 +466,7 @@ export function AddTaskModal({ open, onClose }: Props) {
               maxHeight: '90svh',
             }}
           >
-            {/* ── Handle + header (never scrolls away) ── */}
+            {/* ── Handle + header ── */}
             <div className="shrink-0 flex items-center justify-between px-5 pt-5 pb-3">
               <div
                 className="absolute top-3 left-1/2 -translate-x-1/2 w-10 h-1 rounded-full"
@@ -256,7 +477,7 @@ export function AddTaskModal({ open, onClose }: Props) {
               </h2>
               <button
                 onClick={handleClose}
-                className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl transition-colors duration-200"
+                className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl"
                 style={{ color: '#8B8BA7' }}
                 aria-label="Close"
               >
@@ -267,71 +488,156 @@ export function AddTaskModal({ open, onClose }: Props) {
             {/* ── Scrollable body ── */}
             <div className="flex-1 overflow-y-auto px-5 flex flex-col gap-4 pb-2">
 
-              {/* Title input + Voice */}
-              <div className="flex flex-col gap-2">
-                <div className="flex gap-2">
-                  <input
-                    value={title}
-                    onChange={(e) => { setTitle(e.target.value); setAiSteps(null) }}
-                    onKeyDown={(e) => { if (e.key === 'Enter') void handleSubmit() }}
-                    placeholder={isListening ? 'Listening...' : 'What needs to be done?'}
-                    autoFocus
-                    className="flex-1 rounded-2xl px-4 py-3 text-base outline-none"
-                    style={{
-                      background: '#252840',
-                      border: `1.5px solid ${isListening ? '#4ECDC4' : 'rgba(255,255,255,0.06)'}`,
-                      color: '#E8E8F0',
-                      caretColor: '#7B72FF',
-                    }}
-                    onFocus={(e) => { if (!isListening) e.currentTarget.style.borderColor = '#7B72FF' }}
-                    onBlur={(e) => { if (!isListening) e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)' }}
-                  />
-                  {/* Voice input button */}
-                  {voiceSupported && (
+              {/* AI classifying spinner */}
+              {classifying && (
+                <div className="flex items-center gap-3 px-4 py-3 rounded-2xl"
+                  style={{ background: '#252840', border: '1px solid rgba(123,114,255,0.3)' }}>
+                  <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin shrink-0"
+                    style={{ color: '#7B72FF' }} />
+                  <span className="text-sm" style={{ color: '#7B72FF' }}>AI is thinking… 🧠</span>
+                </div>
+              )}
+
+              {/* Voice AI result card */}
+              {voiceResult && !classifying && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex flex-col gap-3 p-4 rounded-2xl"
+                  style={{ background: '#252840', border: '1px solid rgba(78,205,196,0.4)' }}
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-base">
+                      {voiceResult.type === 'task' ? '✅' : voiceResult.type === 'reminder' ? '⏰' : '💡'}
+                    </span>
+                    <span className="text-sm font-semibold" style={{ color: '#4ECDC4' }}>
+                      {voiceResult.type === 'task' ? 'Task captured'
+                        : voiceResult.type === 'reminder' ? 'Reminder captured'
+                        : 'Idea captured'}
+                    </span>
+                  </div>
+
+                  <p className="text-base font-medium leading-snug" style={{ color: '#E8E8F0' }}>
+                    "{voiceResult.title}"
+                  </p>
+
+                  <div className="flex flex-wrap gap-2">
+                    <span className="text-xs px-2 py-1 rounded-lg" style={{ background: 'rgba(123,114,255,0.15)', color: '#7B72FF' }}>
+                      {voiceResult.pool.toUpperCase()} pool
+                    </span>
+                    <span className="text-xs px-2 py-1 rounded-lg" style={{ background: 'rgba(123,114,255,0.15)', color: '#7B72FF' }}>
+                      ~{voiceResult.estimatedMinutes}m
+                    </span>
+                    {voiceResult.dueDate && (
+                      <span className="text-xs px-2 py-1 rounded-lg" style={{ background: 'rgba(245,158,11,0.15)', color: '#F59E0B' }}>
+                        📅 {voiceResult.dueDate}{voiceResult.dueTime ? ` at ${voiceResult.dueTime}` : ''}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex gap-2 mt-1">
                     <button
-                      onClick={handleVoiceToggle}
-                      className="w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-200 shrink-0"
-                      style={{
-                        background: isListening ? 'rgba(78,205,196,0.2)' : '#252840',
-                        border: `1.5px solid ${isListening ? '#4ECDC4' : 'rgba(255,255,255,0.06)'}`,
-                      }}
-                      aria-label={isListening ? 'Stop recording' : 'Speak your task'}
+                      onClick={() => setVoiceResult(null)}
+                      className="flex-1 py-2.5 rounded-xl text-sm font-medium min-h-[44px]"
+                      style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.08)', color: '#8B8BA7' }}
                     >
-                      {isListening ? (
-                        <MicOff size={18} color="#4ECDC4" />
-                      ) : (
-                        <Mic size={18} color="#8B8BA7" />
-                      )}
+                      Edit
+                    </button>
+                    {voiceResult.dueDate && (
+                      <button
+                        onClick={() => {
+                          // Create temp task for ICS
+                          const t: Task = {
+                            id: crypto.randomUUID(), title: voiceResult.title,
+                            pool: voiceResult.pool, status: 'active',
+                            difficulty: voiceResult.difficulty, estimatedMinutes: voiceResult.estimatedMinutes,
+                            createdAt: new Date().toISOString(), completedAt: null,
+                            snoozeCount: 0, parentTaskId: null, position: 0,
+                            dueDate: voiceResult.dueDate, dueTime: voiceResult.dueTime,
+                            taskType: voiceResult.type, reminderSentAt: null,
+                          }
+                          downloadICS(t)
+                        }}
+                        className="px-3 py-2.5 rounded-xl text-sm font-medium min-h-[44px]"
+                        style={{ background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.3)', color: '#F59E0B' }}
+                      >
+                        📅
+                      </button>
+                    )}
+                    <button
+                      onClick={() => void handleSaveVoiceResult()}
+                      disabled={isSubmitting}
+                      className="flex-1 py-2.5 rounded-xl text-sm font-semibold min-h-[44px]"
+                      style={{ background: '#7B72FF', color: 'white' }}
+                    >
+                      {isSubmitting ? 'Saving…' : 'Save ✓'}
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Title input + Voice — hide when classifying or showing voice result */}
+              {!classifying && !voiceResult && (
+                <div className="flex flex-col gap-2">
+                  <div className="flex gap-2">
+                    <input
+                      value={title}
+                      onChange={(e) => { setTitle(e.target.value); setAiSteps(null) }}
+                      onKeyDown={(e) => { if (e.key === 'Enter') void handleSubmit() }}
+                      placeholder={isListening ? 'Listening...' : 'What needs to be done?'}
+                      autoFocus
+                      className="flex-1 rounded-2xl px-4 py-3 text-base outline-none"
+                      style={{
+                        background: '#252840',
+                        border: `1.5px solid ${isListening ? '#4ECDC4' : 'rgba(255,255,255,0.06)'}`,
+                        color: '#E8E8F0',
+                        caretColor: '#7B72FF',
+                      }}
+                      onFocus={(e) => { if (!isListening) e.currentTarget.style.borderColor = '#7B72FF' }}
+                      onBlur={(e)  => { if (!isListening) e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)' }}
+                    />
+                    {voiceSupported && (
+                      <button
+                        onClick={handleVoiceToggle}
+                        className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0"
+                        style={{
+                          background: isListening ? 'rgba(78,205,196,0.2)' : '#252840',
+                          border: `1.5px solid ${isListening ? '#4ECDC4' : 'rgba(255,255,255,0.06)'}`,
+                        }}
+                        aria-label={isListening ? 'Stop recording' : 'Speak your task'}
+                      >
+                        {isListening ? <MicOff size={18} color="#4ECDC4" /> : <Mic size={18} color="#8B8BA7" />}
+                      </button>
+                    )}
+                  </div>
+                  {isListening && (
+                    <p className="text-xs animate-pulse" style={{ color: '#4ECDC4' }}>
+                      🎙 Listening… tap mic to stop
+                    </p>
+                  )}
+
+                  {/* AI Decompose button */}
+                  {title.trim().length > 3 && !aiSteps && (
+                    <button
+                      onClick={() => void handleDecompose()}
+                      disabled={loadingAi}
+                      className="self-start flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-medium"
+                      style={{
+                        background: 'rgba(123,114,255,0.12)',
+                        border: '1px solid rgba(123,114,255,0.4)',
+                        color: '#7B72FF',
+                      }}
+                    >
+                      {loadingAi ? (
+                        <>
+                          <span className="w-3 h-3 border border-current border-t-transparent rounded-full animate-spin" />
+                          Breaking down...
+                        </>
+                      ) : '✨ Break it down for me'}
                     </button>
                   )}
                 </div>
-                {isListening && (
-                  <p className="text-xs animate-pulse" style={{ color: '#4ECDC4' }}>
-                    🎙 Listening… tap mic to stop
-                  </p>
-                )}
-
-                {/* AI Decompose button */}
-                {title.trim().length > 3 && !aiSteps && (
-                  <button
-                    onClick={() => void handleDecompose()}
-                    disabled={loadingAi}
-                    className="self-start flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-medium transition-all duration-200"
-                    style={{
-                      background: 'rgba(123,114,255,0.12)',
-                      border: '1px solid rgba(123,114,255,0.4)',
-                      color: '#7B72FF',
-                    }}
-                  >
-                    {loadingAi ? (
-                      <>
-                        <span className="w-3 h-3 border border-current border-t-transparent rounded-full animate-spin" />
-                        Breaking down...
-                      </>
-                    ) : '✨ Break it down for me'}
-                  </button>
-                )}
-              </div>
+              )}
 
               {/* AI Steps */}
               {aiSteps && (
@@ -339,23 +645,17 @@ export function AddTaskModal({ open, onClose }: Props) {
                   className="flex flex-col gap-2 p-3 rounded-2xl"
                   style={{ background: '#252840', border: '1px solid rgba(123,114,255,0.3)' }}
                 >
-                  <p className="text-xs font-medium" style={{ color: '#7B72FF' }}>
-                    ✨ Here's a plan:
-                  </p>
+                  <p className="text-xs font-medium" style={{ color: '#7B72FF' }}>✨ Here's a plan:</p>
                   {aiSteps.map((step, i) => (
                     <div key={i} className="flex items-start gap-2">
-                      <span className="text-xs mt-0.5 shrink-0" style={{ color: '#7B72FF' }}>
-                        {i + 1}.
-                      </span>
-                      <span className="text-sm leading-snug" style={{ color: '#E8E8F0' }}>
-                        {step}
-                      </span>
+                      <span className="text-xs mt-0.5 shrink-0" style={{ color: '#7B72FF' }}>{i + 1}.</span>
+                      <span className="text-sm leading-snug" style={{ color: '#E8E8F0' }}>{step}</span>
                     </div>
                   ))}
                   <button
                     onClick={() => void handleAddSteps()}
                     disabled={isSubmitting}
-                    className="mt-1 w-full py-2.5 rounded-xl text-sm font-semibold transition-all duration-200"
+                    className="mt-1 w-full py-2.5 rounded-xl text-sm font-semibold"
                     style={{ background: '#7B72FF', color: 'white' }}
                   >
                     {isSubmitting ? 'Adding...' : `Add ${aiSteps.length} steps to my list →`}
@@ -363,7 +663,75 @@ export function AddTaskModal({ open, onClose }: Props) {
                 </div>
               )}
 
-              {/* Difficulty */}
+              {/* ── 📅 Due date picker ───────────────────────────────────────── */}
+              <div className="flex flex-col gap-2">
+                <button
+                  onClick={() => setShowDatePicker(v => !v)}
+                  className="flex items-center gap-2 self-start px-3 py-2 rounded-xl text-sm font-medium min-h-[44px]"
+                  style={{
+                    background: showDatePicker ? 'rgba(123,114,255,0.15)' : '#252840',
+                    border: `1.5px solid ${showDatePicker ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
+                    color: showDatePicker ? '#7B72FF' : '#8B8BA7',
+                  }}
+                >
+                  <Calendar size={14} />
+                  {dueDate ? (
+                    <span>{getDueDateLabel(dueDate, dueTime || null).label}</span>
+                  ) : '📅 Set due date'}
+                </button>
+
+                {showDatePicker && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex gap-2"
+                  >
+                    <div className="flex-1 flex flex-col gap-1">
+                      <label className="text-xs" style={{ color: '#8B8BA7' }}>Date</label>
+                      <input
+                        type="date"
+                        value={dueDate}
+                        onChange={(e) => setDueDate(e.target.value)}
+                        className="rounded-xl px-3 py-2.5 text-sm outline-none"
+                        style={{
+                          background: '#252840',
+                          border: '1.5px solid rgba(255,255,255,0.06)',
+                          color: '#E8E8F0',
+                          colorScheme: 'dark',
+                        }}
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-xs" style={{ color: '#8B8BA7' }}>
+                        <Clock size={10} style={{ display: 'inline', marginRight: 2 }} />Time
+                      </label>
+                      <input
+                        type="time"
+                        value={dueTime}
+                        onChange={(e) => setDueTime(e.target.value)}
+                        className="rounded-xl px-3 py-2.5 text-sm outline-none w-28"
+                        style={{
+                          background: '#252840',
+                          border: '1.5px solid rgba(255,255,255,0.06)',
+                          color: '#E8E8F0',
+                          colorScheme: 'dark',
+                        }}
+                      />
+                    </div>
+                    {dueDate && (
+                      <button
+                        onClick={() => { setDueDate(''); setDueTime(''); setShowDatePicker(false) }}
+                        className="self-end px-2 py-2.5 rounded-xl text-xs min-h-[44px]"
+                        style={{ color: '#8B8BA7', background: '#1E2136' }}
+                      >
+                        Clear
+                      </button>
+                    )}
+                  </motion.div>
+                )}
+              </div>
+
+              {/* ── Difficulty ─────────────────────────────────────────────── */}
               <div role="group" aria-labelledby="difficulty-label" className="flex flex-col gap-2">
                 <span id="difficulty-label" className="text-xs font-medium tracking-wide uppercase" style={{ color: '#8B8BA7' }}>
                   Difficulty
@@ -374,7 +742,7 @@ export function AddTaskModal({ open, onClose }: Props) {
                       key={d}
                       onClick={() => setDifficulty(d)}
                       aria-pressed={difficulty === d}
-                      className="flex-1 py-2.5 rounded-xl text-sm font-medium transition-all duration-200"
+                      className="flex-1 py-2.5 rounded-xl text-sm font-medium"
                       style={{
                         background: difficulty === d ? 'rgba(123, 114, 255, 0.18)' : '#252840',
                         border: `1.5px solid ${difficulty === d ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
@@ -387,7 +755,7 @@ export function AddTaskModal({ open, onClose }: Props) {
                 </div>
               </div>
 
-              {/* Duration */}
+              {/* ── Duration ───────────────────────────────────────────────── */}
               <div role="group" aria-labelledby="duration-label" className="flex flex-col gap-2">
                 <span id="duration-label" className="text-xs font-medium tracking-wide uppercase" style={{ color: '#8B8BA7' }}>
                   Estimated time
@@ -398,7 +766,7 @@ export function AddTaskModal({ open, onClose }: Props) {
                       key={d}
                       onClick={() => { setMinutes(d); setCustomMinutes('') }}
                       aria-pressed={minutes === d && !customMinutes}
-                      className="px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200"
+                      className="px-3 py-2.5 rounded-xl text-sm font-medium"
                       style={{
                         background: minutes === d && !customMinutes ? 'rgba(123, 114, 255, 0.18)' : '#252840',
                         border: `1.5px solid ${minutes === d && !customMinutes ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
@@ -430,9 +798,34 @@ export function AddTaskModal({ open, onClose }: Props) {
                 </div>
               </div>
 
+              {/* ── Add to Calendar (shown when dueDate is set) ─────────────── */}
+              {dueDate && (
+                <button
+                  onClick={() => {
+                    const t: Task = {
+                      id: crypto.randomUUID(), title: title.trim() || 'Task',
+                      pool: 'now', status: 'active', difficulty, estimatedMinutes: minutes,
+                      createdAt: new Date().toISOString(), completedAt: null,
+                      snoozeCount: 0, parentTaskId: null, position: 0,
+                      dueDate, dueTime: dueTime || null, taskType: 'task', reminderSentAt: null,
+                    }
+                    downloadICS(t)
+                  }}
+                  className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-medium min-h-[44px]"
+                  style={{
+                    background: 'rgba(245,158,11,0.1)',
+                    border: '1px solid rgba(245,158,11,0.3)',
+                    color: '#F59E0B',
+                  }}
+                >
+                  <Calendar size={14} />
+                  Add to Calendar (.ics)
+                </button>
+              )}
+
             </div>{/* end scrollable body */}
 
-            {/* ── Footer — always visible, never scrolls away ── */}
+            {/* ── Footer ── */}
             <div
               className="shrink-0 px-5 pt-3 pb-[calc(16px+env(safe-area-inset-bottom))]"
               style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
@@ -444,12 +837,12 @@ export function AddTaskModal({ open, onClose }: Props) {
               )}
               <button
                 onClick={() => void handleSubmit()}
-                disabled={!title.trim() || isSubmitting}
-                className="w-full py-4 rounded-2xl font-semibold text-base transition-all duration-200"
+                disabled={!title.trim() || isSubmitting || !!voiceResult || classifying}
+                className="w-full py-4 rounded-2xl font-semibold text-base"
                 style={{
-                  background: title.trim() ? '#7B72FF' : '#252840',
-                  color: title.trim() ? '#FFFFFF' : '#5A5B72',
-                  cursor: title.trim() ? 'pointer' : 'default',
+                  background: title.trim() && !voiceResult && !classifying ? '#7B72FF' : '#252840',
+                  color: title.trim() && !voiceResult && !classifying ? '#FFFFFF' : '#5A5B72',
+                  cursor: title.trim() && !voiceResult && !classifying ? 'pointer' : 'default',
                 }}
               >
                 {isSubmitting ? 'Adding…' : nowFull ? 'Add to Next →' : 'Add to Now →'}
@@ -478,7 +871,6 @@ function createRecognition() {
   const r = new SpeechRecognition()
   r.continuous = false
   r.interimResults = false
-  // Use the browser/OS language so Russian, English etc. all work
   r.lang = navigator.language || 'en-US'
   return r
 }

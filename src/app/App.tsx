@@ -13,6 +13,7 @@ import { CookieBanner } from '@/shared/ui/CookieBanner'
 import { RECOVERY_THRESHOLD_HOURS } from '@/shared/lib/constants'
 import { useOfflineSync } from '@/shared/hooks/useOfflineSync'
 import { logError } from '@/shared/lib/logger'
+import { reminders } from '@/shared/lib/reminders'
 
 // Key that AuthScreen writes before sending the magic link
 const CONSENT_PENDING_KEY = 'ms_consent_pending'
@@ -25,6 +26,7 @@ const FocusScreen      = lazy(() => import('@/features/focus/FocusScreen'))
 const TasksScreen      = lazy(() => import('@/features/tasks/TasksScreen'))
 const AudioScreen      = lazy(() => import('@/features/audio/AudioScreen'))
 const ProgressScreen   = lazy(() => import('@/features/progress/ProgressScreen'))
+const CalendarScreen   = lazy(() => import('@/features/calendar/CalendarScreen'))
 const SettingsScreen   = lazy(() => import('@/features/settings/SettingsScreen'))
 const PrivacyPage      = lazy(() => import('@/features/legal/PrivacyPage'))
 const TermsPage        = lazy(() => import('@/features/legal/TermsPage'))
@@ -108,6 +110,12 @@ export default function App() {
     return () => document.removeEventListener('visibilitychange', onVisibilityChange)
   }, [nowPool, onboardingCompleted])
 
+  // ── Reminders restore on mount ─────────────────────────────────────────────
+  // Re-arms all persisted reminders after page reload (timeouts are session-only).
+  useEffect(() => {
+    reminders.restore()
+  }, [])
+
   // ── Offline queue sync ──────────────────────────────────────────────────────
   useOfflineSync()
 
@@ -169,6 +177,7 @@ export default function App() {
                 <Route path="/focus"    element={<FocusScreen />} />
                 <Route path="/tasks"    element={<TasksScreen />} />
                 <Route path="/audio"    element={<AudioScreen />} />
+                <Route path="/calendar" element={<CalendarScreen />} />
                 <Route path="/progress" element={<ProgressScreen />} />
                 <Route path="/settings" element={<SettingsScreen />} />
               </Route>

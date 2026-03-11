@@ -35,6 +35,38 @@ function getDifficultyAccent(difficulty: number, palette: ReturnType<typeof useP
   return palette.primary   // difficulty 2 — medium, steady
 }
 
+// ── Due date badge helper (Research #8: gold for overdue — NEVER red) ────────
+
+interface DueDateBadge {
+  label: string
+  color: string
+}
+
+function getDueDateBadge(task: Task, palette: ReturnType<typeof usePalette>): DueDateBadge | null {
+  if (!task.dueDate) return null
+  const today    = new Date(); today.setHours(0, 0, 0, 0)
+  const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1)
+  const due      = new Date(task.dueDate + 'T00:00:00')
+
+  if (due < today) {
+    // Overdue — gold (NEVER red, per ADHD UX research #8)
+    const label = due.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    return { label, color: palette.gold }
+  }
+  if (due.getTime() === today.getTime()) {
+    // Today — primary (indigo, engagement-positive)
+    const label = task.dueTime ? `Today ${task.dueTime}` : 'Today'
+    return { label, color: palette.primary }
+  }
+  if (due.getTime() === tomorrow.getTime()) {
+    // Tomorrow — teal (calm, forward-looking)
+    return { label: 'Tomorrow', color: palette.teal }
+  }
+  // Further future — muted (low urgency, informational)
+  const label = due.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  return { label, color: '#8B8BA7' }
+}
+
 // ── Task age helper (non-urgency, non-shaming) ────────────────────────────────
 
 function getTaskAgeBadge(task: Task): string | null {
@@ -63,7 +95,8 @@ export function TaskCard({ task, index = 0, onComplete, onSnooze }: Props) {
 
   // Research #8: palette-aware accent — desaturated in calm mode
   const difficultyAccent = getDifficultyAccent(task.difficulty, palette)
-  const ageBadge = getTaskAgeBadge(task)
+  const ageBadge     = getTaskAgeBadge(task)
+  const dueDateBadge = getDueDateBadge(task, palette)
 
   const handleComplete = () => {
     if (isDone) return
@@ -161,8 +194,21 @@ export function TaskCard({ task, index = 0, onComplete, onSnooze }: Props) {
             ~{task.estimatedMinutes}m
           </span>
 
-          {/* Carry-over badge — warm amber, non-shaming (Research #8: amber not neon yellow) */}
-          {ageBadge && (
+          {/* Due date badge — color-coded by urgency, NEVER red (Research #8) */}
+          {dueDateBadge && (
+            <span
+              className="ml-auto text-xs px-2 py-0.5 rounded-lg font-medium"
+              style={{
+                background: `${dueDateBadge.color}20`,
+                color: dueDateBadge.color,
+              }}
+            >
+              {dueDateBadge.label}
+            </span>
+          )}
+
+          {/* Carry-over badge — shown only when no due date badge (never both at once) */}
+          {!dueDateBadge && ageBadge && (
             <span
               className="ml-auto text-xs px-2 py-0.5 rounded-lg font-medium"
               style={{

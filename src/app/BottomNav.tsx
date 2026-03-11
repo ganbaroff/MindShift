@@ -1,18 +1,18 @@
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Home, Timer, ListTodo, TrendingUp, Settings } from 'lucide-react'
+import { Home, Timer, ListTodo, CalendarDays, Settings } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { usePalette } from '@/shared/hooks/usePalette'
 import { cn } from '@/shared/lib/cn'
 
-// Audio removed from primary nav — accessible within FocusScreen (already implemented).
-// Settings added: users need to find Account, GDPR, Subscription, Reduced Stimulation.
+// Audio removed from primary nav — accessible within FocusScreen.
+// Calendar replaces Progress (Progress accessible from Home widget).
 const NAV_ITEMS = [
-  { path: '/',          icon: Home,       label: 'Home'     },
-  { path: '/tasks',     icon: ListTodo,   label: 'Tasks'    },
-  { path: '/focus',     icon: Timer,      label: 'Focus'    },
-  { path: '/progress',  icon: TrendingUp, label: 'Progress' },
-  { path: '/settings',  icon: Settings,   label: 'Settings' },
+  { path: '/',          icon: Home,         label: 'Home'     },
+  { path: '/tasks',     icon: ListTodo,     label: 'Tasks'    },
+  { path: '/focus',     icon: Timer,        label: 'Focus'    },
+  { path: '/calendar',  icon: CalendarDays, label: 'Calendar' },
+  { path: '/settings',  icon: Settings,     label: 'Settings' },
 ] as const
 
 export function BottomNav() {

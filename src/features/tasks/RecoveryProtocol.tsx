@@ -7,6 +7,7 @@ import Avatar from '@/features/progress/Avatar'
 import type { Task } from '@/types'
 import { RECOVERY_THRESHOLD_HOURS } from '@/shared/lib/constants'
 import { logError } from '@/shared/lib/logger'
+import { pushWelcomeBack } from '@/shared/lib/notify'
 
 // ── Fallback messages (Research #7: identity-reinforcing, shame-free) ────────
 // Rules: no quantifying absence, no streaks, forward-looking, persona-voiced.
@@ -46,8 +47,11 @@ export function RecoveryProtocol({ onDismiss }: Props) {
   )
   const [loadingAi, setLoadingAi] = useState(false)
 
-  // Archive overdue tasks + fetch AI welcome on mount
+  // Archive overdue tasks + fetch AI welcome + fire welcome-back push on mount
   useEffect(() => {
+    // Native push — visible when app was backgrounded (silent, no shame)
+    pushWelcomeBack()
+
     const ids = archiveAllOverdue()
     setArchivedCount(ids.length)
 
@@ -96,6 +100,10 @@ export function RecoveryProtocol({ onDismiss }: Props) {
             snoozeCount: 0,
             parentTaskId: null,
             position: i,
+            dueDate: null,
+            dueTime: null,
+            taskType: 'task',
+            reminderSentAt: null,
           }
           addTask(stepTask)
           if (userId) {
@@ -131,6 +139,10 @@ export function RecoveryProtocol({ onDismiss }: Props) {
       snoozeCount: 0,
       parentTaskId: null,
       position: nowPool.length,
+      dueDate: null,
+      dueTime: null,
+      taskType: 'task',
+      reminderSentAt: null,
     }
 
     addTask(newTask)

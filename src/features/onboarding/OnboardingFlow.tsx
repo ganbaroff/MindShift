@@ -44,6 +44,10 @@ function makeSampleTask(
     snoozeCount: 0,
     parentTaskId: null,
     position: index,
+    dueDate: null,
+    dueTime: null,
+    taskType: 'task',
+    reminderSentAt: null,
   }
 }
 
