@@ -141,7 +141,7 @@ export default function TasksScreen() {
           Your Tasks
         </h1>
         <p className="text-sm mt-1" style={{ color: '#8B8BA7' }}>
-          {activeTasks.length + nextTasks.length + somedayTasks.length} tasks in play
+          {(() => { const n = activeTasks.length + nextTasks.length + somedayTasks.length; return `${n} ${n === 1 ? 'task' : 'tasks'} in play` })()}
         </p>
       </div>
 

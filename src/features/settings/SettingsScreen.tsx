@@ -155,7 +155,7 @@ export default function SettingsScreen() {
     : 0
 
   return (
-    <div className="flex flex-col pb-28">
+    <div className="flex flex-col pb-[calc(112px+env(safe-area-inset-bottom))]">
       {/* Header */}
       <div className="px-5 pt-10 pb-6">
         <h1 className="text-2xl font-bold" style={{ color: '#E8E8F0' }}>
