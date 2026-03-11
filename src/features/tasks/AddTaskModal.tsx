@@ -8,23 +8,10 @@ import { supabase } from '@/shared/lib/supabase'
 import { notifyAchievement } from '@/shared/lib/notify'
 import { enqueue } from '@/shared/lib/offlineQueue'
 import { hapticDone } from '@/shared/lib/haptic'
+import { parseClassifyResult, isLowConfidence, type ClassifyResult } from '@/shared/lib/voiceClassify'
 import { ACHIEVEMENT_DEFINITIONS } from '@/types'
 import type { Task } from '@/types'
 import { NOW_POOL_MAX } from '@/shared/lib/constants'
-
-// ── Types ─────────────────────────────────────────────────────────────────────
-
-interface ClassifyResult {
-  type: 'task' | 'idea' | 'reminder'
-  title: string
-  pool: 'now' | 'next' | 'someday'
-  difficulty: 1 | 2 | 3
-  estimatedMinutes: number
-  dueDate: string | null
-  dueTime: string | null
-  reminderMinutesBefore: number | null
-  notes: string | null
-}
 
 // ── ICS export helpers ────────────────────────────────────────────────────────
 
@@ -114,6 +101,8 @@ export function AddTaskModal({ open, onClose }: Props) {
   // Voice AI classify
   const [voiceResult, setVoiceResult] = useState<ClassifyResult | null>(null)
   const [classifying, setClassifying] = useState(false)
+  const [lowConfidence, setLowConfidence] = useState(false)
+  const [voiceTranscript, setVoiceTranscript] = useState('')
 
   // ── Voice input (Web Speech API) ──────────────────────────────────────────
   const [isListening, setIsListening] = useState(false)
@@ -125,14 +114,32 @@ export function AddTaskModal({ open, onClose }: Props) {
   const classifyVoice = useCallback(async (text: string) => {
     setClassifying(true)
     setVoiceResult(null)
+    setLowConfidence(false)
+    setVoiceTranscript(text)
     try {
       const { data, error } = await supabase.functions.invoke('classify-voice-input', {
         body: { text, language: navigator.language || 'en' },
       })
       if (error) throw error
-      const result = data as ClassifyResult
 
-      // For ideas: auto-save immediately, show toast, close
+      // Runtime-validated parse (Step C) — never trust raw `data as X`
+      const result = parseClassifyResult(data, text)
+      if (!result) {
+        // Unparseable response → safe fallback
+        setTitle(text)
+        toast('Recorded your note — edit the details below.', { icon: '🎙' })
+        return
+      }
+
+      // Low confidence → let user pick type (Step B)
+      if (isLowConfidence(result)) {
+        setVoiceResult(result)
+        setLowConfidence(true)
+        setTitle(result.title)
+        return
+      }
+
+      // High confidence idea: auto-save immediately, show toast, close
       if (result.type === 'idea') {
         const ideaTask: Task = {
           id: crypto.randomUUID(),
@@ -166,9 +173,9 @@ export function AddTaskModal({ open, onClose }: Props) {
       if (result.dueDate) { setDueDate(result.dueDate); setShowDatePicker(true) }
       if (result.dueTime) setDueTime(result.dueTime)
     } catch {
-      // Fallback: just populate title
+      // Fallback: just populate title — user never loses their note (Step E)
       setTitle(text)
-      toast.error("AI couldn't classify this — you can edit it manually.")
+      toast('Recorded your note — edit the details below.', { icon: '🎙' })
     } finally {
       setClassifying(false)
     }
@@ -203,10 +210,16 @@ export function AddTaskModal({ open, onClose }: Props) {
         }
         // Classify via AI
         void classifyVoice(transcript)
+      } else {
+        // Empty transcript — Step E: gentle feedback instead of silence
+        toast('Nothing captured — try again in a quiet spot.', { icon: '🎙' })
       }
     }
 
-    recognition.onerror = () => { setIsListening(false) }
+    recognition.onerror = () => {
+      setIsListening(false)
+      toast('Voice input stopped — you can type instead.', { icon: '🎙' })
+    }
     recognition.onend   = () => { setIsListening(false) }
     recognition.start()
     setIsListening(true)
@@ -433,6 +446,8 @@ export function AddTaskModal({ open, onClose }: Props) {
     setShowDatePicker(false)
     setVoiceResult(null)
     setClassifying(false)
+    setLowConfidence(false)
+    setVoiceTranscript('')
     onClose()
   }
 
@@ -492,14 +507,76 @@ export function AddTaskModal({ open, onClose }: Props) {
             {/* ── Scrollable body ── */}
             <div className="flex-1 overflow-y-auto px-5 flex flex-col gap-4 pb-2">
 
-              {/* AI classifying spinner */}
+              {/* AI classifying spinner — Mochi-style (Step E) */}
               {classifying && (
                 <div className="flex items-center gap-3 px-4 py-3 rounded-2xl"
                   style={{ background: '#252840', border: '1px solid rgba(123,114,255,0.3)' }}>
                   <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin motion-reduce:animate-none motion-reduce:opacity-60 shrink-0"
                     style={{ color: '#7B72FF' }} />
-                  <span className="text-sm" style={{ color: '#7B72FF' }}>AI is thinking… 🧠</span>
+                  <span className="text-sm" style={{ color: '#7B72FF' }}>Mochi is thinking… 🧠</span>
                 </div>
+              )}
+
+              {/* Low confidence — let user pick type (Step B) */}
+              {lowConfidence && voiceResult && !classifying && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex flex-col gap-3 p-4 rounded-2xl"
+                  style={{ background: '#252840', border: '1px solid rgba(245,158,11,0.4)' }}
+                >
+                  <p className="text-sm" style={{ color: '#F59E0B' }}>
+                    I heard: &ldquo;{voiceTranscript.slice(0, 80)}&rdquo;
+                  </p>
+                  <p className="text-sm font-medium" style={{ color: '#E8E8F0' }}>
+                    What is this?
+                  </p>
+                  <div className="flex gap-2">
+                    {(['task', 'idea', 'reminder'] as const).map(t => (
+                      <button
+                        key={t}
+                        onClick={() => {
+                          const updated = { ...voiceResult, type: t, confidence: 1.0 } as ClassifyResult
+                          if (t === 'idea') {
+                            updated.pool = 'someday'
+                            updated.difficulty = 1
+                            updated.estimatedMinutes = 5
+                          } else if (t === 'reminder') {
+                            updated.pool = 'next'
+                          }
+                          setVoiceResult(updated)
+                          setLowConfidence(false)
+                          setTitle(updated.title)
+                          setDifficulty(updated.difficulty)
+                          setMinutes(updated.estimatedMinutes)
+                          if (t === 'idea') {
+                            // Auto-save idea
+                            const ideaTask: Task = {
+                              id: crypto.randomUUID(), title: updated.title,
+                              pool: 'someday', status: 'active', difficulty: 1,
+                              estimatedMinutes: updated.estimatedMinutes,
+                              createdAt: new Date().toISOString(), completedAt: null,
+                              snoozeCount: 0, parentTaskId: null, position: 0,
+                              dueDate: null, dueTime: null, taskType: 'idea', reminderSentAt: null,
+                            }
+                            addTask(ideaTask)
+                            hapticDone()
+                            toast.success('💡 Idea saved to Someday!')
+                            resetAndClose()
+                          }
+                        }}
+                        className="flex-1 py-2.5 rounded-xl text-sm font-medium min-h-[44px]"
+                        style={{
+                          background: t === voiceResult.type ? 'rgba(123,114,255,0.2)' : '#1E2136',
+                          border: `1.5px solid ${t === voiceResult.type ? '#7B72FF' : 'rgba(255,255,255,0.08)'}`,
+                          color: t === voiceResult.type ? '#7B72FF' : '#8B8BA7',
+                        }}
+                      >
+                        {t === 'task' ? '✅ Task' : t === 'idea' ? '💡 Idea' : '⏰ Reminder'}
+                      </button>
+                    ))}
+                  </div>
+                </motion.div>
               )}
 
               {/* Voice AI result card */}
@@ -602,7 +679,7 @@ export function AddTaskModal({ open, onClose }: Props) {
                       onFocus={(e) => { if (!isListening) e.currentTarget.style.borderColor = '#7B72FF' }}
                       onBlur={(e)  => { if (!isListening) e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)' }}
                     />
-                    {voiceSupported && (
+                    {voiceSupported ? (
                       <button
                         onClick={handleVoiceToggle}
                         className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0"
@@ -613,6 +690,16 @@ export function AddTaskModal({ open, onClose }: Props) {
                         aria-label={isListening ? 'Stop recording' : 'Speak your task'}
                       >
                         {isListening ? <MicOff size={18} color="#4ECDC4" /> : <Mic size={18} color="#8B8BA7" />}
+                      </button>
+                    ) : (
+                      <button
+                        disabled
+                        className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 opacity-40"
+                        style={{ background: '#252840', border: '1.5px solid rgba(255,255,255,0.06)' }}
+                        aria-label="Voice input available in Chrome or Edge"
+                        title="Voice input available in Chrome or Edge"
+                      >
+                        <MicOff size={18} color="#5A5B72" />
                       </button>
                     )}
                   </div>

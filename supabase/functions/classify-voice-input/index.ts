@@ -44,39 +44,43 @@ Deno.serve(async (req: Request) => {
     const currentTime = new Date().toTimeString().slice(0, 5)
     const lang = language ?? 'en'
 
-    const prompt = `You are an ADHD productivity assistant. The user just dictated something via voice in ${lang}.
-Classify it and extract structured data.
+    const prompt = `You are an ADHD productivity assistant. The user just dictated something via voice.
+Input language: ${lang}
 Input: "${text.trim().slice(0, 400)}"
-Today is ${today}. Current time is ${currentTime}.
+Today: ${today}  Current time: ${currentTime}
 
-Respond ONLY with valid JSON (no markdown fences):
+Classify the input and return ONLY valid JSON (no markdown fences, no explanation):
 {
-  "type": "task",
-  "title": "clean title (max 60 chars, action verb first for tasks)",
-  "pool": "now",
-  "difficulty": 2,
-  "estimatedMinutes": 25,
-  "dueDate": null,
-  "dueTime": null,
-  "reminderMinutesBefore": null,
-  "notes": null
+  "type": "task|idea|reminder",
+  "title": "concise title (max 60 chars)",
+  "pool": "now|next|someday",
+  "difficulty": 1-3,
+  "estimatedMinutes": positive integer,
+  "dueDate": "YYYY-MM-DD" or null,
+  "dueTime": "HH:MM" (24h) or null,
+  "reminderMinutesBefore": 15|30|60|1440 or null,
+  "notes": string or null,
+  "confidence": 0.0-1.0
 }
 
-Rules:
-- "type" must be exactly one of: "task", "idea", "reminder"
-- "task": actionable, has a verb, something to DO
-- "idea": insight, thought, "what if", "maybe I should", brain dump
-- "reminder": has explicit time/date ("tomorrow", "at 3pm", "on Friday", "next week")
-- For "idea": pool="someday", difficulty=1, estimatedMinutes=5
-- For "reminder": pool="next", always extract dueDate/dueTime if mentioned
-- "pool" must be exactly one of: "now", "next", "someday"
-- "difficulty" must be exactly 1, 2, or 3
-- "estimatedMinutes" must be a positive integer
-- "dueDate" format: "YYYY-MM-DD" or null
-- "dueTime" format: "HH:MM" (24h) or null
-- "reminderMinutesBefore" must be one of: 15, 30, 60, 1440, or null
-- Title: be concise, ADHD users need clear short titles
-- Respond with ONLY the JSON object, nothing else`
+Classification rules:
+- "task": actionable, has a verb, something to DO → pool="now", difficulty by complexity
+- "idea": insight, thought, "what if", "maybe I should", brain dump → pool="someday", difficulty=1, estimatedMinutes=5
+- "reminder": has explicit time/date reference ("tomorrow", "at 3pm", "on Friday") → pool="next", extract dueDate/dueTime
+- "confidence": how certain you are about the classification (0.0=guess, 1.0=certain). Use <0.7 when input is ambiguous between types.
+
+CRITICAL — Language handling:
+- Return the "title" in THE SAME LANGUAGE as the user input. If user speaks Russian, title must be in Russian. If English, title in English.
+- Title for tasks: start with action verb. Keep under 60 chars. ADHD users need clear short titles.
+
+Few-shot examples:
+Input: "buy milk on the way home" → {"type":"task","title":"Buy milk on the way home","pool":"now","difficulty":1,"estimatedMinutes":10,"dueDate":null,"dueTime":null,"reminderMinutesBefore":null,"notes":null,"confidence":0.95}
+Input: "what if we tried a subscription model" → {"type":"idea","title":"Try a subscription model","pool":"someday","difficulty":1,"estimatedMinutes":5,"dueDate":null,"dueTime":null,"reminderMinutesBefore":null,"notes":null,"confidence":0.88}
+Input: "remind me to call the dentist tomorrow at 3pm" → {"type":"reminder","title":"Call the dentist","pool":"next","difficulty":1,"estimatedMinutes":5,"dueDate":"${today.slice(0,8)}15","dueTime":"15:00","reminderMinutesBefore":30,"notes":null,"confidence":0.93}
+Input: "написать отчёт для работы" → {"type":"task","title":"Написать отчёт для работы","pool":"now","difficulty":3,"estimatedMinutes":45,"dueDate":null,"dueTime":null,"reminderMinutesBefore":null,"notes":null,"confidence":0.90}
+Input: "hmm I dunno maybe something about dogs" → {"type":"idea","title":"Something about dogs","pool":"someday","difficulty":1,"estimatedMinutes":5,"dueDate":null,"dueTime":null,"reminderMinutesBefore":null,"notes":null,"confidence":0.45}
+
+Respond with ONLY the JSON object.`
 
     const apiKey = Deno.env.get('GEMINI_API_KEY')!
     const controller = new AbortController()
@@ -113,12 +117,13 @@ Rules:
       dueTime: string | null
       reminderMinutesBefore: number | null
       notes: string | null
+      confidence: number | null
     }
 
     try {
       parsed = JSON.parse(jsonText)
     } catch {
-      // Fallback: return the raw text as a plain task
+      // Fallback: return the raw text as a plain task with low confidence
       return new Response(
         JSON.stringify({
           type: 'task',
@@ -130,6 +135,7 @@ Rules:
           dueTime: null,
           reminderMinutesBefore: null,
           notes: null,
+          confidence: 0.3,
         }),
         { status: 200, headers: { ...cors, 'Content-Type': 'application/json' } }
       )
@@ -138,6 +144,7 @@ Rules:
     // Validate and sanitize
     const validTypes = ['task', 'idea', 'reminder']
     const validPools = ['now', 'next', 'someday']
+    const rawConf = Number(parsed.confidence)
     const result = {
       type: validTypes.includes(parsed.type) ? parsed.type : 'task',
       title: String(parsed.title ?? text).slice(0, 60),
@@ -148,6 +155,7 @@ Rules:
       dueTime: typeof parsed.dueTime === 'string' ? parsed.dueTime : null,
       reminderMinutesBefore: parsed.reminderMinutesBefore ?? null,
       notes: parsed.notes ?? null,
+      confidence: Number.isFinite(rawConf) && rawConf >= 0 && rawConf <= 1 ? rawConf : 1.0,
     }
 
     console.log('[classify-voice-input]', user?.id ?? 'guest', '->', result.type, result.title)
