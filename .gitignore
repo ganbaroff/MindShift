@@ -34,3 +34,16 @@ workbox-*.js
 *.njsproj
 *.sln
 *.sw?
+
+# Claude Code working directory
+.claude/
+
+# Test artifacts
+playwright-report/
+test-results/
+
+# Supabase local temp
+supabase/.temp/
+
+# Visual audit (screenshots + capture scripts — not for git)
+docs/visual-audit/
