@@ -4,32 +4,36 @@
  */
 import React from 'react'
 import type { WidgetType } from '@/types'
-import { EnergyWidget }     from './EnergyWidget'
-import { QuickFocusWidget } from './QuickFocusWidget'
-import { NowPoolWidget }    from './NowPoolWidget'
-import { ProgressWidget }   from './ProgressWidget'
-import { AudioWidget }      from './AudioWidget'
+import { EnergyWidget }        from './EnergyWidget'
+import { QuickFocusWidget }    from './QuickFocusWidget'
+import { NowPoolWidget }       from './NowPoolWidget'
+import { ProgressWidget }      from './ProgressWidget'
+import { AudioWidget }         from './AudioWidget'
+import { LifetimeStatsWidget } from './LifetimeStatsWidget'
 
 export const WIDGET_REGISTRY: Record<WidgetType, React.ComponentType> = {
-  energy_check: EnergyWidget,
-  quick_focus:  QuickFocusWidget,
-  now_pool:     NowPoolWidget,
-  progress:     ProgressWidget,
-  audio_quick:  AudioWidget,
+  energy_check:   EnergyWidget,
+  quick_focus:    QuickFocusWidget,
+  now_pool:       NowPoolWidget,
+  progress:       ProgressWidget,
+  audio_quick:    AudioWidget,
+  lifetime_stats: LifetimeStatsWidget,
 }
 
 export const WIDGET_LABELS: Record<WidgetType, string> = {
-  energy_check: 'Energy',
-  quick_focus:  'Quick Focus',
-  now_pool:     'Now Pool',
-  progress:     'Progress',
-  audio_quick:  'Audio',
+  energy_check:   'Energy',
+  quick_focus:    'Quick Focus',
+  now_pool:       'Now Pool',
+  progress:       'Progress',
+  audio_quick:    'Audio',
+  lifetime_stats: 'Lifetime Stats',
 }
 
 export const WIDGET_ICONS: Record<WidgetType, string> = {
-  energy_check: '⚡',
-  quick_focus:  '🚀',
-  now_pool:     '📋',
-  progress:     '🏆',
-  audio_quick:  '🎧',
+  energy_check:   '⚡',
+  quick_focus:    '🚀',
+  now_pool:       '📋',
+  progress:       '🏆',
+  audio_quick:    '🎧',
+  lifetime_stats: '📊',
 }

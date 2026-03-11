@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useState, useMemo } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from 'sonner'
 import { useStore } from '@/store'
@@ -14,6 +14,7 @@ import { RECOVERY_THRESHOLD_HOURS } from '@/shared/lib/constants'
 import { useOfflineSync } from '@/shared/hooks/useOfflineSync'
 import { logError } from '@/shared/lib/logger'
 import { reminders } from '@/shared/lib/reminders'
+import { computeBurnoutScore, deriveBehaviors } from '@/shared/lib/burnout'
 
 // Key that AuthScreen writes before sending the magic link
 const CONSENT_PENDING_KEY = 'ms_consent_pending'
@@ -33,7 +34,12 @@ const TermsPage        = lazy(() => import('@/features/legal/TermsPage'))
 const CookiePolicyPage = lazy(() => import('@/features/legal/CookiePolicyPage'))
 
 export default function App() {
-  const { setUser, updateLastSession, lastSessionAt, recoveryShown, setRecoveryShown, nowPool, onboardingCompleted } = useStore()
+  const {
+    setUser, updateLastSession, lastSessionAt, recoveryShown, setRecoveryShown,
+    nowPool, nextPool, somedayPool,
+    onboardingCompleted, setBurnoutScore, completedTotal, energyLevel,
+    flexiblePauseUntil, setFlexiblePauseUntil,
+  } = useStore()
   const [showContextRestore, setShowContextRestore] = useState(false)
 
   // ── Auth listener ───────────────────────────────────────────────────────────
@@ -116,6 +122,34 @@ export default function App() {
     reminders.restore()
   }, [])
 
+  // ── Burnout score computation — Block 2 ──────────────────────────────────
+  // Runs on mount + when key signals change. Client-side only, no server call.
+  useEffect(() => {
+    const allTasks = [...nowPool, ...nextPool, ...somedayPool]
+    const activeTasks = allTasks.filter(t => t.status === 'active')
+    const snoozedCount = allTasks.reduce((acc, t) => acc + t.snoozeCount, 0)
+
+    // Approximate daily completed count from lifetime total (no day breakdown in store)
+    // Use completedTotal as a proxy: assume uniform distribution over 7 days
+    const avgCompletedPerDay = completedTotal / 7
+
+    // For recent vs avg, use a conservative proxy since we don't have time-series in store
+    // When completedTotal is very low, assume no decay; when high, use energy as decay signal
+    const recentAvgEnergy = energyLevel  // use current energy as proxy
+
+    const behaviors = deriveBehaviors({
+      snoozedCount,
+      activeCount: Math.max(activeTasks.length, 1),
+      recentCompletedPerDay: avgCompletedPerDay * (recentAvgEnergy / 3),
+      avgCompletedPerDay,
+      recentSessionMinutes: 20 * (recentAvgEnergy / 3),  // conservative proxy
+      avgSessionMinutes: 20,
+      recentAvgEnergy,
+    })
+
+    setBurnoutScore(computeBurnoutScore(behaviors))
+  }, [completedTotal, energyLevel, nowPool, nextPool, somedayPool, setBurnoutScore])
+
   // ── Offline queue sync ──────────────────────────────────────────────────────
   useOfflineSync()
 
@@ -125,6 +159,19 @@ export default function App() {
     const hoursSinceLast = (Date.now() - new Date(lastSessionAt).getTime()) / 3_600_000
     return hoursSinceLast >= RECOVERY_THRESHOLD_HOURS
   })()
+
+  // ── Flexible Pause — Block 4b ───────────────────────────────────────────────
+  // Non-blocking rest-mode banner. Shown when user set a 24h pause in Settings.
+  const flexPauseActive = useMemo(() => {
+    if (!flexiblePauseUntil) return false
+    return new Date(flexiblePauseUntil) > new Date()
+  }, [flexiblePauseUntil])
+
+  const flexPauseUntilLabel = useMemo(() => {
+    if (!flexiblePauseUntil) return ''
+    const d = new Date(flexiblePauseUntil)
+    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  }, [flexiblePauseUntil])
 
   return (
     <BrowserRouter>
@@ -154,6 +201,35 @@ export default function App() {
 
           {/* Cookie notice — shown once on first visit, purely informational */}
           <CookieBanner />
+
+          {/* Flexible Pause banner — Block 4b: gentle rest-mode indicator, non-blocking */}
+          {flexPauseActive && (
+            <div
+              className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 py-2.5"
+              style={{
+                background: 'linear-gradient(90deg, rgba(123,114,255,0.18) 0%, rgba(78,205,196,0.10) 100%)',
+                borderBottom: '1px solid rgba(123,114,255,0.25)',
+                backdropFilter: 'blur(8px)',
+              }}
+              role="status"
+              aria-label="Rest mode active"
+            >
+              <p className="text-xs font-medium" style={{ color: '#E8E8F0' }}>
+                🌙 Rest mode active until {flexPauseUntilLabel}
+              </p>
+              <button
+                onClick={() => setFlexiblePauseUntil(null)}
+                className="text-xs px-3 py-1 rounded-lg transition-all duration-200"
+                style={{
+                  background: 'rgba(123,114,255,0.15)',
+                  border: '1px solid rgba(123,114,255,0.35)',
+                  color: '#7B72FF',
+                }}
+              >
+                Wake up early
+              </button>
+            </div>
+          )}
 
           <Routes>
             {/* Public routes — no auth required */}

@@ -56,6 +56,22 @@ export function EnergyWidget() {
           )
         })}
       </div>
+
+      {/* Low Battery chip prompt (Block 3c) — gentle nudge when energy ≤ 2 */}
+      {energyLevel <= 2 && (
+        <div
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl"
+          style={{
+            background: 'rgba(78,205,196,0.08)',
+            border: '1px solid rgba(78,205,196,0.2)',
+          }}
+        >
+          <span className="text-xs">🌱</span>
+          <p className="text-[10px] leading-tight" style={{ color: '#4ECDC4' }}>
+            Low energy? Start with your easiest task — small wins recharge you.
+          </p>
+        </div>
+      )}
     </div>
   )
 }

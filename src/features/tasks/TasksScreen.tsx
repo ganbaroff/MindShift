@@ -88,7 +88,7 @@ function TaskList({ tasks }: { tasks: Task[] }) {
 // ── Tasks screen — all pools visible ─────────────────────────────────────────
 
 export default function TasksScreen() {
-  const { nowPool, nextPool, somedayPool, completedTotal } = useStore()
+  const { nowPool, nextPool, somedayPool, completedTotal, energyLevel } = useStore()
   const [addOpen, setAddOpen] = useState(false)
   const [somedayExpanded, setSomedayExpanded] = useState(false)
 
@@ -155,6 +155,22 @@ export default function TasksScreen() {
             {activeTasks.length}/{NOW_POOL_MAX}
           </span>
         </div>
+        {/* Easy-task banner (Block 6a) — shown when energy ≤ 2 and easy tasks exist in NOW */}
+        {energyLevel <= 2 && activeTasks.some(t => t.difficultyLevel === 'easy') && (
+          <div
+            className="mb-3 px-3 py-2.5 rounded-xl flex items-center gap-2"
+            style={{
+              background: 'rgba(78,205,196,0.08)',
+              border: '1px solid rgba(78,205,196,0.22)',
+            }}
+          >
+            <span className="text-base">🌱</span>
+            <p className="text-xs leading-relaxed" style={{ color: '#4ECDC4' }}>
+              Low energy day? Start with an easy one — momentum builds from small wins.
+            </p>
+          </div>
+        )}
+
         <div className="flex flex-col gap-3">
           {activeTasks.length === 0 ? (
             <p className="text-sm py-4 text-center" style={{ color: '#8B8BA7' }}>

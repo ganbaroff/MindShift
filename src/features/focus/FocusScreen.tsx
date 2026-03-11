@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'motion/react'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { useStore } from '@/store'
 import { ArcTimer, ARC_SIZE } from './ArcTimer'
+import { MochiSessionCompanion } from './MochiSessionCompanion'
 import { useAudioEngine } from '@/shared/hooks/useAudioEngine'
 import { supabase } from '@/shared/lib/supabase'
 import { logError } from '@/shared/lib/logger'
@@ -17,7 +18,10 @@ import {
   MAX_SESSION_MINUTES,
   RECOVERY_LOCK_MINUTES,
   NATURE_BUFFER_SECONDS,
+  SESSION_SOFT_STOP_MINUTES,
+  SESSION_HARD_STOP_MINUTES,
 } from '@/shared/lib/constants'
+import { toast } from 'sonner'
 import type { SessionPhase, AudioPreset, Task, EnergyLevel } from '@/types'
 import type { FocusSessionInsert } from '@/types/database'
 
@@ -44,7 +48,7 @@ function getSmartDuration(energy: EnergyLevel): number {
 
 // ── Screen states ──────────────────────────────────────────────────────────────
 
-type ScreenState = 'setup' | 'session' | 'interrupt-confirm' | 'bookmark-capture' | 'recovery-lock' | 'nature-buffer'
+type ScreenState = 'setup' | 'session' | 'interrupt-confirm' | 'bookmark-capture' | 'recovery-lock' | 'nature-buffer' | 'hard-stop'
 
 // ── Interrupt bookmark (localStorage) ─────────────────────────────────────────
 
@@ -92,6 +96,7 @@ export default function FocusScreen() {
     startSession, endSession, setPhase, updateLastSession,
     hasAchievement, unlockAchievement,
     focusAnchor, activePreset, setPreset,
+    timerStyle, flexiblePauseUntil, setEnergyLevel,
   } = useStore()
 
   const { shouldAnimate, t } = useMotion()
@@ -115,6 +120,8 @@ export default function FocusScreen() {
   const [showDigits, setShowDigits]       = useState(false)
   const [recoverySeconds, setRecovery]    = useState(RECOVERY_LOCK_MINUTES * 60)
   const [bufferSeconds, setBufferSeconds] = useState(NATURE_BUFFER_SECONDS)
+  // Block 3d: post-session energy delta
+  const [postEnergyLogged, setPostEnergyLogged] = useState(false)
 
   // ── Refs (timer) ─────────────────────────────────────────────────────────────
   const startTimeRef        = useRef(0)          // epoch ms of session start
@@ -126,6 +133,7 @@ export default function FocusScreen() {
   const bufferIntervalRef   = useRef<ReturnType<typeof setInterval> | null>(null)
   const sessionSavedRef     = useRef(false)
   const quickStartedRef     = useRef(false)
+  const softStopFiredRef    = useRef(false)  // prevents re-fire across renders
 
   // ── Interrupt bookmark ──────────────────────────────────────────────────────
   const [bookmarkText, setBookmarkText] = useState('')
@@ -180,6 +188,34 @@ export default function FocusScreen() {
     if (recoveryIntervalRef.current) clearInterval(recoveryIntervalRef.current)
     if (bufferIntervalRef.current)   clearInterval(bufferIntervalRef.current)
   }, [])
+
+  // ── Soft-stop toast at SESSION_SOFT_STOP_MINUTES (90 min) ─────────────────────
+  // Non-blocking — just a gentle reminder. Skipped in Flexible Pause mode.
+  useEffect(() => {
+    if (screen !== 'session') return
+    if (softStopFiredRef.current) return
+    const isFlexPauseActive = !!flexiblePauseUntil && new Date(flexiblePauseUntil) > new Date()
+    if (isFlexPauseActive) return
+    if (elapsedSeconds >= SESSION_SOFT_STOP_MINUTES * 60) {
+      softStopFiredRef.current = true
+      toast("You've been going for 90 minutes — wrap up when ready 🌿", {
+        duration: 8_000,
+      })
+    }
+  }, [elapsedSeconds, screen, flexiblePauseUntil])
+
+  // ── Hard-stop half-sheet at SESSION_HARD_STOP_MINUTES (120 min) ───────────────
+  // Pauses the timer and shows a rest prompt. User can still bypass (hyperfocus support).
+  // Skipped in Flexible Pause mode.
+  useEffect(() => {
+    if (screen !== 'session') return
+    const isFlexPauseActive = !!flexiblePauseUntil && new Date(flexiblePauseUntil) > new Date()
+    if (isFlexPauseActive) return
+    if (elapsedSeconds >= SESSION_HARD_STOP_MINUTES * 60) {
+      if (intervalRef.current) clearInterval(intervalRef.current)
+      setScreen('hard-stop')
+    }
+  }, [elapsedSeconds, screen, flexiblePauseUntil])
 
   // ── Save session to DB (non-blocking) ────────────────────────────────────────
   const saveSession = useCallback(async (
@@ -330,7 +366,9 @@ export default function FocusScreen() {
     durationSecRef.current = durationSec
     startTimeRef.current   = Date.now()
     pausedMsRef.current    = 0
-    sessionSavedRef.current = false
+    sessionSavedRef.current  = false
+    softStopFiredRef.current = false
+    setPostEnergyLogged(false)
 
     // Request notification permission lazily on first session start — non-intrusive timing
     void requestNotificationPermission()
@@ -467,6 +505,41 @@ export default function FocusScreen() {
             </p>
             <p className="text-xs mt-1" style={{ color: '#8B8BA7' }}>until next session</p>
           </div>
+
+          {/* Block 3d: Post-session energy delta — quick 1-tap check-in */}
+          {!postEnergyLogged && (
+            <div
+              className="w-full max-w-xs mb-4 p-3 rounded-2xl"
+              style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)' }}
+            >
+              <p className="text-xs font-medium mb-2 text-center" style={{ color: '#8B8BA7' }}>
+                How do you feel after that session?
+              </p>
+              <div className="flex justify-between gap-1">
+                {([
+                  { level: 1 as const, emoji: '😴', label: 'Drained' },
+                  { level: 2 as const, emoji: '😌', label: 'Calm' },
+                  { level: 3 as const, emoji: '🙂', label: 'Good' },
+                  { level: 4 as const, emoji: '😄', label: 'Great' },
+                  { level: 5 as const, emoji: '⚡', label: 'Wired' },
+                ] as const).map(({ level, emoji, label }) => (
+                  <button
+                    key={level}
+                    onClick={() => {
+                      setEnergyLevel(level)
+                      setPostEnergyLogged(true)
+                    }}
+                    className="flex-1 flex flex-col items-center gap-0.5 py-2 rounded-xl text-xs transition-all duration-150 min-h-[52px]"
+                    style={{ background: '#252840', border: '1px solid rgba(255,255,255,0.06)' }}
+                    aria-label={`Post-session energy: ${label}`}
+                  >
+                    <span className="text-lg leading-none">{emoji}</span>
+                    <span className="text-[9px]" style={{ color: '#8B8BA7' }}>{label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           <button
             onClick={handleSkipBuffer}
@@ -889,6 +962,69 @@ export default function FocusScreen() {
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
+  // HARD-STOP HALF-SHEET (120 min)
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  if (screen === 'hard-stop') {
+    return (
+      <div
+        className="flex flex-col items-center justify-end min-h-screen px-6 pb-12"
+        style={{ background: 'rgba(15,17,23,0.92)' }}
+      >
+        <motion.div
+          initial={shouldAnimate ? { opacity: 0, y: 40 } : {}}
+          animate={{ opacity: 1, y: 0 }}
+          transition={t()}
+          className="w-full max-w-xs flex flex-col items-center text-center"
+          style={{
+            background: '#1A1D2E',
+            border: '1px solid rgba(123,114,255,0.25)',
+            borderRadius: 24,
+            padding: '32px 24px',
+          }}
+        >
+          <div className="text-5xl mb-4">🧘</div>
+          <h2 className="text-xl font-bold mb-2" style={{ color: '#E8E8F0' }}>
+            Two hours of deep work
+          </h2>
+          <p className="text-sm leading-relaxed mb-6" style={{ color: '#8B8BA7' }}>
+            That's a serious session. Your brain consolidates everything during rest —
+            even 10 minutes away will help you do better next time.
+          </p>
+
+          <button
+            onClick={() => handleSessionEnd(true)}
+            className="w-full py-3.5 rounded-2xl font-semibold text-sm mb-3 transition-all duration-200"
+            style={{
+              background: 'linear-gradient(135deg, #7B72FF, #8B7FF7)',
+              color: 'white',
+              boxShadow: '0 8px 24px rgba(123,114,255,0.28)',
+            }}
+          >
+            End session & rest 🌿
+          </button>
+
+          {/* Hyperfocus bypass — always available, no shame */}
+          <button
+            onClick={() => {
+              setScreen('session')
+              startInterval()
+            }}
+            className="text-xs px-5 py-2.5 rounded-xl transition-all duration-200"
+            style={{
+              background: 'transparent',
+              border: '1px solid rgba(255,255,255,0.06)',
+              color: '#8B8BA7',
+            }}
+          >
+            I'm in hyperfocus — keep going
+          </button>
+        </motion.div>
+      </div>
+    )
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
   // ACTIVE SESSION SCREEN
   // ─────────────────────────────────────────────────────────────────────────────
 
@@ -918,6 +1054,8 @@ export default function FocusScreen() {
       <ArcTimer
         progress={progress}
         remainingSeconds={remainingSeconds}
+        elapsedSeconds={elapsedSeconds}
+        timerStyle={timerStyle}
         phase={sessionPhase}
         showDigits={isFlow ? false : showDigits}
         onToggleDigits={() => setShowDigits(d => !d)}
@@ -975,6 +1113,12 @@ export default function FocusScreen() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Mochi body-double companion — Block 5a */}
+      <MochiSessionCompanion
+        elapsedSeconds={elapsedSeconds}
+        sessionPhase={sessionPhase}
+      />
 
       {/* ── "Park the thought" — quick capture without leaving focus ────── */}
       <div className="fixed bottom-8 z-30" style={{ right: 'calc(max(0px, (100vw - 480px) / 2) + 20px)' }}>

@@ -253,6 +253,7 @@ export function AddTaskModal({ open, onClose }: Props) {
       pool,
       status: 'active',
       difficulty,
+      difficultyLevel: difficulty === 1 ? 'easy' : difficulty === 3 ? 'hard' : 'medium',
       estimatedMinutes: minutes,
       createdAt: new Date().toISOString(),
       completedAt: null,
@@ -292,6 +293,7 @@ export function AddTaskModal({ open, onClose }: Props) {
         pool: 'next',   // subtasks go to NEXT (parent is in NOW/NEXT)
         status: 'active',
         difficulty,
+        difficultyLevel: difficulty === 1 ? 'easy' : difficulty === 3 ? 'hard' : 'medium',
         estimatedMinutes: Math.max(5, Math.round(minutes / aiSteps.length)),
         createdAt: new Date().toISOString(),
         completedAt: null,
@@ -334,6 +336,7 @@ export function AddTaskModal({ open, onClose }: Props) {
       pool,
       status: 'active',
       difficulty: voiceResult.difficulty,
+      difficultyLevel: voiceResult.difficulty === 1 ? 'easy' : voiceResult.difficulty === 3 ? 'hard' : 'medium',
       estimatedMinutes: voiceResult.estimatedMinutes,
       createdAt: new Date().toISOString(),
       completedAt: null,
@@ -380,6 +383,7 @@ export function AddTaskModal({ open, onClose }: Props) {
       pool,
       status: 'active',
       difficulty,
+      difficultyLevel: difficulty === 1 ? 'easy' : difficulty === 3 ? 'hard' : 'medium',
       estimatedMinutes: minutes,
       createdAt: new Date().toISOString(),
       completedAt: null,
@@ -550,7 +554,9 @@ export function AddTaskModal({ open, onClose }: Props) {
                           const t: Task = {
                             id: crypto.randomUUID(), title: voiceResult.title,
                             pool: voiceResult.pool, status: 'active',
-                            difficulty: voiceResult.difficulty, estimatedMinutes: voiceResult.estimatedMinutes,
+                            difficulty: voiceResult.difficulty,
+                            difficultyLevel: voiceResult.difficulty === 1 ? 'easy' : voiceResult.difficulty === 3 ? 'hard' : 'medium',
+                            estimatedMinutes: voiceResult.estimatedMinutes,
                             createdAt: new Date().toISOString(), completedAt: null,
                             snoozeCount: 0, parentTaskId: null, position: 0,
                             dueDate: voiceResult.dueDate, dueTime: voiceResult.dueTime,
@@ -749,7 +755,7 @@ export function AddTaskModal({ open, onClose }: Props) {
                         color: difficulty === d ? '#7B72FF' : '#8B8BA7',
                       }}
                     >
-                      {d === 1 ? '🟢 Easy' : d === 2 ? '🟡 Medium' : '🟠 Hard'}
+                      {d === 1 ? '🟢 Easy' : d === 2 ? '🟡 Medium' : '🔵 Hard'}
                     </button>
                   ))}
                 </div>
@@ -804,7 +810,9 @@ export function AddTaskModal({ open, onClose }: Props) {
                   onClick={() => {
                     const t: Task = {
                       id: crypto.randomUUID(), title: title.trim() || 'Task',
-                      pool: 'now', status: 'active', difficulty, estimatedMinutes: minutes,
+                      pool: 'now', status: 'active', difficulty,
+                      difficultyLevel: difficulty === 1 ? 'easy' : difficulty === 3 ? 'hard' : 'medium',
+                      estimatedMinutes: minutes,
                       createdAt: new Date().toISOString(), completedAt: null,
                       snoozeCount: 0, parentTaskId: null, position: 0,
                       dueDate, dueTime: dueTime || null, taskType: 'task', reminderSentAt: null,

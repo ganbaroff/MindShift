@@ -28,6 +28,13 @@ import {
 
 const DIFFICULTY_LABELS: Record<number, string> = { 1: 'Easy', 2: 'Medium', 3: 'Hard' }
 
+// Traffic Light difficulty level (Block 6a) — teal/amber/purple, NEVER red
+const TRAFFIC_LIGHT: Record<string, { color: string; label: string }> = {
+  easy:   { color: '#4ECDC4', label: '🟢 Easy' },
+  medium: { color: '#F59E0B', label: '🟡 Medium' },
+  hard:   { color: '#7B72FF', label: '🔵 Hard' },
+}
+
 // getDifficultyAccent: returns palette-aware color (desaturated in calm mode)
 function getDifficultyAccent(difficulty: number, palette: ReturnType<typeof usePalette>): string {
   if (difficulty === 1) return palette.teal
@@ -188,6 +195,20 @@ export function TaskCard({ task, index = 0, onComplete, onSnooze }: Props) {
               />
             ))}
           </div>
+
+          {/* Traffic Light badge (Block 6a) — shown when difficultyLevel is set */}
+          {task.difficultyLevel && TRAFFIC_LIGHT[task.difficultyLevel] && (
+            <span
+              className="text-[10px] font-medium px-1.5 py-0.5 rounded-md"
+              style={{
+                background: `${TRAFFIC_LIGHT[task.difficultyLevel].color}1A`,
+                color: TRAFFIC_LIGHT[task.difficultyLevel].color,
+                border: `1px solid ${TRAFFIC_LIGHT[task.difficultyLevel].color}40`,
+              }}
+            >
+              {TRAFFIC_LIGHT[task.difficultyLevel].label}
+            </span>
+          )}
 
           {/* Time estimate — informational only, not a countdown */}
           <span className="text-xs" style={{ color: '#8B8BA7' }}>

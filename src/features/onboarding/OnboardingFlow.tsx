@@ -8,6 +8,8 @@ import type { AppMode, EnergyLevel, CognitiveMode, Task } from '@/types'
 import { EnergyCheckin } from '@/features/home/EnergyCheckin'
 import { useMotion } from '@/shared/hooks/useMotion'
 
+type TimerStyle = 'countdown' | 'countup' | 'surprise'
+
 // ── Sample tasks (Research #4: blank-slate anxiety prevention) ────────────────
 // Pre-populated per AppMode so first-timers see a meaningful starting point.
 // 1 task in 'now' (actionable today), 1 in 'next' (low pressure queue).
@@ -315,13 +317,101 @@ function ADHDSignalScreen({
   )
 }
 
+// ── Screen 3: Timer Preference (Block 3a) ─────────────────────────────────────
+const TIMER_OPTIONS: {
+  style: TimerStyle
+  emoji: string
+  title: string
+  subtitle: string
+}[] = [
+  {
+    style: 'countdown',
+    emoji: '⏱️',
+    title: 'Count down',
+    subtitle: 'See time remaining — classic focus timer',
+  },
+  {
+    style: 'countup',
+    emoji: '⬆️',
+    title: 'Count up',
+    subtitle: 'See how long you\'ve been going — less pressure',
+  },
+  {
+    style: 'surprise',
+    emoji: '🎲',
+    title: 'Surprise me',
+    subtitle: 'Arc ring only — no numbers, pure presence',
+  },
+]
+
+function TimerPreferenceScreen({
+  onNext,
+  onBack,
+}: {
+  onNext: (style: TimerStyle) => void
+  onBack: () => void
+}) {
+  const { t } = useMotion()
+  const [hovered, setHovered] = useState<TimerStyle | null>(null)
+
+  return (
+    <div className="flex flex-col gap-5 px-5 pt-8 pb-6">
+      <motion.div
+        initial={{ opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={t()}
+      >
+        <h1 className="text-2xl font-bold mb-2" style={{ color: '#E8E8F0' }}>
+          How do you like to see time? ⏱️
+        </h1>
+        <p className="text-sm leading-relaxed" style={{ color: '#8B8BA7' }}>
+          Pick your default focus timer style — change it anytime in Settings.
+        </p>
+      </motion.div>
+
+      <div className="flex flex-col gap-3">
+        {TIMER_OPTIONS.map(({ style, emoji, title, subtitle }, i) => {
+          const isHovered = hovered === style
+          return (
+            <motion.button
+              key={style}
+              initial={{ opacity: 0, x: -16 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ ...t(), delay: 0.05 + i * 0.07 }}
+              whileTap={{ scale: 0.985 }}
+              onClick={() => onNext(style)}
+              onHoverStart={() => setHovered(style)}
+              onHoverEnd={() => setHovered(null)}
+              className="text-left p-4 rounded-2xl transition-all duration-150 flex items-start gap-4"
+              style={{
+                background: isHovered
+                  ? 'linear-gradient(135deg, rgba(123,114,255,0.15) 0%, rgba(123,114,255,0.05) 100%)'
+                  : '#1E2136',
+                border: `1.5px solid ${isHovered ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
+              }}
+            >
+              <span className="text-3xl mt-0.5">{emoji}</span>
+              <div>
+                <p className="font-semibold text-sm mb-0.5" style={{ color: '#E8E8F0' }}>{title}</p>
+                <p className="text-xs" style={{ color: '#8B8BA7' }}>{subtitle}</p>
+              </div>
+            </motion.button>
+          )
+        })}
+      </div>
+
+      <BackBtn onBack={onBack} />
+    </div>
+  )
+}
+
 // ── Main flow ─────────────────────────────────────────────────────────────────
-const TOTAL_STEPS = 3
+const TOTAL_STEPS = 4
 
 export default function OnboardingFlow() {
   const navigate = useNavigate()
   const { t } = useMotion()
-  const { setAppMode, setEnergyLevel, setCognitiveMode, setOnboardingCompleted, addTask, userId } = useStore()
+  const { setAppMode, setEnergyLevel, setCognitiveMode, setOnboardingCompleted, addTask, userId, setTimerStyle } = useStore()
   const [step, setStep] = useState(0)
   const [appMode, setLocalMode] = useState<AppMode>('minimal')
   const [prevStep, setPrevStep] = useState(0)
@@ -340,6 +430,11 @@ export default function OnboardingFlow() {
   const handleEnergy = (level: EnergyLevel) => {
     setEnergyLevel(level)
     goTo(2)
+  }
+
+  const handleTimerPref = (style: TimerStyle) => {
+    setTimerStyle(style)
+    goTo(3)
   }
 
   const handleCognitive = async (mode: CognitiveMode) => {
@@ -364,7 +459,8 @@ export default function OnboardingFlow() {
   const screens = [
     <IntentScreen key="intent" onNext={handleIntent} />,
     <EnergyScreen key="energy" onNext={handleEnergy} onBack={() => goTo(0)} />,
-    <ADHDSignalScreen key="adhd" onNext={handleCognitive} onBack={() => goTo(1)} />,
+    <TimerPreferenceScreen key="timer" onNext={handleTimerPref} onBack={() => goTo(1)} />,
+    <ADHDSignalScreen key="adhd" onNext={handleCognitive} onBack={() => goTo(2)} />,
   ]
 
   return (

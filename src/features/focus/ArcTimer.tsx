@@ -32,14 +32,22 @@ function formatTime(seconds: number): string {
 interface Props {
   progress: number        // 1.0 = full, 0.0 = empty
   remainingSeconds: number
+  elapsedSeconds?: number  // Block 3b: for countup mode
   phase: SessionPhase
   showDigits: boolean
   onToggleDigits: () => void
   disableToggle?: boolean // Bolt 6.16: in flow phase, disable tap-to-show
   size?: number
+  /** Block 3b: timer display mode — countdown (default), countup, surprise (arc-only) */
+  timerStyle?: 'countdown' | 'countup' | 'surprise'
 }
 
-export function ArcTimer({ progress, remainingSeconds, phase, showDigits, onToggleDigits, disableToggle = false, size = ARC_SIZE }: Props) {
+export function ArcTimer({
+  progress, remainingSeconds, elapsedSeconds = 0,
+  phase, showDigits, onToggleDigits,
+  disableToggle = false, size = ARC_SIZE,
+  timerStyle = 'countdown',
+}: Props) {
   const { shouldAnimate } = useMotion()
   const scale = size / ARC_SIZE
 
@@ -47,7 +55,14 @@ export function ArcTimer({ progress, remainingSeconds, phase, showDigits, onTogg
   const arcColor = PHASE_COLORS[phase]
   const isPulsing = phase === 'struggle' && shouldAnimate
 
-  const handleClick = disableToggle ? undefined : onToggleDigits
+  // Block 3b: surprise mode forces digits hidden, countup shows elapsed
+  const isSurprise = timerStyle === 'surprise'
+  const isCountup  = timerStyle === 'countup'
+
+  const displaySeconds = isCountup ? elapsedSeconds : remainingSeconds
+  const effectiveShowDigits = isSurprise ? false : showDigits
+  const effectiveDisable = isSurprise ? true : disableToggle
+  const handleClick = effectiveDisable ? undefined : onToggleDigits
 
   return (
     <motion.button
@@ -56,8 +71,12 @@ export function ArcTimer({ progress, remainingSeconds, phase, showDigits, onTogg
       animate={{ width: size, height: size }}
       transition={shouldAnimate ? { duration: 1.2, ease: 'easeInOut' } : { duration: 0 }}
       className="relative flex items-center justify-center focus:outline-none"
-      style={{ cursor: disableToggle ? 'default' : 'pointer' }}
-      aria-label={disableToggle ? 'Focus timer' : showDigits ? 'Hide time' : 'Show remaining time'}
+      style={{ cursor: effectiveDisable ? 'default' : 'pointer' }}
+      aria-label={
+        isSurprise ? 'Focus timer — arc mode' :
+        effectiveDisable ? 'Focus timer' :
+        effectiveShowDigits ? 'Hide time' : 'Show remaining time'
+      }
     >
       {/* Struggle phase pulsing glow */}
       {isPulsing && (
@@ -99,11 +118,12 @@ export function ArcTimer({ progress, remainingSeconds, phase, showDigits, onTogg
         />
       </svg>
 
-      {/* Center content — shows when tapped (hidden in flow phase) */}
-      <div
-        className="absolute inset-0 flex flex-col items-center justify-center"
-      >
-        {showDigits && !disableToggle ? (
+      {/* Center content */}
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        {isSurprise ? (
+          /* Surprise mode: show only the arc ring, no digits, no tap hint */
+          null
+        ) : effectiveShowDigits && !effectiveDisable ? (
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -117,10 +137,13 @@ export function ArcTimer({ progress, remainingSeconds, phase, showDigits, onTogg
                 letterSpacing: '0.02em',
               }}
             >
-              {formatTime(remainingSeconds)}
+              {formatTime(displaySeconds)}
             </span>
+            {isCountup && (
+              <span className="text-xs mt-0.5" style={{ color: '#8B8BA7' }}>elapsed</span>
+            )}
           </motion.div>
-        ) : !disableToggle ? (
+        ) : !effectiveDisable ? (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.3 }}

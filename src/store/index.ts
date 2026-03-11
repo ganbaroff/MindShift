@@ -31,6 +31,15 @@ interface UserSlice {
   lastSessionAt: string | null
   onboardingCompleted: boolean
   recoveryShown: boolean   // flag: recovery overlay already shown this session
+  // ── Health & Rhythms (Block 1) ──────────────────────────────────────────────
+  timerStyle: 'countdown' | 'countup' | 'surprise'
+  sleepQuality: 1 | 2 | 3 | null        // session-only (not persisted)
+  medicationEnabled: boolean
+  medicationTime: 'morning' | 'afternoon' | 'evening' | null
+  chronotype: 'lark' | 'owl' | 'varies' | null
+  seasonalMode: 'launch' | 'maintain' | 'recover' | 'sandbox'
+  burnoutScore: number                  // 0–100, computed (not persisted)
+  flexiblePauseUntil: string | null     // ISO timestamp, null = no active pause
   setUser: (userId: string, email: string) => void
   setEnergyLevel: (level: EnergyLevel) => void
   setCognitiveMode: (mode: CognitiveMode) => void
@@ -41,6 +50,14 @@ interface UserSlice {
   setRecoveryShown: () => void
   updateLastSession: () => void
   signOut: () => void
+  setTimerStyle: (style: 'countdown' | 'countup' | 'surprise') => void
+  setSleepQuality: (q: 1 | 2 | 3 | null) => void
+  setMedicationEnabled: (val: boolean) => void
+  setMedicationTime: (t: 'morning' | 'afternoon' | 'evening' | null) => void
+  setChronotype: (c: 'lark' | 'owl' | 'varies' | null) => void
+  setSeasonalMode: (m: 'launch' | 'maintain' | 'recover' | 'sandbox') => void
+  setBurnoutScore: (score: number) => void
+  setFlexiblePauseUntil: (until: string | null) => void
 }
 
 interface TaskSlice {
@@ -136,6 +153,15 @@ export const useStore = create<AppStore>()(
         lastSessionAt: null,
         onboardingCompleted: false,
         recoveryShown: false,
+        // Health & Rhythms
+        timerStyle: 'countdown' as const,
+        sleepQuality: null,
+        medicationEnabled: false,
+        medicationTime: null,
+        chronotype: null,
+        seasonalMode: 'launch' as const,
+        burnoutScore: 0,
+        flexiblePauseUntil: null,
 
         setUser: (userId, email) => set({ userId, email }),
         setEnergyLevel: (level) => set({ energyLevel: level }),
@@ -161,10 +187,24 @@ export const useStore = create<AppStore>()(
         setOnboardingCompleted: () => set({ onboardingCompleted: true }),
         setRecoveryShown: () => set({ recoveryShown: true }),
         updateLastSession: () => set({ lastSessionAt: new Date().toISOString() }),
+        // Health & Rhythms setters
+        setTimerStyle: (style) => set({ timerStyle: style }),
+        setSleepQuality: (q) => set({ sleepQuality: q }),
+        setMedicationEnabled: (val) => set({ medicationEnabled: val }),
+        setMedicationTime: (t) => set({ medicationTime: t }),
+        setChronotype: (c) => set({ chronotype: c }),
+        setSeasonalMode: (m) => set({ seasonalMode: m }),
+        setBurnoutScore: (score) => set({ burnoutScore: score }),
+        setFlexiblePauseUntil: (until) => set({ flexiblePauseUntil: until }),
         signOut: () => set({
           // User slice
           userId: null, email: null, xpTotal: 0,
           onboardingCompleted: false, recoveryShown: false, lastSessionAt: null,
+          // Health & Rhythms — reset to defaults on sign out
+          timerStyle: 'countdown' as const,
+          sleepQuality: null, medicationEnabled: false, medicationTime: null,
+          chronotype: null, seasonalMode: 'launch' as const,
+          burnoutScore: 0, flexiblePauseUntil: null,
           // Task slice
           nowPool: [], nextPool: [], somedayPool: [],
           // Session slice — prevent stale focus sessions from persisting
@@ -407,6 +447,14 @@ export const useStore = create<AppStore>()(
           nowPool: s.nowPool,
           nextPool: s.nextPool,
           somedayPool: s.somedayPool,
+          // Health & Rhythms — persisted (device-only, never server unless opt-in)
+          timerStyle: s.timerStyle,
+          medicationEnabled: s.medicationEnabled,
+          medicationTime: s.medicationTime,
+          chronotype: s.chronotype,
+          seasonalMode: s.seasonalMode,
+          flexiblePauseUntil: s.flexiblePauseUntil,
+          // sleepQuality + burnoutScore are NOT persisted (session-only)
         }),
       }
     )

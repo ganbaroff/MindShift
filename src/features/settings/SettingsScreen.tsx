@@ -6,6 +6,37 @@ import { toast } from 'sonner'
 import { logError } from '@/shared/lib/logger'
 import Avatar, { STAGE_NAMES } from '@/features/progress/Avatar'
 
+// ── Chip selector (Health & Rhythms) ──────────────────────────────────────────
+
+function ChipGroup<T extends string | number>({
+  value, options, onChange, label,
+}: {
+  value: T | null
+  options: { value: T; label: string }[]
+  onChange: (v: T) => void
+  label: string
+}) {
+  return (
+    <div role="group" aria-label={label} className="flex flex-wrap gap-2 mt-2">
+      {options.map(opt => (
+        <button
+          key={String(opt.value)}
+          onClick={() => onChange(opt.value)}
+          aria-pressed={value === opt.value}
+          className="px-3 py-1.5 rounded-xl text-xs font-medium transition-all duration-150 min-h-[36px]"
+          style={{
+            background: value === opt.value ? 'rgba(123,114,255,0.18)' : '#252840',
+            border: `1.5px solid ${value === opt.value ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
+            color: value === opt.value ? '#7B72FF' : '#8B8BA7',
+          }}
+        >
+          {opt.label}
+        </button>
+      ))}
+    </div>
+  )
+}
+
 // ── Toggle switch ─────────────────────────────────────────────────────────────
 
 function Toggle({ checked, onChange, label }: {
@@ -46,6 +77,13 @@ export default function SettingsScreen() {
     setAvatarId, setCognitiveMode, setAppMode, setEnergyLevel, signOut,
     reducedStimulation, setReducedStimulation,
     subscriptionTier, trialEndsAt, setSubscription, isProActive,
+    // Health & Rhythms
+    sleepQuality, setSleepQuality,
+    medicationEnabled, setMedicationEnabled,
+    medicationTime, setMedicationTime,
+    chronotype, setChronotype,
+    seasonalMode, setSeasonalMode,
+    flexiblePauseUntil, setFlexiblePauseUntil,
   } = useStore()
 
   const [showTrialActivation, setShowTrialActivation] = useState(false)
@@ -350,6 +388,167 @@ export default function SettingsScreen() {
               </span>
             </button>
           ))}
+        </div>
+      </section>
+
+      {/* ── Health & Rhythms ──────────────────────────────────────────────── */}
+      {/* Block 3e: sleep, medication, chronotype — device-only, never sent to server */}
+      <section className="mx-5 p-4 rounded-2xl mb-4" style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)' }}>
+        <p className="text-xs font-medium tracking-widest uppercase mb-1" style={{ color: '#8B8BA7' }}>
+          Health &amp; Rhythms
+        </p>
+        <p className="text-xs mb-4 leading-relaxed" style={{ color: '#8B8BA7' }}>
+          Helps MindShift tailor timing and difficulty. Stays on this device only.
+        </p>
+
+        {/* Sleep quality — session only (not persisted) */}
+        <div className="mb-4">
+          <p className="text-xs font-medium" style={{ color: '#E8E8F0' }}>😴 How did you sleep?</p>
+          <ChipGroup
+            label="Sleep quality"
+            value={sleepQuality}
+            options={[
+              { value: 1 as const, label: 'Rough' },
+              { value: 2 as const, label: 'Okay' },
+              { value: 3 as const, label: 'Well' },
+            ]}
+            onChange={(v) => {
+              setSleepQuality(v as 1 | 2 | 3)
+              toast.success('Sleep quality saved for today')
+            }}
+          />
+        </div>
+
+        {/* Medication */}
+        <div className="mb-4">
+          <Toggle
+            checked={medicationEnabled}
+            onChange={(val) => {
+              setMedicationEnabled(val)
+              toast.success(val ? '💊 Medication logged for today' : 'Medication cleared')
+            }}
+            label="💊 Taken medication today"
+          />
+          {medicationEnabled && (
+            <div className="mt-2">
+              <p className="text-xs mb-1" style={{ color: '#8B8BA7' }}>When do you typically take it?</p>
+              <ChipGroup
+                label="Medication timing"
+                value={medicationTime}
+                options={[
+                  { value: 'morning'   as const, label: 'Morning' },
+                  { value: 'afternoon' as const, label: 'Afternoon' },
+                  { value: 'evening'   as const, label: 'Evening' },
+                ]}
+                onChange={(v) => setMedicationTime(v as 'morning' | 'afternoon' | 'evening')}
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Chronotype */}
+        <div className="mb-4">
+          <p className="text-xs font-medium" style={{ color: '#E8E8F0' }}>🦉 When do you focus best?</p>
+          <ChipGroup
+            label="Chronotype"
+            value={chronotype}
+            options={[
+              { value: 'lark'   as const, label: '🌅 Early bird' },
+              { value: 'varies' as const, label: '🌤️ It varies' },
+              { value: 'owl'    as const, label: '🦉 Night owl' },
+            ]}
+            onChange={(v) => {
+              setChronotype(v as 'lark' | 'owl' | 'varies')
+              toast.success('Chronotype saved')
+            }}
+          />
+        </div>
+
+        {/* Flexible Pause */}
+        <div>
+          <Toggle
+            checked={!!flexiblePauseUntil && new Date(flexiblePauseUntil) > new Date()}
+            onChange={(val) => {
+              if (val) {
+                // Pause for 24 hours
+                const until = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+                setFlexiblePauseUntil(until)
+                toast.success('🛋️ Rest mode on — no pressure for 24 hours')
+              } else {
+                setFlexiblePauseUntil(null)
+                toast.success('Back in action 💪')
+              }
+            }}
+            label="🛋️ Rest mode (pause focus pressure)"
+          />
+          <p className="text-xs mt-1" style={{ color: '#8B8BA7' }}>
+            Turns off session reminders and soft-stop toasts for 24 hours. You can still focus.
+          </p>
+        </div>
+      </section>
+
+      {/* ── Your Current Phase — Block 6c ─────────────────────────────────── */}
+      {/* Seasonal mode: shapes NOW-pool limits + difficulty defaults, not aesthetics */}
+      <section className="mx-5 p-4 rounded-2xl mb-4" style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)' }}>
+        <p className="text-xs font-medium tracking-widest uppercase mb-1" style={{ color: '#8B8BA7' }}>
+          Your Current Phase
+        </p>
+        <p className="text-xs mb-4 leading-relaxed" style={{ color: '#8B8BA7' }}>
+          Adjusts task limits and defaults to match where you are in life right now.
+        </p>
+
+        {/* 2×2 grid */}
+        <div className="grid grid-cols-2 gap-2">
+          {([
+            {
+              mode: 'launch'   as const,
+              emoji: '🚀',
+              label: 'Launch',
+              desc:  'Ambitious goals — up to 5 NOW tasks',
+            },
+            {
+              mode: 'maintain' as const,
+              emoji: '🌱',
+              label: 'Maintain',
+              desc:  'Steady pace — 3 NOW tasks default',
+            },
+            {
+              mode: 'recover'  as const,
+              emoji: '🛋️',
+              label: 'Recover',
+              desc:  'Minimal pressure — max 2 NOW tasks',
+            },
+            {
+              mode: 'sandbox'  as const,
+              emoji: '🎮',
+              label: 'Sandbox',
+              desc:  'Explore freely — no limits',
+            },
+          ]).map(({ mode, emoji, label, desc }) => {
+            const isActive = seasonalMode === mode
+            return (
+              <button
+                key={mode}
+                onClick={() => {
+                  setSeasonalMode(mode)
+                  toast.success(`Phase set to ${label}`)
+                }}
+                className="flex flex-col items-start p-3 rounded-xl text-left transition-all duration-200 min-h-[88px]"
+                style={{
+                  background: isActive ? 'rgba(123,114,255,0.12)' : '#252840',
+                  border: `1.5px solid ${isActive ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
+                }}
+              >
+                <span className="text-xl mb-1">{emoji}</span>
+                <p className="text-xs font-semibold mb-0.5" style={{ color: isActive ? '#7B72FF' : '#E8E8F0' }}>
+                  {label}
+                </p>
+                <p className="text-[10px] leading-tight" style={{ color: '#8B8BA7' }}>
+                  {desc}
+                </p>
+              </button>
+            )
+          })}
         </div>
       </section>
 

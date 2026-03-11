@@ -25,6 +25,8 @@ import { useStore } from '@/store'
 import { AddTaskModal } from '@/features/tasks/AddTaskModal'
 import { Mascot } from '@/shared/ui/Mascot'
 import { BentoGrid } from './BentoGrid'
+import { BurnoutAlert } from './BurnoutAlert'
+import { BurnoutNudgeCard } from './BurnoutNudgeCard'
 import { hapticTap } from '@/shared/lib/haptic'
 import type { MascotState } from '@/shared/ui/Mascot'
 import type { AppMode } from '@/types'
@@ -183,6 +185,7 @@ export default function HomeScreen() {
   const {
     energyLevel, appMode, activeSession,
     onboardingCompleted, nowPool, gridWidgets, setGridWidgets,
+    burnoutScore,
   } = useStore()
   const { t, shouldAnimate } = useMotion()
   useGridSync()   // two-tier persistence: IndexedDB (offline) + Supabase (cross-device)
@@ -282,6 +285,12 @@ export default function HomeScreen() {
           />
         )}
       </AnimatePresence>
+
+      {/* Burnout nudge card — Block 5b (shows when burnoutScore ≥ 60 + 24h no session) */}
+      <BurnoutNudgeCard burnoutScore={burnoutScore} />
+
+      {/* Burnout alert — Block 2 (shows when burnoutScore ≥ 41) */}
+      <BurnoutAlert score={burnoutScore} />
 
       {/* ── Bento Grid (sortable, psychotype-driven, dnd-kit) ───────────── */}
       <motion.div

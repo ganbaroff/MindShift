@@ -10,6 +10,8 @@ export const PHASE_STRUGGLE_MINUTES = 7   // 0–7 min: high-contrast, large tim
 export const PHASE_RELEASE_MINUTES = 15   // 7–15 min: timer shrinks, animations slow
 export const PHASE_FLOW_MINUTES = 15      // 15+ min: digits vanish, ambient arc only
 export const MAX_SESSION_MINUTES = 90
+export const SESSION_SOFT_STOP_MINUTES = 90   // Block 4a: toast nudge to wrap up
+export const SESSION_HARD_STOP_MINUTES = 120  // Block 4a: half-sheet forced end
 export const RECOVERY_LOCK_MINUTES = 10
 
 // Audio

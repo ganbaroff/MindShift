@@ -26,6 +26,7 @@ export interface Task {
   dueTime: string | null          // "HH:MM" or null
   taskType: 'task' | 'idea' | 'reminder'
   reminderSentAt: string | null   // when reminder notification was sent
+  difficultyLevel?: 'easy' | 'medium' | 'hard'  // Traffic Light (Block 6)
 }
 
 export interface ActiveSession {
@@ -66,6 +67,7 @@ export type WidgetType =
   | 'now_pool'       // Current tasks (NOW pool)
   | 'progress'       // XP + level overview
   | 'audio_quick'    // Compact audio control
+  | 'lifetime_stats' // Lifetime focus + task stats (Block 6)
 
 export interface WidgetConfig {
   id: string         // Stable unique identifier (type-based — one per type)
@@ -93,11 +95,12 @@ export const WIDGET_DEFAULTS: Record<Psychotype, WidgetConfig[]> = {
   ],
   // Connector: emotional baseline first, then tasks
   connector: [
-    { id: 'energy_check', type: 'energy_check', visible: true },
-    { id: 'now_pool',    type: 'now_pool',    visible: true },
-    { id: 'progress',   type: 'progress',    visible: true },
-    { id: 'quick_focus', type: 'quick_focus', visible: true },
-    { id: 'audio_quick', type: 'audio_quick', visible: true },
+    { id: 'energy_check',  type: 'energy_check',  visible: true },
+    { id: 'now_pool',      type: 'now_pool',      visible: true },
+    { id: 'progress',      type: 'progress',      visible: true },
+    { id: 'quick_focus',   type: 'quick_focus',   visible: true },
+    { id: 'audio_quick',   type: 'audio_quick',   visible: true },
+    { id: 'lifetime_stats', type: 'lifetime_stats', visible: false },
   ],
   // Planner: structure-first, time-aware
   planner: [

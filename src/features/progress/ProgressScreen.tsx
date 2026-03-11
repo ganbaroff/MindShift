@@ -5,6 +5,7 @@ import { useStore } from '@/store'
 import { ACHIEVEMENT_DEFINITIONS } from '@/types'
 import { supabase } from '@/shared/lib/supabase'
 import Avatar, { STAGE_NAMES, stageFromLevel } from './Avatar'
+import { BurnoutAlert } from '@/features/home/BurnoutAlert'
 import type { FocusSessionRow } from '@/types'
 
 // ── XP helpers ─────────────────────────────────────────────────────────────────
@@ -38,7 +39,7 @@ export default function ProgressScreen() {
   const {
     xpTotal, achievements, completedTotal,
     weeklyStats, setWeeklyStats,
-    userId,
+    userId, burnoutScore,
   } = useStore()
 
   const { t, shouldAnimate } = useMotion()
@@ -163,6 +164,9 @@ export default function ProgressScreen() {
           Every step counts, no matter how small.
         </motion.p>
       </div>
+
+      {/* Burnout Alert — Block 2: shows only at caution (41–65) or burnout (66+) */}
+      <BurnoutAlert score={burnoutScore} />
 
       {/* ── Avatar + XP card ──────────────────────────────────────────────────── */}
       <motion.div
