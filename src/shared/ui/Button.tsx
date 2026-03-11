@@ -68,7 +68,7 @@ export function Button({
       aria-pressed={ariaProps['aria-pressed']}
     >
       {loading ? (
-        <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+        <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin motion-reduce:animate-none motion-reduce:opacity-60" />
       ) : children}
     </motion.button>
   )

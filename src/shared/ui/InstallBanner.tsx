@@ -9,9 +9,11 @@ import { motion, AnimatePresence } from 'motion/react'
 import { X, Share, Plus, Download } from 'lucide-react'
 import { useInstallPrompt } from '@/shared/hooks/useInstallPrompt'
 import { hapticTap } from '@/shared/lib/haptic'
+import { useMotion } from '@/shared/hooks/useMotion'
 
 export function InstallBanner() {
   const { state, install, dismiss } = useInstallPrompt()
+  const { t } = useMotion()
 
   const handleInstall = () => {
     hapticTap()
@@ -32,7 +34,7 @@ export function InstallBanner() {
           initial={{ opacity: 0, y: 80 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 80 }}
-          transition={{ type: 'spring', damping: 24, stiffness: 260 }}
+          transition={t()}
           role="banner"
           aria-label="Install MindShift as an app"
           className="fixed left-0 right-0 z-40 px-4 pointer-events-none bottom-[calc(64px+env(safe-area-inset-bottom))]"

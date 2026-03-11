@@ -206,7 +206,7 @@ export function RecoveryProtocol({ onDismiss }: Props) {
             </motion.div>
             {loadingAi ? (
               <div className="flex justify-center">
-                <span className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" style={{ color: '#7B72FF' }} />
+                <span className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin motion-reduce:animate-none motion-reduce:opacity-60" style={{ color: '#7B72FF' }} />
               </div>
             ) : (
               <p

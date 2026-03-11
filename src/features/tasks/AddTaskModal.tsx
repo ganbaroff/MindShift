@@ -492,7 +492,7 @@ export function AddTaskModal({ open, onClose }: Props) {
               {classifying && (
                 <div className="flex items-center gap-3 px-4 py-3 rounded-2xl"
                   style={{ background: '#252840', border: '1px solid rgba(123,114,255,0.3)' }}>
-                  <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin shrink-0"
+                  <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin motion-reduce:animate-none motion-reduce:opacity-60 shrink-0"
                     style={{ color: '#7B72FF' }} />
                   <span className="text-sm" style={{ color: '#7B72FF' }}>AI is thinking… 🧠</span>
                 </div>
@@ -630,7 +630,7 @@ export function AddTaskModal({ open, onClose }: Props) {
                     >
                       {loadingAi ? (
                         <>
-                          <span className="w-3 h-3 border border-current border-t-transparent rounded-full animate-spin" />
+                          <span className="w-3 h-3 border border-current border-t-transparent rounded-full animate-spin motion-reduce:animate-none motion-reduce:opacity-60" />
                           Breaking down...
                         </>
                       ) : '✨ Break it down for me'}

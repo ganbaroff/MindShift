@@ -1,4 +1,5 @@
 import { motion } from 'motion/react'
+import { useMotion } from '@/shared/hooks/useMotion'
 import type { EnergyLevel } from '@/types'
 
 // ── Energy level options ───────────────────────────────────────────────────────
@@ -18,6 +19,8 @@ interface Props {
 }
 
 export function EnergyCheckin({ onSelect, selected, compact = false }: Props) {
+  const { shouldAnimate, t } = useMotion()
+
   return (
     <div className="flex gap-2 justify-between">
       {ENERGY_OPTIONS.map(({ level, emoji, label }, i) => {
@@ -25,10 +28,10 @@ export function EnergyCheckin({ onSelect, selected, compact = false }: Props) {
         return (
           <motion.button
             key={level}
-            initial={{ opacity: 0, y: 10 }}
+            initial={shouldAnimate ? { opacity: 0, y: 10 } : {}}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.06 }}
-            whileTap={{ scale: 0.90 }}
+            transition={{ ...t(), delay: i * 0.06 }}
+            whileTap={shouldAnimate ? { scale: 0.90 } : {}}
             onClick={() => onSelect(level)}
             aria-label={`Energy level ${level}: ${label}`}
             aria-pressed={isSelected}

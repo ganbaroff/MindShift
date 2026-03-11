@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'motion/react'
 import { X } from 'lucide-react'
+import { useMotion } from '@/shared/hooks/useMotion'
 
 const CONSENT_KEY = 'ms_cookie_consent'
 const CONSENT_VERSION = '2026-03'
@@ -17,6 +18,7 @@ const CONSENT_VERSION = '2026-03'
  */
 export function CookieBanner() {
   const [visible, setVisible] = useState(false)
+  const { t } = useMotion()
 
   useEffect(() => {
     try {
@@ -61,7 +63,7 @@ export function CookieBanner() {
           initial={{ y: 40, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 40, opacity: 0 }}
-          transition={{ type: 'spring', damping: 22, stiffness: 200 }}
+          transition={t()}
         >
           <div className="flex-1 min-w-0">
             <p className="text-[11px] leading-relaxed" style={{ color: '#7B7B95' }}>

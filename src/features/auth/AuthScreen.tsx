@@ -212,7 +212,7 @@ function EmailStep({
         }}
       >
         {loading ? (
-          <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+          <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin motion-reduce:animate-none motion-reduce:opacity-60" />
         ) : (
           <>
             Send magic link
