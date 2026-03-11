@@ -5,6 +5,8 @@ import { logError } from '@/shared/lib/logger'
 interface Props {
   children: ReactNode
   fallbackRoute?: string
+  /** Custom fallback UI for per-route error boundaries */
+  fallback?: ReactNode
 }
 
 interface State {
@@ -36,6 +38,9 @@ export class ErrorBoundary extends Component<Props, State> {
 
   render() {
     if (this.state.hasError) {
+      // If a custom fallback was provided, render it instead of the default UI
+      if (this.props.fallback) return this.props.fallback
+
       return (
         <div
           className="flex flex-col items-center justify-center min-h-screen px-6 text-center"

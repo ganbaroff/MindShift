@@ -16,7 +16,7 @@
  *   - idle (default): gentle float
  */
 
-import { useState, useEffect } from 'react'
+import { lazy, Suspense, useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { useGridSync } from '@/shared/hooks/useGridSync'
@@ -24,9 +24,12 @@ import { Plus } from 'lucide-react'
 import { useStore } from '@/store'
 import { AddTaskModal } from '@/features/tasks/AddTaskModal'
 import { Mascot } from '@/shared/ui/Mascot'
-import { BentoGrid } from './BentoGrid'
 import { BurnoutAlert } from './BurnoutAlert'
 import { BurnoutNudgeCard } from './BurnoutNudgeCard'
+
+// BentoGrid pulls in dnd-kit (~45 KB gzip) — lazy-load so it only lands in the
+// HomeScreen chunk, not the shared vendor bundle.
+const BentoGrid = lazy(() => import('./BentoGrid').then(m => ({ default: m.BentoGrid })))
 import { hapticTap } from '@/shared/lib/haptic'
 import type { MascotState } from '@/shared/ui/Mascot'
 import type { AppMode } from '@/types'
@@ -179,6 +182,21 @@ function FirstTaskPrompt({ onAdd, onDismiss }: { onAdd: () => void; onDismiss: (
   )
 }
 
+// ── BentoGrid skeleton — shown while the lazy chunk loads (~50 ms) ────────────
+function BentoGridSkeleton() {
+  return (
+    <div className="px-4 grid grid-cols-2 gap-3 mt-2">
+      {[1, 2, 3, 4].map(i => (
+        <div
+          key={i}
+          className="rounded-2xl animate-pulse"
+          style={{ height: 120, background: '#1E2136', border: '1px solid rgba(255,255,255,0.04)' }}
+        />
+      ))}
+    </div>
+  )
+}
+
 // ── Main HomeScreen ────────────────────────────────────────────────────────────
 
 export default function HomeScreen() {
@@ -299,10 +317,12 @@ export default function HomeScreen() {
         transition={{ ...t(), delay: 0.2 }}
         className="mt-2"
       >
-        <BentoGrid
-          widgets={gridWidgets}
-          onReorder={setGridWidgets}
-        />
+        <Suspense fallback={<BentoGridSkeleton />}>
+          <BentoGrid
+            widgets={gridWidgets}
+            onReorder={setGridWidgets}
+          />
+        </Suspense>
       </motion.div>
 
       {/* ── Add Task FAB ────────────────────────────────────────────────── */}

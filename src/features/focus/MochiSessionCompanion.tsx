@@ -11,7 +11,7 @@
  * - Uses `useMotion()` for animation control
  */
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, memo } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { Mascot } from '@/shared/ui/Mascot'
 import { useMotion } from '@/shared/hooks/useMotion'
@@ -62,7 +62,7 @@ const MIN_GAP_SECONDS = 20 * 60  // max 1 bubble per 20 min
 
 // ── Component ──────────────────────────────────────────────────────────────────
 
-export function MochiSessionCompanion({ elapsedSeconds, sessionPhase }: Props) {
+function MochiSessionCompanionInner({ elapsedSeconds, sessionPhase }: Props) {
   const { shouldAnimate, t } = useMotion()
 
   const [activeBubble, setActiveBubble] = useState<BubbleTrigger | null>(null)
@@ -153,3 +153,7 @@ export function MochiSessionCompanion({ elapsedSeconds, sessionPhase }: Props) {
     </div>
   )
 }
+
+// memo: Mochi only updates when elapsedSeconds or sessionPhase change — not
+// on every timer tick if those values haven't actually changed.
+export const MochiSessionCompanion = memo(MochiSessionCompanionInner)

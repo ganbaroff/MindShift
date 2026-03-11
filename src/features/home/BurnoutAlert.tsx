@@ -11,7 +11,7 @@
  * - Calm, supportive copy
  */
 
-import { useState } from 'react'
+import { useState, memo } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { X } from 'lucide-react'
 import { useMotion } from '@/shared/hooks/useMotion'
@@ -46,7 +46,7 @@ const TIER_CONFIG = {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-export function BurnoutAlert({ score }: Props) {
+function BurnoutAlertInner({ score }: Props) {
   const { shouldAnimate, t } = useMotion()
   const [dismissed, setDismissed] = useState(false)
 
@@ -108,3 +108,7 @@ export function BurnoutAlert({ score }: Props) {
     </AnimatePresence>
   )
 }
+
+// memo: BurnoutAlert has its own dismissed state; the score prop only changes
+// when the burnout computation runs (on task/energy changes), not on every render.
+export const BurnoutAlert = memo(BurnoutAlertInner)

@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { motion } from 'motion/react'
 import { useMotion } from '@/shared/hooks/useMotion'
 import type { SessionPhase } from '@/types'
@@ -42,7 +43,7 @@ interface Props {
   timerStyle?: 'countdown' | 'countup' | 'surprise'
 }
 
-export function ArcTimer({
+function ArcTimerInner({
   progress, remainingSeconds, elapsedSeconds = 0,
   phase, showDigits, onToggleDigits,
   disableToggle = false, size = ARC_SIZE,
@@ -157,3 +158,8 @@ export function ArcTimer({
     </motion.button>
   )
 }
+
+// ── memo wrapper — ArcTimer re-renders every 250ms from the parent interval ──
+// With memo, React skips re-render when props are shallowly equal.
+// Critical for SVG-heavy arc animation performance.
+export const ArcTimer = memo(ArcTimerInner)

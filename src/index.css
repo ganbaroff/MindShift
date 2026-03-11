@@ -24,6 +24,34 @@
   --duration-slow:   400ms;
 }
 
+/* ── Runtime CSS tokens — calm mode support ─────────────── */
+/* Aliases matching tokens.ts names; non-layered so they win */
+/* over @layer theme and can be overridden by [data-mode].   */
+:root {
+  --color-primary:         #7B72FF;  /* override @theme so [data-mode] can win */
+  --color-teal:            #4ECDC4;  /* tokens.color.teal                      */
+  --color-gold:            #F59E0B;  /* tokens.color.gold                      */
+  --color-surface-card:    #1E2136;  /* tokens.color.surface                   */
+  --color-surface-raised:  #252840;  /* tokens.color.surfaceRaised             */
+  --color-text-primary:    #E8E8F0;  /* tokens.color.textPrimary               */
+  --color-text-muted:      #8B8BA7;  /* tokens.color.textMuted                 */
+}
+
+/* Calm / reduced-stimulation palette.                        */
+/* App.tsx sets data-mode="calm" on <html> when              */
+/* store.reducedStimulation === true.                         */
+[data-mode="calm"] {
+  /* Primary aliases */
+  --color-primary:    #7878B8;  /* desaturated indigo */
+  --color-teal:       #4A8A87;  /* desaturated teal   */
+  --color-gold:       #8C6A10;  /* desaturated amber  */
+  /* Tailwind @theme mirrors — keeps utility classes in sync */
+  --color-secondary:  #4A8A87;
+  --color-accent:     #8C6A10;
+  --color-warning:    #8C6A10;
+  --color-success:    #4A8A87;
+}
+
 /* ── Base ─────────────────────────────────────────────────── */
 /* NOTE: wrapped in @layer base so Tailwind utility classes (e.g. mx-auto,
    px-*, gap-*) properly override the reset in the Tailwind v4 cascade. */

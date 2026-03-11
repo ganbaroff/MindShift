@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
+import { visualizer } from 'rollup-plugin-visualizer'
 import path from 'path'
 
 export default defineConfig({
@@ -35,6 +36,17 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,ico,png,woff2}'],
       },
     }),
+    // Bundle analyzer — active only when ANALYZE=true env var is set
+    // Usage: ANALYZE=true npm run build → open dist/bundle-report.html
+    // Install once: npm install -D rollup-plugin-visualizer
+    ...(process.env.ANALYZE === 'true' ? [
+      visualizer({
+        filename: 'dist/bundle-report.html',
+        open: false,
+        gzipSize: true,
+        template: 'treemap',
+      }),
+    ] : []),
   ],
   preview: {
     allowedHosts: true,
@@ -54,7 +66,8 @@ export default defineConfig({
           'vendor-query':    ['@tanstack/react-query'],
           'vendor-ui':       ['zustand', 'sonner', 'lucide-react'],
           // dnd-kit only used in BentoGrid (HomeScreen) — split to prevent
-          // polluting the main bundle for users who never visit HomeScreen
+          // polluting the main bundle for users who never visit HomeScreen.
+          // BentoGrid is lazy-loaded, so this chunk defers until HomeScreen renders.
           'vendor-dnd':      ['@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities'],
         },
       },

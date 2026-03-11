@@ -7,8 +7,8 @@ import { AppShell } from './AppShell'
 import { LoadingScreen } from '@/shared/ui/LoadingScreen'
 import { AuthGuard } from './AuthGuard'
 import { ErrorBoundary } from '@/shared/ui/ErrorBoundary'
-import { RecoveryProtocol } from '@/features/tasks/RecoveryProtocol'
-import { ContextRestore, writeLastActive, shouldShowContextRestore } from '@/features/tasks/ContextRestore'
+// Utility helpers (tiny, eagerly loaded — used in visibilitychange handler)
+import { writeLastActive, shouldShowContextRestore } from '@/features/tasks/contextRestoreUtils'
 import { CookieBanner } from '@/shared/ui/CookieBanner'
 import { RECOVERY_THRESHOLD_HOURS } from '@/shared/lib/constants'
 import { useOfflineSync } from '@/shared/hooks/useOfflineSync'
@@ -19,7 +19,7 @@ import { computeBurnoutScore, deriveBehaviors } from '@/shared/lib/burnout'
 // Key that AuthScreen writes before sending the magic link
 const CONSENT_PENDING_KEY = 'ms_consent_pending'
 
-// Lazy-loaded routes for code splitting
+// ── Lazy-loaded routes — each becomes a separate JS chunk ──────────────────────
 const AuthScreen       = lazy(() => import('@/features/auth/AuthScreen'))
 const OnboardingFlow   = lazy(() => import('@/features/onboarding/OnboardingFlow'))
 const HomeScreen       = lazy(() => import('@/features/home/HomeScreen'))
@@ -33,18 +33,36 @@ const PrivacyPage      = lazy(() => import('@/features/legal/PrivacyPage'))
 const TermsPage        = lazy(() => import('@/features/legal/TermsPage'))
 const CookiePolicyPage = lazy(() => import('@/features/legal/CookiePolicyPage'))
 
+// ── Conditional overlays — lazy chunks (shown in < 2% of sessions) ────────────
+// RecoveryProtocol: only after 72h+ absence. ContextRestore: 30–72h absence.
+// Lazy-loading saves ~5–8 KB from the main bundle for typical sessions.
+const LazyRecoveryProtocol = lazy(() =>
+  import('@/features/tasks/RecoveryProtocol').then(m => ({ default: m.RecoveryProtocol }))
+)
+const LazyContextRestore = lazy(() =>
+  import('@/features/tasks/ContextRestore').then(m => ({ default: m.ContextRestore }))
+)
+
 export default function App() {
   const {
     setUser, updateLastSession, lastSessionAt, recoveryShown, setRecoveryShown,
     nowPool, nextPool, somedayPool,
     onboardingCompleted, setBurnoutScore, completedTotal, energyLevel,
     flexiblePauseUntil, setFlexiblePauseUntil,
+    reducedStimulation,
   } = useStore()
   const [showContextRestore, setShowContextRestore] = useState(false)
 
+  // ── Calm mode: set data-mode attribute on <html> for CSS variable overrides ──
+  // Components using CSS vars get theme switching instantly (no JS re-render).
+  useEffect(() => {
+    document.documentElement.setAttribute(
+      'data-mode',
+      reducedStimulation ? 'calm' : 'normal'
+    )
+  }, [reducedStimulation])
+
   // ── Auth listener ───────────────────────────────────────────────────────────
-  // Handles both Google OAuth (coming soon) and the legacy magic-link flow.
-  // In bypass mode, this sets a persistent guest ID so all local features work.
   useEffect(() => {
     // Guest mode: set a stable local ID so tasks, sessions, XP all persist across reloads
     supabase.auth.getSession().then(({ data }) => {
@@ -96,8 +114,6 @@ export default function App() {
   }, [setUser, updateLastSession])
 
   // ── "Where Was I?" context restoration ────────────────────────────────────
-  // Write timestamp when page becomes hidden; check on show (return from background).
-  // Only shown when user has onboarded + has active NOW tasks + returned after 30–72h absence.
   useEffect(() => {
     const hasActiveTasks = nowPool.some(t => t.status === 'active')
 
@@ -117,32 +133,24 @@ export default function App() {
   }, [nowPool, onboardingCompleted])
 
   // ── Reminders restore on mount ─────────────────────────────────────────────
-  // Re-arms all persisted reminders after page reload (timeouts are session-only).
   useEffect(() => {
     reminders.restore()
   }, [])
 
   // ── Burnout score computation — Block 2 ──────────────────────────────────
-  // Runs on mount + when key signals change. Client-side only, no server call.
   useEffect(() => {
     const allTasks = [...nowPool, ...nextPool, ...somedayPool]
     const activeTasks = allTasks.filter(t => t.status === 'active')
     const snoozedCount = allTasks.reduce((acc, t) => acc + t.snoozeCount, 0)
-
-    // Approximate daily completed count from lifetime total (no day breakdown in store)
-    // Use completedTotal as a proxy: assume uniform distribution over 7 days
     const avgCompletedPerDay = completedTotal / 7
-
-    // For recent vs avg, use a conservative proxy since we don't have time-series in store
-    // When completedTotal is very low, assume no decay; when high, use energy as decay signal
-    const recentAvgEnergy = energyLevel  // use current energy as proxy
+    const recentAvgEnergy = energyLevel
 
     const behaviors = deriveBehaviors({
       snoozedCount,
       activeCount: Math.max(activeTasks.length, 1),
       recentCompletedPerDay: avgCompletedPerDay * (recentAvgEnergy / 3),
       avgCompletedPerDay,
-      recentSessionMinutes: 20 * (recentAvgEnergy / 3),  // conservative proxy
+      recentSessionMinutes: 20 * (recentAvgEnergy / 3),
       avgSessionMinutes: 20,
       recentAvgEnergy,
     })
@@ -161,7 +169,6 @@ export default function App() {
   })()
 
   // ── Flexible Pause — Block 4b ───────────────────────────────────────────────
-  // Non-blocking rest-mode banner. Shown when user set a 24h pause in Settings.
   const flexPauseActive = useMemo(() => {
     if (!flexiblePauseUntil) return false
     return new Date(flexiblePauseUntil) > new Date()
@@ -190,19 +197,24 @@ export default function App() {
       />
       <ErrorBoundary>
         <Suspense fallback={<LoadingScreen />}>
+
+          {/* ── Conditional overlays — lazy chunks, null fallback ─────────── */}
           {showRecovery && (
-            <RecoveryProtocol onDismiss={setRecoveryShown} />
+            <Suspense fallback={null}>
+              <LazyRecoveryProtocol onDismiss={setRecoveryShown} />
+            </Suspense>
           )}
 
-          {/* "Where Was I?" — context restore after 30–72h absence, non-blocking */}
           {!showRecovery && showContextRestore && (
-            <ContextRestore onDismiss={() => setShowContextRestore(false)} />
+            <Suspense fallback={null}>
+              <LazyContextRestore onDismiss={() => setShowContextRestore(false)} />
+            </Suspense>
           )}
 
           {/* Cookie notice — shown once on first visit, purely informational */}
           <CookieBanner />
 
-          {/* Flexible Pause banner — Block 4b: gentle rest-mode indicator, non-blocking */}
+          {/* Flexible Pause banner — Block 4b */}
           {flexPauseActive && (
             <div
               className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 py-2.5"
@@ -239,23 +251,48 @@ export default function App() {
             <Route path="/cookie-policy" element={<CookiePolicyPage />} />
 
             <Route element={<AuthGuard />}>
-              {/* /onboarding — optional deep-setup, accessible from Settings */}
               <Route path="/onboarding" element={<OnboardingFlow />} />
 
               <Route element={<AppShell />}>
                 {/*
-                  Progressive disclosure: HomeScreen is ALWAYS the entry point.
-                  New users see a QuickSetupCard embedded in HomeScreen —
-                  no forced tutorial redirect (per ADHD UX research: progressive
-                  disclosure beats wizard flows for neurodivergent users).
+                  Per-route error boundaries: if one screen crashes, the rest of
+                  the app stays functional (the BottomNav remains accessible).
                 */}
-                <Route index          element={<HomeScreen />} />
-                <Route path="/focus"    element={<FocusScreen />} />
-                <Route path="/tasks"    element={<TasksScreen />} />
-                <Route path="/audio"    element={<AudioScreen />} />
-                <Route path="/calendar" element={<CalendarScreen />} />
-                <Route path="/progress" element={<ProgressScreen />} />
-                <Route path="/settings" element={<SettingsScreen />} />
+                <Route index element={
+                  <ErrorBoundary fallback={<RouteError label="Home" />}>
+                    <HomeScreen />
+                  </ErrorBoundary>
+                } />
+                <Route path="/focus" element={
+                  <ErrorBoundary fallback={<RouteError label="Focus" />}>
+                    <FocusScreen />
+                  </ErrorBoundary>
+                } />
+                <Route path="/tasks" element={
+                  <ErrorBoundary fallback={<RouteError label="Tasks" />}>
+                    <TasksScreen />
+                  </ErrorBoundary>
+                } />
+                <Route path="/audio" element={
+                  <ErrorBoundary fallback={<RouteError label="Audio" />}>
+                    <AudioScreen />
+                  </ErrorBoundary>
+                } />
+                <Route path="/calendar" element={
+                  <ErrorBoundary fallback={<RouteError label="Calendar" />}>
+                    <CalendarScreen />
+                  </ErrorBoundary>
+                } />
+                <Route path="/progress" element={
+                  <ErrorBoundary fallback={<RouteError label="Progress" />}>
+                    <ProgressScreen />
+                  </ErrorBoundary>
+                } />
+                <Route path="/settings" element={
+                  <ErrorBoundary fallback={<RouteError label="Settings" />}>
+                    <SettingsScreen />
+                  </ErrorBoundary>
+                } />
               </Route>
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
@@ -263,5 +300,26 @@ export default function App() {
         </Suspense>
       </ErrorBoundary>
     </BrowserRouter>
+  )
+}
+
+// ── Per-route fallback ─────────────────────────────────────────────────────────
+function RouteError({ label }: { label: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen gap-4 px-6 text-center">
+      <p className="text-base font-semibold" style={{ color: '#E8E8F0' }}>
+        {label} had a hiccup
+      </p>
+      <p className="text-sm" style={{ color: '#8B8BA7' }}>
+        Don't worry — your data is safe. Try navigating away and back.
+      </p>
+      <a
+        href="/"
+        className="px-5 py-2.5 rounded-xl text-sm font-semibold"
+        style={{ background: 'rgba(123,114,255,0.15)', border: '1.5px solid #7B72FF', color: '#7B72FF' }}
+      >
+        Go home
+      </a>
+    </div>
   )
 }

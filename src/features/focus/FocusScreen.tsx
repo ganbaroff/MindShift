@@ -1,566 +1,234 @@
-import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
-import { useSearchParams, Link } from 'react-router-dom'
+/**
+ * FocusScreen — thin orchestrator (Block 2d refactor)
+ *
+ * Responsibilities:
+ *   - Route between screen states from useFocusSession FSM
+ *   - Render setup, session, interrupt-confirm, bookmark-capture, hard-stop screens
+ *   - Delegate nature-buffer + recovery-lock to PostSessionFlow
+ *   - Delegate active-session controls to SessionControls
+ *
+ * All timer/session logic lives in useFocusSession.ts
+ * Post-session screens live in PostSessionFlow.tsx
+ * Session controls (audio/stop/park) live in SessionControls.tsx
+ */
+
 import { motion, AnimatePresence } from 'motion/react'
-import { useMotion } from '@/shared/hooks/useMotion'
-import { useStore } from '@/store'
-import { ArcTimer, ARC_SIZE } from './ArcTimer'
+import { Link } from 'react-router-dom'
+import { ArcTimer } from './ArcTimer'
 import { MochiSessionCompanion } from './MochiSessionCompanion'
-import { useAudioEngine } from '@/shared/hooks/useAudioEngine'
-import { supabase } from '@/shared/lib/supabase'
-import { logError } from '@/shared/lib/logger'
-import { notifyFocusEnd, notifyAchievement, requestNotificationPermission, pushFocusComplete, pushRecoveryEnd } from '@/shared/lib/notify'
-import { hapticDone } from '@/shared/lib/haptic'
-import { ACHIEVEMENT_DEFINITIONS } from '@/types'
-import {
-  TIMER_PRESETS,
-  PHASE_STRUGGLE_MINUTES,
-  PHASE_FLOW_MINUTES,
-  MAX_SESSION_MINUTES,
-  RECOVERY_LOCK_MINUTES,
-  NATURE_BUFFER_SECONDS,
-  SESSION_SOFT_STOP_MINUTES,
-  SESSION_HARD_STOP_MINUTES,
-} from '@/shared/lib/constants'
-import { toast } from 'sonner'
-import type { SessionPhase, AudioPreset, Task, EnergyLevel } from '@/types'
-import type { FocusSessionInsert } from '@/types/database'
-
-// ── Phase helpers ──────────────────────────────────────────────────────────────
-
-const PHASE_LABELS: Partial<Record<SessionPhase, string>> = {
-  struggle: 'Getting into it... 💪',
-  release:  'Finding your flow... 🌊',
-  recovery: 'Rest time. You did it! 🌟',
-}
-
-function getPhase(elapsedMinutes: number): SessionPhase {
-  if (elapsedMinutes < PHASE_STRUGGLE_MINUTES) return 'struggle'   // 0–7 min: high-contrast, large timer
-  if (elapsedMinutes < PHASE_FLOW_MINUTES) return 'release'        // 7–15 min: timer shrinks, slows
-  return 'flow'                                                     // 15+ min: digits vanish, ambient arc
-}
-
-/** Smart default duration based on energy — less energy = shorter session */
-function getSmartDuration(energy: EnergyLevel): number {
-  if (energy <= 2) return 5     // low battery → just 5 minutes
-  if (energy === 3) return 25   // medium → classic pomodoro
-  return 52                     // high energy → deep work
-}
-
-// ── Screen states ──────────────────────────────────────────────────────────────
-
-type ScreenState = 'setup' | 'session' | 'interrupt-confirm' | 'bookmark-capture' | 'recovery-lock' | 'nature-buffer' | 'hard-stop'
-
-// ── Interrupt bookmark (localStorage) ─────────────────────────────────────────
-
-interface InterruptBookmark {
-  text: string
-  taskId: string | null
-  taskTitle: string | null
-  timestamp: string
-}
-
-const BOOKMARK_KEY = 'ms_interrupt_bookmark'
-
-function loadBookmark(): InterruptBookmark | null {
-  try {
-    const raw = localStorage.getItem(BOOKMARK_KEY)
-    return raw ? JSON.parse(raw) : null
-  } catch { return null }
-}
-
-function saveBookmark(bookmark: InterruptBookmark): void {
-  try { localStorage.setItem(BOOKMARK_KEY, JSON.stringify(bookmark)) } catch { /* silent */ }
-}
-
-function clearBookmark(): void {
-  try { localStorage.removeItem(BOOKMARK_KEY) } catch { /* silent */ }
-}
-
-// ── Phase-based timer scale ───────────────────────────────────────────────────
-
-function getTimerSize(phase: SessionPhase): number {
-  switch (phase) {
-    case 'struggle': return ARC_SIZE          // 100% — large, high-contrast
-    case 'release':  return Math.round(ARC_SIZE * 0.85)  // 85% — shrinking
-    case 'flow':     return Math.round(ARC_SIZE * 0.75)  // 75% — ambient
-    default:         return ARC_SIZE
-  }
-}
-
-// ── Component ──────────────────────────────────────────────────────────────────
+import { SessionControls } from './SessionControls'
+import { NatureBuffer, RecoveryLock } from './PostSessionFlow'
+import { useFocusSession, clearBookmark, PHASE_LABELS } from './useFocusSession'
 
 export default function FocusScreen() {
+  const session = useFocusSession()
   const {
-    nowPool, nextPool,
-    activeSession, sessionPhase, energyLevel,
-    startSession, endSession, setPhase, updateLastSession,
-    hasAchievement, unlockAchievement,
-    focusAnchor, activePreset, setPreset,
-    timerStyle, flexiblePauseUntil, setEnergyLevel,
-  } = useStore()
+    screen,
+    selectedTask, setSelectedTask,
+    selectedDuration, setSelectedDuration,
+    customDuration, setCustomDuration,
+    showCustom, setShowCustom,
+    smartDuration, allTasks, savedBookmark,
+    elapsedSeconds, remainingSeconds,
+    showDigits, setShowDigits,
+    recoverySeconds, bufferSeconds,
+    postEnergyLogged,
+    bookmarkText, setBookmarkText,
+    parkOpen, setParkOpen,
+    parkText, setParkText,
+    progress, isFlow, elapsedMin, timerSize, energyLabel,
+    timerStyle, sessionPhase,
+    handleStart, handleStop, handleResume, handleConfirmStop,
+    handleBookmarkSave, handleBookmarkSkip, handleSkipBuffer,
+    handleAudioToggle, handleParkThought,
+    handleSessionEnd, handleBypassRecovery, handleBypassHardStop,
+    handlePostEnergy,
+    isPlaying,
+    shouldAnimate, t,
+    TIMER_PRESETS,
+    focusAnchor,
+  } = session
 
-  const { shouldAnimate, t } = useMotion()
-  const { play, stop: stopAudio, playAnchor, isPlaying } = useAudioEngine()
-  const [searchParams] = useSearchParams()
-
-  // ── Smart defaults ─────────────────────────────────────────────────────────
-  const smartDuration = useMemo(() => getSmartDuration(energyLevel), [energyLevel])
-  const isQuickStart = searchParams.get('quick') === '1'
-
-  // ── Setup state ──────────────────────────────────────────────────────────────
-  const [selectedTask, setSelectedTask]       = useState<Task | null>(null)
-  const [selectedDuration, setSelectedDuration] = useState(smartDuration)
-  const [customDuration, setCustomDuration]   = useState('')
-  const [showCustom, setShowCustom]           = useState(false)
-
-  // ── Runtime state ────────────────────────────────────────────────────────────
-  const [screen, setScreen]               = useState<ScreenState>('setup')
-  const [remainingSeconds, setRemaining]  = useState(0)
-  const [elapsedSeconds, setElapsed]      = useState(0)
-  const [showDigits, setShowDigits]       = useState(false)
-  const [recoverySeconds, setRecovery]    = useState(RECOVERY_LOCK_MINUTES * 60)
-  const [bufferSeconds, setBufferSeconds] = useState(NATURE_BUFFER_SECONDS)
-  // Block 3d: post-session energy delta
-  const [postEnergyLogged, setPostEnergyLogged] = useState(false)
-
-  // ── Refs (timer) ─────────────────────────────────────────────────────────────
-  const startTimeRef        = useRef(0)          // epoch ms of session start
-  const pausedMsRef         = useRef(0)          // total paused milliseconds
-  const pauseStartRef       = useRef(0)          // epoch ms when current pause started
-  const durationSecRef      = useRef(0)          // session duration in seconds
-  const intervalRef         = useRef<ReturnType<typeof setInterval> | null>(null)
-  const recoveryIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  const bufferIntervalRef   = useRef<ReturnType<typeof setInterval> | null>(null)
-  const sessionSavedRef     = useRef(false)
-  const quickStartedRef     = useRef(false)
-  const softStopFiredRef    = useRef(false)  // prevents re-fire across renders
-
-  // ── Interrupt bookmark ──────────────────────────────────────────────────────
-  const [bookmarkText, setBookmarkText] = useState('')
-  const [savedBookmark] = useState<InterruptBookmark | null>(() => loadBookmark())
-
-  // ── "Park the thought" quick-capture ──────────────────────────────────────
-  const [parkOpen, setParkOpen] = useState(false)
-  const [parkText, setParkText] = useState('')
-  const { addTask, userId } = useStore()
-
-  const handleParkThought = useCallback(async () => {
-    const text = parkText.trim()
-    if (!text) return
-    const task: Task = {
-      id: crypto.randomUUID(),
-      title: text,
-      pool: 'someday',
-      status: 'active',
-      difficulty: 1,
-      estimatedMinutes: 15,
-      createdAt: new Date().toISOString(),
-      completedAt: null,
-      snoozeCount: 0,
-      parentTaskId: null,
-      position: 0,
-      dueDate: null,
-      dueTime: null,
-      taskType: 'task',
-      reminderSentAt: null,
-    }
-    addTask(task)
-    if (userId) {
-      try {
-        await supabase.from('tasks').insert({
-          id: task.id, user_id: userId, title: task.title,
-          pool: task.pool, status: task.status, difficulty: task.difficulty,
-          estimated_minutes: task.estimatedMinutes, parent_task_id: null, position: 0,
-        } as never)
-      } catch (err) {
-        logError('FocusScreen.parkThought.insert', err, { taskId: task.id })
-      }
-    }
-    setParkText('')
-    setParkOpen(false)
-  }, [parkText, addTask, userId])
-
-  const allTasks = [...nowPool, ...nextPool].filter(t => t.status === 'active')
-
-  // Cleanup on unmount
-  useEffect(() => () => {
-    if (intervalRef.current)         clearInterval(intervalRef.current)
-    if (recoveryIntervalRef.current) clearInterval(recoveryIntervalRef.current)
-    if (bufferIntervalRef.current)   clearInterval(bufferIntervalRef.current)
-  }, [])
-
-  // ── Soft-stop toast at SESSION_SOFT_STOP_MINUTES (90 min) ─────────────────────
-  // Non-blocking — just a gentle reminder. Skipped in Flexible Pause mode.
-  useEffect(() => {
-    if (screen !== 'session') return
-    if (softStopFiredRef.current) return
-    const isFlexPauseActive = !!flexiblePauseUntil && new Date(flexiblePauseUntil) > new Date()
-    if (isFlexPauseActive) return
-    if (elapsedSeconds >= SESSION_SOFT_STOP_MINUTES * 60) {
-      softStopFiredRef.current = true
-      toast("You've been going for 90 minutes — wrap up when ready 🌿", {
-        duration: 8_000,
-      })
-    }
-  }, [elapsedSeconds, screen, flexiblePauseUntil])
-
-  // ── Hard-stop half-sheet at SESSION_HARD_STOP_MINUTES (120 min) ───────────────
-  // Pauses the timer and shows a rest prompt. User can still bypass (hyperfocus support).
-  // Skipped in Flexible Pause mode.
-  useEffect(() => {
-    if (screen !== 'session') return
-    const isFlexPauseActive = !!flexiblePauseUntil && new Date(flexiblePauseUntil) > new Date()
-    if (isFlexPauseActive) return
-    if (elapsedSeconds >= SESSION_HARD_STOP_MINUTES * 60) {
-      if (intervalRef.current) clearInterval(intervalRef.current)
-      setScreen('hard-stop')
-    }
-  }, [elapsedSeconds, screen, flexiblePauseUntil])
-
-  // ── Save session to DB (non-blocking) ────────────────────────────────────────
-  const saveSession = useCallback(async (
-    elapsedMs: number,
-    phaseReached: SessionPhase,
-  ) => {
-    if (sessionSavedRef.current || !activeSession || !userId) return
-    sessionSavedRef.current = true
-    try {
-      const row: FocusSessionInsert = {
-        task_id:       activeSession.taskId,
-        user_id:       userId,
-        started_at:    activeSession.startedAt,
-        audio_preset:  activePreset,
-        duration_ms:   elapsedMs,
-        phase_reached: phaseReached === 'idle' ? null : phaseReached,
-        energy_before: null,
-      }
-      await supabase.from('focus_sessions').insert(row as never)
-      updateLastSession()
-    } catch (err) {
-      // Non-blocking: offline sessions are acceptable; log for monitoring
-      logError('FocusScreen.handleSessionEnd.insert', err)
-    }
-  }, [activeSession, activePreset, updateLastSession, userId])
-
-  // ── Start nature buffer ─────────────────────────────────────────────────────
-  const startNatureBuffer = useCallback(() => {
-    setBufferSeconds(NATURE_BUFFER_SECONDS)
-    setScreen('nature-buffer')
-    // Play nature audio during buffer
-    play('nature')
-    setPreset('nature')
-
-    bufferIntervalRef.current = setInterval(() => {
-      setBufferSeconds(s => {
-        if (s <= 1) {
-          clearInterval(bufferIntervalRef.current!)
-          stopAudio()
-          setPreset(null)
-          setScreen('setup')
-          return 0
-        }
-        return s - 1
-      })
-    }, 1000)
-  }, [play, stopAudio, setPreset])
-
-  // ── Session end handler ───────────────────────────────────────────────────────
-  const handleSessionEnd = useCallback((wasCompleted: boolean) => {
-    if (intervalRef.current) clearInterval(intervalRef.current)
-
-    const elapsedMs = Date.now() - startTimeRef.current - pausedMsRef.current
-    const elapsedMin = Math.floor(elapsedMs / 60_000)
-    void saveSession(elapsedMs, sessionPhase)
-
-    // Toast + haptic (always shown in-app)
-    if (elapsedMin >= 1) {
-      notifyFocusEnd(elapsedMin)
-      hapticDone()
-    }
-    // Native push (shown even when app is backgrounded)
-    if (elapsedMin >= 1) pushFocusComplete(elapsedMin)
-
-    // Achievements
-    if (wasCompleted) {
-      const tryUnlock = (key: string) => {
-        if (!hasAchievement(key)) {
-          unlockAchievement(key)
-          const def = ACHIEVEMENT_DEFINITIONS.find(a => a.key === key)
-          if (def) notifyAchievement(def.name, def.emoji, def.description)
-        }
-      }
-
-      if (durationSecRef.current >= 52 * 60) tryUnlock('flow_rider')
-      if (sessionPhase === 'flow') tryUnlock('full_cycle')
-      if (durationSecRef.current === 5 * 60)  tryUnlock('five_min_hero')
-    }
-
-    stopAudio()
-    setPreset(null)
-    endSession()
-
-    const wasFull = wasCompleted && durationSecRef.current >= MAX_SESSION_MINUTES * 60
-    if (wasFull) {
-      // Mandatory 10-min recovery lock after 90-min session
-      setRecovery(RECOVERY_LOCK_MINUTES * 60)
-      setScreen('recovery-lock')
-      recoveryIntervalRef.current = setInterval(() => {
-        setRecovery(s => {
-          if (s <= 1) {
-            clearInterval(recoveryIntervalRef.current!)
-            pushRecoveryEnd()
-            setScreen('setup')
-            return 0
-          }
-          return s - 1
-        })
-      }, 1000)
-    } else if (wasCompleted) {
-      // Nature buffer between sessions
-      startNatureBuffer()
-    } else {
-      setScreen('setup')
-    }
-  }, [sessionPhase, saveSession, stopAudio, setPreset, endSession,
-      hasAchievement, unlockAchievement, startNatureBuffer])
-
-  // ── visibilitychange: correct timer when returning from background ──────
-  useEffect(() => {
-    const handleVisibility = () => {
-      if (document.visibilityState === 'visible' && screen === 'session' && startTimeRef.current > 0) {
-        const netElapsedMs = Date.now() - startTimeRef.current - pausedMsRef.current
-        const elapsed = Math.floor(netElapsedMs / 1000)
-        const remaining = Math.max(0, durationSecRef.current - elapsed)
-        setElapsed(elapsed)
-        setRemaining(remaining)
-        setPhase(getPhase(elapsed / 60))
-        if (remaining <= 0) handleSessionEnd(true)
-      }
-    }
-    document.addEventListener('visibilitychange', handleVisibility)
-    return () => document.removeEventListener('visibilitychange', handleVisibility)
-  }, [screen, handleSessionEnd, setPhase])
-
-  // ── Interval runner (shared between start & resume) ───────────────────────────
-  const startInterval = useCallback(() => {
-    const durationSec = durationSecRef.current
-    intervalRef.current = setInterval(() => {
-      const netElapsedMs = Date.now() - startTimeRef.current - pausedMsRef.current
-      const elapsed      = Math.floor(netElapsedMs / 1000)
-      const remaining    = Math.max(0, durationSec - elapsed)
-
-      setElapsed(elapsed)
-      setRemaining(remaining)
-      setPhase(getPhase(elapsed / 60))
-
-      if (remaining <= 0) handleSessionEnd(true)
-    }, 250)
-  }, [setPhase, handleSessionEnd])
-
-  // ── Start ────────────────────────────────────────────────────────────────────
-  const handleStart = useCallback((overrideDuration?: number) => {
-    const duration = overrideDuration
-      ?? (showCustom ? (parseInt(customDuration) || 25) : selectedDuration)
-    const durationSec = duration * 60
-
-    durationSecRef.current = durationSec
-    startTimeRef.current   = Date.now()
-    pausedMsRef.current    = 0
-    sessionSavedRef.current  = false
-    softStopFiredRef.current = false
-    setPostEnergyLogged(false)
-
-    // Request notification permission lazily on first session start — non-intrusive timing
-    void requestNotificationPermission()
-
-    startSession(selectedTask?.id ?? null, duration, focusAnchor ?? null)
-
-    // Sonic Anchor: Cmaj9 chord as Pavlovian focus cue (50ms attack, 1.5s release)
-    // Consistent use conditions the brain to enter focus faster over 1–2 weeks.
-    // Plays even on quick-start (no anchor set) — always signals "focus begins now".
-    playAnchor()
-
-    if (focusAnchor) play(focusAnchor)
-
-    setRemaining(durationSec)
-    setElapsed(0)
-    setPhase('struggle')
-    setShowDigits(false)
-    setScreen('session')
-
-    startInterval()
-  }, [showCustom, customDuration, selectedDuration, selectedTask, focusAnchor,
-      play, playAnchor, startSession, setPhase, startInterval])
-
-  // ── Quick-start auto detection ─────────────────────────────────────────────
-  useEffect(() => {
-    if (isQuickStart && !quickStartedRef.current && screen === 'setup') {
-      quickStartedRef.current = true
-      // Auto-start with 5 minutes, no task, sound anchor or brown noise
-      handleStart(5)
-    }
-  }, [isQuickStart, screen, handleStart])
-
-  // ── Stop → interrupt confirm ───────────────────────────────────────────────
-  const handleStop = useCallback(() => {
-    if (intervalRef.current) clearInterval(intervalRef.current)
-    pauseStartRef.current = Date.now()
-    setScreen('interrupt-confirm')
-  }, [])
-
-  // ── Resume from interrupt confirm ────────────────────────────────────────────
-  const handleResume = useCallback(() => {
-    pausedMsRef.current += Date.now() - pauseStartRef.current
-    setScreen('session')
-    startInterval()
-  }, [startInterval])
-
-  // ── Confirm end from interrupt screen → bookmark capture ────────────────────
-  const handleConfirmStop = useCallback(() => {
-    setBookmarkText('')
-    setScreen('bookmark-capture')
-  }, [])
-
-  // ── Save bookmark and end session ──────────────────────────────────────────
-  const handleBookmarkSave = useCallback(() => {
-    const text = bookmarkText.trim()
-    if (text) {
-      saveBookmark({
-        text,
-        taskId: selectedTask?.id ?? null,
-        taskTitle: selectedTask?.title ?? null,
-        timestamp: new Date().toISOString(),
-      })
-    }
-    handleSessionEnd(false)
-  }, [bookmarkText, selectedTask, handleSessionEnd])
-
-  const handleBookmarkSkip = useCallback(() => {
-    handleSessionEnd(false)
-  }, [handleSessionEnd])
-
-  // ── Skip nature buffer ─────────────────────────────────────────────────────
-  const handleSkipBuffer = useCallback(() => {
-    if (bufferIntervalRef.current) clearInterval(bufferIntervalRef.current)
-    stopAudio()
-    setPreset(null)
-    setScreen('setup')
-  }, [stopAudio, setPreset])
-
-  // ── Audio toggle during session ───────────────────────────────────────────────
-  const handleAudioToggle = useCallback(() => {
-    if (isPlaying) {
-      stopAudio()
-    } else {
-      const preset: AudioPreset = (focusAnchor ?? activePreset ?? 'brown')
-      play(preset)
-      setPreset(preset)
-    }
-  }, [isPlaying, focusAnchor, activePreset, play, stopAudio, setPreset])
-
-  const progress  = durationSecRef.current > 0 ? 1 - remainingSeconds / durationSecRef.current : 0
-  const isFlow    = sessionPhase === 'flow'
-  const elapsedMin = Math.floor(elapsedSeconds / 60)
-  const timerSize = getTimerSize(sessionPhase)
-
-  // ── Energy label for setup screen ─────────────────────────────────────────
-  const energyLabel = useMemo(() => {
-    if (energyLevel <= 2) return { text: 'Low energy — starting small 🌱', color: '#4ECDC4' }
-    if (energyLevel === 3) return { text: 'Steady energy — classic focus 🎯', color: '#7B72FF' }
-    return { text: 'High energy — deep work time 🚀', color: '#F59E0B' }
-  }, [energyLevel])
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // NATURE BUFFER SCREEN (2 min between sessions)
-  // ─────────────────────────────────────────────────────────────────────────────
-
+  // ── Nature Buffer ──────────────────────────────────────────────────────────
   if (screen === 'nature-buffer') {
-    const bm = Math.floor(bufferSeconds / 60)
-    const bs = bufferSeconds % 60
+    return (
+      <NatureBuffer
+        bufferSeconds={bufferSeconds}
+        postEnergyLogged={postEnergyLogged}
+        onSetEnergyLevel={handlePostEnergy}
+        onSkip={handleSkipBuffer}
+      />
+    )
+  }
+
+  // ── Recovery Lock ──────────────────────────────────────────────────────────
+  if (screen === 'recovery-lock') {
+    return (
+      <RecoveryLock
+        recoverySeconds={recoverySeconds}
+        onBypass={handleBypassRecovery}
+      />
+    )
+  }
+
+  // ── Interrupt Confirm ──────────────────────────────────────────────────────
+  if (screen === 'interrupt-confirm') {
     return (
       <div
         className="flex flex-col items-center justify-center min-h-screen px-6 text-center"
         style={{ background: '#0F1117' }}
       >
-        <motion.div
-          initial={shouldAnimate ? { opacity: 0, scale: 0.9 } : {}}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={t()}
-          className="flex flex-col items-center"
-        >
-          <div className="text-5xl mb-6">🌿</div>
-          <h2 className="text-2xl font-bold mb-2" style={{ color: '#4ECDC4' }}>
-            Time to breathe 🌿
-          </h2>
-          <p className="text-sm mb-8 max-w-xs leading-relaxed" style={{ color: '#8B8BA7' }}>
-            Great session. Let your mind settle before the next one.
-          </p>
-
-          <div
-            className="px-8 py-4 rounded-2xl mb-6"
-            style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)' }}
-          >
-            <p className="font-mono text-3xl font-bold" style={{ color: '#4ECDC4' }}>
-              {bm}:{bs.toString().padStart(2, '0')}
-            </p>
-            <p className="text-xs mt-1" style={{ color: '#8B8BA7' }}>until next session</p>
-          </div>
-
-          {/* Block 3d: Post-session energy delta — quick 1-tap check-in */}
-          {!postEnergyLogged && (
-            <div
-              className="w-full max-w-xs mb-4 p-3 rounded-2xl"
-              style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)' }}
-            >
-              <p className="text-xs font-medium mb-2 text-center" style={{ color: '#8B8BA7' }}>
-                How do you feel after that session?
-              </p>
-              <div className="flex justify-between gap-1">
-                {([
-                  { level: 1 as const, emoji: '😴', label: 'Drained' },
-                  { level: 2 as const, emoji: '😌', label: 'Calm' },
-                  { level: 3 as const, emoji: '🙂', label: 'Good' },
-                  { level: 4 as const, emoji: '😄', label: 'Great' },
-                  { level: 5 as const, emoji: '⚡', label: 'Wired' },
-                ] as const).map(({ level, emoji, label }) => (
-                  <button
-                    key={level}
-                    onClick={() => {
-                      setEnergyLevel(level)
-                      setPostEnergyLogged(true)
-                    }}
-                    className="flex-1 flex flex-col items-center gap-0.5 py-2 rounded-xl text-xs transition-all duration-150 min-h-[52px]"
-                    style={{ background: '#252840', border: '1px solid rgba(255,255,255,0.06)' }}
-                    aria-label={`Post-session energy: ${label}`}
-                  >
-                    <span className="text-lg leading-none">{emoji}</span>
-                    <span className="text-[9px]" style={{ color: '#8B8BA7' }}>{label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
+        <div className="text-4xl mb-4">⚠️</div>
+        <h2 className="text-xl font-bold mb-2" style={{ color: '#E8E8F0' }}>
+          Leave focus session?
+        </h2>
+        <p className="text-sm mb-8 max-w-xs leading-relaxed" style={{ color: '#8B8BA7' }}>
+          You've been focused for {elapsedMin}m. Your progress will be saved.
+        </p>
+        <div className="flex flex-col gap-3 w-full max-w-xs">
           <button
-            onClick={handleSkipBuffer}
-            className="px-6 py-2.5 rounded-xl text-sm font-medium transition-all duration-200"
+            onClick={handleResume}
+            className="w-full py-3.5 rounded-2xl font-semibold text-sm transition-all duration-200"
+            style={{
+              background: 'rgba(123,114,255,0.15)',
+              border: '1.5px solid #7B72FF',
+              color: '#7B72FF',
+            }}
+          >
+            Keep going 💪
+          </button>
+          <button
+            onClick={handleConfirmStop}
+            className="w-full py-3 rounded-2xl font-medium text-sm transition-all duration-200"
             style={{
               background: 'transparent',
               border: '1px solid rgba(255,255,255,0.06)',
               color: '#8B8BA7',
             }}
           >
-            Skip rest
+            End session
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  // ── Bookmark Capture ───────────────────────────────────────────────────────
+  if (screen === 'bookmark-capture') {
+    return (
+      <div
+        className="flex flex-col items-center justify-center min-h-screen px-6 text-center"
+        style={{ background: '#0F1117' }}
+      >
+        <motion.div
+          initial={shouldAnimate ? { opacity: 0, scale: 0.95 } : {}}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={t()}
+          className="flex flex-col items-center w-full max-w-xs"
+        >
+          <div className="text-4xl mb-4">📌</div>
+          <h2 className="text-xl font-bold mb-2" style={{ color: '#E8E8F0' }}>
+            Park your progress
+          </h2>
+          <p className="text-sm mb-6 leading-relaxed" style={{ color: '#8B8BA7' }}>
+            What were you working on? We'll remind you next time.
+          </p>
+          <input
+            value={bookmarkText}
+            onChange={e => setBookmarkText(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter' && bookmarkText.trim()) handleBookmarkSave() }}
+            placeholder="e.g. Finishing the header layout..."
+            autoFocus
+            className="w-full px-4 py-3 rounded-xl text-sm outline-none mb-4"
+            style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)', color: '#E8E8F0' }}
+          />
+          <div className="flex flex-col gap-3 w-full">
+            <button
+              onClick={handleBookmarkSave}
+              disabled={!bookmarkText.trim()}
+              className="w-full py-3.5 rounded-2xl font-semibold text-sm transition-all duration-200"
+              style={{
+                background: bookmarkText.trim() ? 'rgba(123,114,255,0.15)' : '#1E2136',
+                border: `1.5px solid ${bookmarkText.trim() ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
+                color: bookmarkText.trim() ? '#7B72FF' : '#8B8BA7',
+              }}
+            >
+              Save & Exit 📌
+            </button>
+            <button
+              onClick={handleBookmarkSkip}
+              className="w-full py-3 rounded-2xl font-medium text-sm transition-all duration-200"
+              style={{
+                background: 'transparent',
+                border: '1px solid rgba(255,255,255,0.06)',
+                color: '#8B8BA7',
+              }}
+            >
+              Skip
+            </button>
+          </div>
+        </motion.div>
+      </div>
+    )
+  }
+
+  // ── Hard-Stop Half-Sheet (120 min) ─────────────────────────────────────────
+  if (screen === 'hard-stop') {
+    return (
+      <div
+        className="flex flex-col items-center justify-end min-h-screen px-6 pb-12"
+        style={{ background: 'rgba(15,17,23,0.92)' }}
+      >
+        <motion.div
+          initial={shouldAnimate ? { opacity: 0, y: 40 } : {}}
+          animate={{ opacity: 1, y: 0 }}
+          transition={t()}
+          className="w-full max-w-xs flex flex-col items-center text-center"
+          style={{
+            background: '#1A1D2E',
+            border: '1px solid rgba(123,114,255,0.25)',
+            borderRadius: 24,
+            padding: '32px 24px',
+          }}
+        >
+          <div className="text-5xl mb-4">🧘</div>
+          <h2 className="text-xl font-bold mb-2" style={{ color: '#E8E8F0' }}>
+            Two hours of deep work
+          </h2>
+          <p className="text-sm leading-relaxed mb-6" style={{ color: '#8B8BA7' }}>
+            That's a serious session. Your brain consolidates everything during rest —
+            even 10 minutes away will help you do better next time.
+          </p>
+
+          <button
+            onClick={() => handleSessionEnd(true)}
+            className="w-full py-3.5 rounded-2xl font-semibold text-sm mb-3 transition-all duration-200"
+            style={{
+              background: 'linear-gradient(135deg, #7B72FF, #8B7FF7)',
+              color: 'white',
+              boxShadow: '0 8px 24px rgba(123,114,255,0.28)',
+            }}
+          >
+            End session & rest 🌿
+          </button>
+
+          <button
+            onClick={handleBypassHardStop}
+            className="text-xs px-5 py-2.5 rounded-xl transition-all duration-200"
+            style={{
+              background: 'transparent',
+              border: '1px solid rgba(255,255,255,0.06)',
+              color: '#8B8BA7',
+            }}
+          >
+            I'm in hyperfocus — keep going
           </button>
         </motion.div>
       </div>
     )
   }
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // SETUP SCREEN
-  // ─────────────────────────────────────────────────────────────────────────────
-
+  // ── Setup Screen ───────────────────────────────────────────────────────────
   if (screen === 'setup') {
     return (
       <div className="flex flex-col pb-28" style={{ background: '#0F1117' }}>
@@ -573,7 +241,7 @@ export default function FocusScreen() {
           </p>
         </div>
 
-        {/* Interrupt bookmark anchor (Bolt 6.16) */}
+        {/* Interrupt bookmark anchor */}
         {savedBookmark && (
           <div
             className="mx-5 mb-5 p-4 rounded-2xl"
@@ -635,8 +303,6 @@ export default function FocusScreen() {
           <div className="px-5 mb-6">
             <p className="text-xs font-medium mb-2" style={{ color: '#8B8BA7' }}>TASK (OPTIONAL)</p>
             <div className="flex flex-col gap-2">
-
-              {/* Open focus */}
               <button
                 onClick={() => setSelectedTask(null)}
                 className="flex items-center gap-3 p-3 rounded-xl text-left transition-all duration-200"
@@ -779,255 +445,7 @@ export default function FocusScreen() {
     )
   }
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // RECOVERY LOCK SCREEN
-  // ─────────────────────────────────────────────────────────────────────────────
-
-  if (screen === 'recovery-lock') {
-    const rm = Math.floor(recoverySeconds / 60)
-    const rs = recoverySeconds % 60
-    return (
-      // ── Soft recovery suggestion (NOT a hard lock) ────────────────────────────
-      // Research (March 2025): forcibly interrupting ADHD hyperfocus causes irritation
-      // and makes re-entry much harder. We strongly suggest a break, but let the user
-      // bypass if they're in a hyperfocus state. The countdown is an encouragement, not a gate.
-      <div
-        className="flex flex-col items-center justify-center min-h-screen px-6 text-center"
-        style={{ background: '#0F1117' }}
-      >
-        <motion.div
-          initial={shouldAnimate ? { opacity: 0, scale: 0.9 } : {}}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={t()}
-          className="flex flex-col items-center"
-        >
-          <div className="text-5xl mb-6">🌿</div>
-          <h2 className="text-2xl font-bold mb-2" style={{ color: '#4ECDC4' }}>
-            90 minutes! Amazing 🌊
-          </h2>
-          <p className="text-sm mb-6 max-w-xs leading-relaxed" style={{ color: '#8B8BA7' }}>
-            You just did 90 minutes of deep focus. Your brain consolidates learning during rest —
-            even a short break helps.
-          </p>
-
-          {/* Gentle suggestions */}
-          <div
-            className="w-full max-w-xs mb-6 p-4 rounded-2xl text-left"
-            style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)' }}
-          >
-            <p className="text-xs font-medium mb-3" style={{ color: '#8B8BA7' }}>Try one of these 🌱</p>
-            {['Drink a glass of water', 'Look away from the screen', 'Take 5 deep breaths', 'Stretch your neck and shoulders'].map(s => (
-              <p key={s} className="text-sm mb-1.5" style={{ color: '#E8E8F0' }}>· {s}</p>
-            ))}
-          </div>
-
-          {/* Timer — informational, not a gate */}
-          <div
-            className="px-8 py-3 rounded-2xl mb-6"
-            style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)' }}
-          >
-            <p className="font-mono text-2xl font-bold" style={{ color: '#4ECDC4' }}>
-              {rm}:{rs.toString().padStart(2, '0')}
-            </p>
-            <p className="text-xs mt-1" style={{ color: '#8B8BA7' }}>suggested rest time</p>
-          </div>
-
-          {/* Continue anyway — hyperfocus support */}
-          <button
-            onClick={() => {
-              if (recoveryIntervalRef.current) clearInterval(recoveryIntervalRef.current)
-              setScreen('setup')
-            }}
-            className="text-xs px-5 py-2 rounded-xl transition-all duration-200"
-            style={{
-              background: 'transparent',
-              border: '1px solid rgba(255,255,255,0.06)',
-              color: '#8B8BA7',
-            }}
-          >
-            I'm in hyperfocus — continue →
-          </button>
-        </motion.div>
-      </div>
-    )
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // INTERRUPT CONFIRM SCREEN
-  // ─────────────────────────────────────────────────────────────────────────────
-
-  if (screen === 'interrupt-confirm') {
-    return (
-      <div
-        className="flex flex-col items-center justify-center min-h-screen px-6 text-center"
-        style={{ background: '#0F1117' }}
-      >
-        <div className="text-4xl mb-4">⚠️</div>
-        <h2 className="text-xl font-bold mb-2" style={{ color: '#E8E8F0' }}>
-          Leave focus session?
-        </h2>
-        <p className="text-sm mb-8 max-w-xs leading-relaxed" style={{ color: '#8B8BA7' }}>
-          You've been focused for {elapsedMin}m. Your progress will be saved.
-        </p>
-        <div className="flex flex-col gap-3 w-full max-w-xs">
-          <button
-            onClick={handleResume}
-            className="w-full py-3.5 rounded-2xl font-semibold text-sm transition-all duration-200"
-            style={{
-              background: 'rgba(123,114,255,0.15)',
-              border: '1.5px solid #7B72FF',
-              color: '#7B72FF',
-            }}
-          >
-            Keep going 💪
-          </button>
-          <button
-            onClick={handleConfirmStop}
-            className="w-full py-3 rounded-2xl font-medium text-sm transition-all duration-200"
-            style={{
-              background: 'transparent',
-              border: '1px solid rgba(255,255,255,0.06)',
-              color: '#8B8BA7',
-            }}
-          >
-            End session
-          </button>
-        </div>
-      </div>
-    )
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // BOOKMARK CAPTURE SCREEN (Bolt 6.16)
-  // ─────────────────────────────────────────────────────────────────────────────
-
-  if (screen === 'bookmark-capture') {
-    return (
-      <div
-        className="flex flex-col items-center justify-center min-h-screen px-6 text-center"
-        style={{ background: '#0F1117' }}
-      >
-        <motion.div
-          initial={shouldAnimate ? { opacity: 0, scale: 0.95 } : {}}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={t()}
-          className="flex flex-col items-center w-full max-w-xs"
-        >
-          <div className="text-4xl mb-4">📌</div>
-          <h2 className="text-xl font-bold mb-2" style={{ color: '#E8E8F0' }}>
-            Park your progress
-          </h2>
-          <p className="text-sm mb-6 leading-relaxed" style={{ color: '#8B8BA7' }}>
-            What were you working on? We'll remind you next time.
-          </p>
-
-          <input
-            value={bookmarkText}
-            onChange={e => setBookmarkText(e.target.value)}
-            onKeyDown={e => { if (e.key === 'Enter' && bookmarkText.trim()) handleBookmarkSave() }}
-            placeholder="e.g. Finishing the header layout..."
-            autoFocus
-            className="w-full px-4 py-3 rounded-xl text-sm outline-none mb-4"
-            style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)', color: '#E8E8F0' }}
-          />
-
-          <div className="flex flex-col gap-3 w-full">
-            <button
-              onClick={handleBookmarkSave}
-              disabled={!bookmarkText.trim()}
-              className="w-full py-3.5 rounded-2xl font-semibold text-sm transition-all duration-200"
-              style={{
-                background: bookmarkText.trim() ? 'rgba(123,114,255,0.15)' : '#1E2136',
-                border: `1.5px solid ${bookmarkText.trim() ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
-                color: bookmarkText.trim() ? '#7B72FF' : '#8B8BA7',
-              }}
-            >
-              Save & Exit 📌
-            </button>
-            <button
-              onClick={handleBookmarkSkip}
-              className="w-full py-3 rounded-2xl font-medium text-sm transition-all duration-200"
-              style={{
-                background: 'transparent',
-                border: '1px solid rgba(255,255,255,0.06)',
-                color: '#8B8BA7',
-              }}
-            >
-              Skip
-            </button>
-          </div>
-        </motion.div>
-      </div>
-    )
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // HARD-STOP HALF-SHEET (120 min)
-  // ─────────────────────────────────────────────────────────────────────────────
-
-  if (screen === 'hard-stop') {
-    return (
-      <div
-        className="flex flex-col items-center justify-end min-h-screen px-6 pb-12"
-        style={{ background: 'rgba(15,17,23,0.92)' }}
-      >
-        <motion.div
-          initial={shouldAnimate ? { opacity: 0, y: 40 } : {}}
-          animate={{ opacity: 1, y: 0 }}
-          transition={t()}
-          className="w-full max-w-xs flex flex-col items-center text-center"
-          style={{
-            background: '#1A1D2E',
-            border: '1px solid rgba(123,114,255,0.25)',
-            borderRadius: 24,
-            padding: '32px 24px',
-          }}
-        >
-          <div className="text-5xl mb-4">🧘</div>
-          <h2 className="text-xl font-bold mb-2" style={{ color: '#E8E8F0' }}>
-            Two hours of deep work
-          </h2>
-          <p className="text-sm leading-relaxed mb-6" style={{ color: '#8B8BA7' }}>
-            That's a serious session. Your brain consolidates everything during rest —
-            even 10 minutes away will help you do better next time.
-          </p>
-
-          <button
-            onClick={() => handleSessionEnd(true)}
-            className="w-full py-3.5 rounded-2xl font-semibold text-sm mb-3 transition-all duration-200"
-            style={{
-              background: 'linear-gradient(135deg, #7B72FF, #8B7FF7)',
-              color: 'white',
-              boxShadow: '0 8px 24px rgba(123,114,255,0.28)',
-            }}
-          >
-            End session & rest 🌿
-          </button>
-
-          {/* Hyperfocus bypass — always available, no shame */}
-          <button
-            onClick={() => {
-              setScreen('session')
-              startInterval()
-            }}
-            className="text-xs px-5 py-2.5 rounded-xl transition-all duration-200"
-            style={{
-              background: 'transparent',
-              border: '1px solid rgba(255,255,255,0.06)',
-              color: '#8B8BA7',
-            }}
-          >
-            I'm in hyperfocus — keep going
-          </button>
-        </motion.div>
-      </div>
-    )
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // ACTIVE SESSION SCREEN
-  // ─────────────────────────────────────────────────────────────────────────────
-
+  // ── Active Session Screen ──────────────────────────────────────────────────
   return (
     <div
       className="flex flex-col items-center justify-center min-h-screen px-6"
@@ -1050,7 +468,7 @@ export default function FocusScreen() {
         )}
       </AnimatePresence>
 
-      {/* Arc timer — phase-based sizing (Bolt 6.16) */}
+      {/* Arc timer */}
       <ArcTimer
         progress={progress}
         remainingSeconds={remainingSeconds}
@@ -1075,106 +493,25 @@ export default function FocusScreen() {
         </motion.p>
       )}
 
-      {/* Controls — fade out in flow */}
-      <AnimatePresence>
-        {!isFlow && (
-          <motion.div
-            initial={shouldAnimate ? { opacity: 0, y: 16 } : {}}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 16 }}
-            transition={t()}
-            className="flex flex-col items-center gap-4 mt-8"
-          >
-            {/* Audio toggle */}
-            <button
-              onClick={handleAudioToggle}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm transition-all duration-200"
-              style={{
-                background: isPlaying ? 'rgba(78,205,196,0.12)' : '#1E2136',
-                border: `1.5px solid ${isPlaying ? '#4ECDC4' : 'rgba(255,255,255,0.06)'}`,
-                color: isPlaying ? '#4ECDC4' : '#8B8BA7',
-              }}
-            >
-              {isPlaying ? '🔊 Sound on' : '🔇 Sound off'}
-            </button>
-
-            {/* End session */}
-            <button
-              onClick={handleStop}
-              className="px-6 py-2.5 rounded-xl text-sm font-medium transition-all duration-200"
-              style={{
-                background: 'transparent',
-                border: '1px solid rgba(255,255,255,0.06)',
-                color: '#8B8BA7',
-              }}
-            >
-              End session
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Session controls (audio/stop/park) */}
+      <SessionControls
+        isFlow={isFlow}
+        isPlaying={isPlaying}
+        parkOpen={parkOpen}
+        parkText={parkText}
+        onAudioToggle={handleAudioToggle}
+        onStop={handleStop}
+        onParkToggle={() => setParkOpen(p => !p)}
+        onParkTextChange={setParkText}
+        onParkSave={() => void handleParkThought()}
+        onParkDismiss={() => { setParkOpen(false); setParkText('') }}
+      />
 
       {/* Mochi body-double companion — Block 5a */}
       <MochiSessionCompanion
         elapsedSeconds={elapsedSeconds}
         sessionPhase={sessionPhase}
       />
-
-      {/* ── "Park the thought" — quick capture without leaving focus ────── */}
-      <div className="fixed bottom-8 z-30" style={{ right: 'calc(max(0px, (100vw - 480px) / 2) + 20px)' }}>
-        <AnimatePresence>
-          {parkOpen && (
-            <motion.div
-              initial={shouldAnimate ? { opacity: 0, y: 10, scale: 0.95 } : {}}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 10, scale: 0.95 }}
-              className="mb-3 p-3 rounded-2xl w-64"
-              style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)' }}
-            >
-              <p className="text-xs font-medium mb-2" style={{ color: '#8B8BA7' }}>
-                💭 Park a thought (goes to Someday)
-              </p>
-              <input
-                value={parkText}
-                onChange={e => setParkText(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter') void handleParkThought() }}
-                placeholder="Quick note..."
-                autoFocus
-                className="w-full px-3 py-2 rounded-xl text-sm outline-none mb-2"
-                style={{ background: '#252840', border: '1px solid rgba(255,255,255,0.06)', color: '#E8E8F0' }}
-              />
-              <div className="flex gap-2">
-                <button
-                  onClick={() => void handleParkThought()}
-                  disabled={!parkText.trim()}
-                  className="flex-1 py-1.5 rounded-lg text-xs font-medium"
-                  style={{ background: parkText.trim() ? '#7B72FF' : '#252840', color: 'white' }}
-                >
-                  Save
-                </button>
-                <button
-                  onClick={() => { setParkOpen(false); setParkText('') }}
-                  className="py-1.5 px-3 rounded-lg text-xs"
-                  style={{ color: '#8B8BA7' }}
-                >
-                  ✕
-                </button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-        <button
-          onClick={() => setParkOpen(p => !p)}
-          className="w-11 h-11 rounded-full flex items-center justify-center text-lg shadow-lg"
-          style={{
-            background: parkOpen ? '#7B72FF' : '#1E2136',
-            border: `1.5px solid ${parkOpen ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
-          }}
-          aria-label="Park a thought"
-        >
-          💭
-        </button>
-      </div>
     </div>
   )
 }

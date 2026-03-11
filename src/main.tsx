@@ -6,12 +6,18 @@ import './index.css'
 import App from './app/App'
 import { logError } from '@/shared/lib/logger'
 
-// ── Sentry init — must run before createRoot() ────────────────────────────────
+// ── Sentry init — deferred via requestIdleCallback ────────────────────────────
 // Captures React render errors, lazy-chunk failures, and unhandled rejections.
 // No-op when VITE_SENTRY_DSN is not set (local dev without DSN, unit tests).
 // Privacy: email stripped in beforeSend; no session replay.
+// Deferred: Sentry's instrumentation setup is ~3ms of synchronous work.
+// Using requestIdleCallback (2 s timeout) lets the first render finish before
+// we pay that cost. Early errors (before idle fires) are captured retroactively
+// by Sentry's global error queue.
 const SENTRY_DSN = import.meta.env.VITE_SENTRY_DSN as string | undefined
-if (SENTRY_DSN) {
+
+const initSentry = () => {
+  if (!SENTRY_DSN) return
   Sentry.init({
     dsn: SENTRY_DSN,
     environment: import.meta.env.MODE,
@@ -24,6 +30,12 @@ if (SENTRY_DSN) {
       return event
     },
   })
+}
+
+if (typeof requestIdleCallback !== 'undefined') {
+  requestIdleCallback(initSentry, { timeout: 2_000 })
+} else {
+  setTimeout(initSentry, 0)
 }
 
 // ── Vercel Analytics — GDPR-compliant, no cookies, 50k events/month free ─────

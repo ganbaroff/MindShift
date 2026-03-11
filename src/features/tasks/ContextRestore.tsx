@@ -9,32 +9,18 @@
  * - Non-blocking: user can dismiss immediately
  * - Forward-looking copy — never "you left N minutes ago"
  * - Auto-dismisses if no active NOW tasks (nothing to restore)
+ *
+ * Utility helpers (writeLastActive, shouldShowContextRestore) live in
+ * contextRestoreUtils.ts so App.tsx can import them eagerly without
+ * pulling this component into the main bundle.
  */
 
 import { motion, AnimatePresence } from 'motion/react'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { useStore } from '@/store'
 
-// ── Absence detection ─────────────────────────────────────────────────────────
-
-const LAST_ACTIVE_KEY = 'ms_last_active'
-const CONTEXT_RESTORE_MIN_MS = 30 * 60 * 1000  // 30 min
-const CONTEXT_RESTORE_MAX_MS = 72 * 60 * 60 * 1000  // 72 h (above = RecoveryProtocol handles it)
-
-export function writeLastActive(): void {
-  try { localStorage.setItem(LAST_ACTIVE_KEY, String(Date.now())) } catch { /* ignore */ }
-}
-
-export function shouldShowContextRestore(): boolean {
-  try {
-    const raw = localStorage.getItem(LAST_ACTIVE_KEY)
-    if (!raw) return false
-    const elapsed = Date.now() - Number(raw)
-    return elapsed >= CONTEXT_RESTORE_MIN_MS && elapsed < CONTEXT_RESTORE_MAX_MS
-  } catch {
-    return false
-  }
-}
+// Re-export utils so existing call-sites (tests, etc.) don't break
+export { writeLastActive, shouldShowContextRestore } from './contextRestoreUtils'
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
@@ -110,7 +96,7 @@ export function ContextRestore({ onDismiss }: Props) {
               className="flex-1 py-3 rounded-2xl font-semibold text-sm"
               style={{ background: '#7B72FF', color: '#FFFFFF' }}
             >
-              {activeTasks.length > 0 ? 'Dive back in →' : 'Let\'s go →'}
+              {activeTasks.length > 0 ? 'Dive back in →' : "Let's go →"}
             </button>
             <button
               onClick={onDismiss}

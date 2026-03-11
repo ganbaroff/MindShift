@@ -9,7 +9,7 @@
  * - Timer in FocusScreen (ArcTimer) is the correct place for time visualization (Time Timer concept)
  */
 
-import { useState } from 'react'
+import { useState, memo } from 'react'
 import { motion } from 'motion/react'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { usePalette } from '@/shared/hooks/usePalette'
@@ -92,7 +92,7 @@ interface Props {
   onSnooze?: () => void
 }
 
-export function TaskCard({ task, index = 0, onComplete, onSnooze }: Props) {
+function TaskCardInner({ task, index = 0, onComplete, onSnooze }: Props) {
   const { completeTask, snoozeTask, addXP, energyLevel, unlockAchievement, hasAchievement, completedTotal } = useStore()
   const { shouldAnimate, t } = useMotion()
   const palette = usePalette()
@@ -289,3 +289,18 @@ export function TaskCard({ task, index = 0, onComplete, onSnooze }: Props) {
     </motion.div>
   )
 }
+
+// ── memo wrapper — prevents re-render when sibling tasks change in a list ────
+// Custom comparator: re-render only when the task's own data or callbacks change.
+// This avoids cascade re-renders when other tasks in the NOW pool are updated.
+export const TaskCard = memo(TaskCardInner, (prev, next) =>
+  prev.task.id === next.task.id &&
+  prev.task.title === next.task.title &&
+  prev.task.status === next.task.status &&
+  prev.task.completedAt === next.task.completedAt &&
+  prev.task.snoozeCount === next.task.snoozeCount &&
+  prev.task.difficultyLevel === next.task.difficultyLevel &&
+  prev.index === next.index &&
+  prev.onComplete === next.onComplete &&
+  prev.onSnooze === next.onSnooze
+)
