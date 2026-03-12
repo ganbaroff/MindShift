@@ -173,9 +173,22 @@ export function AddTaskModal({ open, onClose }: Props) {
       if (result.dueDate) { setDueDate(result.dueDate); setShowDatePicker(true) }
       if (result.dueTime) setDueTime(result.dueTime)
     } catch {
-      // Fallback: just populate title — user never loses their note (Step E)
+      // Edge function failed — show type picker so user classifies manually (Step B fallback)
+      const fallback: ClassifyResult = {
+        type: 'task',
+        title: text,
+        pool: 'now',
+        difficulty: 2,
+        estimatedMinutes: 25,
+        dueDate: null,
+        dueTime: null,
+        reminderMinutesBefore: null,
+        notes: null,
+        confidence: 0.0, // triggers low-confidence type picker UI
+      }
+      setVoiceResult(fallback)
+      setLowConfidence(true)
       setTitle(text)
-      toast('Recorded your note — edit the details below.', { icon: '🎙' })
     } finally {
       setClassifying(false)
     }
@@ -246,8 +259,13 @@ export function AddTaskModal({ open, onClose }: Props) {
       } else {
         toast.error('AI returned an unexpected response. Add the task manually for now.')
       }
-    } catch {
-      toast.error("Couldn't reach AI right now — add the task and break it down later.")
+    } catch (err) {
+      const status = (err as { context?: { status?: number } })?.context?.status
+      if (status === 429) {
+        toast.error("AI limit reached — add the task and break it down later.", { icon: '⏳' })
+      } else {
+        toast.error("Couldn't reach AI right now — add the task and break it down later.")
+      }
     } finally {
       setLoadingAi(false)
     }

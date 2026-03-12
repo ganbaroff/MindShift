@@ -9,7 +9,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { getCorsHeaders } from '../_shared/cors.ts'
 
-const GEMINI_MODEL = 'gemini-2.5-flash'
+const GEMINI_MODEL = Deno.env.get('GEMINI_MODEL') ?? 'gemini-2.0-flash'
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`
 const API_TIMEOUT_MS = 12_000
 
@@ -82,7 +82,14 @@ Input: "hmm I dunno maybe something about dogs" → {"type":"idea","title":"Some
 
 Respond with ONLY the JSON object.`
 
-    const apiKey = Deno.env.get('GEMINI_API_KEY')!
+    const apiKey = Deno.env.get('GEMINI_API_KEY')
+    if (!apiKey) {
+      return new Response(
+        JSON.stringify({ error: 'AI not configured' }),
+        { status: 503, headers: { ...cors, 'Content-Type': 'application/json' } }
+      )
+    }
+
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT_MS)
 

@@ -11,7 +11,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { getCorsHeaders } from '../_shared/cors.ts'
 import { checkDbRateLimit } from '../_shared/rateLimit.ts'
 
-const GEMINI_MODEL = 'gemini-2.5-flash'
+const GEMINI_MODEL = Deno.env.get('GEMINI_MODEL') ?? 'gemini-2.0-flash'
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`
 const API_TIMEOUT_MS = 15_000 // 15s — fail fast, don't hang the user
 const MAX_TITLE_LEN = 500
@@ -99,6 +99,14 @@ Deno.serve(async (req: Request) => {
     }
 
     // ── Gemini call (with AbortController timeout) ──────────────────────────
+    const apiKey = Deno.env.get('GEMINI_API_KEY')
+    if (!apiKey) {
+      return new Response(
+        JSON.stringify({ error: 'AI not configured' }),
+        { status: 503, headers: { ...cors, 'Content-Type': 'application/json' } }
+      )
+    }
+
     const title = taskTitle.trim().slice(0, MAX_TITLE_LEN)
     const desc = taskDescription?.trim().slice(0, MAX_DESC_LEN)
 
@@ -116,7 +124,6 @@ Respond ONLY with valid JSON in this exact shape:
 
 No explanation, no markdown fences. Pure JSON only.`
 
-    const apiKey = Deno.env.get('GEMINI_API_KEY')!
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT_MS)
 
