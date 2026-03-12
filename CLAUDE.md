@@ -7,6 +7,7 @@ Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ `4fe6a19`. Status: **p
 ## Sprint History
 | Sprint | Commit | What landed |
 |--------|--------|-------------|
+| Sprint 9 | pending | Design & accessibility pass: WCAG AA compliance (focus rings, motion system universalised), Calendar tab → DueDateScreen, timer style picker in Settings, energy picker on first load, undo task completion (4s), offline indicator in AppShell, BurnoutAlert CTA → /focus?quick=1, snooze/park/thought toasts, BentoGrid min-2 feedback, ArcTimer tap hint, Mochi message randomization, text overflow protection, BentoGrid error fallback, pushWelcomeBack() wired, ADR-0007 |
 | Sprint 8 | `4fe6a19` | Architecture optimization: bundle splitting (lazy RecoveryProtocol/ContextRestore/BentoGrid), FocusScreen decomposition (1180→~350 lines), React.memo (4 components), CSS design tokens (:root vars + [data-mode="calm"]), per-route ErrorBoundary, Sentry deferred init, 5 new ADRs |
 | Sprint 7 | `44e175c` | 3-axis neuroinclusive features: Burnout Radar, Health Profile, Timer modes, Seasonal Modes, Traffic Light tasks, Mochi body-double, Lifetime Stats widget, Flexible Pause |
 | Sprint 6 | — | VR XP, Analytics, Notifications, Energy Level picker, Subtask grouping |
@@ -29,7 +30,7 @@ Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ `4fe6a19`. Status: **p
 | **offline queue** | `enqueue()`/`dequeue()` pattern for Supabase writes when offline |
 | **burnoutScore** | 0-100 score from snooze/completion/session/energy trends (computed, not persisted) |
 | **seasonalMode** | launch/maintain/recover/sandbox — persisted, drives pool limits + AI tone |
-| **timerStyle** | countdown/countup/surprise — set in onboarding screen 3.5 |
+| **timerStyle** | countdown/countup/surprise — now settable in SettingsScreen (Sprint 9) |
 | **MochiSessionCompanion** | Active body-double during focus: phase bubbles, 20-min accountability prompts |
 | **BurnoutAlert** | Amber card (score 41-65) or purple card (66+) on ProgressScreen |
 | **LifetimeStatsWidget** | Bento widget: completedTotal + totalFocusMinutes + "You keep showing up 💫" |
@@ -119,16 +120,25 @@ Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ `4fe6a19`. Status: **p
 - **FocusScreen:** Decomposed into orchestrator + useFocusSession hook + SessionControls + PostSessionFlow
 - **React.memo:** TaskCard (custom comparator), ArcTimer, MochiSessionCompanion, BurnoutAlert
 - **CSS tokens:** `:root` vars + `[data-mode="calm"]` overrides. App.tsx sets data-mode from reducedStimulation.
-- **Error boundaries:** Per-route `<ErrorBoundary fallback={<RouteError />}>` wrapping all lazy routes
-- **ADRs:** 6 documented in `docs/adr/` (rate-limiting, Zustand, offline, PWA, colors, AI)
+- **Error boundaries:** Per-route `<ErrorBoundary fallback={<RouteError />}>` + BentoGrid chunk fallback (Sprint 9)
+- **ADRs:** 7 documented in `docs/adr/` (rate-limiting, Zustand, offline, PWA, colors, AI, accessibility)
+
+## Architecture (Sprint 9 additions)
+- **Motion system:** All components now wired to `useMotion()`. No bypasses. All `animate-spin` gated by `motion-reduce:animate-none`.
+- **Focus rings:** Button.tsx + all interactive elements have `focus-visible:ring-2` (WCAG 2.4.7 AA)
+- **DueDateScreen:** Replaces non-functional CalendarScreen. Groups tasks by Today/Tomorrow/This Week/Later.
+- **Offline indicator:** AppShell shows gold bar when offline, teal confirmation on reconnect.
+- **Undo completion:** TaskCard holds completion for 4s with toast. Confetti fires immediately.
+- **Timer style UI:** Now settable in SettingsScreen (was only in store with no UI).
 
 ## Build Notes (important!)
 - Sprint 8: `npm run build` ✅, `vitest` 82/82 ✅, `tsc` ✅
+- Sprint 9: `tsc --noEmit` ✅ (Cowork session)
 - Cowork session: `tsc --noEmit` ✅ only (no rollup Linux binary in Cowork sandbox)
 - Always run `tsc --noEmit` before any commit from Cowork
-- Branch: `main` @ `4fe6a19`
+- Branch: `main` @ `4fe6a19` (Sprint 9 uncommitted — commit before deploy)
 
-## Production Status (as of Sprint 8)
+## Production Status (as of Sprint 9)
 | Item | Code | Deployed | Notes |
 |------|------|----------|-------|
 | Vercel hosting | ✅ vercel.json | ✅ live | Verified by Yusif. App opens. |
@@ -145,7 +155,9 @@ Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ `4fe6a19`. Status: **p
 - **energy_after** — field exists in DB but never written from UI after focus sessions
 - **Server-side reminders** — browser setTimeout only (lost on tab close). Need SW push or Supabase cron.
 - **Stripe integration** — subscriptionTier exists in store + ProBanner UI, but zero payment logic. Planned next.
-- **classify-voice-input** — code audit shows it IS wired in AddTaskModal (not "pending" as noted). Status: working in code, unconfirmed in production.
+- **classify-voice-input** — code audit shows it IS wired in AddTaskModal. Status: working in code, unconfirmed in production.
+- **Date picker on tasks** — dueDate field exists in Task type but no UI to set it. DueDateScreen works with existing data only.
+- **Social layer** — S-2/S-3/S-4 require Supabase Realtime design (separate sprint)
 
 ## Remaining P2 Backlog (not yet implemented)
 - O-6: Expanded ADHD signal (time blindness, emotional reactivity scenarios)

@@ -27,7 +27,7 @@ const FocusScreen      = lazy(() => import('@/features/focus/FocusScreen'))
 const TasksScreen      = lazy(() => import('@/features/tasks/TasksScreen'))
 const AudioScreen      = lazy(() => import('@/features/audio/AudioScreen'))
 const ProgressScreen   = lazy(() => import('@/features/progress/ProgressScreen'))
-const CalendarScreen   = lazy(() => import('@/features/calendar/CalendarScreen'))
+const DueDateScreen    = lazy(() => import('@/features/calendar/DueDateScreen'))
 const SettingsScreen   = lazy(() => import('@/features/settings/SettingsScreen'))
 const PrivacyPage      = lazy(() => import('@/features/legal/PrivacyPage'))
 const TermsPage        = lazy(() => import('@/features/legal/TermsPage'))
@@ -279,8 +279,8 @@ export default function App() {
                   </ErrorBoundary>
                 } />
                 <Route path="/calendar" element={
-                  <ErrorBoundary fallback={<RouteError label="Calendar" />}>
-                    <CalendarScreen />
+                  <ErrorBoundary fallback={<RouteError label="Upcoming" />}>
+                    <DueDateScreen />
                   </ErrorBoundary>
                 } />
                 <Route path="/progress" element={

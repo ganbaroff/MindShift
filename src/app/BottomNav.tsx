@@ -6,12 +6,12 @@ import { usePalette } from '@/shared/hooks/usePalette'
 import { cn } from '@/shared/lib/cn'
 
 // Audio removed from primary nav — accessible within FocusScreen.
-// Calendar replaces Progress (Progress accessible from Home widget).
+// Upcoming (due dates) replaces Progress (Progress accessible from Home widget).
 const NAV_ITEMS = [
   { path: '/',          icon: Home,         label: 'Home'     },
   { path: '/tasks',     icon: ListTodo,     label: 'Tasks'    },
   { path: '/focus',     icon: Timer,        label: 'Focus'    },
-  { path: '/calendar',  icon: CalendarDays, label: 'Calendar' },
+  { path: '/calendar',  icon: CalendarDays, label: 'Upcoming' },
   { path: '/settings',  icon: Settings,     label: 'Settings' },
 ] as const
 

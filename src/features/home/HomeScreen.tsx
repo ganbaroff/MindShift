@@ -23,6 +23,7 @@ import { useGridSync } from '@/shared/hooks/useGridSync'
 import { Plus } from 'lucide-react'
 import { useStore } from '@/store'
 import { AddTaskModal } from '@/features/tasks/AddTaskModal'
+import { ErrorBoundary } from '@/shared/ui/ErrorBoundary'
 import { Mascot } from '@/shared/ui/Mascot'
 import { BurnoutAlert } from './BurnoutAlert'
 import { BurnoutNudgeCard } from './BurnoutNudgeCard'
@@ -201,7 +202,7 @@ function BentoGridSkeleton() {
 
 export default function HomeScreen() {
   const {
-    energyLevel, appMode, activeSession,
+    energyLevel, setEnergyLevel, appMode, activeSession,
     onboardingCompleted, nowPool, gridWidgets, setGridWidgets,
     burnoutScore,
   } = useStore()
@@ -212,6 +213,7 @@ export default function HomeScreen() {
   const [addOpen,               setAddOpen]               = useState(false)
   const [mascotState,           setMascotState]           = useState<MascotState>('idle')
   const [firstTaskDismissed,    setFirstTaskDismissed]    = useState(false)
+  const [energySet,             setEnergySet]             = useState(energyLevel !== null && energyLevel !== undefined)
 
   const showQuickSetup = !onboardingCompleted && !setupDone
 
@@ -294,6 +296,55 @@ export default function HomeScreen() {
         )}
       </AnimatePresence>
 
+      {/* ── Energy check-in (if not yet set) ───────────────────────────── */}
+      <AnimatePresence>
+        {!energySet && onboardingCompleted && (
+          <motion.div
+            className="mx-4 mb-4 p-4 rounded-2xl"
+            style={{ background: 'var(--color-surface)', border: '1px solid rgba(255,255,255,0.05)' }}
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 8 }}
+            transition={t()}
+          >
+            <p className="text-sm font-medium text-[var(--color-text-primary)] mb-3">
+              How's your energy right now?
+            </p>
+            <div className="flex gap-2">
+              {[
+                { level: 1 as const, emoji: '😴', label: 'Exhausted' },
+                { level: 2 as const, emoji: '😔', label: 'Low' },
+                { level: 3 as const, emoji: '😐', label: 'Neutral' },
+                { level: 4 as const, emoji: '😊', label: 'Good' },
+                { level: 5 as const, emoji: '🔥', label: 'High' },
+              ].map(({ level, emoji, label }) => (
+                <button
+                  key={level}
+                  onClick={() => { setEnergyLevel(level); setEnergySet(true); }}
+                  aria-label={`Energy level ${level} — ${label}`}
+                  className="flex-1 py-2 rounded-xl text-lg transition-colors duration-150"
+                  style={{
+                    background: 'var(--color-surface-raised)',
+                    border: '1px solid rgba(255,255,255,0.06)',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'rgba(123,114,255,0.1)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'var(--color-surface-raised)'
+                  }}
+                >
+                  {emoji}
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-[var(--color-text-muted)] mt-2">
+              Helps us match tasks to your current energy
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* ── First-task prompt (Research #4: blank slate prevention) ─────── */}
       <AnimatePresence>
         {showFirstTaskPrompt && (
@@ -317,12 +368,26 @@ export default function HomeScreen() {
         transition={{ ...t(), delay: 0.2 }}
         className="mt-2"
       >
-        <Suspense fallback={<BentoGridSkeleton />}>
-          <BentoGrid
-            widgets={gridWidgets}
-            onReorder={setGridWidgets}
-          />
-        </Suspense>
+        <ErrorBoundary fallback={
+          <div className="flex flex-col items-center justify-center p-8 text-center mx-5">
+            <p className="text-[var(--color-text-muted)] text-sm">
+              Widget layout couldn't load
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-3 text-xs text-[var(--color-primary)] underline"
+            >
+              Tap to refresh
+            </button>
+          </div>
+        }>
+          <Suspense fallback={<BentoGridSkeleton />}>
+            <BentoGrid
+              widgets={gridWidgets}
+              onReorder={setGridWidgets}
+            />
+          </Suspense>
+        </ErrorBoundary>
       </motion.div>
 
       {/* ── Add Task FAB ────────────────────────────────────────────────── */}

@@ -37,7 +37,7 @@ interface Props {
 }
 
 export function RecoveryProtocol({ onDismiss }: Props) {
-  const { archiveAllOverdue, addTask, nowPool, userId, lastSessionAt, xpTotal } = useStore()
+  const { archiveAllOverdue, addTask, nowPool, userId, lastSessionAt, xpTotal, email } = useStore()
   const { t } = useMotion()
   const [taskInput, setTaskInput] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -50,7 +50,9 @@ export function RecoveryProtocol({ onDismiss }: Props) {
   // Archive overdue tasks + fetch AI welcome + fire welcome-back push on mount
   useEffect(() => {
     // Native push — visible when app was backgrounded (silent, no shame)
-    pushWelcomeBack()
+    // Extract first name from email or use generic greeting
+    const userName = email ? email.split('@')[0].split('.')[0] : undefined
+    pushWelcomeBack(userName)
 
     const ids = archiveAllOverdue()
     setArchivedCount(ids.length)

@@ -9,8 +9,9 @@
  * - Timer in FocusScreen (ArcTimer) is the correct place for time visualization (Time Timer concept)
  */
 
-import { useState, memo } from 'react'
+import { useState, memo, useRef } from 'react'
 import { motion } from 'motion/react'
+import { toast } from 'sonner'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { usePalette } from '@/shared/hooks/usePalette'
 import { useStore } from '@/store'
@@ -99,6 +100,9 @@ function TaskCardInner({ task, index = 0, onComplete, onSnooze }: Props) {
 
   const [confettiActive, setConfettiActive] = useState(false)
   const [isDone, setIsDone] = useState(false)
+  const [isPendingComplete, setIsPendingComplete] = useState(false)
+  const completeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const toastIdRef = useRef<string | number | null>(null)
 
   // Research #8: palette-aware accent — desaturated in calm mode
   const difficultyAccent = getDifficultyAccent(task.difficulty, palette)
@@ -106,10 +110,12 @@ function TaskCardInner({ task, index = 0, onComplete, onSnooze }: Props) {
   const dueDateBadge = getDueDateBadge(task, palette)
 
   const handleComplete = () => {
-    if (isDone) return
-    setIsDone(true)
+    if (isDone || isPendingComplete) return
+
+    // Immediate visual + haptic feedback
+    setIsPendingComplete(true)
     setConfettiActive(true)
-    hapticDone()  // [80ms, 40ms gap, 120ms] — satisfying confirmation pattern
+    hapticDone()
 
     // XP: base × difficulty × energy multiplier
     const energyMultiplier = energyLevel <= 2 ? 1.2 : energyLevel >= 4 ? 0.8 : 1.0
@@ -125,7 +131,8 @@ function TaskCardInner({ task, index = 0, onComplete, onSnooze }: Props) {
     const isBonus = vrMultiplier > 1
     const displayXp = Math.round(baseXp * vrMultiplier)
 
-    addXP(baseXp)  // store applies its own deterministic VR multiplier (same bucket → same result)
+    // Fire XP + task done notifications immediately
+    addXP(baseXp)
     if (isBonus) {
       notifyXPBonus(displayXp)
     } else {
@@ -133,7 +140,7 @@ function TaskCardInner({ task, index = 0, onComplete, onSnooze }: Props) {
     }
     notifyTaskDone(task.title)
 
-    // Achievements (with toast)
+    // Achievements
     const tryUnlock = (key: string) => {
       if (!hasAchievement(key)) {
         unlockAchievement(key)
@@ -147,14 +154,33 @@ function TaskCardInner({ task, index = 0, onComplete, onSnooze }: Props) {
     if (hour >= 21) tryUnlock('night_owl')
     if (hour < 9)  tryUnlock('morning_mind')
 
-    setTimeout(() => {
+    // Show undo toast with 4-second countdown
+    const id = toast('Done! ✓', {
+      duration: 4000,
+      action: {
+        label: 'Undo',
+        onClick: () => {
+          // Cancel the pending completion
+          if (completeTimerRef.current) clearTimeout(completeTimerRef.current)
+          setIsPendingComplete(false)
+          setIsDone(false)
+        },
+      },
+    })
+    toastIdRef.current = id
+
+    // After 4 seconds, actually commit the completion to store/DB
+    if (completeTimerRef.current) clearTimeout(completeTimerRef.current)
+    completeTimerRef.current = setTimeout(() => {
+      setIsDone(true)
       completeTask(task.id)
       onComplete?.()
-    }, 600)
+    }, 4000)
   }
 
   const handleSnooze = () => {
     snoozeTask(task.id)
+    toast('Parked for later. No rush. 🌿')
     onSnooze?.()
   }
 
@@ -162,10 +188,10 @@ function TaskCardInner({ task, index = 0, onComplete, onSnooze }: Props) {
     <motion.div
       initial={shouldAnimate ? { opacity: 0, y: 16 } : {}}
       animate={{
-        opacity: isDone ? 0 : 1,
+        opacity: isDone ? 0 : isPendingComplete ? 0.7 : 1,
         y: 0,
         x: isDone ? -40 : 0,
-        scale: isDone ? 0.96 : 1,
+        scale: isPendingComplete ? 0.98 : isDone ? 0.96 : 1,
       }}
       transition={{ ...t(), delay: index * 0.06 }}
       className="relative overflow-hidden rounded-2xl"
@@ -244,7 +270,7 @@ function TaskCardInner({ task, index = 0, onComplete, onSnooze }: Props) {
 
         {/* Task title */}
         <p
-          className="text-base font-semibold leading-snug mb-4"
+          className="text-base font-semibold leading-snug mb-4 line-clamp-2"
           style={{ color: '#E8E8F0' }}
         >
           {task.title}
@@ -300,6 +326,7 @@ export const TaskCard = memo(TaskCardInner, (prev, next) =>
   prev.task.completedAt === next.task.completedAt &&
   prev.task.snoozeCount === next.task.snoozeCount &&
   prev.task.difficultyLevel === next.task.difficultyLevel &&
+  prev.task.difficulty === next.task.difficulty &&
   prev.index === next.index &&
   prev.onComplete === next.onComplete &&
   prev.onSnooze === next.onSnooze

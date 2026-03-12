@@ -31,6 +31,7 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { motion, AnimatePresence } from 'motion/react'
+import { toast } from 'sonner'
 import { Settings2, EyeOff, Eye, GripVertical } from 'lucide-react'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { WIDGET_REGISTRY, WIDGET_LABELS, WIDGET_ICONS } from './widgets'
@@ -170,7 +171,10 @@ export function BentoGrid({ widgets, onReorder }: BentoGridProps) {
     const updated = widgets.map(w => w.id === id ? { ...w, visible: !w.visible } : w)
     // Enforce minimum 2 visible widgets (ADHD: too few = no structure)
     const visibleCount = updated.filter(w => w.visible).length
-    if (visibleCount < 2) return  // quietly prevent
+    if (visibleCount < 2) {
+      toast('Home screen needs at least 2 widgets')
+      return
+    }
     onReorder(updated)
   }
 

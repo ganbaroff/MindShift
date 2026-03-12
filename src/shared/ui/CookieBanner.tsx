@@ -18,7 +18,7 @@ const CONSENT_VERSION = '2026-03'
  */
 export function CookieBanner() {
   const [visible, setVisible] = useState(false)
-  const { t } = useMotion()
+  const { t, shouldAnimate } = useMotion()
 
   useEffect(() => {
     try {
@@ -60,9 +60,9 @@ export function CookieBanner() {
             maxWidth: 400,
             margin: '0 auto',
           }}
-          initial={{ y: 40, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: 40, opacity: 0 }}
+          initial={shouldAnimate ? { y: 40, opacity: 0 } : false}
+          animate={shouldAnimate ? { y: 0, opacity: 1 } : { opacity: 1 }}
+          exit={shouldAnimate ? { y: 40, opacity: 0 } : { opacity: 0 }}
           transition={t()}
         >
           <div className="flex-1 min-w-0">

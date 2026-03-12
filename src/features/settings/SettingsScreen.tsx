@@ -78,6 +78,7 @@ export default function SettingsScreen() {
     reducedStimulation, setReducedStimulation,
     subscriptionTier, trialEndsAt, setSubscription, isProActive,
     // Health & Rhythms
+    timerStyle, setTimerStyle,
     sleepQuality, setSleepQuality,
     medicationEnabled, setMedicationEnabled,
     medicationTime, setMedicationTime,
@@ -351,6 +352,36 @@ export default function SettingsScreen() {
             </button>
           ))}
         </div>
+      </section>
+
+      {/* ── Focus Timer Style ──────────────────────────────────────────────── */}
+      <section className="mx-5 p-4 rounded-2xl mb-4" style={{ background: 'var(--color-card)', border: '1px solid var(--color-border-subtle)' }}>
+        <p className="text-xs font-medium tracking-widest uppercase mb-3" style={{ color: 'var(--color-muted)' }}>
+          Focus Timer Style
+        </p>
+        <div className="flex gap-2">
+          {([
+            { style: 'countdown' as const, label: 'Countdown' },
+            { style: 'countup' as const, label: 'Count-up' },
+            { style: 'surprise' as const, label: 'Surprise' },
+          ]).map(({ style, label }) => (
+            <button
+              key={style}
+              onClick={() => setTimerStyle(style)}
+              className="flex-1 py-3 rounded-xl text-sm font-medium transition-all duration-200 min-h-[44px]"
+              style={{
+                background: timerStyle === style ? 'var(--color-primary-alpha)' : 'var(--color-elevated)',
+                border: `1.5px solid ${timerStyle === style ? 'var(--color-primary)' : 'var(--color-border-subtle)'}`,
+                color: timerStyle === style ? 'var(--color-primary)' : 'var(--color-muted)',
+              }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        <p className="text-xs text-[var(--color-text-muted)] mt-3">
+          Count-up shows time earned — helps if countdowns feel pressuring.
+        </p>
       </section>
 
       {/* ── Energy Level ──────────────────────────────────────────────────── */}

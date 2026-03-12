@@ -1,5 +1,5 @@
-import { memo } from 'react'
-import { motion } from 'motion/react'
+import { memo, useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'motion/react'
 import { useMotion } from '@/shared/hooks/useMotion'
 import type { SessionPhase } from '@/types'
 
@@ -49,8 +49,14 @@ function ArcTimerInner({
   disableToggle = false, size = ARC_SIZE,
   timerStyle = 'countdown',
 }: Props) {
-  const { shouldAnimate } = useMotion()
+  const { shouldAnimate, t } = useMotion()
   const scale = size / ARC_SIZE
+  const [showHint, setShowHint] = useState(true)
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowHint(false), 8000)
+    return () => clearTimeout(timer)
+  }, [])
 
   const offset = CIRCUMFERENCE * (1 - Math.max(0, Math.min(1, progress)))
   const arcColor = PHASE_COLORS[phase]
@@ -74,9 +80,9 @@ function ArcTimerInner({
       className="relative flex items-center justify-center focus:outline-none"
       style={{ cursor: effectiveDisable ? 'default' : 'pointer' }}
       aria-label={
-        isSurprise ? 'Focus timer — arc mode' :
-        effectiveDisable ? 'Focus timer' :
-        effectiveShowDigits ? 'Hide time' : 'Show remaining time'
+        isSurprise ? 'Focus timer — digits hidden in flow phase' :
+        effectiveDisable ? 'Focus timer — digits hidden in flow phase' :
+        effectiveShowDigits ? 'Focus timer — tap to hide digits' : 'Focus timer — tap to show digits'
       }
     >
       {/* Struggle phase pulsing glow */}
@@ -155,6 +161,22 @@ function ArcTimerInner({
           </motion.div>
         ) : null}
       </div>
+
+      {/* Tap hint — shown for first 8 seconds */}
+      <AnimatePresence>
+        {showHint && !isSurprise && !disableToggle && (
+          <motion.p
+            initial={shouldAnimate ? { opacity: 0 } : {}}
+            animate={{ opacity: 1 }}
+            exit={shouldAnimate ? { opacity: 0 } : {}}
+            transition={t()}
+            className="absolute bottom-0 translate-y-full mt-2 text-xs text-center whitespace-nowrap"
+            style={{ color: 'var(--color-text-muted)' }}
+          >
+            Tap to toggle digits
+          </motion.p>
+        )}
+      </AnimatePresence>
     </motion.button>
   )
 }

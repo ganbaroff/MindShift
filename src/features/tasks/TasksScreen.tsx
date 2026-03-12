@@ -120,7 +120,7 @@ export default function TasksScreen() {
           onClick={() => setAddOpen(true)}
           className="flex items-center gap-2.5 px-8 py-4 rounded-2xl font-semibold text-base"
           style={{
-            background: 'linear-gradient(135deg, #7B72FF 0%, #5B52E8 100%)',
+            background: 'linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%)',
             color: '#fff',
             boxShadow: '0 4px 24px rgba(123,114,255,0.4)',
           }}

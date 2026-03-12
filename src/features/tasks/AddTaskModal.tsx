@@ -687,6 +687,7 @@ export function AddTaskModal({ open, onClose }: Props) {
                       onKeyDown={(e) => { if (e.key === 'Enter') void handleSubmit() }}
                       placeholder={isListening ? 'Listening...' : 'What needs to be done?'}
                       autoFocus
+                      maxLength={200}
                       className="flex-1 rounded-2xl px-4 py-3 text-base outline-none"
                       style={{
                         background: 'var(--color-elevated)',
@@ -725,6 +726,13 @@ export function AddTaskModal({ open, onClose }: Props) {
                     <p className="text-xs animate-pulse" style={{ color: 'var(--color-secondary)' }}>
                       🎙 Listening… tap mic to stop
                     </p>
+                  )}
+
+                  {/* Character counter — shown when approaching limit */}
+                  {title.length > 150 && (
+                    <span className="text-xs" style={{ color: 'var(--color-muted)' }}>
+                      {title.length}/200
+                    </span>
                   )}
 
                   {/* AI Decompose button */}

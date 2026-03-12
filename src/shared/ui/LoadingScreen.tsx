@@ -9,9 +9,9 @@ export function LoadingScreen() {
          style={{ background: 'var(--color-bg)' }}>
       <motion.div
         className="flex flex-col items-center gap-4"
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.3 }}
+        initial={shouldAnimate ? { opacity: 0, scale: 0.9 } : false}
+        animate={shouldAnimate ? { opacity: 1, scale: 1 } : { opacity: 1 }}
+        transition={shouldAnimate ? { duration: 0.3 } : { duration: 0 }}
       >
         {/* Logo mark */}
         <div className="w-16 h-16 rounded-2xl flex items-center justify-center"

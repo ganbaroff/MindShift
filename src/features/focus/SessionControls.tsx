@@ -11,6 +11,7 @@
 
 import { memo } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
+import { toast } from 'sonner'
 import { useMotion } from '@/shared/hooks/useMotion'
 
 interface Props {
@@ -106,7 +107,12 @@ export const SessionControls = memo(function SessionControls({
               />
               <div className="flex gap-2">
                 <button
-                  onClick={onParkSave}
+                  onClick={() => {
+                    if (parkText.trim()) {
+                      onParkSave()
+                      toast('Thought saved to Someday 💭')
+                    }
+                  }}
                   disabled={!parkText.trim()}
                   className="flex-1 py-1.5 rounded-lg text-xs font-medium"
                   style={{ background: parkText.trim() ? '#7B72FF' : '#252840', color: 'white' }}

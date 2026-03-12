@@ -22,12 +22,56 @@ interface Props {
   sessionPhase: SessionPhase
 }
 
+// ── Message pools — randomized responses per trigger ────────────────────────
+
+const MOCHI_MESSAGES: Record<string, string[]> = {
+  phase_release: [
+    "Getting into it... you're past the hardest part 🌊",
+    "The resistance is lifting. You're finding your rhythm.",
+    "Past the tough part. Let it flow. 🌊",
+    "Struggle phase done. You showed up — that's everything.",
+  ],
+  phase_flow: [
+    "Deep focus. I'm here if you need me 🌙",
+    "You're in flow. Beautiful. I'll stay quiet. 🌙",
+    "Full flow mode. Nothing to do but keep going.",
+    "This is it. Deep work happening right now. 🌙",
+  ],
+  milestone_7: [
+    "Made it past the toughest part 💪",
+    "7 minutes in. The hard part is behind you. 💪",
+    "Past the first wall. Nice. 💪",
+    "7 minutes. You pushed through resistance. 💪",
+  ],
+  milestone_15: [
+    "Fifteen minutes — this is real focus ✨",
+    "15 minutes deep. This counts. ✨",
+    "Quarter hour of real work. You did that. ✨",
+    "15 minutes. Not nothing. This is something. ✨",
+  ],
+  milestone_30: [
+    "Half an hour. Seriously solid session 🔥",
+    "30 minutes. That's a real session. 🔥",
+    "30 in. Still here with you. 🔥",
+    "Half hour of focus. You kept going. 🔥",
+  ],
+  milestone_60: [
+    "An hour. That's extraordinary 🌟",
+    "60 minutes. Genuine deep work. 🌟",
+    "One full hour. This is rare. 🌟",
+    "60 minutes. Remember this feeling. 🌟",
+  ],
+}
+
+const getRandomMessage = (messages: string[]): string =>
+  messages[Math.floor(Math.random() * messages.length)]
+
 // ── Bubble triggers ───────────────────────────────────────────────────────────
 
 interface BubbleTrigger {
   id: string
   minElapsed: number  // seconds — earliest this can fire
-  message: string
+  messagePool: string  // key into MOCHI_MESSAGES
   mascotState: 'focused' | 'celebrating' | 'resting'
 }
 
@@ -35,25 +79,37 @@ const BUBBLE_TRIGGERS: BubbleTrigger[] = [
   {
     id: 'phase_release',
     minElapsed: 7 * 60,   // 7 min — struggle → release phase
-    message: "Made it past the toughest minute. I'm right here with you 💪",
+    messagePool: 'phase_release',
     mascotState: 'focused',
   },
   {
     id: 'phase_flow',
     minElapsed: 15 * 60,  // 15 min — release → flow phase
-    message: "You're in the groove — stay loose, I'll keep you company 🌊",
+    messagePool: 'phase_flow',
     mascotState: 'focused',
+  },
+  {
+    id: 'milestone_7',
+    minElapsed: 7 * 60,   // 7 min milestone
+    messagePool: 'milestone_7',
+    mascotState: 'focused',
+  },
+  {
+    id: 'milestone_15',
+    minElapsed: 15 * 60,  // 15 min milestone
+    messagePool: 'milestone_15',
+    mascotState: 'celebrating',
   },
   {
     id: 'milestone_30',
     minElapsed: 30 * 60,  // 30 min milestone
-    message: "30 minutes! That's real, deep work. You're doing amazing 🎯",
+    messagePool: 'milestone_30',
     mascotState: 'celebrating',
   },
   {
     id: 'milestone_60',
     minElapsed: 60 * 60,  // 60 min milestone
-    message: "An hour of focus — that's rare. Take a breath, you've got this 🧘",
+    messagePool: 'milestone_60',
     mascotState: 'resting',
   },
 ]
@@ -132,7 +188,7 @@ function MochiSessionCompanionInner({ elapsedSeconds, sessionPhase }: Props) {
               }}
             />
             <p className="text-xs leading-relaxed" style={{ color: '#E8E8F0' }}>
-              {activeBubble.message}
+              {getRandomMessage(MOCHI_MESSAGES[activeBubble.messagePool] || ['Keep going!'])}
             </p>
           </motion.button>
         )}

@@ -13,6 +13,7 @@
 
 import { useState, memo } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
+import { useNavigate } from 'react-router-dom'
 import { X } from 'lucide-react'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { getBurnoutTier } from '@/shared/lib/burnout'
@@ -48,12 +49,18 @@ const TIER_CONFIG = {
 
 function BurnoutAlertInner({ score }: Props) {
   const { shouldAnimate, t } = useMotion()
+  const navigate = useNavigate()
   const [dismissed, setDismissed] = useState(false)
 
   const tier = getBurnoutTier(score)
   if (tier === 'healthy' || dismissed) return null
 
   const cfg = TIER_CONFIG[tier]
+
+  const handleCTA = () => {
+    navigate('/focus?quick=1')
+    setDismissed(true)
+  }
 
   return (
     <AnimatePresence>
@@ -89,7 +96,7 @@ function BurnoutAlertInner({ score }: Props) {
                   border: `1px solid ${cfg.border}`,
                   color: cfg.color,
                 }}
-                onClick={() => setDismissed(true)}
+                onClick={handleCTA}
               >
                 {cfg.cta}
               </button>

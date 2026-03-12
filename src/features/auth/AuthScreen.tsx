@@ -204,9 +204,9 @@ function EmailStep({
         style={{
           height: 48,
           background: canSubmit
-            ? 'linear-gradient(135deg, #7B72FF 0%, #5B52E8 100%)'
-            : 'linear-gradient(135deg, rgba(123,114,255,0.15) 0%, rgba(91,82,232,0.08) 100%)',
-          color: canSubmit ? '#fff' : '#5A5B72',
+            ? 'linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%)'
+            : 'linear-gradient(135deg, var(--color-primary-alpha) 0%, rgba(91,82,232,0.08) 100%)',
+          color: canSubmit ? '#fff' : 'var(--color-muted)',
           boxShadow: canSubmit ? '0 4px 24px rgba(123,114,255,0.4), 0 0 0 1px rgba(123,114,255,0.3)' : '0 0 0 1px rgba(45,49,80,0.6)',
           cursor: canSubmit && !loading ? 'pointer' : 'not-allowed',
         }}

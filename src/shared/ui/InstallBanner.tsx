@@ -13,7 +13,7 @@ import { useMotion } from '@/shared/hooks/useMotion'
 
 export function InstallBanner() {
   const { state, install, dismiss } = useInstallPrompt()
-  const { t } = useMotion()
+  const { t, shouldAnimate } = useMotion()
 
   const handleInstall = () => {
     hapticTap()
@@ -31,9 +31,9 @@ export function InstallBanner() {
     <AnimatePresence>
       {visible && (
         <motion.div
-          initial={{ opacity: 0, y: 80 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 80 }}
+          initial={shouldAnimate ? { opacity: 0, y: 80 } : false}
+          animate={shouldAnimate ? { opacity: 1, y: 0 } : { opacity: 1 }}
+          exit={shouldAnimate ? { opacity: 0, y: 80 } : { opacity: 0 }}
           transition={t()}
           role="banner"
           aria-label="Install MindShift as an app"
