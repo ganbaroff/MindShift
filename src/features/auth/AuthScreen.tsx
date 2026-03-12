@@ -110,7 +110,7 @@ function EmailStep({
       transition={t()}
     >
       <h2 className="text-lg font-bold mb-1" style={{ color: '#E8E8F0' }}>
-        Welcome — let's get you in
+        Welcome. Let's get started.
       </h2>
       <p className="text-[13px] mb-5 leading-relaxed" style={{ color: '#8B8BA7' }}>
         Enter your email and we'll send a magic link.
@@ -252,7 +252,7 @@ function CheckStep({ email, onBack }: { email: string; onBack: () => void }) {
       </motion.div>
 
       <h2 className="text-xl font-bold mb-2" style={{ color: '#E8E8F0' }}>
-        Check your inbox 📬
+        Magic link on its way ✨
       </h2>
       <p className="text-sm leading-relaxed mb-1" style={{ color: '#8B8BA7' }}>
         We sent a link to
@@ -271,7 +271,7 @@ function CheckStep({ email, onBack }: { email: string; onBack: () => void }) {
         style={{ color: '#7B72FF' }}
         onClick={onBack}
       >
-        ← Use a different email
+        Wrong email? Go back
       </button>
     </motion.div>
   )
@@ -385,7 +385,7 @@ export default function AuthScreen() {
           animate={{ opacity: 1 }}
           transition={{ ...t(), delay: 0.4 }}
         >
-          By continuing you agree to our{' '}
+          Your data stays private. Always.{' '}
           <Link to="/privacy" target="_blank" style={{ color: '#7B72FF' }} className="underline decoration-dotted opacity-60 hover:opacity-100 transition-opacity">
             Privacy Policy
           </Link>

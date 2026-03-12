@@ -327,20 +327,20 @@ const TIMER_OPTIONS: {
   {
     style: 'countdown',
     emoji: '⏱️',
-    title: 'Count down',
+    title: 'Countdown',
     subtitle: 'See time remaining — classic focus timer',
   },
   {
     style: 'countup',
     emoji: '⬆️',
-    title: 'Count up',
+    title: 'Count-up',
     subtitle: 'See how long you\'ve been going — less pressure',
   },
   {
     style: 'surprise',
     emoji: '🎲',
     title: 'Surprise me',
-    subtitle: 'Arc ring only — no numbers, pure presence',
+    subtitle: 'Arc ring only — no numbers, just now',
   },
 ]
 
@@ -362,7 +362,7 @@ function TimerPreferenceScreen({
         transition={t()}
       >
         <h1 className="text-2xl font-bold mb-2" style={{ color: '#E8E8F0' }}>
-          How do you like to see time? ⏱️
+          How do you want to see your timer?
         </h1>
         <p className="text-sm leading-relaxed" style={{ color: '#8B8BA7' }}>
           Pick your default focus timer style — change it anytime in Settings.

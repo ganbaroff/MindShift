@@ -65,7 +65,7 @@ export function InstallBanner() {
                     Install MindShift
                   </p>
                   <p className="text-xs mt-0.5 leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-                    Works offline · No browser bar · Feels native
+                    Works offline · No browser bar · Full screen
                   </p>
                   <button
                     onClick={handleInstall}

@@ -78,7 +78,7 @@ export default function FocusScreen() {
         className="flex flex-col items-center justify-center min-h-screen px-6 text-center"
         style={{ background: 'var(--color-bg)' }}
       >
-        <div className="text-4xl mb-4">⚠️</div>
+        <div className="text-4xl mb-4">⏸️</div>
         <h2 className="text-xl font-bold mb-2" style={{ color: 'var(--color-text)' }}>
           Leave focus session?
         </h2>
@@ -95,7 +95,7 @@ export default function FocusScreen() {
               color: 'var(--color-primary)',
             }}
           >
-            Keep going 💪
+            Keep going 🌿
           </button>
           <button
             onClick={handleConfirmStop}
@@ -221,7 +221,7 @@ export default function FocusScreen() {
               color: 'var(--color-muted)',
             }}
           >
-            I'm in hyperfocus — keep going
+            I know — let me keep going
           </button>
         </motion.div>
       </div>

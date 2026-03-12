@@ -14,6 +14,7 @@ import { memo } from 'react'
 import { motion } from 'motion/react'
 import { useMotion } from '@/shared/hooks/useMotion'
 import type { EnergyLevel } from '@/types'
+import { ENERGY_LABELS, ENERGY_EMOJI } from '@/shared/lib/constants'
 
 // ── Nature Buffer Screen ───────────────────────────────────────────────────────
 
@@ -25,11 +26,11 @@ interface NatureBufferProps {
 }
 
 const ENERGY_OPTIONS = [
-  { level: 1 as EnergyLevel, emoji: '😴', label: 'Drained' },
-  { level: 2 as EnergyLevel, emoji: '😌', label: 'Calm' },
-  { level: 3 as EnergyLevel, emoji: '🙂', label: 'Good' },
-  { level: 4 as EnergyLevel, emoji: '😄', label: 'Great' },
-  { level: 5 as EnergyLevel, emoji: '⚡', label: 'Wired' },
+  { level: 1 as EnergyLevel, emoji: ENERGY_EMOJI[0], label: ENERGY_LABELS[0] },
+  { level: 2 as EnergyLevel, emoji: ENERGY_EMOJI[1], label: ENERGY_LABELS[1] },
+  { level: 3 as EnergyLevel, emoji: ENERGY_EMOJI[2], label: ENERGY_LABELS[2] },
+  { level: 4 as EnergyLevel, emoji: ENERGY_EMOJI[3], label: ENERGY_LABELS[3] },
+  { level: 5 as EnergyLevel, emoji: ENERGY_EMOJI[4], label: ENERGY_LABELS[4] },
 ]
 
 export const NatureBuffer = memo(function NatureBuffer({
@@ -103,7 +104,7 @@ export const NatureBuffer = memo(function NatureBuffer({
             color: '#8B8BA7',
           }}
         >
-          Skip rest
+          I'm ready
         </button>
       </motion.div>
     </div>
@@ -140,7 +141,7 @@ export const RecoveryLock = memo(function RecoveryLock({
       >
         <div className="text-5xl mb-6">🌿</div>
         <h2 className="text-2xl font-bold mb-2" style={{ color: '#4ECDC4' }}>
-          90 minutes! Amazing 🌊
+          90 minutes of deep focus 🌊
         </h2>
         <p className="text-sm mb-6 max-w-xs leading-relaxed" style={{ color: '#8B8BA7' }}>
           You just did 90 minutes of deep focus. Your brain consolidates learning during rest —
@@ -179,7 +180,7 @@ export const RecoveryLock = memo(function RecoveryLock({
             color: '#8B8BA7',
           }}
         >
-          I'm in hyperfocus — continue →
+          I know — keep going →
         </button>
       </motion.div>
     </div>

@@ -49,3 +49,10 @@ export const PSYCHOTYPE_DETECTION_DAYS = 7
 
 // Avatars
 export const AVATAR_COUNT = 6
+
+// ── Energy labels — canonical set used across all UI ──────────────────────────
+// Drained(1) → Low(2) → Okay(3) → Good(4) → Wired(5)
+// Keep in sync: EnergyCheckin, HomeScreen, PostSessionFlow, SettingsScreen
+export const ENERGY_LABELS = ['Drained', 'Low', 'Okay', 'Good', 'Wired'] as const
+export const ENERGY_EMOJI  = ['😴', '😌', '🙂', '😄', '⚡'] as const
+export type EnergyLabel = typeof ENERGY_LABELS[number]

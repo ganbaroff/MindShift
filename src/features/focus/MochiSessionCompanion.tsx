@@ -59,7 +59,7 @@ const MOCHI_MESSAGES: Record<string, string[]> = {
     "An hour. That's extraordinary 🌟",
     "60 minutes. Genuine deep work. 🌟",
     "One full hour. This is rare. 🌟",
-    "60 minutes. Remember this feeling. 🌟",
+    "One hour. This was real. 🌟",
   ],
 }
 

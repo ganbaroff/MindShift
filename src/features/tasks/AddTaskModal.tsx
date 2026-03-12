@@ -51,7 +51,7 @@ export function downloadICS(task: Task): void {
   a.download = `${task.title.slice(0, 30).replace(/[^a-z0-9]/gi, '-')}.ics`
   a.click()
   URL.revokeObjectURL(url)
-  toast.success('📅 Opening in your calendar app...')
+  toast.success('📅 Calendar event downloaded')
 }
 
 // ── Due-date badge helper (used also in CalendarScreen) ───────────────────────
@@ -127,7 +127,7 @@ export function AddTaskModal({ open, onClose }: Props) {
       if (!result) {
         // Unparseable response → safe fallback
         setTitle(text)
-        toast('Recorded your note — edit the details below.', { icon: '🎙' })
+        toast('Got it — check the details below.', { icon: '🎙' })
         return
       }
 
@@ -225,7 +225,7 @@ export function AddTaskModal({ open, onClose }: Props) {
         void classifyVoice(transcript)
       } else {
         // Empty transcript — Step E: gentle feedback instead of silence
-        toast('Nothing captured — try again in a quiet spot.', { icon: '🎙' })
+        toast('Nothing captured — try again, or type it instead.', { icon: '🎙' })
       }
     }
 
@@ -257,7 +257,7 @@ export function AddTaskModal({ open, onClose }: Props) {
           setCustomMinutes('')
         }
       } else {
-        toast.error('AI returned an unexpected response. Add the task manually for now.')
+        toast.error('Something went wrong — add the task and try again later.')
       }
     } catch (err) {
       const status = (err as { context?: { status?: number } })?.context?.status

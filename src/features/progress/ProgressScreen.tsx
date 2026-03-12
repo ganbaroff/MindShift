@@ -292,9 +292,9 @@ export default function ProgressScreen() {
       {/* Research #5: Show cumulative effort (task totals), not consecutive streaks */}
       <div className="mx-5 grid grid-cols-3 gap-3 mb-4">
         {[
-          { label: 'Achievements', value: `${unlocked.length}/${ACHIEVEMENT_DEFINITIONS.length}`, emoji: '🏆', color: '#F59E0B' },
+          { label: 'Achievements', value: `${unlocked.length} unlocked`, emoji: '🏆', color: '#F59E0B' },
           { label: 'Tasks Done', value: completedTotal.toString(), emoji: '✅', color: '#4ECDC4' },
-          { label: 'Active Days', value: `${activeDays}/7`, emoji: '📅', color: '#7B72FF' },
+          { label: 'Active Days', value: `${activeDays} days`, emoji: '📅', color: '#7B72FF' },
         ].map((stat, i) => (
           <motion.div
             key={stat.label}
@@ -334,7 +334,7 @@ export default function ProgressScreen() {
                 opacity: insightLoading ? 0.5 : 1,
               }}
             >
-              {insightLoading ? 'Loading...' : 'Generate'}
+              {insightLoading ? 'Loading...' : 'Get insights'}
             </button>
           )}
         </div>
@@ -358,7 +358,7 @@ export default function ProgressScreen() {
           </div>
         ) : (
           <p className="text-sm leading-relaxed" style={{ color: '#8B8BA7' }}>
-            Tap "Generate" to get personalized insights based on your focus patterns this week.
+            Tap "Get insights" to see personalized insights based on your focus patterns this week.
           </p>
         )}
       </motion.div>
@@ -370,7 +370,7 @@ export default function ProgressScreen() {
             Achievements
           </h2>
           <span className="text-xs" style={{ color: '#7B72FF' }}>
-            {unlocked.length}/{ACHIEVEMENT_DEFINITIONS.length}
+            {unlocked.length} of {ACHIEVEMENT_DEFINITIONS.length} unlocked
           </span>
         </div>
 

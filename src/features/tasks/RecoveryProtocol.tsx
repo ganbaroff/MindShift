@@ -270,7 +270,7 @@ export function RecoveryProtocol({ onDismiss }: Props) {
             {/* Micro-win suggestion chips — Research #7: lower blank-slate barrier */}
             <div className="flex flex-wrap gap-2 mt-1">
               <p className="w-full text-xs mb-0.5" style={{ color: '#5A5B72' }}>
-                Or pick a micro-win to start:
+                Or pick something easy to start with:
               </p>
               {MICRO_WIN_SUGGESTIONS.map(s => (
                 <button
@@ -315,7 +315,7 @@ export function RecoveryProtocol({ onDismiss }: Props) {
               className="w-full py-3 text-sm transition-all duration-200"
               style={{ color: '#8B8BA7' }}
             >
-              Skip — just show me my tasks
+              Skip — show my tasks
             </button>
           </motion.div>
         </div>

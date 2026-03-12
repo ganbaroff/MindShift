@@ -32,7 +32,7 @@ const TIER_CONFIG = {
     emoji:  '🌿',
     title:  'Your rhythm feels a bit stretched',
     body:   "It looks like things have been piling up. That happens — ADHD brains run in bursts, not lines. A short reset can help more than pushing through.",
-    cta:    'Try a 5-min micro-focus →',
+    cta:    'Try a 5-minute session →',
   },
   burnout: {
     bg:     'linear-gradient(135deg, rgba(123,114,255,0.14) 0%, rgba(123,114,255,0.06) 100%)',

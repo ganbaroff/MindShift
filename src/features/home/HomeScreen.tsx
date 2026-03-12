@@ -127,7 +127,7 @@ function QuickSetupCard({ onDone }: QuickSetupCardProps) {
           className="w-full py-2 text-xs text-center transition-colors duration-200"
           style={{ color: 'var(--color-muted)' }}
         >
-          Skip — I'll explore on my own →
+          Skip for now
         </button>
       </div>
     </motion.div>

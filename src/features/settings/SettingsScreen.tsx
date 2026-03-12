@@ -5,6 +5,7 @@ import { supabase } from '@/shared/lib/supabase'
 import { toast } from 'sonner'
 import { logError } from '@/shared/lib/logger'
 import Avatar, { STAGE_NAMES } from '@/features/progress/Avatar'
+import { ENERGY_LABELS, ENERGY_EMOJI } from '@/shared/lib/constants'
 
 // ── Chip selector (Health & Rhythms) ──────────────────────────────────────────
 
@@ -394,11 +395,11 @@ export default function SettingsScreen() {
         </p>
         <div className="flex gap-2">
           {([
-            { level: 1 as const, label: '😴', title: 'Low' },
-            { level: 2 as const, label: '😌', title: 'Calm' },
-            { level: 3 as const, label: '🙂', title: 'Good' },
-            { level: 4 as const, label: '😄', title: 'High' },
-            { level: 5 as const, label: '⚡', title: 'Peak' },
+            { level: 1 as const, label: ENERGY_EMOJI[0], title: ENERGY_LABELS[0] },
+            { level: 2 as const, label: ENERGY_EMOJI[1], title: ENERGY_LABELS[1] },
+            { level: 3 as const, label: ENERGY_EMOJI[2], title: ENERGY_LABELS[2] },
+            { level: 4 as const, label: ENERGY_EMOJI[3], title: ENERGY_LABELS[3] },
+            { level: 5 as const, label: ENERGY_EMOJI[4], title: ENERGY_LABELS[4] },
           ]).map(({ level, label, title }) => (
             <button
               key={level}
@@ -507,7 +508,7 @@ export default function SettingsScreen() {
                 toast.success('🛋️ Rest mode on — no pressure for 24 hours')
               } else {
                 setFlexiblePauseUntil(null)
-                toast.success('Back in action 💪')
+                toast.success('Rest mode off — welcome back 🌿')
               }
             }}
             label="🛋️ Rest mode (pause focus pressure)"
@@ -553,7 +554,7 @@ export default function SettingsScreen() {
               mode: 'sandbox'  as const,
               emoji: '🎮',
               label: 'Sandbox',
-              desc:  'Explore freely — no limits',
+              desc:  'Open mode — no pool constraints',
             },
           ]).map(({ mode, emoji, label, desc }) => {
             const isActive = seasonalMode === mode
@@ -674,7 +675,7 @@ export default function SettingsScreen() {
                   opacity: deleting ? 0.5 : 1,
                 }}
               >
-                {deleting ? 'Deleting...' : 'Permanently delete'}
+                {deleting ? 'Deleting...' : 'Yes, delete my account'}
               </button>
               <button
                 onClick={() => { setShowDeleteConfirm(false); setDeleteEmail('') }}

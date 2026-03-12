@@ -195,7 +195,7 @@ export default function TasksScreen() {
         <div className="flex flex-col gap-3">
           {nextTasks.length === 0 ? (
             <p className="text-sm py-4 text-center" style={{ color: '#8B8BA7' }}>
-              Queued tasks will appear here. No rush.
+              Your upcoming tasks will live here. No rush.
             </p>
           ) : (
             <TaskList tasks={nextTasks} />
@@ -262,7 +262,7 @@ export default function TasksScreen() {
         <CoachMark
           hintId="focus_mode_hint"
           emoji="⏱️"
-          message="Tap Focus for a distraction-free session — it's designed for exactly this."
+          message="Tap Focus to work on this task without distractions."
         />
       )}
     </div>

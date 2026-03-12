@@ -68,7 +68,7 @@ export function CookieBanner() {
           <div className="flex-1 min-w-0">
             <p className="text-[11px] leading-relaxed" style={{ color: 'var(--color-text-subtle)' }}>
               We save your preferences on-device.{' '}
-              <strong style={{ color: 'var(--color-muted)' }}>No cookies, no tracking.</strong>{' '}
+              <strong style={{ color: 'var(--color-muted)' }}>No tracking cookies.</strong>{' '}
               <Link
                 to="/cookie-policy"
                 className="underline decoration-dotted"
