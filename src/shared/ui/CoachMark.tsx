@@ -37,21 +37,21 @@ export function CoachMark({ hintId, emoji, message }: Props) {
           <div
             className="flex items-center gap-3 px-4 py-3 rounded-2xl pointer-events-auto"
             style={{
-              background: 'rgba(123, 114, 255, 0.12)',
-              border: '1.5px solid rgba(123, 114, 255, 0.25)',
+              background: 'var(--color-primary-alpha)',
+              border: '1.5px solid var(--color-border-accent)',
               backdropFilter: 'blur(12px)',
               WebkitBackdropFilter: 'blur(12px)',
               boxShadow: '0 4px 20px rgba(123, 114, 255, 0.08)',
             }}
           >
             <span className="text-xl flex-shrink-0">{emoji}</span>
-            <p className="flex-1 text-sm leading-snug" style={{ color: '#E8E8F0' }}>
+            <p className="flex-1 text-sm leading-snug" style={{ color: 'var(--color-text)' }}>
               {message}
             </p>
             <button
               onClick={() => markHintSeen(hintId)}
               className="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-full transition-opacity hover:opacity-80"
-              style={{ color: '#8B8BA7' }}
+              style={{ color: 'var(--color-muted)' }}
               aria-label="Dismiss tip"
             >
               <X size={14} />

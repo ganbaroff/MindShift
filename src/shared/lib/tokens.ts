@@ -40,6 +40,15 @@ export const color = {
   // Borders
   borderSubtle:   'rgba(255,255,255,0.06)', // Default card borders
   borderAccent:   'rgba(123,114,255,0.35)', // InstallBanner border
+  borderTeal:     'rgba(78,205,196,0.35)',  // Teal accent border
+  borderGold:     'rgba(245,158,11,0.35)',  // Gold accent border
+
+  // Extended palette (Phase 0 — not in original token set)
+  primaryDark:    '#5B52E8',  // Gradient end, hover darken
+  primaryLight:   '#8B85FF',  // Glow tints, light accents
+  primaryAlpha:   'rgba(123,114,255,0.15)', // Active/selected tint bg (CSS-friendly)
+  tealDark:       '#2E9990',  // Teal gradient / pressed state
+  textSubtle:     '#6B6B8A',  // 3rd tier: placeholder, legal footnotes
 
   // Phase colors (FocusScreen ArcTimer)
   phaseIdle:      '#252840',

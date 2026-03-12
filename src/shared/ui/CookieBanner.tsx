@@ -52,10 +52,10 @@ export function CookieBanner() {
           style={{
             // Sit above the BottomNav (≈64 px) + iOS safe area + 8 px breathing room
             bottom: 'calc(64px + env(safe-area-inset-bottom) + 8px)',
-            background: 'rgba(22,25,40,0.95)',
+            background: 'var(--color-glass-dark)',
             backdropFilter: 'blur(12px)',
             WebkitBackdropFilter: 'blur(12px)',
-            border: '1px solid rgba(45,49,80,0.6)',
+            border: '1px solid var(--color-banner-border)',
             boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
             maxWidth: 400,
             margin: '0 auto',
@@ -66,13 +66,13 @@ export function CookieBanner() {
           transition={t()}
         >
           <div className="flex-1 min-w-0">
-            <p className="text-[11px] leading-relaxed" style={{ color: '#7B7B95' }}>
+            <p className="text-[11px] leading-relaxed" style={{ color: 'var(--color-text-subtle)' }}>
               We save your preferences on-device.{' '}
-              <strong style={{ color: '#9B9BB0' }}>No cookies, no tracking.</strong>{' '}
+              <strong style={{ color: 'var(--color-muted)' }}>No cookies, no tracking.</strong>{' '}
               <Link
                 to="/cookie-policy"
                 className="underline decoration-dotted"
-                style={{ color: '#7B72FF' }}
+                style={{ color: 'var(--color-primary)' }}
                 onClick={dismiss}
               >
                 Learn more
@@ -83,7 +83,7 @@ export function CookieBanner() {
             onClick={dismiss}
             aria-label="Dismiss cookie notice"
             className="shrink-0 p-1 rounded-lg transition-colors hover:bg-white/5"
-            style={{ color: '#6B7280' }}
+            style={{ color: 'var(--color-text-subtle)' }}
           >
             <X size={14} />
           </button>

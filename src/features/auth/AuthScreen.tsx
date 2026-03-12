@@ -50,7 +50,7 @@ function MochiLogo() {
           <circle cx="22" cy="22" r="7" stroke="#7B72FF" strokeWidth="2" opacity="0.6" />
           <circle cx="22" cy="22" r="2.5" fill="#7B72FF" />
           <path d="M33 10L33.8 12L36 12L34.2 13.4L35 15.4L33 14L31 15.4L31.8 13.4L30 12L32.2 12Z"
-            fill="#FFE66D" opacity="0.85" />
+            style={{ fill: 'var(--color-gold)' }} opacity="0.85" />
         </svg>
       </div>
     </motion.div>

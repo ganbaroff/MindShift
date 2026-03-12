@@ -25,9 +25,9 @@ function ChipGroup<T extends string | number>({
           aria-pressed={value === opt.value}
           className="px-3 py-1.5 rounded-xl text-xs font-medium transition-all duration-150 min-h-[36px]"
           style={{
-            background: value === opt.value ? 'rgba(123,114,255,0.18)' : '#252840',
-            border: `1.5px solid ${value === opt.value ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
-            color: value === opt.value ? '#7B72FF' : '#8B8BA7',
+            background: value === opt.value ? 'var(--color-primary-alpha)' : 'var(--color-elevated)',
+            border: `1.5px solid ${value === opt.value ? 'var(--color-primary)' : 'var(--color-border-subtle)'}`,
+            color: value === opt.value ? 'var(--color-primary)' : 'var(--color-muted)',
           }}
         >
           {opt.label}
@@ -51,15 +51,15 @@ function Toggle({ checked, onChange, label }: {
       onClick={() => onChange(!checked)}
       className="flex items-center justify-between w-full py-3 min-h-[44px]"
     >
-      <span className="text-sm" style={{ color: '#E8E8F0' }}>{label}</span>
+      <span className="text-sm" style={{ color: 'var(--color-text)' }}>{label}</span>
       <div
         className="w-11 h-6 rounded-full relative transition-colors duration-200"
-        style={{ background: checked ? '#7B72FF' : '#252840' }}
+        style={{ background: checked ? 'var(--color-primary)' : 'var(--color-elevated)' }}
       >
         <div
           className="absolute top-0.5 w-5 h-5 rounded-full transition-transform duration-200"
           style={{
-            background: checked ? '#FFFFFF' : '#8B8BA7',
+            background: checked ? '#FFFFFF' : 'var(--color-muted)',
             transform: checked ? 'translateX(22px)' : 'translateX(2px)',
           }}
         />
@@ -196,76 +196,76 @@ export default function SettingsScreen() {
     <div className="flex flex-col pb-[calc(112px+env(safe-area-inset-bottom))]">
       {/* Header */}
       <div className="px-5 pt-10 pb-6">
-        <h1 className="text-2xl font-bold" style={{ color: '#E8E8F0' }}>
+        <h1 className="text-2xl font-bold" style={{ color: 'var(--color-text)' }}>
           Settings
         </h1>
-        <p className="text-sm mt-1" style={{ color: '#8B8BA7' }}>{email}</p>
+        <p className="text-sm mt-1" style={{ color: 'var(--color-muted)' }}>{email}</p>
       </div>
 
       {/* ── Subscription ─────────────────────────────────────────────────── */}
       <section className="mx-5 p-4 rounded-2xl mb-4" style={{
         background: proActive
-          ? 'linear-gradient(135deg, rgba(123,114,255,0.15) 0%, rgba(78,205,196,0.10) 100%)'
-          : '#1E2136',
-        border: `1.5px solid ${proActive ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
+          ? 'linear-gradient(135deg, var(--color-primary-alpha) 0%, var(--color-teal-alpha) 100%)'
+          : 'var(--color-card)',
+        border: `1.5px solid ${proActive ? 'var(--color-primary)' : 'var(--color-border-subtle)'}`,
       }}>
-        <p className="text-xs font-medium tracking-widest uppercase mb-3" style={{ color: '#8B8BA7' }}>
+        <p className="text-xs font-medium tracking-widest uppercase mb-3" style={{ color: 'var(--color-muted)' }}>
           Plan
         </p>
         {proActive ? (
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
               <span className="text-lg">✨</span>
-              <span className="text-sm font-semibold" style={{ color: '#E8E8F0' }}>
+              <span className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>
                 {subscriptionTier === 'pro_trial' ? 'Pro Trial' : 'Pro'}
               </span>
             </div>
             {subscriptionTier === 'pro_trial' && (
-              <p className="text-xs" style={{ color: '#8B8BA7' }}>
+              <p className="text-xs" style={{ color: 'var(--color-muted)' }}>
                 {trialDaysLeft} day{trialDaysLeft !== 1 ? 's' : ''} remaining — enjoy all features 🎉
               </p>
             )}
             <div className="flex flex-col gap-1 mt-1">
-              <span className="text-xs" style={{ color: '#4ECDC4' }}>✓ Unlimited AI task decomposition</span>
-              <span className="text-xs" style={{ color: '#4ECDC4' }}>✓ Full weekly insights</span>
-              <span className="text-xs" style={{ color: '#4ECDC4' }}>✓ All audio presets</span>
-              <span className="text-xs" style={{ color: '#4ECDC4' }}>✓ Priority recovery support</span>
+              <span className="text-xs" style={{ color: 'var(--color-secondary)' }}>✓ Unlimited AI task decomposition</span>
+              <span className="text-xs" style={{ color: 'var(--color-secondary)' }}>✓ Full weekly insights</span>
+              <span className="text-xs" style={{ color: 'var(--color-secondary)' }}>✓ All audio presets</span>
+              <span className="text-xs" style={{ color: 'var(--color-secondary)' }}>✓ Priority recovery support</span>
             </div>
           </div>
         ) : (
           <div className="flex flex-col gap-3">
             <div className="flex items-center gap-2">
               <span className="text-lg">🌱</span>
-              <span className="text-sm font-semibold" style={{ color: '#E8E8F0' }}>Free</span>
+              <span className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>Free</span>
             </div>
-            <p className="text-xs leading-relaxed" style={{ color: '#8B8BA7' }}>
+            <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
               Upgrade to Pro for unlimited AI features, weekly insights, and more.
             </p>
             {!showTrialActivation ? (
               <button
                 onClick={() => setShowTrialActivation(true)}
                 className="w-full py-3 rounded-xl text-sm font-semibold transition-all duration-200"
-                style={{ background: '#7B72FF', color: '#FFFFFF' }}
+                style={{ background: 'var(--color-primary)', color: '#FFFFFF' }}
               >
                 Start 30-day free trial
               </button>
             ) : (
               <div className="flex flex-col gap-2">
-                <p className="text-xs text-center" style={{ color: '#E8E8F0' }}>
+                <p className="text-xs text-center" style={{ color: 'var(--color-text)' }}>
                   No card required. No charges. Just full access for 30 days.
                 </p>
                 <div className="flex gap-2">
                   <button
                     onClick={handleStartTrial}
                     className="flex-1 py-3 rounded-xl text-sm font-semibold transition-all duration-200 min-h-[44px]"
-                    style={{ background: '#7B72FF', color: '#FFFFFF' }}
+                    style={{ background: 'var(--color-primary)', color: '#FFFFFF' }}
                   >
                     Activate trial
                   </button>
                   <button
                     onClick={() => setShowTrialActivation(false)}
                     className="px-4 py-3 rounded-xl text-sm transition-all duration-200 min-h-[44px]"
-                    style={{ background: '#252840', color: '#8B8BA7' }}
+                    style={{ background: 'var(--color-elevated)', color: 'var(--color-muted)' }}
                   >
                     Maybe later
                   </button>
@@ -277,8 +277,8 @@ export default function SettingsScreen() {
       </section>
 
       {/* ── Avatar ────────────────────────────────────────────────────────── */}
-      <section className="mx-5 p-4 rounded-2xl mb-4" style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)' }}>
-        <p className="text-xs font-medium tracking-widest uppercase mb-3" style={{ color: '#8B8BA7' }}>
+      <section className="mx-5 p-4 rounded-2xl mb-4" style={{ background: 'var(--color-card)', border: '1px solid var(--color-border-subtle)' }}>
+        <p className="text-xs font-medium tracking-widest uppercase mb-3" style={{ color: 'var(--color-muted)' }}>
           Avatar
         </p>
         <div className="flex gap-3 flex-wrap">
@@ -288,8 +288,8 @@ export default function SettingsScreen() {
               onClick={() => setAvatarId(i + 1)}
               className="w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-200"
               style={{
-                background: avatarId === i + 1 ? 'rgba(123, 114, 255, 0.18)' : '#252840',
-                border: `2px solid ${avatarId === i + 1 ? '#7B72FF' : 'transparent'}`,
+                background: avatarId === i + 1 ? 'var(--color-primary-alpha)' : 'var(--color-elevated)',
+                border: `2px solid ${avatarId === i + 1 ? 'var(--color-primary)' : 'transparent'}`,
               }}
               title={name}
               aria-label={`Select ${name} avatar`}
@@ -301,8 +301,8 @@ export default function SettingsScreen() {
       </section>
 
       {/* ── App mode ──────────────────────────────────────────────────────── */}
-      <section className="mx-5 p-4 rounded-2xl mb-4" style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)' }}>
-        <p className="text-xs font-medium tracking-widest uppercase mb-3" style={{ color: '#8B8BA7' }}>
+      <section className="mx-5 p-4 rounded-2xl mb-4" style={{ background: 'var(--color-card)', border: '1px solid var(--color-border-subtle)' }}>
+        <p className="text-xs font-medium tracking-widest uppercase mb-3" style={{ color: 'var(--color-muted)' }}>
           App Mode
         </p>
         <div className="flex flex-col gap-2">
@@ -316,9 +316,9 @@ export default function SettingsScreen() {
               onClick={() => setAppMode(mode)}
               className="text-left px-3 py-3 rounded-xl text-sm transition-all duration-200 min-h-[44px]"
               style={{
-                background: appMode === mode ? 'rgba(123, 114, 255, 0.15)' : 'transparent',
-                border: `1.5px solid ${appMode === mode ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
-                color: appMode === mode ? '#E8E8F0' : '#8B8BA7',
+                background: appMode === mode ? 'var(--color-primary-alpha)' : 'transparent',
+                border: `1.5px solid ${appMode === mode ? 'var(--color-primary)' : 'var(--color-border-subtle)'}`,
+                color: appMode === mode ? 'var(--color-text)' : 'var(--color-muted)',
               }}
             >
               {label}
@@ -328,8 +328,8 @@ export default function SettingsScreen() {
       </section>
 
       {/* ── Focus Style ───────────────────────────────────────────────────── */}
-      <section className="mx-5 p-4 rounded-2xl mb-4" style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)' }}>
-        <p className="text-xs font-medium tracking-widest uppercase mb-3" style={{ color: '#8B8BA7' }}>
+      <section className="mx-5 p-4 rounded-2xl mb-4" style={{ background: 'var(--color-card)', border: '1px solid var(--color-border-subtle)' }}>
+        <p className="text-xs font-medium tracking-widest uppercase mb-3" style={{ color: 'var(--color-muted)' }}>
           Focus Style
         </p>
         <div className="flex gap-2">
@@ -342,9 +342,9 @@ export default function SettingsScreen() {
               onClick={() => setCognitiveMode(mode)}
               className="flex-1 py-3 rounded-xl text-sm font-medium transition-all duration-200 min-h-[44px]"
               style={{
-                background: cognitiveMode === mode ? 'rgba(123, 114, 255, 0.18)' : '#252840',
-                border: `1.5px solid ${cognitiveMode === mode ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
-                color: cognitiveMode === mode ? '#7B72FF' : '#8B8BA7',
+                background: cognitiveMode === mode ? 'var(--color-primary-alpha)' : 'var(--color-elevated)',
+                border: `1.5px solid ${cognitiveMode === mode ? 'var(--color-primary)' : 'var(--color-border-subtle)'}`,
+                color: cognitiveMode === mode ? 'var(--color-primary)' : 'var(--color-muted)',
               }}
             >
               {label}
@@ -354,11 +354,11 @@ export default function SettingsScreen() {
       </section>
 
       {/* ── Energy Level ──────────────────────────────────────────────────── */}
-      <section className="mx-5 p-4 rounded-2xl mb-4" style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)' }}>
-        <p className="text-xs font-medium tracking-widest uppercase mb-1" style={{ color: '#8B8BA7' }}>
+      <section className="mx-5 p-4 rounded-2xl mb-4" style={{ background: 'var(--color-card)', border: '1px solid var(--color-border-subtle)' }}>
+        <p className="text-xs font-medium tracking-widest uppercase mb-1" style={{ color: 'var(--color-muted)' }}>
           Energy Level
         </p>
-        <p className="text-xs mb-3" style={{ color: '#8B8BA7' }}>
+        <p className="text-xs mb-3" style={{ color: 'var(--color-muted)' }}>
           How's your energy right now? Affects XP multipliers.
         </p>
         <div className="flex gap-2">
@@ -378,12 +378,12 @@ export default function SettingsScreen() {
               className="flex-1 flex flex-col items-center gap-1 py-2.5 rounded-xl text-sm transition-all duration-200 min-h-[48px]"
               aria-label={`Set energy to ${title}`}
               style={{
-                background: energyLevel === level ? 'rgba(123, 114, 255, 0.18)' : '#252840',
-                border: `1.5px solid ${energyLevel === level ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
+                background: energyLevel === level ? 'var(--color-primary-alpha)' : 'var(--color-elevated)',
+                border: `1.5px solid ${energyLevel === level ? 'var(--color-primary)' : 'var(--color-border-subtle)'}`,
               }}
             >
               <span className="text-base leading-none">{label}</span>
-              <span className="text-[10px] font-medium" style={{ color: energyLevel === level ? '#7B72FF' : '#8B8BA7' }}>
+              <span className="text-[10px] font-medium" style={{ color: energyLevel === level ? 'var(--color-primary)' : 'var(--color-muted)' }}>
                 {title}
               </span>
             </button>
@@ -393,17 +393,17 @@ export default function SettingsScreen() {
 
       {/* ── Health & Rhythms ──────────────────────────────────────────────── */}
       {/* Block 3e: sleep, medication, chronotype — device-only, never sent to server */}
-      <section className="mx-5 p-4 rounded-2xl mb-4" style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)' }}>
-        <p className="text-xs font-medium tracking-widest uppercase mb-1" style={{ color: '#8B8BA7' }}>
+      <section className="mx-5 p-4 rounded-2xl mb-4" style={{ background: 'var(--color-card)', border: '1px solid var(--color-border-subtle)' }}>
+        <p className="text-xs font-medium tracking-widest uppercase mb-1" style={{ color: 'var(--color-muted)' }}>
           Health &amp; Rhythms
         </p>
-        <p className="text-xs mb-4 leading-relaxed" style={{ color: '#8B8BA7' }}>
+        <p className="text-xs mb-4 leading-relaxed" style={{ color: 'var(--color-muted)' }}>
           Helps MindShift tailor timing and difficulty. Stays on this device only.
         </p>
 
         {/* Sleep quality — session only (not persisted) */}
         <div className="mb-4">
-          <p className="text-xs font-medium" style={{ color: '#E8E8F0' }}>😴 How did you sleep?</p>
+          <p className="text-xs font-medium" style={{ color: 'var(--color-text)' }}>😴 How did you sleep?</p>
           <ChipGroup
             label="Sleep quality"
             value={sleepQuality}
@@ -431,7 +431,7 @@ export default function SettingsScreen() {
           />
           {medicationEnabled && (
             <div className="mt-2">
-              <p className="text-xs mb-1" style={{ color: '#8B8BA7' }}>When do you typically take it?</p>
+              <p className="text-xs mb-1" style={{ color: 'var(--color-muted)' }}>When do you typically take it?</p>
               <ChipGroup
                 label="Medication timing"
                 value={medicationTime}
@@ -448,7 +448,7 @@ export default function SettingsScreen() {
 
         {/* Chronotype */}
         <div className="mb-4">
-          <p className="text-xs font-medium" style={{ color: '#E8E8F0' }}>🦉 When do you focus best?</p>
+          <p className="text-xs font-medium" style={{ color: 'var(--color-text)' }}>🦉 When do you focus best?</p>
           <ChipGroup
             label="Chronotype"
             value={chronotype}
@@ -481,7 +481,7 @@ export default function SettingsScreen() {
             }}
             label="🛋️ Rest mode (pause focus pressure)"
           />
-          <p className="text-xs mt-1" style={{ color: '#8B8BA7' }}>
+          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>
             Turns off session reminders and soft-stop toasts for 24 hours. You can still focus.
           </p>
         </div>
@@ -489,11 +489,11 @@ export default function SettingsScreen() {
 
       {/* ── Your Current Phase — Block 6c ─────────────────────────────────── */}
       {/* Seasonal mode: shapes NOW-pool limits + difficulty defaults, not aesthetics */}
-      <section className="mx-5 p-4 rounded-2xl mb-4" style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)' }}>
-        <p className="text-xs font-medium tracking-widest uppercase mb-1" style={{ color: '#8B8BA7' }}>
+      <section className="mx-5 p-4 rounded-2xl mb-4" style={{ background: 'var(--color-card)', border: '1px solid var(--color-border-subtle)' }}>
+        <p className="text-xs font-medium tracking-widest uppercase mb-1" style={{ color: 'var(--color-muted)' }}>
           Your Current Phase
         </p>
-        <p className="text-xs mb-4 leading-relaxed" style={{ color: '#8B8BA7' }}>
+        <p className="text-xs mb-4 leading-relaxed" style={{ color: 'var(--color-muted)' }}>
           Adjusts task limits and defaults to match where you are in life right now.
         </p>
 
@@ -535,15 +535,15 @@ export default function SettingsScreen() {
                 }}
                 className="flex flex-col items-start p-3 rounded-xl text-left transition-all duration-200 min-h-[88px]"
                 style={{
-                  background: isActive ? 'rgba(123,114,255,0.12)' : '#252840',
-                  border: `1.5px solid ${isActive ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
+                  background: isActive ? 'var(--color-primary-alpha)' : 'var(--color-elevated)',
+                  border: `1.5px solid ${isActive ? 'var(--color-primary)' : 'var(--color-border-subtle)'}`,
                 }}
               >
                 <span className="text-xl mb-1">{emoji}</span>
-                <p className="text-xs font-semibold mb-0.5" style={{ color: isActive ? '#7B72FF' : '#E8E8F0' }}>
+                <p className="text-xs font-semibold mb-0.5" style={{ color: isActive ? 'var(--color-primary)' : 'var(--color-text)' }}>
                   {label}
                 </p>
-                <p className="text-[10px] leading-tight" style={{ color: '#8B8BA7' }}>
+                <p className="text-[10px] leading-tight" style={{ color: 'var(--color-muted)' }}>
                   {desc}
                 </p>
               </button>
@@ -553,8 +553,8 @@ export default function SettingsScreen() {
       </section>
 
       {/* ── Accessibility ─────────────────────────────────────────────────── */}
-      <section className="mx-5 p-4 rounded-2xl mb-4" style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)' }}>
-        <p className="text-xs font-medium tracking-widest uppercase mb-3" style={{ color: '#8B8BA7' }}>
+      <section className="mx-5 p-4 rounded-2xl mb-4" style={{ background: 'var(--color-card)', border: '1px solid var(--color-border-subtle)' }}>
+        <p className="text-xs font-medium tracking-widest uppercase mb-3" style={{ color: 'var(--color-muted)' }}>
           Accessibility
         </p>
         <Toggle
@@ -565,17 +565,17 @@ export default function SettingsScreen() {
           }}
           label="Reduced stimulation mode"
         />
-        <p className="text-xs mt-1 mb-3" style={{ color: '#8B8BA7' }}>
+        <p className="text-xs mt-1 mb-3" style={{ color: 'var(--color-muted)' }}>
           Disables animations, confetti, and reduces visual complexity
         </p>
       </section>
 
       {/* ── Your Data (GDPR) ──────────────────────────────────────────────── */}
-      <section className="mx-5 p-4 rounded-2xl mb-4" style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)' }}>
-        <p className="text-xs font-medium tracking-widest uppercase mb-3" style={{ color: '#8B8BA7' }}>
+      <section className="mx-5 p-4 rounded-2xl mb-4" style={{ background: 'var(--color-card)', border: '1px solid var(--color-border-subtle)' }}>
+        <p className="text-xs font-medium tracking-widest uppercase mb-3" style={{ color: 'var(--color-muted)' }}>
           Your Data
         </p>
-        <p className="text-xs mb-3 leading-relaxed" style={{ color: '#8B8BA7' }}>
+        <p className="text-xs mb-3 leading-relaxed" style={{ color: 'var(--color-muted)' }}>
           You own your data. Export everything or delete your account at any time.
         </p>
 
@@ -585,9 +585,9 @@ export default function SettingsScreen() {
           disabled={exporting}
           className="w-full py-3 rounded-xl text-sm font-medium transition-all duration-200 mb-3"
           style={{
-            background: exporting ? '#252840' : 'rgba(78, 205, 196, 0.12)',
-            border: '1px solid rgba(255,255,255,0.06)',
-            color: exporting ? '#8B8BA7' : '#4ECDC4',
+            background: exporting ? 'var(--color-elevated)' : 'var(--color-teal-alpha)',
+            border: '1px solid var(--color-border-subtle)',
+            color: exporting ? 'var(--color-muted)' : 'var(--color-secondary)',
             opacity: exporting ? 0.7 : 1,
           }}
         >
@@ -601,19 +601,19 @@ export default function SettingsScreen() {
             className="w-full py-3 rounded-xl text-sm font-medium transition-all duration-200"
             style={{
               background: 'transparent',
-              border: '1px solid rgba(255,255,255,0.06)',
-              color: '#8B8BA7',
+              border: '1px solid var(--color-border-subtle)',
+              color: 'var(--color-muted)',
             }}
           >
             Delete my account and all data
           </button>
         ) : (
-          <div className="flex flex-col gap-2 p-3 rounded-xl" style={{ background: '#252840' }}>
-            <p className="text-xs leading-relaxed" style={{ color: '#E8E8F0' }}>
+          <div className="flex flex-col gap-2 p-3 rounded-xl" style={{ background: 'var(--color-elevated)' }}>
+            <p className="text-xs leading-relaxed" style={{ color: 'var(--color-text)' }}>
               This will permanently delete all your tasks, sessions, achievements, and account.
               This action cannot be undone.
             </p>
-            <p className="text-xs" style={{ color: '#8B8BA7' }}>
+            <p className="text-xs" style={{ color: 'var(--color-muted)' }}>
               Type your email to confirm:
             </p>
             <input
@@ -623,9 +623,9 @@ export default function SettingsScreen() {
               placeholder={email ?? 'your@email.com'}
               className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
               style={{
-                background: '#1E2136',
-                border: '1px solid rgba(255,255,255,0.06)',
-                color: '#E8E8F0',
+                background: 'var(--color-card)',
+                border: '1px solid var(--color-border-subtle)',
+                color: 'var(--color-text)',
               }}
               autoComplete="off"
             />
@@ -636,10 +636,10 @@ export default function SettingsScreen() {
                 className="flex-1 py-3 rounded-xl text-sm font-medium transition-all duration-200 min-h-[44px]"
                 style={{
                   background: deleteEmail.toLowerCase() === email?.toLowerCase()
-                    ? 'rgba(232, 151, 107, 0.15)' : '#252840',
-                  border: '1px solid rgba(255,255,255,0.06)',
+                    ? 'rgba(232, 151, 107, 0.15)' : 'var(--color-elevated)',
+                  border: '1px solid var(--color-border-subtle)',
                   color: deleteEmail.toLowerCase() === email?.toLowerCase()
-                    ? '#E8976B' : '#8B8BA7',
+                    ? '#E8976B' : 'var(--color-muted)',
                   opacity: deleting ? 0.5 : 1,
                 }}
               >
@@ -648,7 +648,7 @@ export default function SettingsScreen() {
               <button
                 onClick={() => { setShowDeleteConfirm(false); setDeleteEmail('') }}
                 className="px-4 py-3 rounded-xl text-sm transition-all duration-200 min-h-[44px]"
-                style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)', color: '#8B8BA7' }}
+                style={{ background: 'var(--color-card)', border: '1px solid var(--color-border-subtle)', color: 'var(--color-muted)' }}
               >
                 Cancel
               </button>
@@ -662,7 +662,7 @@ export default function SettingsScreen() {
         <button
           onClick={() => void handleSignOut()}
           className="w-full py-3.5 rounded-2xl text-sm font-medium transition-all duration-200"
-          style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)', color: '#E8976B' }}
+          style={{ background: 'var(--color-card)', border: '1px solid var(--color-border-subtle)', color: '#E8976B' }}
         >
           Sign out
         </button>
@@ -673,30 +673,30 @@ export default function SettingsScreen() {
         <Link
           to="/privacy"
           className="text-xs transition-colors duration-200 hover:underline"
-          style={{ color: '#8B8BA7' }}
+          style={{ color: 'var(--color-muted)' }}
         >
           Privacy Policy
         </Link>
-        <span className="text-xs" style={{ color: '#4A4E5A' }}>·</span>
+        <span className="text-xs" style={{ color: 'var(--color-text-subtle)' }}>·</span>
         <Link
           to="/terms"
           className="text-xs transition-colors duration-200 hover:underline"
-          style={{ color: '#8B8BA7' }}
+          style={{ color: 'var(--color-muted)' }}
         >
           Terms of Service
         </Link>
-        <span className="text-xs" style={{ color: '#4A4E5A' }}>·</span>
+        <span className="text-xs" style={{ color: 'var(--color-text-subtle)' }}>·</span>
         <Link
           to="/cookie-policy"
           className="text-xs transition-colors duration-200 hover:underline"
-          style={{ color: '#8B8BA7' }}
+          style={{ color: 'var(--color-muted)' }}
         >
           Cookie Policy
         </Link>
       </div>
 
       {/* Version */}
-      <p className="text-center text-xs mt-3 mb-2" style={{ color: '#8B8BA7' }}>
+      <p className="text-center text-xs mt-3 mb-2" style={{ color: 'var(--color-muted)' }}>
         MindShift v1.0.0 — Built with 💜 for ADHD minds
       </p>
     </div>

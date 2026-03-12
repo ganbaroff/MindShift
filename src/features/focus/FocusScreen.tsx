@@ -76,13 +76,13 @@ export default function FocusScreen() {
     return (
       <div
         className="flex flex-col items-center justify-center min-h-screen px-6 text-center"
-        style={{ background: '#0F1117' }}
+        style={{ background: 'var(--color-bg)' }}
       >
         <div className="text-4xl mb-4">⚠️</div>
-        <h2 className="text-xl font-bold mb-2" style={{ color: '#E8E8F0' }}>
+        <h2 className="text-xl font-bold mb-2" style={{ color: 'var(--color-text)' }}>
           Leave focus session?
         </h2>
-        <p className="text-sm mb-8 max-w-xs leading-relaxed" style={{ color: '#8B8BA7' }}>
+        <p className="text-sm mb-8 max-w-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
           You've been focused for {elapsedMin}m. Your progress will be saved.
         </p>
         <div className="flex flex-col gap-3 w-full max-w-xs">
@@ -90,9 +90,9 @@ export default function FocusScreen() {
             onClick={handleResume}
             className="w-full py-3.5 rounded-2xl font-semibold text-sm transition-all duration-200"
             style={{
-              background: 'rgba(123,114,255,0.15)',
-              border: '1.5px solid #7B72FF',
-              color: '#7B72FF',
+              background: 'var(--color-primary-alpha)',
+              border: '1.5px solid var(--color-primary)',
+              color: 'var(--color-primary)',
             }}
           >
             Keep going 💪
@@ -102,8 +102,8 @@ export default function FocusScreen() {
             className="w-full py-3 rounded-2xl font-medium text-sm transition-all duration-200"
             style={{
               background: 'transparent',
-              border: '1px solid rgba(255,255,255,0.06)',
-              color: '#8B8BA7',
+              border: '1px solid var(--color-border-subtle)',
+              color: 'var(--color-muted)',
             }}
           >
             End session
@@ -118,7 +118,7 @@ export default function FocusScreen() {
     return (
       <div
         className="flex flex-col items-center justify-center min-h-screen px-6 text-center"
-        style={{ background: '#0F1117' }}
+        style={{ background: 'var(--color-bg)' }}
       >
         <motion.div
           initial={shouldAnimate ? { opacity: 0, scale: 0.95 } : {}}
@@ -127,10 +127,10 @@ export default function FocusScreen() {
           className="flex flex-col items-center w-full max-w-xs"
         >
           <div className="text-4xl mb-4">📌</div>
-          <h2 className="text-xl font-bold mb-2" style={{ color: '#E8E8F0' }}>
+          <h2 className="text-xl font-bold mb-2" style={{ color: 'var(--color-text)' }}>
             Park your progress
           </h2>
-          <p className="text-sm mb-6 leading-relaxed" style={{ color: '#8B8BA7' }}>
+          <p className="text-sm mb-6 leading-relaxed" style={{ color: 'var(--color-muted)' }}>
             What were you working on? We'll remind you next time.
           </p>
           <input
@@ -140,7 +140,7 @@ export default function FocusScreen() {
             placeholder="e.g. Finishing the header layout..."
             autoFocus
             className="w-full px-4 py-3 rounded-xl text-sm outline-none mb-4"
-            style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)', color: '#E8E8F0' }}
+            style={{ background: 'var(--color-card)', border: '1px solid var(--color-border-subtle)', color: 'var(--color-text)' }}
           />
           <div className="flex flex-col gap-3 w-full">
             <button
@@ -148,9 +148,9 @@ export default function FocusScreen() {
               disabled={!bookmarkText.trim()}
               className="w-full py-3.5 rounded-2xl font-semibold text-sm transition-all duration-200"
               style={{
-                background: bookmarkText.trim() ? 'rgba(123,114,255,0.15)' : '#1E2136',
-                border: `1.5px solid ${bookmarkText.trim() ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
-                color: bookmarkText.trim() ? '#7B72FF' : '#8B8BA7',
+                background: bookmarkText.trim() ? 'var(--color-primary-alpha)' : 'var(--color-card)',
+                border: `1.5px solid ${bookmarkText.trim() ? 'var(--color-primary)' : 'var(--color-border-subtle)'}`,
+                color: bookmarkText.trim() ? 'var(--color-primary)' : 'var(--color-muted)',
               }}
             >
               Save & Exit 📌
@@ -160,8 +160,8 @@ export default function FocusScreen() {
               className="w-full py-3 rounded-2xl font-medium text-sm transition-all duration-200"
               style={{
                 background: 'transparent',
-                border: '1px solid rgba(255,255,255,0.06)',
-                color: '#8B8BA7',
+                border: '1px solid var(--color-border-subtle)',
+                color: 'var(--color-muted)',
               }}
             >
               Skip
@@ -185,17 +185,17 @@ export default function FocusScreen() {
           transition={t()}
           className="w-full max-w-xs flex flex-col items-center text-center"
           style={{
-            background: '#1A1D2E',
-            border: '1px solid rgba(123,114,255,0.25)',
+            background: 'var(--color-card)',
+            border: '1px solid var(--color-border-accent)',
             borderRadius: 24,
             padding: '32px 24px',
           }}
         >
           <div className="text-5xl mb-4">🧘</div>
-          <h2 className="text-xl font-bold mb-2" style={{ color: '#E8E8F0' }}>
+          <h2 className="text-xl font-bold mb-2" style={{ color: 'var(--color-text)' }}>
             Two hours of deep work
           </h2>
-          <p className="text-sm leading-relaxed mb-6" style={{ color: '#8B8BA7' }}>
+          <p className="text-sm leading-relaxed mb-6" style={{ color: 'var(--color-muted)' }}>
             That's a serious session. Your brain consolidates everything during rest —
             even 10 minutes away will help you do better next time.
           </p>
@@ -217,8 +217,8 @@ export default function FocusScreen() {
             className="text-xs px-5 py-2.5 rounded-xl transition-all duration-200"
             style={{
               background: 'transparent',
-              border: '1px solid rgba(255,255,255,0.06)',
-              color: '#8B8BA7',
+              border: '1px solid var(--color-border-subtle)',
+              color: 'var(--color-muted)',
             }}
           >
             I'm in hyperfocus — keep going
@@ -231,9 +231,9 @@ export default function FocusScreen() {
   // ── Setup Screen ───────────────────────────────────────────────────────────
   if (screen === 'setup') {
     return (
-      <div className="flex flex-col pb-28" style={{ background: '#0F1117' }}>
+      <div className="flex flex-col pb-28" style={{ background: 'var(--color-bg)' }}>
         <div className="px-5 pt-10 pb-4">
-          <h1 className="text-2xl font-bold" style={{ color: '#E8E8F0' }}>
+          <h1 className="text-2xl font-bold" style={{ color: 'var(--color-text)' }}>
             Focus Session ⏱️
           </h1>
           <p className="text-sm mt-1" style={{ color: energyLabel.color }}>
@@ -245,15 +245,15 @@ export default function FocusScreen() {
         {savedBookmark && (
           <div
             className="mx-5 mb-5 p-4 rounded-2xl"
-            style={{ background: '#1E2136', border: '1.5px solid #7B72FF33' }}
+            style={{ background: 'var(--color-card)', border: '1.5px solid var(--color-primary-alpha)' }}
           >
             <div className="flex items-center gap-2 mb-2">
               <span>📌</span>
-              <p className="text-xs font-medium" style={{ color: '#8B8BA7' }}>
+              <p className="text-xs font-medium" style={{ color: 'var(--color-muted)' }}>
                 PICK UP WHERE YOU LEFT OFF
               </p>
             </div>
-            <p className="text-sm font-medium mb-3" style={{ color: '#E8E8F0' }}>
+            <p className="text-sm font-medium mb-3" style={{ color: 'var(--color-text)' }}>
               {savedBookmark.text}
             </p>
             <div className="flex gap-2">
@@ -265,7 +265,7 @@ export default function FocusScreen() {
                     clearBookmark()
                   }}
                   className="flex-1 py-2 rounded-xl text-xs font-semibold"
-                  style={{ background: 'rgba(123,114,255,0.15)', border: '1.5px solid #7B72FF', color: '#7B72FF' }}
+                  style={{ background: 'var(--color-primary-alpha)', border: '1.5px solid var(--color-primary)', color: 'var(--color-primary)' }}
                 >
                   Continue task →
                 </button>
@@ -273,7 +273,7 @@ export default function FocusScreen() {
               <button
                 onClick={clearBookmark}
                 className="py-2 px-4 rounded-xl text-xs"
-                style={{ color: '#8B8BA7', border: '1px solid rgba(255,255,255,0.06)' }}
+                style={{ color: 'var(--color-muted)', border: '1px solid var(--color-border-subtle)' }}
               >
                 Dismiss
               </button>
@@ -284,35 +284,35 @@ export default function FocusScreen() {
         {/* Task picker / empty state */}
         {allTasks.length === 0 ? (
           <div className="mx-5 mb-6 p-6 rounded-2xl flex flex-col items-center text-center"
-            style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)' }}
+            style={{ background: 'var(--color-card)', border: '1px solid var(--color-border-subtle)' }}
           >
             <span style={{ fontSize: 40 }} className="mb-3">🎯</span>
-            <p className="text-sm font-medium mb-1" style={{ color: '#E8E8F0' }}>No tasks yet</p>
-            <p className="text-xs mb-4 leading-relaxed" style={{ color: '#8B8BA7' }}>
+            <p className="text-sm font-medium mb-1" style={{ color: 'var(--color-text)' }}>No tasks yet</p>
+            <p className="text-xs mb-4 leading-relaxed" style={{ color: 'var(--color-muted)' }}>
               Pick a task to focus on — it gives your session direction.
             </p>
             <Link
               to="/tasks"
               className="px-5 py-2.5 rounded-xl text-xs font-semibold transition-all"
-              style={{ background: 'rgba(123,114,255,0.15)', border: '1.5px solid #7B72FF', color: '#7B72FF' }}
+              style={{ background: 'var(--color-primary-alpha)', border: '1.5px solid var(--color-primary)', color: 'var(--color-primary)' }}
             >
               Go to Tasks →
             </Link>
           </div>
         ) : (
           <div className="px-5 mb-6">
-            <p className="text-xs font-medium mb-2" style={{ color: '#8B8BA7' }}>TASK (OPTIONAL)</p>
+            <p className="text-xs font-medium mb-2" style={{ color: 'var(--color-muted)' }}>TASK (OPTIONAL)</p>
             <div className="flex flex-col gap-2">
               <button
                 onClick={() => setSelectedTask(null)}
                 className="flex items-center gap-3 p-3 rounded-xl text-left transition-all duration-200"
                 style={{
-                  background: selectedTask === null ? 'rgba(123,114,255,0.1)' : '#1E2136',
-                  border: `1.5px solid ${selectedTask === null ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
+                  background: selectedTask === null ? 'var(--color-primary-alpha)' : 'var(--color-card)',
+                  border: `1.5px solid ${selectedTask === null ? 'var(--color-primary)' : 'var(--color-border-subtle)'}`,
                 }}
               >
                 <span>🧠</span>
-                <span className="text-sm" style={{ color: selectedTask === null ? '#7B72FF' : '#E8E8F0' }}>
+                <span className="text-sm" style={{ color: selectedTask === null ? 'var(--color-primary)' : 'var(--color-text)' }}>
                   Open focus — no specific task
                 </span>
               </button>
@@ -325,17 +325,17 @@ export default function FocusScreen() {
                     onClick={() => setSelectedTask(task)}
                     className="flex items-center gap-3 p-3 rounded-xl text-left transition-all duration-200"
                     style={{
-                      background: isSelected ? 'rgba(123,114,255,0.1)' : '#1E2136',
-                      border: `1.5px solid ${isSelected ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
+                      background: isSelected ? 'var(--color-primary-alpha)' : 'var(--color-card)',
+                      border: `1.5px solid ${isSelected ? 'var(--color-primary)' : 'var(--color-border-subtle)'}`,
                     }}
                   >
                     <span
                       className="text-xs px-1.5 py-0.5 rounded-md font-medium"
-                      style={{ background: '#252840', color: '#8B8BA7' }}
+                      style={{ background: 'var(--color-elevated)', color: 'var(--color-muted)' }}
                     >
                       {task.pool === 'now' ? 'NOW' : 'NEXT'}
                     </span>
-                    <span className="text-sm flex-1" style={{ color: isSelected ? '#7B72FF' : '#E8E8F0' }}>
+                    <span className="text-sm flex-1" style={{ color: isSelected ? 'var(--color-primary)' : 'var(--color-text)' }}>
                       {task.title}
                     </span>
                   </button>
@@ -347,9 +347,9 @@ export default function FocusScreen() {
 
         {/* Duration presets */}
         <div className="px-5 mb-6">
-          <p className="text-xs font-medium mb-2" style={{ color: '#8B8BA7' }}>
+          <p className="text-xs font-medium mb-2" style={{ color: 'var(--color-muted)' }}>
             DURATION
-            <span className="ml-2 font-normal" style={{ color: '#7B72FF' }}>
+            <span className="ml-2 font-normal" style={{ color: 'var(--color-primary)' }}>
               (smart: {smartDuration}m)
             </span>
           </p>
@@ -363,16 +363,16 @@ export default function FocusScreen() {
                   onClick={() => { setSelectedDuration(min); setShowCustom(false) }}
                   className="flex-1 py-3 rounded-xl font-semibold text-sm transition-all duration-200 relative"
                   style={{
-                    background:  isActive ? 'rgba(123,114,255,0.15)' : '#1E2136',
-                    border:      `1.5px solid ${isActive ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
-                    color:       isActive ? '#7B72FF' : '#E8E8F0',
+                    background:  isActive ? 'var(--color-primary-alpha)' : 'var(--color-card)',
+                    border:      `1.5px solid ${isActive ? 'var(--color-primary)' : 'var(--color-border-subtle)'}`,
+                    color:       isActive ? 'var(--color-primary)' : 'var(--color-text)',
                   }}
                 >
                   {min}m
                   {isRecommended && (
                     <span
                       className="absolute -top-1.5 -right-1.5 text-xs w-4 h-4 flex items-center justify-center rounded-full"
-                      style={{ background: '#7B72FF', color: 'white', fontSize: '8px' }}
+                      style={{ background: 'var(--color-primary)', color: 'white', fontSize: '8px' }}
                     >
                       ✦
                     </span>
@@ -384,9 +384,9 @@ export default function FocusScreen() {
               onClick={() => setShowCustom(true)}
               className="flex-1 py-3 rounded-xl font-semibold text-sm transition-all duration-200"
               style={{
-                background: showCustom ? 'rgba(123,114,255,0.15)' : '#1E2136',
-                border:     `1.5px solid ${showCustom ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
-                color:      showCustom ? '#7B72FF' : '#8B8BA7',
+                background: showCustom ? 'var(--color-primary-alpha)' : 'var(--color-card)',
+                border:     `1.5px solid ${showCustom ? 'var(--color-primary)' : 'var(--color-border-subtle)'}`,
+                color:      showCustom ? 'var(--color-primary)' : 'var(--color-muted)',
               }}
             >
               ✎
@@ -404,9 +404,9 @@ export default function FocusScreen() {
                 placeholder="Minutes..."
                 autoFocus
                 className="flex-1 px-4 py-2.5 rounded-xl text-sm focus:outline-none"
-                style={{ background: '#1E2136', border: '1.5px solid #7B72FF', color: '#E8E8F0' }}
+                style={{ background: 'var(--color-card)', border: '1.5px solid var(--color-primary)', color: 'var(--color-text)' }}
               />
-              <span className="text-sm" style={{ color: '#8B8BA7' }}>min</span>
+              <span className="text-sm" style={{ color: 'var(--color-muted)' }}>min</span>
             </div>
           )}
         </div>
@@ -415,12 +415,12 @@ export default function FocusScreen() {
         {focusAnchor && (
           <div
             className="mx-5 mb-6 p-3 rounded-xl flex items-center gap-3"
-            style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)' }}
+            style={{ background: 'var(--color-card)', border: '1px solid var(--color-border-subtle)' }}
           >
             <span>🎯</span>
             <div>
-              <p className="text-xs font-medium" style={{ color: '#E8E8F0' }}>Sound Anchor ready</p>
-              <p className="text-xs" style={{ color: '#8B8BA7' }}>
+              <p className="text-xs font-medium" style={{ color: 'var(--color-text)' }}>Sound Anchor ready</p>
+              <p className="text-xs" style={{ color: 'var(--color-muted)' }}>
                 {focusAnchor} noise will play automatically
               </p>
             </div>
@@ -449,7 +449,7 @@ export default function FocusScreen() {
   return (
     <div
       className="flex flex-col items-center justify-center min-h-screen px-6"
-      style={{ background: '#0F1117' }}
+      style={{ background: 'var(--color-bg)' }}
     >
       {/* Phase label — hidden in flow mode */}
       <AnimatePresence mode="wait">
@@ -461,7 +461,7 @@ export default function FocusScreen() {
             exit={{ opacity: 0, y: -8 }}
             transition={t()}
             className="text-sm mb-6 text-center"
-            style={{ color: '#8B8BA7' }}
+            style={{ color: 'var(--color-muted)' }}
           >
             {PHASE_LABELS[sessionPhase]}
           </motion.p>
@@ -487,7 +487,7 @@ export default function FocusScreen() {
           animate={{ opacity: isFlow ? 0.3 : 1 }}
           transition={t()}
           className="text-base font-semibold mt-6 text-center max-w-xs leading-snug"
-          style={{ color: '#E8E8F0' }}
+          style={{ color: 'var(--color-text)' }}
         >
           {selectedTask.title}
         </motion.p>

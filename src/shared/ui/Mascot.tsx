@@ -80,7 +80,7 @@ function Star({ x, y, delay }: { x: number; y: number; delay: number }) {
       animate={{ opacity: [0, 1, 1, 0], scale: [0, 1.2, 1, 0], rotate: [0, 45] }}
       transition={{ duration: 1.0, delay, repeat: Infinity, repeatDelay: 1.5 }}
     >
-      <text x={x} y={y} fontSize={10} textAnchor="middle" fill="#FFE66D">✦</text>
+      <text x={x} y={y} fontSize={10} textAnchor="middle" style={{ fill: 'var(--color-gold)' }}>✦</text>
     </motion.g>
   )
 }

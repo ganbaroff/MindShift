@@ -82,14 +82,14 @@ function QuickSetupCard({ onDone }: QuickSetupCardProps) {
       exit={{ opacity: 0, y: 24 }}
       transition={{ duration: 0.35 }}
       className="mx-5 mb-4 rounded-2xl overflow-hidden"
-      style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)' }}
+      style={{ background: 'var(--color-card)', border: '1px solid var(--color-border-subtle)' }}
     >
       <div className="p-4 pb-3">
         <div className="flex items-center gap-2 mb-1">
           <span>👋</span>
-          <h2 className="text-base font-bold" style={{ color: '#E8E8F0' }}>Welcome to MindShift</h2>
+          <h2 className="text-base font-bold" style={{ color: 'var(--color-text)' }}>Welcome to MindShift</h2>
         </div>
-        <p className="text-xs leading-relaxed" style={{ color: '#8B8BA7' }}>
+        <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
           Pick a style to personalise your widget layout — or skip and explore.
         </p>
       </div>
@@ -104,16 +104,16 @@ function QuickSetupCard({ onDone }: QuickSetupCardProps) {
               disabled={saving}
               className="flex items-start gap-3 p-3 rounded-xl text-left transition-all duration-150"
               style={{
-                background: isSelected ? 'rgba(123,114,255,0.15)' : '#252840',
-                border: `1.5px solid ${isSelected ? '#7B72FF' : 'transparent'}`,
+                background: isSelected ? 'var(--color-primary-alpha)' : 'var(--color-elevated)',
+                border: `1.5px solid ${isSelected ? 'var(--color-primary)' : 'transparent'}`,
               }}
             >
               <span className="text-lg mt-0.5 shrink-0">{emoji}</span>
               <div>
-                <p className="text-sm font-semibold" style={{ color: isSelected ? '#7B72FF' : '#E8E8F0' }}>
+                <p className="text-sm font-semibold" style={{ color: isSelected ? 'var(--color-primary)' : 'var(--color-text)' }}>
                   {label}
                 </p>
-                <p className="text-xs mt-0.5" style={{ color: '#8B8BA7' }}>{sub}</p>
+                <p className="text-xs mt-0.5" style={{ color: 'var(--color-muted)' }}>{sub}</p>
               </div>
             </button>
           )
@@ -124,7 +124,7 @@ function QuickSetupCard({ onDone }: QuickSetupCardProps) {
         <button
           onClick={handleSkip}
           className="w-full py-2 text-xs text-center transition-colors duration-200"
-          style={{ color: '#8B8BA7' }}
+          style={{ color: 'var(--color-muted)' }}
         >
           Skip — I'll explore on my own →
         </button>
@@ -146,12 +146,12 @@ function FirstTaskPrompt({ onAdd, onDismiss }: { onAdd: () => void; onDismiss: (
       transition={t()}
       className="mx-5 mb-4 rounded-2xl p-4"
       style={{
-        background: 'linear-gradient(135deg, rgba(123,114,255,0.12) 0%, rgba(123,114,255,0.04) 100%)',
-        border: '1.5px solid rgba(123,114,255,0.35)',
+        background: 'linear-gradient(135deg, var(--color-primary-alpha) 0%, rgba(123,114,255,0.04) 100%)',
+        border: '1.5px solid var(--color-border-accent)',
       }}
     >
       <div className="flex items-start justify-between gap-2 mb-1">
-        <p className="text-sm font-semibold" style={{ color: '#E8E8F0' }}>
+        <p className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>
           🧠 What's one thing on your mind right now?
         </p>
         <button
@@ -163,7 +163,7 @@ function FirstTaskPrompt({ onAdd, onDismiss }: { onAdd: () => void; onDismiss: (
           ✕
         </button>
       </div>
-      <p className="text-xs mb-3" style={{ color: '#8B8BA7' }}>
+      <p className="text-xs mb-3" style={{ color: 'var(--color-muted)' }}>
         Capture it — we'll help you break it down into steps.
       </p>
       <motion.button
@@ -171,7 +171,7 @@ function FirstTaskPrompt({ onAdd, onDismiss }: { onAdd: () => void; onDismiss: (
         onClick={onAdd}
         className="w-full py-3 rounded-xl text-sm font-semibold"
         style={{
-          background: 'linear-gradient(135deg, #7B72FF 0%, #5B52E8 100%)',
+          background: 'linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%)',
           color: '#fff',
           boxShadow: '0 4px 20px rgba(123,114,255,0.3)',
         }}
@@ -190,7 +190,7 @@ function BentoGridSkeleton() {
         <div
           key={i}
           className="rounded-2xl animate-pulse"
-          style={{ height: 120, background: '#1E2136', border: '1px solid rgba(255,255,255,0.04)' }}
+          style={{ height: 120, background: 'var(--color-card)', border: '1px solid rgba(255,255,255,0.04)' }}
         />
       ))}
     </div>
@@ -257,7 +257,7 @@ export default function HomeScreen() {
             animate={{ opacity: 1, y: 0 }}
             transition={t()}
             className="text-2xl font-bold mb-0.5"
-            style={{ color: '#E8E8F0' }}
+            style={{ color: 'var(--color-text)' }}
           >
             {greeting}
           </motion.h1>
@@ -266,7 +266,7 @@ export default function HomeScreen() {
             animate={{ opacity: 1 }}
             transition={{ ...t(), delay: 0.1 }}
             className="text-sm"
-            style={{ color: '#8B8BA7' }}
+            style={{ color: 'var(--color-muted)' }}
           >
             {subtitle}
           </motion.p>
@@ -333,7 +333,7 @@ export default function HomeScreen() {
         whileTap={shouldAnimate ? { scale: 0.94 } : {}}
         onClick={() => { hapticTap(); setAddOpen(true) }}
         className="fixed bottom-24 flex items-center gap-2 px-5 py-3.5 rounded-full shadow-lg z-30"
-        style={{ background: '#7B72FF', right: 'calc(max(0px, (100vw - 480px) / 2) + 20px)' }}
+        style={{ background: 'var(--color-primary)', right: 'calc(max(0px, (100vw - 480px) / 2) + 20px)' }}
         aria-label="Add task"
       >
         <Plus size={20} color="white" />

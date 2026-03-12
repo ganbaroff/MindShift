@@ -35,6 +35,22 @@
   --color-surface-raised:  #252840;  /* tokens.color.surfaceRaised             */
   --color-text-primary:    #E8E8F0;  /* tokens.color.textPrimary               */
   --color-text-muted:      #8B8BA7;  /* tokens.color.textMuted                 */
+
+  /* ── Extended palette (Phase 0 additions) ─────────────── */
+  --color-border-subtle:   rgba(255,255,255,0.06);   /* default card border — 80+ uses */
+  --color-primary-alpha:   rgba(123,114,255,0.15);   /* active/selected tint bg        */
+  --color-border-accent:   rgba(123,114,255,0.35);   /* accent border (install banner) */
+  --color-border-teal:     rgba(78,205,196,0.35);    /* teal accent border             */
+  --color-border-gold:     rgba(245,158,11,0.35);    /* gold accent border             */
+  --color-primary-dark:    #5B52E8;                  /* gradient end, hover darken     */
+  --color-primary-light:   #8B85FF;                  /* glow tints, light accents      */
+  --color-teal-dark:       #2E9990;                  /* teal pressed / gradient end    */
+  --color-text-subtle:     #6B6B8A;                  /* 3rd-tier: placeholder, footnotes */
+  --color-glass-dark:      rgba(22,25,40,0.95);      /* dark glass bg (CookieBanner etc) */
+  --color-banner-border:   rgba(45,49,80,0.6);       /* dim border for glass overlays    */
+  --color-primary-ring:    rgba(123,114,255,0.30);   /* primary ring/border at 30%       */
+  --color-teal-alpha:      rgba(78,205,196,0.20);    /* teal tint bg (voice mic active)  */
+  --color-gold-alpha:      rgba(245,158,11,0.15);    /* gold/amber tint bg               */
 }
 
 /* Calm / reduced-stimulation palette.                        */
@@ -42,14 +58,20 @@
 /* store.reducedStimulation === true.                         */
 [data-mode="calm"] {
   /* Primary aliases */
-  --color-primary:    #7878B8;  /* desaturated indigo */
-  --color-teal:       #4A8A87;  /* desaturated teal   */
-  --color-gold:       #8C6A10;  /* desaturated amber  */
+  --color-primary:       #7878B8;  /* desaturated indigo */
+  --color-teal:          #4A8A87;  /* desaturated teal   */
+  --color-gold:          #8C6A10;  /* desaturated amber  */
   /* Tailwind @theme mirrors — keeps utility classes in sync */
-  --color-secondary:  #4A8A87;
-  --color-accent:     #8C6A10;
-  --color-warning:    #8C6A10;
-  --color-success:    #4A8A87;
+  --color-secondary:     #4A8A87;
+  --color-accent:        #8C6A10;
+  --color-warning:       #8C6A10;
+  --color-success:       #4A8A87;
+  /* Extended palette calm overrides */
+  --color-primary-dark:  #5252A0;
+  --color-primary-light: #9999CC;
+  --color-primary-alpha: rgba(120,120,184,0.15);
+  --color-border-accent: rgba(120,120,184,0.35);
+  --color-teal-dark:     #2E7A77;
 }
 
 /* ── Base ─────────────────────────────────────────────────── */
@@ -94,6 +116,15 @@
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* ── Input primitive placeholder color ─────────────────────── */
+.ms-input::placeholder {
+  color: var(--color-muted);
+  opacity: 1;
+}
+.ms-input:focus {
+  border-color: var(--color-primary) !important;
 }
 
 /* ── Utility classes ───────────────────────────────────────── */

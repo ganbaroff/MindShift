@@ -42,8 +42,8 @@ export function InstallBanner() {
           <div
             className="max-w-[480px] mx-auto rounded-2xl px-4 py-3 flex items-start gap-3 pointer-events-auto"
             style={{
-              background: 'linear-gradient(135deg, #252840 0%, #1E2136 100%)',
-              border: '1px solid rgba(123,114,255,0.35)',
+              background: 'linear-gradient(135deg, var(--color-elevated) 0%, var(--color-card) 100%)',
+              border: '1px solid var(--color-border-accent)',
               boxShadow: '0 8px 32px rgba(0,0,0,0.45)',
             }}
           >
@@ -61,16 +61,16 @@ export function InstallBanner() {
             <div className="flex-1 min-w-0">
               {state === 'android' ? (
                 <>
-                  <p className="text-sm font-semibold" style={{ color: '#E8E8F0' }}>
+                  <p className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>
                     Install MindShift
                   </p>
-                  <p className="text-xs mt-0.5 leading-relaxed" style={{ color: '#8B8BA7' }}>
+                  <p className="text-xs mt-0.5 leading-relaxed" style={{ color: 'var(--color-muted)' }}>
                     Works offline · No browser bar · Feels native
                   </p>
                   <button
                     onClick={handleInstall}
                     className="mt-2 flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all active:scale-95"
-                    style={{ background: '#7B72FF', color: '#fff' }}
+                    style={{ background: 'var(--color-primary)', color: '#fff' }}
                   >
                     <Download size={13} />
                     Install app
@@ -78,14 +78,14 @@ export function InstallBanner() {
                 </>
               ) : (
                 <>
-                  <p className="text-sm font-semibold" style={{ color: '#E8E8F0' }}>
+                  <p className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>
                     Add to Home Screen
                   </p>
-                  <p className="text-xs mt-1 leading-relaxed" style={{ color: '#8B8BA7' }}>
+                  <p className="text-xs mt-1 leading-relaxed" style={{ color: 'var(--color-muted)' }}>
                     Tap{' '}
                     <span
                       className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded"
-                      style={{ background: '#252840', color: '#E8E8F0' }}
+                      style={{ background: 'var(--color-elevated)', color: 'var(--color-text)' }}
                     >
                       <Share size={10} />
                       Share
@@ -93,7 +93,7 @@ export function InstallBanner() {
                     , then{' '}
                     <span
                       className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded"
-                      style={{ background: '#252840', color: '#E8E8F0' }}
+                      style={{ background: 'var(--color-elevated)', color: 'var(--color-text)' }}
                     >
                       <Plus size={10} />
                       Add to Home Screen
@@ -109,7 +109,7 @@ export function InstallBanner() {
               onClick={handleDismiss}
               aria-label="Dismiss install banner"
               className="flex-shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg transition-colors"
-              style={{ color: '#8B8BA7' }}
+              style={{ color: 'var(--color-muted)' }}
             >
               <X size={16} />
             </button>

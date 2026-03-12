@@ -64,12 +64,12 @@ export function getDueDateLabel(dueDate: string, dueTime: string | null): {
   const due       = new Date(dueDate); due.setHours(0,0,0,0)
   const timeStr   = dueTime ? ` ${dueTime}` : ''
 
-  if (due < today)     return { label: `${dueDate.slice(5).replace('-', '/')}${timeStr}`, color: '#F59E0B' }
-  if (due.getTime() === today.getTime())    return { label: `Today${timeStr}`,    color: '#7B72FF' }
-  if (due.getTime() === tomorrow.getTime()) return { label: `Tomorrow${timeStr}`, color: '#4ECDC4' }
+  if (due < today)     return { label: `${dueDate.slice(5).replace('-', '/')}${timeStr}`, color: 'var(--color-accent)' }
+  if (due.getTime() === today.getTime())    return { label: `Today${timeStr}`,    color: 'var(--color-primary)' }
+  if (due.getTime() === tomorrow.getTime()) return { label: `Tomorrow${timeStr}`, color: 'var(--color-secondary)' }
   const mon = due.toLocaleString('en', { month: 'short' })
   const day = due.getDate()
-  return { label: `${mon} ${day}${timeStr}`, color: '#8B8BA7' }
+  return { label: `${mon} ${day}${timeStr}`, color: 'var(--color-muted)' }
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -498,8 +498,8 @@ export function AddTaskModal({ open, onClose }: Props) {
             aria-labelledby="add-task-dialog-title"
             className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] z-50 flex flex-col rounded-t-3xl"
             style={{
-              background: '#1E2136',
-              border: '1px solid rgba(255,255,255,0.06)',
+              background: 'var(--color-card)',
+              border: '1px solid var(--color-border-subtle)',
               maxHeight: '90svh',
             }}
           >
@@ -507,15 +507,15 @@ export function AddTaskModal({ open, onClose }: Props) {
             <div className="shrink-0 flex items-center justify-between px-5 pt-5 pb-3">
               <div
                 className="absolute top-3 left-1/2 -translate-x-1/2 w-10 h-1 rounded-full"
-                style={{ background: '#252840' }}
+                style={{ background: 'var(--color-elevated)' }}
               />
-              <h2 id="add-task-dialog-title" className="text-lg font-bold" style={{ color: '#E8E8F0' }}>
+              <h2 id="add-task-dialog-title" className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>
                 Add task
               </h2>
               <button
                 onClick={handleClose}
                 className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl"
-                style={{ color: '#8B8BA7' }}
+                style={{ color: 'var(--color-muted)' }}
                 aria-label="Close"
               >
                 <X size={18} />
@@ -528,10 +528,10 @@ export function AddTaskModal({ open, onClose }: Props) {
               {/* AI classifying spinner — Mochi-style (Step E) */}
               {classifying && (
                 <div className="flex items-center gap-3 px-4 py-3 rounded-2xl"
-                  style={{ background: '#252840', border: '1px solid rgba(123,114,255,0.3)' }}>
+                  style={{ background: 'var(--color-elevated)', border: '1px solid var(--color-border-accent)' }}>
                   <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin motion-reduce:animate-none motion-reduce:opacity-60 shrink-0"
-                    style={{ color: '#7B72FF' }} />
-                  <span className="text-sm" style={{ color: '#7B72FF' }}>Mochi is thinking… 🧠</span>
+                    style={{ color: 'var(--color-primary)' }} />
+                  <span className="text-sm" style={{ color: 'var(--color-primary)' }}>Mochi is thinking… 🧠</span>
                 </div>
               )}
 
@@ -541,12 +541,12 @@ export function AddTaskModal({ open, onClose }: Props) {
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="flex flex-col gap-3 p-4 rounded-2xl"
-                  style={{ background: '#252840', border: '1px solid rgba(245,158,11,0.4)' }}
+                  style={{ background: 'var(--color-elevated)', border: '1px solid var(--color-border-gold)' }}
                 >
-                  <p className="text-sm" style={{ color: '#F59E0B' }}>
+                  <p className="text-sm" style={{ color: 'var(--color-accent)' }}>
                     I heard: &ldquo;{voiceTranscript.slice(0, 80)}&rdquo;
                   </p>
-                  <p className="text-sm font-medium" style={{ color: '#E8E8F0' }}>
+                  <p className="text-sm font-medium" style={{ color: 'var(--color-text)' }}>
                     What is this?
                   </p>
                   <div className="flex gap-2">
@@ -585,9 +585,9 @@ export function AddTaskModal({ open, onClose }: Props) {
                         }}
                         className="flex-1 py-2.5 rounded-xl text-sm font-medium min-h-[44px]"
                         style={{
-                          background: t === voiceResult.type ? 'rgba(123,114,255,0.2)' : '#1E2136',
-                          border: `1.5px solid ${t === voiceResult.type ? '#7B72FF' : 'rgba(255,255,255,0.08)'}`,
-                          color: t === voiceResult.type ? '#7B72FF' : '#8B8BA7',
+                          background: t === voiceResult.type ? 'var(--color-primary-alpha)' : 'var(--color-card)',
+                          border: `1.5px solid ${t === voiceResult.type ? 'var(--color-primary)' : 'var(--color-border-subtle)'}`,
+                          color: t === voiceResult.type ? 'var(--color-primary)' : 'var(--color-muted)',
                         }}
                       >
                         {t === 'task' ? '✅ Task' : t === 'idea' ? '💡 Idea' : '⏰ Reminder'}
@@ -603,32 +603,32 @@ export function AddTaskModal({ open, onClose }: Props) {
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="flex flex-col gap-3 p-4 rounded-2xl"
-                  style={{ background: '#252840', border: '1px solid rgba(78,205,196,0.4)' }}
+                  style={{ background: 'var(--color-elevated)', border: '1px solid var(--color-border-teal)' }}
                 >
                   <div className="flex items-center gap-2">
                     <span className="text-base">
                       {voiceResult.type === 'task' ? '✅' : voiceResult.type === 'reminder' ? '⏰' : '💡'}
                     </span>
-                    <span className="text-sm font-semibold" style={{ color: '#4ECDC4' }}>
+                    <span className="text-sm font-semibold" style={{ color: 'var(--color-secondary)' }}>
                       {voiceResult.type === 'task' ? 'Task captured'
                         : voiceResult.type === 'reminder' ? 'Reminder captured'
                         : 'Idea captured'}
                     </span>
                   </div>
 
-                  <p className="text-base font-medium leading-snug" style={{ color: '#E8E8F0' }}>
+                  <p className="text-base font-medium leading-snug" style={{ color: 'var(--color-text)' }}>
                     "{voiceResult.title}"
                   </p>
 
                   <div className="flex flex-wrap gap-2">
-                    <span className="text-xs px-2 py-1 rounded-lg" style={{ background: 'rgba(123,114,255,0.15)', color: '#7B72FF' }}>
+                    <span className="text-xs px-2 py-1 rounded-lg" style={{ background: 'var(--color-primary-alpha)', color: 'var(--color-primary)' }}>
                       {voiceResult.pool.toUpperCase()} pool
                     </span>
-                    <span className="text-xs px-2 py-1 rounded-lg" style={{ background: 'rgba(123,114,255,0.15)', color: '#7B72FF' }}>
+                    <span className="text-xs px-2 py-1 rounded-lg" style={{ background: 'var(--color-primary-alpha)', color: 'var(--color-primary)' }}>
                       ~{voiceResult.estimatedMinutes}m
                     </span>
                     {voiceResult.dueDate && (
-                      <span className="text-xs px-2 py-1 rounded-lg" style={{ background: 'rgba(245,158,11,0.15)', color: '#F59E0B' }}>
+                      <span className="text-xs px-2 py-1 rounded-lg" style={{ background: 'var(--color-gold-alpha)', color: 'var(--color-accent)' }}>
                         📅 {voiceResult.dueDate}{voiceResult.dueTime ? ` at ${voiceResult.dueTime}` : ''}
                       </span>
                     )}
@@ -638,7 +638,7 @@ export function AddTaskModal({ open, onClose }: Props) {
                     <button
                       onClick={() => setVoiceResult(null)}
                       className="flex-1 py-2.5 rounded-xl text-sm font-medium min-h-[44px]"
-                      style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.08)', color: '#8B8BA7' }}
+                      style={{ background: 'var(--color-card)', border: '1px solid var(--color-border-subtle)', color: 'var(--color-muted)' }}
                     >
                       Edit
                     </button>
@@ -660,7 +660,7 @@ export function AddTaskModal({ open, onClose }: Props) {
                           downloadICS(t)
                         }}
                         className="px-3 py-2.5 rounded-xl text-sm font-medium min-h-[44px]"
-                        style={{ background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.3)', color: '#F59E0B' }}
+                        style={{ background: 'var(--color-gold-alpha)', border: '1px solid var(--color-border-gold)', color: 'var(--color-accent)' }}
                       >
                         📅
                       </button>
@@ -669,7 +669,7 @@ export function AddTaskModal({ open, onClose }: Props) {
                       onClick={() => void handleSaveVoiceResult()}
                       disabled={isSubmitting}
                       className="flex-1 py-2.5 rounded-xl text-sm font-semibold min-h-[44px]"
-                      style={{ background: '#7B72FF', color: 'white' }}
+                      style={{ background: 'var(--color-primary)', color: 'white' }}
                     >
                       {isSubmitting ? 'Saving…' : 'Save ✓'}
                     </button>
@@ -689,21 +689,21 @@ export function AddTaskModal({ open, onClose }: Props) {
                       autoFocus
                       className="flex-1 rounded-2xl px-4 py-3 text-base outline-none"
                       style={{
-                        background: '#252840',
-                        border: `1.5px solid ${isListening ? '#4ECDC4' : 'rgba(255,255,255,0.06)'}`,
-                        color: '#E8E8F0',
-                        caretColor: '#7B72FF',
+                        background: 'var(--color-elevated)',
+                        border: `1.5px solid ${isListening ? 'var(--color-secondary)' : 'var(--color-border-subtle)'}`,
+                        color: 'var(--color-text)',
+                        caretColor: 'var(--color-primary)',
                       }}
-                      onFocus={(e) => { if (!isListening) e.currentTarget.style.borderColor = '#7B72FF' }}
-                      onBlur={(e)  => { if (!isListening) e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)' }}
+                      onFocus={(e) => { if (!isListening) e.currentTarget.style.borderColor = 'var(--color-primary)' }}
+                      onBlur={(e)  => { if (!isListening) e.currentTarget.style.borderColor = 'var(--color-border-subtle)' }}
                     />
                     {voiceSupported ? (
                       <button
                         onClick={handleVoiceToggle}
                         className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0"
                         style={{
-                          background: isListening ? 'rgba(78,205,196,0.2)' : '#252840',
-                          border: `1.5px solid ${isListening ? '#4ECDC4' : 'rgba(255,255,255,0.06)'}`,
+                          background: isListening ? 'var(--color-teal-alpha)' : 'var(--color-elevated)',
+                          border: `1.5px solid ${isListening ? 'var(--color-secondary)' : 'var(--color-border-subtle)'}`,
                         }}
                         aria-label={isListening ? 'Stop recording' : 'Speak your task'}
                       >
@@ -713,7 +713,7 @@ export function AddTaskModal({ open, onClose }: Props) {
                       <button
                         disabled
                         className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 opacity-40"
-                        style={{ background: '#252840', border: '1.5px solid rgba(255,255,255,0.06)' }}
+                        style={{ background: 'var(--color-elevated)', border: '1.5px solid var(--color-border-subtle)' }}
                         aria-label="Voice input available in Chrome or Edge"
                         title="Voice input available in Chrome or Edge"
                       >
@@ -722,7 +722,7 @@ export function AddTaskModal({ open, onClose }: Props) {
                     )}
                   </div>
                   {isListening && (
-                    <p className="text-xs animate-pulse" style={{ color: '#4ECDC4' }}>
+                    <p className="text-xs animate-pulse" style={{ color: 'var(--color-secondary)' }}>
                       🎙 Listening… tap mic to stop
                     </p>
                   )}
@@ -734,9 +734,9 @@ export function AddTaskModal({ open, onClose }: Props) {
                       disabled={loadingAi}
                       className="self-start flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-medium"
                       style={{
-                        background: 'rgba(123,114,255,0.12)',
-                        border: '1px solid rgba(123,114,255,0.4)',
-                        color: '#7B72FF',
+                        background: 'var(--color-primary-alpha)',
+                        border: '1px solid var(--color-border-accent)',
+                        color: 'var(--color-primary)',
                       }}
                     >
                       {loadingAi ? (
@@ -754,20 +754,20 @@ export function AddTaskModal({ open, onClose }: Props) {
               {aiSteps && (
                 <div
                   className="flex flex-col gap-2 p-3 rounded-2xl"
-                  style={{ background: '#252840', border: '1px solid rgba(123,114,255,0.3)' }}
+                  style={{ background: 'var(--color-elevated)', border: '1px solid var(--color-border-accent)' }}
                 >
-                  <p className="text-xs font-medium" style={{ color: '#7B72FF' }}>✨ Here's a plan:</p>
+                  <p className="text-xs font-medium" style={{ color: 'var(--color-primary)' }}>✨ Here's a plan:</p>
                   {aiSteps.map((step, i) => (
                     <div key={i} className="flex items-start gap-2">
-                      <span className="text-xs mt-0.5 shrink-0" style={{ color: '#7B72FF' }}>{i + 1}.</span>
-                      <span className="text-sm leading-snug" style={{ color: '#E8E8F0' }}>{step}</span>
+                      <span className="text-xs mt-0.5 shrink-0" style={{ color: 'var(--color-primary)' }}>{i + 1}.</span>
+                      <span className="text-sm leading-snug" style={{ color: 'var(--color-text)' }}>{step}</span>
                     </div>
                   ))}
                   <button
                     onClick={() => void handleAddSteps()}
                     disabled={isSubmitting}
                     className="mt-1 w-full py-2.5 rounded-xl text-sm font-semibold"
-                    style={{ background: '#7B72FF', color: 'white' }}
+                    style={{ background: 'var(--color-primary)', color: 'white' }}
                   >
                     {isSubmitting ? 'Adding...' : `Add ${aiSteps.length} steps to my list →`}
                   </button>
@@ -780,9 +780,9 @@ export function AddTaskModal({ open, onClose }: Props) {
                   onClick={() => setShowDatePicker(v => !v)}
                   className="flex items-center gap-2 self-start px-3 py-2 rounded-xl text-sm font-medium min-h-[44px]"
                   style={{
-                    background: showDatePicker ? 'rgba(123,114,255,0.15)' : '#252840',
-                    border: `1.5px solid ${showDatePicker ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
-                    color: showDatePicker ? '#7B72FF' : '#8B8BA7',
+                    background: showDatePicker ? 'var(--color-primary-alpha)' : 'var(--color-elevated)',
+                    border: `1.5px solid ${showDatePicker ? 'var(--color-primary)' : 'var(--color-border-subtle)'}`,
+                    color: showDatePicker ? 'var(--color-primary)' : 'var(--color-muted)',
                   }}
                 >
                   <Calendar size={14} />
@@ -798,22 +798,22 @@ export function AddTaskModal({ open, onClose }: Props) {
                     className="flex gap-2"
                   >
                     <div className="flex-1 flex flex-col gap-1">
-                      <label className="text-xs" style={{ color: '#8B8BA7' }}>Date</label>
+                      <label className="text-xs" style={{ color: 'var(--color-muted)' }}>Date</label>
                       <input
                         type="date"
                         value={dueDate}
                         onChange={(e) => setDueDate(e.target.value)}
                         className="rounded-xl px-3 py-2.5 text-sm outline-none"
                         style={{
-                          background: '#252840',
-                          border: '1.5px solid rgba(255,255,255,0.06)',
-                          color: '#E8E8F0',
+                          background: 'var(--color-elevated)',
+                          border: '1.5px solid var(--color-border-subtle)',
+                          color: 'var(--color-text)',
                           colorScheme: 'dark',
                         }}
                       />
                     </div>
                     <div className="flex flex-col gap-1">
-                      <label className="text-xs" style={{ color: '#8B8BA7' }}>
+                      <label className="text-xs" style={{ color: 'var(--color-muted)' }}>
                         <Clock size={10} style={{ display: 'inline', marginRight: 2 }} />Time
                       </label>
                       <input
@@ -822,9 +822,9 @@ export function AddTaskModal({ open, onClose }: Props) {
                         onChange={(e) => setDueTime(e.target.value)}
                         className="rounded-xl px-3 py-2.5 text-sm outline-none w-28"
                         style={{
-                          background: '#252840',
-                          border: '1.5px solid rgba(255,255,255,0.06)',
-                          color: '#E8E8F0',
+                          background: 'var(--color-elevated)',
+                          border: '1.5px solid var(--color-border-subtle)',
+                          color: 'var(--color-text)',
                           colorScheme: 'dark',
                         }}
                       />
@@ -833,7 +833,7 @@ export function AddTaskModal({ open, onClose }: Props) {
                       <button
                         onClick={() => { setDueDate(''); setDueTime(''); setShowDatePicker(false) }}
                         className="self-end px-2 py-2.5 rounded-xl text-xs min-h-[44px]"
-                        style={{ color: '#8B8BA7', background: '#1E2136' }}
+                        style={{ color: 'var(--color-muted)', background: 'var(--color-card)' }}
                       >
                         Clear
                       </button>
@@ -844,7 +844,7 @@ export function AddTaskModal({ open, onClose }: Props) {
 
               {/* ── Difficulty ─────────────────────────────────────────────── */}
               <div role="group" aria-labelledby="difficulty-label" className="flex flex-col gap-2">
-                <span id="difficulty-label" className="text-xs font-medium tracking-wide uppercase" style={{ color: '#8B8BA7' }}>
+                <span id="difficulty-label" className="text-xs font-medium tracking-wide uppercase" style={{ color: 'var(--color-muted)' }}>
                   Difficulty
                 </span>
                 <div className="flex gap-2">
@@ -855,9 +855,9 @@ export function AddTaskModal({ open, onClose }: Props) {
                       aria-pressed={difficulty === d}
                       className="flex-1 py-2.5 rounded-xl text-sm font-medium"
                       style={{
-                        background: difficulty === d ? 'rgba(123, 114, 255, 0.18)' : '#252840',
-                        border: `1.5px solid ${difficulty === d ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
-                        color: difficulty === d ? '#7B72FF' : '#8B8BA7',
+                        background: difficulty === d ? 'var(--color-primary-alpha)' : 'var(--color-elevated)',
+                        border: `1.5px solid ${difficulty === d ? 'var(--color-primary)' : 'var(--color-border-subtle)'}`,
+                        color: difficulty === d ? 'var(--color-primary)' : 'var(--color-muted)',
                       }}
                     >
                       {d === 1 ? '🟢 Easy' : d === 2 ? '🟡 Medium' : '🔵 Hard'}
@@ -868,7 +868,7 @@ export function AddTaskModal({ open, onClose }: Props) {
 
               {/* ── Duration ───────────────────────────────────────────────── */}
               <div role="group" aria-labelledby="duration-label" className="flex flex-col gap-2">
-                <span id="duration-label" className="text-xs font-medium tracking-wide uppercase" style={{ color: '#8B8BA7' }}>
+                <span id="duration-label" className="text-xs font-medium tracking-wide uppercase" style={{ color: 'var(--color-muted)' }}>
                   Estimated time
                 </span>
                 <div className="flex gap-2 flex-wrap">
@@ -879,9 +879,9 @@ export function AddTaskModal({ open, onClose }: Props) {
                       aria-pressed={minutes === d && !customMinutes}
                       className="px-3 py-2.5 rounded-xl text-sm font-medium"
                       style={{
-                        background: minutes === d && !customMinutes ? 'rgba(123, 114, 255, 0.18)' : '#252840',
-                        border: `1.5px solid ${minutes === d && !customMinutes ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
-                        color: minutes === d && !customMinutes ? '#7B72FF' : '#8B8BA7',
+                        background: minutes === d && !customMinutes ? 'var(--color-primary-alpha)' : 'var(--color-elevated)',
+                        border: `1.5px solid ${minutes === d && !customMinutes ? 'var(--color-primary)' : 'var(--color-border-subtle)'}`,
+                        color: minutes === d && !customMinutes ? 'var(--color-primary)' : 'var(--color-muted)',
                       }}
                     >
                       {d}m
@@ -901,9 +901,9 @@ export function AddTaskModal({ open, onClose }: Props) {
                     }}
                     className="w-24 px-3 py-2 rounded-xl text-sm outline-none"
                     style={{
-                      background: customMinutes ? 'rgba(123, 114, 255, 0.18)' : '#252840',
-                      border: `1.5px solid ${customMinutes ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
-                      color: '#E8E8F0',
+                      background: customMinutes ? 'var(--color-primary-alpha)' : 'var(--color-elevated)',
+                      border: `1.5px solid ${customMinutes ? 'var(--color-primary)' : 'var(--color-border-subtle)'}`,
+                      color: 'var(--color-text)',
                     }}
                   />
                 </div>
@@ -926,9 +926,9 @@ export function AddTaskModal({ open, onClose }: Props) {
                   }}
                   className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-medium min-h-[44px]"
                   style={{
-                    background: 'rgba(245,158,11,0.1)',
-                    border: '1px solid rgba(245,158,11,0.3)',
-                    color: '#F59E0B',
+                    background: 'var(--color-gold-alpha)',
+                    border: '1px solid var(--color-border-gold)',
+                    color: 'var(--color-accent)',
                   }}
                 >
                   <Calendar size={14} />
@@ -941,10 +941,10 @@ export function AddTaskModal({ open, onClose }: Props) {
             {/* ── Footer ── */}
             <div
               className="shrink-0 px-5 pt-3 pb-[calc(16px+env(safe-area-inset-bottom))]"
-              style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
+              style={{ borderTop: '1px solid var(--color-border-subtle)' }}
             >
               {nowFull && (
-                <p className="text-xs mb-2" style={{ color: '#8B8BA7' }}>
+                <p className="text-xs mb-2" style={{ color: 'var(--color-muted)' }}>
                   💙 NOW is full — this will land in NEXT, ready when you are.
                 </p>
               )}
@@ -953,7 +953,7 @@ export function AddTaskModal({ open, onClose }: Props) {
                 disabled={!title.trim() || isSubmitting || !!voiceResult || classifying}
                 className="w-full py-4 rounded-2xl font-semibold text-base"
                 style={{
-                  background: title.trim() && !voiceResult && !classifying ? '#7B72FF' : '#252840',
+                  background: title.trim() && !voiceResult && !classifying ? 'var(--color-primary)' : 'var(--color-elevated)',
                   color: title.trim() && !voiceResult && !classifying ? '#FFFFFF' : '#5A5B72',
                   cursor: title.trim() && !voiceResult && !classifying ? 'pointer' : 'default',
                 }}

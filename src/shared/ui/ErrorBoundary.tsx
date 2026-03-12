@@ -44,13 +44,13 @@ export class ErrorBoundary extends Component<Props, State> {
       return (
         <div
           className="flex flex-col items-center justify-center min-h-screen px-6 text-center"
-          style={{ background: '#0F1117' }}
+          style={{ background: 'var(--color-bg)' }}
         >
           <div className="text-5xl mb-6">🌿</div>
-          <h2 className="text-xl font-bold mb-2" style={{ color: '#E8E8F0' }}>
+          <h2 className="text-xl font-bold mb-2" style={{ color: 'var(--color-text)' }}>
             Something went sideways
           </h2>
-          <p className="text-sm mb-8 max-w-xs leading-relaxed" style={{ color: '#8B8BA7' }}>
+          <p className="text-sm mb-8 max-w-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
             No worries — your data is safe. Let's get you back on track.
           </p>
           <div className="flex flex-col gap-3 w-full max-w-xs">
@@ -58,9 +58,9 @@ export class ErrorBoundary extends Component<Props, State> {
               onClick={this.handleReset}
               className="w-full py-3.5 rounded-2xl font-semibold text-sm"
               style={{
-                background: 'rgba(123,114,255,0.15)',
-                border: '1.5px solid #7B72FF',
-                color: '#7B72FF',
+                background: 'var(--color-primary-alpha)',
+                border: '1.5px solid var(--color-primary)',
+                color: 'var(--color-primary)',
               }}
             >
               Try again
@@ -70,8 +70,8 @@ export class ErrorBoundary extends Component<Props, State> {
               className="w-full py-3 rounded-2xl font-medium text-sm"
               style={{
                 background: 'transparent',
-                border: '1px solid rgba(255,255,255,0.06)',
-                color: '#8B8BA7',
+                border: '1px solid var(--color-border-subtle)',
+                color: 'var(--color-muted)',
               }}
             >
               Go home
