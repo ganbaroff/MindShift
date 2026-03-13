@@ -2,7 +2,7 @@
 
 ## Project
 **MindShift** — ADHD-aware productivity PWA. Mobile-first, React + TypeScript + Supabase.
-Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ `bd1d8b1`. Status: **production-ready**.
+Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ `e2f2220`. Status: **production-ready**.
 
 ## Stable Production URL
 **`https://mind-shift-git-main-yusifg27-3093s-projects.vercel.app`**
@@ -22,6 +22,7 @@ Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ `bd1d8b1`. Status: **p
 ## Sprint History
 | Sprint | Commit | What landed |
 |--------|--------|-------------|
+| Sprint A "Nothing Should Lie" | `e2f2220` | 28-issue UX dead-end audit → 6 fixes: "Done recently" section for completed tasks (7-day history + 30-day pruning), APP_MODE_CONFIG drives pool visibility/limits (minimal/habit/system), ProBanner removed (no Stripe yet), energy_before now written + ProgressScreen energy trends, Health & Rhythms fields removed (sleep/chrono/medication — unused), BurnoutAlert CTA fix ("Take a breather" for burnout tier), rest-mode banner, QuickSetupCard toast, BurnoutNudge cooldown copy. e2e tests synced. |
 | Copy audit | `bd1d8b1` | UX copy audit 4 waves: canonical ENERGY_LABELS/EMOJI in constants.ts, tone/emoji (AuthScreen/FocusScreen/PostSessionFlow/OnboardingFlow/SettingsScreen), jargon removal (micro-win/micro-focus/Generate/Feels native/CoachMark), polish (stats counters, Mochi milestone_60, CookieBanner, HomeScreen skip). e2e tests synced to new copy. GitHub Actions e2e-production.yml (deployment_status trigger). Stable URL documented. |
 | Sprint 9 | `e54f751` | Design & accessibility pass: WCAG AA compliance (focus rings, motion system universalised), Calendar tab → DueDateScreen, timer style picker in Settings, energy picker on first load, undo task completion (4s), offline indicator in AppShell, BurnoutAlert CTA → /focus?quick=1, snooze/park/thought toasts, BentoGrid min-2 feedback, ArcTimer tap hint, Mochi message randomization, text overflow protection, BentoGrid error fallback, pushWelcomeBack() wired, ADR-0007 |
 | Sprint 8 | `4fe6a19` | Architecture optimization: bundle splitting (lazy RecoveryProtocol/ContextRestore/BentoGrid), FocusScreen decomposition (1180→~350 lines), React.memo (4 components), CSS design tokens (:root vars + [data-mode="calm"]), per-route ErrorBoundary, Sentry deferred init, 5 new ADRs |
@@ -147,12 +148,20 @@ Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ `bd1d8b1`. Status: **p
 - **Undo completion:** TaskCard holds completion for 4s with toast. Confetti fires immediately.
 - **Timer style UI:** Now settable in SettingsScreen (was only in store with no UI).
 
+## Architecture (Sprint A additions)
+- **APP_MODE_CONFIG:** `constants.ts` — each appMode (minimal/habit/system) now drives `nowPoolMax`, `showNextOnHome`, `showSomedayOnHome`, `homeSubtitle`. Single source of truth.
+- **Done recently:** TasksScreen collapsible section — `[...nowPool, ...nextPool, ...somedayPool].filter(completed, <7d)`, sorted by `completedAt` desc.
+- **Store hydration pruning:** `onRehydrateStorage` callback prunes completed tasks >30d from all pools.
+- **Rest-mode banner:** HomeScreen + App.tsx show banner when `flexiblePauseUntil` is in the future.
+- **Energy tracking:** `energy_before` now written from current `energyLevel` on session save. `energy_after` still pending PostSessionFlow wiring.
+
 ## Build Notes (important!)
 - Sprint 8: `npm run build` ✅, `vitest` 82/82 ✅, `tsc` ✅
 - Sprint 9: `tsc --noEmit` ✅ (Cowork session)
 - Cowork session: `tsc --noEmit` ✅ only (no rollup Linux binary in Cowork sandbox)
 - Always run `tsc --noEmit` before any commit from Cowork
-- Branch: `main` @ `4fe6a19` (Sprint 9 uncommitted — commit before deploy)
+- Sprint A: `tsc --noEmit` ✅, deployed `e2f2220`
+- Branch: `main` @ `e2f2220`
 
 ## Production Status (as of Sprint 9)
 | Item | Code | Deployed | Notes |
@@ -164,16 +173,18 @@ Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ `bd1d8b1`. Status: **p
 | Data persistence (tasks etc.) | ✅ code ready | ❓ untested | Only 1 user (Yusif). Needs real session test. |
 | Sentry | ✅ DSN configured, deferred init | ❓ unconfirmed | Check sentry.io → Issues |
 | Analytics | ✅ @vercel/analytics + web-vitals | ❓ unconfirmed | Check Vercel dashboard → Analytics tab |
-| Stripe / Payments | ❌ not implemented | ❌ planned | ProBanner UI exists. Stripe account to be set up. |
+| Stripe / Payments | ❌ not implemented | ❌ planned | ProBanner UI removed (Sprint A). Store logic intact. |
 | Real users | 1 (Yusif only) | — | Design + auth issues resolved. Ready for beta invites. |
 
 ## Known Gaps (not yet implemented)
-- **energy_after** — field exists in DB but never written from UI after focus sessions
+- **energy_after** — `energy_before` now written (Sprint A). `energy_after` still needs PostSessionFlow picker wiring to DB UPDATE.
 - **Server-side reminders** — browser setTimeout only (lost on tab close). Need SW push or Supabase cron.
-- **Stripe integration** — subscriptionTier exists in store + ProBanner UI, but zero payment logic. Planned next.
+- **Stripe integration** — subscriptionTier exists in store, ProBanner UI removed (Sprint A). Zero payment logic. Restore ProBanner when Stripe ready.
 - **classify-voice-input** — code audit shows it IS wired in AddTaskModal. Status: working in code, unconfirmed in production.
 - **Date picker on tasks** — dueDate field exists in Task type but no UI to set it. DueDateScreen works with existing data only.
 - **Social layer** — S-2/S-3/S-4 require Supabase Realtime design (separate sprint)
+- **Health signals (Sprint B)** — sleepQuality, chronotype, medicationTime removed from UI (Sprint A). Store fields remain. Re-add when wired to recommendations.
+- **DueDateScreen interactivity** — read-only; task rows not tappable; no edit/reschedule UI.
 
 ## Remaining P2 Backlog (not yet implemented)
 - O-6: Expanded ADHD signal (time blindness, emotional reactivity scenarios)
