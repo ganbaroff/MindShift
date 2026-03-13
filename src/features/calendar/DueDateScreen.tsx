@@ -1,11 +1,13 @@
 // ── DueDateScreen ──────────────────────────────────────────────────────────
 // List of all tasks with due dates, grouped by section: Today, Tomorrow,
-// This Week, Later. Non-shaming, warm colors.
+// This Week, Later. Non-shaming, warm colors. Task rows are tappable.
 
-import { useMemo } from 'react'
-import { motion } from 'motion/react'
+import { useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { motion, AnimatePresence } from 'motion/react'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { useStore } from '@/store'
+import { toast } from 'sonner'
 import type { Task } from '@/types'
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -53,17 +55,133 @@ function SectionHeader({ title, color, count }: { title: string; color: string; 
   )
 }
 
+// ── Reschedule sheet ─────────────────────────────────────────────────────────
+
+interface RescheduleSheetProps {
+  task: Task
+  onClose: () => void
+  onNavigate: () => void
+}
+
+function RescheduleSheet({ task, onClose, onNavigate }: RescheduleSheetProps) {
+  const { setTaskDueDate } = useStore()
+  const [newDate, setNewDate] = useState(task.dueDate ?? '')
+  const diffColor =
+    task.difficulty === 1 ? '#4ECDC4' :
+    task.difficulty === 2 ? '#F59E0B' :
+    '#7B72FF'
+
+  const handleReschedule = () => {
+    if (!newDate) return
+    setTaskDueDate(task.id, newDate, task.dueTime)
+    toast('Due date updated 📅')
+    onClose()
+  }
+
+  const handleClearDate = () => {
+    setTaskDueDate(task.id, null, null)
+    toast('Due date removed')
+    onClose()
+  }
+
+  return (
+    <>
+      {/* Backdrop */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-40"
+        style={{ background: 'rgba(0,0,0,0.55)' }}
+        onClick={onClose}
+      />
+      {/* Sheet */}
+      <motion.div
+        initial={{ y: '100%' }}
+        animate={{ y: 0 }}
+        exit={{ y: '100%' }}
+        transition={{ type: 'spring', stiffness: 320, damping: 32 }}
+        className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] z-50 rounded-t-3xl p-5 pb-[calc(20px+env(safe-area-inset-bottom))]"
+        style={{ background: 'var(--color-card)', border: '1px solid rgba(255,255,255,0.08)' }}
+      >
+        {/* Drag handle */}
+        <div className="w-10 h-1 rounded-full mx-auto mb-4" style={{ background: 'rgba(255,255,255,0.15)' }} />
+
+        {/* Task title */}
+        <div className="flex items-center gap-2 mb-4">
+          <div className="w-1 h-5 rounded-full shrink-0" style={{ background: diffColor }} />
+          <p className="text-sm font-semibold truncate" style={{ color: 'var(--color-text)' }}>
+            {task.title}
+          </p>
+        </div>
+
+        {/* Reschedule date input */}
+        <label className="block text-xs mb-1" style={{ color: 'var(--color-muted)' }}>
+          Reschedule to
+        </label>
+        <input
+          type="date"
+          value={newDate}
+          onChange={(e) => setNewDate(e.target.value)}
+          className="w-full rounded-xl px-3 py-2.5 text-sm outline-none mb-3"
+          style={{
+            background: 'var(--color-elevated)',
+            border: '1.5px solid var(--color-border-subtle)',
+            color: 'var(--color-text)',
+            colorScheme: 'dark',
+          }}
+        />
+
+        {/* Actions */}
+        <div className="flex flex-col gap-2">
+          <button
+            onClick={handleReschedule}
+            disabled={!newDate || newDate === task.dueDate}
+            className="w-full py-3 rounded-xl text-sm font-semibold transition-all duration-200 min-h-[44px]"
+            style={{
+              background: newDate && newDate !== task.dueDate ? 'var(--color-primary-alpha)' : 'var(--color-elevated)',
+              border: `1.5px solid ${newDate && newDate !== task.dueDate ? 'var(--color-primary)' : 'var(--color-border-subtle)'}`,
+              color: newDate && newDate !== task.dueDate ? 'var(--color-primary)' : 'var(--color-muted)',
+            }}
+          >
+            Save new date
+          </button>
+          <button
+            onClick={onNavigate}
+            className="w-full py-3 rounded-xl text-sm font-medium transition-all duration-200 min-h-[44px]"
+            style={{
+              background: 'var(--color-elevated)',
+              border: '1px solid var(--color-border-subtle)',
+              color: 'var(--color-text)',
+            }}
+          >
+            Go to task →
+          </button>
+          <button
+            onClick={handleClearDate}
+            className="w-full py-2 text-xs transition-all duration-200"
+            style={{ color: 'var(--color-muted)' }}
+          >
+            Remove due date
+          </button>
+        </div>
+      </motion.div>
+    </>
+  )
+}
+
 // ── Task row ────────────────────────────────────────────────────────────────
 
-function TaskRow({ task }: { task: Task }) {
+function TaskRow({ task, onTap }: { task: Task; onTap: (t: Task) => void }) {
   const diffColor =
     task.difficulty === 1 ? '#4ECDC4' :
     task.difficulty === 2 ? '#F59E0B' :
     '#7B72FF'
 
   return (
-    <div
-      className="flex items-center gap-3 px-3 py-3 rounded-xl"
+    <button
+      onClick={() => onTap(task)}
+      className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-left transition-all duration-150 active:opacity-80"
       style={{ background: 'var(--color-card)', border: '1px solid rgba(255,255,255,0.04)' }}
     >
       <div
@@ -78,7 +196,8 @@ function TaskRow({ task }: { task: Task }) {
           {formatDueDate(task.dueDate!)} · ~{task.estimatedMinutes}m
         </p>
       </div>
-    </div>
+      <span className="text-xs shrink-0" style={{ color: 'var(--color-muted)' }}>›</span>
+    </button>
   )
 }
 
@@ -87,6 +206,9 @@ function TaskRow({ task }: { task: Task }) {
 export default function DueDateScreen() {
   const { nowPool, nextPool, somedayPool } = useStore()
   const { shouldAnimate, t } = useMotion()
+  const navigate = useNavigate()
+
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null)
 
   const allTasks = useMemo(
     () => [...nowPool, ...nextPool, ...somedayPool],
@@ -97,79 +219,88 @@ export default function DueDateScreen() {
   const hasDueTasks = allTasks.some(t => t.dueDate && t.status === 'active')
 
   return (
-    <motion.div
-      initial={shouldAnimate ? { opacity: 0, y: 10 } : {}}
-      animate={{ opacity: 1, y: 0 }}
-      transition={t()}
-      className="flex flex-col pb-[calc(112px+env(safe-area-inset-bottom))]"
-    >
-      {/* Header */}
-      <div className="px-5 pt-10 pb-6">
-        <h1 className="text-2xl font-bold" style={{ color: 'var(--color-text)' }}>
-          Upcoming
-        </h1>
-        <p className="text-sm mt-1" style={{ color: 'var(--color-muted)' }}>
-          Tasks with due dates
-        </p>
-      </div>
-
-      {/* Empty state */}
-      {!hasDueTasks && (
-        <div className="px-5 py-12 flex flex-col items-center gap-3">
-          <p className="text-4xl">📅</p>
-          <p className="text-base font-medium text-center" style={{ color: 'var(--color-text)' }}>
-            No upcoming tasks
-          </p>
-          <p className="text-sm text-center" style={{ color: 'var(--color-muted)' }}>
-            Add a due date when creating a task.
+    <>
+      <motion.div
+        initial={shouldAnimate ? { opacity: 0, y: 10 } : {}}
+        animate={{ opacity: 1, y: 0 }}
+        transition={t()}
+        className="flex flex-col pb-[calc(112px+env(safe-area-inset-bottom))]"
+      >
+        {/* Header */}
+        <div className="px-5 pt-10 pb-6">
+          <h1 className="text-2xl font-bold" style={{ color: 'var(--color-text)' }}>
+            Upcoming
+          </h1>
+          <p className="text-sm mt-1" style={{ color: 'var(--color-muted)' }}>
+            Tap a task to reschedule
           </p>
         </div>
-      )}
 
-      {/* Content */}
-      {hasDueTasks && (
-        <div className="px-5 flex flex-col gap-5">
-          {/* Today */}
-          {grouped.today.length > 0 && (
-            <div>
-              <SectionHeader title="Today" color="#7B72FF" count={grouped.today.length} />
-              <div className="flex flex-col gap-2">
-                {grouped.today.map(t => <TaskRow key={t.id} task={t} />)}
-              </div>
-            </div>
-          )}
+        {/* Empty state */}
+        {!hasDueTasks && (
+          <div className="px-5 py-12 flex flex-col items-center gap-3">
+            <p className="text-4xl">📅</p>
+            <p className="text-base font-medium text-center" style={{ color: 'var(--color-text)' }}>
+              No upcoming tasks
+            </p>
+            <p className="text-sm text-center" style={{ color: 'var(--color-muted)' }}>
+              Add a due date when creating a task.
+            </p>
+          </div>
+        )}
 
-          {/* Tomorrow */}
-          {grouped.tomorrow.length > 0 && (
-            <div>
-              <SectionHeader title="Tomorrow" color="#4ECDC4" count={grouped.tomorrow.length} />
-              <div className="flex flex-col gap-2">
-                {grouped.tomorrow.map(t => <TaskRow key={t.id} task={t} />)}
+        {/* Content */}
+        {hasDueTasks && (
+          <div className="px-5 flex flex-col gap-5">
+            {grouped.today.length > 0 && (
+              <div>
+                <SectionHeader title="Today" color="#7B72FF" count={grouped.today.length} />
+                <div className="flex flex-col gap-2">
+                  {grouped.today.map(task => <TaskRow key={task.id} task={task} onTap={setSelectedTask} />)}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* This Week */}
-          {grouped.thisWeek.length > 0 && (
-            <div>
-              <SectionHeader title="This Week" color="#E8E8F0" count={grouped.thisWeek.length} />
-              <div className="flex flex-col gap-2">
-                {grouped.thisWeek.map(t => <TaskRow key={t.id} task={t} />)}
+            {grouped.tomorrow.length > 0 && (
+              <div>
+                <SectionHeader title="Tomorrow" color="#4ECDC4" count={grouped.tomorrow.length} />
+                <div className="flex flex-col gap-2">
+                  {grouped.tomorrow.map(task => <TaskRow key={task.id} task={task} onTap={setSelectedTask} />)}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Later */}
-          {grouped.later.length > 0 && (
-            <div>
-              <SectionHeader title="Later" color="#8B8BA7" count={grouped.later.length} />
-              <div className="flex flex-col gap-2">
-                {grouped.later.map(t => <TaskRow key={t.id} task={t} />)}
+            {grouped.thisWeek.length > 0 && (
+              <div>
+                <SectionHeader title="This Week" color="#E8E8F0" count={grouped.thisWeek.length} />
+                <div className="flex flex-col gap-2">
+                  {grouped.thisWeek.map(task => <TaskRow key={task.id} task={task} onTap={setSelectedTask} />)}
+                </div>
               </div>
-            </div>
-          )}
-        </div>
-      )}
-    </motion.div>
+            )}
+
+            {grouped.later.length > 0 && (
+              <div>
+                <SectionHeader title="Later" color="#8B8BA7" count={grouped.later.length} />
+                <div className="flex flex-col gap-2">
+                  {grouped.later.map(task => <TaskRow key={task.id} task={task} onTap={setSelectedTask} />)}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </motion.div>
+
+      {/* Reschedule bottom sheet */}
+      <AnimatePresence>
+        {selectedTask && (
+          <RescheduleSheet
+            task={selectedTask}
+            onClose={() => setSelectedTask(null)}
+            onNavigate={() => { setSelectedTask(null); navigate('/tasks') }}
+          />
+        )}
+      </AnimatePresence>
+    </>
   )
 }
