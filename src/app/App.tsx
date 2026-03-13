@@ -25,7 +25,6 @@ const OnboardingFlow   = lazy(() => import('@/features/onboarding/OnboardingFlow
 const HomeScreen       = lazy(() => import('@/features/home/HomeScreen'))
 const FocusScreen      = lazy(() => import('@/features/focus/FocusScreen'))
 const TasksScreen      = lazy(() => import('@/features/tasks/TasksScreen'))
-const AudioScreen      = lazy(() => import('@/features/audio/AudioScreen'))
 const ProgressScreen   = lazy(() => import('@/features/progress/ProgressScreen'))
 const DueDateScreen    = lazy(() => import('@/features/calendar/DueDateScreen'))
 const SettingsScreen   = lazy(() => import('@/features/settings/SettingsScreen'))
@@ -271,11 +270,6 @@ export default function App() {
                 <Route path="/tasks" element={
                   <ErrorBoundary fallback={<RouteError label="Tasks" />}>
                     <TasksScreen />
-                  </ErrorBoundary>
-                } />
-                <Route path="/audio" element={
-                  <ErrorBoundary fallback={<RouteError label="Audio" />}>
-                    <AudioScreen />
                   </ErrorBoundary>
                 } />
                 <Route path="/calendar" element={
