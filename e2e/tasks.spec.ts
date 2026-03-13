@@ -11,8 +11,8 @@ test.describe('Task creation', () => {
     await page.goto('/tasks')
 
     await expect(page.getByRole('heading', { name: /All Tasks/ })).toBeVisible()
-    await expect(page.getByText(/Now pool is empty/)).toBeVisible()
-    await expect(page.getByText(/Next pool is empty/)).toBeVisible()
+    await expect(page.getByText(/Nothing here yet/)).toBeVisible()
+    await expect(page.getByText(/upcoming tasks will live here/)).toBeVisible()
   })
 
   test('FAB opens add task modal', async ({ authedPage: page }) => {

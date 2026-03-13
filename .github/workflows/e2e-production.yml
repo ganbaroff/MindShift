@@ -1,0 +1,55 @@
+name: E2E — Production
+
+# Triggers when Vercel marks a deployment as "success" on GitHub.
+# Vercel registers GitHub Deployments automatically (githubDeployment: 1),
+# so this fires ~1–2 min after every push to main that passes the Vercel build.
+on:
+  deployment_status:
+
+jobs:
+  e2e-production:
+    # Only run when Vercel production deployment succeeds
+    if: >
+      github.event.deployment_status.state == 'success' &&
+      (github.event.deployment.environment == 'Production' ||
+       github.event.deployment.environment == 'production')
+
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright (Chromium only)
+        run: npx playwright install chromium --with-deps
+
+      - name: Run E2E against production
+        env:
+          # Use the stable branch alias — always points to latest production build.
+          # Playwright config skips the dev-server webServer when this is set.
+          PLAYWRIGHT_BASE_URL: https://mind-shift-git-main-yusifg27-3093s-projects.vercel.app
+        run: npx playwright test --project=chromium
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report-production
+          path: playwright-report/
+          retention-days: 14
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## E2E Production Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Tested against: https://mind-shift-git-main-yusifg27-3093s-projects.vercel.app" >> $GITHUB_STEP_SUMMARY
+          echo "Triggered by deployment: ${{ github.event.deployment_status.target_url }}" >> $GITHUB_STEP_SUMMARY

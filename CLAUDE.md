@@ -2,12 +2,28 @@
 
 ## Project
 **MindShift** — ADHD-aware productivity PWA. Mobile-first, React + TypeScript + Supabase.
-Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ `4fe6a19`. Status: **production-ready**.
+Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ `bd1d8b1`. Status: **production-ready**.
+
+## Stable Production URL
+**`https://mind-shift-git-main-yusifg27-3093s-projects.vercel.app`**
+- This URL never changes — always the latest `main` branch production build
+- Auto-updates on every `git push origin main` (Vercel GitHub integration)
+- Works from any device / network without auth
+- Custom domain: add via Vercel Dashboard → Project Settings → Domains
+
+## E2E Testing
+- Framework: `@playwright/test` (already in package.json)
+- Local: `npx playwright test` (starts dev server automatically)
+- Production: `PLAYWRIGHT_BASE_URL=https://mind-shift-git-main-yusifg27-3093s-projects.vercel.app npx playwright test`
+- CI auto-run: `.github/workflows/e2e-production.yml` fires after every successful Vercel deploy via `deployment_status` event
+- Browsers: Chromium + iPhone 14 (mobile)
+- All Supabase API calls are mocked via `page.route()` — tests run offline
 
 ## Sprint History
 | Sprint | Commit | What landed |
 |--------|--------|-------------|
-| Sprint 9 | pending | Design & accessibility pass: WCAG AA compliance (focus rings, motion system universalised), Calendar tab → DueDateScreen, timer style picker in Settings, energy picker on first load, undo task completion (4s), offline indicator in AppShell, BurnoutAlert CTA → /focus?quick=1, snooze/park/thought toasts, BentoGrid min-2 feedback, ArcTimer tap hint, Mochi message randomization, text overflow protection, BentoGrid error fallback, pushWelcomeBack() wired, ADR-0007 |
+| Copy audit | `bd1d8b1` | UX copy audit 4 waves: canonical ENERGY_LABELS/EMOJI in constants.ts, tone/emoji (AuthScreen/FocusScreen/PostSessionFlow/OnboardingFlow/SettingsScreen), jargon removal (micro-win/micro-focus/Generate/Feels native/CoachMark), polish (stats counters, Mochi milestone_60, CookieBanner, HomeScreen skip). e2e tests synced to new copy. GitHub Actions e2e-production.yml (deployment_status trigger). Stable URL documented. |
+| Sprint 9 | `e54f751` | Design & accessibility pass: WCAG AA compliance (focus rings, motion system universalised), Calendar tab → DueDateScreen, timer style picker in Settings, energy picker on first load, undo task completion (4s), offline indicator in AppShell, BurnoutAlert CTA → /focus?quick=1, snooze/park/thought toasts, BentoGrid min-2 feedback, ArcTimer tap hint, Mochi message randomization, text overflow protection, BentoGrid error fallback, pushWelcomeBack() wired, ADR-0007 |
 | Sprint 8 | `4fe6a19` | Architecture optimization: bundle splitting (lazy RecoveryProtocol/ContextRestore/BentoGrid), FocusScreen decomposition (1180→~350 lines), React.memo (4 components), CSS design tokens (:root vars + [data-mode="calm"]), per-route ErrorBoundary, Sentry deferred init, 5 new ADRs |
 | Sprint 7 | `44e175c` | 3-axis neuroinclusive features: Burnout Radar, Health Profile, Timer modes, Seasonal Modes, Traffic Light tasks, Mochi body-double, Lifetime Stats widget, Flexible Pause |
 | Sprint 6 | — | VR XP, Analytics, Notifications, Energy Level picker, Subtask grouping |

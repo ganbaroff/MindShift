@@ -111,7 +111,7 @@ test.describe('GDPR controls', () => {
     await expect(page.getByText(/type your email to confirm/i)).toBeVisible()
 
     // Delete button is disabled until email matches
-    const deleteBtn = page.getByRole('button', { name: /permanently delete/i })
+    const deleteBtn = page.getByRole('button', { name: /yes, delete/i })
     await expect(deleteBtn).toBeDisabled()
   })
 
@@ -135,7 +135,7 @@ test.describe('GDPR controls', () => {
     await emailInput.fill(TEST_USER.email)
 
     // Delete button should be enabled
-    const deleteBtn = page.getByRole('button', { name: /permanently delete/i })
+    const deleteBtn = page.getByRole('button', { name: /yes, delete/i })
     await expect(deleteBtn).toBeEnabled()
   })
 })

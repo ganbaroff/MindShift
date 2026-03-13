@@ -42,8 +42,8 @@ test.describe('Auth screen', () => {
   })
 
   test('renders sign-in form with email input and consent checkbox', async ({ page }) => {
-    // Heading
-    await expect(page.getByText('Sign in with email')).toBeVisible()
+    // Heading (copy: Welcome. Let's get started.)
+    await expect(page.getByText("Welcome. Let's get started.")).toBeVisible()
 
     // Email field
     const emailInput = page.getByPlaceholder('your@email.com')
@@ -80,31 +80,31 @@ test.describe('Auth screen', () => {
     await expect(submitBtn).toBeEnabled()
   })
 
-  test('shows "check your inbox" after submitting', async ({ page }) => {
+  test('shows "magic link on its way" after submitting', async ({ page }) => {
     const emailInput = page.getByPlaceholder('your@email.com')
     await emailInput.fill('user@example.com')
     await page.getByText(/16 or older/).click()
 
     await page.getByRole('button', { name: /send magic link/i }).click()
 
-    // Check inbox step
-    await expect(page.getByText('Check your inbox')).toBeVisible()
+    // Sent state — copy: "Magic link on its way ✨"
+    await expect(page.getByText('Magic link on its way ✨')).toBeVisible()
     await expect(page.getByText('user@example.com')).toBeVisible()
-    await expect(page.getByText(/use a different email/i)).toBeVisible()
+    await expect(page.getByText(/wrong email/i)).toBeVisible()
   })
 
-  test('"use a different email" returns to email input', async ({ page }) => {
+  test('"wrong email? go back" returns to email input', async ({ page }) => {
     // Submit first
     await page.getByPlaceholder('your@email.com').fill('user@example.com')
     await page.getByText(/16 or older/).click()
     await page.getByRole('button', { name: /send magic link/i }).click()
 
-    // Go back
-    await page.getByText(/use a different email/i).click()
+    // Go back — copy: "Wrong email? Go back"
+    await page.getByText(/wrong email/i).click()
 
     // Should be back on email step
     await expect(page.getByPlaceholder('your@email.com')).toBeVisible()
-    await expect(page.getByText('Sign in with email')).toBeVisible()
+    await expect(page.getByText("Welcome. Let's get started.")).toBeVisible()
   })
 
   test('MindShift branding is visible', async ({ page }) => {
@@ -133,6 +133,6 @@ test.describe('Auth redirect', () => {
     await page.goto('/')
     // AuthGuard should redirect to /auth
     await page.waitForURL('**/auth')
-    await expect(page.getByText('Sign in with email')).toBeVisible()
+    await expect(page.getByText("Welcome. Let's get started.")).toBeVisible()
   })
 })
