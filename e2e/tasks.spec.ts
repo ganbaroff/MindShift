@@ -158,6 +158,26 @@ test.describe('Task from HomeScreen', () => {
     const fab = page.getByRole('button', { name: /add task/i })
     await expect(fab).toBeVisible()
   })
+
+  test('FirstTaskPrompt reappears after NOW pool empties', async ({ authedPage: page }) => {
+    // Start with one task in NOW pool
+    await seedStore(page, {
+      nowPool: [
+        { id: 'e2e-reset-1', title: 'Reset test task', pool: 'now', difficulty: 1, estimatedMinutes: 5, status: 'active', snoozeCount: 0, completedAt: null, dueDate: null, subtasks: [], position: 0, createdAt: new Date().toISOString(), userId: 'e2e-test-user-00000000-0000-0000-0000-000000000001' },
+      ],
+    })
+    await page.goto('/')
+
+    // FirstTaskPrompt should NOT be visible (pool has a task)
+    await expect(page.getByText(/What's one thing on your mind right now/)).not.toBeVisible()
+
+    // Remove the task (empty the pool)
+    await seedStore(page, { nowPool: [] })
+    await page.goto('/')
+
+    // FirstTaskPrompt should now reappear
+    await expect(page.getByText(/What's one thing on your mind right now/)).toBeVisible()
+  })
 })
 
 test.describe('Pool overflow', () => {

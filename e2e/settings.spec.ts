@@ -40,6 +40,21 @@ test.describe('Settings screen', () => {
   })
 
   // Focus Style (cognitiveMode) section removed — App Mode covers the same spectrum.
+
+  test('seasonal mode section is visible', async ({ authedPage: page }) => {
+    await expect(page.getByText('Your Current Phase')).toBeVisible()
+    await expect(page.getByText(/Launch/)).toBeVisible()
+    await expect(page.getByText(/Maintain/)).toBeVisible()
+    await expect(page.getByText(/Recover/)).toBeVisible()
+  })
+
+  test('switching seasonal mode shows NOW pool limit toast', async ({ authedPage: page }) => {
+    // Click Recover mode — nowPoolMaxOverride = 2
+    await page.getByRole('button', { name: /Recover/i }).click()
+
+    // Toast should mention the pool limit
+    await expect(page.getByText(/Recover mode — NOW pool: 2 tasks/i)).toBeVisible()
+  })
 })
 
 test.describe('Accessibility toggle', () => {

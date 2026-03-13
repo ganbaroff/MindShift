@@ -2,7 +2,7 @@
 
 ## Project
 **MindShift** — ADHD-aware productivity PWA. Mobile-first, React + TypeScript + Supabase.
-Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ `e2f2220`. Status: **production-ready**.
+Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ `4f7f9aa`. Status: **production-ready**.
 
 ## Stable Production URL
 **`https://mind-shift-git-main-yusifg27-3093s-projects.vercel.app`**
@@ -22,6 +22,7 @@ Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ `e2f2220`. Status: **p
 ## Sprint History
 | Sprint | Commit | What landed |
 |--------|--------|-------------|
+| Sprint B "Finish What You Started" | `4f7f9aa` | 10 UX fixes from ux-dead-ends-audit: cognitiveMode removed from UI (C-3), psychotype wired to Mochi messages (C-4), appMode change resets BentoGrid (C-4), SEASONAL_MODE_CONFIG + getNowPoolMax compose both mode configs (H-4), DueDateScreen task rows → bottom-sheet reschedule (M-1), FirstTaskPrompt resets when NOW pool empties (M-8), carry-over badge → actionable button with popover (M-9), taskType badge (idea/reminder emoji) on TaskCard (M-12), DIFFICULTY_MAP single source of truth replacing difficultyLevel (A-2), /audio orphaned route removed (A-4). e2e tests: seasonalMode toast + FirstTaskPrompt reset. |
 | Sprint A "Nothing Should Lie" | `e2f2220` | 28-issue UX dead-end audit → 6 fixes: "Done recently" section for completed tasks (7-day history + 30-day pruning), APP_MODE_CONFIG drives pool visibility/limits (minimal/habit/system), ProBanner removed (no Stripe yet), energy_before now written + ProgressScreen energy trends, Health & Rhythms fields removed (sleep/chrono/medication — unused), BurnoutAlert CTA fix ("Take a breather" for burnout tier), rest-mode banner, QuickSetupCard toast, BurnoutNudge cooldown copy. e2e tests synced. |
 | Copy audit | `bd1d8b1` | UX copy audit 4 waves: canonical ENERGY_LABELS/EMOJI in constants.ts, tone/emoji (AuthScreen/FocusScreen/PostSessionFlow/OnboardingFlow/SettingsScreen), jargon removal (micro-win/micro-focus/Generate/Feels native/CoachMark), polish (stats counters, Mochi milestone_60, CookieBanner, HomeScreen skip). e2e tests synced to new copy. GitHub Actions e2e-production.yml (deployment_status trigger). Stable URL documented. |
 | Sprint 9 | `e54f751` | Design & accessibility pass: WCAG AA compliance (focus rings, motion system universalised), Calendar tab → DueDateScreen, timer style picker in Settings, energy picker on first load, undo task completion (4s), offline indicator in AppShell, BurnoutAlert CTA → /focus?quick=1, snooze/park/thought toasts, BentoGrid min-2 feedback, ArcTimer tap hint, Mochi message randomization, text overflow protection, BentoGrid error fallback, pushWelcomeBack() wired, ADR-0007 |
@@ -53,6 +54,9 @@ Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ `e2f2220`. Status: **p
 | **LifetimeStatsWidget** | Bento widget: completedTotal + totalFocusMinutes + "You keep showing up 💫" |
 | **flexiblePauseUntil** | ISO date: planned break gate in App.tsx. Clears silently on date pass. |
 | **Traffic Light** | Task difficulty: easy(teal)/medium(gold)/hard(purple) — never red |
+| **DIFFICULTY_MAP** | `types/index.ts` — `1→Easy/teal, 2→Medium/gold, 3→Hard/purple`. Single source of truth (Sprint B A-2). |
+| **cognitiveMode** | DEPRECATED (Sprint B). Store field kept for localStorage compat. Not set from UI. |
+| **SEASONAL_MODE_CONFIG** | `constants.ts` — per-seasonalMode `nowPoolMaxOverride`. Composed with `APP_MODE_CONFIG` via `getNowPoolMax()`. |
 
 ## Pools & Core Concepts
 | Term | Meaning |
@@ -148,6 +152,17 @@ Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ `e2f2220`. Status: **p
 - **Undo completion:** TaskCard holds completion for 4s with toast. Confetti fires immediately.
 - **Timer style UI:** Now settable in SettingsScreen (was only in store with no UI).
 
+## Architecture (Sprint B additions)
+- **SEASONAL_MODE_CONFIG:** `constants.ts` — each seasonalMode (launch/maintain/recover/sandbox) has `nowPoolMaxOverride` (null = defer to appMode).
+- **getNowPoolMax(appMode, seasonalMode):** helper composing both configs. Used in NowPoolWidget + AddTaskModal + SettingsScreen toast.
+- **cognitiveMode:** Deprecated in UI (Sprint B). Field kept in store for localStorage compat. Not set from any UI anymore.
+- **DIFFICULTY_MAP:** `types/index.ts` — `1|2|3 → { label, color }`. Single source of truth. Replaces hardcoded ternaries and deprecated `difficultyLevel` string field.
+- **DueDateScreen reschedule:** Task rows are `<button>` — tap opens spring-animated bottom sheet with date input, "Go to task →", and "Remove due date".
+- **Carry-over badge:** Now a `<button>` with AnimatePresence popover (Park it / Move to Someday / Still on it). Outside-click closes via `useRef` + `useEffect`.
+- **Mochi psychotype overlay:** `MochiSessionCompanion` now reads `psychotype` from store and picks per-psychotype messages (achiever/explorer/connector/planner × 4 milestones).
+- **FirstTaskPrompt reset:** `useEffect` in HomeScreen resets `firstTaskDismissed` whenever `activeNowTasks.length === 0`.
+- **/audio route removed:** `AudioScreen` lazy import + `/audio` route deleted from App.tsx (dead route, nothing linked to it).
+
 ## Architecture (Sprint A additions)
 - **APP_MODE_CONFIG:** `constants.ts` — each appMode (minimal/habit/system) now drives `nowPoolMax`, `showNextOnHome`, `showSomedayOnHome`, `homeSubtitle`. Single source of truth.
 - **Done recently:** TasksScreen collapsible section — `[...nowPool, ...nextPool, ...somedayPool].filter(completed, <7d)`, sorted by `completedAt` desc.
@@ -161,7 +176,8 @@ Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ `e2f2220`. Status: **p
 - Cowork session: `tsc --noEmit` ✅ only (no rollup Linux binary in Cowork sandbox)
 - Always run `tsc --noEmit` before any commit from Cowork
 - Sprint A: `tsc --noEmit` ✅, deployed `e2f2220`
-- Branch: `main` @ `e2f2220`
+- Sprint B: `tsc --noEmit` ✅, committed `4f7f9aa`
+- Branch: `main` @ `4f7f9aa`
 
 ## Production Status (as of Sprint 9)
 | Item | Code | Deployed | Notes |
@@ -181,10 +197,9 @@ Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ `e2f2220`. Status: **p
 - **Server-side reminders** — browser setTimeout only (lost on tab close). Need SW push or Supabase cron.
 - **Stripe integration** — subscriptionTier exists in store, ProBanner UI removed (Sprint A). Zero payment logic. Restore ProBanner when Stripe ready.
 - **classify-voice-input** — code audit shows it IS wired in AddTaskModal. Status: working in code, unconfirmed in production.
-- **Date picker on tasks** — dueDate field exists in Task type but no UI to set it. DueDateScreen works with existing data only.
+- **Date picker on tasks** — dueDate field exists in Task type but AddTaskModal has no UI to set it. DueDateScreen reschedules existing dates only.
 - **Social layer** — S-2/S-3/S-4 require Supabase Realtime design (separate sprint)
-- **Health signals (Sprint B)** — sleepQuality, chronotype, medicationTime removed from UI (Sprint A). Store fields remain. Re-add when wired to recommendations.
-- **DueDateScreen interactivity** — read-only; task rows not tappable; no edit/reschedule UI.
+- **Health signals** — sleepQuality, chronotype, medicationTime removed from UI (Sprint A). Store fields remain. Re-add when wired to recommendations.
 
 ## Remaining P2 Backlog (not yet implemented)
 - O-6: Expanded ADHD signal (time blindness, emotional reactivity scenarios)
