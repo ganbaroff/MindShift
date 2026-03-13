@@ -9,8 +9,8 @@
  * - Timer in FocusScreen (ArcTimer) is the correct place for time visualization (Time Timer concept)
  */
 
-import { useState, memo, useRef } from 'react'
-import { motion } from 'motion/react'
+import { useState, memo, useRef, useEffect } from 'react'
+import { motion, AnimatePresence } from 'motion/react'
 import { toast } from 'sonner'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { usePalette } from '@/shared/hooks/usePalette'
@@ -94,15 +94,29 @@ interface Props {
 }
 
 function TaskCardInner({ task, index = 0, onComplete, onSnooze }: Props) {
-  const { completeTask, snoozeTask, addXP, energyLevel, unlockAchievement, hasAchievement, completedTotal } = useStore()
+  const { completeTask, snoozeTask, moveTask, addXP, energyLevel, unlockAchievement, hasAchievement, completedTotal } = useStore()
   const { shouldAnimate, t } = useMotion()
   const palette = usePalette()
 
   const [confettiActive, setConfettiActive] = useState(false)
   const [isDone, setIsDone] = useState(false)
   const [isPendingComplete, setIsPendingComplete] = useState(false)
+  const [carryOverOpen, setCarryOverOpen] = useState(false)
   const completeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const toastIdRef = useRef<string | number | null>(null)
+  const carryOverRef = useRef<HTMLDivElement>(null)
+
+  // Close carry-over menu on outside click
+  useEffect(() => {
+    if (!carryOverOpen) return
+    const handler = (e: MouseEvent) => {
+      if (carryOverRef.current && !carryOverRef.current.contains(e.target as Node)) {
+        setCarryOverOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [carryOverOpen])
 
   // Research #8: palette-aware accent — desaturated in calm mode
   const difficultyAccent = getDifficultyAccent(task.difficulty, palette)
@@ -254,25 +268,74 @@ function TaskCardInner({ task, index = 0, onComplete, onSnooze }: Props) {
             </span>
           )}
 
-          {/* Carry-over badge — shown only when no due date badge (never both at once) */}
+          {/* Carry-over badge — tappable, opens quick action menu */}
           {!dueDateBadge && ageBadge && (
-            <span
-              className="ml-auto text-xs px-2 py-0.5 rounded-lg font-medium"
-              style={{
-                background: `${palette.gold}20`,
-                color: palette.gold,
-              }}
-            >
-              carry-over
-            </span>
+            <div ref={carryOverRef} className="ml-auto relative">
+              <button
+                onClick={(e) => { e.stopPropagation(); setCarryOverOpen(v => !v) }}
+                className="text-xs px-2 py-0.5 rounded-lg font-medium"
+                style={{
+                  background: `${palette.gold}20`,
+                  color: palette.gold,
+                }}
+                aria-label="Carry-over options"
+              >
+                carry-over ›
+              </button>
+              <AnimatePresence>
+                {carryOverOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.92, y: -4 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.92, y: -4 }}
+                    transition={{ duration: 0.12 }}
+                    className="absolute right-0 top-full mt-1 z-20 rounded-xl overflow-hidden"
+                    style={{
+                      background: '#252840',
+                      border: '1px solid rgba(255,255,255,0.10)',
+                      boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+                      minWidth: 160,
+                    }}
+                  >
+                    <button
+                      onClick={() => { snoozeTask(task.id); setCarryOverOpen(false); toast('Parked for later 🌿') }}
+                      className="w-full text-left px-4 py-2.5 text-xs transition-colors duration-100 hover:bg-white/5"
+                      style={{ color: '#E8E8F0' }}
+                    >
+                      Park it →
+                    </button>
+                    <button
+                      onClick={() => { moveTask(task.id, 'someday'); setCarryOverOpen(false); toast('Moved to Someday 🗂️') }}
+                      className="w-full text-left px-4 py-2.5 text-xs transition-colors duration-100 hover:bg-white/5"
+                      style={{ color: '#E8E8F0' }}
+                    >
+                      Move to Someday
+                    </button>
+                    <button
+                      onClick={() => setCarryOverOpen(false)}
+                      className="w-full text-left px-4 py-2.5 text-xs transition-colors duration-100 hover:bg-white/5"
+                      style={{ color: '#8B8BA7' }}
+                    >
+                      Still on it ✓
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           )}
         </div>
 
-        {/* Task title */}
+        {/* Task title + type badge */}
         <p
           className="text-base font-semibold leading-snug mb-4 line-clamp-2"
           style={{ color: '#E8E8F0' }}
         >
+          {task.taskType === 'idea' && (
+            <span className="mr-1.5" aria-label="Idea" title="Idea">💡</span>
+          )}
+          {task.taskType === 'reminder' && (
+            <span className="mr-1.5" aria-label="Reminder" title="Reminder">🔔</span>
+          )}
           {task.title}
         </p>
 
