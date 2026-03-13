@@ -49,7 +49,7 @@ interface QuickSetupCardProps { onDone: () => void }
 
 function QuickSetupCard({ onDone }: QuickSetupCardProps) {
   const {
-    setAppMode, setCognitiveMode, setOnboardingCompleted,
+    setAppMode, setOnboardingCompleted,
     userId, resetGridToDefaults,
   } = useStore()
   const [selected, setSelected] = useState<AppMode | null>(null)
@@ -59,7 +59,7 @@ function QuickSetupCard({ onDone }: QuickSetupCardProps) {
     setSelected(mode)
     setSaving(true)
     setAppMode(mode)
-    setCognitiveMode(mode === 'system' ? 'overview' : 'focused')
+    // cognitiveMode DEPRECATED: replaced by appMode (Sprint B). Not set from UI anymore.
     setOnboardingCompleted()
     resetGridToDefaults()   // Apply psychotype-driven widget layout immediately
     const modeLabel = MODE_OPTIONS.find(o => o.mode === mode)?.label ?? mode
@@ -71,7 +71,6 @@ function QuickSetupCard({ onDone }: QuickSetupCardProps) {
         await supabase.from('users').upsert({
           id: userId,
           app_mode: mode,
-          cognitive_mode: mode === 'system' ? 'overview' : 'focused',
           onboarding_completed: true,
         } as never)
       } catch (err) {

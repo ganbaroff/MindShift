@@ -22,6 +22,7 @@ function derivePsychotype(mode: AppMode, cognitive: CognitiveMode): Psychotype {
 interface UserSlice {
   userId: string | null
   email: string | null
+  // DEPRECATED: cognitiveMode replaced by appMode (Sprint B). Kept for localStorage compat.
   cognitiveMode: CognitiveMode
   appMode: AppMode
   energyLevel: EnergyLevel
