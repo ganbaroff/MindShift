@@ -424,6 +424,18 @@ export const useStore = create<AppStore>()(
       }),
       {
         name: 'mindshift-store',
+        // Prune completed tasks older than 30 days on every store rehydration.
+        // Prevents localStorage from growing unboundedly while keeping recent
+        // completed tasks visible in the "Done recently" section.
+        onRehydrateStorage: () => (state) => {
+          if (!state) return
+          const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+          const prune = (tasks: Task[]) =>
+            tasks.filter(t => !(t.status === 'completed' && t.completedAt && t.completedAt < cutoff))
+          state.nowPool = prune(state.nowPool)
+          state.nextPool = prune(state.nextPool)
+          state.somedayPool = prune(state.somedayPool)
+        },
         partialize: (s) => ({
           userId: s.userId,
           email: s.email,

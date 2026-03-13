@@ -7,37 +7,6 @@ import { logError } from '@/shared/lib/logger'
 import Avatar, { STAGE_NAMES } from '@/features/progress/Avatar'
 import { ENERGY_LABELS, ENERGY_EMOJI } from '@/shared/lib/constants'
 
-// ── Chip selector (Health & Rhythms) ──────────────────────────────────────────
-
-function ChipGroup<T extends string | number>({
-  value, options, onChange, label,
-}: {
-  value: T | null
-  options: { value: T; label: string }[]
-  onChange: (v: T) => void
-  label: string
-}) {
-  return (
-    <div role="group" aria-label={label} className="flex flex-wrap gap-2 mt-2">
-      {options.map(opt => (
-        <button
-          key={String(opt.value)}
-          onClick={() => onChange(opt.value)}
-          aria-pressed={value === opt.value}
-          className="px-3 py-1.5 rounded-xl text-xs font-medium transition-all duration-150 min-h-[36px]"
-          style={{
-            background: value === opt.value ? 'var(--color-primary-alpha)' : 'var(--color-elevated)',
-            border: `1.5px solid ${value === opt.value ? 'var(--color-primary)' : 'var(--color-border-subtle)'}`,
-            color: value === opt.value ? 'var(--color-primary)' : 'var(--color-muted)',
-          }}
-        >
-          {opt.label}
-        </button>
-      ))}
-    </div>
-  )
-}
-
 // ── Toggle switch ─────────────────────────────────────────────────────────────
 
 function Toggle({ checked, onChange, label }: {
@@ -74,21 +43,15 @@ function Toggle({ checked, onChange, label }: {
 export default function SettingsScreen() {
   const navigate = useNavigate()
   const {
-    email, cognitiveMode, appMode, avatarId, energyLevel,
-    setAvatarId, setCognitiveMode, setAppMode, setEnergyLevel, signOut,
+    email, appMode, avatarId, energyLevel,
+    setAvatarId, setAppMode, setEnergyLevel, signOut,
     reducedStimulation, setReducedStimulation,
-    subscriptionTier, trialEndsAt, setSubscription, isProActive,
-    // Health & Rhythms
+    // Timer + seasonal
     timerStyle, setTimerStyle,
-    sleepQuality, setSleepQuality,
-    medicationEnabled, setMedicationEnabled,
-    medicationTime, setMedicationTime,
-    chronotype, setChronotype,
     seasonalMode, setSeasonalMode,
     flexiblePauseUntil, setFlexiblePauseUntil,
   } = useStore()
 
-  const [showTrialActivation, setShowTrialActivation] = useState(false)
   const [exporting, setExporting] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleteEmail, setDeleteEmail] = useState('')
@@ -180,20 +143,6 @@ export default function SettingsScreen() {
     }
   }, [deleteEmail, email, signOut, navigate])
 
-  const handleStartTrial = () => {
-    // 30-day free trial — no card, no charges
-    const trialEnd = new Date()
-    trialEnd.setDate(trialEnd.getDate() + 30)
-    setSubscription('pro_trial', trialEnd.toISOString())
-    setShowTrialActivation(false)
-    toast.success('🎉 Pro trial activated — 30 days free!')
-  }
-
-  const proActive = isProActive()
-  const trialDaysLeft = trialEndsAt
-    ? Math.max(0, Math.ceil((new Date(trialEndsAt).getTime() - Date.now()) / 86_400_000))
-    : 0
-
   return (
     <div className="flex flex-col pb-[calc(112px+env(safe-area-inset-bottom))]">
       {/* Header */}
@@ -204,78 +153,16 @@ export default function SettingsScreen() {
         <p className="text-sm mt-1" style={{ color: 'var(--color-muted)' }}>{email}</p>
       </div>
 
-      {/* ── Subscription ─────────────────────────────────────────────────── */}
-      <section className="mx-5 p-4 rounded-2xl mb-4" style={{
-        background: proActive
-          ? 'linear-gradient(135deg, var(--color-primary-alpha) 0%, var(--color-teal-alpha) 100%)'
-          : 'var(--color-card)',
-        border: `1.5px solid ${proActive ? 'var(--color-primary)' : 'var(--color-border-subtle)'}`,
-      }}>
+      {/* ── Plan ──────────────────────────────────────────────────────────── */}
+      {/* TODO: Restore full ProBanner when Stripe integration is ready (see CLAUDE.md Known Gaps) */}
+      <section className="mx-5 p-4 rounded-2xl mb-4" style={{ background: 'var(--color-card)', border: '1px solid var(--color-border-subtle)' }}>
         <p className="text-xs font-medium tracking-widest uppercase mb-3" style={{ color: 'var(--color-muted)' }}>
           Plan
         </p>
-        {proActive ? (
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-2">
-              <span className="text-lg">✨</span>
-              <span className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>
-                {subscriptionTier === 'pro_trial' ? 'Pro Trial' : 'Pro'}
-              </span>
-            </div>
-            {subscriptionTier === 'pro_trial' && (
-              <p className="text-xs" style={{ color: 'var(--color-muted)' }}>
-                {trialDaysLeft} day{trialDaysLeft !== 1 ? 's' : ''} remaining — enjoy all features 🎉
-              </p>
-            )}
-            <div className="flex flex-col gap-1 mt-1">
-              <span className="text-xs" style={{ color: 'var(--color-secondary)' }}>✓ Unlimited AI task decomposition</span>
-              <span className="text-xs" style={{ color: 'var(--color-secondary)' }}>✓ Full weekly insights</span>
-              <span className="text-xs" style={{ color: 'var(--color-secondary)' }}>✓ All audio presets</span>
-              <span className="text-xs" style={{ color: 'var(--color-secondary)' }}>✓ Priority recovery support</span>
-            </div>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-3">
-            <div className="flex items-center gap-2">
-              <span className="text-lg">🌱</span>
-              <span className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>Free</span>
-            </div>
-            <p className="text-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-              Upgrade to Pro for unlimited AI features, weekly insights, and more.
-            </p>
-            {!showTrialActivation ? (
-              <button
-                onClick={() => setShowTrialActivation(true)}
-                className="w-full py-3 rounded-xl text-sm font-semibold transition-all duration-200"
-                style={{ background: 'var(--color-primary)', color: '#FFFFFF' }}
-              >
-                Start 30-day free trial
-              </button>
-            ) : (
-              <div className="flex flex-col gap-2">
-                <p className="text-xs text-center" style={{ color: 'var(--color-text)' }}>
-                  No card required. No charges. Just full access for 30 days.
-                </p>
-                <div className="flex gap-2">
-                  <button
-                    onClick={handleStartTrial}
-                    className="flex-1 py-3 rounded-xl text-sm font-semibold transition-all duration-200 min-h-[44px]"
-                    style={{ background: 'var(--color-primary)', color: '#FFFFFF' }}
-                  >
-                    Activate trial
-                  </button>
-                  <button
-                    onClick={() => setShowTrialActivation(false)}
-                    className="px-4 py-3 rounded-xl text-sm transition-all duration-200 min-h-[44px]"
-                    style={{ background: 'var(--color-elevated)', color: 'var(--color-muted)' }}
-                  >
-                    Maybe later
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
+        <div className="flex items-center gap-2">
+          <span className="text-lg">🌱</span>
+          <span className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>MindShift Free</span>
+        </div>
       </section>
 
       {/* ── Avatar ────────────────────────────────────────────────────────── */}
@@ -329,31 +216,7 @@ export default function SettingsScreen() {
         </div>
       </section>
 
-      {/* ── Focus Style ───────────────────────────────────────────────────── */}
-      <section className="mx-5 p-4 rounded-2xl mb-4" style={{ background: 'var(--color-card)', border: '1px solid var(--color-border-subtle)' }}>
-        <p className="text-xs font-medium tracking-widest uppercase mb-3" style={{ color: 'var(--color-muted)' }}>
-          Focus Style
-        </p>
-        <div className="flex gap-2">
-          {([
-            { mode: 'focused',  label: '🎯 One at a time' },
-            { mode: 'overview', label: '🗺️ See everything' },
-          ] as const).map(({ mode, label }) => (
-            <button
-              key={mode}
-              onClick={() => setCognitiveMode(mode)}
-              className="flex-1 py-3 rounded-xl text-sm font-medium transition-all duration-200 min-h-[44px]"
-              style={{
-                background: cognitiveMode === mode ? 'var(--color-primary-alpha)' : 'var(--color-elevated)',
-                border: `1.5px solid ${cognitiveMode === mode ? 'var(--color-primary)' : 'var(--color-border-subtle)'}`,
-                color: cognitiveMode === mode ? 'var(--color-primary)' : 'var(--color-muted)',
-              }}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-      </section>
+      {/* Focus Style section removed — App Mode covers the same spectrum */}
 
       {/* ── Focus Timer Style ──────────────────────────────────────────────── */}
       <section className="mx-5 p-4 rounded-2xl mb-4" style={{ background: 'var(--color-card)', border: '1px solid var(--color-border-subtle)' }}>
@@ -423,100 +286,29 @@ export default function SettingsScreen() {
         </div>
       </section>
 
-      {/* ── Health & Rhythms ──────────────────────────────────────────────── */}
-      {/* Block 3e: sleep, medication, chronotype — device-only, never sent to server */}
+      {/* ── Rest Mode ─────────────────────────────────────────────────────── */}
+      {/* TODO Sprint B: add sleep, chronotype, medication health signals once wired to recommendations */}
       <section className="mx-5 p-4 rounded-2xl mb-4" style={{ background: 'var(--color-card)', border: '1px solid var(--color-border-subtle)' }}>
         <p className="text-xs font-medium tracking-widest uppercase mb-1" style={{ color: 'var(--color-muted)' }}>
-          Health &amp; Rhythms
+          Rest Mode
         </p>
-        <p className="text-xs mb-4 leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-          Helps MindShift tailor timing and difficulty. Stays on this device only.
+        <Toggle
+          checked={!!flexiblePauseUntil && new Date(flexiblePauseUntil) > new Date()}
+          onChange={(val) => {
+            if (val) {
+              const until = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+              setFlexiblePauseUntil(until)
+              toast.success('🛋️ Rest mode on — no pressure for 24 hours')
+            } else {
+              setFlexiblePauseUntil(null)
+              toast.success('Rest mode off — welcome back 🌿')
+            }
+          }}
+          label="🛋️ Pause focus pressure for 24 hours"
+        />
+        <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>
+          Turns off session reminders and soft-stop toasts. You can still focus.
         </p>
-
-        {/* Sleep quality — session only (not persisted) */}
-        <div className="mb-4">
-          <p className="text-xs font-medium" style={{ color: 'var(--color-text)' }}>😴 How did you sleep?</p>
-          <ChipGroup
-            label="Sleep quality"
-            value={sleepQuality}
-            options={[
-              { value: 1 as const, label: 'Rough' },
-              { value: 2 as const, label: 'Okay' },
-              { value: 3 as const, label: 'Well' },
-            ]}
-            onChange={(v) => {
-              setSleepQuality(v as 1 | 2 | 3)
-              toast.success('Sleep quality saved for today')
-            }}
-          />
-        </div>
-
-        {/* Medication */}
-        <div className="mb-4">
-          <Toggle
-            checked={medicationEnabled}
-            onChange={(val) => {
-              setMedicationEnabled(val)
-              toast.success(val ? '💊 Medication logged for today' : 'Medication cleared')
-            }}
-            label="💊 Taken medication today"
-          />
-          {medicationEnabled && (
-            <div className="mt-2">
-              <p className="text-xs mb-1" style={{ color: 'var(--color-muted)' }}>When do you typically take it?</p>
-              <ChipGroup
-                label="Medication timing"
-                value={medicationTime}
-                options={[
-                  { value: 'morning'   as const, label: 'Morning' },
-                  { value: 'afternoon' as const, label: 'Afternoon' },
-                  { value: 'evening'   as const, label: 'Evening' },
-                ]}
-                onChange={(v) => setMedicationTime(v as 'morning' | 'afternoon' | 'evening')}
-              />
-            </div>
-          )}
-        </div>
-
-        {/* Chronotype */}
-        <div className="mb-4">
-          <p className="text-xs font-medium" style={{ color: 'var(--color-text)' }}>🦉 When do you focus best?</p>
-          <ChipGroup
-            label="Chronotype"
-            value={chronotype}
-            options={[
-              { value: 'lark'   as const, label: '🌅 Early bird' },
-              { value: 'varies' as const, label: '🌤️ It varies' },
-              { value: 'owl'    as const, label: '🦉 Night owl' },
-            ]}
-            onChange={(v) => {
-              setChronotype(v as 'lark' | 'owl' | 'varies')
-              toast.success('Chronotype saved')
-            }}
-          />
-        </div>
-
-        {/* Flexible Pause */}
-        <div>
-          <Toggle
-            checked={!!flexiblePauseUntil && new Date(flexiblePauseUntil) > new Date()}
-            onChange={(val) => {
-              if (val) {
-                // Pause for 24 hours
-                const until = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
-                setFlexiblePauseUntil(until)
-                toast.success('🛋️ Rest mode on — no pressure for 24 hours')
-              } else {
-                setFlexiblePauseUntil(null)
-                toast.success('Rest mode off — welcome back 🌿')
-              }
-            }}
-            label="🛋️ Rest mode (pause focus pressure)"
-          />
-          <p className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>
-            Turns off session reminders and soft-stop toasts for 24 hours. You can still focus.
-          </p>
-        </div>
       </section>
 
       {/* ── Your Current Phase — Block 6c ─────────────────────────────────── */}

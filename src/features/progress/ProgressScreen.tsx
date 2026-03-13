@@ -6,6 +6,7 @@ import { ACHIEVEMENT_DEFINITIONS } from '@/types'
 import { supabase } from '@/shared/lib/supabase'
 import Avatar, { STAGE_NAMES, stageFromLevel } from './Avatar'
 import { BurnoutAlert } from '@/features/home/BurnoutAlert'
+import { ENERGY_EMOJI } from '@/shared/lib/constants'
 import type { FocusSessionRow } from '@/types'
 
 // ── XP helpers ─────────────────────────────────────────────────────────────────
@@ -51,24 +52,26 @@ export default function ProgressScreen() {
   const [consistencyData, setConsistencyData] = useState<Record<string, number>>({})
   const [insightLoading, setInsightLoading] = useState(false)
   const [insights, setInsights] = useState<string[]>([])
+  // Energy after sessions — last 10 sessions with energy_after set
+  const [energySessions, setEnergySessions] = useState<number[]>([])
 
   const last7Days = useMemo(() => getLast7Days(), [])
 
-  // ── Load consistency data (sessions per day for last 7 days) ────────────────
+  // ── Load consistency + energy data ──────────────────────────────────────────
   useEffect(() => {
     if (!userId) return
-    const loadConsistency = async () => {
+    const loadData = async () => {
       try {
         const sevenDaysAgo = new Date()
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
         const { data } = await supabase
           .from('focus_sessions')
-          .select('started_at, duration_ms')
+          .select('started_at, duration_ms, energy_after')
           .gte('started_at', sevenDaysAgo.toISOString())
           .order('started_at', { ascending: true })
 
         if (data) {
-          const rows = data as Pick<FocusSessionRow, 'started_at' | 'duration_ms'>[]
+          const rows = data as Pick<FocusSessionRow, 'started_at' | 'duration_ms' | 'energy_after'>[]
           const byDay: Record<string, number> = {}
           rows.forEach(row => {
             const day = new Date(row.started_at).toISOString().slice(0, 10)
@@ -76,10 +79,17 @@ export default function ProgressScreen() {
             byDay[day] = (byDay[day] || 0) + minutes
           })
           setConsistencyData(byDay)
+
+          // Energy after sessions — last 10 with a value, most recent first
+          const energyRows = rows
+            .filter(r => r.energy_after != null)
+            .slice(-10)
+            .map(r => r.energy_after as number)
+          setEnergySessions(energyRows)
         }
       } catch { /* offline fallback — show empty */ }
     }
-    loadConsistency()
+    loadData()
   }, [userId])
 
   // ── Derived consistency stats ──────────────────────────────────────────────
@@ -310,6 +320,47 @@ export default function ProgressScreen() {
           </motion.div>
         ))}
       </div>
+
+      {/* ── Energy After Sessions ─────────────────────────────────────────────── */}
+      <motion.div
+        initial={shouldAnimate ? { opacity: 0, y: 10 } : {}}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ ...t(), delay: 0.42 }}
+        className="mx-5 p-5 rounded-2xl mb-4"
+        style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)' }}
+      >
+        <p className="text-xs font-medium tracking-widest uppercase mb-3" style={{ color: '#4ECDC4' }}>
+          Energy after sessions
+        </p>
+        {energySessions.length === 0 ? (
+          <p className="text-sm" style={{ color: '#8B8BA7' }}>
+            After your next session, we'll track how you feel.
+          </p>
+        ) : (
+          <>
+            <div className="flex gap-2 flex-wrap mb-3">
+              {energySessions.map((level, i) => (
+                <span key={i} className="text-xl" title={`Energy level ${level}`} aria-label={`Energy ${level}`}>
+                  {ENERGY_EMOJI[level - 1] ?? '🙂'}
+                </span>
+              ))}
+            </div>
+            {(() => {
+              const half = Math.floor(energySessions.length / 2)
+              const recent = energySessions.slice(-5).reduce((s, v) => s + v, 0) / Math.min(5, energySessions.length)
+              const older  = energySessions.slice(0, half).reduce((s, v) => s + v, 0) / Math.max(1, half)
+              const arrow = energySessions.length < 4 ? '→ steady' :
+                recent > older + 0.3 ? '↑ trending up' :
+                recent < older - 0.3 ? '↓ trending down' : '→ steady'
+              return (
+                <p className="text-xs" style={{ color: '#8B8BA7' }}>
+                  {arrow}
+                </p>
+              )
+            })()}
+          </>
+        )}
+      </motion.div>
 
       {/* ── Weekly Insight ──────────────────────────────────────────────────────── */}
       <motion.div

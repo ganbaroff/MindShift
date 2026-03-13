@@ -20,7 +20,7 @@ test.describe('Settings screen', () => {
     await expect(page.getByText('Plan').first()).toBeVisible()
     await expect(page.getByText('Avatar')).toBeVisible()
     await expect(page.getByText('App Mode')).toBeVisible()
-    await expect(page.getByText('Focus Style')).toBeVisible()
+    // Focus Style section removed — App Mode covers the same spectrum
     await expect(page.getByText('Accessibility')).toBeVisible()
     await expect(page.getByText('Your Data', { exact: true })).toBeVisible()
   })
@@ -39,10 +39,7 @@ test.describe('Settings screen', () => {
     await expect(page.getByText(/System — full visibility/)).toBeVisible()
   })
 
-  test('focus style shows 2 cognitive modes', async ({ authedPage: page }) => {
-    await expect(page.getByText(/One at a time/)).toBeVisible()
-    await expect(page.getByText(/See everything/)).toBeVisible()
-  })
+  // Focus Style (cognitiveMode) section removed — App Mode covers the same spectrum.
 })
 
 test.describe('Accessibility toggle', () => {
@@ -65,31 +62,13 @@ test.describe('Accessibility toggle', () => {
 })
 
 test.describe('Subscription (free tier)', () => {
-  test('shows free tier with trial CTA', async ({ authedPage: page }) => {
+  // Pro trial UI removed until Stripe integration is ready (see CLAUDE.md Known Gaps).
+  // Only a static "MindShift Free" label is shown.
+  test('shows MindShift Free plan label', async ({ authedPage: page }) => {
     await page.goto('/settings')
 
-    await expect(page.getByText('Free').first()).toBeVisible()
-    await expect(page.getByRole('button', { name: /start 30-day free trial/i })).toBeVisible()
-  })
-
-  test('clicking trial CTA shows confirmation', async ({ authedPage: page }) => {
-    await page.goto('/settings')
-
-    await page.getByRole('button', { name: /start 30-day free trial/i }).click()
-
-    await expect(page.getByText(/No card required/)).toBeVisible()
-    await expect(page.getByRole('button', { name: /activate trial/i })).toBeVisible()
-    await expect(page.getByRole('button', { name: /later/i })).toBeVisible()
-  })
-
-  test('"Later" dismisses trial activation', async ({ authedPage: page }) => {
-    await page.goto('/settings')
-
-    await page.getByRole('button', { name: /start 30-day free trial/i }).click()
-    await page.getByRole('button', { name: /later/i }).click()
-
-    // Back to original state
-    await expect(page.getByRole('button', { name: /start 30-day free trial/i })).toBeVisible()
+    await expect(page.getByText('Plan').first()).toBeVisible()
+    await expect(page.getByText('MindShift Free')).toBeVisible()
   })
 })
 

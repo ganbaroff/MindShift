@@ -50,6 +50,30 @@ export const PSYCHOTYPE_DETECTION_DAYS = 7
 // Avatars
 export const AVATAR_COUNT = 6
 
+// ── App mode configuration — drives pool limits + HomeScreen visibility ───────
+// Each appMode maps to a specific NOW pool max and HomeScreen layout.
+// Used by HomeScreen, AddTaskModal, and NowPoolWidget.
+export const APP_MODE_CONFIG = {
+  minimal: {
+    nowPoolMax: 3,
+    showNextOnHome: false,
+    showSomedayOnHome: false,
+    homeSubtitle: 'One task at a time. What matters most?',
+  },
+  habit: {
+    nowPoolMax: 3,
+    showNextOnHome: true,
+    showSomedayOnHome: false,
+    homeSubtitle: 'Build your routine, one step at a time.',
+  },
+  system: {
+    nowPoolMax: 5,
+    showNextOnHome: true,
+    showSomedayOnHome: true,
+    homeSubtitle: "Everything visible. You're in control.",
+  },
+} as const
+
 // ── Energy labels — canonical set used across all UI ──────────────────────────
 // Drained(1) → Low(2) → Okay(3) → Good(4) → Wired(5)
 // Keep in sync: EnergyCheckin, HomeScreen, PostSessionFlow, SettingsScreen

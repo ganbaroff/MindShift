@@ -27,6 +27,8 @@ import { ErrorBoundary } from '@/shared/ui/ErrorBoundary'
 import { Mascot } from '@/shared/ui/Mascot'
 import { BurnoutAlert } from './BurnoutAlert'
 import { BurnoutNudgeCard } from './BurnoutNudgeCard'
+import { APP_MODE_CONFIG } from '@/shared/lib/constants'
+import { toast } from 'sonner'
 
 // BentoGrid pulls in dnd-kit (~45 KB gzip) — lazy-load so it only lands in the
 // HomeScreen chunk, not the shared vendor bundle.
@@ -60,6 +62,8 @@ function QuickSetupCard({ onDone }: QuickSetupCardProps) {
     setCognitiveMode(mode === 'system' ? 'overview' : 'focused')
     setOnboardingCompleted()
     resetGridToDefaults()   // Apply psychotype-driven widget layout immediately
+    const modeLabel = MODE_OPTIONS.find(o => o.mode === mode)?.label ?? mode
+    toast(`Layout updated for ${modeLabel}`)
 
     if (userId) {
       const { supabase } = await import('@/shared/lib/supabase')
@@ -208,8 +212,8 @@ function BentoGridSkeleton() {
 export default function HomeScreen() {
   const {
     energyLevel, setEnergyLevel, appMode, activeSession,
-    onboardingCompleted, nowPool, gridWidgets, setGridWidgets,
-    burnoutScore,
+    onboardingCompleted, nowPool, nextPool, gridWidgets, setGridWidgets,
+    burnoutScore, flexiblePauseUntil,
   } = useStore()
   const { t, shouldAnimate } = useMotion()
   useGridSync()   // two-tier persistence: IndexedDB (offline) + Supabase (cross-device)
@@ -248,10 +252,17 @@ export default function HomeScreen() {
     hour < 17 ? 'Good afternoon 🌤️' :
     'Good evening 🌙'
 
-  const subtitle =
-    appMode === 'minimal' ? 'One task at a time. What matters most?' :
-    appMode === 'habit'   ? "Let's build your routine, one step at a time." :
-    'Everything visible at once. What needs attention first?'
+  const modeConfig = APP_MODE_CONFIG[appMode]
+  const subtitle = modeConfig.homeSubtitle
+
+  // Flexible pause — is rest mode currently active?
+  const isRestModeActive = !!flexiblePauseUntil && new Date(flexiblePauseUntil) > new Date()
+  const restModeDate = flexiblePauseUntil
+    ? new Date(flexiblePauseUntil).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+    : ''
+
+  // AppMode-driven pool previews
+  const activeNextTasks = nextPool.filter(t => t.status === 'active')
 
   return (
     <div className="flex flex-col min-h-full pb-[calc(128px+env(safe-area-inset-bottom))]">
@@ -360,11 +371,64 @@ export default function HomeScreen() {
         )}
       </AnimatePresence>
 
+      {/* ── Rest mode banner (Flexible Pause) ──────────────────────────── */}
+      <AnimatePresence>
+        {isRestModeActive && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={t()}
+            className="mx-5 mb-3 px-4 py-3 rounded-2xl flex items-center gap-3"
+            style={{
+              background: 'linear-gradient(135deg, rgba(123,114,255,0.10) 0%, rgba(78,205,196,0.06) 100%)',
+              border: '1.5px solid rgba(123,114,255,0.25)',
+            }}
+          >
+            <span className="text-lg shrink-0">🛋️</span>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-semibold" style={{ color: '#7B72FF' }}>
+                Rest mode active
+              </p>
+              <p className="text-xs" style={{ color: '#8B8BA7' }}>
+                Until {restModeDate}. Taking a break is progress too.
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Burnout nudge card — Block 5b (shows when burnoutScore ≥ 60 + 24h no session) */}
       <BurnoutNudgeCard burnoutScore={burnoutScore} />
 
       {/* Burnout alert — Block 2 (shows when burnoutScore ≥ 41) */}
       <BurnoutAlert score={burnoutScore} />
+
+      {/* ── AppMode: NEXT pool preview (habit + system modes) ────────────── */}
+      {modeConfig.showNextOnHome && activeNextTasks.length > 0 && (
+        <motion.a
+          href="/tasks"
+          initial={shouldAnimate ? { opacity: 0, y: 8 } : {}}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ ...t(), delay: 0.18 }}
+          className="mx-5 mb-3 px-4 py-3 rounded-2xl flex items-center gap-3 no-underline"
+          style={{
+            background: 'var(--color-card)',
+            border: '1px solid var(--color-border-subtle)',
+          }}
+        >
+          <span className="text-base shrink-0">📋</span>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-semibold" style={{ color: 'var(--color-text)' }}>
+              Up next
+            </p>
+            <p className="text-xs" style={{ color: 'var(--color-muted)' }}>
+              {activeNextTasks.length} task{activeNextTasks.length !== 1 ? 's' : ''} queued
+            </p>
+          </div>
+          <span className="text-xs" style={{ color: 'var(--color-muted)' }}>→</span>
+        </motion.a>
+      )}
 
       {/* ── Bento Grid (sortable, psychotype-driven, dnd-kit) ───────────── */}
       <motion.div

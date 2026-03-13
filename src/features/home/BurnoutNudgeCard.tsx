@@ -17,6 +17,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'motion/react'
 import { X } from 'lucide-react'
+import { toast } from 'sonner'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { useStore } from '@/store'
 
@@ -55,6 +56,7 @@ export function BurnoutNudgeCard({ burnoutScore }: Props) {
   const handleDismiss = () => {
     recordNudgeShown()
     setDismissed(true)
+    toast("No worries — we'll check back in a couple days 🌿")
   }
 
   return (

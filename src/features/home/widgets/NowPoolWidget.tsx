@@ -8,16 +8,18 @@ import { useState } from 'react'
 import { useStore } from '@/store'
 import { TaskCard } from '@/features/tasks/TaskCard'
 import { AddTaskModal } from '@/features/tasks/AddTaskModal'
-import { NOW_POOL_MAX } from '@/shared/lib/constants'
+import { NOW_POOL_MAX, APP_MODE_CONFIG } from '@/shared/lib/constants'
 
 export function NowPoolWidget() {
-  const { nowPool, cognitiveMode } = useStore()
+  const { nowPool, appMode } = useStore()
   const [addOpen, setAddOpen] = useState(false)
 
   const activeTasks = nowPool.filter(t => t.status === 'active')
-  const visibleTasks = cognitiveMode === 'focused'
+  const modeMax = APP_MODE_CONFIG[appMode].nowPoolMax
+  // minimal mode: show 1 task at a time; habit/system: show up to mode max
+  const visibleTasks = appMode === 'minimal'
     ? activeTasks.slice(0, 1)
-    : activeTasks.slice(0, NOW_POOL_MAX)
+    : activeTasks.slice(0, modeMax)
 
   return (
     <div className="flex flex-col gap-3">
@@ -68,8 +70,8 @@ export function NowPoolWidget() {
         )}
       </AnimatePresence>
 
-      {/* Focused mode overflow hint */}
-      {cognitiveMode === 'focused' && activeTasks.length > 1 && (
+      {/* Minimal mode overflow hint */}
+      {appMode === 'minimal' && activeTasks.length > 1 && (
         <p className="text-xs text-center" style={{ color: '#8B8BA7' }}>
           +{activeTasks.length - 1} more in queue — finish this first 🎯
         </p>

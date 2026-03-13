@@ -41,7 +41,7 @@ const TIER_CONFIG = {
     emoji:  '🧘',
     title:  'Rest is part of the work',
     body:   "Your patterns suggest you might need a proper break — not a \"push harder\" moment. ADHD brains need recovery cycles. What's one small, gentle thing you can do right now?",
-    cta:    'Start with just 5 minutes →',
+    cta:    'Take a breather first →',
   },
 } as const
 
@@ -58,7 +58,9 @@ function BurnoutAlertInner({ score }: Props) {
   const cfg = TIER_CONFIG[tier]
 
   const handleCTA = () => {
-    navigate('/focus?quick=1')
+    // caution tier: short focus session; burnout tier: go to focus setup (no auto-start)
+    // so user can choose rest or a gentle session — not forced into a timer
+    navigate(tier === 'caution' ? '/focus?quick=1' : '/focus')
     setDismissed(true)
   }
 

@@ -241,7 +241,8 @@ export function useFocusSession() {
         audio_preset:  activePreset,
         duration_ms:   elapsedMs,
         phase_reached: phaseReached === 'idle' ? null : phaseReached,
-        energy_before: null,
+        // Capture current energy level as pre-session baseline (H-5 fix)
+        energy_before: energyLevel ?? null,
       }
       const { data: saved } = await supabase
         .from('focus_sessions')

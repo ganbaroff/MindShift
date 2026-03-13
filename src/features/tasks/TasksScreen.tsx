@@ -8,6 +8,55 @@ import { Plus } from 'lucide-react'
 import { NOW_POOL_MAX } from '@/shared/lib/constants'
 import type { Task } from '@/types'
 
+// ── CompletedTaskRow — read-only row for "Done recently" section ───────────────
+
+function relativeDate(iso: string): string {
+  const ms = Date.now() - new Date(iso).getTime()
+  const days = Math.floor(ms / 86_400_000)
+  if (days === 0) return 'today'
+  if (days === 1) return 'yesterday'
+  return `${days} days ago`
+}
+
+function DifficultyBadge({ level }: { level: Task['difficultyLevel'] }) {
+  if (!level) return null
+  const cfg = {
+    easy:   { color: '#4ECDC4', label: 'Easy' },
+    medium: { color: '#F59E0B', label: 'Medium' },
+    hard:   { color: '#7B72FF', label: 'Hard' },
+  }[level]
+  return (
+    <span
+      className="text-[10px] font-medium px-1.5 py-0.5 rounded-md"
+      style={{ background: `${cfg.color}22`, color: cfg.color, border: `1px solid ${cfg.color}44` }}
+    >
+      {cfg.label}
+    </span>
+  )
+}
+
+function CompletedTaskRow({ task }: { task: Task }) {
+  return (
+    <div
+      className="flex items-center gap-3 px-3 py-2.5 rounded-xl"
+      style={{ background: 'rgba(78,205,196,0.04)', border: '1px solid rgba(78,205,196,0.1)' }}
+    >
+      <span className="text-sm shrink-0" style={{ color: '#4ECDC4' }}>✓</span>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm truncate" style={{ color: '#8B8BA7', textDecoration: 'line-through' }}>
+          {task.title}
+        </p>
+      </div>
+      <div className="flex items-center gap-2 shrink-0">
+        {task.difficultyLevel && <DifficultyBadge level={task.difficultyLevel} />}
+        <span className="text-[10px]" style={{ color: '#5A5B72' }}>
+          {task.completedAt ? relativeDate(task.completedAt) : ''}
+        </span>
+      </div>
+    </div>
+  )
+}
+
 // ── Subtask grouping helpers ──────────────────────────────────────────────────
 
 /**
@@ -91,11 +140,18 @@ export default function TasksScreen() {
   const { nowPool, nextPool, somedayPool, completedTotal, energyLevel } = useStore()
   const [addOpen, setAddOpen] = useState(false)
   const [somedayExpanded, setSomedayExpanded] = useState(false)
+  const [doneOpen, setDoneOpen] = useState(false)
 
   const activeTasks = nowPool.filter(t => t.status === 'active')
   const nextTasks = nextPool.filter(t => t.status === 'active')
   const somedayTasks = somedayPool.filter(t => t.status === 'active')
   const allEmpty = activeTasks.length === 0 && nextTasks.length === 0 && somedayTasks.length === 0
+
+  // Completed tasks in the last 7 days — newest first
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+  const recentDone = [...nowPool, ...nextPool, ...somedayPool]
+    .filter(t => t.status === 'completed' && t.completedAt && t.completedAt >= sevenDaysAgo)
+    .sort((a, b) => (b.completedAt ?? '').localeCompare(a.completedAt ?? ''))
 
   if (allEmpty) {
     return (
@@ -242,6 +298,47 @@ export default function TasksScreen() {
           )}
         </AnimatePresence>
       </section>
+
+      {/* Done recently */}
+      {recentDone.length > 0 && (
+        <section className="px-5 mt-4" aria-label="Done recently — completed tasks">
+          <button
+            onClick={() => setDoneOpen(v => !v)}
+            className="flex items-center justify-between w-full mb-3 min-h-[44px]"
+            aria-expanded={doneOpen}
+          >
+            <h2 className="text-xs font-medium tracking-widest uppercase flex items-center gap-1.5" style={{ color: '#4ECDC4' }}>
+              ✓ Done recently
+            </h2>
+            <div className="flex items-center gap-2">
+              <span
+                className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                style={{ background: 'rgba(78,205,196,0.12)', color: '#4ECDC4' }}
+              >
+                {recentDone.length}
+              </span>
+              <motion.span animate={{ rotate: doneOpen ? 180 : 0 }} style={{ display: 'inline-block', color: '#4ECDC4' }}>
+                ▾
+              </motion.span>
+            </div>
+          </button>
+
+          <AnimatePresence>
+            {doneOpen && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="flex flex-col gap-2 overflow-hidden"
+              >
+                {recentDone.map(task => (
+                  <CompletedTaskRow key={task.id} task={task} />
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </section>
+      )}
 
       {/* Add Task FAB */}
       <motion.button
