@@ -15,7 +15,8 @@ import { useState, useEffect, useRef, memo } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { Mascot } from '@/shared/ui/Mascot'
 import { useMotion } from '@/shared/hooks/useMotion'
-import type { SessionPhase } from '@/types'
+import { useStore } from '@/store'
+import type { SessionPhase, Psychotype } from '@/types'
 
 interface Props {
   elapsedSeconds: number
@@ -65,6 +66,35 @@ const MOCHI_MESSAGES: Record<string, string[]> = {
 
 const getRandomMessage = (messages: string[]): string =>
   messages[Math.floor(Math.random() * messages.length)]
+
+// ── Psychotype flavor overlays — personalize Mochi's voice ───────────────────
+// These replace the generic milestone messages for users with a known psychotype.
+const PSYCHOTYPE_MESSAGES: Record<Psychotype, Record<string, string[]>> = {
+  achiever: {
+    milestone_7:  ["7 minutes — another one in the books 💪", "You're crushing it. Keep the momentum."],
+    milestone_15: ["15 minutes of real progress. That's what you do. ✨", "Quarter hour down. You're on a roll."],
+    milestone_30: ["Half an hour. You showed up and delivered. 🔥", "30 minutes conquered. That's your style."],
+    milestone_60: ["One hour. You set the bar and cleared it. 🌟", "60 minutes. Extraordinary output today."],
+  },
+  explorer: {
+    milestone_7:  ["7 minutes in — what will you discover? 🔍", "Warming up the curiosity engine..."],
+    milestone_15: ["15 minutes of following that thread. ✨", "Still exploring — that's the good stuff."],
+    milestone_30: ["Half an hour deep in the rabbit hole. 🔥", "30 minutes of pure exploration."],
+    milestone_60: ["An hour of discovery. Where did it take you? 🌟", "60 minutes. What did you find?"],
+  },
+  connector: {
+    milestone_7:  ["7 minutes. Someone will appreciate this work 🌱", "Your consistency inspires."],
+    milestone_15: ["15 minutes. Real work that touches people. ✨", "Your effort matters to others."],
+    milestone_30: ["Half an hour of showing up. 🔥", "30 minutes. That's the kind of reliability people count on."],
+    milestone_60: ["One hour. Your work helps others, even when they don't see it. 🌟", "60 minutes. Quietly remarkable."],
+  },
+  planner: {
+    milestone_7:  ["7 minutes — right on track. ✅", "The plan is working. Keep going."],
+    milestone_15: ["15 minutes. Just as planned. ✨", "Quarter hour in, still on schedule."],
+    milestone_30: ["Half an hour. Steady and structured. 🔥", "30 minutes. Exactly where you planned to be."],
+    milestone_60: ["One hour. Flawless execution. 🌟", "60 minutes — the plan, delivered."],
+  },
+}
 
 // ── Bubble triggers ───────────────────────────────────────────────────────────
 
@@ -120,6 +150,7 @@ const MIN_GAP_SECONDS = 20 * 60  // max 1 bubble per 20 min
 
 function MochiSessionCompanionInner({ elapsedSeconds, sessionPhase }: Props) {
   const { shouldAnimate, t } = useMotion()
+  const { psychotype } = useStore()
 
   const [activeBubble, setActiveBubble] = useState<BubbleTrigger | null>(null)
   const shownRef      = useRef<Set<string>>(new Set())
@@ -188,7 +219,11 @@ function MochiSessionCompanionInner({ elapsedSeconds, sessionPhase }: Props) {
               }}
             />
             <p className="text-xs leading-relaxed" style={{ color: '#E8E8F0' }}>
-              {getRandomMessage(MOCHI_MESSAGES[activeBubble.messagePool] || ['Keep going!'])}
+              {getRandomMessage(
+                (psychotype && PSYCHOTYPE_MESSAGES[psychotype]?.[activeBubble.messagePool])
+                  ?? MOCHI_MESSAGES[activeBubble.messagePool]
+                  ?? ['Keep going!']
+              )}
             </p>
           </motion.button>
         )}

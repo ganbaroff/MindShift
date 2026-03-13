@@ -50,6 +50,7 @@ export default function SettingsScreen() {
     timerStyle, setTimerStyle,
     seasonalMode, setSeasonalMode,
     flexiblePauseUntil, setFlexiblePauseUntil,
+    resetGridToDefaults,
   } = useStore()
 
   const [exporting, setExporting] = useState(false)
@@ -202,7 +203,7 @@ export default function SettingsScreen() {
           ] as const).map(({ mode, label }) => (
             <button
               key={mode}
-              onClick={() => setAppMode(mode)}
+              onClick={() => { setAppMode(mode); resetGridToDefaults() }}
               className="text-left px-3 py-3 rounded-xl text-sm transition-all duration-200 min-h-[44px]"
               style={{
                 background: appMode === mode ? 'var(--color-primary-alpha)' : 'transparent',
