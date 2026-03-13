@@ -5,7 +5,7 @@ import { supabase } from '@/shared/lib/supabase'
 import { toast } from 'sonner'
 import { logError } from '@/shared/lib/logger'
 import Avatar, { STAGE_NAMES } from '@/features/progress/Avatar'
-import { ENERGY_LABELS, ENERGY_EMOJI } from '@/shared/lib/constants'
+import { ENERGY_LABELS, ENERGY_EMOJI, SEASONAL_MODE_CONFIG, getNowPoolMax } from '@/shared/lib/constants'
 
 // ── Toggle switch ─────────────────────────────────────────────────────────────
 
@@ -356,7 +356,8 @@ export default function SettingsScreen() {
                 key={mode}
                 onClick={() => {
                   setSeasonalMode(mode)
-                  toast.success(`Phase set to ${label}`)
+                  const limit = getNowPoolMax(appMode, mode)
+                  toast.success(`${SEASONAL_MODE_CONFIG[mode].label} mode — NOW pool: ${limit} task${limit === 1 ? '' : 's'}`)
                 }}
                 className="flex flex-col items-start p-3 rounded-xl text-left transition-all duration-200 min-h-[88px]"
                 style={{

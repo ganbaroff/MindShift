@@ -74,6 +74,26 @@ export const APP_MODE_CONFIG = {
   },
 } as const
 
+// ── Seasonal mode configuration — overrides NOW pool max per life phase ────────
+// recover: gentle mode caps NOW tasks at 2. launch: high capacity at 5.
+// null = use appMode default (no seasonal override).
+export const SEASONAL_MODE_CONFIG = {
+  launch:   { nowPoolMaxOverride: 5,    label: 'Launch'   },
+  maintain: { nowPoolMaxOverride: null, label: 'Maintain' },
+  recover:  { nowPoolMaxOverride: 2,    label: 'Recover'  },
+  sandbox:  { nowPoolMaxOverride: null, label: 'Sandbox'  },
+} as const
+
+export type SeasonalMode = keyof typeof SEASONAL_MODE_CONFIG
+
+/** Returns the effective NOW pool max, considering seasonal override over appMode default. */
+export function getNowPoolMax(
+  appMode: keyof typeof APP_MODE_CONFIG,
+  seasonalMode: SeasonalMode
+): number {
+  return SEASONAL_MODE_CONFIG[seasonalMode].nowPoolMaxOverride ?? APP_MODE_CONFIG[appMode].nowPoolMax
+}
+
 // ── Energy labels — canonical set used across all UI ──────────────────────────
 // Drained(1) → Low(2) → Okay(3) → Good(4) → Wired(5)
 // Keep in sync: EnergyCheckin, HomeScreen, PostSessionFlow, SettingsScreen

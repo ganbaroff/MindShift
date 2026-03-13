@@ -11,7 +11,7 @@ import { hapticDone } from '@/shared/lib/haptic'
 import { parseClassifyResult, isLowConfidence, type ClassifyResult } from '@/shared/lib/voiceClassify'
 import { ACHIEVEMENT_DEFINITIONS } from '@/types'
 import type { Task } from '@/types'
-import { NOW_POOL_MAX, APP_MODE_CONFIG } from '@/shared/lib/constants'
+import { NOW_POOL_MAX, getNowPoolMax } from '@/shared/lib/constants'
 
 // ── ICS export helpers ────────────────────────────────────────────────────────
 
@@ -82,7 +82,7 @@ interface Props {
 const PRESET_DURATIONS = [5, 15, 25, 45, 60]
 
 export function AddTaskModal({ open, onClose }: Props) {
-  const { addTask, nowPool, nextPool, userId, hasAchievement, unlockAchievement, appMode } = useStore()
+  const { addTask, nowPool, nextPool, userId, hasAchievement, unlockAchievement, appMode, seasonalMode } = useStore()
   const { shouldAnimate } = useMotion()
 
   const [title, setTitle]             = useState('')
@@ -238,7 +238,7 @@ export function AddTaskModal({ open, onClose }: Props) {
     setIsListening(true)
   }, [isListening, voiceSupported, hasAchievement, unlockAchievement, classifyVoice])
 
-  const nowPoolMax = APP_MODE_CONFIG[appMode].nowPoolMax
+  const nowPoolMax = getNowPoolMax(appMode, seasonalMode)
   const nowFull = nowPool.filter(t => t.status === 'active').length >= nowPoolMax
 
   // ── AI decomposition ─────────────────────────────────────────────────────────

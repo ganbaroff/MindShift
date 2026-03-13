@@ -8,15 +8,15 @@ import { useState } from 'react'
 import { useStore } from '@/store'
 import { TaskCard } from '@/features/tasks/TaskCard'
 import { AddTaskModal } from '@/features/tasks/AddTaskModal'
-import { NOW_POOL_MAX, APP_MODE_CONFIG } from '@/shared/lib/constants'
+import { NOW_POOL_MAX, getNowPoolMax } from '@/shared/lib/constants'
 
 export function NowPoolWidget() {
-  const { nowPool, appMode } = useStore()
+  const { nowPool, appMode, seasonalMode } = useStore()
   const [addOpen, setAddOpen] = useState(false)
 
   const activeTasks = nowPool.filter(t => t.status === 'active')
-  const modeMax = APP_MODE_CONFIG[appMode].nowPoolMax
-  // minimal mode: show 1 task at a time; habit/system: show up to mode max
+  const modeMax = getNowPoolMax(appMode, seasonalMode)
+  // minimal mode: show 1 task at a time; habit/system: show up to effective mode max
   const visibleTasks = appMode === 'minimal'
     ? activeTasks.slice(0, 1)
     : activeTasks.slice(0, modeMax)
