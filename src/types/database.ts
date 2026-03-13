@@ -130,6 +130,7 @@ export interface FocusSessionInsert {
   audio_preset: string | null
   task_id: string | null
   energy_before: number | null
+  energy_after?: number | null   // written via UPDATE after NatureBuffer energy pick
 }
 
 export interface UserBehaviorRow {

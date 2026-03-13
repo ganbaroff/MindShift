@@ -150,6 +150,7 @@ export function useFocusSession() {
   const sessionSavedRef     = useRef(false)
   const quickStartedRef     = useRef(false)
   const softStopFiredRef    = useRef(false)
+  const savedSessionIdRef   = useRef<string | null>(null)  // captures DB row id for energy_after UPDATE
 
   // ── Interrupt bookmark ──────────────────────────────────────────────────────
   const [bookmarkText, setBookmarkText] = useState('')
@@ -242,7 +243,12 @@ export function useFocusSession() {
         phase_reached: phaseReached === 'idle' ? null : phaseReached,
         energy_before: null,
       }
-      await supabase.from('focus_sessions').insert(row as never)
+      const { data: saved } = await supabase
+        .from('focus_sessions')
+        .insert(row as never)
+        .select('id')
+        .single()
+      savedSessionIdRef.current = (saved as { id?: string } | null)?.id ?? null
       updateLastSession()
     } catch (err) {
       logError('FocusScreen.handleSessionEnd.insert', err)
@@ -460,6 +466,14 @@ export function useFocusSession() {
   const handlePostEnergy = useCallback((level: EnergyLevel) => {
     setEnergyLevel(level)
     setPostEnergyLogged(true)
+    // Persist post-session energy to the focus_sessions row that was just created
+    if (savedSessionIdRef.current) {
+      void supabase
+        .from('focus_sessions')
+        .update({ energy_after: level })
+        .eq('id', savedSessionIdRef.current)
+        .then(({ error }) => { if (error) logError('useFocusSession.energy_after.update', error) })
+    }
   }, [setEnergyLevel])
 
   // ── Derived ──────────────────────────────────────────────────────────────────

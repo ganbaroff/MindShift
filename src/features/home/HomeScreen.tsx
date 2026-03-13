@@ -63,12 +63,17 @@ function QuickSetupCard({ onDone }: QuickSetupCardProps) {
 
     if (userId) {
       const { supabase } = await import('@/shared/lib/supabase')
-      await supabase.from('users').upsert({
-        id: userId,
-        app_mode: mode,
-        cognitive_mode: mode === 'system' ? 'overview' : 'focused',
-        onboarding_completed: true,
-      } as never)
+      try {
+        await supabase.from('users').upsert({
+          id: userId,
+          app_mode: mode,
+          cognitive_mode: mode === 'system' ? 'overview' : 'focused',
+          onboarding_completed: true,
+        } as never)
+      } catch (err) {
+        // Log but don't block — store state is already updated (offline-first)
+        console.error('[HomeScreen] app mode upsert failed:', err)
+      }
     }
     setSaving(false)
     onDone()
