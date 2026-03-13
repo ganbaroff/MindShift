@@ -19,25 +19,17 @@ import { Confetti } from '@/shared/ui/Confetti'
 import { notifyXP, notifyXPBonus, notifyAchievement, notifyTaskDone } from '@/shared/lib/notify'
 import { hapticDone } from '@/shared/lib/haptic'
 import type { Task } from '@/types'
-import { ACHIEVEMENT_DEFINITIONS } from '@/types'
+import { ACHIEVEMENT_DEFINITIONS, DIFFICULTY_MAP } from '@/types'
 import {
   VR_BUCKET_SIZE, VR_JACKPOT_THRESHOLD, VR_BONUS_THRESHOLD,
   VR_MULTIPLIER_JACKPOT, VR_MULTIPLIER_BONUS,
 } from '@/shared/lib/constants'
 
 // ── Difficulty accent color labels (Research #8: teal/indigo/gold — never red) ─
-
-const DIFFICULTY_LABELS: Record<number, string> = { 1: 'Easy', 2: 'Medium', 3: 'Hard' }
-
-// Traffic Light difficulty level (Block 6a) — teal/amber/purple, NEVER red
-const TRAFFIC_LIGHT: Record<string, { color: string; label: string }> = {
-  easy:   { color: '#4ECDC4', label: '🟢 Easy' },
-  medium: { color: '#F59E0B', label: '🟡 Medium' },
-  hard:   { color: '#7B72FF', label: '🔵 Hard' },
-}
+// DIFFICULTY_MAP imported from @/types — single source of truth (Sprint B A-2)
 
 // getDifficultyAccent: returns palette-aware color (desaturated in calm mode)
-function getDifficultyAccent(difficulty: number, palette: ReturnType<typeof usePalette>): string {
+function getDifficultyAccent(difficulty: 1 | 2 | 3, palette: ReturnType<typeof usePalette>): string {
   if (difficulty === 1) return palette.teal
   if (difficulty === 3) return palette.gold
   return palette.primary   // difficulty 2 — medium, steady
@@ -224,7 +216,7 @@ function TaskCardInner({ task, index = 0, onComplete, onSnooze }: Props) {
         {/* Header: difficulty dots + time estimate + optional carry-over badge */}
         <div className="flex items-center gap-2 mb-2">
           {/* Difficulty dots */}
-          <div className="flex gap-1" aria-label={`Difficulty: ${DIFFICULTY_LABELS[task.difficulty]}`}>
+          <div className="flex gap-1" aria-label={`Difficulty: ${DIFFICULTY_MAP[task.difficulty]?.label}`}>
             {[1, 2, 3].map(dot => (
               <div
                 key={dot}
@@ -236,17 +228,17 @@ function TaskCardInner({ task, index = 0, onComplete, onSnooze }: Props) {
             ))}
           </div>
 
-          {/* Traffic Light badge (Block 6a) — shown when difficultyLevel is set */}
-          {task.difficultyLevel && TRAFFIC_LIGHT[task.difficultyLevel] && (
+          {/* Difficulty badge — DIFFICULTY_MAP single source of truth (Sprint B A-2) */}
+          {task.difficulty && DIFFICULTY_MAP[task.difficulty] && (
             <span
               className="text-[10px] font-medium px-1.5 py-0.5 rounded-md"
               style={{
-                background: `${TRAFFIC_LIGHT[task.difficultyLevel].color}1A`,
-                color: TRAFFIC_LIGHT[task.difficultyLevel].color,
-                border: `1px solid ${TRAFFIC_LIGHT[task.difficultyLevel].color}40`,
+                background: `${DIFFICULTY_MAP[task.difficulty].color}1A`,
+                color: DIFFICULTY_MAP[task.difficulty].color,
+                border: `1px solid ${DIFFICULTY_MAP[task.difficulty].color}40`,
               }}
             >
-              {TRAFFIC_LIGHT[task.difficultyLevel].label}
+              {DIFFICULTY_MAP[task.difficulty].label}
             </span>
           )}
 

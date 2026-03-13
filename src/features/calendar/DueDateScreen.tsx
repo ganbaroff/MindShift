@@ -9,6 +9,7 @@ import { useMotion } from '@/shared/hooks/useMotion'
 import { useStore } from '@/store'
 import { toast } from 'sonner'
 import type { Task } from '@/types'
+import { DIFFICULTY_MAP } from '@/types'
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -66,10 +67,7 @@ interface RescheduleSheetProps {
 function RescheduleSheet({ task, onClose, onNavigate }: RescheduleSheetProps) {
   const { setTaskDueDate } = useStore()
   const [newDate, setNewDate] = useState(task.dueDate ?? '')
-  const diffColor =
-    task.difficulty === 1 ? '#4ECDC4' :
-    task.difficulty === 2 ? '#F59E0B' :
-    '#7B72FF'
+  const diffColor = DIFFICULTY_MAP[task.difficulty]?.color ?? '#7B72FF'
 
   const handleReschedule = () => {
     if (!newDate) return
@@ -173,10 +171,7 @@ function RescheduleSheet({ task, onClose, onNavigate }: RescheduleSheetProps) {
 // ── Task row ────────────────────────────────────────────────────────────────
 
 function TaskRow({ task, onTap }: { task: Task; onTap: (t: Task) => void }) {
-  const diffColor =
-    task.difficulty === 1 ? '#4ECDC4' :
-    task.difficulty === 2 ? '#F59E0B' :
-    '#7B72FF'
+  const diffColor = DIFFICULTY_MAP[task.difficulty]?.color ?? '#7B72FF'
 
   return (
     <button

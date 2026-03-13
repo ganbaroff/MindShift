@@ -26,8 +26,16 @@ export interface Task {
   dueTime: string | null          // "HH:MM" or null
   taskType: 'task' | 'idea' | 'reminder'
   reminderSentAt: string | null   // when reminder notification was sent
-  difficultyLevel?: 'easy' | 'medium' | 'hard'  // Traffic Light (Block 6)
+  /** @deprecated DEPRECATED: use difficulty (1|2|3) + DIFFICULTY_MAP instead (Sprint B A-2). */
+  difficultyLevel?: 'easy' | 'medium' | 'hard'
 }
+
+/** Canonical difficulty mapper — use instead of difficultyLevel (Sprint B A-2). */
+export const DIFFICULTY_MAP = {
+  1: { label: 'Easy',   color: '#4ECDC4' },
+  2: { label: 'Medium', color: '#F59E0B' },
+  3: { label: 'Hard',   color: '#7B72FF' },
+} as const
 
 export interface ActiveSession {
   id: string
