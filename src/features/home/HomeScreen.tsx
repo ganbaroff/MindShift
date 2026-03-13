@@ -233,6 +233,13 @@ export default function HomeScreen() {
     activeNowTasks.length === 0 &&
     !firstTaskDismissed
 
+  // Research #4: Reset prompt when NOW pool empties — encourage adding a next task
+  useEffect(() => {
+    if (activeNowTasks.length === 0) {
+      setFirstTaskDismissed(false)
+    }
+  }, [activeNowTasks.length])
+
   // ── Mochi: driven by energy level + active session ──────────────────────────
   useEffect(() => {
     if (activeSession) {
