@@ -4,7 +4,7 @@
  * Tests the AddTaskModal, NOW/NEXT/SOMEDAY pools,
  * task completion, snoozing, and pool overflow behavior.
  */
-import { test, expect } from './helpers'
+import { test, expect, seedStore } from './helpers'
 
 test.describe('Task creation', () => {
   test('tasks screen shows empty state', async ({ authedPage: page }) => {
@@ -157,5 +157,29 @@ test.describe('Task from HomeScreen', () => {
 
     const fab = page.getByRole('button', { name: /add task/i })
     await expect(fab).toBeVisible()
+  })
+})
+
+test.describe('Pool overflow', () => {
+  test('shows overflow message and "Add to Next" when NOW pool is full', async ({ authedPage: page }) => {
+    // Seed 3 active tasks (NOW_POOL_MAX = 3) so the pool is full
+    await seedStore(page, {
+      nowPool: [
+        { id: 'e2e-overflow-1', title: 'Task A', pool: 'now', difficulty: 1, estimatedMinutes: 15, status: 'active', snoozeCount: 0, completedAt: null, dueDate: null, subtasks: [], position: 0, createdAt: new Date().toISOString(), userId: 'e2e-test-user-00000000-0000-0000-0000-000000000001' },
+        { id: 'e2e-overflow-2', title: 'Task B', pool: 'now', difficulty: 1, estimatedMinutes: 15, status: 'active', snoozeCount: 0, completedAt: null, dueDate: null, subtasks: [], position: 1, createdAt: new Date().toISOString(), userId: 'e2e-test-user-00000000-0000-0000-0000-000000000001' },
+        { id: 'e2e-overflow-3', title: 'Task C', pool: 'now', difficulty: 1, estimatedMinutes: 15, status: 'active', snoozeCount: 0, completedAt: null, dueDate: null, subtasks: [], position: 2, createdAt: new Date().toISOString(), userId: 'e2e-test-user-00000000-0000-0000-0000-000000000001' },
+      ],
+    })
+
+    await page.goto('/tasks')
+
+    // Open add task modal
+    await page.getByRole('button', { name: /add task/i }).click()
+
+    // Overflow notice should be visible
+    await expect(page.getByText(/NOW is full/i)).toBeVisible()
+
+    // Submit button should say "Add to Next →" (not "Add to Now →")
+    await expect(page.getByRole('button', { name: /add to next/i })).toBeVisible()
   })
 })
