@@ -34,6 +34,7 @@ export function buildStoreState(overrides: Record<string, unknown> = {}) {
       xpTotal: 0,
       lastSessionAt: new Date().toISOString(),
       onboardingCompleted: true,
+      seasonalMode: 'maintain',
       focusAnchor: null,
       achievements: [],
       audioVolume: 0.47,
@@ -191,6 +192,9 @@ export async function seedStore(page: Page, overrides: Record<string, unknown> =
       version: '2026-03',
       at: new Date().toISOString(),
     }))
+
+    // Dismiss InstallBanner so it doesn't intercept pointer events (esp. on mobile)
+    localStorage.setItem('mindshift_install_dismissed', '1')
   }, { storeState, supabaseSession, storageKey })
 }
 

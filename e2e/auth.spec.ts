@@ -9,6 +9,15 @@
  */
 import { test, expect } from '@playwright/test'
 
+/** Helper: click the custom consent checkbox (the visual checkbox <div>, not the text). */
+async function clickConsentCheckbox(page: import('@playwright/test').Page) {
+  // The consent label wraps a <div> (visual checkbox) and a <span> (text).
+  // The onClick handler lives on the <div>, so we must click it — not the text.
+  const label = page.locator('label').filter({ hasText: /16 or older/ })
+  // Click the first div inside the label — that's the checkbox container
+  await label.locator('div').first().click()
+}
+
 test.describe('Auth screen', () => {
   test.beforeEach(async ({ page }) => {
     // Intercept the Supabase OTP call so it never hits a real server
@@ -49,12 +58,13 @@ test.describe('Auth screen', () => {
     const emailInput = page.getByPlaceholder('your@email.com')
     await expect(emailInput).toBeVisible()
 
-    // Consent checkbox
-    await expect(page.getByText(/16 or older/)).toBeVisible()
-    await expect(page.getByText('Terms of Service')).toBeVisible()
-    await expect(page.getByText('Privacy Policy')).toBeVisible()
+    // Consent checkbox — UI says "Terms" (not "Terms of Service") and "Privacy Policy"
+    const consentLabel = page.locator('label').filter({ hasText: /16 or older/ })
+    await expect(consentLabel).toBeVisible()
+    await expect(consentLabel.locator('a').filter({ hasText: 'Terms' })).toBeVisible()
+    await expect(consentLabel.locator('a').filter({ hasText: 'Privacy Policy' })).toBeVisible()
 
-    // Submit button — initially disabled
+    // Submit button — initially disabled (no email, no consent)
     const submitBtn = page.getByRole('button', { name: /send magic link/i })
     await expect(submitBtn).toBeVisible()
     await expect(submitBtn).toBeDisabled()
@@ -73,8 +83,8 @@ test.describe('Auth screen', () => {
     const emailInput = page.getByPlaceholder('your@email.com')
     await emailInput.fill('user@example.com')
 
-    // Check the consent checkbox by clicking the label text
-    await page.getByText(/16 or older/).click()
+    // Check the consent checkbox by clicking the visual checkbox div
+    await clickConsentCheckbox(page)
 
     const submitBtn = page.getByRole('button', { name: /send magic link/i })
     await expect(submitBtn).toBeEnabled()
@@ -83,7 +93,7 @@ test.describe('Auth screen', () => {
   test('shows "magic link on its way" after submitting', async ({ page }) => {
     const emailInput = page.getByPlaceholder('your@email.com')
     await emailInput.fill('user@example.com')
-    await page.getByText(/16 or older/).click()
+    await clickConsentCheckbox(page)
 
     await page.getByRole('button', { name: /send magic link/i }).click()
 
@@ -96,7 +106,7 @@ test.describe('Auth screen', () => {
   test('"wrong email? go back" returns to email input', async ({ page }) => {
     // Submit first
     await page.getByPlaceholder('your@email.com').fill('user@example.com')
-    await page.getByText(/16 or older/).click()
+    await clickConsentCheckbox(page)
     await page.getByRole('button', { name: /send magic link/i }).click()
 
     // Go back — copy: "Wrong email? Go back"
@@ -113,14 +123,18 @@ test.describe('Auth screen', () => {
   })
 })
 
-test.describe('Auth redirect', () => {
-  test('unauthenticated user on / is redirected to /auth', async ({ page }) => {
-    // No session mocked — return empty
+test.describe('Auth bypass (AuthGuard disabled)', () => {
+  test('unauthenticated user on / stays on home (no redirect to /auth)', async ({ page }) => {
+    // AuthGuard is currently a passthrough — magic-link auth removed,
+    // Google OAuth coming soon. Unauthenticated users see the home screen.
     await page.route('**/auth/v1/session', (route) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({}) })
     )
     await page.route('**/auth/v1/token**', (route) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({}) })
+    )
+    await page.route('**/rest/v1/**', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) })
     )
 
     // Dismiss cookie banner
@@ -131,8 +145,8 @@ test.describe('Auth redirect', () => {
     })
 
     await page.goto('/')
-    // AuthGuard should redirect to /auth
-    await page.waitForURL('**/auth')
-    await expect(page.getByText("Welcome. Let's get started.")).toBeVisible()
+    // Should stay on / and render the home screen (not redirect to /auth)
+    await expect(page).toHaveURL(/\/$/)
+    await expect(page.getByRole('button', { name: /add task/i })).toBeVisible()
   })
 })

@@ -1,11 +1,12 @@
 /**
- * E2E: Onboarding flow (3 screens)
+ * E2E: Onboarding flow (4 screens)
  *
- * Screen 1: Intent / App Mode selection (minimal / habit / system)
- * Screen 2: Energy check-in (5 levels)
- * Screen 3: ADHD Signal (focused / overview cognitive mode)
+ * Step 1 (screen 0): Intent / App Mode selection — 3 options (One thing at a time / Build daily habits / Full picture)
+ * Step 2 (screen 1): Energy check-in — EnergyPicker with 5 emoji levels
+ * Step 3 (screen 2): Timer style — 3 options (Countdown / Count-up / Surprise)
+ * Step 4 (screen 3): Cognitive mode — 2 options (Yes — one at a time / No — show everything)
  *
- * After completion → redirect to HomeScreen.
+ * After completion -> redirect to HomeScreen.
  */
 import { test, expect, seedStore } from './helpers'
 
@@ -16,75 +17,142 @@ test.describe('Onboarding flow', () => {
     await page.goto('/onboarding')
   })
 
-  test('screen 1: shows intent selection with 3 modes', async ({ authedPage: page }) => {
+  test('step 1: shows intent selection with 3 options', async ({ authedPage: page }) => {
     // Step indicator
-    await expect(page.getByText('Step 1 of 3')).toBeVisible()
+    await expect(page.getByText('Step 1 of 4')).toBeVisible()
 
     // Title
     await expect(page.getByText('What brings you here today?')).toBeVisible()
 
-    // 3 mode cards
-    await expect(page.getByText(/Close ONE important task/)).toBeVisible()
-    await expect(page.getByText(/Build a daily routine/)).toBeVisible()
-    await expect(page.getByText(/Organize my whole system/)).toBeVisible()
+    // 3 intent options
+    await expect(page.getByText('One thing at a time')).toBeVisible()
+    await expect(page.getByText('Build daily habits')).toBeVisible()
+    await expect(page.getByText('Full picture')).toBeVisible()
   })
 
-  test('selecting "minimal" mode advances to screen 2', async ({ authedPage: page }) => {
-    await page.getByText(/Close ONE important task/).click()
+  test('selecting an option enables Continue and advances to step 2', async ({ authedPage: page }) => {
+    // Continue should be disabled before selection
+    const continueBtn = page.getByRole('button', { name: /Continue/ })
+    await expect(continueBtn).toBeDisabled()
 
-    // Should now be on energy check-in
-    await expect(page.getByText('Step 2 of 3')).toBeVisible()
+    // Select first option
+    await page.getByText('One thing at a time').click()
+
+    // Continue should now be enabled
+    await expect(continueBtn).toBeEnabled()
+
+    // Click Continue to advance
+    await continueBtn.click()
+
+    // Should now be on energy check-in (step 2)
+    await expect(page.getByText('Step 2 of 4')).toBeVisible()
     await expect(page.getByText("How's your brain right now?")).toBeVisible()
   })
 
-  test('screen 2: energy check-in shows 5 options', async ({ authedPage: page }) => {
-    // Navigate to screen 2
-    await page.getByText(/Close ONE important task/).click()
+  test('step 2: shows 5 energy options (emoji picker)', async ({ authedPage: page }) => {
+    // Navigate to step 2
+    await page.getByText('One thing at a time').click()
+    await page.getByRole('button', { name: /Continue/ }).click()
 
-    // Should show energy checkin heading
+    // Should show energy check-in heading
     await expect(page.getByText("How's your brain right now?")).toBeVisible()
 
-    // EnergyCheckin renders 5 buttons with aria-labels like "Energy level N: Label"
-    await expect(page.getByRole('button', { name: /energy level 1/i })).toBeVisible()
-    await expect(page.getByRole('button', { name: /energy level 5/i })).toBeVisible()
+    // EnergyPicker renders 5 buttons with emoji + labels
+    await expect(page.getByText('Drained')).toBeVisible()
+    await expect(page.getByText('Low')).toBeVisible()
+    await expect(page.getByText('Okay')).toBeVisible()
+    await expect(page.getByText('Good')).toBeVisible()
+    await expect(page.getByText('Wired')).toBeVisible()
   })
 
-  test('selecting energy advances to screen 3 (ADHD signal)', async ({ authedPage: page }) => {
-    // Screen 1 → select minimal
-    await page.getByText(/Close ONE important task/).click()
+  test('step 2: Continue is always enabled (no selection required)', async ({ authedPage: page }) => {
+    // Navigate to step 2
+    await page.getByText('One thing at a time').click()
+    await page.getByRole('button', { name: /Continue/ }).click()
 
-    // Screen 2 → select an energy level by aria-label
-    await page.getByRole('button', { name: /energy level 3/i }).click()
+    // Continue should be enabled without any explicit selection (default energy pre-selected)
+    const continueBtn = page.getByRole('button', { name: /Continue/ })
+    await expect(continueBtn).toBeEnabled()
 
-    // Screen 3 — ADHD signal
-    await expect(page.getByText('Step 3 of 3')).toBeVisible()
+    // Click Continue to advance to step 3
+    await continueBtn.click()
+    await expect(page.getByText('Step 3 of 4')).toBeVisible()
+  })
+
+  test('step 3: shows 3 timer style options', async ({ authedPage: page }) => {
+    // Navigate through steps 1 and 2
+    await page.getByText('One thing at a time').click()
+    await page.getByRole('button', { name: /Continue/ }).click()
+    await page.getByRole('button', { name: /Continue/ }).click()
+
+    // Step indicator
+    await expect(page.getByText('Step 3 of 4')).toBeVisible()
+
+    // Title
+    await expect(page.getByText('How do you want to see your timer?')).toBeVisible()
+
+    // 3 timer options
+    await expect(page.getByText('Countdown')).toBeVisible()
+    await expect(page.getByText('Count-up')).toBeVisible()
+    await expect(page.getByText('Surprise')).toBeVisible()
+  })
+
+  test('step 3: selecting timer option enables Continue and advances to step 4', async ({ authedPage: page }) => {
+    // Navigate through steps 1 and 2
+    await page.getByText('One thing at a time').click()
+    await page.getByRole('button', { name: /Continue/ }).click()
+    await page.getByRole('button', { name: /Continue/ }).click()
+
+    // Continue should be disabled before selection
+    const continueBtn = page.getByRole('button', { name: /Continue/ })
+    await expect(continueBtn).toBeDisabled()
+
+    // Select Countdown
+    await page.getByText('Countdown').click()
+    await expect(continueBtn).toBeEnabled()
+
+    // Advance to step 4
+    await continueBtn.click()
+    await expect(page.getByText('Step 4 of 4')).toBeVisible()
+  })
+
+  test('step 4: shows 2 task visibility options', async ({ authedPage: page }) => {
+    // Navigate through steps 1, 2, and 3
+    await page.getByText('Build daily habits').click()
+    await page.getByRole('button', { name: /Continue/ }).click()
+    await page.getByRole('button', { name: /Continue/ }).click()
+    await page.getByText('Countdown').click()
+    await page.getByRole('button', { name: /Continue/ }).click()
+
+    // Step indicator
+    await expect(page.getByText('Step 4 of 4')).toBeVisible()
+
+    // Title and subtitle
     await expect(page.getByText(/One last question/)).toBeVisible()
-    await expect(page.getByText(/forgets tasks exist/)).toBeVisible()
+    await expect(page.getByText(/Do tasks disappear from your mind/)).toBeVisible()
+
+    // 2 cognitive mode options
+    await expect(page.getByText('Yes — one at a time')).toBeVisible()
+    await expect(page.getByText('No — show everything')).toBeVisible()
   })
 
-  test('completing all 3 screens redirects to home', async ({ authedPage: page }) => {
-    // Screen 1
-    await page.getByText(/Close ONE important task/).click()
+  test('completing all 4 steps redirects to home', async ({ authedPage: page }) => {
+    // Step 1: select intent
+    await page.getByText('One thing at a time').click()
+    await page.getByRole('button', { name: /Continue/ }).click()
 
-    // Screen 2 — click energy level
-    await page.getByRole('button', { name: /energy level 3/i }).click()
+    // Step 2: energy (Continue always enabled, just advance)
+    await page.getByRole('button', { name: /Continue/ }).click()
 
-    // Screen 3 — select cognitive mode
-    await page.getByText(/Yes — show me one task at a time/).click()
+    // Step 3: select timer style
+    await page.getByText('Countdown').click()
+    await page.getByRole('button', { name: /Continue/ }).click()
+
+    // Step 4: select cognitive mode, final button is "Let's go"
+    await page.getByText('Yes — one at a time').click()
+    await page.getByRole('button', { name: /Let's go/ }).click()
 
     // Should redirect to home
     await page.waitForURL('**/', { timeout: 5000 })
-  })
-
-  test('screen 3: both cognitive mode options are present', async ({ authedPage: page }) => {
-    // Navigate through to screen 3
-    await page.getByText(/Build a daily routine/).click()
-
-    // Energy level
-    await page.getByRole('button', { name: /energy level 3/i }).click()
-
-    // Verify both options
-    await expect(page.getByText(/Yes — show me one task at a time/)).toBeVisible()
-    await expect(page.getByText(/No — I like seeing the full picture/)).toBeVisible()
   })
 })

@@ -23,6 +23,14 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
   const [difficulty, setDifficulty] = useState<1 | 2 | 3>(1);
   const [minutes, setMinutes] = useState(25);
 
+  // Reset form when modal closes
+  const handleClose = () => {
+    setTitle('');
+    setDifficulty(1);
+    setMinutes(25);
+    onClose();
+  };
+
   const handleSubmit = () => {
     if (!title.trim()) return;
     const newTask: Task = {
@@ -58,7 +66,7 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/60 z-40"
-            onClick={onClose}
+            onClick={handleClose}
           />
           <motion.div
             initial={{ y: '100%' }}
@@ -70,7 +78,7 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
             <div className="w-10 h-1 rounded-full bg-ms-muted/30 mx-auto mb-4" />
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-title text-ms-text">Add a task</h2>
-              <button onClick={onClose} className="p-2 text-ms-muted">
+              <button onClick={handleClose} className="p-2 text-ms-muted">
                 <X size={20} />
               </button>
             </div>
