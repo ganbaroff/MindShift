@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import MochiAvatar from '@/components/MochiAvatar';
-import { useStore, selectActiveTasks, selectSessionProgress } from '@/store';
+import { useStore } from '@/store';
 import { ENERGY_EMOJI, ENERGY_LABELS } from '@/shared/lib/constants';
 
 const durationOptions = [5, 15, 25, 45, 60];
@@ -10,8 +10,8 @@ export default function FocusPage() {
   const [selectedTask, setSelectedTask] = useState<string | null>(null);
   const [duration, setDuration] = useState(25);
 
-  const availableTasks = useStore(selectActiveTasks);
-  const { activeSession, startSession, endSession, timerSeconds, sessionPhase, energyLevel } = useStore();
+  const { nowPool, activeSession, startSession, endSession, timerSeconds, sessionPhase, energyLevel } = useStore();
+  const availableTasks = useMemo(() => nowPool.filter(t => t.status === 'active').slice(0, 3), [nowPool]);
 
   if (activeSession) {
     const task = availableTasks.find(t => t.id === activeSession.taskId);
@@ -98,7 +98,12 @@ function TaskOption({ selected, onClick, emoji, title, badge }: {
   );
 }
 function FocusActive({ onEnd, task, timerSeconds, phase }: { onEnd: () => void; task?: any; timerSeconds: number; phase: string }) {
-  const progress = useStore(selectSessionProgress);
+  const { activeSession: session, timerSeconds: ts } = useStore();
+  const progress = useMemo(() => {
+    if (!session) return 0;
+    const elapsed = session.durationMs / 1000 - ts;
+    return elapsed / (session.durationMs / 1000);
+  }, [session, ts]);
   const mins = Math.floor(timerSeconds / 60);
   const secs = timerSeconds % 60;
   const timeLeft = `${mins}:${String(secs).padStart(2, '0')}`;
