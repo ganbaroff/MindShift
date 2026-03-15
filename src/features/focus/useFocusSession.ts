@@ -376,8 +376,11 @@ export function useFocusSession() {
 
     void requestNotificationPermission()
     startSession(selectedTask?.id ?? null, duration, focusAnchor ?? null)
-    playAnchor()
-    if (focusAnchor) play(focusAnchor)
+
+    // Audio calls wrapped in try/catch — AudioContext can throw on iOS Safari
+    // if the context is in a bad state. Session must start regardless.
+    try { playAnchor() } catch { /* audio unavailable — session continues silently */ }
+    if (focusAnchor) { try { play(focusAnchor) } catch { /* silent */ } }
 
     setRemaining(durationSec)
     setElapsed(0)

@@ -21,7 +21,7 @@ const CONSENT_PENDING_KEY = 'ms_consent_pending'
 const AuthScreen       = lazy(() => import('@/features/auth/AuthScreen'))
 const OnboardingPage   = lazy(() => import('@/features/onboarding/OnboardingPage'))
 const HomePage         = lazy(() => import('@/features/home/HomePage'))
-const FocusPage        = lazy(() => import('@/features/focus/FocusPage'))
+const FocusPage        = lazy(() => import('@/features/focus/FocusScreen'))
 const TasksPage        = lazy(() => import('@/features/tasks/TasksPage'))
 const ProgressPage     = lazy(() => import('@/features/progress/ProgressPage'))
 const SettingsPage     = lazy(() => import('@/features/settings/SettingsPage'))
