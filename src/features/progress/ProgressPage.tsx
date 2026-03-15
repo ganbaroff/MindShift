@@ -1,28 +1,30 @@
 import { motion } from 'framer-motion';
+import { useStore } from '@/store';
+import { ENERGY_EMOJI } from '@/shared/lib/constants';
 
-const weekData = [
-  { day: 'Mon', mins: 45 },
-  { day: 'Tue', mins: 30 },
-  { day: 'Wed', mins: 50 },
-  { day: 'Thu', mins: 20 },
-  { day: 'Fri', mins: 40 },
-  { day: 'Sat', mins: 0 },
-  { day: 'Sun', mins: 0 },
-];
-
-const achievements = [
-  { emoji: '🌟', name: 'First Focus', unlocked: true },
-  { emoji: '🔥', name: '5-Day Streak', unlocked: true },
-  { emoji: '🎯', name: '10 Tasks', unlocked: true },
-  { emoji: '🧘', name: 'Zen Master', unlocked: false },
-  { emoji: '🏔️', name: 'Summit', unlocked: false },
-  { emoji: '💎', name: 'Diamond', unlocked: false },
-];
-
-const energyEmojis = ['😌', '🙂', '😄', '🙂', '😄', '😄', '⚡', '😄', '🙂', '😄'];
+const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 export default function ProgressPage() {
+  const { xpTotal, completedTotal, achievements, weeklyStats, energyLevel, burnoutScore } = useStore();
+
+  const level = Math.floor(xpTotal / 1000) + 1;
+  const xpInLevel = xpTotal % 1000;
+  const xpToNext = 1000;
+
+  const weekData = DAY_LABELS.map((day, i) => ({
+    day,
+    mins: (weeklyStats as any)?.dailyMinutes?.[i] ?? 0,
+  }));
+
   const maxMins = Math.max(...weekData.map(d => d.mins), 1);
+
+  const achievementList = achievements.map(a => ({
+    emoji: a.emoji,
+    name: a.name,
+    unlocked: !!a.unlockedAt,
+  }));
+
+  const unlockedCount = achievements.filter(a => a.unlockedAt).length;
 
   return (
     <div className="min-h-screen px-5 pb-36 pt-10" style={{ backgroundColor: '#0F1120' }}>
@@ -39,12 +41,12 @@ export default function ProgressPage() {
               <div className="w-full h-full rounded-full flex items-center justify-center" style={{ backgroundColor: '#1E2136' }}>🧠</div>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[15px] font-semibold" style={{ color: '#E8E8F0' }}>Level 7 — Steadfast</p>
-              <p className="text-[13px]" style={{ color: '#7B72FF' }}>2,340 XP</p>
+              <p className="text-[15px] font-semibold" style={{ color: '#E8E8F0' }}>Level {level}</p>
+              <p className="text-[13px]" style={{ color: '#7B72FF' }}>{xpTotal.toLocaleString()} XP</p>
               <div className="w-full h-1.5 rounded-full mt-1.5 overflow-hidden" style={{ backgroundColor: '#252840' }}>
-                <div className="h-full rounded-full gradient-primary-teal" style={{ width: '67%' }} />
+                <div className="h-full rounded-full gradient-primary-teal" style={{ width: `${(xpInLevel / xpToNext) * 100}%` }} />
               </div>
-              <p className="text-[11px] mt-0.5" style={{ color: '#8B8BA7' }}>1,340/2,000 XP to Level 8</p>
+              <p className="text-[11px] mt-0.5" style={{ color: '#8B8BA7' }}>{xpInLevel}/{xpToNext} XP to Level {level + 1}</p>
             </div>
           </div>
         </motion.div>
@@ -69,15 +71,17 @@ export default function ProgressPage() {
               </div>
             ))}
           </div>
-          <p className="text-[11px] mt-1.5 text-center" style={{ color: '#8B8BA7' }}>5 of 7 days · 185m focus</p>
+          <p className="text-[11px] mt-1.5 text-center" style={{ color: '#8B8BA7' }}>
+            {weeklyStats ? `${weeklyStats.totalFocusMinutes}m focus this week` : 'No data yet'}
+          </p>
         </motion.div>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-3 gap-2">
           {[
-            { value: '12', emoji: '🏆', label: 'Achievements' },
-            { value: '47', emoji: '✅', label: 'Tasks Done' },
-            { value: '23', emoji: '📅', label: 'Active Days' },
+            { value: String(unlockedCount), emoji: '🏆', label: 'Achievements' },
+            { value: String(completedTotal), emoji: '✅', label: 'Tasks Done' },
+            { value: String(burnoutScore), emoji: '🧠', label: 'Burnout score' },
           ].map((s, i) => (
             <motion.div key={i} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 + i * 0.03 }} className="rounded-2xl p-2.5 flex flex-col items-center" style={{ backgroundColor: '#1E2136' }}>
               <span className="text-[18px] font-bold" style={{ color: '#E8E8F0' }}>{s.value}</span>
@@ -90,8 +94,8 @@ export default function ProgressPage() {
         {/* Energy Trends */}
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="rounded-2xl p-3" style={{ backgroundColor: '#1E2136' }}>
           <p className="text-[11px] uppercase tracking-widest mb-1.5" style={{ color: '#4ECDC4' }}>Energy after sessions</p>
-          <div className="flex gap-0.5 text-[18px] flex-wrap">{energyEmojis.map((e, i) => <span key={i}>{e}</span>)}</div>
-          <p className="text-[13px] mt-1" style={{ color: '#4ECDC4' }}>↑ Trending up</p>
+          <div className="flex gap-0.5 text-[28px]">{ENERGY_EMOJI[energyLevel - 1]}</div>
+          <p className="text-[13px] mt-1" style={{ color: '#4ECDC4' }}>Current energy level</p>
         </motion.div>
 
         {/* AI Insights */}
@@ -110,7 +114,7 @@ export default function ProgressPage() {
         <div>
           <p className="text-[11px] uppercase tracking-widest mb-2" style={{ color: '#8B8BA7' }}>Achievements</p>
           <div className="grid grid-cols-3 gap-2">
-            {achievements.map((a, i) => (
+            {achievementList.map((a, i) => (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, scale: 0.95 }}

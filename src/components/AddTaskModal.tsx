@@ -1,27 +1,54 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
-import { difficultyConfig, durationOptions, type Difficulty } from '@/lib/mock-data';
 import { X } from 'lucide-react';
+import { useStore } from '@/store';
+import { DIFFICULTY_MAP } from '@/types';
+import type { Task } from '@/types';
+import { getNowPoolMax } from '@/shared/lib/constants';
+
+const durationOptions = [5, 15, 25, 45, 60];
+
 interface AddTaskModalProps {
   open: boolean;
   onClose: () => void;
-  nowCount: number;
-  maxNow?: number;
-  onAdd?: (task: { title: string; difficulty: Difficulty; minutes: number }) => void;
 }
-export default function AddTaskModal({ open, onClose, nowCount, maxNow = 3, onAdd }: AddTaskModalProps) {
-  const [title, setTitle] = useState('');
-  const [difficulty, setDifficulty] = useState<Difficulty>('easy');
-  const [minutes, setMinutes] = useState(25);
+
+export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
+  const { addTask, nowPool, appMode, seasonalMode } = useStore();
+  const maxNow = getNowPoolMax(appMode, seasonalMode);
+  const nowCount = nowPool.filter(t => t.status === 'active').length;
   const isFull = nowCount >= maxNow;
+
+  const [title, setTitle] = useState('');
+  const [difficulty, setDifficulty] = useState<1 | 2 | 3>(1);
+  const [minutes, setMinutes] = useState(25);
+
   const handleSubmit = () => {
     if (!title.trim()) return;
-    onAdd?.({ title: title.trim(), difficulty, minutes });
+    const newTask: Task = {
+      id: crypto.randomUUID(),
+      title: title.trim(),
+      pool: isFull ? 'next' : 'now',
+      status: 'active',
+      difficulty,
+      estimatedMinutes: minutes,
+      createdAt: new Date().toISOString(),
+      completedAt: null,
+      snoozeCount: 0,
+      parentTaskId: null,
+      position: 0,
+      dueDate: null,
+      dueTime: null,
+      taskType: 'task',
+      reminderSentAt: null,
+    };
+    addTask(newTask);
     setTitle('');
-    setDifficulty('easy');
+    setDifficulty(1);
     setMinutes(25);
     onClose();
   };
+
   return (
     <AnimatePresence>
       {open && (
@@ -57,8 +84,8 @@ export default function AddTaskModal({ open, onClose, nowCount, maxNow = 3, onAd
               <div>
                 <label className="text-caption text-ms-muted uppercase tracking-widest mb-2 block">Difficulty</label>
                 <div className="flex gap-2">
-                  {(['easy', 'medium', 'hard'] as Difficulty[]).map(d => {
-                    const c = difficultyConfig[d];
+                  {([1, 2, 3] as const).map(d => {
+                    const c = DIFFICULTY_MAP[d];
                     const sel = difficulty === d;
                     return (
                       <motion.button
@@ -74,7 +101,7 @@ export default function AddTaskModal({ open, onClose, nowCount, maxNow = 3, onAd
                         }}
                       >
                         <div className="flex gap-0.5">
-                          {Array.from({ length: c.dots }).map((_, i) => (
+                          {Array.from({ length: d }).map((_, i) => (
                             <div key={i} className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: sel ? c.color : '#8B8BA7' }} />
                           ))}
                         </div>

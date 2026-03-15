@@ -2,6 +2,11 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import EnergyPicker from '@/components/EnergyPicker';
+import { useStore } from '@/store';
+import type { EnergyLevel } from '@/types';
+
+const modeMap = ['minimal', 'habit', 'system'] as const;
+const timerMap = ['countdown', 'countup', 'surprise'] as const;
 
 const steps = [
   {
@@ -33,6 +38,7 @@ const steps = [
 
 export default function OnboardingPage() {
   const navigate = useNavigate();
+  const { setAppMode, setEnergyLevel, setTimerStyle, setOnboardingCompleted } = useStore();
   const [step, setStep] = useState(0);
   const [selections, setSelections] = useState<(number | null)[]>([null, null, null, null]);
   const [energy, setEnergy] = useState(2);
@@ -41,8 +47,15 @@ export default function OnboardingPage() {
   const canContinue = step === 1 ? true : selections[step] !== null;
 
   const handleNext = () => {
-    if (step < 3) setStep(step + 1);
-    else navigate('/');
+    if (step < 3) {
+      setStep(step + 1);
+    } else {
+      if (selections[0] !== null) setAppMode(modeMap[selections[0]]);
+      setEnergyLevel((energy + 1) as EnergyLevel);
+      if (selections[2] !== null) setTimerStyle(timerMap[selections[2]]);
+      setOnboardingCompleted();
+      navigate('/');
+    }
   };
 
   const select = (i: number) => {

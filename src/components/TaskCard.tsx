@@ -1,19 +1,19 @@
 import { motion } from 'framer-motion';
-import type { MockTask, Difficulty } from '@/lib/mock-data';
-import { difficultyConfig } from '@/lib/mock-data';
+import { DIFFICULTY_MAP } from '@/types';
+import type { Task } from '@/types';
 
 interface TaskCardProps {
-  task: MockTask;
+  task: Task;
   index?: number;
   onDone?: (id: string) => void;
   onPark?: (id: string) => void;
 }
 
-function DifficultyDots({ difficulty }: { difficulty: Difficulty }) {
-  const config = difficultyConfig[difficulty];
+function DifficultyDots({ difficulty }: { difficulty: 1 | 2 | 3 }) {
+  const config = DIFFICULTY_MAP[difficulty];
   return (
     <div className="flex gap-0.5 items-center">
-      {Array.from({ length: config.dots }).map((_, i) => (
+      {Array.from({ length: difficulty }).map((_, i) => (
         <div
           key={i}
           className="w-1.5 h-1.5 rounded-full"
@@ -25,7 +25,9 @@ function DifficultyDots({ difficulty }: { difficulty: Difficulty }) {
 }
 
 export default function TaskCard({ task, index = 0, onDone, onPark }: TaskCardProps) {
-  const config = difficultyConfig[task.difficulty];
+  const config = DIFFICULTY_MAP[task.difficulty ?? 1];
+  const isCarryOver = task.status === 'active' &&
+    (Date.now() - new Date(task.createdAt).getTime() > 24 * 60 * 60 * 1000);
 
   return (
     <motion.div
@@ -40,7 +42,7 @@ export default function TaskCard({ task, index = 0, onDone, onPark }: TaskCardPr
     >
       {/* Header row */}
       <div className="flex items-center gap-2 mb-1.5">
-        <DifficultyDots difficulty={task.difficulty} />
+        <DifficultyDots difficulty={task.difficulty ?? 1} />
         {task.pool !== 'now' && (
           <span
             className="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
@@ -54,9 +56,9 @@ export default function TaskCard({ task, index = 0, onDone, onPark }: TaskCardPr
             {task.estimatedMinutes}m
           </span>
         )}
-        {task.hasIdea && <span className="text-[13px]">💡</span>}
-        {task.hasReminder && <span className="text-[13px]">🔔</span>}
-        {task.isCarryOver && (
+        {task.taskType === 'idea' && <span className="text-[13px]">💡</span>}
+        {task.taskType === 'reminder' && <span className="text-[13px]">🔔</span>}
+        {isCarryOver && (
           <span
             className="text-[10px] px-1.5 py-0.5 rounded-full"
             style={{ backgroundColor: 'rgba(245,158,11,0.15)', color: '#F59E0B' }}

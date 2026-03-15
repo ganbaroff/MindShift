@@ -1,5 +1,8 @@
 import { motion } from 'framer-motion';
-import { energyOptions } from '@/lib/mock-data';
+import { ENERGY_LABELS, ENERGY_EMOJI } from '@/shared/lib/constants';
+
+const energyOptions = ENERGY_LABELS.map((label, i) => ({ emoji: ENERGY_EMOJI[i], label }));
+
 interface EnergyPickerProps {
   selected: number;
   onSelect: (i: number) => void;

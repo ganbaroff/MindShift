@@ -1,6 +1,12 @@
-import { useState } from 'react';
 import { motion } from 'framer-motion';
 import EnergyPicker from '@/components/EnergyPicker';
+import { useStore } from '@/store';
+import type { EnergyLevel } from '@/types';
+import { supabase } from '@/shared/lib/supabase';
+
+const modeKeys = ['minimal', 'habit', 'system'] as const;
+const timerKeys = ['countdown', 'countup', 'surprise'] as const;
+const phaseKeys = ['launch', 'maintain', 'recover', 'sandbox'] as const;
 
 const modeChips = [
   { emoji: '🎯', label: 'Minimal', desc: 'One task at a time' },
@@ -22,49 +28,73 @@ const phaseCards = [
 ];
 
 export default function SettingsPage() {
-  const [mode, setMode] = useState(0);
-  const [timer, setTimer] = useState(0);
-  const [energy, setEnergy] = useState(3);
-  const [phase, setPhase] = useState(1);
-  const [restMode, setRestMode] = useState(false);
-  const [reducedStim, setReducedStim] = useState(false);
+  const {
+    appMode, setAppMode,
+    timerStyle, setTimerStyle,
+    energyLevel, setEnergyLevel,
+    seasonalMode, setSeasonalMode,
+    flexiblePauseUntil, setFlexiblePauseUntil,
+    reducedStimulation, setReducedStimulation,
+    subscriptionTier,
+    email,
+    signOut,
+  } = useStore();
+
+  const mode = modeKeys.indexOf(appMode);
+  const timer = timerKeys.indexOf(timerStyle);
+  const phase = phaseKeys.indexOf(seasonalMode);
+  const restMode = flexiblePauseUntil ? new Date(flexiblePauseUntil) > new Date() : false;
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    signOut();
+  };
+
+  const planLabel =
+    subscriptionTier === 'pro' ? 'MindShift Pro' :
+    subscriptionTier === 'pro_trial' ? 'MindShift Pro Trial' :
+    'MindShift Free';
 
   return (
     <div className="min-h-screen px-5 pb-36 pt-10" style={{ backgroundColor: '#0F1120' }}>
       <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
         <h1 className="text-[24px] font-bold" style={{ color: '#E8E8F0' }}>Settings</h1>
-        <p className="text-[13px] mt-0.5" style={{ color: '#8B8BA7' }}>user@mindshift.app</p>
+        <p className="text-[13px] mt-0.5" style={{ color: '#8B8BA7' }}>{email ?? 'Not signed in'}</p>
       </motion.div>
 
       <div className="space-y-3 mt-5">
         {/* Plan */}
         <div className="rounded-2xl p-3" style={{ backgroundColor: '#1E2136' }}>
-          <p className="text-[15px]" style={{ color: '#E8E8F0' }}>🌱 MindShift Free</p>
+          <p className="text-[15px]" style={{ color: '#E8E8F0' }}>🌱 {planLabel}</p>
         </div>
 
         {/* App Mode */}
         <Section label="App Mode">
           <div className="flex gap-1.5">
             {modeChips.map((c, i) => (
-              <Chip key={i} selected={mode === i} onClick={() => setMode(i)} emoji={c.emoji} label={c.label} />
+              <Chip key={i} selected={mode === i} onClick={() => setAppMode(modeKeys[i])} emoji={c.emoji} label={c.label} />
             ))}
           </div>
-          <p className="text-[11px] mt-1.5" style={{ color: '#8B8BA7' }}>{modeChips[mode].desc}</p>
+          <p className="text-[11px] mt-1.5" style={{ color: '#8B8BA7' }}>{modeChips[mode]?.desc}</p>
         </Section>
 
         {/* Timer */}
         <Section label="Timer">
           <div className="flex gap-1.5">
             {timerChips.map((c, i) => (
-              <Chip key={i} selected={timer === i} onClick={() => setTimer(i)} emoji={c.emoji} label={c.label} />
+              <Chip key={i} selected={timer === i} onClick={() => setTimerStyle(timerKeys[i])} emoji={c.emoji} label={c.label} />
             ))}
           </div>
-          <p className="text-[11px] mt-1.5" style={{ color: '#8B8BA7' }}>{timerChips[timer].desc}</p>
+          <p className="text-[11px] mt-1.5" style={{ color: '#8B8BA7' }}>{timerChips[timer]?.desc}</p>
         </Section>
 
         {/* Energy */}
         <Section label="Energy">
-          <EnergyPicker selected={energy} onSelect={setEnergy} size={40} />
+          <EnergyPicker
+            selected={energyLevel - 1}
+            onSelect={(i) => setEnergyLevel((i + 1) as EnergyLevel)}
+            size={40}
+          />
         </Section>
 
         {/* Phase */}
@@ -74,7 +104,7 @@ export default function SettingsPage() {
               <motion.button
                 key={i}
                 whileTap={{ scale: 0.97 }}
-                onClick={() => setPhase(i)}
+                onClick={() => setSeasonalMode(phaseKeys[i])}
                 className="p-2.5 rounded-xl text-left"
                 style={{
                   backgroundColor: phase === i ? 'rgba(123,114,255,0.15)' : '#252840',
@@ -93,11 +123,15 @@ export default function SettingsPage() {
 
         {/* Toggles */}
         <Section label="Rest Mode">
-          <Toggle checked={restMode} onChange={setRestMode} label="🛋️ Pause for 24h" />
+          <Toggle
+            checked={restMode}
+            onChange={(v) => setFlexiblePauseUntil(v ? new Date(Date.now() + 24 * 3600 * 1000).toISOString() : null)}
+            label="🛋️ Pause for 24h"
+          />
         </Section>
 
         <Section label="Accessibility">
-          <Toggle checked={reducedStim} onChange={setReducedStim} label="Reduced stimulation" />
+          <Toggle checked={reducedStimulation} onChange={setReducedStimulation} label="Reduced stimulation" />
         </Section>
 
         {/* Data */}
@@ -106,7 +140,7 @@ export default function SettingsPage() {
           <button className="text-[13px] font-medium w-full text-center mt-2" style={{ color: '#F59E0B' }}>Delete account</button>
         </Section>
 
-        <button className="text-[13px] font-medium w-full text-center py-2" style={{ color: '#E8976B' }}>Sign out</button>
+        <button onClick={handleSignOut} className="text-[13px] font-medium w-full text-center py-2" style={{ color: '#E8976B' }}>Sign out</button>
 
         <div className="text-center space-y-1 pt-2 pb-6">
           <p className="text-[11px]" style={{ color: '#8B8BA7' }}>Privacy · Terms · Cookies</p>

@@ -1,18 +1,27 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { mockTasks, durationOptions } from '@/lib/mock-data';
 import MochiAvatar from '@/components/MochiAvatar';
+import { useStore, selectActiveTasks, selectSessionProgress } from '@/store';
+import { ENERGY_EMOJI, ENERGY_LABELS } from '@/shared/lib/constants';
+
+const durationOptions = [5, 15, 25, 45, 60];
+
 export default function FocusPage() {
-  const [activeSession, setActiveSession] = useState(false);
   const [selectedTask, setSelectedTask] = useState<string | null>(null);
   const [duration, setDuration] = useState(25);
-  const availableTasks = mockTasks.filter(t => !t.done).slice(0, 3);
-  if (activeSession) return <FocusActive duration={duration} task={availableTasks.find(t => t.id === selectedTask)} onEnd={() => setActiveSession(false)} />;
+
+  const availableTasks = useStore(selectActiveTasks);
+  const { activeSession, startSession, endSession, timerSeconds, sessionPhase, energyLevel } = useStore();
+
+  if (activeSession) {
+    const task = availableTasks.find(t => t.id === activeSession.taskId);
+    return <FocusActive onEnd={endSession} task={task} timerSeconds={timerSeconds} phase={sessionPhase} />;
+  }
   return (
     <div className="min-h-screen px-5 pb-36 pt-10" style={{ backgroundColor: '#0F1120' }}>
       <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
         <h1 className="text-[24px] font-bold" style={{ color: '#E8E8F0' }}>Focus Session ⏱️</h1>
-        <p className="text-[13px] mt-0.5" style={{ color: '#4ECDC4' }}>Energy: Good 😄</p>
+        <p className="text-[13px] mt-0.5" style={{ color: '#4ECDC4' }}>Energy: {ENERGY_LABELS[energyLevel - 1]} {ENERGY_EMOJI[energyLevel - 1]}</p>
       </motion.div>
       <div className="space-y-4 mt-5">
         {/* Bookmark */}
@@ -20,7 +29,7 @@ export default function FocusPage() {
           <p className="text-[11px] uppercase tracking-widest mb-1" style={{ color: '#7B72FF' }}>📌 Pick up where you left off</p>
           <p className="text-[15px] font-semibold" style={{ color: '#E8E8F0' }}>Review project proposal</p>
           <div className="flex gap-2 mt-2">
-            <motion.button whileTap={{ scale: 0.97 }} onClick={() => { setSelectedTask('2'); setActiveSession(true); }} className="px-3 h-8 rounded-lg gradient-primary text-[13px] font-medium" style={{ color: '#fff' }}>Continue →</motion.button>
+            <motion.button whileTap={{ scale: 0.97 }} onClick={() => startSession(selectedTask, duration, null)} className="px-3 h-8 rounded-lg gradient-primary text-[13px] font-medium" style={{ color: '#fff' }}>Continue →</motion.button>
             <button className="px-3 h-8 rounded-lg text-[13px]" style={{ backgroundColor: '#252840', color: '#8B8BA7' }}>Dismiss</button>
           </div>
         </motion.div>
@@ -57,7 +66,7 @@ export default function FocusPage() {
         </div>
         <motion.button
           whileTap={{ scale: 0.97 }}
-          onClick={() => setActiveSession(true)}
+          onClick={() => startSession(selectedTask, duration, null)}
           className="w-full h-[48px] rounded-xl gradient-primary font-semibold text-[15px] shadow-primary"
           style={{ color: '#fff' }}
         >
@@ -88,15 +97,17 @@ function TaskOption({ selected, onClick, emoji, title, badge }: {
     </motion.button>
   );
 }
-function FocusActive({ duration, task, onEnd }: { duration: number; task?: any; onEnd: () => void }) {
-  const progress = 0.57;
-  const timeLeft = `${Math.floor(duration * (1 - progress))}:${String(Math.floor((duration * 60 * (1 - progress)) % 60)).padStart(2, '0')}`;
+function FocusActive({ onEnd, task, timerSeconds, phase }: { onEnd: () => void; task?: any; timerSeconds: number; phase: string }) {
+  const progress = useStore(selectSessionProgress);
+  const mins = Math.floor(timerSeconds / 60);
+  const secs = timerSeconds % 60;
+  const timeLeft = `${mins}:${String(secs).padStart(2, '0')}`;
   const r = 120;
   const circumference = Math.PI * r;
   const offset = circumference * (1 - progress);
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-5 relative" style={{ backgroundColor: '#0F1120' }}>
-      <p className="text-[13px] mb-4" style={{ color: '#4ECDC4' }}>Release</p>
+      <p className="text-[13px] mb-4" style={{ color: '#4ECDC4' }}>{phase.charAt(0).toUpperCase() + phase.slice(1)}</p>
       <div className="relative w-[260px] h-[260px] flex items-center justify-center">
         <svg width="260" height="260" viewBox="0 0 260 260" className="absolute">
           <circle cx="130" cy="130" r={r} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="7" />
@@ -126,7 +137,7 @@ function FocusActive({ duration, task, onEnd }: { duration: number; task?: any; 
       </div>
       <div className="flex items-center gap-6 mt-10">
         <motion.button whileTap={{ scale: 0.97 }} className="w-11 h-11 rounded-full flex items-center justify-center text-[18px]" style={{ backgroundColor: '#252840' }}>🔊</motion.button>
-        <motion.button whileTap={{ scale: 0.97 }} onClick={onEnd} className="w-11 h-11 rounded-full flex items-center justify-center text-[18px]" style={{ backgroundColor: '#252840' }}>⏹</motion.button>
+        <motion.button whileTap={{ scale: 0.97 }} onClick={() => { onEnd(); }} className="w-11 h-11 rounded-full flex items-center justify-center text-[18px]" style={{ backgroundColor: '#252840' }}>⏹</motion.button>
         <motion.button whileTap={{ scale: 0.97 }} className="w-11 h-11 rounded-full flex items-center justify-center text-[18px]" style={{ backgroundColor: '#252840' }}>💭</motion.button>
       </div>
     </div>

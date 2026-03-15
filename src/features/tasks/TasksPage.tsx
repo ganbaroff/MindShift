@@ -4,17 +4,25 @@ import { ChevronDown } from 'lucide-react';
 import TaskCard from '@/components/TaskCard';
 import Fab from '@/components/Fab';
 import AddTaskModal from '@/components/AddTaskModal';
-import { mockTasks, difficultyConfig } from '@/lib/mock-data';
+import { useStore } from '@/store';
+import { DIFFICULTY_MAP } from '@/types';
+import { getNowPoolMax } from '@/shared/lib/constants';
 
 export default function TasksPage() {
   const [showAddTask, setShowAddTask] = useState(false);
   const [showSomeday, setShowSomeday] = useState(false);
   const [showDone, setShowDone] = useState(false);
 
-  const nowTasks = mockTasks.filter(t => t.pool === 'now' && !t.done);
-  const nextTasks = mockTasks.filter(t => t.pool === 'next' && !t.done);
-  const somedayTasks = mockTasks.filter(t => t.pool === 'someday' && !t.done);
-  const doneTasks = mockTasks.filter(t => t.done);
+  const { nowPool, nextPool, somedayPool, completeTask, snoozeTask, appMode, seasonalMode } = useStore();
+
+  const nowTasks = nowPool.filter(t => t.status === 'active');
+  const nextTasks = nextPool.filter(t => t.status === 'active');
+  const somedayTasks = somedayPool.filter(t => t.status === 'active');
+  const doneTasks = [...nowPool, ...nextPool, ...somedayPool]
+    .filter(t => t.status === 'completed' && t.completedAt)
+    .sort((a, b) => new Date(b.completedAt!).getTime() - new Date(a.completedAt!).getTime());
+
+  const nowMax = getNowPoolMax(appMode, seasonalMode);
 
   return (
     <div className="min-h-screen px-5 pb-36 pt-10" style={{ backgroundColor: '#0F1120' }}>
@@ -28,10 +36,12 @@ export default function TasksPage() {
         <div>
           <div className="flex items-center gap-2 mb-2">
             <span className="text-[11px] uppercase tracking-widest font-semibold" style={{ color: '#7B72FF' }}>NOW</span>
-            <span className="text-[11px]" style={{ color: '#8B8BA7' }}>{nowTasks.length}/3</span>
+            <span className="text-[11px]" style={{ color: '#8B8BA7' }}>{nowTasks.length}/{nowMax}</span>
           </div>
           <div className="space-y-2">
-            {nowTasks.map((t, i) => <TaskCard key={t.id} task={t} index={i} />)}
+            {nowTasks.map((t, i) => (
+              <TaskCard key={t.id} task={t} index={i} onDone={(id) => completeTask(id)} onPark={(id) => snoozeTask(id)} />
+            ))}
           </div>
         </div>
 
@@ -54,36 +64,50 @@ export default function TasksPage() {
             <span className="text-[11px]" style={{ color: '#8B8BA7' }}>{nextTasks.length}/6</span>
           </div>
           <div className="space-y-2">
-            {nextTasks.map((t, i) => <TaskCard key={t.id} task={t} index={i} />)}
+            {nextTasks.map((t, i) => (
+              <TaskCard key={t.id} task={t} index={i} onDone={(id) => completeTask(id)} onPark={(id) => snoozeTask(id)} />
+            ))}
           </div>
         </div>
 
         {/* Someday */}
         <CollapsibleSection label="SOMEDAY" count={somedayTasks.length} open={showSomeday} onToggle={() => setShowSomeday(!showSomeday)}>
           <div className="space-y-2 mt-2">
-            {somedayTasks.map((t, i) => <TaskCard key={t.id} task={t} index={i} />)}
+            {somedayTasks.map((t, i) => (
+              <TaskCard key={t.id} task={t} index={i} onDone={(id) => completeTask(id)} onPark={(id) => snoozeTask(id)} />
+            ))}
           </div>
         </CollapsibleSection>
 
         {/* Done */}
         <CollapsibleSection label="✓ Done recently" count={doneTasks.length} open={showDone} onToggle={() => setShowDone(!showDone)} labelColor="#4ECDC4">
           <div className="space-y-1 mt-2">
-            {doneTasks.map(t => (
-              <div key={t.id} className="flex items-center gap-2 py-1.5">
-                <span style={{ color: '#4ECDC4' }}>✓</span>
-                <span className="text-[14px] line-through flex-1" style={{ color: '#8B8BA7' }}>{t.title}</span>
-                <span className="text-[11px] px-1.5 py-0.5 rounded-full" style={{ backgroundColor: `${difficultyConfig[t.difficulty].color}20`, color: difficultyConfig[t.difficulty].color }}>
-                  {difficultyConfig[t.difficulty].label}
-                </span>
-                <span className="text-[11px]" style={{ color: '#8B8BA7' }}>{t.doneAt}</span>
-              </div>
-            ))}
+            {doneTasks.map(t => {
+              const diffConfig = DIFFICULTY_MAP[t.difficulty ?? 1];
+              return (
+                <div key={t.id} className="flex items-center gap-2 py-1.5">
+                  <span style={{ color: '#4ECDC4' }}>✓</span>
+                  <span className="text-[14px] line-through flex-1" style={{ color: '#8B8BA7' }}>{t.title}</span>
+                  <span
+                    className="text-[11px] px-1.5 py-0.5 rounded-full"
+                    style={{ backgroundColor: `${diffConfig.color}20`, color: diffConfig.color }}
+                  >
+                    {diffConfig.label}
+                  </span>
+                  {t.completedAt && (
+                    <span className="text-[11px]" style={{ color: '#8B8BA7' }}>
+                      {new Date(t.completedAt).toLocaleDateString()}
+                    </span>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </CollapsibleSection>
       </div>
 
       <Fab onClick={() => setShowAddTask(true)} />
-      <AddTaskModal open={showAddTask} onClose={() => setShowAddTask(false)} nowCount={nowTasks.length} />
+      <AddTaskModal open={showAddTask} onClose={() => setShowAddTask(false)} />
     </div>
   );
 }
