@@ -2,18 +2,29 @@
 
 @theme {
   /* ── MindShift Design Tokens ───────────────────────────── */
-  --color-bg:        #0F1117;
-  --color-surface:   #171A2B;   /* nav/sheet bg (was #1A1D2E) */
-  --color-card:      #1E2136;   /* main cards, panels — depth without borders */
+  --color-bg:        #0F1120;
+  --color-surface:   #171A2B;
+  --color-card:      #1E2136;
   --color-elevated:  #252840;
-  --color-primary:   #7B72FF;  /* WCAG AA: 5.0:1 on #0F1117 (was #6C63FF 4.37:1) */
+  --color-primary:   #7B72FF;
   --color-secondary: #4ECDC4;
-  --color-accent:    #F59E0B;  /* Research #8: amber replaces #FFE66D for task contexts */
+  --color-accent:    #F59E0B;
   --color-text:      #E8E8F0;
   --color-muted:     #8B8BA7;
-  --color-warning:   #F59E0B;  /* Research #8: amber — #FF6B6B (coral) is RSD trigger */
+  --color-warning:   #F59E0B;
   --color-success:   #4ECDC4;
   --color-border:    #2D3150;
+
+  /* ── ms.* aliases (Lovable component classes) ─────────── */
+  --color-ms-primary: #7B72FF;
+  --color-ms-teal:    #4ECDC4;
+  --color-ms-gold:    #F59E0B;
+  --color-ms-purple:  #A78BFA;
+  --color-ms-bg:      #0F1120;
+  --color-ms-card:    #1E2136;
+  --color-ms-raised:  #252840;
+  --color-ms-text:    #E8E8F0;
+  --color-ms-muted:   #8B8BA7;
 
   /* Typography */
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -22,51 +33,78 @@
   --duration-fast:   150ms;
   --duration-normal: 250ms;
   --duration-slow:   400ms;
+
+  /* Border radius */
+  --radius: 1rem;
 }
 
-/* ── Runtime CSS tokens — calm mode support ─────────────── */
-/* Aliases matching tokens.ts names; non-layered so they win */
-/* over @layer theme and can be overridden by [data-mode].   */
+/* ── shadcn/ui HSL variables (for Radix-based components) ── */
 :root {
-  --color-primary:         #7B72FF;  /* override @theme so [data-mode] can win */
-  --color-teal:            #4ECDC4;  /* tokens.color.teal                      */
-  --color-gold:            #F59E0B;  /* tokens.color.gold                      */
-  --color-surface-card:    #1E2136;  /* tokens.color.surface                   */
-  --color-surface-raised:  #252840;  /* tokens.color.surfaceRaised             */
-  --color-text-primary:    #E8E8F0;  /* tokens.color.textPrimary               */
-  --color-text-muted:      #8B8BA7;  /* tokens.color.textMuted                 */
+  --background: 228 60% 9%;
+  --foreground: 240 33% 93%;
+  --card: 230 28% 16%;
+  --card-foreground: 240 33% 93%;
+  --card-raised: 232 25% 20%;
+  --popover: 230 28% 16%;
+  --popover-foreground: 240 33% 93%;
+  --primary: 244 100% 72%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 230 28% 16%;
+  --secondary-foreground: 240 33% 93%;
+  --muted: 232 25% 20%;
+  --muted-foreground: 240 14% 60%;
+  --accent: 263 86% 76%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 43 96% 56%;
+  --destructive-foreground: 0 0% 100%;
+  --success: 170 58% 55%;
+  --success-foreground: 0 0% 100%;
+  --warning: 43 96% 56%;
+  --warning-foreground: 228 60% 9%;
+  --border: 0 0% 100% / 0.06;
+  --input: 232 25% 20%;
+  --ring: 244 100% 72%;
+  --sidebar-background: 228 60% 9%;
+  --sidebar-foreground: 240 33% 93%;
+  --sidebar-primary: 244 100% 72%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 232 25% 20%;
+  --sidebar-accent-foreground: 240 33% 93%;
+  --sidebar-border: 0 0% 100% / 0.06;
+  --sidebar-ring: 244 100% 72%;
 
-  /* ── Extended palette (Phase 0 additions) ─────────────── */
-  --color-border-subtle:   rgba(255,255,255,0.06);   /* default card border — 80+ uses */
-  --color-primary-alpha:   rgba(123,114,255,0.15);   /* active/selected tint bg        */
-  --color-border-accent:   rgba(123,114,255,0.35);   /* accent border (install banner) */
-  --color-border-teal:     rgba(78,205,196,0.35);    /* teal accent border             */
-  --color-border-gold:     rgba(245,158,11,0.35);    /* gold accent border             */
-  --color-primary-dark:    #5B52E8;                  /* gradient end, hover darken     */
-  --color-primary-light:   #8B85FF;                  /* glow tints, light accents      */
-  --color-teal-dark:       #2E9990;                  /* teal pressed / gradient end    */
-  --color-text-subtle:     #6B6B8A;                  /* 3rd-tier: placeholder, footnotes */
-  --color-glass-dark:      rgba(22,25,40,0.95);      /* dark glass bg (CookieBanner etc) */
-  --color-banner-border:   rgba(45,49,80,0.6);       /* dim border for glass overlays    */
-  --color-primary-ring:    rgba(123,114,255,0.30);   /* primary ring/border at 30%       */
-  --color-teal-alpha:      rgba(78,205,196,0.20);    /* teal tint bg (voice mic active)  */
-  --color-gold-alpha:      rgba(245,158,11,0.15);    /* gold/amber tint bg               */
+  /* ── Runtime CSS tokens ─────────────────────────────────── */
+  --color-primary:         #7B72FF;
+  --color-teal:            #4ECDC4;
+  --color-gold:            #F59E0B;
+  --color-surface-card:    #1E2136;
+  --color-surface-raised:  #252840;
+  --color-text-primary:    #E8E8F0;
+  --color-text-muted:      #8B8BA7;
+  --color-border-subtle:   rgba(255,255,255,0.06);
+  --color-primary-alpha:   rgba(123,114,255,0.15);
+  --color-border-accent:   rgba(123,114,255,0.35);
+  --color-border-teal:     rgba(78,205,196,0.35);
+  --color-border-gold:     rgba(245,158,11,0.35);
+  --color-primary-dark:    #5B52E8;
+  --color-primary-light:   #8B85FF;
+  --color-teal-dark:       #2E9990;
+  --color-text-subtle:     #6B6B8A;
+  --color-glass-dark:      rgba(22,25,40,0.95);
+  --color-banner-border:   rgba(45,49,80,0.6);
+  --color-primary-ring:    rgba(123,114,255,0.30);
+  --color-teal-alpha:      rgba(78,205,196,0.20);
+  --color-gold-alpha:      rgba(245,158,11,0.15);
 }
 
-/* Calm / reduced-stimulation palette.                        */
-/* App.tsx sets data-mode="calm" on <html> when              */
-/* store.reducedStimulation === true.                         */
 [data-mode="calm"] {
-  /* Primary aliases */
-  --color-primary:       #7878B8;  /* desaturated indigo */
-  --color-teal:          #4A8A87;  /* desaturated teal   */
-  --color-gold:          #8C6A10;  /* desaturated amber  */
-  /* Tailwind @theme mirrors — keeps utility classes in sync */
+  --color-primary:       #7878B8;
+  --color-teal:          #4A8A87;
+  --color-gold:          #8C6A10;
   --color-secondary:     #4A8A87;
   --color-accent:        #8C6A10;
   --color-warning:       #8C6A10;
   --color-success:       #4A8A87;
-  /* Extended palette calm overrides */
   --color-primary-dark:  #5252A0;
   --color-primary-light: #9999CC;
   --color-primary-alpha: rgba(120,120,184,0.15);
@@ -75,14 +113,13 @@
 }
 
 /* ── Base ─────────────────────────────────────────────────── */
-/* NOTE: wrapped in @layer base so Tailwind utility classes (e.g. mx-auto,
-   px-*, gap-*) properly override the reset in the Tailwind v4 cascade. */
 @layer base {
   *, *::before, *::after {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
     -webkit-tap-highlight-color: transparent;
+    border-color: hsl(var(--border));
   }
 
   html, body, #root {
@@ -96,7 +133,6 @@
     overscroll-behavior: none;
   }
 
-  /* ── Focus ring (keyboard only) ──────────────────────────── */
   :focus { outline: none; }
   :focus-visible {
     outline: 2px solid var(--color-primary);
@@ -104,13 +140,12 @@
     border-radius: 4px;
   }
 
-  /* ── Scrollbar ────────────────────────────────────────────── */
   ::-webkit-scrollbar { width: 2px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 2px; }
 }
 
-/* ── Reduced motion ────────────────────────────────────────── */
+/* ── Reduced motion ─────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -118,43 +153,68 @@
   }
 }
 
-/* ── Input primitive placeholder color ─────────────────────── */
-.ms-input::placeholder {
-  color: var(--color-muted);
-  opacity: 1;
-}
-.ms-input:focus {
-  border-color: var(--color-primary) !important;
-}
-
-/* ── Utility classes ───────────────────────────────────────── */
+/* ── Utility classes ────────────────────────────────────── */
 .glass {
-  background: rgba(23, 26, 43, 0.8);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(23, 26, 43, 0.95);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
 }
 
-/* ── Task time bar animation ───────────────────────────────── */
+.gradient-primary {
+  background: linear-gradient(135deg, #7B72FF, #8B7FF7);
+}
+
+.gradient-primary-teal {
+  background: linear-gradient(135deg, #7B72FF, #4ECDC4);
+}
+
+.shadow-primary {
+  box-shadow: 0 8px 32px rgba(123, 114, 255, 0.3);
+}
+
+/* ── Typography utilities ────────────────────────────────── */
+.text-caption    { font-size: 11px; line-height: 1.4; }
+.text-secondary  { font-size: 13px; line-height: 1.5; }
+.text-body       { font-size: 15px; line-height: 1.6; }
+.text-subheading { font-size: 17px; line-height: 1.4; font-weight: 600; }
+.text-title      { font-size: 20px; line-height: 1.3; font-weight: 700; }
+.text-screen-title { font-size: 24px; line-height: 1.2; font-weight: 700; }
+.text-hero       { font-size: 30px; line-height: 1.1; font-weight: 700; }
+
+/* ── Safe area ───────────────────────────────────────────── */
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom, 16px); }
+
+/* ── Input ────────────────────────────────────────────────── */
+.ms-input::placeholder { color: var(--color-muted); opacity: 1; }
+.ms-input:focus { border-color: var(--color-primary) !important; }
+
+/* ── Animations ───────────────────────────────────────────── */
 @keyframes shrinkBar {
   from { width: 100%; }
   to   { width: 0%;   }
 }
 
-/* ── XP particle burst ─────────────────────────────────────── */
 @keyframes particleBurst {
   0%   { opacity: 1; transform: translateY(0) scale(1); }
   100% { opacity: 0; transform: translateY(-40px) scale(0); }
 }
 
-/* ── Confetti ──────────────────────────────────────────────── */
 @keyframes confettiFall {
   0%   { opacity: 1; transform: translateY(-10px) rotate(0deg); }
   100% { opacity: 0; transform: translateY(60px)  rotate(360deg); }
 }
 
-/* ── Session phase pulse ───────────────────────────────────── */
 @keyframes phasePulse {
   0%,100% { box-shadow: 0 0 0 0 rgba(123, 114, 255, 0.4); }
   50%      { box-shadow: 0 0 0 12px rgba(123, 114, 255, 0); }
+}
+
+@keyframes accordion-down {
+  from { height: 0; }
+  to   { height: var(--radix-accordion-content-height); }
+}
+
+@keyframes accordion-up {
+  from { height: var(--radix-accordion-content-height); }
+  to   { height: 0; }
 }

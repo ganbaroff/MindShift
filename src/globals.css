@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 228 60% 9%;
+    --foreground: 240 33% 93%;
+    --card: 230 28% 16%;
+    --card-foreground: 240 33% 93%;
+    --card-raised: 232 25% 20%;
+    --popover: 230 28% 16%;
+    --popover-foreground: 240 33% 93%;
+    --primary: 244 100% 72%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 230 28% 16%;
+    --secondary-foreground: 240 33% 93%;
+    --muted: 232 25% 20%;
+    --muted-foreground: 240 14% 60%;
+    --accent: 263 86% 76%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 43 96% 56%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 170 58% 55%;
+    --success-foreground: 0 0% 100%;
+    --warning: 43 96% 56%;
+    --warning-foreground: 228 60% 9%;
+    --border: 0 0% 100% / 0.06;
+    --input: 232 25% 20%;
+    --ring: 244 100% 72%;
+    --radius: 1rem;
+    --sidebar-background: 228 60% 9%;
+    --sidebar-foreground: 240 33% 93%;
+    --sidebar-primary: 244 100% 72%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 232 25% 20%;
+    --sidebar-accent-foreground: 240 33% 93%;
+    --sidebar-border: 0 0% 100% / 0.06;
+    --sidebar-ring: 244 100% 72%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Inter', sans-serif;
+  }
+}
+
+@layer utilities {
+  .glass {
+    background: rgba(23, 26, 43, 0.95);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+  }
+  .gradient-primary {
+    background: linear-gradient(135deg, #7B72FF, #8B7FF7);
+  }
+  .gradient-primary-teal {
+    background: linear-gradient(135deg, #7B72FF, #4ECDC4);
+  }
+  .shadow-primary {
+    box-shadow: 0 8px 32px rgba(123, 114, 255, 0.3);
+  }
+  .text-caption { font-size: 11px; line-height: 1.4; }
+  .text-secondary { font-size: 13px; line-height: 1.5; }
+  .text-body { font-size: 15px; line-height: 1.6; }
+  .text-subheading { font-size: 17px; line-height: 1.4; font-weight: 600; }
+  .text-title { font-size: 20px; line-height: 1.3; font-weight: 700; }
+  .text-screen-title { font-size: 24px; line-height: 1.2; font-weight: 700; }
+  .text-hero { font-size: 30px; line-height: 1.1; font-weight: 700; }
+  .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 16px); }
+}
