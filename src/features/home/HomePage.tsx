@@ -9,26 +9,17 @@ import { useStore } from '@/store';
 import type { EnergyLevel } from '@/types';
 import { getNowPoolMax, APP_MODE_CONFIG, ENERGY_EMOJI } from '@/shared/lib/constants';
 
-const modeOptions = [
-  { emoji: '🎯', title: 'One thing at a time', desc: 'Just need to focus on one task right now' },
-  { emoji: '🌱', title: 'Build daily habits', desc: 'Consistency without overwhelm' },
-  { emoji: '🗂️', title: 'Manage everything', desc: 'Full visibility over my projects' },
-];
-
-const modeKeys = ['minimal', 'habit', 'system'] as const;
-
 export default function HomePage() {
   const {
     nowPool, nextPool,
     energyLevel, setEnergyLevel,
-    appMode, setAppMode,
+    appMode,
     seasonalMode,
     completedTotal, xpTotal,
     burnoutScore,
     weeklyStats,
   } = useStore();
 
-  const [showWelcome, setShowWelcome] = useState(true);
   const [showAddTask, setShowAddTask] = useState(false);
 
   const nowTasks = nowPool.filter(t => t.status === 'active');
@@ -52,41 +43,24 @@ export default function HomePage() {
       </motion.div>
 
       <div className="space-y-5">
-        {/* Welcome Card */}
-        {showWelcome && (
-          <motion.div
+        {/* Empty State — prompt to add first task */}
+        {nowTasks.length === 0 && nextTasks.length === 0 && (
+          <motion.button
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            className="rounded-2xl p-4 border"
+            whileTap={{ scale: 0.97 }}
+            onClick={() => setShowAddTask(true)}
+            className="w-full rounded-2xl p-5 border text-left"
             style={{ backgroundColor: '#1E2136', borderColor: 'rgba(123,114,255,0.25)', boxShadow: '0 0 20px rgba(123,114,255,0.08)' }}
           >
-            <p className="text-[15px] font-semibold mb-3" style={{ color: '#E8E8F0' }}>👋 Welcome to MindShift</p>
-            <div className="space-y-2">
-              {modeOptions.map((m, i) => (
-                <motion.button
-                  key={i}
-                  whileTap={{ scale: 0.97 }}
-                  onClick={() => setAppMode(modeKeys[i])}
-                  className="w-full text-left p-3 rounded-xl transition-all"
-                  style={{
-                    backgroundColor: appMode === modeKeys[i] ? 'rgba(123,114,255,0.15)' : '#252840',
-                    borderWidth: appMode === modeKeys[i] ? 1.5 : 1,
-                    borderStyle: 'solid',
-                    borderColor: appMode === modeKeys[i] ? '#7B72FF' : 'rgba(255,255,255,0.06)',
-                  }}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <span className="text-[20px]">{m.emoji}</span>
-                    <div>
-                      <p className="text-[15px] font-semibold" style={{ color: appMode === modeKeys[i] ? '#7B72FF' : '#E8E8F0' }}>{m.title}</p>
-                      <p className="text-[11px]" style={{ color: '#8B8BA7' }}>{m.desc}</p>
-                    </div>
-                  </div>
-                </motion.button>
-              ))}
+            <div className="flex items-center gap-3">
+              <MochiAvatar size={36} />
+              <div>
+                <p className="text-[15px] font-semibold" style={{ color: '#E8E8F0' }}>What's on your mind?</p>
+                <p className="text-[12px]" style={{ color: '#8B8BA7' }}>Tap to add your first task — just one is enough</p>
+              </div>
             </div>
-            <button onClick={() => setShowWelcome(false)} className="text-[13px] mt-2 block mx-auto" style={{ color: '#8B8BA7' }}>Skip for now</button>
-          </motion.div>
+          </motion.button>
         )}
 
         {/* Energy Check-in */}
