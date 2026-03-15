@@ -8,6 +8,13 @@ import { getNowPoolMax } from '@/shared/lib/constants';
 
 const durationOptions = [5, 15, 25, 45, 60];
 
+// Quick-date helpers
+function toISODate(d: Date): string {
+  return d.toISOString().split('T')[0];
+}
+const TODAY    = toISODate(new Date());
+const TOMORROW = toISODate(new Date(Date.now() + 86_400_000));
+
 interface AddTaskModalProps {
   open: boolean;
   onClose: () => void;
@@ -22,12 +29,14 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
   const [title, setTitle] = useState('');
   const [difficulty, setDifficulty] = useState<1 | 2 | 3>(1);
   const [minutes, setMinutes] = useState(25);
+  const [dueDate, setDueDate] = useState<string | null>(null);
 
   // Reset form when modal closes
   const handleClose = () => {
     setTitle('');
     setDifficulty(1);
     setMinutes(25);
+    setDueDate(null);
     onClose();
   };
 
@@ -45,7 +54,7 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
       snoozeCount: 0,
       parentTaskId: null,
       position: 0,
-      dueDate: null,
+      dueDate: dueDate,
       dueTime: null,
       taskType: 'task',
       reminderSentAt: null,
@@ -54,6 +63,7 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
     setTitle('');
     setDifficulty(1);
     setMinutes(25);
+    setDueDate(null);
     onClose();
   };
 
@@ -143,6 +153,59 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
                   })}
                 </div>
               </div>
+              {/* Due date */}
+              <div>
+                <label className="text-caption text-ms-muted uppercase tracking-widest mb-2 block">Due date <span style={{ color: '#4ECDC4' }}>(optional)</span></label>
+                <div className="flex gap-2 mb-2">
+                  {[
+                    { label: 'Today', value: TODAY },
+                    { label: 'Tomorrow', value: TOMORROW },
+                  ].map(({ label, value }) => {
+                    const sel = dueDate === value;
+                    return (
+                      <motion.button
+                        key={value}
+                        whileTap={{ scale: 0.97 }}
+                        onClick={() => setDueDate(sel ? null : value)}
+                        className="flex-1 h-9 rounded-xl text-secondary font-medium transition-all"
+                        style={{
+                          backgroundColor: sel ? 'rgba(78,205,196,0.15)' : '#252840',
+                          borderWidth: sel ? 1.5 : 1,
+                          borderStyle: 'solid',
+                          borderColor: sel ? '#4ECDC4' : 'rgba(255,255,255,0.06)',
+                          color: sel ? '#4ECDC4' : '#8B8BA7',
+                        }}
+                      >
+                        {label}
+                      </motion.button>
+                    );
+                  })}
+                  <input
+                    type="date"
+                    value={dueDate ?? ''}
+                    min={TODAY}
+                    onChange={e => setDueDate(e.target.value || null)}
+                    className="flex-1 h-9 rounded-xl px-2 text-secondary outline-none transition-all"
+                    style={{
+                      backgroundColor: (dueDate && dueDate !== TODAY && dueDate !== TOMORROW) ? 'rgba(123,114,255,0.15)' : '#252840',
+                      border: `${(dueDate && dueDate !== TODAY && dueDate !== TOMORROW) ? 1.5 : 1}px solid ${(dueDate && dueDate !== TODAY && dueDate !== TOMORROW) ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
+                      color: (dueDate && dueDate !== TODAY && dueDate !== TOMORROW) ? '#7B72FF' : '#8B8BA7',
+                      colorScheme: 'dark',
+                    }}
+                  />
+                </div>
+                {dueDate && (
+                  <motion.p
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-xs"
+                    style={{ color: '#4ECDC4' }}
+                  >
+                    📅 Will appear in Upcoming tab
+                  </motion.p>
+                )}
+              </div>
+
               <div className="text-secondary text-ms-muted">
                 {isFull ? '💙 NOW is full — landing in NEXT' : '→ Adding to NOW'}
               </div>
