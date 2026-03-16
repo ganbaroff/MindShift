@@ -386,7 +386,22 @@ export default function FocusScreen() {
           </div>
         )}
 
-        {/* Duration presets */}
+        {/* Duration presets — hidden in surprise mode (O-9: full time-blindness) */}
+        {timerStyle === 'surprise' && (
+          <div
+            className="mx-5 mb-6 px-4 py-3 rounded-2xl flex items-center gap-3"
+            style={{ background: 'var(--color-card)', border: '1px solid var(--color-border-subtle)' }}
+          >
+            <span className="text-xl">🎲</span>
+            <div>
+              <p className="text-sm font-medium" style={{ color: 'var(--color-text)' }}>Surprise mode</p>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--color-muted)' }}>
+                Timer ends when it ends — just focus. No digits, no arc.
+              </p>
+            </div>
+          </div>
+        )}
+        {timerStyle !== 'surprise' && (
         <div className="px-5 mb-6">
           <p className="text-xs font-medium mb-2" style={{ color: 'var(--color-muted)' }}>
             DURATION
@@ -451,6 +466,7 @@ export default function FocusScreen() {
             </div>
           )}
         </div>
+        )} {/* end timerStyle !== 'surprise' */}
 
         {/* Sound anchor indicator */}
         {focusAnchor && (

@@ -127,6 +127,8 @@ export interface SessionHistoryResult {
   /** AI-generated or fallback insight strings */
   weeklyInsight: string[]
   loading: boolean
+  /** Last 30 days of raw sessions — exposed for psychotype derivation (O-7) */
+  sessions: FocusSessionRow[]
 }
 
 export function useSessionHistory(): SessionHistoryResult {
@@ -134,6 +136,7 @@ export function useSessionHistory(): SessionHistoryResult {
 
   const [energyTrend, setEnergyTrend] = useState<number[]>([])
   const [weeklyInsight, setWeeklyInsight] = useState<string[]>(FALLBACK_INSIGHTS)
+  const [sessions, setSessions] = useState<FocusSessionRow[]>([])
   const [loading, setLoading] = useState(false)
 
   // Guard: only call the AI edge function once per mount
@@ -157,6 +160,9 @@ export function useSessionHistory(): SessionHistoryResult {
         if (error) { logError('useSessionHistory.fetch', error); return }
 
         const sessions: FocusSessionRow[] = (data ?? []) as FocusSessionRow[]
+
+        // Expose raw sessions for psychotype derivation (O-7)
+        setSessions(sessions)
 
         // Compute and store WeeklyStats
         const stats = computeWeeklyStats(sessions)
@@ -207,5 +213,5 @@ export function useSessionHistory(): SessionHistoryResult {
   }, [userId]) // eslint-disable-line react-hooks/exhaustive-deps
   // Intentionally omitting seasonalMode/setWeeklyStats — re-fetch only on login
 
-  return { energyTrend, weeklyInsight, loading }
+  return { energyTrend, weeklyInsight, loading, sessions }
 }
