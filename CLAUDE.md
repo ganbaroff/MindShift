@@ -2,7 +2,7 @@
 
 ## Project
 **MindShift** — ADHD-aware productivity PWA. Mobile-first, React + TypeScript + Supabase.
-Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ `c31f321`. Status: **production-ready**.
+Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ `4f3bec1`. Status: **production-ready**.
 
 ## Stable Production URL
 **`https://mind-shift-git-main-yusifg27-3093s-projects.vercel.app`**
@@ -22,7 +22,7 @@ Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ `c31f321`. Status: **p
 ## Sprint History
 | Sprint | Commit | What landed |
 |--------|--------|-------------|
-| Sprint H "Final QA" | `(current)` | 20 new e2e tests: due date picker (Today/Tomorrow chips, toggle, upcoming hint), NEXT pool empty state, home empty state CTA, Settings Reminders section. CLAUDE.md updated. 132/132 e2e tests passing. |
+| Sprint H "Final QA" | `4f3bec1` | 20 new e2e tests: due date picker (Today/Tomorrow chips, toggle, upcoming hint), NEXT pool empty state, home empty state CTA, Settings Reminders section. Feedback link in Settings. CLAUDE.md updated. 132/132 e2e passing. |
 | Sprint G "Polish & Harden" | `c31f321` | Accessibility: EnergyPicker aria-label+aria-pressed, Fab aria-label+focus-visible ring, CollapsibleSection aria-expanded+aria-label. Performance: TaskCard React.memo (custom comparator), useMemo for all filtered task lists in TasksPage + HomePage. Error handling: useTaskSync surfaces Supabase fetch errors as toast. Empty states: TasksPage NEXT pool "Queue tasks here" hint. |
 | Sprint F "Push & Remind" | `e34b345` | SW push+notificationclick handlers. OnboardingPage 5-step flow (step 5 = notification permission + skip). SettingsPage Reminders section. AddTaskModal due date picker (Today/Tomorrow chips + native input) + auto-schedules reminder. TaskCard 🔔 badge + 📅 due date pill. |
 | Sprint E "Real Data Pipeline" | `42b8996` | useTaskSync: bidirectional Supabase↔store sync, server-wins on login, local-push on first device. useSessionHistory: last-30-days focus_sessions, computes WeeklyStats (dailyMinutes, totalFocusMinutes, peakFocusTime, consistencyScore), energyTrend from energy_after, calls weekly-insight edge function. ProgressPage wired to real data. |
@@ -192,10 +192,10 @@ Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ `c31f321`. Status: **p
 - Always run `tsc --noEmit` before any commit from Cowork
 - Sprint A: `tsc --noEmit` ✅, deployed `e2f2220`
 - Sprint B: `tsc --noEmit` ✅, committed `4f7f9aa`
-- Sprint D–H: `tsc --noEmit` ✅, `npx playwright test` 132/132 ✅
-- Branch: `main` @ `c31f321`
+- Sprint D–H: `tsc --noEmit` ✅, `npm run build` ✅ (38 precache entries), `npx playwright test` 132/132 ✅
+- Branch: `main` @ `4f3bec1`
 
-## Production Status (as of Sprint 9)
+## Production Status (as of Sprint H — 16 March 2026)
 | Item | Code | Deployed | Notes |
 |------|------|----------|-------|
 | Vercel hosting | ✅ vercel.json | ✅ live | Verified by Yusif. App opens. |
@@ -209,12 +209,11 @@ Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ `c31f321`. Status: **p
 | Real users | 1 (Yusif only) | — | Design + auth issues resolved. Ready for beta invites. |
 
 ## Known Gaps (not yet implemented)
-- **energy_after** — `energy_before` now written (Sprint A). `energy_after` still needs PostSessionFlow picker wiring to DB UPDATE.
-- **Server-side reminders** — SW showNotification works when app is in background tab (Sprint F). Full background push (app fully closed) needs Web Push API + VAPID keys + Supabase cron (v2).
+- **energy_after** — `energy_before` written on session save. `energy_after` still needs PostSessionFlow picker wiring to DB UPDATE.
+- **Server-side push (v2)** — SW showNotification works when tab is in background (Sprint F). Full push when app is closed needs VAPID keys + Supabase cron.
 - **Stripe integration** — subscriptionTier exists in store, ProBanner UI removed (Sprint A). Zero payment logic. Restore ProBanner when Stripe ready.
-- **classify-voice-input** — edge function written + wired in AddTaskModal. Unconfirmed in production (run `supabase functions list` to verify).
-- **Date picker on tasks** ~~FIXED Sprint F~~ — AddTaskModal now has Today/Tomorrow chips + native date input.
-- **Social layer** — S-2/S-3/S-4 require Supabase Realtime design (separate sprint)
+- **classify-voice-input** — edge function written + wired in AddTaskModal. Unconfirmed in production (`supabase functions list` to verify).
+- **Social layer** — S-2/S-3/S-4 require Supabase Realtime design (separate sprint).
 - **Health signals** — sleepQuality, chronotype, medicationTime removed from UI (Sprint A). Store fields remain. Re-add when wired to recommendations.
 
 ## Remaining P2 Backlog (not yet implemented)

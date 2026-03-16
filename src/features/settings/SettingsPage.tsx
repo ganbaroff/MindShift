@@ -167,6 +167,18 @@ export default function SettingsPage() {
           )}
         </Section>
 
+        {/* Feedback */}
+        <Section label="Feedback">
+          <a
+            href="mailto:ganbarov.y@gmail.com?subject=MindShift%20Feedback&body=Hi%20Yusif%2C%0A%0A"
+            className="flex items-center gap-3 w-full h-10 rounded-xl px-3 text-[14px] font-medium focus-visible:ring-2 focus-visible:ring-ms-primary/50 focus-visible:outline-none"
+            style={{ backgroundColor: 'rgba(123,114,255,0.1)', color: '#7B72FF' }}
+          >
+            <span>📬</span>
+            <span>Send feedback</span>
+          </a>
+        </Section>
+
         {/* Data */}
         <Section label="Your Data">
           <motion.button whileTap={{ scale: 0.97 }} className="w-full h-10 rounded-xl text-[14px] font-medium" style={{ backgroundColor: 'rgba(78,205,196,0.12)', color: '#4ECDC4' }}>📦 Export (JSON)</motion.button>
