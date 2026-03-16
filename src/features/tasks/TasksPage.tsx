@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import TaskCard from '@/components/TaskCard';
 import Fab from '@/components/Fab';
 import AddTaskModal from '@/components/AddTaskModal';
@@ -8,7 +9,10 @@ import { useStore } from '@/store';
 import { DIFFICULTY_MAP } from '@/types';
 import { getNowPoolMax } from '@/shared/lib/constants';
 
+const TODAY_ISO = new Date().toISOString().split('T')[0];
+
 export default function TasksPage() {
+  const navigate = useNavigate();
   const [showAddTask, setShowAddTask] = useState(false);
   const [showSomeday, setShowSomeday] = useState(false);
   const [showDone, setShowDone] = useState(false);
@@ -27,6 +31,14 @@ export default function TasksPage() {
 
   const nowMax = getNowPoolMax(appMode, seasonalMode);
 
+  // Overdue task detection — tasks with a past due date still active
+  const overdueTasks = useMemo(() =>
+    [...nowPool, ...nextPool].filter(
+      t => t.status === 'active' && t.dueDate && t.dueDate < TODAY_ISO
+    ),
+    [nowPool, nextPool]
+  );
+
   return (
     <div className="min-h-screen px-5 pb-36 pt-10" style={{ backgroundColor: '#0F1120' }}>
       <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
@@ -35,6 +47,35 @@ export default function TasksPage() {
       </motion.div>
 
       <div className="space-y-5 mt-5">
+
+        {/* Auto-reschedule banner — gentle, non-shaming */}
+        <AnimatePresence>
+          {overdueTasks.length > 0 && (
+            <motion.button
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              onClick={() => navigate('/calendar')}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-left"
+              style={{
+                background: 'rgba(245,158,11,0.07)',
+                border: '1px solid rgba(245,158,11,0.20)',
+              }}
+            >
+              <span className="text-base">🗓️</span>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium" style={{ color: '#F59E0B' }}>
+                  {overdueTasks.length} task{overdueTasks.length !== 1 ? 's' : ''} past their due date
+                </p>
+                <p className="text-xs mt-0.5" style={{ color: '#8B8BA7' }}>
+                  No pressure — tap to set new dates when you're ready
+                </p>
+              </div>
+              <span className="text-xs" style={{ color: '#F59E0B' }}>Reschedule →</span>
+            </motion.button>
+          )}
+        </AnimatePresence>
+
         {/* NOW */}
         <div>
           <div className="flex items-center gap-2 mb-2">

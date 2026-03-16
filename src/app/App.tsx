@@ -38,6 +38,9 @@ const LazyRecoveryProtocol = lazy(() =>
 const LazyContextRestore = lazy(() =>
   import('@/features/tasks/ContextRestore').then(m => ({ default: m.ContextRestore }))
 )
+const LazyShutdownRitual = lazy(() =>
+  import('@/features/focus/ShutdownRitual').then(m => ({ default: m.ShutdownRitual }))
+)
 
 export default function App() {
   const {
@@ -46,8 +49,10 @@ export default function App() {
     onboardingCompleted, setBurnoutScore, completedTotal, energyLevel,
     flexiblePauseUntil, setFlexiblePauseUntil,
     reducedStimulation,
+    shutdownShownDate, setShutdownShownDate,
   } = useStore()
   const [showContextRestore, setShowContextRestore] = useState(false)
+  const [showShutdown, setShowShutdown] = useState(false)
 
   useEffect(() => {
     document.documentElement.setAttribute(
@@ -133,6 +138,19 @@ export default function App() {
     setBurnoutScore(computeBurnoutScore(behaviors))
   }, [completedTotal, energyLevel, nowPool, nextPool, somedayPool, setBurnoutScore])
 
+  // Shutdown ritual — triggers once per day after 9pm when onboarding done
+  useEffect(() => {
+    if (!onboardingCompleted) return
+    const hour = new Date().getHours()
+    if (hour < 21) return
+    const today = new Date().toISOString().split('T')[0]
+    if (shutdownShownDate === today) return
+    // Small delay so the main UI renders first
+    const t = setTimeout(() => setShowShutdown(true), 1200)
+    return () => clearTimeout(t)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onboardingCompleted])
+
   useOfflineSync()
   useTaskSync()
   useSessionHistory()
@@ -180,6 +198,17 @@ export default function App() {
           {!showRecovery && showContextRestore && (
             <Suspense fallback={null}>
               <LazyContextRestore onDismiss={() => setShowContextRestore(false)} />
+            </Suspense>
+          )}
+
+          {/* Shutdown ritual — end-of-day wind-down (9pm+, once per day) */}
+          {!showRecovery && !showContextRestore && showShutdown && (
+            <Suspense fallback={null}>
+              <LazyShutdownRitual onDismiss={() => {
+                setShowShutdown(false)
+                const today = new Date().toISOString().split('T')[0]
+                setShutdownShownDate(today)
+              }} />
             </Suspense>
           )}
 
