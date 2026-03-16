@@ -73,10 +73,12 @@ Deno.serve(async (req: Request) => {
     const body = await req.json() as {
       daysAbsent?: unknown
       incompleteCount?: unknown
+      locale?: string
     }
 
-    const days  = Math.min(365, Math.max(0, Math.floor(Number(body.daysAbsent  ?? 0))))
-    const tasks = Math.min(999, Math.max(0, Math.floor(Number(body.incompleteCount ?? 0))))
+    const days   = Math.min(365, Math.max(0, Math.floor(Number(body.daysAbsent  ?? 0))))
+    const tasks  = Math.min(999, Math.max(0, Math.floor(Number(body.incompleteCount ?? 0))))
+    const targetLocale = ((body.locale as string | undefined) ?? 'en').slice(0, 10)
 
     // ── Gemini call ──────────────────────────────────────────────────────────
     const prompt = `You are a compassionate ADHD productivity coach writing a welcome-back message.
@@ -91,6 +93,7 @@ Write exactly 2 sentences. Rules:
 - Focus on the present moment and what's possible right now
 - Use gentle, grounded language — not toxic positivity
 - Second sentence can suggest one small first step
+- IMPORTANT: Respond in the language with BCP-47 code "${targetLocale}". If unsure, use English.
 
 Respond ONLY with the 2-sentence message. No quotes, no JSON, no labels.`
 

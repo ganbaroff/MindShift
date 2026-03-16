@@ -22,6 +22,7 @@ Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ `4f3bec1`. Status: **p
 ## Sprint History
 | Sprint | Commit | What landed |
 |--------|--------|-------------|
+| Sprint I "Sensory UX" | pending | 10 neuroinclusive features from Deep Research sessions: (1) IndexedDB migration via idbStorage adapter (transparent localStorage→IDB migration), (2) Invisible streaks (shown only when ≥2 days, reset-shame-free), (3) Haptic engine expanded to 9 ADHD-safe patterns (tap/done/wow/warning/breathe/phase/start/end/park/add), (4) Pink noise UI + Sound section in Settings (5 presets: brown/pink/nature/lofi/gamma, preview + lock as anchor, volume slider), (5) Phase-adaptive audio (struggle=100%/release=80%/flow=60% gain, 1.5s ramp), (6) Focus Breathwork Ritual (3×inhale+exhale cycles, SVG orb, haptic sync, skip always visible), (7) Low-energy auto-simplify (energyLevel≤2 or burnoutScore>60 → 1 NOW task, hide NEXT, gentle banner), (8) Mochi energy reactions (speech bubble on HP change, psychotype-specific, 5s auto-dismiss), (9) Locale injection in all AI edge functions (decompose-task/recovery-message/weekly-insight), (10) Spiciness meter in RecoveryProtocol (1-5 overwhelm chips → step count + granularity in AI decomposition). tsc ✅ |
 | Sprint H "Final QA" | `4f3bec1` | 20 new e2e tests: due date picker (Today/Tomorrow chips, toggle, upcoming hint), NEXT pool empty state, home empty state CTA, Settings Reminders section. Feedback link in Settings. CLAUDE.md updated. 132/132 e2e passing. |
 | Sprint G "Polish & Harden" | `c31f321` | Accessibility: EnergyPicker aria-label+aria-pressed, Fab aria-label+focus-visible ring, CollapsibleSection aria-expanded+aria-label. Performance: TaskCard React.memo (custom comparator), useMemo for all filtered task lists in TasksPage + HomePage. Error handling: useTaskSync surfaces Supabase fetch errors as toast. Empty states: TasksPage NEXT pool "Queue tasks here" hint. |
 | Sprint F "Push & Remind" | `e34b345` | SW push+notificationclick handlers. OnboardingPage 5-step flow (step 5 = notification permission + skip). SettingsPage Reminders section. AddTaskModal due date picker (Today/Tomorrow chips + native input) + auto-schedules reminder. TaskCard 🔔 badge + 📅 due date pill. |
@@ -166,6 +167,18 @@ Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ `4f3bec1`. Status: **p
 - **TaskCard:** React.memo with custom comparator (id/status/title/dueDate/difficulty). 🔔 badge when reminder active. 📅 due date pill.
 - **Performance:** useMemo on filtered task lists in HomePage + TasksPage. React.memo on TaskCard.
 - **Accessibility:** EnergyPicker aria-label+aria-pressed. Fab aria-label+focus-visible ring. CollapsibleSection aria-expanded+aria-label.
+
+## Architecture (Sprint I additions)
+- **idbStorage:** `src/shared/lib/idbStorage.ts` — Zustand `StateStorage` adapter using `idb-keyval`. Transparent migration: reads localStorage on first load, migrates to IDB, removes from localStorage. Replaces 5MB localStorage limit.
+- **Invisible streaks:** `currentStreak / longestStreak / lastActiveDate` in store. Tracked inside `completeTask`. Shown in HomePage only when `currentStreak >= 2`. Never shames on break.
+- **Haptic engine:** 9 ADHD-safe patterns in `haptic.ts`. All focus-session events (start/phase/end/breathe) now have distinct patterns. Works on Android Chrome; silently fails on iOS.
+- **AudioPreset + Sound section:** Settings → Sound: 5 presets (brown/pink/nature/lofi/gamma), preview button, "lock as focus anchor" button, volume slider. `focusAnchor` persisted in store.
+- **Phase-adaptive audio:** `adaptToPhase(phase)` on `useAudioEngine` hook. Called from `useFocusSession` on every `sessionPhase` change. 1.5s smooth ramp via Web Audio `setTargetAtTime`.
+- **BreathworkRitual:** `src/features/focus/BreathworkRitual.tsx` — 3-cycle breathwork overlay before focus session. Pulsing SVG orb, haptic sync, progress dots, skip button. Respects `reducedMotion`.
+- **Low-energy auto-simplify:** `isLowEnergy = energyLevel <= 2 || burnoutScore > 60`. When true: 1 NOW task shown, NEXT pool hidden, BentoGrid hidden, gentle banner shown.
+- **Mochi energy reactions:** `MOCHI_ENERGY_MESSAGES` pool (5 levels × 3 messages). Speech bubble appears on homepage when energy changes, auto-dismisses after 5s.
+- **Locale injection:** `navigator.language` BCP-47 code injected into all 3 AI edge functions (decompose-task/recovery-message/weekly-insight). Gemini responds in user's language natively.
+- **Spiciness meter:** 5-chip overwhelm picker in `RecoveryProtocol`. Value 1–5 maps to step count (5-7/3-5/2-3) and granularity in `decompose-task` edge function. Defaults to 3 (moderate).
 
 ## Architecture (Sprint B additions)
 - **SEASONAL_MODE_CONFIG:** `constants.ts` — each seasonalMode (launch/maintain/recover/sandbox) has `nowPoolMaxOverride` (null = defer to appMode).

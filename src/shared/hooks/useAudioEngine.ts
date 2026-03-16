@@ -459,6 +459,25 @@ export function useAudioEngine() {
     )
   }, [])
 
+  /**
+   * Adapt audio volume to focus phase — Research #1 (Sensory UX).
+   * Struggle: 100% (full masking, high-arousal state needs acoustic anchor)
+   * Release:  80%  (stepping back as flow begins to emerge)
+   * Flow:     60%  (near-silent — don't disrupt hyperfocus)
+   *
+   * Uses a slow 4-second ramp to avoid jarring transitions between phases.
+   */
+  const adaptToPhase = useCallback((phase: 'struggle' | 'release' | 'flow') => {
+    if (!masterRef.current || !ctxRef.current) return
+    const phaseMultiplier = phase === 'struggle' ? 1.0 : phase === 'release' ? 0.80 : 0.60
+    const targetGain = volumeToGain(audioVolume) * phaseMultiplier
+    masterRef.current.gain.setTargetAtTime(
+      targetGain,
+      ctxRef.current.currentTime,
+      1.5,  // slow 4-5s ramp (time constant × 3 ≈ 95% complete)
+    )
+  }, [audioVolume])
+
   const toggle = useCallback((preset: AudioPreset) => {
     if (audioPlaying) stop()
     else void play(preset)
@@ -474,5 +493,5 @@ export function useAudioEngine() {
     playSonicAnchor(ctx)
   }, [])
 
-  return { play, stop, toggle, setVolume, playAnchor, isPlaying: audioPlaying }
+  return { play, stop, toggle, setVolume, playAnchor, adaptToPhase, isPlaying: audioPlaying }
 }

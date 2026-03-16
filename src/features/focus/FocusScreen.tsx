@@ -12,6 +12,7 @@
  * Session controls (audio/stop/park) live in SessionControls.tsx
  */
 
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { Link } from 'react-router-dom'
 import { ArcTimer } from './ArcTimer'
@@ -19,9 +20,11 @@ import { MochiSessionCompanion } from './MochiSessionCompanion'
 import { SessionControls } from './SessionControls'
 import { NatureBuffer, RecoveryLock } from './PostSessionFlow'
 import { useFocusSession, clearBookmark, PHASE_LABELS } from './useFocusSession'
+import { BreathworkRitual } from './BreathworkRitual'
 
 export default function FocusScreen() {
   const session = useFocusSession()
+  const [showBreathwork, setShowBreathwork] = useState(false)
   const {
     screen,
     selectedTask, setSelectedTask,
@@ -428,9 +431,9 @@ export default function FocusScreen() {
         )}
 
         {/* Start button */}
-        <div className="px-5">
+        <div className="px-5 space-y-2">
           <button
-            onClick={() => handleStart()}
+            onClick={() => setShowBreathwork(true)}
             className="w-full py-4 rounded-2xl font-bold text-base transition-all duration-200"
             style={{
               background: 'linear-gradient(135deg, #7B72FF, #8B7FF7)',
@@ -440,8 +443,33 @@ export default function FocusScreen() {
           >
             Start Focus →
           </button>
+          <button
+            onClick={() => handleStart()}
+            className="w-full py-2 text-[12px]"
+            style={{ color: '#8B8BA7' }}
+          >
+            Skip ritual & jump in
+          </button>
         </div>
       </div>
+
+      {/* Breathwork ritual overlay */}
+      <AnimatePresence>
+        {showBreathwork && (
+          <div className="fixed inset-0 z-50">
+            <BreathworkRitual
+              onComplete={() => {
+                setShowBreathwork(false)
+                handleStart()
+              }}
+              onSkip={() => {
+                setShowBreathwork(false)
+                handleStart()
+              }}
+            />
+          </div>
+        )}
+      </AnimatePresence>
     )
   }
 

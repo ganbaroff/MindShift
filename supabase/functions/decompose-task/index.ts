@@ -72,9 +72,11 @@ Deno.serve(async (req: Request) => {
     }
 
     // ── Input (with size validation) ──────────────────────────────────────────
-    const { taskTitle, taskDescription } = await req.json() as {
+    const { taskTitle, taskDescription, locale, spiciness } = await req.json() as {
       taskTitle: string
       taskDescription?: string
+      locale?: string        // BCP-47 e.g. 'en', 'ru', 'de' — AI responds in this language
+      spiciness?: number     // 1-5: how overwhelmed is the user (drives granularity)
     }
 
     if (!taskTitle?.trim()) {
@@ -110,9 +112,24 @@ Deno.serve(async (req: Request) => {
     const title = taskTitle.trim().slice(0, MAX_TITLE_LEN)
     const desc = taskDescription?.trim().slice(0, MAX_DESC_LEN)
 
-    const prompt = `You are an ADHD task coach. Break this task into 3-5 concrete micro-steps, each under 10 minutes.
+    // Research #2: locale must be injected into prompt directly — never translate after.
+    // "Generating text in English and passing through a secondary translation API is an
+    //  architectural anti-pattern — strips cultural nuance, compounds hallucination errors."
+    const targetLocale = (locale ?? 'en').slice(0, 10)
+    const spicinessLevel = Math.min(5, Math.max(1, Math.floor(spiciness ?? 3)))
+    const stepCount = spicinessLevel <= 2 ? '5-7' : spicinessLevel <= 3 ? '3-5' : '2-3'
+    const granularity = spicinessLevel >= 4
+      ? 'very granular (each step under 2 minutes, extremely simple actions)'
+      : spicinessLevel <= 2
+        ? 'moderately detailed (each step under 5 minutes)'
+        : 'standard (each step under 10 minutes)'
+
+    const prompt = `You are an ADHD task coach.
+Break this task into ${stepCount} concrete micro-steps (${granularity}).
 Each step must be specific and immediately actionable — no vague language.
 Keep language warm and encouraging.
+IMPORTANT: Respond in the language with BCP-47 code "${targetLocale}". If unsure, use English.
+Keep each step under 60 characters.
 
 Task: "${title}"${desc ? `\nContext: "${desc}"` : ''}
 

@@ -46,6 +46,11 @@ export function RecoveryProtocol({ onDismiss }: Props) {
     () => FALLBACK_MESSAGES[Math.floor(Math.random() * FALLBACK_MESSAGES.length)]
   )
   const [loadingAi, setLoadingAi] = useState(false)
+  // Spiciness meter — Research #3 (Goblin Tools): "How overwhelmed are you?"
+  // 1 = very overwhelmed (max granularity), 5 = barely overwhelmed (fewer steps)
+  const [spiciness, setSpiciness] = useState(3)
+  // Hoisted to component scope so handleSubmit can inject into decompose-task
+  const locale = navigator.language?.split('-')[0] ?? 'en'
 
   // Archive overdue tasks + fetch AI welcome + fire welcome-back push on mount
   useEffect(() => {
@@ -65,7 +70,7 @@ export function RecoveryProtocol({ onDismiss }: Props) {
     // Fetch personalized recovery message (non-blocking)
     setLoadingAi(true)
     supabase.functions.invoke('recovery-message', {
-      body: { daysAbsent, incompleteCount: ids.length },
+      body: { daysAbsent, incompleteCount: ids.length, locale },
     }).then(({ data }) => {
       if (data?.message) setWelcomeMsg(data.message as string)
     }).catch(() => { /* fallback already set */ }).finally(() => {
@@ -83,7 +88,7 @@ export function RecoveryProtocol({ onDismiss }: Props) {
     // Try AI decomposition first — break the ONE thing into micro-steps
     try {
       const { data } = await supabase.functions.invoke('decompose-task', {
-        body: { taskTitle: title },
+        body: { taskTitle: title, spiciness, locale },
       })
       if (data?.steps && Array.isArray(data.steps) && data.steps.length > 0) {
         // AI decomposed — add each step as a task
@@ -223,6 +228,43 @@ export function RecoveryProtocol({ onDismiss }: Props) {
                 🗃️ {archivedCount} old task{archivedCount !== 1 ? 's' : ''} tucked into your time capsule — they waited patiently. You can review them anytime.
               </p>
             )}
+          </motion.div>
+
+          {/* Spiciness meter — Research #3 (Goblin Tools): overwhelm scale */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ ...t(), delay: 0.35 }}
+            className="flex flex-col gap-2"
+          >
+            <p className="text-xs text-center" style={{ color: '#5A5B72' }}>
+              🌶️ How overwhelmed are you right now?
+            </p>
+            <div className="flex justify-center gap-2">
+              {([
+                { value: 1, label: 'Very', emoji: '😵' },
+                { value: 2, label: 'A lot', emoji: '😰' },
+                { value: 3, label: 'Some', emoji: '😐' },
+                { value: 4, label: 'A bit', emoji: '🙂' },
+                { value: 5, label: 'Barely', emoji: '😎' },
+              ] as const).map(({ value, label, emoji }) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setSpiciness(value)}
+                  className="flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl transition-all duration-150"
+                  style={{
+                    background: spiciness === value ? 'rgba(123,114,255,0.18)' : '#1E2136',
+                    border: `1px solid ${spiciness === value ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
+                  }}
+                  aria-pressed={spiciness === value}
+                  aria-label={`Overwhelm level: ${label}`}
+                >
+                  <span className="text-base leading-none">{emoji}</span>
+                  <span className="text-[10px]" style={{ color: spiciness === value ? '#C8C0FF' : '#5A5B72' }}>{label}</span>
+                </button>
+              ))}
+            </div>
           </motion.div>
 
           {/* Task input */}

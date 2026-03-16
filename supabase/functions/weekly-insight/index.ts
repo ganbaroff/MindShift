@@ -103,6 +103,7 @@ Deno.serve(async (req: Request) => {
     const energyTrend      = ['improving', 'stable', 'declining'].includes(raw.energyTrend as string)
       ? (raw.energyTrend as 'improving' | 'stable' | 'declining')
       : null
+    const targetLocale     = typeof raw.locale === 'string' ? raw.locale.slice(0, 10) : 'en'
 
     // ── Build context ──────────────────────────────────────────────────────────
     const stats = [
@@ -127,6 +128,7 @@ Write exactly 3 short insights. Rules:
 - Actionable where possible — suggest one small thing to try next week
 - Varied tone: one observation, one celebration, one suggestion
 - No bullet points, no numbering — just 3 plain text sentences separated by newlines
+- IMPORTANT: Respond in the language with BCP-47 code "${targetLocale}". If unsure, use English.
 
 Respond ONLY with the 3 insights, one per line. No headers, no JSON, no extra text.`
 

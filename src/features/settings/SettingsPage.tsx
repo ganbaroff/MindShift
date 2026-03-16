@@ -2,12 +2,20 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import EnergyPicker from '@/components/EnergyPicker';
 import { useStore } from '@/store';
-import type { EnergyLevel } from '@/types';
+import type { EnergyLevel, AudioPreset } from '@/types';
 import { supabase } from '@/shared/lib/supabase';
+import { useAudioEngine } from '@/shared/hooks/useAudioEngine';
 
 const modeKeys = ['minimal', 'habit', 'system'] as const;
 const timerKeys = ['countdown', 'countup', 'surprise'] as const;
 const phaseKeys = ['launch', 'maintain', 'recover', 'sandbox'] as const;
+const audioPresets: { key: AudioPreset; emoji: string; label: string; desc: string }[] = [
+  { key: 'brown', emoji: '🌊', label: 'Brown',  desc: 'Deep rumble — quiets racing thoughts' },
+  { key: 'pink',  emoji: '🌧️', label: 'Pink',   desc: 'Steady rain — boosts working memory' },
+  { key: 'nature',emoji: '🌿', label: 'Nature', desc: 'Organic swell — parasympathetic calm' },
+  { key: 'lofi',  emoji: '🎵', label: 'Lo-fi',  desc: 'Cassette warmth — gentle stimulation' },
+  { key: 'gamma', emoji: '⚡', label: 'Gamma',  desc: '40 Hz beat — narrows focus spotlight' },
+];
 
 const modeChips = [
   { emoji: '🎯', label: 'Minimal', desc: 'One task at a time' },
@@ -39,7 +47,26 @@ export default function SettingsPage() {
     subscriptionTier,
     email,
     signOut,
+    focusAnchor, setFocusAnchor,
+    audioVolume, setVolume: setStoreVolume,
   } = useStore();
+
+  const { play, stop, isPlaying, setVolume: setEngineVolume } = useAudioEngine();
+  const [previewPreset, setPreviewPreset] = useState<AudioPreset | null>(null);
+
+  const handlePresetPreview = (preset: AudioPreset) => {
+    if (previewPreset === preset && isPlaying) {
+      stop();
+      setPreviewPreset(null);
+    } else {
+      void play(preset);
+      setPreviewPreset(preset);
+    }
+  };
+
+  const handleSetFocusAnchor = (preset: AudioPreset) => {
+    setFocusAnchor(focusAnchor === preset ? null : preset);
+  };
 
   const mode = modeKeys.indexOf(appMode);
   const timer = timerKeys.indexOf(timerStyle);
@@ -98,6 +125,80 @@ export default function SettingsPage() {
             ))}
           </div>
           <p className="text-[11px] mt-1.5" style={{ color: '#8B8BA7' }}>{timerChips[timer]?.desc}</p>
+        </Section>
+
+        {/* Sound */}
+        <Section label="Sound">
+          <p className="text-[11px] mb-2" style={{ color: '#8B8BA7' }}>
+            Tap to preview · Press 🔒 to set as focus anchor
+          </p>
+          <div className="space-y-1.5">
+            {audioPresets.map((p) => {
+              const isAnchor = focusAnchor === p.key;
+              const isPreviewing = previewPreset === p.key && isPlaying;
+              return (
+                <div key={p.key} className="flex items-center gap-2">
+                  <motion.button
+                    whileTap={{ scale: 0.97 }}
+                    onClick={() => handlePresetPreview(p.key)}
+                    className="flex-1 flex items-center gap-2 h-10 rounded-xl px-3 text-left"
+                    style={{
+                      backgroundColor: isPreviewing ? 'rgba(123,114,255,0.15)' : '#252840',
+                      borderWidth: isPreviewing ? 1.5 : 1,
+                      borderStyle: 'solid',
+                      borderColor: isPreviewing ? '#7B72FF' : 'rgba(255,255,255,0.06)',
+                    }}
+                    aria-label={`${isPreviewing ? 'Stop' : 'Preview'} ${p.label} noise`}
+                    aria-pressed={isPreviewing}
+                  >
+                    <span className="text-[16px]">{p.emoji}</span>
+                    <div className="flex-1">
+                      <p className="text-[13px] font-medium leading-none" style={{ color: isPreviewing ? '#7B72FF' : '#E8E8F0' }}>{p.label}</p>
+                      <p className="text-[10px] mt-0.5" style={{ color: '#8B8BA7' }}>{p.desc}</p>
+                    </div>
+                    {isPreviewing && <span className="text-[10px]" style={{ color: '#7B72FF' }}>▶ playing</span>}
+                  </motion.button>
+                  <motion.button
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => handleSetFocusAnchor(p.key)}
+                    className="w-9 h-10 rounded-xl flex items-center justify-center text-[16px]"
+                    style={{
+                      backgroundColor: isAnchor ? 'rgba(78,205,196,0.15)' : '#252840',
+                      borderWidth: isAnchor ? 1.5 : 1,
+                      borderStyle: 'solid',
+                      borderColor: isAnchor ? '#4ECDC4' : 'rgba(255,255,255,0.06)',
+                    }}
+                    aria-label={isAnchor ? `Remove ${p.label} as focus anchor` : `Set ${p.label} as focus anchor`}
+                    aria-pressed={isAnchor}
+                  >
+                    🔒
+                  </motion.button>
+                </div>
+              );
+            })}
+          </div>
+          {/* Volume slider */}
+          <div className="mt-3">
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-[11px] uppercase tracking-widest" style={{ color: '#8B8BA7' }}>Volume</p>
+              <p className="text-[11px]" style={{ color: '#8B8BA7' }}>{Math.round(audioVolume * 100)}%</p>
+            </div>
+            <input
+              type="range"
+              min={0}
+              max={1}
+              step={0.01}
+              value={audioVolume}
+              onChange={(e) => {
+                const v = parseFloat(e.target.value);
+                setStoreVolume(v);
+                setEngineVolume(v);
+              }}
+              className="w-full h-1.5 rounded-full appearance-none cursor-pointer"
+              style={{ accentColor: '#7B72FF' }}
+              aria-label="Audio volume"
+            />
+          </div>
         </Section>
 
         {/* Energy */}
