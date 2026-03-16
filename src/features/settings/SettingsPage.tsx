@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import EnergyPicker from '@/components/EnergyPicker';
 import { useStore } from '@/store';
 import type { EnergyLevel, AudioPreset } from '@/types';
@@ -49,6 +50,8 @@ export default function SettingsPage() {
     signOut,
     focusAnchor, setFocusAnchor,
     audioVolume, setVolume: setStoreVolume,
+    medicationEnabled, setMedicationEnabled,
+    medicationTime, setMedicationTime,
   } = useStore();
 
   const { play, stop, isPlaying, setVolume: setEngineVolume } = useAudioEngine();
@@ -71,6 +74,7 @@ export default function SettingsPage() {
   const mode = modeKeys.indexOf(appMode);
   const timer = timerKeys.indexOf(timerStyle);
   const phase = phaseKeys.indexOf(seasonalMode);
+  const navigate = useNavigate();
   const restMode = flexiblePauseUntil ? new Date(flexiblePauseUntil) > new Date() : false;
 
   const handleSignOut = async () => {
@@ -266,6 +270,79 @@ export default function SettingsPage() {
               🔔 Enable reminders
             </motion.button>
           )}
+        </Section>
+
+        {/* Medication peak window — B-12: show optimal focus window around med timing */}
+        <Section label="Medication">
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-[14px] font-medium" style={{ color: '#E8E8F0' }}>Peak window indicator</p>
+                <p className="text-[12px] mt-0.5" style={{ color: '#8B8BA7' }}>
+                  Highlights your optimal focus window on the Focus screen
+                </p>
+              </div>
+              <button
+                onClick={() => setMedicationEnabled(!medicationEnabled)}
+                className="w-11 h-6 rounded-full relative transition-colors duration-200"
+                style={{ background: medicationEnabled ? '#7B72FF' : '#252840' }}
+                aria-pressed={medicationEnabled}
+                aria-label="Toggle medication peak indicator"
+              >
+                <motion.div
+                  animate={{ x: medicationEnabled ? 20 : 2 }}
+                  transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+                  className="absolute top-1 w-4 h-4 rounded-full bg-white"
+                />
+              </button>
+            </div>
+            {medicationEnabled && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                className="overflow-hidden"
+              >
+                <p className="text-[12px] mb-2" style={{ color: '#8B8BA7' }}>When do you take it?</p>
+                <div className="flex gap-2">
+                  {([
+                    { key: 'morning', label: 'Morning', sub: '7–9am', emoji: '🌅' },
+                    { key: 'afternoon', label: 'Afternoon', sub: '12–2pm', emoji: '☀️' },
+                    { key: 'evening', label: 'Evening', sub: '4–6pm', emoji: '🌆' },
+                  ] as const).map(({ key, label, sub, emoji }) => {
+                    const sel = medicationTime === key;
+                    return (
+                      <button
+                        key={key}
+                        onClick={() => setMedicationTime(sel ? null : key)}
+                        className="flex-1 flex flex-col items-center gap-0.5 py-2.5 rounded-xl transition-all text-xs"
+                        style={{
+                          background: sel ? 'rgba(123,114,255,0.18)' : '#252840',
+                          border: `1px solid ${sel ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
+                          color: sel ? '#C8C0FF' : '#8B8BA7',
+                        }}
+                      >
+                        <span className="text-base">{emoji}</span>
+                        <span className="font-medium">{label}</span>
+                        <span style={{ color: '#5A5B72', fontSize: 10 }}>{sub}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            )}
+          </div>
+        </Section>
+
+        {/* Setup revisit — O-11: re-run onboarding to update preferences */}
+        <Section label="Preferences">
+          <button
+            onClick={() => navigate('/onboarding')}
+            className="flex items-center gap-3 w-full h-10 rounded-xl px-3 text-[14px] font-medium"
+            style={{ backgroundColor: 'rgba(78,205,196,0.08)', color: '#4ECDC4', border: '1px solid rgba(78,205,196,0.15)' }}
+          >
+            <span>🔄</span>
+            <span>Re-run setup wizard</span>
+          </button>
         </Section>
 
         {/* Feedback */}

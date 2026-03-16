@@ -136,6 +136,9 @@ interface PreferencesSlice {
   // Shutdown ritual — end-of-day wind-down, shown once per day after 9pm
   shutdownShownDate: string | null  // ISO date — prevents re-showing same day
   setShutdownShownDate: (date: string) => void
+  // Monthly reflection — shown within first 5 days of each new month
+  monthlyReflectionShownMonth: string | null  // 'YYYY-MM' e.g. '2026-03'
+  setMonthlyReflectionShownMonth: (month: string) => void
 }
 
 interface GridSlice {
@@ -480,6 +483,10 @@ export const useStore = create<AppStore>()(
         // Shutdown ritual — shown once per day after 9pm
         shutdownShownDate: null,
         setShutdownShownDate: (date) => set({ shutdownShownDate: date }),
+
+        // Monthly reflection — shown within first 5 days of each new month
+        monthlyReflectionShownMonth: null,
+        setMonthlyReflectionShownMonth: (month) => set({ monthlyReflectionShownMonth: month }),
       }),
       {
         name: 'mindshift-store',
@@ -533,6 +540,7 @@ export const useStore = create<AppStore>()(
           longestStreak: s.longestStreak,
           lastActiveDate: s.lastActiveDate,
           shutdownShownDate: s.shutdownShownDate,
+          monthlyReflectionShownMonth: s.monthlyReflectionShownMonth,
         }),
       }
     )

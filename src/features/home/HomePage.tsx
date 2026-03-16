@@ -8,6 +8,7 @@ import AddTaskModal from '@/components/AddTaskModal';
 import { useStore } from '@/store';
 import type { EnergyLevel } from '@/types';
 import { getNowPoolMax, APP_MODE_CONFIG, ENERGY_EMOJI } from '@/shared/lib/constants';
+import { useI18n } from '@/shared/hooks/useI18n';
 
 // ── Mochi energy reaction messages ────────────────────────────────────────────
 // Research #3: state-aware apps adapt to user's real-time neurological capacity.
@@ -97,13 +98,14 @@ export default function HomePage() {
   // Research #3: show only when growing — celebrate consistency, never shame gaps.
   const showStreak = currentStreak >= 2;
 
-  // Time-based greeting
+  // Time-based greeting (i18n-aware)
+  const { t } = useI18n();
   const hour = new Date().getHours();
   const greeting =
-    hour < 5  ? 'Good night 🌃' :
-    hour < 12 ? 'Good morning ☀️' :
-    hour < 17 ? 'Good afternoon 🌤️' :
-    hour < 21 ? 'Good evening 🌙' : 'Good night 🌃';
+    hour < 5  ? t('home.greeting.night') :
+    hour < 12 ? t('home.greeting.morning') :
+    hour < 17 ? t('home.greeting.afternoon') :
+    hour < 21 ? t('home.greeting.evening') : t('home.greeting.night');
 
   return (
     <div className="min-h-screen px-5 pb-36 pt-10" style={{ backgroundColor: '#0F1120' }}>
