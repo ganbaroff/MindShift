@@ -2,7 +2,7 @@
 
 ## Project
 **MindShift** — ADHD-aware productivity PWA. Mobile-first, React + TypeScript + Supabase.
-Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ `4f7f9aa`. Status: **production-ready**.
+Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ `c31f321`. Status: **production-ready**.
 
 ## Stable Production URL
 **`https://mind-shift-git-main-yusifg27-3093s-projects.vercel.app`**
@@ -22,6 +22,11 @@ Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ `4f7f9aa`. Status: **p
 ## Sprint History
 | Sprint | Commit | What landed |
 |--------|--------|-------------|
+| Sprint H "Final QA" | `(current)` | 20 new e2e tests: due date picker (Today/Tomorrow chips, toggle, upcoming hint), NEXT pool empty state, home empty state CTA, Settings Reminders section. CLAUDE.md updated. 132/132 e2e tests passing. |
+| Sprint G "Polish & Harden" | `c31f321` | Accessibility: EnergyPicker aria-label+aria-pressed, Fab aria-label+focus-visible ring, CollapsibleSection aria-expanded+aria-label. Performance: TaskCard React.memo (custom comparator), useMemo for all filtered task lists in TasksPage + HomePage. Error handling: useTaskSync surfaces Supabase fetch errors as toast. Empty states: TasksPage NEXT pool "Queue tasks here" hint. |
+| Sprint F "Push & Remind" | `e34b345` | SW push+notificationclick handlers. OnboardingPage 5-step flow (step 5 = notification permission + skip). SettingsPage Reminders section. AddTaskModal due date picker (Today/Tomorrow chips + native input) + auto-schedules reminder. TaskCard 🔔 badge + 📅 due date pill. |
+| Sprint E "Real Data Pipeline" | `42b8996` | useTaskSync: bidirectional Supabase↔store sync, server-wins on login, local-push on first device. useSessionHistory: last-30-days focus_sessions, computes WeeklyStats (dailyMinutes, totalFocusMinutes, peakFocusTime, consistencyScore), energyTrend from energy_after, calls weekly-insight edge function. ProgressPage wired to real data. |
+| Sprint D "Clean Slate" | `f77504d` | Removed 1,648 lines dead code (duplicate TaskCard/AddTaskModal in features/tasks/, unused lib/utils.ts). Fixed AddTaskModal aria-label="Close modal". FocusScreen restored (was routing to Lovable prototype FocusPage). |
 | Sprint B "Finish What You Started" | `4f7f9aa` | 10 UX fixes from ux-dead-ends-audit: cognitiveMode removed from UI (C-3), psychotype wired to Mochi messages (C-4), appMode change resets BentoGrid (C-4), SEASONAL_MODE_CONFIG + getNowPoolMax compose both mode configs (H-4), DueDateScreen task rows → bottom-sheet reschedule (M-1), FirstTaskPrompt resets when NOW pool empties (M-8), carry-over badge → actionable button with popover (M-9), taskType badge (idea/reminder emoji) on TaskCard (M-12), DIFFICULTY_MAP single source of truth replacing difficultyLevel (A-2), /audio orphaned route removed (A-4). e2e tests: seasonalMode toast + FirstTaskPrompt reset. |
 | Sprint A "Nothing Should Lie" | `e2f2220` | 28-issue UX dead-end audit → 6 fixes: "Done recently" section for completed tasks (7-day history + 30-day pruning), APP_MODE_CONFIG drives pool visibility/limits (minimal/habit/system), ProBanner removed (no Stripe yet), energy_before now written + ProgressScreen energy trends, Health & Rhythms fields removed (sleep/chrono/medication — unused), BurnoutAlert CTA fix ("Take a breather" for burnout tier), rest-mode banner, QuickSetupCard toast, BurnoutNudge cooldown copy. e2e tests synced. |
 | Copy audit | `bd1d8b1` | UX copy audit 4 waves: canonical ENERGY_LABELS/EMOJI in constants.ts, tone/emoji (AuthScreen/FocusScreen/PostSessionFlow/OnboardingFlow/SettingsScreen), jargon removal (micro-win/micro-focus/Generate/Feels native/CoachMark), polish (stats counters, Mochi milestone_60, CookieBanner, HomeScreen skip). e2e tests synced to new copy. GitHub Actions e2e-production.yml (deployment_status trigger). Stable URL documented. |
@@ -152,6 +157,16 @@ Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ `4f7f9aa`. Status: **p
 - **Undo completion:** TaskCard holds completion for 4s with toast. Confetti fires immediately.
 - **Timer style UI:** Now settable in SettingsScreen (was only in store with no UI).
 
+## Architecture (Sprint D–H additions)
+- **useTaskSync:** `src/shared/hooks/useTaskSync.ts` — bidirectional Supabase↔store sync. Server-wins on login. Local-push on first device. Surfaces fetch errors as sonner toast.
+- **useSessionHistory:** `src/shared/hooks/useSessionHistory.ts` — fetches last 30 days of focus_sessions, computes WeeklyStats, calls `weekly-insight` edge function once per mount.
+- **SW push handlers:** `src/sw.ts` — `push` renders OS notification, `notificationclick` opens app URL.
+- **OnboardingPage:** 5-step flow — step 5 is notification permission with "Skip for now". TOTAL_STEPS = 5.
+- **AddTaskModal:** Due date picker (Today/Tomorrow chips + native date input). Auto-schedules reminder 15 min before due date when Notification.permission === 'granted'. Reset on close via handleClose().
+- **TaskCard:** React.memo with custom comparator (id/status/title/dueDate/difficulty). 🔔 badge when reminder active. 📅 due date pill.
+- **Performance:** useMemo on filtered task lists in HomePage + TasksPage. React.memo on TaskCard.
+- **Accessibility:** EnergyPicker aria-label+aria-pressed. Fab aria-label+focus-visible ring. CollapsibleSection aria-expanded+aria-label.
+
 ## Architecture (Sprint B additions)
 - **SEASONAL_MODE_CONFIG:** `constants.ts` — each seasonalMode (launch/maintain/recover/sandbox) has `nowPoolMaxOverride` (null = defer to appMode).
 - **getNowPoolMax(appMode, seasonalMode):** helper composing both configs. Used in NowPoolWidget + AddTaskModal + SettingsScreen toast.
@@ -177,7 +192,8 @@ Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ `4f7f9aa`. Status: **p
 - Always run `tsc --noEmit` before any commit from Cowork
 - Sprint A: `tsc --noEmit` ✅, deployed `e2f2220`
 - Sprint B: `tsc --noEmit` ✅, committed `4f7f9aa`
-- Branch: `main` @ `4f7f9aa`
+- Sprint D–H: `tsc --noEmit` ✅, `npx playwright test` 132/132 ✅
+- Branch: `main` @ `c31f321`
 
 ## Production Status (as of Sprint 9)
 | Item | Code | Deployed | Notes |
@@ -194,10 +210,10 @@ Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ `4f7f9aa`. Status: **p
 
 ## Known Gaps (not yet implemented)
 - **energy_after** — `energy_before` now written (Sprint A). `energy_after` still needs PostSessionFlow picker wiring to DB UPDATE.
-- **Server-side reminders** — browser setTimeout only (lost on tab close). Need SW push or Supabase cron.
+- **Server-side reminders** — SW showNotification works when app is in background tab (Sprint F). Full background push (app fully closed) needs Web Push API + VAPID keys + Supabase cron (v2).
 - **Stripe integration** — subscriptionTier exists in store, ProBanner UI removed (Sprint A). Zero payment logic. Restore ProBanner when Stripe ready.
-- **classify-voice-input** — code audit shows it IS wired in AddTaskModal. Status: working in code, unconfirmed in production.
-- **Date picker on tasks** — dueDate field exists in Task type but AddTaskModal has no UI to set it. DueDateScreen reschedules existing dates only.
+- **classify-voice-input** — edge function written + wired in AddTaskModal. Unconfirmed in production (run `supabase functions list` to verify).
+- **Date picker on tasks** ~~FIXED Sprint F~~ — AddTaskModal now has Today/Tomorrow chips + native date input.
 - **Social layer** — S-2/S-3/S-4 require Supabase Realtime design (separate sprint)
 - **Health signals** — sleepQuality, chronotype, medicationTime removed from UI (Sprint A). Store fields remain. Re-add when wired to recommendations.
 
