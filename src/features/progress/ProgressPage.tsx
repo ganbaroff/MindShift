@@ -133,6 +133,35 @@ export default function ProgressPage() {
           )}
         </motion.div>
 
+        {/* Peak Focus Window (O-12) — derived from session history */}
+        {weeklyStats && weeklyStats.peakFocusTime !== 'Not enough data' && (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.17 }}
+            className="rounded-2xl p-3"
+            style={{ backgroundColor: '#1E2136', border: '1px solid rgba(78,205,196,0.12)' }}
+          >
+            <p className="text-[11px] uppercase tracking-widest mb-2" style={{ color: '#4ECDC4' }}>⚡ Peak focus window</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-[20px] font-bold" style={{ color: '#4ECDC4' }}>{weeklyStats.peakFocusTime}</p>
+                <p className="text-[11px] mt-0.5" style={{ color: '#8B8BA7' }}>
+                  Your most productive time this week
+                </p>
+              </div>
+              {weeklyStats.consistencyScore > 0 && (
+                <div className="text-right">
+                  <p className="text-[18px] font-bold" style={{ color: '#7B72FF' }}>
+                    {Math.round(weeklyStats.consistencyScore * 7)}/7
+                  </p>
+                  <p className="text-[10px]" style={{ color: '#8B8BA7' }}>days active</p>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+
         {/* Share this week — Web Share API / Capacitor Share */}
         {shareSupported && (
           <motion.button

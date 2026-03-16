@@ -1,15 +1,38 @@
-import { useState } from 'react';
+/**
+ * OnboardingPage — 6-step setup wizard.
+ *
+ * Step 0: Intent (appMode)
+ * Step 1: Current energy
+ * Step 2: Timer preference
+ * Step 3: Time blindness — O-6 ADHD signal
+ * Step 4: Emotional reactivity — O-6 ADHD signal
+ * Step 5: Notification permission
+ *
+ * O-11 Revisit mode: when onboardingCompleted is already true (user came from
+ * Settings → "Re-run setup wizard"), show a gentle banner, skip re-seeding
+ * sample tasks, navigate back on finish instead of to '/'.
+ */
+import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import EnergyPicker from '@/components/EnergyPicker';
 import { useStore } from '@/store';
-import type { EnergyLevel } from '@/types';
+import type { EnergyLevel, AppMode } from '@/types';
 
-const modeMap  = ['minimal', 'habit', 'system']    as const;
+// ── Maps ──────────────────────────────────────────────────────────────────────
+const modeMap  = ['minimal', 'habit', 'system']       as const;
 const timerMap = ['countdown', 'countup', 'surprise'] as const;
-const TOTAL_STEPS = 5;
+
+type TimeBlindness       = 'often' | 'sometimes' | 'rarely'
+type EmotionalReactivity = 'high'  | 'moderate'  | 'steady'
+
+const TIME_BLINDNESS_MAP: TimeBlindness[]       = ['often', 'sometimes', 'rarely']
+const EMOTIONAL_REACTIVITY_MAP: EmotionalReactivity[] = ['high', 'moderate', 'steady']
+
+const TOTAL_STEPS = 6;
 
 const steps = [
+  // 0 — Intent
   {
     title: 'What brings you here today?',
     options: [
@@ -18,7 +41,9 @@ const steps = [
       { emoji: '🗂️', label: 'Full picture',        desc: 'Full visibility over my projects' },
     ],
   },
-  { title: "How's your brain right now?" },
+  // 1 — Energy (rendered separately)
+  { title: "How's your brain right now?", options: [] },
+  // 2 — Timer style
   {
     title: 'How do you want to see your timer?',
     options: [
@@ -27,15 +52,27 @@ const steps = [
       { emoji: '🎲', label: 'Surprise',  desc: "Random — you'll focus until it rings" },
     ],
   },
+  // 3 — Time blindness (O-6)
   {
-    title: 'One last question 🧠',
-    subtitle: 'Do tasks disappear from your mind when off-screen?',
+    title: 'How do you experience time? 🕰️',
+    subtitle: "There's no wrong answer — this helps us personalise your timer.",
     options: [
-      { emoji: '🎯', label: 'Yes — one at a time',   desc: 'Show me only what I need right now' },
-      { emoji: '🗺️', label: 'No — show everything', desc: 'I like to see the full picture' },
+      { emoji: '😵', label: 'Time vanishes on me',          desc: 'An hour can feel like five minutes' },
+      { emoji: '🤔', label: 'I notice time slipping sometimes', desc: 'Depends on what I'm doing' },
+      { emoji: '✅', label: 'I track time naturally',       desc: 'I usually know how long things take' },
     ],
   },
-  // Step 4 (index 4): notification permission — rendered separately
+  // 4 — Emotional reactivity (O-6)
+  {
+    title: 'When plans change unexpectedly... 🌊',
+    subtitle: 'How you respond helps us support you better on tough days.',
+    options: [
+      { emoji: '🌀', label: 'Throws me off completely', desc: 'Hard to refocus — RSD can hit hard' },
+      { emoji: '🌊', label: 'I notice it, then recover', desc: 'Some friction, but I bounce back' },
+      { emoji: '🌱', label: 'Rarely phases me',          desc: 'I adapt pretty smoothly' },
+    ],
+  },
+  // 5 — Notifications (rendered separately)
   {
     title: 'Want gentle reminders? 🔔',
     subtitle: "We'll nudge you before tasks are due — nothing aggressive, just friendly taps.",
@@ -43,36 +80,84 @@ const steps = [
   },
 ];
 
+// ── Helpers to pre-fill from store (revisit mode) ─────────────────────────────
+function modeToIdx(m: AppMode | string | undefined): number | null {
+  const i = modeMap.indexOf(m as typeof modeMap[number])
+  return i >= 0 ? i : null
+}
+function tbToIdx(v: TimeBlindness | null): number | null {
+  if (!v) return null
+  const i = TIME_BLINDNESS_MAP.indexOf(v)
+  return i >= 0 ? i : null
+}
+function erToIdx(v: EmotionalReactivity | null): number | null {
+  if (!v) return null
+  const i = EMOTIONAL_REACTIVITY_MAP.indexOf(v)
+  return i >= 0 ? i : null
+}
+
+// ── Component ─────────────────────────────────────────────────────────────────
 export default function OnboardingPage() {
   const navigate = useNavigate();
-  const { setAppMode, setEnergyLevel, setTimerStyle, setOnboardingCompleted } = useStore();
+  const {
+    setAppMode, setEnergyLevel, setTimerStyle, setOnboardingCompleted,
+    setTimeBlindness, setEmotionalReactivity,
+    appMode, timeBlindness, emotionalReactivity, timerStyle,
+    onboardingCompleted,
+  } = useStore();
+
+  // O-11: revisit mode — user came from Settings "Re-run setup wizard"
+  const isRevisit = onboardingCompleted;
+
+  // Pre-fill from store if revisiting
+  const initialSelections = useMemo<(number | null)[]>(() => {
+    if (!isRevisit) return [null, null, null, null, null, null];
+    const timerIdx = timerMap.indexOf(timerStyle as typeof timerMap[number])
+    return [
+      modeToIdx(appMode),
+      null, // energy is always fresh
+      timerIdx >= 0 ? timerIdx : null,
+      tbToIdx(timeBlindness),
+      erToIdx(emotionalReactivity),
+      null,
+    ]
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // intentionally once — revisit pre-fill uses snapshot at mount
+
   const [step,       setStep]       = useState(0);
-  const [selections, setSelections] = useState<(number | null)[]>([null, null, null, null, null]);
+  const [selections, setSelections] = useState<(number | null)[]>(initialSelections);
   const [energy,     setEnergy]     = useState(2);
   const [notifState, setNotifState] = useState<'idle' | 'granted' | 'denied'>('idle');
 
   const current = steps[step];
+  const isEnergyStep = step === 1;
+  const isNotifStep  = step === 5;
 
-  // Step 4 = notification step — always "continuable" (skip is valid)
   const canContinue =
-    step === 1 ? true :
-    step === 4 ? true :
+    isEnergyStep  ? true :
+    isNotifStep   ? true :
     selections[step] !== null;
 
   const finish = () => {
+    // Persist all selections to store
     if (selections[0] !== null) setAppMode(modeMap[selections[0]]);
     setEnergyLevel((energy + 1) as EnergyLevel);
     if (selections[2] !== null) setTimerStyle(timerMap[selections[2]]);
-    setOnboardingCompleted();
-    navigate('/');
+    if (selections[3] !== null) setTimeBlindness(TIME_BLINDNESS_MAP[selections[3]]);
+    if (selections[4] !== null) setEmotionalReactivity(EMOTIONAL_REACTIVITY_MAP[selections[4]]);
+
+    if (!isRevisit) {
+      setOnboardingCompleted();
+      navigate('/');
+    } else {
+      // Revisit: already completed — just go back
+      navigate(-1);
+    }
   };
 
   const handleNext = () => {
-    if (step < TOTAL_STEPS - 1) {
-      setStep(step + 1);
-    } else {
-      finish();
-    }
+    if (step < TOTAL_STEPS - 1) setStep(step + 1);
+    else finish();
   };
 
   const requestNotifications = async () => {
@@ -89,18 +174,42 @@ export default function OnboardingPage() {
     const s = [...selections];
     s[step] = i;
     setSelections(s);
+    // Auto-advance on single-select steps after brief delay (except energy/notif)
+    if (!isEnergyStep && !isNotifStep) {
+      setTimeout(() => {
+        if (step < TOTAL_STEPS - 1) setStep(step + 1);
+        else finish();
+      }, 160);
+    }
   };
-
-  const isNotifStep = step === 4;
 
   return (
     <div className="min-h-screen px-5 flex flex-col" style={{ backgroundColor: '#0F1120' }}>
+      {/* Revisit banner */}
+      {isRevisit && (
+        <div
+          className="mx-0 mt-safe mt-8 mb-0 px-4 py-2.5 rounded-2xl flex items-center gap-2"
+          style={{ background: 'rgba(123,114,255,0.10)', border: '1px solid rgba(123,114,255,0.20)' }}
+        >
+          <span className="text-base">🔧</span>
+          <p className="text-xs" style={{ color: '#C8C0FF' }}>
+            Refreshing your profile — changes apply immediately
+          </p>
+        </div>
+      )}
+
       {/* Progress bar */}
-      <div className="pt-10 mb-6">
+      <div className={isRevisit ? 'pt-4 mb-6' : 'pt-10 mb-6'}>
         <div className="flex gap-1.5 mb-2">
           {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
             <div key={i} className="flex-1 h-1 rounded-full overflow-hidden" style={{ backgroundColor: '#252840' }}>
-              {i <= step && <motion.div initial={{ width: 0 }} animate={{ width: '100%' }} className="h-full gradient-primary" />}
+              {i <= step && (
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: '100%' }}
+                  className="h-full gradient-primary"
+                />
+              )}
             </div>
           ))}
         </div>
@@ -113,6 +222,7 @@ export default function OnboardingPage() {
         </div>
       </div>
 
+      {/* Screen content */}
       <AnimatePresence mode="wait">
         <motion.div
           key={step}
@@ -128,13 +238,13 @@ export default function OnboardingPage() {
           )}
 
           {/* Step 1: Energy picker */}
-          {step === 1 && (
+          {isEnergyStep && (
             <div className="mt-6">
               <EnergyPicker selected={energy} onSelect={setEnergy} size={56} />
             </div>
           )}
 
-          {/* Step 4: Notification permission */}
+          {/* Step 5: Notification permission */}
           {isNotifStep && (
             <div className="mt-8 space-y-3">
               {notifState === 'idle' && (
@@ -175,8 +285,8 @@ export default function OnboardingPage() {
             </div>
           )}
 
-          {/* Steps 0, 2, 3: Option cards */}
-          {!isNotifStep && step !== 1 && (
+          {/* Steps 0, 2, 3, 4: Option cards (auto-advance on tap) */}
+          {!isEnergyStep && !isNotifStep && (
             <div className="space-y-2 mt-5">
               {current.options?.map((opt, i) => (
                 <motion.button
@@ -206,7 +316,8 @@ export default function OnboardingPage() {
       </AnimatePresence>
 
       {/* Continue button — hidden on notification step (has its own CTA + skip) */}
-      {!isNotifStep && (
+      {/* Also hidden on option-card steps since they auto-advance */}
+      {(isEnergyStep) && (
         <div className="py-6">
           <motion.button
             whileTap={{ scale: 0.97 }}
