@@ -50,6 +50,7 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
   const [difficulty, setDifficulty] = useState<1 | 2 | 3>(1);
   const [minutes, setMinutes] = useState(SMART_DURATION[1]);
   const [dueDate, setDueDate] = useState<string | null>(null);
+  const [repeat, setRepeat] = useState<'none' | 'daily' | 'weekly'>('none');
   const [voiceState, setVoiceState] = useState<VoiceState>('idle');
   const [voiceError, setVoiceError] = useState<string | null>(null);
   const [classifyConfidence, setClassifyConfidence] = useState<number | null>(null)
@@ -73,6 +74,7 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
       setDifficulty(1);
       setMinutes(SMART_DURATION[1]);
       setDueDate(null);
+      setRepeat('none');
       setVoiceState('idle');
       setVoiceError(null);
       setClassifyConfidence(null);
@@ -189,6 +191,7 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
       dueTime: null,
       taskType: 'task',
       reminderSentAt: null,
+      repeat,
     };
     addTask(newTask);
     // Auto-schedule reminder 15 min before due date if permission granted
@@ -420,6 +423,28 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
                     📅 Will appear in Upcoming tab
                   </motion.p>
                 )}
+              </div>
+
+              {/* Repeat — auto-recreate on completion */}
+              <div>
+                <p className="text-[12px] mb-1.5" style={{ color: '#8B8BA7' }}>Repeat</p>
+                <div className="flex gap-2">
+                  {(['none', 'daily', 'weekly'] as const).map(r => (
+                    <motion.button
+                      key={r}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setRepeat(r)}
+                      className="flex-1 h-8 rounded-full text-[12px] font-medium capitalize"
+                      style={{
+                        backgroundColor: repeat === r ? 'rgba(123,114,255,0.15)' : '#252840',
+                        border: `${repeat === r ? 1.5 : 1}px solid ${repeat === r ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
+                        color: repeat === r ? '#7B72FF' : '#8B8BA7',
+                      }}
+                    >
+                      {r === 'none' ? 'Once' : r}
+                    </motion.button>
+                  ))}
+                </div>
               </div>
 
               <div className="text-secondary text-ms-muted">
