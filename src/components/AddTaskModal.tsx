@@ -1,13 +1,20 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
-import { X } from 'lucide-react';
+import { useState, useRef, useCallback, useEffect } from 'react';
+import { X, Mic, MicOff, Loader2 } from 'lucide-react';
 import { useStore } from '@/store';
 import { DIFFICULTY_MAP } from '@/types';
 import type { Task } from '@/types';
 import { getNowPoolMax } from '@/shared/lib/constants';
 import { reminders } from '@/shared/lib/reminders';
+import { supabase } from '@/shared/lib/supabase';
+import { logError } from '@/shared/lib/logger';
 
 const durationOptions = [5, 15, 25, 45, 60];
+
+// Smart duration defaults — Research: difficulty predicts time needed
+// Easy tasks are often underestimated; hard tasks overestimated. These are
+// conservative midpoints that match ADHD task-time perception research.
+const SMART_DURATION: Record<1 | 2 | 3, number> = { 1: 15, 2: 25, 3: 45 };
 
 // Quick-date helpers
 function toISODate(d: Date): string {
@@ -16,30 +23,150 @@ function toISODate(d: Date): string {
 const TODAY    = toISODate(new Date());
 const TOMORROW = toISODate(new Date(Date.now() + 86_400_000));
 
+// SpeechRecognition browser compatibility
+type SpeechRecognitionCtor = typeof SpeechRecognition
+const SpeechRecognitionAPI: SpeechRecognitionCtor | null =
+  (typeof window !== 'undefined' &&
+    ((window as unknown as { SpeechRecognition?: SpeechRecognitionCtor }).SpeechRecognition ??
+     (window as unknown as { webkitSpeechRecognition?: SpeechRecognitionCtor }).webkitSpeechRecognition)) || null
+
+type VoiceState = 'idle' | 'listening' | 'classifying'
+
 interface AddTaskModalProps {
   open: boolean;
   onClose: () => void;
 }
 
 export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
-  const { addTask, nowPool, appMode, seasonalMode } = useStore();
+  const { addTask, nowPool, appMode, seasonalMode, locale } = useStore();
   const maxNow = getNowPoolMax(appMode, seasonalMode);
   const nowCount = nowPool.filter(t => t.status === 'active').length;
   const isFull = nowCount >= maxNow;
 
   const [title, setTitle] = useState('');
   const [difficulty, setDifficulty] = useState<1 | 2 | 3>(1);
-  const [minutes, setMinutes] = useState(25);
+  const [minutes, setMinutes] = useState(SMART_DURATION[1]);
   const [dueDate, setDueDate] = useState<string | null>(null);
+  const [voiceState, setVoiceState] = useState<VoiceState>('idle');
+  const [voiceError, setVoiceError] = useState<string | null>(null);
+  const [classifyConfidence, setClassifyConfidence] = useState<number | null>(null)
 
-  // Reset form when modal closes
+  // Track whether the user manually picked a duration (prevents smart override)
+  const minutesManuallySet = useRef(false);
+
+  // Smart duration: auto-update when difficulty changes unless user picked manually
+  useEffect(() => {
+    if (!minutesManuallySet.current) {
+      setMinutes(SMART_DURATION[difficulty]);
+    }
+  }, [difficulty]);
+
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
+
+  // Reset form when modal closes/opens
+  useEffect(() => {
+    if (!open) {
+      setTitle('');
+      setDifficulty(1);
+      setMinutes(SMART_DURATION[1]);
+      setDueDate(null);
+      setVoiceState('idle');
+      setVoiceError(null);
+      setClassifyConfidence(null);
+      minutesManuallySet.current = false;
+      recognitionRef.current?.abort();
+    }
+  }, [open]);
+
   const handleClose = () => {
-    setTitle('');
-    setDifficulty(1);
-    setMinutes(25);
-    setDueDate(null);
+    recognitionRef.current?.abort();
     onClose();
   };
+
+  // ── Voice classification ──────────────────────────────────────────────────
+  const classifyTranscript = useCallback(async (transcript: string) => {
+    if (!transcript.trim()) { setVoiceState('idle'); return; }
+
+    setVoiceState('classifying');
+    try {
+      const { data } = await supabase.functions.invoke('classify-voice-input', {
+        body: { text: transcript.trim(), language: locale },
+      });
+
+      if (data?.title) {
+        setTitle(data.title as string);
+        if (data.difficulty && [1, 2, 3].includes(Number(data.difficulty))) {
+          const d = Number(data.difficulty) as 1 | 2 | 3;
+          setDifficulty(d);
+          // Smart duration: use AI estimated minutes if provided, else SMART_DURATION
+          const aiMinutes = Number(data.estimatedMinutes);
+          if (aiMinutes > 0 && durationOptions.includes(aiMinutes)) {
+            setMinutes(aiMinutes);
+            minutesManuallySet.current = true;
+          } else {
+            setMinutes(SMART_DURATION[d]);
+          }
+        }
+        if (data.dueDate && typeof data.dueDate === 'string') {
+          setDueDate(data.dueDate);
+        }
+        setClassifyConfidence(typeof data.confidence === 'number' ? data.confidence : null);
+      }
+    } catch (err) {
+      logError('AddTaskModal.classifyVoice', err);
+      // Fallback: use raw transcript as title
+      setTitle(transcript.trim().slice(0, 80));
+    } finally {
+      setVoiceState('idle');
+    }
+  }, [locale]);
+
+  const handleVoiceTap = useCallback(() => {
+    if (!SpeechRecognitionAPI) {
+      setVoiceError('Voice input not supported on this browser.');
+      return;
+    }
+
+    if (voiceState === 'listening') {
+      recognitionRef.current?.stop();
+      return;
+    }
+
+    if (voiceState === 'classifying') return;
+
+    setVoiceError(null);
+    setClassifyConfidence(null);
+    const rec = new SpeechRecognitionAPI();
+    rec.continuous = false;
+    rec.interimResults = false;
+    rec.lang = locale + '-' + locale.toUpperCase(); // e.g. en-EN (browser normalises)
+
+    rec.onstart = () => setVoiceState('listening');
+
+    rec.onresult = (e: SpeechRecognitionEvent) => {
+      const transcript = Array.from(e.results)
+        .map(r => r[0].transcript)
+        .join(' ');
+      void classifyTranscript(transcript);
+    };
+
+    rec.onerror = (e: SpeechRecognitionErrorEvent) => {
+      if (e.error !== 'aborted') {
+        setVoiceError(e.error === 'not-allowed'
+          ? 'Microphone permission denied.'
+          : 'Could not hear you. Try again?'
+        );
+      }
+      setVoiceState('idle');
+    };
+
+    rec.onend = () => {
+      if (voiceState === 'listening') setVoiceState('idle');
+    };
+
+    recognitionRef.current = rec;
+    rec.start();
+  }, [voiceState, locale, classifyTranscript]);
 
   const handleSubmit = () => {
     if (!title.trim()) return;
@@ -65,12 +192,10 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
     if (newTask.dueDate && 'Notification' in window && Notification.permission === 'granted') {
       reminders.schedule(newTask, 15);
     }
-    setTitle('');
-    setDifficulty(1);
-    setMinutes(25);
-    setDueDate(null);
     onClose();
   };
+
+  const voiceSupported = !!SpeechRecognitionAPI;
 
   return (
     <AnimatePresence>
@@ -97,13 +222,86 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
                 <X size={20} />
               </button>
             </div>
+
             <div className="space-y-5">
-              <input
-                value={title}
-                onChange={e => setTitle(e.target.value)}
-                placeholder="What's on your mind?"
-                className="w-full bg-ms-raised rounded-xl px-4 h-12 text-body text-ms-text placeholder:text-ms-muted border border-transparent focus:border-ms-primary outline-none transition-colors"
-              />
+              {/* Title + mic button */}
+              <div className="relative">
+                <input
+                  value={title}
+                  onChange={e => { setTitle(e.target.value); setClassifyConfidence(null); }}
+                  placeholder={voiceState === 'listening' ? 'Listening...' : "What's on your mind?"}
+                  className="w-full bg-ms-raised rounded-xl px-4 h-12 text-body text-ms-text placeholder:text-ms-muted border border-transparent focus:border-ms-primary outline-none transition-colors pr-12"
+                  style={{
+                    borderColor: voiceState === 'listening' ? '#7B72FF' : undefined,
+                  }}
+                />
+
+                {/* Voice mic button */}
+                {voiceSupported && (
+                  <button
+                    type="button"
+                    onClick={handleVoiceTap}
+                    disabled={voiceState === 'classifying'}
+                    aria-label={voiceState === 'listening' ? 'Stop recording' : 'Start voice input'}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200"
+                    style={{
+                      background: voiceState === 'listening'
+                        ? 'rgba(123,114,255,0.25)'
+                        : 'rgba(255,255,255,0.04)',
+                      color: voiceState === 'listening' ? '#7B72FF'
+                        : voiceState === 'classifying' ? '#4ECDC4'
+                        : '#8B8BA7',
+                    }}
+                  >
+                    {voiceState === 'classifying'
+                      ? <Loader2 size={15} className="animate-spin motion-reduce:animate-none" />
+                      : voiceState === 'listening'
+                        ? <MicOff size={15} />
+                        : <Mic size={15} />
+                    }
+                  </button>
+                )}
+              </div>
+
+              {/* Voice feedback */}
+              <AnimatePresence>
+                {voiceState === 'listening' && (
+                  <motion.p
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    className="text-xs flex items-center gap-1.5 -mt-3"
+                    style={{ color: '#7B72FF' }}
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse motion-reduce:opacity-80" />
+                    Listening — say your task...
+                  </motion.p>
+                )}
+                {classifyConfidence !== null && classifyConfidence >= 0.7 && (
+                  <motion.p
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    className="text-xs -mt-3"
+                    style={{ color: '#4ECDC4' }}
+                  >
+                    ✓ AI filled in the details — adjust if needed
+                  </motion.p>
+                )}
+                {voiceError && (
+                  <motion.p
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    className="text-xs -mt-3"
+                    style={{ color: '#F59E0B' }}
+                  >
+                    ⚠ {voiceError}
+                  </motion.p>
+                )}
+              </AnimatePresence>
+
+              {/* Difficulty */}
               <div>
                 <label className="text-caption text-ms-muted uppercase tracking-widest mb-2 block">Difficulty</label>
                 <div className="flex gap-2">
@@ -114,7 +312,7 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
                       <motion.button
                         key={d}
                         whileTap={{ scale: 0.97 }}
-                        onClick={() => setDifficulty(d)}
+                        onClick={() => { setDifficulty(d); }}
                         className="flex-1 h-11 rounded-xl flex items-center justify-center gap-2 text-secondary font-medium transition-all"
                         style={{
                           backgroundColor: sel ? `${c.color}20` : '#252840',
@@ -134,8 +332,17 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
                   })}
                 </div>
               </div>
+
+              {/* Time */}
               <div>
-                <label className="text-caption text-ms-muted uppercase tracking-widest mb-2 block">Time</label>
+                <div className="flex items-center gap-2 mb-2">
+                  <label className="text-caption text-ms-muted uppercase tracking-widest">Time</label>
+                  {!minutesManuallySet.current && (
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: 'rgba(123,114,255,0.12)', color: '#7B72FF' }}>
+                      ✨ smart
+                    </span>
+                  )}
+                </div>
                 <div className="flex gap-2">
                   {durationOptions.map(d => {
                     const sel = minutes === d;
@@ -143,7 +350,7 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
                       <motion.button
                         key={d}
                         whileTap={{ scale: 0.97 }}
-                        onClick={() => setMinutes(d)}
+                        onClick={() => { setMinutes(d); minutesManuallySet.current = true; }}
                         className="flex-1 h-10 rounded-full text-secondary font-medium transition-all"
                         style={{
                           background: sel ? 'linear-gradient(135deg, #7B72FF, #8B7FF7)' : '#252840',
@@ -158,6 +365,7 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
                   })}
                 </div>
               </div>
+
               {/* Due date */}
               <div>
                 <label className="text-caption text-ms-muted uppercase tracking-widest mb-2 block">Due date <span style={{ color: '#4ECDC4' }}>(optional)</span></label>
@@ -217,7 +425,8 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
               <motion.button
                 whileTap={{ scale: 0.97 }}
                 onClick={handleSubmit}
-                className="w-full h-[52px] rounded-xl gradient-primary text-primary-foreground font-semibold text-body shadow-primary"
+                disabled={!title.trim()}
+                className="w-full h-[52px] rounded-xl gradient-primary text-primary-foreground font-semibold text-body shadow-primary disabled:opacity-40"
               >
                 {isFull ? 'Add to Next →' : 'Add to Now →'}
               </motion.button>

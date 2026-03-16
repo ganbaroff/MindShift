@@ -133,6 +133,9 @@ interface PreferencesSlice {
   longestStreak: number        // all-time record
   lastActiveDate: string | null // ISO date (YYYY-MM-DD) of last completion
   recordStreakDay: () => void   // call on completeTask
+  // Shutdown ritual — end-of-day wind-down, shown once per day after 9pm
+  shutdownShownDate: string | null  // ISO date — prevents re-showing same day
+  setShutdownShownDate: (date: string) => void
 }
 
 interface GridSlice {
@@ -473,6 +476,10 @@ export const useStore = create<AppStore>()(
             lastActiveDate: today,
           }
         }),
+
+        // Shutdown ritual — shown once per day after 9pm
+        shutdownShownDate: null,
+        setShutdownShownDate: (date) => set({ shutdownShownDate: date }),
       }),
       {
         name: 'mindshift-store',
@@ -525,6 +532,7 @@ export const useStore = create<AppStore>()(
           currentStreak: s.currentStreak,
           longestStreak: s.longestStreak,
           lastActiveDate: s.lastActiveDate,
+          shutdownShownDate: s.shutdownShownDate,
         }),
       }
     )
