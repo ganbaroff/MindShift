@@ -53,6 +53,8 @@ export interface WeeklyStats {
   peakEnergyLevel: EnergyLevel
   consistencyScore: number // 0-1, tasks done / 7 days
   totalFocusMinutes: number
+  /** Minutes per day: [Mon, Tue, Wed, Thu, Fri, Sat, Sun] — 7 elements */
+  dailyMinutes?: number[]
 }
 
 export interface Achievement {

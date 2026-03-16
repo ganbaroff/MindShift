@@ -1,11 +1,13 @@
 import { motion } from 'framer-motion';
 import { useStore } from '@/store';
 import { ENERGY_EMOJI } from '@/shared/lib/constants';
+import { useSessionHistory } from '@/shared/hooks/useSessionHistory';
 
 const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 export default function ProgressPage() {
-  const { xpTotal, completedTotal, achievements, weeklyStats, energyLevel, burnoutScore } = useStore();
+  const { xpTotal, completedTotal, achievements, weeklyStats, burnoutScore } = useStore();
+  const { energyTrend, weeklyInsight, loading } = useSessionHistory();
 
   const xpSafe = xpTotal ?? 0;
   const level = Math.floor(xpSafe / 1000) + 1;
@@ -14,7 +16,7 @@ export default function ProgressPage() {
 
   const weekData = DAY_LABELS.map((day, i) => ({
     day,
-    mins: (weeklyStats as any)?.dailyMinutes?.[i] ?? 0,
+    mins: weeklyStats?.dailyMinutes?.[i] ?? 0,
   }));
 
   const maxMins = Math.max(...weekData.map(d => d.mins), 1);
@@ -26,6 +28,11 @@ export default function ProgressPage() {
   }));
 
   const unlockedCount = achievements.filter(a => a.unlockedAt).length;
+
+  // Show last 5 energy_after values as emojis (most recent first)
+  const energyTrendEmojis = energyTrend
+    .slice(0, 5)
+    .map(e => ENERGY_EMOJI[Math.min(4, Math.max(0, e - 1))]);
 
   return (
     <div className="min-h-screen px-5 pb-36 pt-10" style={{ backgroundColor: '#0F1120' }}>
@@ -56,7 +63,9 @@ export default function ProgressPage() {
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="rounded-2xl p-3" style={{ backgroundColor: '#1E2136' }}>
           <div className="flex items-center justify-between mb-2">
             <span className="text-[11px] uppercase tracking-widest" style={{ color: '#8B8BA7' }}>This week</span>
-            <span className="text-[13px]" style={{ color: '#E8E8F0' }}>Great week 💪</span>
+            <span className="text-[13px]" style={{ color: '#E8E8F0' }}>
+              {loading ? 'Loading…' : 'Great week 💪'}
+            </span>
           </div>
           <div className="flex items-end justify-between h-20 gap-1.5">
             {weekData.map((d, i) => (
@@ -95,15 +104,28 @@ export default function ProgressPage() {
         {/* Energy Trends */}
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="rounded-2xl p-3" style={{ backgroundColor: '#1E2136' }}>
           <p className="text-[11px] uppercase tracking-widest mb-1.5" style={{ color: '#4ECDC4' }}>Energy after sessions</p>
-          <div className="flex gap-0.5 text-[28px]">{ENERGY_EMOJI[energyLevel - 1]}</div>
-          <p className="text-[13px] mt-1" style={{ color: '#4ECDC4' }}>Current energy level</p>
+          {energyTrendEmojis.length > 0 ? (
+            <>
+              <div className="flex gap-1 text-[22px]">
+                {energyTrendEmojis.map((emoji, i) => (
+                  <span key={i}>{emoji}</span>
+                ))}
+              </div>
+              <p className="text-[11px] mt-1" style={{ color: '#8B8BA7' }}>Last {energyTrendEmojis.length} sessions (most recent first)</p>
+            </>
+          ) : (
+            <>
+              <p className="text-[13px]" style={{ color: '#4ECDC4' }}>No post-session energy data yet</p>
+              <p className="text-[11px] mt-0.5" style={{ color: '#8B8BA7' }}>Complete a focus session to track your trend</p>
+            </>
+          )}
         </motion.div>
 
         {/* AI Insights */}
         <div>
           <p className="text-[11px] uppercase tracking-widest mb-2" style={{ color: '#F59E0B' }}>✨ Weekly insight</p>
           <div className="space-y-1.5">
-            {['🧠 Peak focus: 2-4pm', '💡 Try 15-min sessions on low days', '🎯 You finish 73% of tasks'].map((insight, i) => (
+            {weeklyInsight.map((insight, i) => (
               <div key={i} className="rounded-xl p-2.5" style={{ backgroundColor: '#1E2136' }}>
                 <p className="text-[13px]" style={{ color: '#E8E8F0' }}>{insight}</p>
               </div>

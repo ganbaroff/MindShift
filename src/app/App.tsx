@@ -11,6 +11,8 @@ import { writeLastActive, shouldShowContextRestore } from '@/features/tasks/cont
 import { CookieBanner } from '@/shared/ui/CookieBanner'
 import { RECOVERY_THRESHOLD_HOURS } from '@/shared/lib/constants'
 import { useOfflineSync } from '@/shared/hooks/useOfflineSync'
+import { useTaskSync } from '@/shared/hooks/useTaskSync'
+import { useSessionHistory } from '@/shared/hooks/useSessionHistory'
 import { logError } from '@/shared/lib/logger'
 import { reminders } from '@/shared/lib/reminders'
 import { computeBurnoutScore, deriveBehaviors } from '@/shared/lib/burnout'
@@ -132,6 +134,8 @@ export default function App() {
   }, [completedTotal, energyLevel, nowPool, nextPool, somedayPool, setBurnoutScore])
 
   useOfflineSync()
+  useTaskSync()
+  useSessionHistory()
 
   const showRecovery = (() => {
     if (recoveryShown || !lastSessionAt) return false
