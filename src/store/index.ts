@@ -39,6 +39,11 @@ interface UserSlice {
   medicationEnabled: boolean
   medicationTime: 'morning' | 'afternoon' | 'evening' | null
   chronotype: 'lark' | 'owl' | 'varies' | null
+  // ADHD signal (O-6) — collected in onboarding, used for AI personalisation
+  timeBlindness: 'often' | 'sometimes' | 'rarely' | null
+  emotionalReactivity: 'high' | 'moderate' | 'steady' | null
+  setTimeBlindness: (v: 'often' | 'sometimes' | 'rarely') => void
+  setEmotionalReactivity: (v: 'high' | 'moderate' | 'steady') => void
   seasonalMode: 'launch' | 'maintain' | 'recover' | 'sandbox'
   burnoutScore: number                  // 0–100, computed (not persisted)
   flexiblePauseUntil: string | null     // ISO timestamp, null = no active pause
@@ -175,6 +180,8 @@ export const useStore = create<AppStore>()(
         medicationEnabled: false,
         medicationTime: null,
         chronotype: null,
+        timeBlindness: null,
+        emotionalReactivity: null,
         seasonalMode: 'launch' as const,
         burnoutScore: 0,
         flexiblePauseUntil: null,
@@ -209,6 +216,8 @@ export const useStore = create<AppStore>()(
         setMedicationEnabled: (val) => set({ medicationEnabled: val }),
         setMedicationTime: (t) => set({ medicationTime: t }),
         setChronotype: (c) => set({ chronotype: c }),
+        setTimeBlindness: (v) => set({ timeBlindness: v }),
+        setEmotionalReactivity: (v) => set({ emotionalReactivity: v }),
         setSeasonalMode: (m) => set({ seasonalMode: m }),
         setBurnoutScore: (score) => set({ burnoutScore: score }),
         setFlexiblePauseUntil: (until) => set({ flexiblePauseUntil: until }),
@@ -219,7 +228,8 @@ export const useStore = create<AppStore>()(
           // Health & Rhythms — reset to defaults on sign out
           timerStyle: 'countdown' as const,
           sleepQuality: null, medicationEnabled: false, medicationTime: null,
-          chronotype: null, seasonalMode: 'launch' as const,
+          chronotype: null, timeBlindness: null, emotionalReactivity: null,
+          seasonalMode: 'launch' as const,
           burnoutScore: 0, flexiblePauseUntil: null,
           // Task slice
           nowPool: [], nextPool: [], somedayPool: [],
@@ -531,6 +541,8 @@ export const useStore = create<AppStore>()(
           medicationEnabled: s.medicationEnabled,
           medicationTime: s.medicationTime,
           chronotype: s.chronotype,
+          timeBlindness: s.timeBlindness,
+          emotionalReactivity: s.emotionalReactivity,
           seasonalMode: s.seasonalMode,
           flexiblePauseUntil: s.flexiblePauseUntil,
           // sleepQuality + burnoutScore are NOT persisted (session-only)

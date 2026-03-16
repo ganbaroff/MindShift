@@ -22,6 +22,7 @@ Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ `4f3bec1`. Status: **p
 ## Sprint History
 | Sprint | Commit | What landed |
 |--------|--------|-------------|
+| Sprint M "Onboarding & Energy Intelligence" | pending | (1) O-6 Expanded ADHD signal — 2 new onboarding steps: Time Blindness (3 chips: often/sometimes/rarely) + Emotional Reactivity (3 chips: high/moderate/steady); store fields timeBlindness + emotionalReactivity persisted; TOTAL_STEPS now 6. (2) O-11 Revisit mode — OnboardingPage detects onboardingCompleted; shows "Refreshing your profile 🔧" banner; pre-fills selections from store; on finish skips setOnboardingCompleted + navigate(-1) instead of '/'; option cards auto-advance with 160ms delay. (3) O-12 Peak Focus Window — ProgressPage shows "⚡ Peak focus window: {peakFocusTime} + X/7 days active" card using weeklyStats.peakFocusTime/consistencyScore from useSessionHistory (already computed). (4) energy_after Known Gap resolved — was already implemented in useFocusSession.ts (savedSessionIdRef + handlePostEnergy). tsc ✅ |
 | Sprint L "i18n & Rituals" | pending | (1) Medication peak window badge (B-12) — FocusScreen setup shows ⚡ pill when current hour falls in med peak window (morning/afternoon/evening); wired to medicationEnabled + medicationTime from store. (2) Monthly Reflection ritual (B-5) — MonthlyReflection.tsx: 3-step flow (recap stats → set 1-word intention → closing auto-dismiss); triggers first 5 days of month, once/month; monthlyReflectionShownMonth persisted in store. (3) Settings: Medication section + Preferences > Re-run setup wizard. (4) i18n foundation — src/shared/lib/i18n/{en,ru,index}.ts + src/shared/hooks/useI18n.ts; resolves from navigator.language, fallback to en; EN+RU strings for greetings, home, focus, tasks, settings; wired to greeting in HomePage. tsc ✅ |
 | Sprint K "ADHD Patterns & Native" | pending | (1) Surprise timer ambient orb — pulsing radial gradient in arc center when timerStyle=surprise (O-9). (2) Hyperfocus Autopsy — NatureBuffer shows 3-option reflection card after sessions ≥45min: 🌊 flow / 🌱 steady / 🌀 scattered (B-6). (3) Two-Thirds guardrail — "filling up" badge in TasksPage NEXT header + gentle warning in AddTaskModal when nextPool ≥4 (B-9). (4) Native bridge — src/shared/lib/native.ts: Capacitor runtime detection, nativeHapticImpact/Notification/Selection, nativeStatusBarHide/Show/Dark, nativeShare + canShare; all with web fallbacks. FocusScreen hides status bar during active sessions. (5) Web Share — "Share this week" button in ProgressPage using nativeShare. (6) PWA manifest — public/manifest.json with 4 shortcuts (Focus/Quick Focus/Tasks/Progress), categories, screenshots, edge_side_panel; linked from index.html. tsc ✅ |
 | Sprint J "Voice & Rituals" | pending | (1) Voice input in AddTaskModal — Web SpeechRecognition → classify-voice-input edge fn → auto-fill title/difficulty/duration/dueDate; mic button with listening/classifying states + AI confidence feedback. (2) ShutdownRitual component — 3-step evening wind-down (9pm+, once/day): wins review → set ONE thing for tomorrow (creates NEXT task) → goodnight message; triggered from App.tsx. (3) Smart duration — difficulty-linked defaults (Easy=15m/Medium=25m/Hard=45m), "✨ smart" badge, resets on manual pick. (4) Auto-reschedule banner in TasksPage — gold non-shaming banner links to /calendar when active tasks have past dueDate. (5) Capacitor scaffold — capacitor.config.ts (iOS/Android/StatusBar/Keyboard/Notifications) + package.json cap: scripts. tsc ✅ |
@@ -176,6 +177,12 @@ Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ `4f3bec1`. Status: **p
 - **Performance:** useMemo on filtered task lists in HomePage + TasksPage. React.memo on TaskCard.
 - **Accessibility:** EnergyPicker aria-label+aria-pressed. Fab aria-label+focus-visible ring. CollapsibleSection aria-expanded+aria-label.
 
+## Architecture (Sprint M additions)
+- **O-6 ADHD signal:** `OnboardingPage.tsx` — 2 new steps (index 3 & 4) replace deprecated cognitiveMode step. `TIME_BLINDNESS_MAP: ['often','sometimes','rarely']`, `EMOTIONAL_REACTIVITY_MAP: ['high','moderate','steady']`. Store: `timeBlindness`, `emotionalReactivity` (both persisted). `setTimeBlindness`, `setEmotionalReactivity` setters. Option cards auto-advance with 160ms delay (removes need for Continue button on card-select steps).
+- **O-11 Revisit mode:** `OnboardingPage.tsx` reads `onboardingCompleted` from store. `isRevisit = onboardingCompleted`. `initialSelections` pre-fills from store values via `modeToIdx/tbToIdx/erToIdx` helpers (run once at mount). `finish()` skips `setOnboardingCompleted()` and calls `navigate(-1)` on revisit. "Refreshing your profile 🔧" banner shown at top.
+- **O-12 Peak Focus Window:** `ProgressPage.tsx` — new card between Energy Trends and Share button. Shows `weeklyStats.peakFocusTime` (teal) + `weeklyStats.consistencyScore × 7` days active (indigo). Only renders when `peakFocusTime !== 'Not enough data'`. Data already computed by `useSessionHistory` → `computeWeeklyStats`.
+- **energy_after (Known Gap resolved):** `useFocusSession.ts` — `savedSessionIdRef.current` captures DB row ID after session save. `handlePostEnergy` calls `supabase.from('focus_sessions').update({ energy_after: level }).eq('id', savedSessionIdRef.current)`. This was already implemented; marking as resolved.
+
 ## Architecture (Sprint L additions)
 - **Medication peak window (B-12):** `FocusScreen.tsx` — `MED_PEAK_HOURS` map (morning=[8,11], afternoon=[13,16], evening=[17,20]). `getMedPeakLabel()` returns pill string if current hour is in window and `medicationEnabled`. `medPeakLabel` via `useMemo`. Badge renders above Start button in indigo-tinted pill. Non-blocking, no DB write.
 - **Monthly Reflection (B-5):** `src/features/focus/MonthlyReflection.tsx` — lazy loaded, z-50. 3 steps: recap (completedTotal + longestStreak) → 1-word intention (quick-pick chips + free input) → closing auto-dismiss 3s. `monthlyReflectionShownMonth: string | null` in store (persisted as 'YYYY-MM'). `setMonthlyReflectionShownMonth`. Triggers in App.tsx when `currentDay <= 5 && monthlyReflectionShownMonth !== currentMonth`. Mutually exclusive with all other overlays (lowest priority).
@@ -252,7 +259,7 @@ Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ `4f3bec1`. Status: **p
 | Real users | 1 (Yusif only) | — | Design + auth issues resolved. Ready for beta invites. |
 
 ## Known Gaps (not yet implemented)
-- **energy_after** — `energy_before` written on session save. `energy_after` still needs PostSessionFlow picker wiring to DB UPDATE.
+- ~~**energy_after**~~ ✅ Resolved Sprint M — `handlePostEnergy` in `useFocusSession.ts` calls `supabase.update({ energy_after: level })` using `savedSessionIdRef.current`.
 - **Server-side push (v2)** — SW showNotification works when tab is in background (Sprint F). Full push when app is closed needs VAPID keys + Supabase cron.
 - **Stripe integration** — subscriptionTier exists in store, ProBanner UI removed (Sprint A). Zero payment logic. Restore ProBanner when Stripe ready.
 - **classify-voice-input** — edge function written + wired in AddTaskModal. Unconfirmed in production (`supabase functions list` to verify).
@@ -260,11 +267,11 @@ Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ `4f3bec1`. Status: **p
 - **Health signals** — sleepQuality, chronotype, medicationTime removed from UI (Sprint A). Store fields remain. Re-add when wired to recommendations.
 
 ## Remaining P2 Backlog (not yet implemented)
-- O-6: Expanded ADHD signal (time blindness, emotional reactivity scenarios)
+- ~~O-6: Expanded ADHD signal~~ ✅ Sprint M
 - O-7: Psychotype re-derivation from usage patterns (Day 30+)
 - O-9: "Surprise me" timer (hide all digits completely)
-- O-11: Onboarding skip + revisit engine
-- O-12: Daily energy pattern detection from logs
+- ~~O-11: Onboarding skip + revisit engine~~ ✅ Sprint M
+- ~~O-12: Daily energy pattern detection from logs~~ ✅ Sprint M (peakFocusTime card)
 - S-2: Ambient Orbit (anonymous "47 people focusing now" counter)
 - S-3: 1:1 Focus Partner (Model A — Supabase Realtime)
 - S-4: Quiet Room (Model B — 2-4 person rooms)
