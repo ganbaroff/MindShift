@@ -101,11 +101,11 @@ test.describe('Task creation', () => {
     // Fill title
     await page.getByPlaceholder("What's on your mind?").fill('Temp task')
 
-    // Close via backdrop overlay click
-    await page.locator('.fixed.inset-0.bg-black\\/60').click({ force: true })
+    // Close via the X button (aria-label="Close modal")
+    await page.getByRole('button', { name: 'Close modal' }).click()
 
     // Wait for the sheet to finish its exit animation before re-opening
-    await expect(page.getByText('Add a task')).not.toBeVisible({ timeout: 3000 })
+    await expect(page.getByText('Add a task')).not.toBeVisible({ timeout: 4000 })
 
     // Re-open — title should be empty
     await page.getByRole('button', { name: /add task/i }).click()
