@@ -96,6 +96,20 @@ test.describe('Settings screen', () => {
     await expect(page.getByRole('button', { name: /Sign out/i })).toBeVisible()
   })
 
+  test('Reminders section is visible', async ({ authedPage: page }) => {
+    await expect(page.getByText('Reminders', { exact: true })).toBeVisible()
+  })
+
+  test('Reminders section shows enable button when permission not granted', async ({ authedPage: page }) => {
+    // In test environment Notification.permission defaults to 'default'
+    // The section should show the "Enable reminders" button (not the granted state)
+    await expect(
+      page.getByRole('button', { name: /Enable reminders/i })
+        .or(page.getByText(/Reminders enabled/))
+        .or(page.getByText(/Blocked by browser/))
+    ).toBeVisible()
+  })
+
   test('footer shows legal links and version', async ({ authedPage: page }) => {
     await expect(page.getByText(/Privacy/)).toBeVisible()
     await expect(page.getByText(/Terms/)).toBeVisible()

@@ -199,6 +199,73 @@ test.describe('Task from HomeScreen', () => {
   })
 })
 
+test.describe('Due date picker', () => {
+  test.beforeEach(async ({ authedPage: page }) => {
+    await page.goto('/tasks')
+    await page.getByRole('button', { name: /add task/i }).click()
+  })
+
+  test('due date section is visible in modal', async ({ authedPage: page }) => {
+    await expect(page.getByText('Due date')).toBeVisible()
+    await expect(page.getByRole('button', { name: /Today/i })).toBeVisible()
+    await expect(page.getByRole('button', { name: /Tomorrow/i })).toBeVisible()
+  })
+
+  test('clicking Today shows upcoming hint', async ({ authedPage: page }) => {
+    // Before selection — no hint
+    await expect(page.getByText(/Upcoming tab/)).not.toBeVisible()
+
+    // Select Today
+    await page.getByRole('button', { name: 'Today', exact: true }).click()
+
+    // Hint should appear
+    await expect(page.getByText(/Will appear in Upcoming tab/)).toBeVisible()
+  })
+
+  test('clicking Tomorrow shows upcoming hint', async ({ authedPage: page }) => {
+    await page.getByRole('button', { name: 'Tomorrow', exact: true }).click()
+    await expect(page.getByText(/Will appear in Upcoming tab/)).toBeVisible()
+  })
+
+  test('clicking selected date chip deselects it (toggles)', async ({ authedPage: page }) => {
+    // Select Today
+    await page.getByRole('button', { name: 'Today', exact: true }).click()
+    await expect(page.getByText(/Will appear in Upcoming tab/)).toBeVisible()
+
+    // Click again to deselect
+    await page.getByRole('button', { name: 'Today', exact: true }).click()
+    await expect(page.getByText(/Will appear in Upcoming tab/)).not.toBeVisible()
+  })
+})
+
+test.describe('Empty states', () => {
+  test('NEXT pool shows queue hint when empty', async ({ authedPage: page }) => {
+    await page.goto('/tasks')
+    await expect(page.getByText(/Queue tasks here/)).toBeVisible()
+  })
+
+  test('NOW pool shows no tasks when empty', async ({ authedPage: page }) => {
+    await page.goto('/tasks')
+    // NOW pool header is visible with 0 count
+    await expect(page.getByText('NOW', { exact: true })).toBeVisible()
+    await expect(page.getByText('0/3')).toBeVisible()
+  })
+
+  test('home shows empty state prompt when no tasks', async ({ authedPage: page }) => {
+    await page.goto('/')
+    await expect(page.getByText("What's on your mind?")).toBeVisible()
+    await expect(page.getByText(/Tap to add your first task/)).toBeVisible()
+  })
+
+  test('empty state prompt is a button that opens add task modal', async ({ authedPage: page }) => {
+    await page.goto('/')
+    // The empty state card is a button
+    await page.getByText(/Tap to add your first task/).click()
+    // Modal should open
+    await expect(page.getByText('Add a task')).toBeVisible()
+  })
+})
+
 test.describe('Pool overflow', () => {
   test('shows overflow message and "Add to Next" when NOW pool is full', async ({ authedPage: page }) => {
     // Seed 3 active tasks (appMode minimal + seasonalMode maintain → NOW_POOL_MAX = 3)
