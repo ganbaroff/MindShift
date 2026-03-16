@@ -10,11 +10,23 @@
  *   - No countdown language, no shame, no missed-opportunity framing
  */
 
-import { memo } from 'react'
-import { motion } from 'motion/react'
+import { memo, useState } from 'react'
+import { motion, AnimatePresence } from 'motion/react'
 import { useMotion } from '@/shared/hooks/useMotion'
 import type { EnergyLevel } from '@/types'
 import { ENERGY_LABELS, ENERGY_EMOJI } from '@/shared/lib/constants'
+
+// ── Hyperfocus Autopsy threshold (B-6 backlog item) ───────────────────────────
+// Research: ADHD users in hyperfocus often lose awareness of time + body state.
+// After 45+ min sessions, a brief non-judgmental reflection seeds self-awareness.
+// Three options chosen to cover the full spectrum without assigning success/failure.
+const HYPERFOCUS_THRESHOLD_MIN = 45
+
+const AUTOPSY_OPTIONS = [
+  { key: 'flow',     emoji: '🌊', label: 'Found my flow',   desc: 'Deep concentration, time flew' },
+  { key: 'steady',   emoji: '🌱', label: 'Steady progress', desc: 'Focused but aware of time' },
+  { key: 'scattered',emoji: '🌀', label: 'Bit scattered',   desc: 'Distractions crept in' },
+] as const
 
 // ── Nature Buffer Screen ───────────────────────────────────────────────────────
 
@@ -23,6 +35,8 @@ interface NatureBufferProps {
   postEnergyLogged: boolean
   onSetEnergyLevel: (level: EnergyLevel) => void
   onSkip: () => void
+  /** Session length in minutes — drives Hyperfocus Autopsy (B-6) */
+  sessionMinutes?: number
 }
 
 const ENERGY_OPTIONS = [
@@ -34,9 +48,11 @@ const ENERGY_OPTIONS = [
 ]
 
 export const NatureBuffer = memo(function NatureBuffer({
-  bufferSeconds, postEnergyLogged, onSetEnergyLevel, onSkip,
+  bufferSeconds, postEnergyLogged, onSetEnergyLevel, onSkip, sessionMinutes = 0,
 }: NatureBufferProps) {
   const { shouldAnimate, t } = useMotion()
+  const [autopsyPick, setAutopsyPick] = useState<string | null>(null)
+  const showAutopsy = sessionMinutes >= HYPERFOCUS_THRESHOLD_MIN
   const bm = Math.floor(bufferSeconds / 60)
   const bs = bufferSeconds % 60
 
@@ -68,6 +84,44 @@ export const NatureBuffer = memo(function NatureBuffer({
           </p>
           <p className="text-xs mt-1" style={{ color: '#8B8BA7' }}>until next session</p>
         </div>
+
+        {/* Hyperfocus Autopsy — B-6: shown when session ≥ 45 min */}
+        {showAutopsy && (
+          <AnimatePresence>
+            <motion.div
+              initial={shouldAnimate ? { opacity: 0, y: 12 } : {}}
+              animate={{ opacity: 1, y: 0 }}
+              transition={t()}
+              className="w-full max-w-xs mb-4 p-3 rounded-2xl"
+              style={{ background: '#1E2136', border: '1px solid rgba(123,114,255,0.15)' }}
+            >
+              <p className="text-xs font-medium mb-1 text-center" style={{ color: '#7B72FF' }}>
+                {sessionMinutes}+ minutes — how did that feel? ✨
+              </p>
+              <p className="text-[11px] mb-3 text-center" style={{ color: '#5A5B72' }}>
+                No right answer — just notice
+              </p>
+              <div className="flex gap-2">
+                {AUTOPSY_OPTIONS.map(({ key, emoji, label }) => (
+                  <button
+                    key={key}
+                    onClick={() => setAutopsyPick(key)}
+                    className="flex-1 flex flex-col items-center gap-1 py-2 rounded-xl text-xs transition-all duration-150"
+                    style={{
+                      background: autopsyPick === key ? 'rgba(123,114,255,0.18)' : '#252840',
+                      border: `1px solid ${autopsyPick === key ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
+                      color: autopsyPick === key ? '#C8C0FF' : '#8B8BA7',
+                    }}
+                    aria-pressed={autopsyPick === key}
+                  >
+                    <span className="text-base leading-none">{emoji}</span>
+                    <span className="text-[10px] leading-tight text-center">{label}</span>
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          </AnimatePresence>
+        )}
 
         {/* Block 3d: Post-session energy delta check-in */}
         {!postEnergyLogged && (

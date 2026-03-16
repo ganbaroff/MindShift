@@ -38,10 +38,13 @@ interface AddTaskModalProps {
 }
 
 export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
-  const { addTask, nowPool, appMode, seasonalMode, locale } = useStore();
+  const { addTask, nowPool, nextPool, appMode, seasonalMode, locale } = useStore();
   const maxNow = getNowPoolMax(appMode, seasonalMode);
   const nowCount = nowPool.filter(t => t.status === 'active').length;
+  const nextCount = nextPool.filter(t => t.status === 'active').length;
   const isFull = nowCount >= maxNow;
+  // Two-Thirds guardrail (B-9): NEXT pool >= 4 of 6 = filling up
+  const nextNearFull = isFull && nextCount >= 4;
 
   const [title, setTitle] = useState('');
   const [difficulty, setDifficulty] = useState<1 | 2 | 3>(1);
@@ -422,6 +425,12 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
               <div className="text-secondary text-ms-muted">
                 {isFull ? '💙 NOW is full — landing in NEXT' : '→ Adding to NOW'}
               </div>
+              {/* Two-Thirds guardrail (B-9) — gentle nudge, never blocking */}
+              {nextNearFull && (
+                <p className="text-xs -mt-2" style={{ color: '#F59E0B' }}>
+                  🌿 Your queue is getting full — maybe park one before adding?
+                </p>
+              )}
               <motion.button
                 whileTap={{ scale: 0.97 }}
                 onClick={handleSubmit}
