@@ -9,6 +9,7 @@ import { useStore } from '@/store';
 import type { EnergyLevel } from '@/types';
 import { getNowPoolMax, APP_MODE_CONFIG, ENERGY_EMOJI } from '@/shared/lib/constants';
 import { useI18n } from '@/shared/hooks/useI18n';
+import { toast } from 'sonner';
 
 // ── Mochi energy reaction messages ────────────────────────────────────────────
 // Research #3: state-aware apps adapt to user's real-time neurological capacity.
@@ -57,6 +58,8 @@ export default function HomePage() {
     burnoutScore,
     weeklyStats,
     currentStreak, longestStreak,
+    dailyFocusGoalMin,
+    goalCelebratedDate, setGoalCelebratedDate,
   } = useStore();
 
   const [showAddTask, setShowAddTask] = useState(false);
@@ -97,6 +100,22 @@ export default function HomePage() {
   // ── Invisible streak ─────────────────────────────────────────────────────────
   // Research #3: show only when growing — celebrate consistency, never shame gaps.
   const showStreak = currentStreak >= 2;
+
+  // ── Daily focus goal progress (P-1) ──────────────────────────────────────────
+  // dailyMinutes[0]=Mon…[6]=Sun; today's index from JS getDay (0=Sun)
+  const todayDayIdx = (new Date().getDay() + 6) % 7
+  const todayMin = weeklyStats?.dailyMinutes?.[todayDayIdx] ?? 0
+  const goalProgress = dailyFocusGoalMin > 0 ? Math.min(1, todayMin / dailyFocusGoalMin) : 0
+  const goalReached = todayMin >= dailyFocusGoalMin && dailyFocusGoalMin > 0
+  const todayISO = new Date().toISOString().split('T')[0]
+
+  // One-time celebration per day when goal is first crossed
+  useEffect(() => {
+    if (goalReached && goalCelebratedDate !== todayISO) {
+      setGoalCelebratedDate(todayISO)
+      toast.success(`🎯 Daily goal reached! ${dailyFocusGoalMin} min focused today`, { duration: 4000 })
+    }
+  }, [goalReached, goalCelebratedDate, todayISO, dailyFocusGoalMin, setGoalCelebratedDate])
 
   // Time-based greeting (i18n-aware)
   const { t } = useI18n();
@@ -173,6 +192,34 @@ export default function HomePage() {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Daily focus goal progress (P-1) — only show when we have session data */}
+        {weeklyStats && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="rounded-2xl px-4 py-3"
+            style={{ backgroundColor: '#1E2136' }}
+          >
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[13px] font-semibold" style={{ color: goalReached ? '#4ECDC4' : '#E8E8F0' }}>
+                {goalReached ? '🎯 Goal reached!' : '🎯 Today\'s focus'}
+              </span>
+              <span className="text-[12px]" style={{ color: '#8B8BA7' }}>
+                {todayMin} / {dailyFocusGoalMin} min
+              </span>
+            </div>
+            <div className="h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: 'rgba(255,255,255,0.06)' }}>
+              <motion.div
+                className="h-full rounded-full"
+                initial={{ width: 0 }}
+                animate={{ width: `${goalProgress * 100}%` }}
+                transition={{ duration: 0.8, ease: 'easeOut' }}
+                style={{ background: goalReached ? '#4ECDC4' : 'linear-gradient(90deg, #7B72FF, #9B8EFF)' }}
+              />
+            </div>
+          </motion.div>
+        )}
 
         {/* Low-energy banner */}
         <AnimatePresence>

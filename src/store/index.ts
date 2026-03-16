@@ -149,6 +149,12 @@ interface PreferencesSlice {
   // Monthly reflection — shown within first 5 days of each new month
   monthlyReflectionShownMonth: string | null  // 'YYYY-MM' e.g. '2026-03'
   setMonthlyReflectionShownMonth: (month: string) => void
+  // Daily focus goal — user-configurable target (default 60 min)
+  dailyFocusGoalMin: number
+  setDailyFocusGoalMin: (min: number) => void
+  // Prevents re-celebrating the same day's goal completion
+  goalCelebratedDate: string | null
+  setGoalCelebratedDate: (date: string) => void
 }
 
 interface GridSlice {
@@ -505,6 +511,12 @@ export const useStore = create<AppStore>()(
         // Monthly reflection — shown within first 5 days of each new month
         monthlyReflectionShownMonth: null,
         setMonthlyReflectionShownMonth: (month) => set({ monthlyReflectionShownMonth: month }),
+
+        // Daily focus goal
+        dailyFocusGoalMin: 60,
+        setDailyFocusGoalMin: (min) => set({ dailyFocusGoalMin: min }),
+        goalCelebratedDate: null,
+        setGoalCelebratedDate: (date) => set({ goalCelebratedDate: date }),
       }),
       {
         name: 'mindshift-store',
@@ -562,6 +574,8 @@ export const useStore = create<AppStore>()(
           lastActiveDate: s.lastActiveDate,
           shutdownShownDate: s.shutdownShownDate,
           monthlyReflectionShownMonth: s.monthlyReflectionShownMonth,
+          dailyFocusGoalMin: s.dailyFocusGoalMin,
+          goalCelebratedDate: s.goalCelebratedDate,
         }),
       }
     )

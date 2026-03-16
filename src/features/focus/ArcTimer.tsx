@@ -62,13 +62,13 @@ function ArcTimerInner({
   const arcColor = PHASE_COLORS[phase]
   const isPulsing = phase === 'struggle' && shouldAnimate
 
-  // O-9: in surprise mode hide the progress stroke completely — no time cue visible.
-  // Background track still shows (passive ring); only the orb signals the session.
-  const progressStroke = isSurprise ? 'transparent' : arcColor
-
   // Block 3b: surprise mode forces digits hidden, countup shows elapsed
   const isSurprise = timerStyle === 'surprise'
   const isCountup  = timerStyle === 'countup'
+
+  // O-9: in surprise mode hide the progress stroke completely — no time cue visible.
+  // Background track still shows (passive ring); only the orb signals the session.
+  const progressStroke = isSurprise ? 'transparent' : arcColor
 
   const displaySeconds = isCountup ? elapsedSeconds : remainingSeconds
   const effectiveShowDigits = isSurprise ? false : showDigits
