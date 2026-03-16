@@ -117,7 +117,7 @@ export function useFocusSession() {
   } = useStore()
 
   const { shouldAnimate, t } = useMotion()
-  const { play, stop: stopAudio, playAnchor, isPlaying } = useAudioEngine()
+  const { play, stop: stopAudio, playAnchor, adaptToPhase, isPlaying } = useAudioEngine()
   const [searchParams] = useSearchParams()
 
   // ── Smart defaults ──────────────────────────────────────────────────────────
@@ -168,6 +168,16 @@ export function useFocusSession() {
     if (recoveryIntervalRef.current) clearInterval(recoveryIntervalRef.current)
     if (bufferIntervalRef.current)   clearInterval(bufferIntervalRef.current)
   }, [])
+
+  // ── Phase-adaptive audio volume ────────────────────────────────────────────
+  // Research #1: sound adapts to cognitive phase — full masking in struggle,
+  // quiet ambient in flow to avoid disrupting hyperfocus state.
+  useEffect(() => {
+    if (screen !== 'session') return
+    if (sessionPhase === 'struggle' || sessionPhase === 'release' || sessionPhase === 'flow') {
+      adaptToPhase(sessionPhase)
+    }
+  }, [sessionPhase, screen, adaptToPhase])
 
   // ── Soft-stop toast at 90 min ──────────────────────────────────────────────
   useEffect(() => {

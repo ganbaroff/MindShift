@@ -6,6 +6,7 @@ import {
   VR_BUCKET_SIZE, VR_JACKPOT_THRESHOLD, VR_BONUS_THRESHOLD,
   VR_MULTIPLIER_JACKPOT, VR_MULTIPLIER_BONUS, VR_MULTIPLIER_BASE,
 } from '@/shared/lib/constants'
+import { idbStorage } from '@/shared/lib/idbStorage'
 
 // ── Psychotype derivation ─────────────────────────────────────────────────────
 // Derives a personality profile from onboarding choices.
@@ -124,6 +125,14 @@ interface PreferencesSlice {
   trialEndsAt: string | null        // ISO timestamp
   setSubscription: (tier: 'free' | 'pro_trial' | 'pro', trialEnd?: string | null) => void
   isProActive: () => boolean
+  // Language / locale — drives AI prompt language injection
+  locale: string   // BCP-47 e.g. 'en', 'ru', 'de'
+  setLocale: (locale: string) => void
+  // Invisible streaks (Research #3: show only when growing, never shame on break)
+  currentStreak: number        // consecutive days with ≥1 task completed
+  longestStreak: number        // all-time record
+  lastActiveDate: string | null // ISO date (YYYY-MM-DD) of last completion
+  recordStreakDay: () => void   // call on completeTask
 }
 
 interface GridSlice {
@@ -221,6 +230,8 @@ export const useStore = create<AppStore>()(
           subscriptionTier: 'free' as const, trialEndsAt: null,
           // Grid slice
           gridWidgets: WIDGET_DEFAULTS_GENERIC,
+          // Streaks reset on sign out (user-specific data)
+          currentStreak: 0, longestStreak: 0, lastActiveDate: null,
         }),
 
         // ── Tasks ───────────────────────────────────────────────────────────
@@ -240,12 +251,27 @@ export const useStore = create<AppStore>()(
             tasks.map(t => t.id === taskId ? { ...t, status: 'completed' as const, completedAt: now } : t)
           const wasActive = [...s.nowPool, ...s.nextPool, ...s.somedayPool]
             .some(t => t.id === taskId && t.status === 'active')
+
+          // Invisible streak tracking — Research #3
+          const today = new Date().toISOString().split('T')[0]
+          const yesterday = new Date(Date.now() - 86_400_000).toISOString().split('T')[0]
+          const streakUpdate = wasActive && s.lastActiveDate !== today ? (() => {
+            const isConsecutive = s.lastActiveDate === yesterday
+            const newStreak = isConsecutive ? s.currentStreak + 1 : 1
+            return {
+              currentStreak: newStreak,
+              longestStreak: Math.max(s.longestStreak, newStreak),
+              lastActiveDate: today,
+            }
+          })() : {}
+
           return {
             nowPool: complete(s.nowPool),
             nextPool: complete(s.nextPool),
             somedayPool: complete(s.somedayPool),
             // Research #5: track cumulative effort (task total), never consecutive
             completedTotal: wasActive ? s.completedTotal + 1 : s.completedTotal,
+            ...streakUpdate,
           }
         }),
 
@@ -422,9 +448,35 @@ export const useStore = create<AppStore>()(
           }
           return false
         },
+
+        // Locale — BCP-47, auto-detected from browser on first load
+        locale: typeof navigator !== 'undefined'
+          ? (navigator.language?.split('-')[0] ?? 'en')
+          : 'en',
+        setLocale: (locale) => set({ locale }),
+
+        // Invisible streaks — Research #3: show only when growing, never shame
+        currentStreak: 0,
+        longestStreak: 0,
+        lastActiveDate: null,
+        recordStreakDay: () => set((s) => {
+          const today = new Date().toISOString().split('T')[0]
+          if (s.lastActiveDate === today) return s  // already recorded today
+
+          const yesterday = new Date(Date.now() - 86_400_000).toISOString().split('T')[0]
+          const isConsecutive = s.lastActiveDate === yesterday
+
+          const newStreak = isConsecutive ? s.currentStreak + 1 : 1
+          return {
+            currentStreak: newStreak,
+            longestStreak: Math.max(s.longestStreak, newStreak),
+            lastActiveDate: today,
+          }
+        }),
       }),
       {
         name: 'mindshift-store',
+        storage: idbStorage,
         // Prune completed tasks older than 30 days on every store rehydration.
         // Prevents localStorage from growing unboundedly while keeping recent
         // completed tasks visible in the "Done recently" section.
@@ -468,6 +520,11 @@ export const useStore = create<AppStore>()(
           seasonalMode: s.seasonalMode,
           flexiblePauseUntil: s.flexiblePauseUntil,
           // sleepQuality + burnoutScore are NOT persisted (session-only)
+          // Locale & streaks
+          locale: s.locale,
+          currentStreak: s.currentStreak,
+          longestStreak: s.longestStreak,
+          lastActiveDate: s.lastActiveDate,
         }),
       }
     )
