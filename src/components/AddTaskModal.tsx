@@ -5,6 +5,7 @@ import { useStore } from '@/store';
 import { DIFFICULTY_MAP } from '@/types';
 import type { Task } from '@/types';
 import { getNowPoolMax } from '@/shared/lib/constants';
+import { reminders } from '@/shared/lib/reminders';
 
 const durationOptions = [5, 15, 25, 45, 60];
 
@@ -60,6 +61,10 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
       reminderSentAt: null,
     };
     addTask(newTask);
+    // Auto-schedule reminder 15 min before due date if permission granted
+    if (newTask.dueDate && 'Notification' in window && Notification.permission === 'granted') {
+      reminders.schedule(newTask, 15);
+    }
     setTitle('');
     setDifficulty(1);
     setMinutes(25);

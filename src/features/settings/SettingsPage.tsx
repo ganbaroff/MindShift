@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import EnergyPicker from '@/components/EnergyPicker';
 import { useStore } from '@/store';
@@ -49,6 +50,17 @@ export default function SettingsPage() {
     await supabase.auth.signOut();
     signOut();
   };
+
+  // Notification permission state
+  const [notifPermission, setNotifPermission] = useState<NotificationPermission>('default')
+  useEffect(() => {
+    if ('Notification' in window) setNotifPermission(Notification.permission)
+  }, [])
+  const requestNotifications = async () => {
+    if (!('Notification' in window)) return
+    const result = await Notification.requestPermission()
+    setNotifPermission(result)
+  }
 
   const planLabel =
     subscriptionTier === 'pro' ? 'MindShift Pro' :
@@ -132,6 +144,27 @@ export default function SettingsPage() {
 
         <Section label="Accessibility">
           <Toggle checked={reducedStimulation} onChange={setReducedStimulation} label="Reduced stimulation" />
+        </Section>
+
+        {/* Notifications */}
+        <Section label="Reminders">
+          {notifPermission === 'granted' ? (
+            <div className="flex items-center gap-2">
+              <span className="text-[20px]">🔔</span>
+              <p className="text-[14px]" style={{ color: '#4ECDC4' }}>Reminders enabled</p>
+            </div>
+          ) : notifPermission === 'denied' ? (
+            <p className="text-[13px]" style={{ color: '#8B8BA7' }}>Blocked by browser — enable in browser settings to get due-date nudges.</p>
+          ) : (
+            <motion.button
+              whileTap={{ scale: 0.97 }}
+              onClick={requestNotifications}
+              className="w-full h-10 rounded-xl text-[14px] font-medium"
+              style={{ backgroundColor: 'rgba(78,205,196,0.12)', color: '#4ECDC4' }}
+            >
+              🔔 Enable reminders
+            </motion.button>
+          )}
         </Section>
 
         {/* Data */}

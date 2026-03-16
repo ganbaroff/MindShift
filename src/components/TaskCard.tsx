@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { DIFFICULTY_MAP } from '@/types';
 import type { Task } from '@/types';
+import { reminders } from '@/shared/lib/reminders';
 
 interface TaskCardProps {
   task: Task;
@@ -28,6 +29,7 @@ export default function TaskCard({ task, index = 0, onDone, onPark }: TaskCardPr
   const config = DIFFICULTY_MAP[task.difficulty ?? 1];
   const isCarryOver = task.status === 'active' &&
     (Date.now() - new Date(task.createdAt).getTime() > 24 * 60 * 60 * 1000);
+  const hasReminder = !!task.dueDate && reminders.has(task.id);
 
   return (
     <motion.div
@@ -58,6 +60,12 @@ export default function TaskCard({ task, index = 0, onDone, onPark }: TaskCardPr
         )}
         {task.taskType === 'idea' && <span className="text-[13px]">💡</span>}
         {task.taskType === 'reminder' && <span className="text-[13px]">🔔</span>}
+        {hasReminder && task.taskType !== 'reminder' && <span className="text-[13px]" title="Reminder set">🔔</span>}
+        {task.dueDate && (
+          <span className="text-[10px] px-1.5 py-0.5 rounded-full ml-auto" style={{ backgroundColor: 'rgba(123,114,255,0.12)', color: '#7B72FF' }}>
+            📅 {task.dueDate}
+          </span>
+        )}
         {isCarryOver && (
           <span
             className="text-[10px] px-1.5 py-0.5 rounded-full"
