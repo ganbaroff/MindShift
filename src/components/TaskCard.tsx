@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { motion } from 'framer-motion';
 import { DIFFICULTY_MAP } from '@/types';
 import type { Task } from '@/types';
@@ -25,7 +26,7 @@ function DifficultyDots({ difficulty }: { difficulty: 1 | 2 | 3 }) {
   );
 }
 
-export default function TaskCard({ task, index = 0, onDone, onPark }: TaskCardProps) {
+function TaskCardInner({ task, index = 0, onDone, onPark }: TaskCardProps) {
   const config = DIFFICULTY_MAP[task.difficulty ?? 1];
   const isCarryOver = task.status === 'active' &&
     (Date.now() - new Date(task.createdAt).getTime() > 24 * 60 * 60 * 1000);
@@ -110,3 +111,15 @@ export default function TaskCard({ task, index = 0, onDone, onPark }: TaskCardPr
     </motion.div>
   );
 }
+
+const TaskCard = memo(TaskCardInner, (prev, next) =>
+  prev.task.id === next.task.id &&
+  prev.task.status === next.task.status &&
+  prev.task.title === next.task.title &&
+  prev.task.dueDate === next.task.dueDate &&
+  prev.task.difficulty === next.task.difficulty &&
+  prev.task.estimatedMinutes === next.task.estimatedMinutes &&
+  prev.index === next.index
+);
+
+export default TaskCard;

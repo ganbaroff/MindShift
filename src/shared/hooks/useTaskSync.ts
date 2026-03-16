@@ -12,6 +12,7 @@
  */
 
 import { useEffect } from 'react'
+import { toast } from 'sonner'
 import { supabase } from '@/shared/lib/supabase'
 import { useStore } from '@/store'
 import { logError } from '@/shared/lib/logger'
@@ -90,7 +91,11 @@ export function useTaskSync(): void {
       .eq('user_id', userId)
       .neq('status', 'archived')
       .then(({ data, error }) => {
-        if (error) { logError('useTaskSync.fetch', error); return }
+        if (error) {
+          logError('useTaskSync.fetch', error)
+          toast('Could not sync tasks — working offline 📶', { duration: 4000 })
+          return
+        }
 
         const serverTasks: Task[] = (data ?? []).map(rowToTask)
 

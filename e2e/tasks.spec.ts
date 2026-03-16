@@ -16,9 +16,9 @@ test.describe('Task creation', () => {
     await expect(page.getByText('Your Tasks')).toBeVisible()
 
     // NOW and NEXT pool headers with counters
-    await expect(page.getByText('NOW')).toBeVisible()
+    await expect(page.getByText('NOW', { exact: true })).toBeVisible()
     await expect(page.getByText('0/3')).toBeVisible()
-    await expect(page.getByText('NEXT')).toBeVisible()
+    await expect(page.getByText('NEXT', { exact: true })).toBeVisible()
     await expect(page.getByText('0/6')).toBeVisible()
   })
 

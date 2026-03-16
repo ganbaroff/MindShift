@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
 import TaskCard from '@/components/TaskCard';
@@ -15,12 +15,15 @@ export default function TasksPage() {
 
   const { nowPool, nextPool, somedayPool, completeTask, snoozeTask, appMode, seasonalMode } = useStore();
 
-  const nowTasks = nowPool.filter(t => t.status === 'active');
-  const nextTasks = nextPool.filter(t => t.status === 'active');
-  const somedayTasks = somedayPool.filter(t => t.status === 'active');
-  const doneTasks = [...nowPool, ...nextPool, ...somedayPool]
-    .filter(t => t.status === 'completed' && t.completedAt)
-    .sort((a, b) => new Date(b.completedAt!).getTime() - new Date(a.completedAt!).getTime());
+  const nowTasks = useMemo(() => nowPool.filter(t => t.status === 'active'), [nowPool]);
+  const nextTasks = useMemo(() => nextPool.filter(t => t.status === 'active'), [nextPool]);
+  const somedayTasks = useMemo(() => somedayPool.filter(t => t.status === 'active'), [somedayPool]);
+  const doneTasks = useMemo(() =>
+    [...nowPool, ...nextPool, ...somedayPool]
+      .filter(t => t.status === 'completed' && t.completedAt)
+      .sort((a, b) => new Date(b.completedAt!).getTime() - new Date(a.completedAt!).getTime()),
+    [nowPool, nextPool, somedayPool]
+  );
 
   const nowMax = getNowPoolMax(appMode, seasonalMode);
 
@@ -64,9 +67,13 @@ export default function TasksPage() {
             <span className="text-[11px]" style={{ color: '#8B8BA7' }}>{nextTasks.length}/6</span>
           </div>
           <div className="space-y-2">
-            {nextTasks.map((t, i) => (
-              <TaskCard key={t.id} task={t} index={i} onDone={(id) => completeTask(id)} onPark={(id) => snoozeTask(id)} />
-            ))}
+            {nextTasks.length === 0 ? (
+              <p className="text-[13px] py-2" style={{ color: '#8B8BA7' }}>Queue tasks here — they'll be ready when NOW has room.</p>
+            ) : (
+              nextTasks.map((t, i) => (
+                <TaskCard key={t.id} task={t} index={i} onDone={(id) => completeTask(id)} onPark={(id) => snoozeTask(id)} />
+              ))
+            )}
           </div>
         </div>
 
@@ -117,7 +124,7 @@ function CollapsibleSection({ label, count, open, onToggle, children, labelColor
 }) {
   return (
     <div>
-      <motion.button whileTap={{ scale: 0.97 }} onClick={onToggle} className="flex items-center gap-2 w-full py-1">
+      <motion.button whileTap={{ scale: 0.97 }} onClick={onToggle} aria-expanded={open} aria-label={`${open ? 'Collapse' : 'Expand'} ${label} section`} className="flex items-center gap-2 w-full py-1 focus-visible:ring-2 focus-visible:ring-ms-primary/50 focus-visible:outline-none rounded">
         <span className="text-[11px] uppercase tracking-widest font-semibold" style={{ color: labelColor || '#8B8BA7' }}>{label}</span>
         <span className="text-[11px] px-1.5 py-0.5 rounded-full" style={{ backgroundColor: '#252840', color: '#8B8BA7' }}>{count}</span>
         <ChevronDown size={14} className={`ml-auto transition-transform ${open ? 'rotate-180' : ''}`} style={{ color: '#8B8BA7' }} />

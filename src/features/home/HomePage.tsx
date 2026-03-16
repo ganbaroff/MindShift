@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import TaskCard from '@/components/TaskCard';
 import MochiAvatar from '@/components/MochiAvatar';
@@ -22,8 +22,8 @@ export default function HomePage() {
 
   const [showAddTask, setShowAddTask] = useState(false);
 
-  const nowTasks = nowPool.filter(t => t.status === 'active');
-  const nextTasks = nextPool.filter(t => t.status === 'active');
+  const nowTasks = useMemo(() => nowPool.filter(t => t.status === 'active'), [nowPool]);
+  const nextTasks = useMemo(() => nextPool.filter(t => t.status === 'active'), [nextPool]);
   const nowMax = getNowPoolMax(appMode, seasonalMode);
   const { showNextOnHome, homeSubtitle } = APP_MODE_CONFIG[appMode];
 

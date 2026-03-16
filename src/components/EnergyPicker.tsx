@@ -18,6 +18,8 @@ export default function EnergyPicker({ selected, onSelect, size = 40 }: EnergyPi
             key={i}
             whileTap={{ scale: 0.97 }}
             onClick={() => onSelect(i)}
+            aria-label={`${opt.label} energy${active ? ' (selected)' : ''}`}
+            aria-pressed={active}
             className="flex flex-col items-center gap-0.5"
           >
             <motion.span

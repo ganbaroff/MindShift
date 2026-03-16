@@ -11,7 +11,8 @@ export default function Fab({ onClick, label = 'Add task' }: FabProps) {
     <motion.button
       whileTap={{ scale: 0.97 }}
       onClick={onClick}
-      className="fixed bottom-24 right-5 flex items-center gap-2 px-5 h-12 rounded-full gradient-primary shadow-primary z-20"
+      aria-label={label}
+      className="fixed bottom-24 right-5 flex items-center gap-2 px-5 h-12 rounded-full gradient-primary shadow-primary z-20 focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:outline-none"
       style={{ color: '#fff' }}
     >
       <Plus size={18} strokeWidth={2.5} />
