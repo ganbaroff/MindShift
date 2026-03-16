@@ -88,7 +88,7 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
             <div className="w-10 h-1 rounded-full bg-ms-muted/30 mx-auto mb-4" />
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-title text-ms-text">Add a task</h2>
-              <button onClick={handleClose} className="p-2 text-ms-muted">
+              <button onClick={handleClose} aria-label="Close modal" className="p-2 text-ms-muted">
                 <X size={20} />
               </button>
             </div>

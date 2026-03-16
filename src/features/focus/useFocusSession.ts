@@ -472,11 +472,11 @@ export function useFocusSession() {
     setPostEnergyLogged(true)
     // Persist post-session energy to the focus_sessions row that was just created
     if (savedSessionIdRef.current) {
-      void supabase
-        .from('focus_sessions')
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      void (supabase.from('focus_sessions') as any)
         .update({ energy_after: level })
         .eq('id', savedSessionIdRef.current)
-        .then(({ error }) => { if (error) logError('useFocusSession.energy_after.update', error) })
+        .then(({ error }: { error: unknown }) => { if (error) logError('useFocusSession.energy_after.update', error) })
     }
   }, [setEnergyLevel])
 
