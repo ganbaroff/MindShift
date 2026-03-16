@@ -52,6 +52,7 @@ export default function SettingsPage() {
     audioVolume, setVolume: setStoreVolume,
     medicationEnabled, setMedicationEnabled,
     medicationTime, setMedicationTime,
+    dailyFocusGoalMin, setDailyFocusGoalMin,
   } = useStore();
 
   const { play, stop, isPlaying, setVolume: setEngineVolume } = useAudioEngine();
@@ -334,6 +335,30 @@ export default function SettingsPage() {
         </Section>
 
         {/* Setup revisit — O-11: re-run onboarding to update preferences */}
+        {/* Daily focus goal — P-1 */}
+        <Section label="Daily Focus Goal">
+          <p className="text-[12px] mb-2" style={{ color: '#8B8BA7' }}>
+            Target minutes of focused work per day
+          </p>
+          <div className="flex gap-2">
+            {([30, 45, 60, 90] as const).map(min => (
+              <motion.button
+                key={min}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setDailyFocusGoalMin(min)}
+                className="flex-1 h-9 rounded-full text-[13px] font-medium"
+                style={{
+                  backgroundColor: dailyFocusGoalMin === min ? 'rgba(123,114,255,0.15)' : '#252840',
+                  border: `${dailyFocusGoalMin === min ? 1.5 : 1}px solid ${dailyFocusGoalMin === min ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
+                  color: dailyFocusGoalMin === min ? '#7B72FF' : '#8B8BA7',
+                }}
+              >
+                {min}m
+              </motion.button>
+            ))}
+          </div>
+        </Section>
+
         <Section label="Preferences">
           <button
             onClick={() => navigate('/onboarding')}
