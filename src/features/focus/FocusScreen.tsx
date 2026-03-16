@@ -23,6 +23,33 @@ import { useFocusSession, clearBookmark, PHASE_LABELS } from './useFocusSession'
 import { BreathworkRitual } from './BreathworkRitual'
 import { nativeStatusBarHide, nativeStatusBarShow } from '@/shared/lib/native'
 import { useStore } from '@/store'
+import { supabase } from '@/shared/lib/supabase'
+
+// ── Ambient Orbit (S-2) ───────────────────────────────────────────────────────
+// Shows how many people are currently in a focus session — body-doubling signal.
+// Queries focus_sessions started in the last 30 min as a proxy for active sessions.
+function useAmbientOrbit(active: boolean) {
+  const [count, setCount] = useState<number | null>(null)
+
+  useEffect(() => {
+    if (!active) { setCount(null); return }
+
+    let cancelled = false
+    const fetch = async () => {
+      const since = new Date(Date.now() - 30 * 60_000).toISOString()
+      const { count: n } = await supabase
+        .from('focus_sessions')
+        .select('id', { count: 'exact', head: true })
+        .gte('started_at', since)
+      if (!cancelled && n !== null) setCount(Math.max(1, n))
+    }
+    void fetch()
+    const id = setInterval(() => void fetch(), 5 * 60_000)
+    return () => { cancelled = true; clearInterval(id) }
+  }, [active])
+
+  return count
+}
 
 // ── Medication peak window helper (B-12) ──────────────────────────────────────
 // Stimulant meds typically peak 1–3h after ingestion.
@@ -47,6 +74,7 @@ function getMedPeakLabel(medicationTime: string | null): string | null {
 export default function FocusScreen() {
   const session = useFocusSession()
   const [showBreathwork, setShowBreathwork] = useState(false)
+  const orbitCount = useAmbientOrbit(session.screen === 'session')
 
   // Immersive status bar — hide during active session, restore otherwise
   useEffect(() => {
@@ -604,6 +632,30 @@ export default function FocusScreen() {
         elapsedSeconds={elapsedSeconds}
         sessionPhase={sessionPhase}
       />
+
+      {/* Ambient Orbit (S-2) — body-doubling social signal, fades in after 10s */}
+      <AnimatePresence>
+        {orbitCount !== null && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 0.55, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ delay: 10, duration: 1.5 }}
+            className="absolute bottom-40 left-0 right-0 flex justify-center pointer-events-none"
+          >
+            <span
+              className="text-[11px] px-3 py-1 rounded-full"
+              style={{
+                backgroundColor: 'rgba(78,205,196,0.08)',
+                border: '1px solid rgba(78,205,196,0.15)',
+                color: '#4ECDC4',
+              }}
+            >
+              🌍 {orbitCount} {orbitCount === 1 ? 'person' : 'people'} focusing now
+            </span>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
