@@ -41,6 +41,9 @@ const LazyContextRestore = lazy(() =>
 const LazyShutdownRitual = lazy(() =>
   import('@/features/focus/ShutdownRitual').then(m => ({ default: m.ShutdownRitual }))
 )
+const LazyMonthlyReflection = lazy(() =>
+  import('@/features/focus/MonthlyReflection').then(m => ({ default: m.MonthlyReflection }))
+)
 
 export default function App() {
   const {
@@ -50,9 +53,11 @@ export default function App() {
     flexiblePauseUntil, setFlexiblePauseUntil,
     reducedStimulation,
     shutdownShownDate, setShutdownShownDate,
+    monthlyReflectionShownMonth, setMonthlyReflectionShownMonth,
   } = useStore()
   const [showContextRestore, setShowContextRestore] = useState(false)
   const [showShutdown, setShowShutdown] = useState(false)
+  const [showMonthly, setShowMonthly] = useState(false)
 
   useEffect(() => {
     document.documentElement.setAttribute(
@@ -151,6 +156,19 @@ export default function App() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onboardingCompleted])
 
+  // Monthly reflection — first 5 days of each new month, once per month
+  useEffect(() => {
+    if (!onboardingCompleted) return
+    const now = new Date()
+    const currentDay = now.getDate()
+    const currentMonth = now.toISOString().slice(0, 7) // 'YYYY-MM'
+    if (currentDay > 5) return
+    if (monthlyReflectionShownMonth === currentMonth) return
+    const t = setTimeout(() => setShowMonthly(true), 2000)
+    return () => clearTimeout(t)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onboardingCompleted])
+
   useOfflineSync()
   useTaskSync()
   useSessionHistory()
@@ -208,6 +226,17 @@ export default function App() {
                 setShowShutdown(false)
                 const today = new Date().toISOString().split('T')[0]
                 setShutdownShownDate(today)
+              }} />
+            </Suspense>
+          )}
+
+          {/* Monthly reflection — first 5 days of new month, once per month */}
+          {!showRecovery && !showContextRestore && !showShutdown && showMonthly && (
+            <Suspense fallback={null}>
+              <LazyMonthlyReflection onDismiss={() => {
+                setShowMonthly(false)
+                const currentMonth = new Date().toISOString().slice(0, 7)
+                setMonthlyReflectionShownMonth(currentMonth)
               }} />
             </Suspense>
           )}

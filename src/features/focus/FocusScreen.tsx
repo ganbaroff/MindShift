@@ -12,7 +12,7 @@
  * Session controls (audio/stop/park) live in SessionControls.tsx
  */
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { Link } from 'react-router-dom'
 import { ArcTimer } from './ArcTimer'
@@ -22,6 +22,27 @@ import { NatureBuffer, RecoveryLock } from './PostSessionFlow'
 import { useFocusSession, clearBookmark, PHASE_LABELS } from './useFocusSession'
 import { BreathworkRitual } from './BreathworkRitual'
 import { nativeStatusBarHide, nativeStatusBarShow } from '@/shared/lib/native'
+import { useStore } from '@/store'
+
+// ── Medication peak window helper (B-12) ──────────────────────────────────────
+// Stimulant meds typically peak 1–3h after ingestion.
+// morning=07-09 → peak 08-11, afternoon=12-14 → peak 13-16, evening=16-18 → peak 17-20
+const MED_PEAK_HOURS: Record<string, [number, number]> = {
+  morning:   [8,  11],
+  afternoon: [13, 16],
+  evening:   [17, 20],
+}
+function getMedPeakLabel(medicationTime: string | null): string | null {
+  if (!medicationTime) return null
+  const [start, end] = MED_PEAK_HOURS[medicationTime] ?? []
+  if (!start) return null
+  const h = new Date().getHours()
+  if (h >= start && h <= end) {
+    const fmt = (n: number) => `${n > 12 ? n - 12 : n}${n >= 12 ? 'pm' : 'am'}`
+    return `⚡ Med peak window: ${fmt(start)}–${fmt(end)}`
+  }
+  return null
+}
 
 export default function FocusScreen() {
   const session = useFocusSession()
@@ -60,6 +81,13 @@ export default function FocusScreen() {
     TIMER_PRESETS,
     focusAnchor,
   } = session
+
+  // ── Medication peak window (B-12) ──────────────────────────────────────────
+  const { medicationEnabled, medicationTime } = useStore()
+  const medPeakLabel = useMemo(
+    () => medicationEnabled ? getMedPeakLabel(medicationTime ?? null) : null,
+    [medicationEnabled, medicationTime],
+  )
 
   // ── Nature Buffer ──────────────────────────────────────────────────────────
   if (screen === 'nature-buffer') {
@@ -437,6 +465,16 @@ export default function FocusScreen() {
                 {focusAnchor} noise will play automatically
               </p>
             </div>
+          </div>
+        )}
+
+        {/* Medication peak window badge — B-12 */}
+        {medPeakLabel && (
+          <div
+            className="mx-5 mb-4 px-3 py-2 rounded-xl flex items-center gap-2"
+            style={{ background: 'rgba(123,114,255,0.10)', border: '1px solid rgba(123,114,255,0.20)' }}
+          >
+            <span className="text-xs font-medium" style={{ color: '#7B72FF' }}>{medPeakLabel}</span>
           </div>
         )}
 

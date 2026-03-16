@@ -22,6 +22,7 @@ Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ `4f3bec1`. Status: **p
 ## Sprint History
 | Sprint | Commit | What landed |
 |--------|--------|-------------|
+| Sprint L "i18n & Rituals" | pending | (1) Medication peak window badge (B-12) — FocusScreen setup shows ⚡ pill when current hour falls in med peak window (morning/afternoon/evening); wired to medicationEnabled + medicationTime from store. (2) Monthly Reflection ritual (B-5) — MonthlyReflection.tsx: 3-step flow (recap stats → set 1-word intention → closing auto-dismiss); triggers first 5 days of month, once/month; monthlyReflectionShownMonth persisted in store. (3) Settings: Medication section + Preferences > Re-run setup wizard. (4) i18n foundation — src/shared/lib/i18n/{en,ru,index}.ts + src/shared/hooks/useI18n.ts; resolves from navigator.language, fallback to en; EN+RU strings for greetings, home, focus, tasks, settings; wired to greeting in HomePage. tsc ✅ |
 | Sprint K "ADHD Patterns & Native" | pending | (1) Surprise timer ambient orb — pulsing radial gradient in arc center when timerStyle=surprise (O-9). (2) Hyperfocus Autopsy — NatureBuffer shows 3-option reflection card after sessions ≥45min: 🌊 flow / 🌱 steady / 🌀 scattered (B-6). (3) Two-Thirds guardrail — "filling up" badge in TasksPage NEXT header + gentle warning in AddTaskModal when nextPool ≥4 (B-9). (4) Native bridge — src/shared/lib/native.ts: Capacitor runtime detection, nativeHapticImpact/Notification/Selection, nativeStatusBarHide/Show/Dark, nativeShare + canShare; all with web fallbacks. FocusScreen hides status bar during active sessions. (5) Web Share — "Share this week" button in ProgressPage using nativeShare. (6) PWA manifest — public/manifest.json with 4 shortcuts (Focus/Quick Focus/Tasks/Progress), categories, screenshots, edge_side_panel; linked from index.html. tsc ✅ |
 | Sprint J "Voice & Rituals" | pending | (1) Voice input in AddTaskModal — Web SpeechRecognition → classify-voice-input edge fn → auto-fill title/difficulty/duration/dueDate; mic button with listening/classifying states + AI confidence feedback. (2) ShutdownRitual component — 3-step evening wind-down (9pm+, once/day): wins review → set ONE thing for tomorrow (creates NEXT task) → goodnight message; triggered from App.tsx. (3) Smart duration — difficulty-linked defaults (Easy=15m/Medium=25m/Hard=45m), "✨ smart" badge, resets on manual pick. (4) Auto-reschedule banner in TasksPage — gold non-shaming banner links to /calendar when active tasks have past dueDate. (5) Capacitor scaffold — capacitor.config.ts (iOS/Android/StatusBar/Keyboard/Notifications) + package.json cap: scripts. tsc ✅ |
 | Sprint I "Sensory UX" | pending | 10 neuroinclusive features from Deep Research sessions: (1) IndexedDB migration via idbStorage adapter (transparent localStorage→IDB migration), (2) Invisible streaks (shown only when ≥2 days, reset-shame-free), (3) Haptic engine expanded to 9 ADHD-safe patterns (tap/done/wow/warning/breathe/phase/start/end/park/add), (4) Pink noise UI + Sound section in Settings (5 presets: brown/pink/nature/lofi/gamma, preview + lock as anchor, volume slider), (5) Phase-adaptive audio (struggle=100%/release=80%/flow=60% gain, 1.5s ramp), (6) Focus Breathwork Ritual (3×inhale+exhale cycles, SVG orb, haptic sync, skip always visible), (7) Low-energy auto-simplify (energyLevel≤2 or burnoutScore>60 → 1 NOW task, hide NEXT, gentle banner), (8) Mochi energy reactions (speech bubble on HP change, psychotype-specific, 5s auto-dismiss), (9) Locale injection in all AI edge functions (decompose-task/recovery-message/weekly-insight), (10) Spiciness meter in RecoveryProtocol (1-5 overwhelm chips → step count + granularity in AI decomposition). tsc ✅ |
@@ -106,6 +107,11 @@ Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ `4f3bec1`. Status: **p
 | `src/features/home/BurnoutNudgeCard.tsx` | Proactive in-app burnout nudge (3-gate, 48h cooldown) |
 | `src/features/home/widgets/LifetimeStatsWidget.tsx` | Cumulative progress bento widget |
 | `src/features/focus/MochiSessionCompanion.tsx` | Active body-double bubbles during sessions |
+| `src/features/focus/MonthlyReflection.tsx` | Monthly reflection ritual (B-5) — recap + intention + closing |
+| `src/shared/lib/i18n/en.ts` | i18n source strings (English, typed I18nKey) |
+| `src/shared/lib/i18n/ru.ts` | i18n Russian overrides (partial) |
+| `src/shared/lib/i18n/index.ts` | resolveLocale() + t() translation function |
+| `src/shared/hooks/useI18n.ts` | React hook: `{ t, locale }` |
 | `docs/neuroinclusive-ux-audit-2026-03-11.md` | 6-domain UX audit (Motion/Color/Focus/Shame-free/AI) |
 | `docs/3-axis-audit-2026-03-11.md` | 3-axis audit (Onboarding/Social/Burnout) + 35-item backlog |
 | `docs/claude-code-prompt-3axis.md` | Sprint 7 implementation prompt (reference) |
@@ -169,6 +175,13 @@ Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ `4f3bec1`. Status: **p
 - **TaskCard:** React.memo with custom comparator (id/status/title/dueDate/difficulty). 🔔 badge when reminder active. 📅 due date pill.
 - **Performance:** useMemo on filtered task lists in HomePage + TasksPage. React.memo on TaskCard.
 - **Accessibility:** EnergyPicker aria-label+aria-pressed. Fab aria-label+focus-visible ring. CollapsibleSection aria-expanded+aria-label.
+
+## Architecture (Sprint L additions)
+- **Medication peak window (B-12):** `FocusScreen.tsx` — `MED_PEAK_HOURS` map (morning=[8,11], afternoon=[13,16], evening=[17,20]). `getMedPeakLabel()` returns pill string if current hour is in window and `medicationEnabled`. `medPeakLabel` via `useMemo`. Badge renders above Start button in indigo-tinted pill. Non-blocking, no DB write.
+- **Monthly Reflection (B-5):** `src/features/focus/MonthlyReflection.tsx` — lazy loaded, z-50. 3 steps: recap (completedTotal + longestStreak) → 1-word intention (quick-pick chips + free input) → closing auto-dismiss 3s. `monthlyReflectionShownMonth: string | null` in store (persisted as 'YYYY-MM'). `setMonthlyReflectionShownMonth`. Triggers in App.tsx when `currentDay <= 5 && monthlyReflectionShownMonth !== currentMonth`. Mutually exclusive with all other overlays (lowest priority).
+- **Settings Medication section:** Toggle + 3 time chips (morning/afternoon/evening). Wired to `medicationEnabled/setMedicationEnabled` + `medicationTime/setMedicationTime` from store.
+- **Settings Preferences section:** "Re-run setup wizard" button → `navigate('/onboarding')`.
+- **i18n foundation:** `src/shared/lib/i18n/en.ts` (source of truth, typed `I18nKey`), `ru.ts` (partial override), `index.ts` (resolveLocale + t() with `{{placeholder}}` interpolation, auto-fallback to en). `src/shared/hooks/useI18n.ts` — `{ t, locale }`, locale resolved once per mount from `navigator.language`. Greeting in `HomePage` wired to `t('home.greeting.*')`. EN+RU strings cover: greetings, home, focus, tasks, settings, generic.
 
 ## Architecture (Sprint K additions)
 - **Surprise timer orb:** `ArcTimer.tsx` — in surprise mode, center shows `motion.div` with radial-gradient pulsing animation (scale 0.7→1.15→0.7, opacity 0.2→0.55→0.2, 3.5s loop). Respects `reducedMotion`.
@@ -259,10 +272,10 @@ Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ `4f3bec1`. Status: **p
 - S-7: Anti-social-scroll friction
 - S-9: Post-social cool-down ritual
 - S-11: Anonymous encouragement in rooms
-- B-5: Monthly reflection ritual (first-of-month flow)
-- B-6: Hyperfocus Autopsy (after 45min+ sessions)
-- B-9: Two-Thirds guardrail (warn if overcommitted)
-- B-12: Medication peak window overlay
+- ~~B-5: Monthly reflection ritual~~ ✅ Sprint L
+- ~~B-6: Hyperfocus Autopsy~~ ✅ Sprint K
+- ~~B-9: Two-Thirds guardrail~~ ✅ Sprint K
+- ~~B-12: Medication peak window overlay~~ ✅ Sprint L
 
 ## Preferences (Yusif)
 - Russian comms OK in conversation; commit messages in English
