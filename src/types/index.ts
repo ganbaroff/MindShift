@@ -26,6 +26,7 @@ export interface Task {
   dueTime: string | null          // "HH:MM" or null
   taskType: 'task' | 'idea' | 'reminder'
   reminderSentAt: string | null   // when reminder notification was sent
+  repeat: 'none' | 'daily' | 'weekly'  // auto-recreates task on completion
   /** @deprecated DEPRECATED: use difficulty (1|2|3) + DIFFICULTY_MAP instead (Sprint B A-2). */
   difficultyLevel?: 'easy' | 'medium' | 'hard'
 }

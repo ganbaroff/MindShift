@@ -279,8 +279,9 @@ export const useStore = create<AppStore>()(
           const now = new Date().toISOString()
           const complete = (tasks: Task[]) =>
             tasks.map(t => t.id === taskId ? { ...t, status: 'completed' as const, completedAt: now } : t)
-          const wasActive = [...s.nowPool, ...s.nextPool, ...s.somedayPool]
-            .some(t => t.id === taskId && t.status === 'active')
+          const completedTask = [...s.nowPool, ...s.nextPool, ...s.somedayPool]
+            .find(t => t.id === taskId && t.status === 'active')
+          const wasActive = !!completedTask
 
           // Invisible streak tracking — Research #3
           const today = new Date().toISOString().split('T')[0]
@@ -295,9 +296,30 @@ export const useStore = create<AppStore>()(
             }
           })() : {}
 
+          // Recurring tasks — auto-create next occurrence in NEXT pool
+          const recurTask: Task | null = (() => {
+            if (!completedTask || !completedTask.repeat || completedTask.repeat === 'none') return null
+            const offsetDays = completedTask.repeat === 'daily' ? 1 : 7
+            const nextDue = new Date(Date.now() + offsetDays * 86_400_000).toISOString().split('T')[0]
+            return {
+              ...completedTask,
+              id: crypto.randomUUID(),
+              status: 'active' as const,
+              pool: 'next' as const,
+              completedAt: null,
+              snoozeCount: 0,
+              createdAt: now,
+              dueDate: nextDue,
+              reminderSentAt: null,
+              position: s.nextPool.length,
+            }
+          })()
+
           return {
             nowPool: complete(s.nowPool),
-            nextPool: complete(s.nextPool),
+            nextPool: recurTask
+              ? [...complete(s.nextPool), recurTask]
+              : complete(s.nextPool),
             somedayPool: complete(s.somedayPool),
             // Research #5: track cumulative effort (task total), never consecutive
             completedTotal: wasActive ? s.completedTotal + 1 : s.completedTotal,

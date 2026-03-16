@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Search, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import TaskCard from '@/components/TaskCard';
 import Fab from '@/components/Fab';
@@ -16,12 +16,14 @@ export default function TasksPage() {
   const [showAddTask, setShowAddTask] = useState(false);
   const [showSomeday, setShowSomeday] = useState(false);
   const [showDone, setShowDone] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const { nowPool, nextPool, somedayPool, completeTask, snoozeTask, appMode, seasonalMode } = useStore();
 
-  const nowTasks = useMemo(() => nowPool.filter(t => t.status === 'active'), [nowPool]);
-  const nextTasks = useMemo(() => nextPool.filter(t => t.status === 'active'), [nextPool]);
-  const somedayTasks = useMemo(() => somedayPool.filter(t => t.status === 'active'), [somedayPool]);
+  const q = searchQuery.toLowerCase().trim();
+  const nowTasks = useMemo(() => nowPool.filter(t => t.status === 'active' && (!q || t.title.toLowerCase().includes(q))), [nowPool, q]);
+  const nextTasks = useMemo(() => nextPool.filter(t => t.status === 'active' && (!q || t.title.toLowerCase().includes(q))), [nextPool, q]);
+  const somedayTasks = useMemo(() => somedayPool.filter(t => t.status === 'active' && (!q || t.title.toLowerCase().includes(q))), [somedayPool, q]);
   const doneTasks = useMemo(() =>
     [...nowPool, ...nextPool, ...somedayPool]
       .filter(t => t.status === 'completed' && t.completedAt)
@@ -44,6 +46,28 @@ export default function TasksPage() {
       <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
         <h1 className="text-[24px] font-bold" style={{ color: '#E8E8F0' }}>Your Tasks</h1>
         <p className="text-[13px] mt-0.5" style={{ color: '#8B8BA7' }}>{nowTasks.length + nextTasks.length} tasks in play</p>
+      </motion.div>
+
+      {/* Search bar */}
+      <motion.div
+        initial={{ opacity: 0, y: 4 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mt-3 flex items-center gap-2 px-3 rounded-2xl h-10"
+        style={{ backgroundColor: '#1E2136', border: '1px solid rgba(255,255,255,0.06)' }}
+      >
+        <Search size={14} style={{ color: '#8B8BA7', flexShrink: 0 }} />
+        <input
+          value={searchQuery}
+          onChange={e => setSearchQuery(e.target.value)}
+          placeholder="Search tasks…"
+          className="flex-1 bg-transparent text-[13px] outline-none"
+          style={{ color: '#E8E8F0' }}
+        />
+        {searchQuery && (
+          <button onClick={() => setSearchQuery('')} aria-label="Clear search">
+            <X size={13} style={{ color: '#8B8BA7' }} />
+          </button>
+        )}
       </motion.div>
 
       <div className="space-y-5 mt-5">
