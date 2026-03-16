@@ -67,3 +67,29 @@ setCatchHandler(async ({ event }) => {
   }
   return Response.error()
 })
+
+// ── Push notification handler ────────────────────────────────────────────────
+self.addEventListener('push', (event) => {
+  const data = event.data?.json() as { title?: string; body?: string; tag?: string; url?: string } | undefined
+  const title = data?.title ?? 'MindShift'
+  const body  = data?.body  ?? "Time to check in 🌊"
+
+  event.waitUntil(
+    self.registration.showNotification(title, {
+      body,
+      icon:  '/icons/icon-192.png',
+      badge: '/icons/icon-192.png',
+      tag:   data?.tag ?? 'mindshift-reminder',
+      data:  { url: data?.url ?? '/' },
+    })
+  )
+})
+
+// ── Notification click — open the app at the right URL ──────────────────────
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close()
+  const url = (event.notification.data as { url?: string })?.url ?? '/'
+  event.waitUntil(
+    (self.clients as Clients).openWindow(url)
+  )
+})

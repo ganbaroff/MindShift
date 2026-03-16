@@ -19,7 +19,7 @@ test.describe('Onboarding flow', () => {
 
   test('step 1: shows intent selection with 3 options', async ({ authedPage: page }) => {
     // Step indicator
-    await expect(page.getByText('Step 1 of 4')).toBeVisible()
+    await expect(page.getByText('Step 1 of 5')).toBeVisible()
 
     // Title
     await expect(page.getByText('What brings you here today?')).toBeVisible()
@@ -45,7 +45,7 @@ test.describe('Onboarding flow', () => {
     await continueBtn.click()
 
     // Should now be on energy check-in (step 2)
-    await expect(page.getByText('Step 2 of 4')).toBeVisible()
+    await expect(page.getByText('Step 2 of 5')).toBeVisible()
     await expect(page.getByText("How's your brain right now?")).toBeVisible()
   })
 
@@ -76,7 +76,7 @@ test.describe('Onboarding flow', () => {
 
     // Click Continue to advance to step 3
     await continueBtn.click()
-    await expect(page.getByText('Step 3 of 4')).toBeVisible()
+    await expect(page.getByText('Step 3 of 5')).toBeVisible()
   })
 
   test('step 3: shows 3 timer style options', async ({ authedPage: page }) => {
@@ -86,7 +86,7 @@ test.describe('Onboarding flow', () => {
     await page.getByRole('button', { name: /Continue/ }).click()
 
     // Step indicator
-    await expect(page.getByText('Step 3 of 4')).toBeVisible()
+    await expect(page.getByText('Step 3 of 5')).toBeVisible()
 
     // Title
     await expect(page.getByText('How do you want to see your timer?')).toBeVisible()
@@ -113,7 +113,7 @@ test.describe('Onboarding flow', () => {
 
     // Advance to step 4
     await continueBtn.click()
-    await expect(page.getByText('Step 4 of 4')).toBeVisible()
+    await expect(page.getByText('Step 4 of 5')).toBeVisible()
   })
 
   test('step 4: shows 2 task visibility options', async ({ authedPage: page }) => {
@@ -125,7 +125,7 @@ test.describe('Onboarding flow', () => {
     await page.getByRole('button', { name: /Continue/ }).click()
 
     // Step indicator
-    await expect(page.getByText('Step 4 of 4')).toBeVisible()
+    await expect(page.getByText('Step 4 of 5')).toBeVisible()
 
     // Title and subtitle
     await expect(page.getByText(/One last question/)).toBeVisible()
@@ -136,7 +136,7 @@ test.describe('Onboarding flow', () => {
     await expect(page.getByText('No — show everything')).toBeVisible()
   })
 
-  test('completing all 4 steps redirects to home', async ({ authedPage: page }) => {
+  test('completing all 5 steps redirects to home', async ({ authedPage: page }) => {
     // Step 1: select intent
     await page.getByText('One thing at a time').click()
     await page.getByRole('button', { name: /Continue/ }).click()
@@ -148,9 +148,14 @@ test.describe('Onboarding flow', () => {
     await page.getByText('Countdown').click()
     await page.getByRole('button', { name: /Continue/ }).click()
 
-    // Step 4: select cognitive mode, final button is "Let's go"
+    // Step 4: select cognitive mode → Continue (no longer the final step)
     await page.getByText('Yes — one at a time').click()
-    await page.getByRole('button', { name: /Let's go/ }).click()
+    await page.getByRole('button', { name: /Continue/ }).click()
+
+    // Step 5: notification permission — skip to finish
+    await expect(page.getByText('Step 5 of 5')).toBeVisible()
+    await expect(page.getByText(/Want gentle reminders/)).toBeVisible()
+    await page.getByRole('button', { name: /Skip for now/ }).click()
 
     // Should redirect to home
     await page.waitForURL('**/', { timeout: 5000 })
