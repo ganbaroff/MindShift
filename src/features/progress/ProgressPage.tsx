@@ -1,17 +1,43 @@
+import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useStore } from '@/store';
 import { ENERGY_EMOJI } from '@/shared/lib/constants';
 import { useSessionHistory } from '@/shared/hooks/useSessionHistory';
 import { nativeShare, canShare } from '@/shared/lib/native';
+import { deriveFromSessions } from '@/shared/lib/psychotype';
 
 const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
+const PSYCHOTYPE_META = {
+  achiever:  { emoji: '🎯', label: 'Achiever',  desc: 'You dive deep and finish what you start' },
+  explorer:  { emoji: '🗺️', label: 'Explorer',  desc: 'You thrive on variety and follow curiosity' },
+  connector: { emoji: '💙', label: 'Connector', desc: 'You build momentum through consistency' },
+  planner:   { emoji: '📋', label: 'Planner',   desc: 'You focus best with a predictable rhythm' },
+} as const
+
 export default function ProgressPage() {
-  const { xpTotal, completedTotal, achievements, weeklyStats, burnoutScore } = useStore();
-  const { energyTrend, weeklyInsight, loading } = useSessionHistory();
+  const {
+    xpTotal, completedTotal, achievements, weeklyStats, burnoutScore,
+    psychotype, setPsychotype, setPsychotypeLastDerived, resetGridToDefaults,
+  } = useStore();
+  const { energyTrend, weeklyInsight, loading, sessions } = useSessionHistory();
 
   const xpSafe = xpTotal ?? 0;
   const shareSupported = canShare();
+
+  // O-7: Derive psychotype from usage patterns once sessions load
+  const derivedPsychotype = useMemo(() => deriveFromSessions(sessions), [sessions])
+  const psychotypeEvolved =
+    derivedPsychotype !== null &&
+    psychotype !== null &&
+    derivedPsychotype !== psychotype
+
+  const handleAcceptEvolution = () => {
+    if (!derivedPsychotype) return
+    setPsychotype(derivedPsychotype)
+    setPsychotypeLastDerived(new Date().toISOString().slice(0, 10))
+    resetGridToDefaults()
+  }
 
   const handleShareWeek = async () => {
     const mins = weeklyStats?.totalFocusMinutes ?? 0;
@@ -159,6 +185,65 @@ export default function ProgressPage() {
                 </div>
               )}
             </div>
+          </motion.div>
+        )}
+
+        {/* Your Focus Style — O-7 psychotype re-derivation */}
+        {psychotype && (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.19 }}
+            className="rounded-2xl p-3"
+            style={{
+              backgroundColor: '#1E2136',
+              border: psychotypeEvolved
+                ? '1px solid rgba(245,158,11,0.30)'
+                : '1px solid rgba(123,114,255,0.12)',
+            }}
+          >
+            <p className="text-[11px] uppercase tracking-widest mb-2" style={{ color: '#7B72FF' }}>
+              Your focus style
+            </p>
+            <div className="flex items-center gap-3">
+              <span className="text-[28px]">{PSYCHOTYPE_META[psychotype].emoji}</span>
+              <div className="flex-1 min-w-0">
+                <p className="text-[15px] font-semibold" style={{ color: '#E8E8F0' }}>
+                  {PSYCHOTYPE_META[psychotype].label}
+                </p>
+                <p className="text-[11px] mt-0.5" style={{ color: '#8B8BA7' }}>
+                  {PSYCHOTYPE_META[psychotype].desc}
+                </p>
+              </div>
+            </div>
+
+            {/* Evolution nudge — shown when usage patterns suggest a different type */}
+            {psychotypeEvolved && derivedPsychotype && (
+              <div
+                className="mt-3 pt-3 flex items-center justify-between gap-3"
+                style={{ borderTop: '1px solid rgba(245,158,11,0.15)' }}
+              >
+                <div className="min-w-0 flex-1">
+                  <p className="text-[12px] font-medium" style={{ color: '#F59E0B' }}>
+                    Your patterns suggest {PSYCHOTYPE_META[derivedPsychotype].label} {PSYCHOTYPE_META[derivedPsychotype].emoji}
+                  </p>
+                  <p className="text-[10px] mt-0.5" style={{ color: '#8B8BA7' }}>
+                    Based on your last {sessions.length} sessions
+                  </p>
+                </div>
+                <button
+                  onClick={handleAcceptEvolution}
+                  className="text-[11px] font-semibold px-3 py-1.5 rounded-xl shrink-0 transition-all duration-150"
+                  style={{
+                    background: 'rgba(245,158,11,0.15)',
+                    border: '1px solid rgba(245,158,11,0.30)',
+                    color: '#F59E0B',
+                  }}
+                >
+                  Update
+                </button>
+              </div>
+            )}
           </motion.div>
         )}
 

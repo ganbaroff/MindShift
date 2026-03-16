@@ -52,6 +52,11 @@ interface UserSlice {
   setCognitiveMode: (mode: CognitiveMode) => void
   setAppMode: (mode: AppMode) => void
   setAvatarId: (id: number) => void
+  /** O-7: update psychotype from usage-derived re-derivation */
+  setPsychotype: (type: Psychotype) => void
+  /** O-7: ISO date of last usage-derived psychotype computation */
+  psychotypeLastDerived: string | null
+  setPsychotypeLastDerived: (date: string) => void
   addXP: (amount: number) => void
   setOnboardingCompleted: () => void
   setRecoveryShown: () => void
@@ -169,6 +174,7 @@ export const useStore = create<AppStore>()(
         appMode: 'minimal',
         energyLevel: 3,
         psychotype: null,
+        psychotypeLastDerived: null,
         avatarId: 1,
         xpTotal: 0,
         lastSessionAt: null,
@@ -197,6 +203,8 @@ export const useStore = create<AppStore>()(
           psychotype: derivePsychotype(mode, s.cognitiveMode),
         })),
         setAvatarId: (id) => set({ avatarId: id }),
+        setPsychotype: (type) => set({ psychotype: type }),
+        setPsychotypeLastDerived: (date) => set({ psychotypeLastDerived: date }),
         addXP: (amount) => set((s) => {
           // Research #5: Variable Ratio XP schedule — unpredictable rewards sustain ADHD motivation
           // 8% jackpot (2×) | 17% bonus (1.5×) | 75% base (1×) — rolling per VR_BUCKET_SIZE
@@ -223,7 +231,7 @@ export const useStore = create<AppStore>()(
         setFlexiblePauseUntil: (until) => set({ flexiblePauseUntil: until }),
         signOut: () => set({
           // User slice
-          userId: null, email: null, xpTotal: 0,
+          userId: null, email: null, xpTotal: 0, psychotypeLastDerived: null,
           onboardingCompleted: false, recoveryShown: false, lastSessionAt: null,
           // Health & Rhythms — reset to defaults on sign out
           timerStyle: 'countdown' as const,
@@ -531,6 +539,7 @@ export const useStore = create<AppStore>()(
           trialEndsAt: s.trialEndsAt,
           gridWidgets: s.gridWidgets,
           psychotype: s.psychotype,
+          psychotypeLastDerived: s.psychotypeLastDerived,
           completedTotal: s.completedTotal,
           // Persist task pools so tasks survive page reload in guest mode
           nowPool: s.nowPool,
