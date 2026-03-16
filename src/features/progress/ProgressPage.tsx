@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { useStore } from '@/store';
 import { ENERGY_EMOJI } from '@/shared/lib/constants';
 import { useSessionHistory } from '@/shared/hooks/useSessionHistory';
+import { nativeShare, canShare } from '@/shared/lib/native';
 
 const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
@@ -10,6 +11,17 @@ export default function ProgressPage() {
   const { energyTrend, weeklyInsight, loading } = useSessionHistory();
 
   const xpSafe = xpTotal ?? 0;
+  const shareSupported = canShare();
+
+  const handleShareWeek = async () => {
+    const mins = weeklyStats?.totalFocusMinutes ?? 0;
+    const tasks = completedTotal;
+    await nativeShare({
+      title: 'My MindShift week 🌱',
+      text: `This week I focused for ${mins} minutes and completed ${tasks} tasks with MindShift — ADHD-aware productivity. 💙`,
+      url: 'https://mindshift.app',
+    });
+  };
   const level = Math.floor(xpSafe / 1000) + 1;
   const xpInLevel = xpSafe % 1000;
   const xpToNext = 1000;
@@ -120,6 +132,26 @@ export default function ProgressPage() {
             </>
           )}
         </motion.div>
+
+        {/* Share this week — Web Share API / Capacitor Share */}
+        {shareSupported && (
+          <motion.button
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.18 }}
+            whileTap={{ scale: 0.97 }}
+            onClick={() => void handleShareWeek()}
+            className="w-full py-3 rounded-2xl text-sm font-medium flex items-center justify-center gap-2 transition-all duration-200"
+            style={{
+              background: 'rgba(123,114,255,0.10)',
+              border: '1px solid rgba(123,114,255,0.20)',
+              color: '#C8C0FF',
+            }}
+          >
+            <span>🔗</span>
+            Share this week
+          </motion.button>
+        )}
 
         {/* AI Insights */}
         <div>

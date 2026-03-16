@@ -106,6 +106,12 @@ export default function TasksPage() {
           <div className="flex items-center gap-2 mb-2">
             <span className="text-[11px] uppercase tracking-widest font-semibold" style={{ color: '#8B8BA7' }}>NEXT</span>
             <span className="text-[11px]" style={{ color: '#8B8BA7' }}>{nextTasks.length}/6</span>
+            {/* Two-Thirds guardrail — B-9: gentle nudge when queue is getting full */}
+            {nextTasks.length >= 4 && (
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: 'rgba(245,158,11,0.10)', color: '#F59E0B' }}>
+                filling up
+              </span>
+            )}
           </div>
           <div className="space-y-2">
             {nextTasks.length === 0 ? (

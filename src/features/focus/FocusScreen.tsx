@@ -12,7 +12,7 @@
  * Session controls (audio/stop/park) live in SessionControls.tsx
  */
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { Link } from 'react-router-dom'
 import { ArcTimer } from './ArcTimer'
@@ -21,10 +21,19 @@ import { SessionControls } from './SessionControls'
 import { NatureBuffer, RecoveryLock } from './PostSessionFlow'
 import { useFocusSession, clearBookmark, PHASE_LABELS } from './useFocusSession'
 import { BreathworkRitual } from './BreathworkRitual'
+import { nativeStatusBarHide, nativeStatusBarShow } from '@/shared/lib/native'
 
 export default function FocusScreen() {
   const session = useFocusSession()
   const [showBreathwork, setShowBreathwork] = useState(false)
+
+  // Immersive status bar — hide during active session, restore otherwise
+  useEffect(() => {
+    const inSession = session.screen === 'session'
+    if (inSession) { nativeStatusBarHide() }
+    else { nativeStatusBarShow() }
+    return () => { nativeStatusBarShow() }
+  }, [session.screen])
   const {
     screen,
     selectedTask, setSelectedTask,
@@ -60,6 +69,7 @@ export default function FocusScreen() {
         postEnergyLogged={postEnergyLogged}
         onSetEnergyLevel={handlePostEnergy}
         onSkip={handleSkipBuffer}
+        sessionMinutes={elapsedMin}
       />
     )
   }

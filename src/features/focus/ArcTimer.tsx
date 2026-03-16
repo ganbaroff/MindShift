@@ -128,8 +128,20 @@ function ArcTimerInner({
       {/* Center content */}
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         {isSurprise ? (
-          /* Surprise mode: show only the arc ring, no digits, no tap hint */
-          null
+          /* Surprise mode: ambient breathing orb — intentionally zen, no digits */
+          <motion.div
+            className="rounded-full"
+            animate={shouldAnimate ? {
+              scale: [0.7, 1.15, 0.7],
+              opacity: [0.2, 0.55, 0.2],
+            } : { opacity: 0.35 }}
+            transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
+            style={{
+              width: ARC_SIZE * 0.22 * scale,
+              height: ARC_SIZE * 0.22 * scale,
+              background: `radial-gradient(circle, ${arcColor}90 0%, ${arcColor}20 70%, transparent 100%)`,
+            }}
+          />
         ) : effectiveShowDigits && !effectiveDisable ? (
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
