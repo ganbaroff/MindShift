@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { useStore } from '@/store';
 import { ENERGY_EMOJI } from '@/shared/lib/constants';
 import { useSessionHistory } from '@/shared/hooks/useSessionHistory';
@@ -321,6 +322,19 @@ export default function ProgressPage() {
             Share this week
           </motion.button>
         )}
+
+        {/* Session Log link */}
+        <Link
+          to="/history"
+          className="flex items-center justify-between px-4 py-3 rounded-2xl transition-all duration-200"
+          style={{ backgroundColor: '#1E2136', border: '1px solid rgba(255,255,255,0.05)' }}
+        >
+          <div className="flex items-center gap-2">
+            <span className="text-base">📋</span>
+            <span className="text-[14px] font-medium" style={{ color: '#E8E8F0' }}>Session Log</span>
+          </div>
+          <span className="text-[12px]" style={{ color: '#8B8BA7' }}>→</span>
+        </Link>
 
         {/* AI Insights */}
         <div>

@@ -21,6 +21,8 @@ import { SessionControls } from './SessionControls'
 import { NatureBuffer, RecoveryLock } from './PostSessionFlow'
 import { useFocusSession, clearBookmark, PHASE_LABELS } from './useFocusSession'
 import { BreathworkRitual } from './BreathworkRitual'
+import { FocusRoomSheet } from './FocusRoomSheet'
+import { useFocusRoom, ROOM_ENCOURAGEMENTS } from '@/shared/hooks/useFocusRoom'
 import { nativeStatusBarHide, nativeStatusBarShow } from '@/shared/lib/native'
 import { useStore } from '@/store'
 import { supabase } from '@/shared/lib/supabase'
@@ -74,7 +76,30 @@ function getMedPeakLabel(medicationTime: string | null): string | null {
 export default function FocusScreen() {
   const session = useFocusSession()
   const [showBreathwork, setShowBreathwork] = useState(false)
+  const [showRoomSheet, setShowRoomSheet] = useState(false)
   const orbitCount = useAmbientOrbit(session.screen === 'session')
+  const room = useFocusRoom()
+
+  // Broadcast phase changes to room peers
+  useEffect(() => {
+    if (room.status === 'connected' && session.sessionPhase !== 'idle') {
+      room.broadcast(session.sessionPhase)
+    }
+  }, [session.sessionPhase, room.status, room])
+
+  // Leave room when session ends
+  useEffect(() => {
+    if (session.screen !== 'session' && session.screen !== 'setup') {
+      room.leave()
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session.screen])
+
+  // Anonymous encouragement — rotate every 5 min during session
+  const encouragement = useMemo(() => {
+    if (room.status !== 'connected' || room.peers.length === 0) return null
+    return ROOM_ENCOURAGEMENTS[Math.floor(Date.now() / 300_000) % ROOM_ENCOURAGEMENTS.length]
+  }, [room.status, room.peers.length])
 
   // Immersive status bar — hide during active session, restore otherwise
   useEffect(() => {
@@ -583,6 +608,31 @@ export default function FocusScreen() {
           </div>
         )}
 
+        {/* Focus Room — active room status chip */}
+        {room.status === 'connected' && room.code && (
+          <div
+            className="mx-5 mb-4 px-4 py-2.5 rounded-2xl flex items-center gap-3"
+            style={{ background: 'rgba(78,205,196,0.08)', border: '1px solid rgba(78,205,196,0.20)' }}
+          >
+            <span className="text-base">🤝</span>
+            <div className="flex-1 min-w-0">
+              <p className="text-[12px] font-semibold" style={{ color: '#4ECDC4' }}>
+                Room {room.code} · {room.peers.length + 1} focusing
+              </p>
+              {room.peers.length === 0 && (
+                <p className="text-[10px]" style={{ color: '#5A5B72' }}>Waiting for partner to join…</p>
+              )}
+            </div>
+            <button
+              onClick={() => setShowRoomSheet(true)}
+              className="text-[10px] px-2 py-1 rounded-lg"
+              style={{ background: 'rgba(78,205,196,0.12)', color: '#4ECDC4' }}
+            >
+              View
+            </button>
+          </div>
+        )}
+
         {/* Start button */}
         <div className="px-5 space-y-2">
           <button
@@ -603,6 +653,16 @@ export default function FocusScreen() {
           >
             Skip ritual & jump in
           </button>
+          {/* Focus with someone — S-3/S-4 */}
+          {room.status === 'idle' && (
+            <button
+              onClick={() => setShowRoomSheet(true)}
+              className="w-full py-1.5 text-[12px] flex items-center justify-center gap-1.5"
+              style={{ color: '#5A5B72' }}
+            >
+              🤝 Focus with someone
+            </button>
+          )}
         </div>
       </div>
 
@@ -621,6 +681,17 @@ export default function FocusScreen() {
               }}
             />
           </div>
+        )}
+      </AnimatePresence>
+
+      {/* Focus Room sheet */}
+      <AnimatePresence>
+        {showRoomSheet && (
+          <FocusRoomSheet
+            room={room}
+            onClose={() => setShowRoomSheet(false)}
+            onReady={() => handleStart()}
+          />
         )}
       </AnimatePresence>
       </>
@@ -695,29 +766,61 @@ export default function FocusScreen() {
         sessionPhase={sessionPhase}
       />
 
-      {/* Ambient Orbit (S-2) — body-doubling social signal, fades in after 10s */}
-      <AnimatePresence>
-        {orbitCount !== null && (
+      {/* Focus Room — in-session peer indicator (replaces Ambient Orbit when in room) */}
+      {room.status === 'connected' ? (
+        <AnimatePresence>
           <motion.div
             initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 0.55, y: 0 }}
+            animate={{ opacity: 0.75, y: 0 }}
             exit={{ opacity: 0 }}
-            transition={{ delay: 10, duration: 1.5 }}
-            className="absolute bottom-40 left-0 right-0 flex justify-center pointer-events-none"
+            transition={{ delay: 2, duration: 1 }}
+            className="absolute bottom-40 left-0 right-0 flex flex-col items-center gap-1 pointer-events-none"
           >
-            <span
-              className="text-[11px] px-3 py-1 rounded-full"
-              style={{
-                backgroundColor: 'rgba(78,205,196,0.08)',
-                border: '1px solid rgba(78,205,196,0.15)',
-                color: '#4ECDC4',
-              }}
+            {/* Peer phase dots */}
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full"
+              style={{ backgroundColor: 'rgba(78,205,196,0.08)', border: '1px solid rgba(78,205,196,0.15)' }}
             >
-              🌍 {orbitCount} {orbitCount === 1 ? 'person' : 'people'} focusing now
-            </span>
+              <span className="text-[11px]" style={{ color: '#4ECDC4' }}>🤝 {room.peers.length + 1} in room</span>
+              {room.peers.map(p => (
+                <div key={p.userId} className="flex items-center gap-1">
+                  <span className="text-[11px]">{p.emoji}</span>
+                  <div className="w-1.5 h-1.5 rounded-full"
+                    style={{ background: p.phase === 'flow' ? '#4ECDC4' : p.phase === 'release' ? '#F59E0B' : '#7B72FF' }}
+                  />
+                </div>
+              ))}
+            </div>
+            {/* Anonymous encouragement — S-11 */}
+            {encouragement && room.peers.length > 0 && (
+              <p className="text-[10px] mt-0.5" style={{ color: '#5A5B72' }}>{encouragement}</p>
+            )}
           </motion.div>
-        )}
-      </AnimatePresence>
+        </AnimatePresence>
+      ) : (
+        /* Ambient Orbit (S-2) — body-doubling social signal, fades in after 10s */
+        <AnimatePresence>
+          {orbitCount !== null && (
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 0.55, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ delay: 10, duration: 1.5 }}
+              className="absolute bottom-40 left-0 right-0 flex justify-center pointer-events-none"
+            >
+              <span
+                className="text-[11px] px-3 py-1 rounded-full"
+                style={{
+                  backgroundColor: 'rgba(78,205,196,0.08)',
+                  border: '1px solid rgba(78,205,196,0.15)',
+                  color: '#4ECDC4',
+                }}
+              >
+                🌍 {orbitCount} {orbitCount === 1 ? 'person' : 'people'} focusing now
+              </span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      )}
     </div>
   )
 }

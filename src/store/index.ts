@@ -86,6 +86,8 @@ interface TaskSlice {
   archiveAllOverdue: () => string[]     // returns archived ids
   setTaskDueDate: (id: string, dueDate: string | null, dueTime: string | null) => void
   setTaskType: (id: string, type: 'task' | 'idea' | 'reminder') => void
+  /** Reorder tasks within a pool — receives the full new ordered array */
+  reorderPool: (pool: Task['pool'], ordered: Task[]) => void
 }
 
 interface SessionSlice {
@@ -423,6 +425,13 @@ export const useStore = create<AppStore>()(
             nextPool: update(s.nextPool),
             somedayPool: update(s.somedayPool),
           }
+        }),
+
+        reorderPool: (pool, ordered) => set(() => {
+          const withPositions = ordered.map((t, i) => ({ ...t, position: i }))
+          if (pool === 'now')     return { nowPool: withPositions }
+          if (pool === 'next')    return { nextPool: withPositions }
+          return { somedayPool: withPositions }
         }),
 
         // ── Session ─────────────────────────────────────────────────────────

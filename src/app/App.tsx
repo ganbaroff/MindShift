@@ -28,6 +28,7 @@ const TasksPage        = lazy(() => import('@/features/tasks/TasksPage'))
 const ProgressPage     = lazy(() => import('@/features/progress/ProgressPage'))
 const SettingsPage     = lazy(() => import('@/features/settings/SettingsPage'))
 const DueDateScreen    = lazy(() => import('@/features/calendar/DueDateScreen'))
+const HistoryPage      = lazy(() => import('@/features/history/HistoryPage'))
 const PrivacyPage      = lazy(() => import('@/features/legal/PrivacyPage'))
 const TermsPage        = lazy(() => import('@/features/legal/TermsPage'))
 const CookiePolicyPage = lazy(() => import('@/features/legal/CookiePolicyPage'))
@@ -358,6 +359,11 @@ export default function App() {
                 <Route path="/settings" element={
                   <ErrorBoundary fallback={<RouteError label="Settings" />}>
                     <SettingsPage />
+                  </ErrorBoundary>
+                } />
+                <Route path="/history" element={
+                  <ErrorBoundary fallback={<RouteError label="History" />}>
+                    <HistoryPage />
                   </ErrorBoundary>
                 } />
               </Route>
