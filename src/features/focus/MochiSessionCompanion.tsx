@@ -1,29 +1,38 @@
 /**
- * MochiSessionCompanion — Block 5a
+ * MochiSessionCompanion — AI-powered body-double
  *
- * Mochi body-double speech bubbles during focus sessions.
- * Appears at phase transitions and milestone timestamps.
+ * Mochi speech bubbles during focus sessions. Now backed by Gemini AI
+ * via the `mochi-respond` edge function, with hardcoded fallback.
  *
  * Rules:
  * - Max 1 bubble per 20 min (1200 s)
  * - Auto-dismisses after 8 s; tap to dismiss early
+ * - AI provides personalized, context-aware messages
+ * - Hardcoded pools used as instant fallback (offline / rate limit / guest)
  * - Calm, supportive copy — no "you should", no urgency
  * - Uses `useMotion()` for animation control
  */
 
-import { useState, useEffect, useRef, memo } from 'react'
+import { useState, useEffect, useRef, memo, useCallback } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { Mascot } from '@/shared/ui/Mascot'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { useStore } from '@/store'
+import { supabase } from '@/shared/lib/supabase'
+import { logError } from '@/shared/lib/logger'
 import type { SessionPhase, Psychotype } from '@/types'
+import type { UserBehaviorProfile } from '@/shared/hooks/useUserBehavior'
+
+type MascotState = 'focused' | 'celebrating' | 'resting' | 'encouraging'
 
 interface Props {
   elapsedSeconds: number
   sessionPhase: SessionPhase
+  /** Behavior profile from useUserBehavior — enables AI personalization */
+  behaviorProfile?: UserBehaviorProfile | null
 }
 
-// ── Message pools — randomized responses per trigger ────────────────────────
+// ── Hardcoded fallback pools (used instantly, offline, or guest) ──────────────
 
 const MOCHI_MESSAGES: Record<string, string[]> = {
   phase_release: [
@@ -67,8 +76,7 @@ const MOCHI_MESSAGES: Record<string, string[]> = {
 const getRandomMessage = (messages: string[]): string =>
   messages[Math.floor(Math.random() * messages.length)]
 
-// ── Psychotype flavor overlays — personalize Mochi's voice ───────────────────
-// These replace the generic milestone messages for users with a known psychotype.
+// Psychotype flavor overlays — personalize fallback messages
 const PSYCHOTYPE_MESSAGES: Record<Psychotype, Record<string, string[]>> = {
   achiever: {
     milestone_7:  ["7 minutes — another one in the books 💪", "You're crushing it. Keep the momentum."],
@@ -102,79 +110,140 @@ interface BubbleTrigger {
   id: string
   minElapsed: number  // seconds — earliest this can fire
   messagePool: string  // key into MOCHI_MESSAGES
-  mascotState: 'focused' | 'celebrating' | 'resting'
+  fallbackState: MascotState
 }
 
 const BUBBLE_TRIGGERS: BubbleTrigger[] = [
-  {
-    id: 'phase_release',
-    minElapsed: 7 * 60,   // 7 min — struggle → release phase
-    messagePool: 'phase_release',
-    mascotState: 'focused',
-  },
-  {
-    id: 'phase_flow',
-    minElapsed: 15 * 60,  // 15 min — release → flow phase
-    messagePool: 'phase_flow',
-    mascotState: 'focused',
-  },
-  {
-    id: 'milestone_7',
-    minElapsed: 7 * 60,   // 7 min milestone
-    messagePool: 'milestone_7',
-    mascotState: 'focused',
-  },
-  {
-    id: 'milestone_15',
-    minElapsed: 15 * 60,  // 15 min milestone
-    messagePool: 'milestone_15',
-    mascotState: 'celebrating',
-  },
-  {
-    id: 'milestone_30',
-    minElapsed: 30 * 60,  // 30 min milestone
-    messagePool: 'milestone_30',
-    mascotState: 'celebrating',
-  },
-  {
-    id: 'milestone_60',
-    minElapsed: 60 * 60,  // 60 min milestone
-    messagePool: 'milestone_60',
-    mascotState: 'resting',
-  },
+  { id: 'phase_release', minElapsed: 7 * 60,  messagePool: 'phase_release', fallbackState: 'focused' },
+  { id: 'phase_flow',    minElapsed: 15 * 60, messagePool: 'phase_flow',    fallbackState: 'focused' },
+  { id: 'milestone_7',   minElapsed: 7 * 60,  messagePool: 'milestone_7',   fallbackState: 'focused' },
+  { id: 'milestone_15',  minElapsed: 15 * 60, messagePool: 'milestone_15',  fallbackState: 'celebrating' },
+  { id: 'milestone_30',  minElapsed: 30 * 60, messagePool: 'milestone_30',  fallbackState: 'celebrating' },
+  { id: 'milestone_60',  minElapsed: 60 * 60, messagePool: 'milestone_60',  fallbackState: 'resting' },
 ]
 
 const MIN_GAP_SECONDS = 20 * 60  // max 1 bubble per 20 min
 
+// ── AI fetch helper ──────────────────────────────────────────────────────────
+
+interface MochiAIResponse {
+  message: string
+  mascotState: MascotState
+}
+
+async function fetchMochiAI(
+  trigger: string,
+  context: {
+    psychotype: Psychotype | null
+    sessionPhase: SessionPhase
+    elapsedMinutes: number
+    energyLevel: number
+    totalSessions: number
+    currentStreak: number
+    completedToday: number
+    timeBlindness: string | null
+    emotionalReactivity: string | null
+    recentStruggles: string | null
+    seasonalMode: string
+  },
+  locale: string,
+): Promise<MochiAIResponse | null> {
+  try {
+    const { data, error } = await supabase.functions.invoke('mochi-respond', {
+      body: { trigger, context, locale },
+    })
+    if (error) throw error
+    const resp = data as MochiAIResponse | null
+    if (resp?.message) return resp
+    return null
+  } catch (err) {
+    logError('MochiAI.fetch', err)
+    return null
+  }
+}
+
 // ── Component ──────────────────────────────────────────────────────────────────
 
-function MochiSessionCompanionInner({ elapsedSeconds, sessionPhase }: Props) {
-  const { shouldAnimate, t } = useMotion()
-  const { psychotype } = useStore()
+interface ActiveBubble {
+  id: string
+  message: string
+  mascotState: MascotState
+}
 
-  const [activeBubble, setActiveBubble] = useState<BubbleTrigger | null>(null)
+function MochiSessionCompanionInner({ elapsedSeconds, sessionPhase, behaviorProfile }: Props) {
+  const { shouldAnimate, t } = useMotion()
+  const { psychotype, userId, energyLevel, currentStreak, seasonalMode, timeBlindness, emotionalReactivity, locale } = useStore()
+
+  const [activeBubble, setActiveBubble] = useState<ActiveBubble | null>(null)
   const shownRef      = useRef<Set<string>>(new Set())
   const lastShownAtRef = useRef<number>(0)
   const dismissTimer  = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const isGuest = !userId || userId.startsWith('guest_')
+
+  // Get fallback message from hardcoded pools
+  const getFallbackMessage = useCallback((trigger: BubbleTrigger): ActiveBubble => {
+    const pool = (psychotype && PSYCHOTYPE_MESSAGES[psychotype]?.[trigger.messagePool])
+      ?? MOCHI_MESSAGES[trigger.messagePool]
+      ?? ['Keep going!']
+    return {
+      id: trigger.id,
+      message: getRandomMessage(pool),
+      mascotState: trigger.fallbackState,
+    }
+  }, [psychotype])
 
   // ── Trigger logic ───────────────────────────────────────────────────────────
   useEffect(() => {
     for (const trigger of BUBBLE_TRIGGERS) {
       if (shownRef.current.has(trigger.id)) continue
       if (elapsedSeconds < trigger.minElapsed) continue
-      // Enforce max 1 per 20 min
       if (lastShownAtRef.current > 0 && elapsedSeconds - lastShownAtRef.current < MIN_GAP_SECONDS) continue
 
       shownRef.current.add(trigger.id)
       lastShownAtRef.current = elapsedSeconds
-      setActiveBubble(trigger)
 
-      // Auto-dismiss after 8 s
+      // Show fallback immediately so user sees something fast
+      const fallback = getFallbackMessage(trigger)
+      setActiveBubble(fallback)
+
+      // Auto-dismiss after 8s
       if (dismissTimer.current) clearTimeout(dismissTimer.current)
       dismissTimer.current = setTimeout(() => setActiveBubble(null), 8_000)
+
+      // If authenticated, fire AI request to upgrade the message
+      if (!isGuest) {
+        const elapsedMin = Math.floor(elapsedSeconds / 60)
+        fetchMochiAI(
+          trigger.messagePool,
+          {
+            psychotype,
+            sessionPhase,
+            elapsedMinutes: elapsedMin,
+            energyLevel,
+            totalSessions: behaviorProfile?.totalSessions ?? 0,
+            currentStreak,
+            completedToday: behaviorProfile?.completedToday ?? 0,
+            timeBlindness,
+            emotionalReactivity,
+            recentStruggles: behaviorProfile?.recentStruggles ?? null,
+            seasonalMode,
+          },
+          locale,
+        ).then(aiResp => {
+          if (aiResp) {
+            // Replace fallback with AI response (if bubble is still showing)
+            setActiveBubble(prev => {
+              if (prev?.id !== trigger.id) return prev // bubble already dismissed
+              return { id: trigger.id, message: aiResp.message, mascotState: aiResp.mascotState }
+            })
+          }
+        })
+      }
+
       break  // one at a time
     }
-  }, [elapsedSeconds])
+  }, [elapsedSeconds, getFallbackMessage, isGuest, psychotype, sessionPhase, energyLevel, currentStreak, behaviorProfile, timeBlindness, emotionalReactivity, seasonalMode, locale])
 
   // Cleanup timer on unmount
   useEffect(() => () => {
@@ -219,11 +288,7 @@ function MochiSessionCompanionInner({ elapsedSeconds, sessionPhase }: Props) {
               }}
             />
             <p className="text-xs leading-relaxed" style={{ color: '#E8E8F0' }}>
-              {getRandomMessage(
-                (psychotype && PSYCHOTYPE_MESSAGES[psychotype]?.[activeBubble.messagePool])
-                  ?? MOCHI_MESSAGES[activeBubble.messagePool]
-                  ?? ['Keep going!']
-              )}
+              {activeBubble.message}
             </p>
           </motion.button>
         )}

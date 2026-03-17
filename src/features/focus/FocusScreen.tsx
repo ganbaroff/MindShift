@@ -26,6 +26,8 @@ import { useFocusRoom, ROOM_ENCOURAGEMENTS } from '@/shared/hooks/useFocusRoom'
 import { nativeStatusBarHide, nativeStatusBarShow } from '@/shared/lib/native'
 import { useStore } from '@/store'
 import { supabase } from '@/shared/lib/supabase'
+import { useSessionHistory } from '@/shared/hooks/useSessionHistory'
+import { useUserBehavior } from '@/shared/hooks/useUserBehavior'
 
 // ── Ambient Orbit (S-2) ───────────────────────────────────────────────────────
 // Shows how many people are currently in a focus session — body-doubling signal.
@@ -79,6 +81,10 @@ export default function FocusScreen() {
   const [showRoomSheet, setShowRoomSheet] = useState(false)
   const orbitCount = useAmbientOrbit(session.screen === 'session')
   const room = useFocusRoom()
+
+  // User behavior profile for AI Mochi — feeds context to mochi-respond edge fn
+  const { sessions: historySessions } = useSessionHistory()
+  const behaviorProfile = useUserBehavior(historySessions)
 
   // Broadcast phase changes to room peers
   useEffect(() => {
@@ -764,6 +770,7 @@ export default function FocusScreen() {
       <MochiSessionCompanion
         elapsedSeconds={elapsedSeconds}
         sessionPhase={sessionPhase}
+        behaviorProfile={behaviorProfile}
       />
 
       {/* Focus Room — in-session peer indicator (replaces Ambient Orbit when in room) */}
