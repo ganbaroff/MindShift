@@ -58,7 +58,7 @@ const steps = [
     subtitle: "There's no wrong answer — this helps us personalise your timer.",
     options: [
       { emoji: '😵', label: 'Time vanishes on me',          desc: 'An hour can feel like five minutes' },
-      { emoji: '🤔', label: 'I notice time slipping sometimes', desc: 'Depends on what I'm doing' },
+      { emoji: '🤔', label: 'I notice time slipping sometimes', desc: "Depends on what I'm doing" },
       { emoji: '✅', label: 'I track time naturally',       desc: 'I usually know how long things take' },
     ],
   },
