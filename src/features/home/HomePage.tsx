@@ -103,6 +103,9 @@ export default function HomePage() {
   // Research #3: show only when growing — celebrate consistency, never shame gaps.
   const showStreak = currentStreak >= 2;
 
+  // hour declared early — used by greeting AND daily brief
+  const hour = new Date().getHours();
+
   // ── Daily brief (Sprint T) ────────────────────────────────────────────────────
   // A personalised tip based on the user's ADHD profile, shown once per session.
   // Visible in the morning (before 12) or afternoon; dismissed by user.
@@ -135,7 +138,6 @@ export default function HomePage() {
 
   // Time-based greeting (i18n-aware)
   const { t } = useI18n();
-  const hour = new Date().getHours();
   const greeting =
     hour < 5  ? t('home.greeting.night') :
     hour < 12 ? t('home.greeting.morning') :
