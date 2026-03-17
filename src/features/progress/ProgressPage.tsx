@@ -52,6 +52,19 @@ export default function ProgressPage() {
   const xpInLevel = xpSafe % 1000;
   const xpToNext = 1000;
 
+  // Named XP tiers — calm growth language, no competitive framing
+  const LEVEL_NAMES = ['Seedling', 'Sprout', 'Grower', 'Bloomer', 'Flourisher',
+    'Cultivator', 'Nurturer', 'Luminary', 'Pathfinder', 'Sage'] as const
+  const levelName = LEVEL_NAMES[Math.min(level - 1, LEVEL_NAMES.length - 1)]
+
+  // Focus score — composite metric (0-100): sessions + tasks + consistency
+  const focusScore = useMemo(() => {
+    const sessionScore = Math.min(30, (weeklyStats?.tasksCompleted ?? 0) * 6)
+    const consistencyScore = Math.round((weeklyStats?.consistencyScore ?? 0) * 40)
+    const taskScore = Math.min(30, completedTotal * 3)
+    return Math.min(100, sessionScore + consistencyScore + taskScore)
+  }, [weeklyStats, completedTotal])
+
   const weekData = DAY_LABELS.map((day, i) => ({
     day,
     mins: weeklyStats?.dailyMinutes?.[i] ?? 0,
@@ -88,7 +101,9 @@ export default function ProgressPage() {
               <div className="w-full h-full rounded-full flex items-center justify-center" style={{ backgroundColor: '#1E2136' }}>🧠</div>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[15px] font-semibold" style={{ color: '#E8E8F0' }}>Level {level}</p>
+              <p className="text-[15px] font-semibold" style={{ color: '#E8E8F0' }}>
+                Level {level} · {levelName}
+              </p>
               <p className="text-[13px]" style={{ color: '#7B72FF' }}>{xpSafe.toLocaleString()} XP</p>
               <div className="w-full h-1.5 rounded-full mt-1.5 overflow-hidden" style={{ backgroundColor: '#252840' }}>
                 <div className="h-full rounded-full gradient-primary-teal" style={{ width: `${(xpInLevel / xpToNext) * 100}%` }} />
@@ -139,6 +154,45 @@ export default function ProgressPage() {
             </motion.div>
           ))}
         </div>
+
+        {/* Focus Score — composite health metric */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.13 }}
+          className="rounded-2xl p-3"
+          style={{ backgroundColor: '#1E2136' }}
+        >
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-[11px] uppercase tracking-widest" style={{ color: '#8B8BA7' }}>Focus health score</p>
+            <span
+              className="text-[12px] font-semibold px-2 py-0.5 rounded-full"
+              style={{
+                backgroundColor: focusScore >= 70 ? 'rgba(78,205,196,0.15)' : focusScore >= 40 ? 'rgba(123,114,255,0.12)' : 'rgba(245,158,11,0.10)',
+                color: focusScore >= 70 ? '#4ECDC4' : focusScore >= 40 ? '#7B72FF' : '#F59E0B',
+              }}
+            >
+              {focusScore >= 70 ? '🌿 Thriving' : focusScore >= 40 ? '🌱 Growing' : '🌾 Planting'}
+            </span>
+          </div>
+          <div className="h-2 rounded-full overflow-hidden" style={{ backgroundColor: 'rgba(255,255,255,0.06)' }}>
+            <motion.div
+              className="h-full rounded-full"
+              initial={{ width: 0 }}
+              animate={{ width: `${focusScore}%` }}
+              transition={{ duration: 0.9, ease: 'easeOut' }}
+              style={{
+                background: focusScore >= 70
+                  ? 'linear-gradient(90deg, #4ECDC4, #7B72FF)'
+                  : 'linear-gradient(90deg, #7B72FF, #9B8EFF)',
+              }}
+            />
+          </div>
+          <div className="flex justify-between mt-1.5">
+            <p className="text-[11px]" style={{ color: '#8B8BA7' }}>Sessions · Consistency · Tasks</p>
+            <p className="text-[11px] font-medium" style={{ color: '#E8E8F0' }}>{focusScore}/100</p>
+          </div>
+        </motion.div>
 
         {/* Energy Trends */}
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="rounded-2xl p-3" style={{ backgroundColor: '#1E2136' }}>
