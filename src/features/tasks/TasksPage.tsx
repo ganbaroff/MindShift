@@ -1,12 +1,29 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Search, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+  arrayMove,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import TaskCard from '@/components/TaskCard';
 import Fab from '@/components/Fab';
 import AddTaskModal from '@/components/AddTaskModal';
 import { useStore } from '@/store';
 import { DIFFICULTY_MAP } from '@/types';
+import type { Task } from '@/types';
 import { getNowPoolMax } from '@/shared/lib/constants';
 
 const TODAY_ISO = new Date().toISOString().split('T')[0];
@@ -18,7 +35,22 @@ export default function TasksPage() {
   const [showDone, setShowDone] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const { nowPool, nextPool, somedayPool, completeTask, snoozeTask, appMode, seasonalMode } = useStore();
+  const { nowPool, nextPool, somedayPool, completeTask, snoozeTask, reorderPool, appMode, seasonalMode } = useStore();
+
+  // dnd-kit sensors — pointer for desktop, touch for mobile
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(TouchSensor,   { activationConstraint: { delay: 200, tolerance: 8 } }),
+  )
+
+  const handleDragEnd = useCallback((event: DragEndEvent, pool: Task['pool'], tasks: Task[]) => {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+    const oldIdx = tasks.findIndex(t => t.id === active.id)
+    const newIdx = tasks.findIndex(t => t.id === over.id)
+    if (oldIdx === -1 || newIdx === -1) return
+    reorderPool(pool, arrayMove(tasks, oldIdx, newIdx))
+  }, [reorderPool])
 
   const q = searchQuery.toLowerCase().trim();
   const nowTasks = useMemo(() => nowPool.filter(t => t.status === 'active' && (!q || t.title.toLowerCase().includes(q))), [nowPool, q]);
@@ -105,12 +137,21 @@ export default function TasksPage() {
           <div className="flex items-center gap-2 mb-2">
             <span className="text-[11px] uppercase tracking-widest font-semibold" style={{ color: '#7B72FF' }}>NOW</span>
             <span className="text-[11px]" style={{ color: '#8B8BA7' }}>{nowTasks.length}/{nowMax}</span>
+            {nowTasks.length > 1 && <span className="text-[10px]" style={{ color: '#3A3B52' }}>hold to reorder</span>}
           </div>
-          <div className="space-y-2">
-            {nowTasks.map((t, i) => (
-              <TaskCard key={t.id} task={t} index={i} onDone={(id) => completeTask(id)} onPark={(id) => snoozeTask(id)} />
-            ))}
-          </div>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={(e) => handleDragEnd(e, 'now', nowTasks)}
+          >
+            <SortableContext items={nowTasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
+              <div className="space-y-2">
+                {nowTasks.map((t, i) => (
+                  <SortableTaskCard key={t.id} task={t} index={i} onDone={completeTask} onPark={snoozeTask} />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
         </div>
 
         {/* Energy hint */}
@@ -137,15 +178,23 @@ export default function TasksPage() {
               </span>
             )}
           </div>
-          <div className="space-y-2">
-            {nextTasks.length === 0 ? (
-              <p className="text-[13px] py-2" style={{ color: '#8B8BA7' }}>Queue tasks here — they'll be ready when NOW has room.</p>
-            ) : (
-              nextTasks.map((t, i) => (
-                <TaskCard key={t.id} task={t} index={i} onDone={(id) => completeTask(id)} onPark={(id) => snoozeTask(id)} />
-              ))
-            )}
-          </div>
+          {nextTasks.length === 0 ? (
+            <p className="text-[13px] py-2" style={{ color: '#8B8BA7' }}>Queue tasks here — they'll be ready when NOW has room.</p>
+          ) : (
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={(e) => handleDragEnd(e, 'next', nextTasks)}
+            >
+              <SortableContext items={nextTasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
+                <div className="space-y-2">
+                  {nextTasks.map((t, i) => (
+                    <SortableTaskCard key={t.id} task={t} index={i} onDone={completeTask} onPark={snoozeTask} />
+                  ))}
+                </div>
+              </SortableContext>
+            </DndContext>
+          )}
         </div>
 
         {/* Someday */}
@@ -188,6 +237,29 @@ export default function TasksPage() {
       <AddTaskModal open={showAddTask} onClose={() => setShowAddTask(false)} />
     </div>
   );
+}
+
+// ── Sortable wrapper for TaskCard ─────────────────────────────────────────────
+function SortableTaskCard({ task, index, onDone, onPark }: {
+  task: Task; index: number; onDone: (id: string) => void; onPark: (id: string) => void
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: task.id })
+  return (
+    <div
+      ref={setNodeRef}
+      style={{
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.5 : 1,
+        zIndex: isDragging ? 999 : 'auto',
+      }}
+    >
+      {/* Drag handle overlay — long press activates via TouchSensor */}
+      <div {...attributes} {...listeners} className="touch-none">
+        <TaskCard task={task} index={index} onDone={onDone} onPark={onPark} />
+      </div>
+    </div>
+  )
 }
 
 function CollapsibleSection({ label, count, open, onToggle, children, labelColor }: {

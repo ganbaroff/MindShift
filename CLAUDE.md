@@ -22,6 +22,9 @@ Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ `4f3bec1`. Status: **p
 ## Sprint History
 | Sprint | Commit | What landed |
 |--------|--------|-------------|
+| Sprint Z "Session Log + S-7 + Rooms" | pending | (1) `/history` route — `HistoryPage.tsx`: session timeline grouped by date (duration/phase/energy delta emojis), summary strip (total sessions/min/flow count). Linked from ProgressPage "Session Log →". (2) S-7 Anti-scroll friction — `SessionFrictionNudge` in AppShell: 5s auto-dismiss nudge when user navigates away from /focus during active session. (3) Lazy `/history` route in App.tsx. tsc ✅ |
+| Sprint Y "Task Reordering" | pending | Drag-to-reorder tasks in NOW and NEXT pools. `SortableTaskCard` wrapper + `DndContext`/`SortableContext` in TasksPage. `reorderPool(pool, ordered[])` in store updates `position`. TouchSensor with 200ms delay. "hold to reorder" hint in header. tsc ✅ |
+| Sprint X "Focus Rooms" | pending | Supabase Realtime presence rooms (S-3/S-4/S-11). `useFocusRoom` hook: create (4-char code) / join / broadcast phase / leave. `FocusRoomSheet` bottom sheet: create/join UI, copy code, live peer list with phase dots. In-session: replaces Ambient Orbit with "🤝 N in room" peer indicators + S-11 anonymous encouragement text. No DB table needed. tsc ✅ |
 | Sprint W "Adaptive Focus Setup" | pending | FocusScreen setup: (1) Today's Progress strip — shows completedTotal + today's focused minutes + weeklyIntention chip. (2) Adaptive ADHD tip card — 4 variants from timeBlindness/emotionalReactivity; teal-tinted, non-blocking. Both hidden when no data yet. tsc ✅ |
 | Sprint V "Task Notes" | pending | `note?: string` on Task interface. AddTaskModal: collapsible "Add context" textarea (hidden by default, "+ Add context" link expands it). TaskCard: shows `📝 {note}` preview line (truncated 1 line) when note present. Memo comparator updated. tsc ✅ |
 | Sprint U "Weekly Planning Ritual" | pending | `WeeklyPlanning.tsx` (lazy z-50): 3 steps — wins recap with completedTotal + streak → intention chip picker (4 options) → closing affirmation. Triggers Sunday 18pm+ or Monday before noon, once per ISO week. Store: `weeklyPlanShownWeek: string\|null`, `weeklyIntention: string\|null` (both persisted). App.tsx: mutually exclusive with Recovery/ContextRestore/Shutdown/Monthly. Weekly intention displayed in FocusScreen setup strip (Sprint W). tsc ✅ |
@@ -188,6 +191,11 @@ Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ `4f3bec1`. Status: **p
 - **Performance:** useMemo on filtered task lists in HomePage + TasksPage. React.memo on TaskCard.
 - **Accessibility:** EnergyPicker aria-label+aria-pressed. Fab aria-label+focus-visible ring. CollapsibleSection aria-expanded+aria-label.
 
+## Architecture (Sprints X–Z additions)
+- **Focus Rooms (Sprint X):** `src/shared/hooks/useFocusRoom.ts` — `useFocusRoom()` hook manages Supabase Realtime channel `focus-room:{code}` with presence protocol. States: idle/connecting/connected/error. `create()` → 4-char code via `Math.random().toString(36)`. `join(code)` → subscribes. `broadcast(phase)` → `channel.track({ phase })`. `leave()` → `untrack` + `removeChannel`. `src/features/focus/FocusRoomSheet.tsx` — bottom sheet with create/join/copy-code UI and live peer list. FocusScreen: "🤝 Focus with someone" button (idle state) → opens sheet. Room active chip shows peer count. In-session: peer phase dots + S-11 encouragement text replaces Ambient Orbit pill when room active.
+- **Task Reordering (Sprint Y):** `TasksPage.tsx` — `DndContext` + `SortableContext` wraps NOW and NEXT pool lists. `SortableTaskCard` uses `useSortable` from `@dnd-kit/sortable`. `handleDragEnd` calls `reorderPool(pool, arrayMove(tasks, oldIdx, newIdx))`. Store: `reorderPool(pool, ordered)` updates `position` field on each task. PointerSensor (distance: 6) + TouchSensor (delay: 200ms) for mobile hold-to-drag.
+- **Session History (Sprint Z):** `src/features/history/HistoryPage.tsx` — `/history` route (lazy). Groups raw sessions from `useSessionHistory` by date. Shows duration / phase (color-coded) / energy before→after emojis per session. Summary strip: total sessions / total minutes / flow-session count. Guest → sign-in prompt. Empty → encouraging empty state. Linked from ProgressPage via "📋 Session Log →" row. S-7 `SessionFrictionNudge` component in `AppShell.tsx` — detects `prevPath === '/focus' && currPath !== '/focus' && isInFocus` → shows 5s auto-dismiss teal pill.
+
 ## Architecture (Sprints U–W additions)
 - **Weekly Planning Ritual (Sprint U):** `src/features/focus/WeeklyPlanning.tsx` — lazy z-50. 3 steps: recap (completedTotal + currentStreak mini-cards) → intention chip picker (4 options: consistent/challenge/recover/explore) → closing affirmation. Auto-advances on chip pick (220ms). `finish()` calls `setWeeklyIntention('emoji label')`. Store: `weeklyPlanShownWeek: string|null`, `weeklyIntention: string|null` (both persisted). Trigger in `App.tsx`: Sunday 18pm+ or Monday before noon; ISO week key computed with Sunday→next-week offset. Mutually exclusive with all other overlays (lowest priority).
 - **Task Notes (Sprint V):** `note?: string` added to `Task` interface (`types/index.ts`). `AddTaskModal`: `showNote` state; initially shows "+ Add context (optional)" link; click expands animated textarea. `note.trim() || undefined` written to task. `TaskCard`: shows `📝 {note}` 1-line preview below title when present. Memo comparator includes `note` field.
@@ -293,12 +301,12 @@ Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ `4f3bec1`. Status: **p
 - ~~O-11: Onboarding skip + revisit engine~~ ✅ Sprint M
 - ~~O-12: Daily energy pattern detection from logs~~ ✅ Sprint M (peakFocusTime card)
 - ~~S-2: Ambient Orbit (anonymous "47 people focusing now" counter)~~ ✅ Sprint Q (Supabase count proxy, 30-min window)
-- S-3: 1:1 Focus Partner (Model A — Supabase Realtime)
-- S-4: Quiet Room (Model B — 2-4 person rooms)
+- ~~S-3: 1:1 Focus Partner (Model A — Supabase Realtime)~~ ✅ Sprint X (useFocusRoom + FocusRoomSheet — create/join room, peer phases)
+- ~~S-4: Quiet Room (Model B — 2-4 person rooms)~~ ✅ Sprint X (same room supports up to N people via presence)
 - S-5: Ghosting Grace protocol
-- S-7: Anti-social-scroll friction
+- ~~S-7: Anti-social-scroll friction~~ ✅ Sprint Z (SessionFrictionNudge in AppShell — 5s auto-dismiss)
 - S-9: Post-social cool-down ritual
-- S-11: Anonymous encouragement in rooms
+- ~~S-11: Anonymous encouragement in rooms~~ ✅ Sprint X (ROOM_ENCOURAGEMENTS rotating text shown during sessions)
 - ~~B-5: Monthly reflection ritual~~ ✅ Sprint L
 - ~~B-6: Hyperfocus Autopsy~~ ✅ Sprint K
 - ~~B-9: Two-Thirds guardrail~~ ✅ Sprint K
