@@ -16,7 +16,7 @@
 import { motion, AnimatePresence } from 'motion/react'
 import { useMotion } from '@/shared/hooks/useMotion'
 
-export type MascotState = 'idle' | 'focused' | 'celebrating' | 'resting' | 'low-energy'
+export type MascotState = 'idle' | 'focused' | 'celebrating' | 'resting' | 'low-energy' | 'encouraging'
 
 interface MascotProps {
   state?: MascotState
@@ -68,6 +68,13 @@ const STATE_CONFIG: Record<MascotState, {
     glowColor: 'transparent',
     cheeks: false,
     smile: 'M33 52 Q40 55 47 52',
+  },
+  encouraging: {
+    bodyColor1: '#7B72FF',
+    bodyColor2: '#4ECDC4',
+    glowColor: 'rgba(78,205,196,0.20)',
+    cheeks: true,
+    smile: 'M30 50 Q40 57 50 50',
   },
 }
 

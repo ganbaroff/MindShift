@@ -22,6 +22,7 @@ Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ `4f3bec1`. Status: **p
 ## Sprint History
 | Sprint | Commit | What landed |
 |--------|--------|-------------|
+| Sprint AA "Google Auth + AI Mochi + User Memory" | pending | (1) Google OAuth — AuthScreen: "Continue with Google" button via `supabase.auth.signInWithOAuth({ provider: 'google' })`. Consent persisted before redirect. Requires Supabase Dashboard Google provider config. (2) User Behavior Memory — `useUserBehavior(sessions)` hook: aggregates focus_sessions into `UserBehaviorProfile` (avgSessionMinutes, flowRate, struggleDropRate, peakHour, energyTrend, recentStruggles, completedToday). (3) AI Mochi — `mochi-respond` edge function: Gemini 2.5 Flash generates personalized mascot messages using psychotype + behavior profile + session context + ADHD signals. 10 calls/day rate limit. (4) MochiSessionCompanion upgraded: shows hardcoded fallback instantly, then replaces with AI response when available. Guest users use hardcoded only. `encouraging` mascot state added. tsc ✅ |
 | Sprint Z "Session Log + S-7 + Rooms" | pending | (1) `/history` route — `HistoryPage.tsx`: session timeline grouped by date (duration/phase/energy delta emojis), summary strip (total sessions/min/flow count). Linked from ProgressPage "Session Log →". (2) S-7 Anti-scroll friction — `SessionFrictionNudge` in AppShell: 5s auto-dismiss nudge when user navigates away from /focus during active session. (3) Lazy `/history` route in App.tsx. tsc ✅ |
 | Sprint Y "Task Reordering" | pending | Drag-to-reorder tasks in NOW and NEXT pools. `SortableTaskCard` wrapper + `DndContext`/`SortableContext` in TasksPage. `reorderPool(pool, ordered[])` in store updates `position`. TouchSensor with 200ms delay. "hold to reorder" hint in header. tsc ✅ |
 | Sprint X "Focus Rooms" | pending | Supabase Realtime presence rooms (S-3/S-4/S-11). `useFocusRoom` hook: create (4-char code) / join / broadcast phase / leave. `FocusRoomSheet` bottom sheet: create/join UI, copy code, live peer list with phase dots. In-session: replaces Ambient Orbit with "🤝 N in room" peer indicators + S-11 anonymous encouragement text. No DB table needed. tsc ✅ |
@@ -145,6 +146,7 @@ Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ `4f3bec1`. Status: **p
 | `recovery-message` | AI welcome back message after 72h+ (accepts seasonalMode context) |
 | `weekly-insight` | AI weekly summary from session data (accepts seasonalMode context) |
 | `classify-voice-input` | AI routes voice → task / idea / reminder (⚠️ defined, UI wiring pending) |
+| `mochi-respond` | AI Mochi mascot — personalized messages from psychotype + behavior profile + ADHD signals. 10/day free, unlimited pro. Gemini 2.5 Flash, 8s timeout, 0.9 temp. |
 | `gdpr-export` | JSON data export |
 | `gdpr-delete` | Full account deletion |
 
@@ -190,6 +192,13 @@ Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ `4f3bec1`. Status: **p
 - **TaskCard:** React.memo with custom comparator (id/status/title/dueDate/difficulty). 🔔 badge when reminder active. 📅 due date pill.
 - **Performance:** useMemo on filtered task lists in HomePage + TasksPage. React.memo on TaskCard.
 - **Accessibility:** EnergyPicker aria-label+aria-pressed. Fab aria-label+focus-visible ring. CollapsibleSection aria-expanded+aria-label.
+
+## Architecture (Sprint AA additions)
+- **Google OAuth:** `AuthScreen.tsx` — "Continue with Google" button using `supabase.auth.signInWithOAuth({ provider: 'google' })`. Consent persisted to localStorage before redirect (same pattern as magic link). `prompt: 'select_account'` query param forces Google account picker. Requires: Supabase Dashboard → Authentication → Providers → Google (enable + set OAuth credentials). `googleLoading` state prevents double-clicks.
+- **User Behavior Memory:** `src/shared/hooks/useUserBehavior.ts` — `useUserBehavior(sessions: FocusSessionRow[]): UserBehaviorProfile`. Computes from existing focus_sessions: avgSessionMinutes, flowRate, struggleDropRate (0-1), peakHour, avgEnergy, energyTrend (improving/stable/declining from first-5 vs last-5 energy_after), completedToday (from store pools), recentStruggles (human-readable string combining up to 4 patterns: struggle drop, short sessions, low flow rate, declining energy). Memoized on [sessions, pools].
+- **AI Mochi (mochi-respond):** `supabase/functions/mochi-respond/index.ts` — Gemini 2.5 Flash edge function. Receives trigger + full user context (psychotype, ADHD signals, behavior profile, seasonal mode). Returns `{ message, mascotState }`. System prompt positions Mochi as warm ADHD-aware companion (not coach, not therapist). Psychotype-specific tone guidance. 8s timeout, 0.9 temperature, 150 max tokens. Rate limit: 10/day free. Structured output: `MESSAGE: .../STATE: ...` format with parsing.
+- **MochiSessionCompanion upgrade:** Shows hardcoded fallback message immediately on trigger, then fires async AI request. If AI responds before bubble is dismissed (8s window), replaces the text seamlessly via `setActiveBubble` callback. Guest users → hardcoded only (no API call). New `behaviorProfile` prop fed from `useUserBehavior` in FocusScreen.
+- **Mascot `encouraging` state:** `src/shared/ui/Mascot.tsx` — new visual state: warm purple+teal gradient with teal glow, cheeks visible, wider smile. Used by AI Mochi for comeback/struggle triggers.
 
 ## Architecture (Sprints X–Z additions)
 - **Focus Rooms (Sprint X):** `src/shared/hooks/useFocusRoom.ts` — `useFocusRoom()` hook manages Supabase Realtime channel `focus-room:{code}` with presence protocol. States: idle/connecting/connected/error. `create()` → 4-char code via `Math.random().toString(36)`. `join(code)` → subscribes. `broadcast(phase)` → `channel.track({ phase })`. `leave()` → `untrack` + `removeChannel`. `src/features/focus/FocusRoomSheet.tsx` — bottom sheet with create/join/copy-code UI and live peer list. FocusScreen: "🤝 Focus with someone" button (idle state) → opens sheet. Room active chip shows peer count. In-session: peer phase dots + S-11 encouragement text replaces Ambient Orbit pill when room active.
@@ -291,8 +300,10 @@ Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ `4f3bec1`. Status: **p
 - **Server-side push (v2)** — SW showNotification works when tab is in background (Sprint F). Full push when app is closed needs VAPID keys + Supabase cron.
 - **Stripe integration** — subscriptionTier exists in store, ProBanner UI removed (Sprint A). Zero payment logic. Restore ProBanner when Stripe ready.
 - **classify-voice-input** — edge function written + wired in AddTaskModal. Unconfirmed in production (`supabase functions list` to verify).
-- **Social layer** — S-2/S-3/S-4 require Supabase Realtime design (separate sprint).
+- ~~**Social layer**~~ ✅ Sprint X — Focus Rooms via Supabase Realtime presence.
 - **Health signals** — sleepQuality, chronotype, medicationTime removed from UI (Sprint A). Store fields remain. Re-add when wired to recommendations.
+- **Google OAuth setup** — Code ready (Sprint AA). Requires: Supabase Dashboard → Authentication → Providers → Google → Enable + set Client ID/Secret from Google Cloud Console.
+- **user_behavior table** — Schema defined in types/database.ts. `useUserBehavior` hook computes behavior profile client-side. Server-side aggregation (populating `user_behavior` table via cron) is a future optimization.
 
 ## Remaining P2 Backlog (not yet implemented)
 - ~~O-6: Expanded ADHD signal~~ ✅ Sprint M
