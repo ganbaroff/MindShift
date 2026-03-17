@@ -44,6 +44,9 @@ const LazyShutdownRitual = lazy(() =>
 const LazyMonthlyReflection = lazy(() =>
   import('@/features/focus/MonthlyReflection').then(m => ({ default: m.MonthlyReflection }))
 )
+const LazyWeeklyPlanning = lazy(() =>
+  import('@/features/focus/WeeklyPlanning').then(m => ({ default: m.WeeklyPlanning }))
+)
 
 export default function App() {
   const {
@@ -54,10 +57,12 @@ export default function App() {
     reducedStimulation,
     shutdownShownDate, setShutdownShownDate,
     monthlyReflectionShownMonth, setMonthlyReflectionShownMonth,
+    weeklyPlanShownWeek, setWeeklyPlanShownWeek,
   } = useStore()
   const [showContextRestore, setShowContextRestore] = useState(false)
   const [showShutdown, setShowShutdown] = useState(false)
   const [showMonthly, setShowMonthly] = useState(false)
+  const [showWeeklyPlan, setShowWeeklyPlan] = useState(false)
 
   useEffect(() => {
     document.documentElement.setAttribute(
@@ -169,6 +174,32 @@ export default function App() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onboardingCompleted])
 
+  // Weekly planning ritual — Sunday 18pm+ or Monday before noon, once per ISO week
+  useEffect(() => {
+    if (!onboardingCompleted) return
+    const now = new Date()
+    const day = now.getDay()   // 0=Sun, 1=Mon
+    const hour = now.getHours()
+    const isSundayEvening = day === 0 && hour >= 18
+    const isMondayMorning  = day === 1 && hour < 12
+    if (!isSundayEvening && !isMondayMorning) return
+    // ISO week key: YYYY-Www  (ISO week starts Mon — for Sunday use next week's key)
+    const isoWeek = (() => {
+      const d = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()))
+      // For Sunday, advance 1 day so we get the upcoming week's key
+      if (now.getDay() === 0) d.setUTCDate(d.getUTCDate() + 1)
+      const dayNum = d.getUTCDay() || 7
+      d.setUTCDate(d.getUTCDate() + 4 - dayNum)
+      const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1))
+      const weekNum = Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7)
+      return `${d.getUTCFullYear()}-W${weekNum.toString().padStart(2, '0')}`
+    })()
+    if (weeklyPlanShownWeek === isoWeek) return
+    const timer = setTimeout(() => setShowWeeklyPlan(true), 2500)
+    return () => clearTimeout(timer)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onboardingCompleted])
+
   useOfflineSync()
   useTaskSync()
   useSessionHistory()
@@ -237,6 +268,24 @@ export default function App() {
                 setShowMonthly(false)
                 const currentMonth = new Date().toISOString().slice(0, 7)
                 setMonthlyReflectionShownMonth(currentMonth)
+              }} />
+            </Suspense>
+          )}
+
+          {/* Weekly planning — Sunday evening or Monday morning, once per ISO week */}
+          {!showRecovery && !showContextRestore && !showShutdown && !showMonthly && showWeeklyPlan && (
+            <Suspense fallback={null}>
+              <LazyWeeklyPlanning onDismiss={() => {
+                setShowWeeklyPlan(false)
+                // Compute the same ISO week key as the trigger useEffect
+                const now = new Date()
+                const d = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()))
+                if (now.getDay() === 0) d.setUTCDate(d.getUTCDate() + 1)
+                const dayNum = d.getUTCDay() || 7
+                d.setUTCDate(d.getUTCDate() + 4 - dayNum)
+                const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1))
+                const weekNum = Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7)
+                setWeeklyPlanShownWeek(`${d.getUTCFullYear()}-W${weekNum.toString().padStart(2, '0')}`)
               }} />
             </Suspense>
           )}

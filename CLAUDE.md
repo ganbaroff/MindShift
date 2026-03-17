@@ -22,6 +22,9 @@ Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ `4f3bec1`. Status: **p
 ## Sprint History
 | Sprint | Commit | What landed |
 |--------|--------|-------------|
+| Sprint W "Adaptive Focus Setup" | pending | FocusScreen setup: (1) Today's Progress strip — shows completedTotal + today's focused minutes + weeklyIntention chip. (2) Adaptive ADHD tip card — 4 variants from timeBlindness/emotionalReactivity; teal-tinted, non-blocking. Both hidden when no data yet. tsc ✅ |
+| Sprint V "Task Notes" | pending | `note?: string` on Task interface. AddTaskModal: collapsible "Add context" textarea (hidden by default, "+ Add context" link expands it). TaskCard: shows `📝 {note}` preview line (truncated 1 line) when note present. Memo comparator updated. tsc ✅ |
+| Sprint U "Weekly Planning Ritual" | pending | `WeeklyPlanning.tsx` (lazy z-50): 3 steps — wins recap with completedTotal + streak → intention chip picker (4 options) → closing affirmation. Triggers Sunday 18pm+ or Monday before noon, once per ISO week. Store: `weeklyPlanShownWeek: string\|null`, `weeklyIntention: string\|null` (both persisted). App.tsx: mutually exclusive with Recovery/ContextRestore/Shutdown/Monthly. Weekly intention displayed in FocusScreen setup strip (Sprint W). tsc ✅ |
 | Sprint T "Daily Brief" | `3bf45d4` | Personalised ADHD tip card on HomePage: 6 variants from timeBlindness/emotionalReactivity/medicationTime; shows top NOW task as "Start with →"; visible before 17h; dismiss-per-session; hidden in low-energy mode. tsc ✅ |
 | Sprint S "XP Levels + Focus Score" | `39cd4fb` | Named XP tiers (Seedling→Sprout→Grower→Bloomer→Flourisher…); Focus Health Score 0-100 composite card (sessions/consistency/tasks) with Planting/Growing/Thriving label + gradient bar. tsc ✅ |
 | Sprint R "Achievement Auto-Unlock" | `51a0fc6` | completeTask unlocks first_seed/task_sniper/micro_master/night_owl/morning_mind/gentle_start via get() post-set + notifyAchievement toast; ProgressPage achievement grid: click badge → description tooltip + unlock date; unlocked/total counter. tsc ✅ |
@@ -116,6 +119,7 @@ Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ `4f3bec1`. Status: **p
 | `src/features/home/widgets/LifetimeStatsWidget.tsx` | Cumulative progress bento widget |
 | `src/features/focus/MochiSessionCompanion.tsx` | Active body-double bubbles during sessions |
 | `src/features/focus/MonthlyReflection.tsx` | Monthly reflection ritual (B-5) — recap + intention + closing |
+| `src/features/focus/WeeklyPlanning.tsx` | Weekly planning ritual (Sprint U) — recap + intention chips + closing |
 | `src/shared/lib/i18n/en.ts` | i18n source strings (English, typed I18nKey) |
 | `src/shared/lib/i18n/ru.ts` | i18n Russian overrides (partial) |
 | `src/shared/lib/i18n/index.ts` | resolveLocale() + t() translation function |
@@ -183,6 +187,11 @@ Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ `4f3bec1`. Status: **p
 - **TaskCard:** React.memo with custom comparator (id/status/title/dueDate/difficulty). 🔔 badge when reminder active. 📅 due date pill.
 - **Performance:** useMemo on filtered task lists in HomePage + TasksPage. React.memo on TaskCard.
 - **Accessibility:** EnergyPicker aria-label+aria-pressed. Fab aria-label+focus-visible ring. CollapsibleSection aria-expanded+aria-label.
+
+## Architecture (Sprints U–W additions)
+- **Weekly Planning Ritual (Sprint U):** `src/features/focus/WeeklyPlanning.tsx` — lazy z-50. 3 steps: recap (completedTotal + currentStreak mini-cards) → intention chip picker (4 options: consistent/challenge/recover/explore) → closing affirmation. Auto-advances on chip pick (220ms). `finish()` calls `setWeeklyIntention('emoji label')`. Store: `weeklyPlanShownWeek: string|null`, `weeklyIntention: string|null` (both persisted). Trigger in `App.tsx`: Sunday 18pm+ or Monday before noon; ISO week key computed with Sunday→next-week offset. Mutually exclusive with all other overlays (lowest priority).
+- **Task Notes (Sprint V):** `note?: string` added to `Task` interface (`types/index.ts`). `AddTaskModal`: `showNote` state; initially shows "+ Add context (optional)" link; click expands animated textarea. `note.trim() || undefined` written to task. `TaskCard`: shows `📝 {note}` 1-line preview below title when present. Memo comparator includes `note` field.
+- **Adaptive Focus Setup (Sprint W):** `FocusScreen.tsx` setup screen: (1) Today's Progress strip — shows `completedTotal` + `todayFocusMin` (from weeklyStats.dailyMinutes[(day+6)%7]) + weeklyIntention chip; only renders when any value >0 or intention set. (2) Adaptive ADHD tip card — 4 variants from `timeBlindness` (often/sometimes) + `emotionalReactivity` (high/moderate); teal-tinted card; returns null for non-ADHD profiles. Both values come from new store destructure in `FocusScreen.tsx`.
 
 ## Architecture (Sprint N additions)
 - **O-9 Full surprise timer:** `ArcTimer.tsx` — `progressStroke = isSurprise ? 'transparent' : arcColor`. Progress arc becomes invisible; background ring track still renders as passive visual anchor. `FocusScreen.tsx` — wraps entire duration preset block in `{timerStyle !== 'surprise' && ...}`. In surprise mode renders "🎲 Surprise mode" info card instead. Digits were already hidden (Sprint K). Now truly time-blind: no arc, no digits, only orb.

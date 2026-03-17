@@ -79,11 +79,18 @@ function TaskCardInner({ task, index = 0, onDone, onPark }: TaskCardProps) {
 
       {/* Title */}
       <p
-        className="text-[15px] font-semibold mb-2.5 line-clamp-2"
+        className="text-[15px] font-semibold mb-1.5 line-clamp-2"
         style={{ color: '#E8E8F0' }}
       >
         {task.title}
       </p>
+
+      {/* Note preview — shown when task has context */}
+      {task.note && (
+        <p className="text-[11px] mb-2 line-clamp-1" style={{ color: '#5A5B72' }}>
+          📝 {task.note}
+        </p>
+      )}
 
       {/* Actions */}
       <div className="flex gap-2">
@@ -116,6 +123,7 @@ const TaskCard = memo(TaskCardInner, (prev, next) =>
   prev.task.id === next.task.id &&
   prev.task.status === next.task.status &&
   prev.task.title === next.task.title &&
+  prev.task.note === next.task.note &&
   prev.task.dueDate === next.task.dueDate &&
   prev.task.difficulty === next.task.difficulty &&
   prev.task.estimatedMinutes === next.task.estimatedMinutes &&

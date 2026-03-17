@@ -47,6 +47,8 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
   const nextNearFull = isFull && nextCount >= 4;
 
   const [title, setTitle] = useState('');
+  const [note, setNote] = useState('');
+  const [showNote, setShowNote] = useState(false);
   const [difficulty, setDifficulty] = useState<1 | 2 | 3>(1);
   const [minutes, setMinutes] = useState(SMART_DURATION[1]);
   const [dueDate, setDueDate] = useState<string | null>(null);
@@ -71,6 +73,8 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
   useEffect(() => {
     if (!open) {
       setTitle('');
+      setNote('');
+      setShowNote(false);
       setDifficulty(1);
       setMinutes(SMART_DURATION[1]);
       setDueDate(null);
@@ -192,6 +196,7 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
       taskType: 'task',
       reminderSentAt: null,
       repeat,
+      note: note.trim() || undefined,
     };
     addTask(newTask);
     // Auto-schedule reminder 15 min before due date if permission granted
@@ -306,6 +311,32 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
                   </motion.p>
                 )}
               </AnimatePresence>
+
+              {/* Optional note / context */}
+              <div>
+                {!showNote ? (
+                  <button
+                    type="button"
+                    onClick={() => setShowNote(true)}
+                    className="text-xs flex items-center gap-1 -mt-1"
+                    style={{ color: '#5A5B72' }}
+                  >
+                    <span>+</span> Add context (optional)
+                  </button>
+                ) : (
+                  <AnimatePresence>
+                    <motion.textarea
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      value={note}
+                      onChange={e => setNote(e.target.value)}
+                      placeholder="Any extra detail, links, or context…"
+                      rows={2}
+                      className="w-full bg-ms-raised rounded-xl px-4 py-3 text-body text-ms-text placeholder:text-ms-muted border border-transparent focus:border-ms-primary outline-none transition-colors resize-none text-[13px]"
+                    />
+                  </AnimatePresence>
+                )}
+              </div>
 
               {/* Difficulty */}
               <div>
