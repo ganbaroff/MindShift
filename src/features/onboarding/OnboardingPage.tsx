@@ -13,7 +13,7 @@
  * sample tasks, navigate back on finish instead of to '/'.
  */
 import { useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import EnergyPicker from '@/components/EnergyPicker';
 import { useStore } from '@/store';

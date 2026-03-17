@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import EnergyPicker from '@/components/EnergyPicker';
 import { useStore } from '@/store';
 import type { EnergyLevel, AudioPreset } from '@/types';
+import type { UITone } from '@/shared/lib/uiTone';
+import { TONE_LABELS, TONE_DESCRIPTIONS } from '@/shared/lib/uiTone';
 import { supabase } from '@/shared/lib/supabase';
 import { useAudioEngine } from '@/shared/hooks/useAudioEngine';
 
@@ -55,6 +57,7 @@ export default function SettingsPage() {
     medicationEnabled, setMedicationEnabled,
     medicationTime, setMedicationTime,
     dailyFocusGoalMin, setDailyFocusGoalMin,
+    uiTone, setUITone,
   } = useStore();
 
   const { play, stop, isPlaying, setVolume: setEngineVolume } = useAudioEngine();
@@ -421,6 +424,36 @@ export default function SettingsPage() {
                 {min}m
               </motion.button>
             ))}
+          </div>
+        </Section>
+
+        {/* Interface Style — age-adaptive UI tone override */}
+        <Section label="Interface Style">
+          <div className="grid grid-cols-2 gap-1.5">
+            {(['neutral', 'gen_z', 'millennial', 'gen_x'] as UITone[]).map(tone => {
+              const sel = uiTone === tone;
+              return (
+                <motion.button
+                  key={tone}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => setUITone(tone)}
+                  className="p-2.5 rounded-xl text-left"
+                  style={{
+                    backgroundColor: sel ? 'rgba(123,114,255,0.15)' : '#252840',
+                    borderWidth: sel ? 1.5 : 1,
+                    borderStyle: 'solid',
+                    borderColor: sel ? '#7B72FF' : 'rgba(255,255,255,0.06)',
+                  }}
+                >
+                  <p className="text-[13px] font-semibold" style={{ color: sel ? '#7B72FF' : '#E8E8F0' }}>
+                    {TONE_LABELS[tone]}
+                  </p>
+                  <p className="text-[10px] mt-0.5" style={{ color: '#8B8BA7' }}>
+                    {TONE_DESCRIPTIONS[tone]}
+                  </p>
+                </motion.button>
+              );
+            })}
           </div>
         </Section>
 

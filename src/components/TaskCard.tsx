@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { DIFFICULTY_MAP } from '@/types';
 import type { Task } from '@/types';
 import { reminders } from '@/shared/lib/reminders';
