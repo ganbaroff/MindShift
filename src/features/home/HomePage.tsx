@@ -60,10 +60,12 @@ export default function HomePage() {
     currentStreak, longestStreak,
     dailyFocusGoalMin,
     goalCelebratedDate, setGoalCelebratedDate,
+    timeBlindness, emotionalReactivity, medicationEnabled, medicationTime,
   } = useStore();
 
   const [showAddTask, setShowAddTask] = useState(false);
   const [mochiMsg, setMochiMsg] = useState<{ text: string; emoji: string } | null>(null);
+  const [briefDismissed, setBriefDismissed] = useState(false);
   const prevEnergy = useRef<EnergyLevel>(energyLevel);
 
   const nowTasks = useMemo(() => nowPool.filter(t => t.status === 'active'), [nowPool]);
@@ -100,6 +102,20 @@ export default function HomePage() {
   // ── Invisible streak ─────────────────────────────────────────────────────────
   // Research #3: show only when growing — celebrate consistency, never shame gaps.
   const showStreak = currentStreak >= 2;
+
+  // ── Daily brief (Sprint T) ────────────────────────────────────────────────────
+  // A personalised tip based on the user's ADHD profile, shown once per session.
+  // Visible in the morning (before 12) or afternoon; dismissed by user.
+  const briefTip = useMemo(() => {
+    if (timeBlindness === 'often') return { emoji: '⏰', text: 'Time blindness day? Set one visible timer before you start.' }
+    if (timeBlindness === 'sometimes') return { emoji: '⏰', text: 'Check the clock before diving in — surprises are harder to handle today.' }
+    if (emotionalReactivity === 'high') return { emoji: '🛡️', text: 'High-reactivity mode: protect your first 30 min from interruptions.' }
+    if (emotionalReactivity === 'moderate') return { emoji: '🌿', text: 'Start slow, build momentum — emotions lead focus today.' }
+    if (medicationEnabled && medicationTime === 'morning') return { emoji: '⚡', text: 'Morning window open — this is your sharpest hour.' }
+    return { emoji: '🎯', text: 'Pick one task you\'d regret not starting. Just one.' }
+  }, [timeBlindness, emotionalReactivity, medicationEnabled, medicationTime])
+  const topNowTask = nowTasks[0] ?? null
+  const showBrief = !briefDismissed && hour < 17 && !isLowEnergy
 
   // ── Daily focus goal progress (P-1) ──────────────────────────────────────────
   // dailyMinutes[0]=Mon…[6]=Sun; today's index from JS getDay (0=Sun)
@@ -189,6 +205,47 @@ export default function HomePage() {
                   )}
                 </div>
               </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Daily Brief (Sprint T) — personalised ADHD tip + top task */}
+        <AnimatePresence>
+          {showBrief && (
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, height: 0 }}
+              className="rounded-2xl p-3"
+              style={{ backgroundColor: '#1E2136', border: '1px solid rgba(123,114,255,0.12)' }}
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-start gap-2.5 flex-1 min-w-0">
+                  <span className="text-[18px] shrink-0">{briefTip.emoji}</span>
+                  <p className="text-[13px] leading-relaxed" style={{ color: '#E8E8F0' }}>
+                    {briefTip.text}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setBriefDismissed(true)}
+                  className="text-[11px] shrink-0 mt-0.5"
+                  style={{ color: '#8B8BA7' }}
+                  aria-label="Dismiss daily brief"
+                >
+                  ✕
+                </button>
+              </div>
+              {topNowTask && (
+                <div
+                  className="mt-2 pt-2 flex items-center gap-2"
+                  style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}
+                >
+                  <span className="text-[11px]" style={{ color: '#8B8BA7' }}>Start with →</span>
+                  <span className="text-[12px] font-medium truncate" style={{ color: '#7B72FF' }}>
+                    {topNowTask.title}
+                  </span>
+                </div>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
