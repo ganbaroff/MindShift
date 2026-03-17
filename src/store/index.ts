@@ -7,6 +7,7 @@ import {
   VR_MULTIPLIER_JACKPOT, VR_MULTIPLIER_BONUS, VR_MULTIPLIER_BASE,
 } from '@/shared/lib/constants'
 import { idbStorage } from '@/shared/lib/idbStorage'
+import { notifyAchievement } from '@/shared/lib/notify'
 
 // ── Psychotype derivation ─────────────────────────────────────────────────────
 // Derives a personality profile from onboarding choices.
@@ -275,13 +276,18 @@ export const useStore = create<AppStore>()(
           return { somedayPool: [...s.somedayPool, task] }
         }),
 
-        completeTask: (taskId) => set((s) => {
+        completeTask: (taskId) => {
+          // Snapshot pre-set state for achievement checks (set() is sync in Zustand)
+          const energyBefore = get().energyLevel
+          let didComplete = false
+          set((s) => {
           const now = new Date().toISOString()
           const complete = (tasks: Task[]) =>
             tasks.map(t => t.id === taskId ? { ...t, status: 'completed' as const, completedAt: now } : t)
           const completedTask = [...s.nowPool, ...s.nextPool, ...s.somedayPool]
             .find(t => t.id === taskId && t.status === 'active')
           const wasActive = !!completedTask
+          if (wasActive) didComplete = true
 
           // Invisible streak tracking — Research #3
           const today = new Date().toISOString().split('T')[0]
@@ -325,7 +331,26 @@ export const useStore = create<AppStore>()(
             completedTotal: wasActive ? s.completedTotal + 1 : s.completedTotal,
             ...streakUpdate,
           }
-        }),
+          })
+
+          // ── Achievement checks (post-set via get()) ────────────────────────────
+          if (!didComplete) return
+          const s2 = get()
+          const tryUnlock = (key: string) => {
+            if (s2.hasAchievement(key)) return
+            s2.unlockAchievement(key)
+            const def = ACHIEVEMENT_DEFINITIONS.find(a => a.key === key)
+            if (def) notifyAchievement(def.name, def.emoji, def.description)
+          }
+          const newTotal = s2.completedTotal
+          const hour = new Date().getHours()
+          if (newTotal === 1)  tryUnlock('first_seed')
+          if (newTotal === 10) tryUnlock('task_sniper')
+          if (newTotal === 50) tryUnlock('micro_master')
+          if (hour >= 21)      tryUnlock('night_owl')
+          if (hour < 9)        tryUnlock('morning_mind')
+          if (energyBefore <= 2) tryUnlock('gentle_start')
+        },
 
         snoozeTask: (taskId) => set((s) => {
           const task = s.nowPool.find(t => t.id === taskId)
