@@ -23,11 +23,17 @@ export function notifyXPBonus(amount: number): void {
   })
 }
 
-export function notifyAchievement(name: string, emoji: string, description: string): void {
+export function notifyAchievement(
+  name: string,
+  emoji: string,
+  description: string,
+  onShare?: () => void,
+): void {
   hapticWow()
   toast(`${emoji} ${name}`, {
     description,
     duration: 5000,
+    action: onShare ? { label: 'Share', onClick: onShare } : undefined,
   })
 }
 

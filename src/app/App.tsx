@@ -20,6 +20,7 @@ import { computeBurnoutScore, deriveBehaviors } from '@/shared/lib/burnout'
 const CONSENT_PENDING_KEY = 'ms_consent_pending'
 
 // ── Lazy routes — Lovable redesign pages ───────────────────────────────────────
+const PreviewScreen    = lazy(() => import('@/features/preview/PreviewScreen'))
 const AuthScreen       = lazy(() => import('@/features/auth/AuthScreen'))
 const OnboardingPage   = lazy(() => import('@/features/onboarding/OnboardingPage'))
 const HomePage         = lazy(() => import('@/features/home/HomePage'))
@@ -75,6 +76,8 @@ export default function App() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       if (!data.session) {
+        // If user explicitly signed out, don't auto-create guest — let them stay on /auth
+        if (localStorage.getItem('ms_signed_out')) return
         const guestId = localStorage.getItem('ms_guest_id') ?? `guest_${crypto.randomUUID()}`
         localStorage.setItem('ms_guest_id', guestId)
         setUser(guestId, '')
@@ -84,6 +87,7 @@ export default function App() {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session?.user) {
+        localStorage.removeItem('ms_signed_out')
         setUser(session.user.id, session.user.email ?? '')
         updateLastSession()
         try {
@@ -322,6 +326,7 @@ export default function App() {
           )}
 
           <Routes>
+            <Route path="/preview"       element={<PreviewScreen />} />
             <Route path="/auth"          element={<AuthScreen />} />
             <Route path="/privacy"       element={<PrivacyPage />} />
             <Route path="/terms"         element={<TermsPage />} />

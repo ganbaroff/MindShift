@@ -13,16 +13,17 @@
  * Step 3: "New month, fresh start 🌱" — closing, auto-dismiss 3s.
  */
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { useStore } from '@/store'
+import { ShareCard } from '@/shared/ui/ShareCard'
 
 interface Props {
   onDismiss: () => void
 }
 
-type Step = 'recap' | 'intention' | 'close'
+type Step = 'wrapped' | 'recap' | 'intention' | 'close'
 
 const MONTH_NAMES = [
   'January','February','March','April','May','June',
@@ -42,13 +43,19 @@ const CLOSING_MESSAGES = [
 ]
 
 export function MonthlyReflection({ onDismiss }: Props) {
-  const { completedTotal, currentStreak, longestStreak, setMonthlyReflectionShownMonth } = useStore()
+  const { completedTotal, currentStreak, longestStreak, xpTotal, achievements, setMonthlyReflectionShownMonth } = useStore()
   const { t, shouldAnimate } = useMotion()
-  const [step, setStep] = useState<Step>('recap')
+  const [step, setStep] = useState<Step>('wrapped')
   const [intention, setIntention] = useState('')
+  const [showShareCard, setShowShareCard] = useState(false)
   const [closing] = useState(
     () => CLOSING_MESSAGES[Math.floor(Math.random() * CLOSING_MESSAGES.length)]
   )
+
+  const unlockedBadges = useMemo(() => achievements.filter(a => a.unlockedAt), [achievements])
+  const topBadge = useMemo(() => unlockedBadges.length > 0
+    ? unlockedBadges[unlockedBadges.length - 1]
+    : null, [unlockedBadges])
 
   const now = new Date()
   const monthName = MONTH_NAMES[now.getMonth()]
@@ -92,7 +99,7 @@ export function MonthlyReflection({ onDismiss }: Props) {
         <div className="relative max-w-sm mx-auto w-full flex flex-col gap-8">
           {/* Step dots */}
           <div className="flex justify-center gap-2">
-            {(['recap', 'intention', 'close'] as Step[]).map((s, i) => (
+            {(['wrapped', 'recap', 'intention', 'close'] as Step[]).map((s, i) => (
               <motion.div
                 key={s}
                 className="rounded-full"
@@ -101,7 +108,7 @@ export function MonthlyReflection({ onDismiss }: Props) {
                   height: 6,
                   backgroundColor:
                     step === s ? '#4ECDC4'
-                    : (['recap','intention','close'].indexOf(step) > i) ? '#7B72FF'
+                    : (['wrapped','recap','intention','close'].indexOf(step) > i) ? '#7B72FF'
                     : 'rgba(255,255,255,0.10)',
                 }}
                 transition={{ duration: 0.3 }}
@@ -110,6 +117,91 @@ export function MonthlyReflection({ onDismiss }: Props) {
           </div>
 
           <AnimatePresence mode="wait">
+            {/* ── Step 0: Wrapped ────────────────────────────────────────── */}
+            {step === 'wrapped' && (
+              <motion.div
+                key="wrapped"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, y: -16 }}
+                transition={{ ...t('expressive'), duration: 0.4 }}
+                className="flex flex-col gap-6"
+              >
+                <div className="text-center">
+                  <p className="text-4xl mb-3">✨</p>
+                  <h2 className="text-xl font-semibold" style={{ color: '#E8E8F0' }}>
+                    Your {prevMonthName} Wrapped
+                  </h2>
+                  <p className="text-sm mt-2" style={{ color: '#8B8BA7' }}>
+                    Here is what you built last month
+                  </p>
+                </div>
+
+                {/* Stats grid */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div
+                    className="flex flex-col items-center p-3 rounded-2xl"
+                    style={{ background: '#1E2136', border: '1px solid rgba(123,114,255,0.12)' }}
+                  >
+                    <span className="text-2xl font-bold" style={{ color: '#7B72FF' }}>{xpTotal}</span>
+                    <span className="text-[11px] mt-0.5 text-center" style={{ color: '#8B8BA7' }}>total XP</span>
+                  </div>
+                  <div
+                    className="flex flex-col items-center p-3 rounded-2xl"
+                    style={{ background: '#1E2136', border: '1px solid rgba(78,205,196,0.12)' }}
+                  >
+                    <span className="text-2xl font-bold" style={{ color: '#4ECDC4' }}>{completedTotal}</span>
+                    <span className="text-[11px] mt-0.5 text-center" style={{ color: '#8B8BA7' }}>tasks done</span>
+                  </div>
+                  <div
+                    className="flex flex-col items-center p-3 rounded-2xl"
+                    style={{ background: '#1E2136', border: '1px solid rgba(78,205,196,0.12)' }}
+                  >
+                    <span className="text-2xl font-bold" style={{ color: '#4ECDC4' }}>{Math.max(currentStreak, longestStreak)}</span>
+                    <span className="text-[11px] mt-0.5 text-center" style={{ color: '#8B8BA7' }}>best streak 🔥</span>
+                  </div>
+                  <div
+                    className="flex flex-col items-center p-3 rounded-2xl"
+                    style={{ background: '#1E2136', border: '1px solid rgba(123,114,255,0.12)' }}
+                  >
+                    <span className="text-2xl font-bold" style={{ color: '#7B72FF' }}>{unlockedBadges.length}</span>
+                    <span className="text-[11px] mt-0.5 text-center" style={{ color: '#8B8BA7' }}>badges earned</span>
+                  </div>
+                </div>
+
+                {/* Top badge highlight */}
+                {topBadge && (
+                  <div
+                    className="flex items-center gap-3 px-4 py-3 rounded-2xl"
+                    style={{ background: 'rgba(123,114,255,0.08)', border: '1px solid rgba(123,114,255,0.15)' }}
+                  >
+                    <span className="text-2xl">{topBadge.emoji}</span>
+                    <div>
+                      <p className="text-sm font-medium" style={{ color: '#E8E8F0' }}>{topBadge.name}</p>
+                      <p className="text-xs" style={{ color: '#8B8BA7' }}>Latest badge</p>
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex flex-col gap-3">
+                  <button
+                    onClick={() => setShowShareCard(true)}
+                    className="w-full py-4 rounded-2xl font-semibold text-base"
+                    style={{ background: '#7B72FF', color: '#FFFFFF' }}
+                  >
+                    Share your wrapped ✨
+                  </button>
+                  <button
+                    onClick={() => setStep('recap')}
+                    className="w-full py-3 text-sm"
+                    style={{ color: '#8B8BA7' }}
+                  >
+                    Continue →
+                  </button>
+                </div>
+              </motion.div>
+            )}
+
             {/* ── Step 1: Recap ──────────────────────────────────────────── */}
             {step === 'recap' && (
               <motion.div
@@ -285,6 +377,26 @@ export function MonthlyReflection({ onDismiss }: Props) {
           </AnimatePresence>
         </div>
       </motion.div>
+
+      {/* Share Card overlay */}
+      {showShareCard && topBadge && (
+        <ShareCard
+          emoji={topBadge.emoji}
+          title={`${prevMonthName} Wrapped`}
+          subtitle={`${completedTotal} tasks · ${Math.max(currentStreak, longestStreak)} day streak`}
+          stat={`${xpTotal} XP · ${unlockedBadges.length} badges`}
+          onClose={() => setShowShareCard(false)}
+        />
+      )}
+      {showShareCard && !topBadge && (
+        <ShareCard
+          emoji="✨"
+          title={`${prevMonthName} Wrapped`}
+          subtitle={`${completedTotal} tasks completed`}
+          stat={`${xpTotal} XP earned`}
+          onClose={() => setShowShareCard(false)}
+        />
+      )}
     </AnimatePresence>
   )
 }

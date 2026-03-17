@@ -91,6 +91,15 @@ test.describe('Auth screen', () => {
   })
 
   test('shows "magic link on its way" after submitting', async ({ page }) => {
+    // Ensure OTP endpoint is mocked for POST as well
+    await page.route('**/auth/v1/otp**', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ message_id: 'e2e-mock-message' }),
+      })
+    )
+
     const emailInput = page.getByPlaceholder('your@email.com')
     await emailInput.fill('user@example.com')
     await clickConsentCheckbox(page)
@@ -120,6 +129,14 @@ test.describe('Auth screen', () => {
   test('MindShift branding is visible', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'MindShift' })).toBeVisible()
     await expect(page.getByText(/Focus made kind/)).toBeVisible()
+  })
+
+  test('"Continue without account" link is visible', async ({ page }) => {
+    await expect(page.getByText(/Continue without account/)).toBeVisible()
+  })
+
+  test('Google sign-in button is visible', async ({ page }) => {
+    await expect(page.getByRole('button', { name: /Continue with Google/i })).toBeVisible()
   })
 })
 
