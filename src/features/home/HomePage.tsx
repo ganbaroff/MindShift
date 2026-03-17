@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import TaskCard from '@/components/TaskCard';
 import MochiAvatar from '@/components/MochiAvatar';
 import EnergyPicker from '@/components/EnergyPicker';
@@ -9,6 +9,7 @@ import { useStore } from '@/store';
 import type { EnergyLevel } from '@/types';
 import { getNowPoolMax, APP_MODE_CONFIG, ENERGY_EMOJI } from '@/shared/lib/constants';
 import { useI18n } from '@/shared/hooks/useI18n';
+import { useUITone } from '@/shared/hooks/useUITone';
 import { toast } from 'sonner';
 
 // ── Mochi energy reaction messages ────────────────────────────────────────────
@@ -63,6 +64,7 @@ export default function HomePage() {
     timeBlindness, emotionalReactivity, medicationEnabled, medicationTime,
   } = useStore();
 
+  const { copy } = useUITone();
   const [showAddTask, setShowAddTask] = useState(false);
   const [mochiMsg, setMochiMsg] = useState<{ text: string; emoji: string } | null>(null);
   const [briefDismissed, setBriefDismissed] = useState(false);
@@ -151,7 +153,7 @@ export default function HomePage() {
         <div>
           <h1 className="text-[24px] font-bold" style={{ color: '#E8E8F0' }}>{greeting}</h1>
           <p className="text-[13px] mt-0.5" style={{ color: '#8B8BA7' }}>
-            {isLowEnergy ? 'Just one thing today — that\'s enough 🌿' : homeSubtitle}
+            {isLowEnergy ? copy.lowEnergyNudge : homeSubtitle}
           </p>
         </div>
         {/* Mochi with speech bubble */}
@@ -200,7 +202,7 @@ export default function HomePage() {
                 <span className="text-[20px]">🔥</span>
                 <div>
                   <p className="text-[13px] font-semibold" style={{ color: '#F59E0B' }}>
-                    {currentStreak} day{currentStreak !== 1 ? 's' : ''} — you keep showing up
+                    {copy.streakGoing(currentStreak)}
                   </p>
                   {longestStreak > currentStreak && (
                     <p className="text-[11px]" style={{ color: '#8B8BA7' }}>Best: {longestStreak} days</p>

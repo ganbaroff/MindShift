@@ -9,7 +9,7 @@
  */
 
 import { useMemo } from 'react'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { useStore } from '@/store'
 import { ENERGY_EMOJI } from '@/shared/lib/constants'
 import { useSessionHistory } from '@/shared/hooks/useSessionHistory'

@@ -1,4 +1,4 @@
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { X, Mic, MicOff, Loader2 } from 'lucide-react';
 import { useStore } from '@/store';

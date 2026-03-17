@@ -8,7 +8,7 @@ import {
 } from '@/shared/lib/constants'
 import { idbStorage } from '@/shared/lib/idbStorage'
 import { notifyAchievement } from '@/shared/lib/notify'
-import { deriveUITone } from '@/shared/lib/uiTone'
+import { deriveUITone, getToneCopy } from '@/shared/lib/uiTone'
 
 // ── Psychotype derivation ─────────────────────────────────────────────────────
 // Derives a personality profile from onboarding choices.
@@ -165,9 +165,9 @@ interface PreferencesSlice {
   // Weekly intention — user's chosen focus area for the week (shown in FocusScreen)
   weeklyIntention: string | null
   setWeeklyIntention: (intention: string | null) => void
-  // UI Tone — Gen Z / Millennial / Neutral (auto-derived from signals, persisted for override)
-  uiTone: 'gen_z' | 'millennial' | 'neutral'
-  setUITone: (tone: 'gen_z' | 'millennial' | 'neutral') => void
+  // UI Tone — auto-derived from signals, user-overridable via Settings
+  uiTone: 'gen_z' | 'millennial' | 'gen_x' | 'neutral'
+  setUITone: (tone: 'gen_z' | 'millennial' | 'gen_x' | 'neutral') => void
 }
 
 interface GridSlice {
@@ -236,7 +236,7 @@ export const useStore = create<AppStore>()(
         }),
         setOnboardingCompleted: () => {
           const s = get()
-          const tone = deriveUITone(s.appMode, s.emotionalReactivity, s.timeBlindness)
+          const tone = deriveUITone(s.appMode, s.emotionalReactivity, s.timeBlindness, s.psychotype, s.seasonalMode)
           set({ onboardingCompleted: true, uiTone: tone })
         },
         setRecoveryShown: () => set({ recoveryShown: true }),
@@ -354,11 +354,12 @@ export const useStore = create<AppStore>()(
           // ── Achievement checks (post-set via get()) ────────────────────────────
           if (!didComplete) return
           const s2 = get()
+          const toneCopy = getToneCopy(s2.uiTone)
           const tryUnlock = (key: string) => {
             if (s2.hasAchievement(key)) return
             s2.unlockAchievement(key)
             const def = ACHIEVEMENT_DEFINITIONS.find(a => a.key === key)
-            if (def) notifyAchievement(def.name, def.emoji, def.description)
+            if (def) notifyAchievement(toneCopy.badgeUnlocked(def.name), def.emoji, def.description)
           }
           const newTotal = s2.completedTotal
           const hour = new Date().getHours()

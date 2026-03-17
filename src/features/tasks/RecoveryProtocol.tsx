@@ -8,6 +8,7 @@ import type { Task } from '@/types'
 import { RECOVERY_THRESHOLD_HOURS } from '@/shared/lib/constants'
 import { logError } from '@/shared/lib/logger'
 import { pushWelcomeBack } from '@/shared/lib/notify'
+import { useUITone } from '@/shared/hooks/useUITone'
 
 // ── Fallback messages (Research #7: identity-reinforcing, shame-free) ────────
 // Rules: no quantifying absence, no streaks, forward-looking, persona-voiced.
@@ -39,12 +40,11 @@ interface Props {
 export function RecoveryProtocol({ onDismiss }: Props) {
   const { archiveAllOverdue, addTask, nowPool, userId, lastSessionAt, xpTotal, email } = useStore()
   const { t } = useMotion()
+  const { copy } = useUITone()
   const [taskInput, setTaskInput] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [archivedCount, setArchivedCount] = useState(0)
-  const [welcomeMsg, setWelcomeMsg] = useState(
-    () => FALLBACK_MESSAGES[Math.floor(Math.random() * FALLBACK_MESSAGES.length)]
-  )
+  const [welcomeMsg, setWelcomeMsg] = useState(() => copy.recoveryWelcome)
   const [loadingAi, setLoadingAi] = useState(false)
   // Spiciness meter — Research #3 (Goblin Tools): "How overwhelmed are you?"
   // 1 = very overwhelmed (max granularity), 5 = barely overwhelmed (fewer steps)

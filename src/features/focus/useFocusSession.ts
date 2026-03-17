@@ -23,6 +23,7 @@ import {
   pushFocusComplete, pushRecoveryEnd,
 } from '@/shared/lib/notify'
 import { hapticDone } from '@/shared/lib/haptic'
+import { getToneCopy } from '@/shared/lib/uiTone'
 import { ACHIEVEMENT_DEFINITIONS } from '@/types'
 import {
   TIMER_PRESETS,
@@ -299,11 +300,12 @@ export function useFocusSession() {
     if (elapsedMin >= 1) pushFocusComplete(elapsedMin)
 
     if (wasCompleted) {
+      const toneCopy = getToneCopy(useStore.getState().uiTone)
       const tryUnlock = (key: string) => {
         if (!hasAchievement(key)) {
           unlockAchievement(key)
           const def = ACHIEVEMENT_DEFINITIONS.find(a => a.key === key)
-          if (def) notifyAchievement(def.name, def.emoji, def.description)
+          if (def) notifyAchievement(toneCopy.badgeUnlocked(def.name), def.emoji, def.description)
         }
       }
       if (durationSecRef.current >= 52 * 60) tryUnlock('flow_rider')
