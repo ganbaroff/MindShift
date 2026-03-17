@@ -156,6 +156,12 @@ interface PreferencesSlice {
   // Prevents re-celebrating the same day's goal completion
   goalCelebratedDate: string | null
   setGoalCelebratedDate: (date: string) => void
+  // Weekly planning ritual — shown Sunday 18pm+ or Monday before noon, once per week
+  weeklyPlanShownWeek: string | null   // ISO week key: 'YYYY-Www'
+  setWeeklyPlanShownWeek: (week: string) => void
+  // Weekly intention — user's chosen focus area for the week (shown in FocusScreen)
+  weeklyIntention: string | null
+  setWeeklyIntention: (intention: string | null) => void
 }
 
 interface GridSlice {
@@ -564,6 +570,12 @@ export const useStore = create<AppStore>()(
         setDailyFocusGoalMin: (min) => set({ dailyFocusGoalMin: min }),
         goalCelebratedDate: null,
         setGoalCelebratedDate: (date) => set({ goalCelebratedDate: date }),
+
+        // Weekly planning ritual
+        weeklyPlanShownWeek: null,
+        setWeeklyPlanShownWeek: (week) => set({ weeklyPlanShownWeek: week }),
+        weeklyIntention: null,
+        setWeeklyIntention: (intention) => set({ weeklyIntention: intention }),
       }),
       {
         name: 'mindshift-store',
@@ -623,6 +635,8 @@ export const useStore = create<AppStore>()(
           monthlyReflectionShownMonth: s.monthlyReflectionShownMonth,
           dailyFocusGoalMin: s.dailyFocusGoalMin,
           goalCelebratedDate: s.goalCelebratedDate,
+          weeklyPlanShownWeek: s.weeklyPlanShownWeek,
+          weeklyIntention: s.weeklyIntention,
         }),
       }
     )

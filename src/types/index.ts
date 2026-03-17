@@ -27,6 +27,7 @@ export interface Task {
   taskType: 'task' | 'idea' | 'reminder'
   reminderSentAt: string | null   // when reminder notification was sent
   repeat: 'none' | 'daily' | 'weekly'  // auto-recreates task on completion
+  note?: string                         // optional context / extra detail
   /** @deprecated DEPRECATED: use difficulty (1|2|3) + DIFFICULTY_MAP instead (Sprint B A-2). */
   difficultyLevel?: 'easy' | 'medium' | 'hard'
 }

@@ -111,11 +111,31 @@ export default function FocusScreen() {
   } = session
 
   // ── Medication peak window (B-12) ──────────────────────────────────────────
-  const { medicationEnabled, medicationTime } = useStore()
+  const { medicationEnabled, medicationTime, timeBlindness, emotionalReactivity, weeklyIntention, weeklyStats, completedTotal } = useStore()
   const medPeakLabel = useMemo(
     () => medicationEnabled ? getMedPeakLabel(medicationTime ?? null) : null,
     [medicationEnabled, medicationTime],
   )
+
+  // ── Adaptive ADHD tip (W) ─────────────────────────────────────────────────
+  // Personalised, non-prescriptive tip based on the user's ADHD profile signals.
+  const adaptiveTip = useMemo<{ emoji: string; text: string } | null>(() => {
+    if (timeBlindness === 'often')
+      return { emoji: '⏰', text: 'Time slips fast for you — one visible timer is enough.' }
+    if (timeBlindness === 'sometimes')
+      return { emoji: '🕐', text: 'Check the clock before you start — then forget about it.' }
+    if (emotionalReactivity === 'high')
+      return { emoji: '🛡️', text: 'Block your first 15 min from interruptions. Start small.' }
+    if (emotionalReactivity === 'moderate')
+      return { emoji: '🌿', text: 'If distracted, pause and return. That counts too.' }
+    return null
+  }, [timeBlindness, emotionalReactivity])
+
+  // ── Today's progress strip (W) ────────────────────────────────────────────
+  const todayFocusMin = useMemo(() => {
+    const idx = (new Date().getDay() + 6) % 7 // Mon=0…Sun=6
+    return weeklyStats?.dailyMinutes?.[idx] ?? 0
+  }, [weeklyStats])
 
   // ── Nature Buffer ──────────────────────────────────────────────────────────
   if (screen === 'nature-buffer') {
@@ -310,6 +330,46 @@ export default function FocusScreen() {
             {energyLabel.text}
           </p>
         </div>
+
+        {/* Today's progress strip + weekly intention (W) */}
+        {(todayFocusMin > 0 || completedTotal > 0 || weeklyIntention) && (
+          <div
+            className="mx-5 mb-3 px-4 py-2.5 rounded-2xl flex items-center gap-3 flex-wrap"
+            style={{ background: 'var(--color-card)', border: '1px solid rgba(255,255,255,0.05)' }}
+          >
+            {completedTotal > 0 && (
+              <span className="text-[11px]" style={{ color: '#4ECDC4' }}>
+                ✓ {completedTotal} done all-time
+              </span>
+            )}
+            {todayFocusMin > 0 && (
+              <span className="text-[11px]" style={{ color: '#7B72FF' }}>
+                · {todayFocusMin}m focused today
+              </span>
+            )}
+            {weeklyIntention && (
+              <span
+                className="text-[11px] px-2 py-0.5 rounded-full ml-auto"
+                style={{ background: 'rgba(123,114,255,0.10)', color: '#C8C0FF' }}
+              >
+                {weeklyIntention}
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Adaptive ADHD tip (W) */}
+        {adaptiveTip && (
+          <div
+            className="mx-5 mb-4 px-4 py-2.5 rounded-2xl flex items-center gap-2"
+            style={{ background: 'rgba(78,205,196,0.06)', border: '1px solid rgba(78,205,196,0.12)' }}
+          >
+            <span className="text-base">{adaptiveTip.emoji}</span>
+            <p className="text-[12px] leading-relaxed" style={{ color: '#8B8BA7' }}>
+              {adaptiveTip.text}
+            </p>
+          </div>
+        )}
 
         {/* Interrupt bookmark anchor */}
         {savedBookmark && (

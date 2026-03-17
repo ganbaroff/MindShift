@@ -1,0 +1,234 @@
+/**
+ * WeeklyPlanning — Sunday/Monday planning ritual.
+ *
+ * Triggers once per week:
+ *   - Sunday 18:00+ : "end of week, let's plan what's next"
+ *   - Monday 00:00–11:59 : "new week, set your intention"
+ *
+ * 3 steps:
+ *   0 — Week recap: celebrate completedTotal + streak (warm, non-comparative)
+ *   1 — Pick ONE weekly intention from 4 chips (or skip)
+ *   2 — Closing affirmation: intention saved, first task CTA
+ *
+ * The chosen intention is persisted in store.weeklyIntention and shown
+ * as a subtle chip in FocusScreen setup (Sprint W).
+ */
+
+import { memo, useState } from 'react'
+import { motion, AnimatePresence } from 'motion/react'
+import { useMotion } from '@/shared/hooks/useMotion'
+import { useStore } from '@/store'
+
+interface WeeklyPlanningProps {
+  onDismiss: () => void
+}
+
+const INTENTIONS = [
+  { key: 'consistent',  emoji: '🌱', label: 'Stay consistent',     desc: 'Show up every day, even briefly' },
+  { key: 'challenge',   emoji: '🔥', label: 'Take on a challenge', desc: 'Push my edge a little further' },
+  { key: 'recover',     emoji: '🌊', label: 'Rest & recover',       desc: 'Gentle pace, recharge this week' },
+  { key: 'explore',     emoji: '🗺️', label: 'Follow curiosity',    desc: 'Explore without a fixed plan' },
+] as const
+
+type IntentionKey = typeof INTENTIONS[number]['key']
+
+const TOTAL_STEPS = 3
+
+export const WeeklyPlanning = memo(function WeeklyPlanning({ onDismiss }: WeeklyPlanningProps) {
+  const { shouldAnimate, t } = useMotion()
+  const { completedTotal, currentStreak, setWeeklyIntention } = useStore()
+
+  const [step, setStep] = useState(0)
+  const [chosen, setChosen] = useState<IntentionKey | null>(null)
+
+  const handleIntentionPick = (key: IntentionKey) => {
+    setChosen(key)
+    setTimeout(() => setStep(2), 220)
+  }
+
+  const handleSkip = () => {
+    setWeeklyIntention(null)
+    onDismiss()
+  }
+
+  const handleFinish = () => {
+    const intent = INTENTIONS.find(i => i.key === chosen)
+    setWeeklyIntention(intent ? `${intent.emoji} ${intent.label}` : null)
+    onDismiss()
+  }
+
+  // Choose a warm, non-comparative recap message based on count
+  const recapMsg =
+    completedTotal >= 50 ? "You've built something real here." :
+    completedTotal >= 20 ? "Look how far you've come." :
+    completedTotal >= 5  ? "You're getting into your stride." :
+    "Every task you finish is a win. That matters."
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center px-6"
+      style={{ background: 'rgba(15,17,32,0.96)', backdropFilter: 'blur(8px)' }}
+    >
+      {/* Step dots */}
+      <div className="flex gap-1.5 mb-8">
+        {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
+          <div
+            key={i}
+            className="rounded-full transition-all duration-300"
+            style={{
+              width: i === step ? 20 : 6,
+              height: 6,
+              background: i <= step ? '#7B72FF' : '#252840',
+            }}
+          />
+        ))}
+      </div>
+
+      <AnimatePresence mode="wait">
+        {/* Step 0 — Recap */}
+        {step === 0 && (
+          <motion.div
+            key="recap"
+            initial={shouldAnimate ? { opacity: 0, y: 24 } : {}}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -16 }}
+            transition={t()}
+            className="w-full max-w-xs text-center"
+          >
+            <div className="text-5xl mb-5">🌅</div>
+            <h2 className="text-2xl font-bold mb-2" style={{ color: '#E8E8F0' }}>
+              New week, fresh start
+            </h2>
+            <p className="text-sm leading-relaxed mb-8" style={{ color: '#8B8BA7' }}>
+              {recapMsg}
+            </p>
+
+            {/* Mini stats */}
+            <div className="flex gap-3 mb-8">
+              <div
+                className="flex-1 rounded-2xl p-3 text-center"
+                style={{ background: '#1E2136', border: '1px solid rgba(123,114,255,0.12)' }}
+              >
+                <p className="text-2xl font-bold" style={{ color: '#7B72FF' }}>{completedTotal}</p>
+                <p className="text-[11px] mt-0.5" style={{ color: '#8B8BA7' }}>tasks done</p>
+              </div>
+              {currentStreak >= 2 && (
+                <div
+                  className="flex-1 rounded-2xl p-3 text-center"
+                  style={{ background: '#1E2136', border: '1px solid rgba(78,205,196,0.12)' }}
+                >
+                  <p className="text-2xl font-bold" style={{ color: '#4ECDC4' }}>{currentStreak}</p>
+                  <p className="text-[11px] mt-0.5" style={{ color: '#8B8BA7' }}>day streak</p>
+                </div>
+              )}
+            </div>
+
+            <motion.button
+              whileTap={{ scale: 0.97 }}
+              onClick={() => setStep(1)}
+              className="w-full py-3.5 rounded-2xl font-semibold text-sm"
+              style={{
+                background: 'linear-gradient(135deg, #7B72FF, #8B7FF7)',
+                color: '#fff',
+                boxShadow: '0 8px 24px rgba(123,114,255,0.25)',
+              }}
+            >
+              Set my intention →
+            </motion.button>
+            <button
+              onClick={handleSkip}
+              className="mt-3 w-full py-2 text-xs"
+              style={{ color: '#5A5B72' }}
+            >
+              Skip for now
+            </button>
+          </motion.div>
+        )}
+
+        {/* Step 1 — Intention picker */}
+        {step === 1 && (
+          <motion.div
+            key="intention"
+            initial={shouldAnimate ? { opacity: 0, y: 24 } : {}}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -16 }}
+            transition={t()}
+            className="w-full max-w-xs"
+          >
+            <h2 className="text-xl font-bold mb-1 text-center" style={{ color: '#E8E8F0' }}>
+              What's your focus this week?
+            </h2>
+            <p className="text-[13px] mb-6 text-center" style={{ color: '#8B8BA7' }}>
+              Pick one — no wrong answers.
+            </p>
+
+            <div className="space-y-2">
+              {INTENTIONS.map(({ key, emoji, label, desc }) => (
+                <motion.button
+                  key={key}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => handleIntentionPick(key)}
+                  className="w-full text-left p-3.5 rounded-2xl flex items-center gap-3"
+                  style={{
+                    background: chosen === key ? 'rgba(123,114,255,0.15)' : '#1E2136',
+                    border: `1px solid ${chosen === key ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
+                  }}
+                >
+                  <span className="text-[26px]">{emoji}</span>
+                  <div className="min-w-0">
+                    <p className="text-[14px] font-semibold" style={{ color: chosen === key ? '#C8C0FF' : '#E8E8F0' }}>{label}</p>
+                    <p className="text-[11px] mt-0.5" style={{ color: '#8B8BA7' }}>{desc}</p>
+                  </div>
+                </motion.button>
+              ))}
+            </div>
+
+            <button
+              onClick={handleSkip}
+              className="mt-4 w-full py-2 text-xs text-center"
+              style={{ color: '#5A5B72' }}
+            >
+              Skip — I'll decide as I go
+            </button>
+          </motion.div>
+        )}
+
+        {/* Step 2 — Closing */}
+        {step === 2 && (
+          <motion.div
+            key="closing"
+            initial={shouldAnimate ? { opacity: 0, scale: 0.95 } : {}}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            transition={t()}
+            className="w-full max-w-xs text-center"
+          >
+            <div className="text-5xl mb-4">
+              {INTENTIONS.find(i => i.key === chosen)?.emoji ?? '🌱'}
+            </div>
+            <h2 className="text-xl font-bold mb-2" style={{ color: '#E8E8F0' }}>
+              {INTENTIONS.find(i => i.key === chosen)?.label ?? 'Intention set'}
+            </h2>
+            <p className="text-sm leading-relaxed mb-8" style={{ color: '#8B8BA7' }}>
+              You'll see this reminder when you start a focus session.
+              Small steps in this direction add up fast.
+            </p>
+
+            <motion.button
+              whileTap={{ scale: 0.97 }}
+              onClick={handleFinish}
+              className="w-full py-3.5 rounded-2xl font-semibold text-sm"
+              style={{
+                background: 'linear-gradient(135deg, #7B72FF, #4ECDC4)',
+                color: '#fff',
+                boxShadow: '0 8px 24px rgba(123,114,255,0.22)',
+              }}
+            >
+              Let's go 🌿
+            </motion.button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+})
