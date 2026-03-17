@@ -92,8 +92,44 @@ test.describe('Settings screen', () => {
     await expect(page.getByRole('button', { name: /Delete account/i })).toBeVisible()
   })
 
-  test('sign out button visible', async ({ authedPage: page }) => {
-    await expect(page.getByRole('button', { name: /Sign out/i })).toBeVisible()
+  test('sign out button visible and navigates to /auth', async ({ authedPage: page }) => {
+    const signOutBtn = page.getByRole('button', { name: /Sign out/i })
+    await expect(signOutBtn).toBeVisible()
+
+    // Mock the signOut endpoint
+    await page.route('**/auth/v1/logout', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: '{}' })
+    )
+
+    await signOutBtn.click()
+
+    // Should navigate to auth screen
+    await expect(page).toHaveURL(/\/auth/)
+    await expect(page.getByText("Welcome. Let's get started.")).toBeVisible()
+  })
+
+  test('delete account shows confirmation dialog', async ({ authedPage: page }) => {
+    const deleteBtn = page.getByRole('button', { name: /Delete account/i })
+    await expect(deleteBtn).toBeVisible()
+    await deleteBtn.click()
+
+    // Confirmation dialog appears
+    await expect(page.getByText(/permanently delete/i)).toBeVisible()
+    await expect(page.getByRole('button', { name: /Cancel/i })).toBeVisible()
+    await expect(page.getByRole('button', { name: /Yes, delete/i })).toBeVisible()
+
+    // Cancel hides the dialog
+    await page.getByRole('button', { name: /Cancel/i }).click()
+    await expect(page.getByText(/permanently delete/i)).not.toBeVisible()
+  })
+
+  test('export button is clickable', async ({ authedPage: page }) => {
+    const exportBtn = page.getByRole('button', { name: /Export/i })
+    await expect(exportBtn).toBeVisible()
+    // Click triggers download (edge function mocked in helpers)
+    await exportBtn.click()
+    // Button should still be visible (no crash)
+    await expect(exportBtn).toBeVisible()
   })
 
   test('Reminders section is visible', async ({ authedPage: page }) => {

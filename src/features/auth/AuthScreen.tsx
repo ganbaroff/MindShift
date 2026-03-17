@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'motion/react'
 import { Mail, ArrowRight, CheckCircle2 } from 'lucide-react'
 import { supabase } from '@/shared/lib/supabase'
@@ -319,11 +319,22 @@ function CheckStep({ email, onBack }: { email: string; onBack: () => void }) {
 // ── Main component ────────────────────────────────────────────────────────────
 export default function AuthScreen() {
   const { t } = useMotion()
+  const navigate = useNavigate()
   const [step, setStep]           = useState<Step>('email')
   const [email, setEmail]         = useState('')
   const [loading, setLoading]     = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
   const [consented, setConsented] = useState(false)
+
+  const handleContinueAsGuest = useCallback(() => {
+    localStorage.removeItem('ms_signed_out')
+    const guestId = `guest_${crypto.randomUUID()}`
+    localStorage.setItem('ms_guest_id', guestId)
+    // Store will pick up guest on next getSession check — navigate immediately
+    navigate('/')
+    // Force reload so App.tsx re-runs session check and creates guest user
+    window.location.reload()
+  }, [navigate])
 
   const handleGoogleSignIn = useCallback(async () => {
     if (!consented) return
@@ -339,6 +350,7 @@ export default function AuthScreen() {
       // localStorage unavailable — proceed anyway
     }
 
+    localStorage.removeItem('ms_signed_out')
     setGoogleLoading(true)
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
@@ -461,6 +473,18 @@ export default function AuthScreen() {
             Privacy Policy
           </Link>
         </motion.p>
+
+        {/* Continue as guest */}
+        <motion.button
+          onClick={handleContinueAsGuest}
+          className="text-[13px] mt-4 transition-opacity hover:opacity-80"
+          style={{ color: '#8B8BA7' }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ ...t(), delay: 0.5 }}
+        >
+          Continue without account →
+        </motion.button>
       </div>
 
       <div className="flex-1 min-h-[60px]" />

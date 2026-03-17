@@ -29,14 +29,14 @@ const PEER_EMOJIS = ['🌱', '🌊', '🔥', '🌙', '⚡', '🦋', '🌸', '�
 
 // Pre-written encouragement messages — S-11: feels peer-to-peer without needing it
 export const ROOM_ENCOURAGEMENTS = [
-  'You're doing great — keep going 🌿',
+  "You're doing great — keep going 🌿",
   'Stay with it. The flow is coming 🌊',
   'One minute at a time 💙',
   'Your focus is inspiring ✨',
-  'Almost there — you've got this 🔥',
+  "Almost there — you've got this 🔥",
   'The room is with you 🤝',
   'Deep work in progress 🧠',
-  'You showed up — that's already a win 🌱',
+  "You showed up — that's already a win 🌱",
 ]
 
 export interface RoomPeer {

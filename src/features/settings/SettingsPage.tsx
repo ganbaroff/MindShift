@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import EnergyPicker from '@/components/EnergyPicker';
 import { useStore } from '@/store';
 import type { EnergyLevel, AudioPreset } from '@/types';
@@ -47,6 +48,7 @@ export default function SettingsPage() {
     reducedStimulation, setReducedStimulation,
     subscriptionTier,
     email,
+    userId,
     signOut,
     focusAnchor, setFocusAnchor,
     audioVolume, setVolume: setStoreVolume,
@@ -80,8 +82,71 @@ export default function SettingsPage() {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
+    localStorage.removeItem('ms_guest_id');
+    localStorage.setItem('ms_signed_out', '1');
     signOut();
+    navigate('/auth');
   };
+
+  const isGuest = !userId || userId.startsWith('guest_')
+
+  // ── Delete account ───────────────────────────────────────────────────────────
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [deleteLoading, setDeleteLoading] = useState(false)
+
+  const handleDeleteAccount = async () => {
+    if (isGuest) {
+      // Guest users — just clear local data
+      localStorage.clear()
+      signOut()
+      navigate('/auth')
+      return
+    }
+    setDeleteLoading(true)
+    try {
+      const { error } = await supabase.functions.invoke('gdpr-delete', {
+        body: { confirmEmail: email },
+      })
+      if (error) throw error
+      await supabase.auth.signOut()
+      localStorage.clear()
+      signOut()
+      toast.success('Account deleted')
+      navigate('/auth')
+    } catch {
+      toast.error('Could not delete account. Try again later.')
+    } finally {
+      setDeleteLoading(false)
+      setShowDeleteConfirm(false)
+    }
+  }
+
+  // ── Export data ──────────────────────────────────────────────────────────────
+  const [exportLoading, setExportLoading] = useState(false)
+
+  const handleExport = async () => {
+    if (isGuest) {
+      toast('Export is available for signed-in users')
+      return
+    }
+    setExportLoading(true)
+    try {
+      const { data, error } = await supabase.functions.invoke('gdpr-export')
+      if (error) throw error
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `mindshift-export-${new Date().toISOString().slice(0, 10)}.json`
+      a.click()
+      URL.revokeObjectURL(url)
+      toast.success('Data exported')
+    } catch {
+      toast.error('Export failed. Try again later.')
+    } finally {
+      setExportLoading(false)
+    }
+  }
 
   // Notification permission state
   const [notifPermission, setNotifPermission] = useState<NotificationPermission>('default')
@@ -384,9 +449,57 @@ export default function SettingsPage() {
 
         {/* Data */}
         <Section label="Your Data">
-          <motion.button whileTap={{ scale: 0.97 }} className="w-full h-10 rounded-xl text-[14px] font-medium" style={{ backgroundColor: 'rgba(78,205,196,0.12)', color: '#4ECDC4' }}>📦 Export (JSON)</motion.button>
-          <button className="text-[13px] font-medium w-full text-center mt-2" style={{ color: '#F59E0B' }}>Delete account</button>
+          <motion.button
+            whileTap={{ scale: 0.97 }}
+            onClick={handleExport}
+            disabled={exportLoading}
+            className="w-full h-10 rounded-xl text-[14px] font-medium disabled:opacity-50"
+            style={{ backgroundColor: 'rgba(78,205,196,0.12)', color: '#4ECDC4' }}
+          >
+            {exportLoading ? 'Exporting...' : '📦 Export (JSON)'}
+          </motion.button>
+          <button
+            onClick={() => setShowDeleteConfirm(true)}
+            className="text-[13px] font-medium w-full text-center mt-2"
+            style={{ color: '#F59E0B' }}
+          >
+            Delete account
+          </button>
         </Section>
+
+        {/* Delete confirmation */}
+        <AnimatePresence>
+          {showDeleteConfirm && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="rounded-2xl p-4 space-y-3"
+              style={{ backgroundColor: '#1E2136', border: '1px solid rgba(245,158,11,0.3)' }}
+            >
+              <p className="text-[13px]" style={{ color: '#E8E8F0' }}>
+                This will permanently delete your account and all data. This cannot be undone.
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="flex-1 h-9 rounded-xl text-[13px] font-medium"
+                  style={{ backgroundColor: 'rgba(139,139,167,0.15)', color: '#8B8BA7' }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDeleteAccount}
+                  disabled={deleteLoading}
+                  className="flex-1 h-9 rounded-xl text-[13px] font-medium disabled:opacity-50"
+                  style={{ backgroundColor: 'rgba(245,158,11,0.15)', color: '#F59E0B' }}
+                >
+                  {deleteLoading ? 'Deleting...' : 'Yes, delete'}
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <button onClick={handleSignOut} className="text-[13px] font-medium w-full text-center py-2" style={{ color: '#E8976B' }}>Sign out</button>
 

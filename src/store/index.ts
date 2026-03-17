@@ -8,6 +8,7 @@ import {
 } from '@/shared/lib/constants'
 import { idbStorage } from '@/shared/lib/idbStorage'
 import { notifyAchievement } from '@/shared/lib/notify'
+import { deriveUITone } from '@/shared/lib/uiTone'
 
 // ── Psychotype derivation ─────────────────────────────────────────────────────
 // Derives a personality profile from onboarding choices.
@@ -164,6 +165,9 @@ interface PreferencesSlice {
   // Weekly intention — user's chosen focus area for the week (shown in FocusScreen)
   weeklyIntention: string | null
   setWeeklyIntention: (intention: string | null) => void
+  // UI Tone — Gen Z / Millennial / Neutral (auto-derived from signals, persisted for override)
+  uiTone: 'gen_z' | 'millennial' | 'neutral'
+  setUITone: (tone: 'gen_z' | 'millennial' | 'neutral') => void
 }
 
 interface GridSlice {
@@ -230,7 +234,11 @@ export const useStore = create<AppStore>()(
                                             VR_MULTIPLIER_BASE
           return { xpTotal: s.xpTotal + Math.round(amount * multiplier) }
         }),
-        setOnboardingCompleted: () => set({ onboardingCompleted: true }),
+        setOnboardingCompleted: () => {
+          const s = get()
+          const tone = deriveUITone(s.appMode, s.emotionalReactivity, s.timeBlindness)
+          set({ onboardingCompleted: true, uiTone: tone })
+        },
         setRecoveryShown: () => set({ recoveryShown: true }),
         updateLastSession: () => set({ lastSessionAt: new Date().toISOString() }),
         // Health & Rhythms setters
@@ -271,6 +279,8 @@ export const useStore = create<AppStore>()(
           gridWidgets: WIDGET_DEFAULTS_GENERIC,
           // Streaks reset on sign out (user-specific data)
           currentStreak: 0, longestStreak: 0, lastActiveDate: null,
+          // UI tone reset
+          uiTone: 'neutral' as const,
         }),
 
         // ── Tasks ───────────────────────────────────────────────────────────
@@ -585,6 +595,10 @@ export const useStore = create<AppStore>()(
         setWeeklyPlanShownWeek: (week) => set({ weeklyPlanShownWeek: week }),
         weeklyIntention: null,
         setWeeklyIntention: (intention) => set({ weeklyIntention: intention }),
+
+        // UI Tone — auto-derived from ADHD signals, settable manually
+        uiTone: 'neutral',
+        setUITone: (tone) => set({ uiTone: tone }),
       }),
       {
         name: 'mindshift-store',
@@ -646,6 +660,7 @@ export const useStore = create<AppStore>()(
           goalCelebratedDate: s.goalCelebratedDate,
           weeklyPlanShownWeek: s.weeklyPlanShownWeek,
           weeklyIntention: s.weeklyIntention,
+          uiTone: s.uiTone,
         }),
       }
     )
