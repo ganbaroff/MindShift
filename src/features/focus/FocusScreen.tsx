@@ -300,6 +300,7 @@ export default function FocusScreen() {
   // ── Setup Screen ───────────────────────────────────────────────────────────
   if (screen === 'setup') {
     return (
+      <>
       <div className="flex flex-col pb-28" style={{ background: 'var(--color-bg)' }}>
         <div className="px-5 pt-10 pb-4">
           <h1 className="text-2xl font-bold" style={{ color: 'var(--color-text)' }}>
@@ -562,6 +563,7 @@ export default function FocusScreen() {
           </div>
         )}
       </AnimatePresence>
+      </>
     )
   }
 
