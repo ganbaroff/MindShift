@@ -1,5 +1,6 @@
 import { memo } from 'react';
 import { motion } from 'motion/react';
+import { useMotion } from '@/shared/hooks/useMotion';
 import { DIFFICULTY_MAP } from '@/types';
 import type { Task } from '@/types';
 import { reminders } from '@/shared/lib/reminders';
@@ -27,6 +28,7 @@ function DifficultyDots({ difficulty }: { difficulty: 1 | 2 | 3 }) {
 }
 
 function TaskCardInner({ task, index = 0, onDone, onPark }: TaskCardProps) {
+  const { shouldAnimate } = useMotion();
   const config = DIFFICULTY_MAP[task.difficulty ?? 1];
   const isCarryOver = task.status === 'active' &&
     (Date.now() - new Date(task.createdAt).getTime() > 24 * 60 * 60 * 1000);
@@ -34,9 +36,9 @@ function TaskCardInner({ task, index = 0, onDone, onPark }: TaskCardProps) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.05 }}
+      initial={shouldAnimate ? { opacity: 0, y: 8 } : false}
+      animate={shouldAnimate ? { opacity: 1, y: 0 } : false}
+      transition={shouldAnimate ? { delay: index * 0.05 } : undefined}
       className="rounded-2xl p-3 overflow-hidden"
       style={{
         backgroundColor: '#1E2136',
@@ -95,7 +97,7 @@ function TaskCardInner({ task, index = 0, onDone, onPark }: TaskCardProps) {
       {/* Actions */}
       <div className="flex gap-2">
         <motion.button
-          whileTap={{ scale: 0.97 }}
+          whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
           onClick={() => onDone?.(task.id)}
           className="flex-1 h-9 rounded-xl text-[13px] font-medium"
           style={{
@@ -107,7 +109,7 @@ function TaskCardInner({ task, index = 0, onDone, onPark }: TaskCardProps) {
           ✓ Done
         </motion.button>
         <motion.button
-          whileTap={{ scale: 0.97 }}
+          whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
           onClick={() => onPark?.(task.id)}
           className="flex-1 h-9 rounded-xl text-[13px] font-medium"
           style={{ backgroundColor: '#252840', color: '#8B8BA7' }}

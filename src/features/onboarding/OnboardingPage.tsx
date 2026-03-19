@@ -15,6 +15,7 @@
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
+import { useMotion } from '@/shared/hooks/useMotion';
 import EnergyPicker from '@/components/EnergyPicker';
 import { useStore } from '@/store';
 import type { EnergyLevel, AppMode } from '@/types';
@@ -99,6 +100,7 @@ function erToIdx(v: EmotionalReactivity | null): number | null {
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function OnboardingPage() {
   const navigate = useNavigate();
+  const { shouldAnimate } = useMotion();
   const {
     setAppMode, setEnergyLevel, setTimerStyle, setOnboardingCompleted,
     setTimeBlindness, setEmotionalReactivity,
@@ -205,8 +207,9 @@ export default function OnboardingPage() {
             <div key={i} className="flex-1 h-1 rounded-full overflow-hidden" style={{ backgroundColor: '#252840' }}>
               {i <= step && (
                 <motion.div
-                  initial={{ width: 0 }}
+                  initial={shouldAnimate ? { width: 0 } : false}
                   animate={{ width: '100%' }}
+                  transition={shouldAnimate ? undefined : { duration: 0 }}
                   className="h-full gradient-primary"
                 />
               )}
@@ -226,10 +229,10 @@ export default function OnboardingPage() {
       <AnimatePresence mode="wait">
         <motion.div
           key={step}
-          initial={{ opacity: 0, x: 40 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -40 }}
-          transition={{ duration: 0.2 }}
+          initial={shouldAnimate ? { opacity: 0, x: 40 } : false}
+          animate={shouldAnimate ? { opacity: 1, x: 0 } : false}
+          exit={shouldAnimate ? { opacity: 0, x: -40 } : undefined}
+          transition={shouldAnimate ? { duration: 0.2 } : { duration: 0 }}
           className="flex-1"
         >
           <h1 className="text-[24px] font-bold mb-1" style={{ color: '#E8E8F0' }}>{current.title}</h1>
@@ -249,7 +252,7 @@ export default function OnboardingPage() {
             <div className="mt-8 space-y-3">
               {notifState === 'idle' && (
                 <motion.button
-                  whileTap={{ scale: 0.97 }}
+                  whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
                   onClick={requestNotifications}
                   className="w-full p-4 rounded-2xl text-left"
                   style={{ backgroundColor: 'rgba(78,205,196,0.12)', border: '1.5px solid rgba(78,205,196,0.35)' }}
@@ -291,7 +294,7 @@ export default function OnboardingPage() {
               {current.options?.map((opt, i) => (
                 <motion.button
                   key={i}
-                  whileTap={{ scale: 0.97 }}
+                  whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
                   onClick={() => select(i)}
                   className="w-full text-left p-3.5 rounded-2xl"
                   style={{
@@ -320,7 +323,7 @@ export default function OnboardingPage() {
       {(isEnergyStep) && (
         <div className="py-6">
           <motion.button
-            whileTap={{ scale: 0.97 }}
+            whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
             onClick={handleNext}
             disabled={!canContinue}
             className="w-full h-[48px] rounded-xl gradient-primary font-semibold text-[15px] shadow-primary disabled:opacity-40"

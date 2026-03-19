@@ -1,5 +1,6 @@
 import { motion } from 'motion/react';
 import { Plus } from 'lucide-react';
+import { useMotion } from '@/shared/hooks/useMotion';
 
 interface FabProps {
   onClick: () => void;
@@ -7,9 +8,10 @@ interface FabProps {
 }
 
 export default function Fab({ onClick, label = 'Add task' }: FabProps) {
+  const { shouldAnimate } = useMotion();
   return (
     <motion.button
-      whileTap={{ scale: 0.97 }}
+      whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
       onClick={onClick}
       aria-label={label}
       className="fixed bottom-24 right-5 flex items-center gap-2 px-5 h-12 rounded-full gradient-primary shadow-primary z-20 focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:outline-none"

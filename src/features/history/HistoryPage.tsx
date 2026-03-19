@@ -10,6 +10,7 @@
 
 import { useMemo } from 'react'
 import { motion } from 'motion/react'
+import { useMotion } from '@/shared/hooks/useMotion'
 import { useStore } from '@/store'
 import { ENERGY_EMOJI } from '@/shared/lib/constants'
 import { useSessionHistory } from '@/shared/hooks/useSessionHistory'
@@ -47,6 +48,7 @@ function formatDuration(ms: number | null): string {
 }
 
 export default function HistoryPage() {
+  const { shouldAnimate } = useMotion()
   const { userId } = useStore()
   const { sessions, loading } = useSessionHistory()
 
@@ -72,16 +74,16 @@ export default function HistoryPage() {
 
   return (
     <div className="min-h-screen px-5 pb-36 pt-10" style={{ backgroundColor: '#0F1120' }}>
-      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
+      <motion.div initial={shouldAnimate ? { opacity: 0, y: -8 } : false} animate={shouldAnimate ? { opacity: 1, y: 0 } : false}>
         <h1 className="text-[24px] font-bold" style={{ color: '#E8E8F0' }}>Session Log 📋</h1>
         <p className="text-[13px] mt-0.5" style={{ color: '#8B8BA7' }}>Last 30 days of focus</p>
       </motion.div>
 
       {isGuest ? (
         <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
+          initial={shouldAnimate ? { opacity: 0, y: 12 } : false}
+          animate={shouldAnimate ? { opacity: 1, y: 0 } : false}
+          transition={shouldAnimate ? { delay: 0.1 } : undefined}
           className="mt-8 rounded-2xl p-6 text-center"
           style={{ backgroundColor: '#1E2136', border: '1px solid rgba(123,114,255,0.12)' }}
         >
@@ -93,14 +95,14 @@ export default function HistoryPage() {
         </motion.div>
       ) : loading ? (
         <div className="mt-12 flex justify-center">
-          <div className="w-6 h-6 rounded-full border-2 border-t-transparent animate-spin"
+          <div className="w-6 h-6 rounded-full border-2 border-t-transparent animate-spin motion-reduce:animate-none motion-reduce:opacity-60"
             style={{ borderColor: '#7B72FF', borderTopColor: 'transparent' }} />
         </div>
       ) : sessions.length === 0 ? (
         <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
+          initial={shouldAnimate ? { opacity: 0, y: 12 } : false}
+          animate={shouldAnimate ? { opacity: 1, y: 0 } : false}
+          transition={shouldAnimate ? { delay: 0.1 } : undefined}
           className="mt-8 rounded-2xl p-6 text-center"
           style={{ backgroundColor: '#1E2136' }}
         >
@@ -112,9 +114,9 @@ export default function HistoryPage() {
         <>
           {/* Summary row */}
           <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.05 }}
+            initial={shouldAnimate ? { opacity: 0, y: 8 } : false}
+            animate={shouldAnimate ? { opacity: 1, y: 0 } : false}
+            transition={shouldAnimate ? { delay: 0.05 } : undefined}
             className="flex gap-2 mt-5 mb-6"
           >
             {[
@@ -134,9 +136,9 @@ export default function HistoryPage() {
             {grouped.map(([day, daySessions], gi) => (
               <motion.div
                 key={day}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.05 + gi * 0.03 }}
+                initial={shouldAnimate ? { opacity: 0, y: 10 } : false}
+                animate={shouldAnimate ? { opacity: 1, y: 0 } : false}
+                transition={shouldAnimate ? { delay: 0.05 + gi * 0.03 } : undefined}
               >
                 <p className="text-[11px] uppercase tracking-widest mb-2 font-semibold" style={{ color: '#8B8BA7' }}>
                   {formatDate(day)}

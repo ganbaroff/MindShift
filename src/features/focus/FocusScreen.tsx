@@ -743,8 +743,8 @@ export default function FocusScreen() {
       {/* Task title — fades to 30% in flow */}
       {selectedTask && (
         <motion.p
-          animate={{ opacity: isFlow ? 0.3 : 1 }}
-          transition={t()}
+          animate={shouldAnimate ? { opacity: isFlow ? 0.3 : 1 } : { opacity: isFlow ? 0.3 : 1 }}
+          transition={shouldAnimate ? t() : { duration: 0 }}
           className="text-base font-semibold mt-6 text-center max-w-xs leading-snug"
           style={{ color: 'var(--color-text)' }}
         >
@@ -777,10 +777,10 @@ export default function FocusScreen() {
       {room.status === 'connected' ? (
         <AnimatePresence>
           <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 0.75, y: 0 }}
-            exit={{ opacity: 0 }}
-            transition={{ delay: 2, duration: 1 }}
+            initial={shouldAnimate ? { opacity: 0, y: 8 } : false}
+            animate={shouldAnimate ? { opacity: 0.75, y: 0 } : { opacity: 0.75 }}
+            exit={shouldAnimate ? { opacity: 0 } : undefined}
+            transition={shouldAnimate ? { delay: 2, duration: 1 } : { duration: 0 }}
             className="absolute bottom-40 left-0 right-0 flex flex-col items-center gap-1 pointer-events-none"
           >
             {/* Peer phase dots */}
@@ -808,10 +808,10 @@ export default function FocusScreen() {
         <AnimatePresence>
           {orbitCount !== null && (
             <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 0.55, y: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ delay: 10, duration: 1.5 }}
+              initial={shouldAnimate ? { opacity: 0, y: 8 } : false}
+              animate={shouldAnimate ? { opacity: 0.55, y: 0 } : { opacity: 0.55 }}
+              exit={shouldAnimate ? { opacity: 0 } : undefined}
+              transition={shouldAnimate ? { delay: 10, duration: 1.5 } : { duration: 0 }}
               className="absolute bottom-40 left-0 right-0 flex justify-center pointer-events-none"
             >
               <span

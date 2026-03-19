@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { useMotion } from '@/shared/hooks/useMotion';
 import EnergyPicker from '@/components/EnergyPicker';
 import { useStore } from '@/store';
 import type { EnergyLevel, AudioPreset } from '@/types';
@@ -41,6 +42,7 @@ const phaseCards = [
 ];
 
 export default function SettingsPage() {
+  const { shouldAnimate } = useMotion();
   const {
     appMode, setAppMode,
     timerStyle, setTimerStyle,
@@ -169,7 +171,7 @@ export default function SettingsPage() {
 
   return (
     <div className="min-h-screen px-5 pb-36 pt-10" style={{ backgroundColor: '#0F1120' }}>
-      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
+      <motion.div initial={shouldAnimate ? { opacity: 0, y: -8 } : false} animate={shouldAnimate ? { opacity: 1, y: 0 } : false}>
         <h1 className="text-[24px] font-bold" style={{ color: '#E8E8F0' }}>Settings</h1>
         <p className="text-[13px] mt-0.5" style={{ color: '#8B8BA7' }}>{email ?? 'Not signed in'}</p>
       </motion.div>
@@ -212,7 +214,7 @@ export default function SettingsPage() {
               return (
                 <div key={p.key} className="flex items-center gap-2">
                   <motion.button
-                    whileTap={{ scale: 0.97 }}
+                    whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
                     onClick={() => handlePresetPreview(p.key)}
                     className="flex-1 flex items-center gap-2 h-10 rounded-xl px-3 text-left"
                     style={{
@@ -232,7 +234,7 @@ export default function SettingsPage() {
                     {isPreviewing && <span className="text-[10px]" style={{ color: '#7B72FF' }}>▶ playing</span>}
                   </motion.button>
                   <motion.button
-                    whileTap={{ scale: 0.9 }}
+                    whileTap={shouldAnimate ? { scale: 0.9 } : undefined}
                     onClick={() => handleSetFocusAnchor(p.key)}
                     className="w-9 h-10 rounded-xl flex items-center justify-center text-[16px]"
                     style={{
@@ -289,7 +291,7 @@ export default function SettingsPage() {
             {phaseCards.map((c, i) => (
               <motion.button
                 key={i}
-                whileTap={{ scale: 0.97 }}
+                whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
                 onClick={() => setSeasonalMode(phaseKeys[i])}
                 className="p-2.5 rounded-xl text-left"
                 style={{
@@ -331,7 +333,7 @@ export default function SettingsPage() {
             <p className="text-[13px]" style={{ color: '#8B8BA7' }}>Blocked by browser — enable in browser settings to get due-date nudges.</p>
           ) : (
             <motion.button
-              whileTap={{ scale: 0.97 }}
+              whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
               onClick={requestNotifications}
               className="w-full h-10 rounded-xl text-[14px] font-medium"
               style={{ backgroundColor: 'rgba(78,205,196,0.12)', color: '#4ECDC4' }}
@@ -359,16 +361,16 @@ export default function SettingsPage() {
                 aria-label="Toggle medication peak indicator"
               >
                 <motion.div
-                  animate={{ x: medicationEnabled ? 20 : 2 }}
-                  transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+                  animate={shouldAnimate ? { x: medicationEnabled ? 20 : 2 } : { x: medicationEnabled ? 20 : 2 }}
+                  transition={shouldAnimate ? { type: 'spring', damping: 20, stiffness: 300 } : { duration: 0 }}
                   className="absolute top-1 w-4 h-4 rounded-full bg-white"
                 />
               </button>
             </div>
             {medicationEnabled && (
               <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
+                initial={shouldAnimate ? { opacity: 0, height: 0 } : false}
+                animate={shouldAnimate ? { opacity: 1, height: 'auto' } : false}
                 className="overflow-hidden"
               >
                 <p className="text-[12px] mb-2" style={{ color: '#8B8BA7' }}>When do you take it?</p>
@@ -412,7 +414,7 @@ export default function SettingsPage() {
             {([30, 45, 60, 90] as const).map(min => (
               <motion.button
                 key={min}
-                whileTap={{ scale: 0.95 }}
+                whileTap={shouldAnimate ? { scale: 0.95 } : undefined}
                 onClick={() => setDailyFocusGoalMin(min)}
                 className="flex-1 h-9 rounded-full text-[13px] font-medium"
                 style={{
@@ -435,7 +437,7 @@ export default function SettingsPage() {
               return (
                 <motion.button
                   key={tone}
-                  whileTap={{ scale: 0.97 }}
+                  whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
                   onClick={() => setUITone(tone)}
                   className="p-2.5 rounded-xl text-left"
                   style={{
@@ -483,7 +485,7 @@ export default function SettingsPage() {
         {/* Data */}
         <Section label="Your Data">
           <motion.button
-            whileTap={{ scale: 0.97 }}
+            whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
             onClick={handleExport}
             disabled={exportLoading}
             className="w-full h-10 rounded-xl text-[14px] font-medium disabled:opacity-50"
@@ -504,9 +506,9 @@ export default function SettingsPage() {
         <AnimatePresence>
           {showDeleteConfirm && (
             <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
+              initial={shouldAnimate ? { opacity: 0, height: 0 } : false}
+              animate={shouldAnimate ? { opacity: 1, height: 'auto' } : false}
+              exit={shouldAnimate ? { opacity: 0, height: 0 } : undefined}
               className="rounded-2xl p-4 space-y-3"
               style={{ backgroundColor: '#1E2136', border: '1px solid rgba(245,158,11,0.3)' }}
             >
@@ -546,8 +548,9 @@ export default function SettingsPage() {
 }
 
 function Section({ label, children }: { label: string; children: React.ReactNode }) {
+  const { shouldAnimate } = useMotion();
   return (
-    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl p-3" style={{ backgroundColor: '#1E2136' }}>
+    <motion.div initial={shouldAnimate ? { opacity: 0, y: 12 } : false} animate={shouldAnimate ? { opacity: 1, y: 0 } : false} className="rounded-2xl p-3" style={{ backgroundColor: '#1E2136' }}>
       <p className="text-[11px] uppercase tracking-widest mb-2" style={{ color: '#8B8BA7' }}>{label}</p>
       {children}
     </motion.div>
@@ -555,9 +558,10 @@ function Section({ label, children }: { label: string; children: React.ReactNode
 }
 
 function Chip({ selected, onClick, emoji, label }: { selected: boolean; onClick: () => void; emoji: string; label: string }) {
+  const { shouldAnimate } = useMotion();
   return (
     <motion.button
-      whileTap={{ scale: 0.97 }}
+      whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
       onClick={onClick}
       className="flex-1 h-9 rounded-full flex items-center justify-center gap-1 text-[13px] font-medium"
       style={{
@@ -574,11 +578,12 @@ function Chip({ selected, onClick, emoji, label }: { selected: boolean; onClick:
 }
 
 function Toggle({ checked, onChange, label }: { checked: boolean; onChange: (v: boolean) => void; label: string }) {
+  const { shouldAnimate } = useMotion();
   return (
     <button onClick={() => onChange(!checked)} className="flex items-center justify-between w-full">
       <span className="text-[14px]" style={{ color: '#E8E8F0' }}>{label}</span>
       <div className="w-11 h-6 rounded-full p-0.5 transition-colors" style={{ backgroundColor: checked ? '#7B72FF' : '#252840' }}>
-        <motion.div animate={{ x: checked ? 20 : 0 }} className="w-5 h-5 rounded-full" style={{ backgroundColor: '#E8E8F0' }} />
+        <motion.div animate={{ x: checked ? 20 : 0 }} transition={shouldAnimate ? undefined : { duration: 0 }} className="w-5 h-5 rounded-full" style={{ backgroundColor: '#E8E8F0' }} />
       </div>
     </button>
   );

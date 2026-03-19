@@ -16,12 +16,10 @@ const durationOptions = [5, 15, 25, 45, 60];
 // conservative midpoints that match ADHD task-time perception research.
 const SMART_DURATION: Record<1 | 2 | 3, number> = { 1: 15, 2: 25, 3: 45 };
 
-// Quick-date helpers
+// Quick-date helper
 function toISODate(d: Date): string {
   return d.toISOString().split('T')[0];
 }
-const TODAY    = toISODate(new Date());
-const TOMORROW = toISODate(new Date(Date.now() + 86_400_000));
 
 // SpeechRecognition browser compatibility
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -41,6 +39,8 @@ interface AddTaskModalProps {
 export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
   const { addTask, nowPool, nextPool, appMode, seasonalMode, locale } = useStore();
   const maxNow = getNowPoolMax(appMode, seasonalMode);
+  const today = toISODate(new Date());
+  const tomorrow = toISODate(new Date(Date.now() + 86_400_000));
   const nowCount = nowPool.filter(t => t.status === 'active').length;
   const nextCount = nextPool.filter(t => t.status === 'active').length;
   const isFull = nowCount >= maxNow;
@@ -409,8 +409,8 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
                 <label className="text-caption text-ms-muted uppercase tracking-widest mb-2 block">Due date <span style={{ color: '#4ECDC4' }}>(optional)</span></label>
                 <div className="flex gap-2 mb-2">
                   {[
-                    { label: 'Today', value: TODAY },
-                    { label: 'Tomorrow', value: TOMORROW },
+                    { label: 'Today', value: today },
+                    { label: 'Tomorrow', value: tomorrow },
                   ].map(({ label, value }) => {
                     const sel = dueDate === value;
                     return (
@@ -434,13 +434,13 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
                   <input
                     type="date"
                     value={dueDate ?? ''}
-                    min={TODAY}
+                    min={today}
                     onChange={e => setDueDate(e.target.value || null)}
                     className="flex-1 h-9 rounded-xl px-2 text-secondary outline-none transition-all"
                     style={{
-                      backgroundColor: (dueDate && dueDate !== TODAY && dueDate !== TOMORROW) ? 'rgba(123,114,255,0.15)' : '#252840',
-                      border: `${(dueDate && dueDate !== TODAY && dueDate !== TOMORROW) ? 1.5 : 1}px solid ${(dueDate && dueDate !== TODAY && dueDate !== TOMORROW) ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
-                      color: (dueDate && dueDate !== TODAY && dueDate !== TOMORROW) ? '#7B72FF' : '#8B8BA7',
+                      backgroundColor: (dueDate && dueDate !== today && dueDate !== tomorrow) ? 'rgba(123,114,255,0.15)' : '#252840',
+                      border: `${(dueDate && dueDate !== today && dueDate !== tomorrow) ? 1.5 : 1}px solid ${(dueDate && dueDate !== today && dueDate !== tomorrow) ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
+                      color: (dueDate && dueDate !== today && dueDate !== tomorrow) ? '#7B72FF' : '#8B8BA7',
                       colorScheme: 'dark',
                     }}
                   />
