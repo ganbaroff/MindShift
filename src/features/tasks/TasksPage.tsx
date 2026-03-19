@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { ChevronDown, Search, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useMotion } from '@/shared/hooks/useMotion';
+import { todayISO } from '@/shared/lib/dateUtils';
 import {
   DndContext,
   closestCenter,
@@ -30,7 +31,7 @@ import { getNowPoolMax } from '@/shared/lib/constants';
 export default function TasksPage() {
   const navigate = useNavigate();
   const { shouldAnimate } = useMotion();
-  const todayIso = new Date().toISOString().split('T')[0];
+  const todayIso = todayISO();
   const [showAddTask, setShowAddTask] = useState(false);
   const [showSomeday, setShowSomeday] = useState(false);
   const [showDone, setShowDone] = useState(false);

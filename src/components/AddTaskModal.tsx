@@ -8,6 +8,7 @@ import { getNowPoolMax } from '@/shared/lib/constants';
 import { reminders } from '@/shared/lib/reminders';
 import { supabase } from '@/shared/lib/supabase';
 import { logError } from '@/shared/lib/logger';
+import { todayISO, tomorrowISO } from '@/shared/lib/dateUtils';
 
 const durationOptions = [5, 15, 25, 45, 60];
 
@@ -15,11 +16,6 @@ const durationOptions = [5, 15, 25, 45, 60];
 // Easy tasks are often underestimated; hard tasks overestimated. These are
 // conservative midpoints that match ADHD task-time perception research.
 const SMART_DURATION: Record<1 | 2 | 3, number> = { 1: 15, 2: 25, 3: 45 };
-
-// Quick-date helper
-function toISODate(d: Date): string {
-  return d.toISOString().split('T')[0];
-}
 
 // SpeechRecognition browser compatibility
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -39,8 +35,8 @@ interface AddTaskModalProps {
 export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
   const { addTask, nowPool, nextPool, appMode, seasonalMode, locale } = useStore();
   const maxNow = getNowPoolMax(appMode, seasonalMode);
-  const today = toISODate(new Date());
-  const tomorrow = toISODate(new Date(Date.now() + 86_400_000));
+  const today = todayISO();
+  const tomorrow = tomorrowISO();
   const nowCount = nowPool.filter(t => t.status === 'active').length;
   const nextCount = nextPool.filter(t => t.status === 'active').length;
   const isFull = nowCount >= maxNow;
