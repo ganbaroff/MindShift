@@ -39,13 +39,9 @@ export const TONE_DENSITY: Record<UITone, UIDensity> = {
 
 // ── Cohort detection ────────────────────────────────────────────────────────
 
-interface CohortSignals {
-  appMode: string
-  emotionalReactivity: string | null
-  timeBlindness: string | null
-  psychotype?: string | null
-  seasonalMode?: string
-}
+// CohortSignals interface — inlined into deriveUITone parameter type.
+// Kept as documentation reference:
+// { appMode, emotionalReactivity, timeBlindness, psychotype?, seasonalMode? }
 
 /**
  * Derive UI tone from existing store fields.

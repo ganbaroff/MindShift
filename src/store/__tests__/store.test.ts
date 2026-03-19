@@ -39,6 +39,7 @@ function makeTask(overrides: Partial<Task> = {}): Task {
     dueTime: null,
     taskType: 'task',
     reminderSentAt: null,
+    repeat: 'none' as const,
     ...overrides,
   }
 }

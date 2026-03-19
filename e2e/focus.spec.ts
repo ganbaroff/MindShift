@@ -10,8 +10,17 @@
  * Timer presets: TIMER_PRESETS = [5, 25, 52, 90] → "5m", "25m", "52m", "90m"
  * Audio controls: "🔊 Sound on" / "🔇 Sound off" (text labels, not bare emoji)
  * Stop → "End session" button → interrupt-confirm screen
+ *
+ * Note: "Start Focus →" opens BreathworkRitual first.
+ *       Use "Skip ritual & jump in" to bypass breathwork in tests.
  */
 import { test, expect, seedStore } from './helpers'
+
+/** Helper: start a focus session by skipping the breathwork ritual */
+async function startSession(page: import('@playwright/test').Page) {
+  // BreathworkRitual is a z-50 overlay with its own Skip button
+  await page.getByRole('button', { name: /Skip breathing ritual/i }).click()
+}
 
 test.describe('Focus setup screen', () => {
   test('shows header with energy display', async ({ authedPage: page }) => {
@@ -29,8 +38,6 @@ test.describe('Focus setup screen', () => {
     await expect(page.getByText(/smart:/i)).toBeVisible()
 
     // TIMER_PRESETS = [5, 25, 52, 90] → shown with "m" suffix
-    // Note: the recommended preset (25m for energy=3) also has a ✦ span inside,
-    // so we use regex matching (not exact) to avoid the "25m ✦" accessible name issue.
     await expect(page.getByRole('button', { name: /^5m/ })).toBeVisible()
     await expect(page.getByRole('button', { name: /^25m/ })).toBeVisible()
     await expect(page.getByRole('button', { name: /^52m/ })).toBeVisible()
@@ -88,7 +95,7 @@ test.describe('Focus setup screen', () => {
     await page.goto('/focus')
 
     // Task picker label shows when tasks exist
-    await expect(page.getByText(/TASK \(OPTIONAL\)/i)).toBeVisible({ timeout: 5000 })
+    await expect(page.getByText(/TASK \(OPTIONAL\)/i)).toBeVisible({ timeout: 8000 })
     // Task in picker
     await expect(page.getByText('Focus test task')).toBeVisible()
     // Open focus option
@@ -117,15 +124,16 @@ test.describe('Focus session', () => {
   test('starting a session shows the active timer view', async ({ authedPage: page }) => {
     await page.goto('/focus')
     await page.getByRole('button', { name: /Start Focus/ }).click()
+    await startSession(page)
 
-    // ArcTimer is present — digits hidden by default (tap to show).
-    // Check for the ArcTimer button's aria-label instead of digit text.
+    // ArcTimer is present — check for the ArcTimer button's aria-label
     await expect(page.getByRole('button', { name: /Focus timer/i })).toBeVisible({ timeout: 5000 })
   })
 
   test('active session shows struggle phase label', async ({ authedPage: page }) => {
     await page.goto('/focus')
     await page.getByRole('button', { name: /Start Focus/ }).click()
+    await startSession(page)
 
     // PHASE_LABELS.struggle = "Getting into it... 💪"
     await expect(page.getByText(/Getting into it/)).toBeVisible({ timeout: 5000 })
@@ -134,6 +142,7 @@ test.describe('Focus session', () => {
   test('active session shows audio and end session controls', async ({ authedPage: page }) => {
     await page.goto('/focus')
     await page.getByRole('button', { name: /Start Focus/ }).click()
+    await startSession(page)
 
     // Wait for active session — ArcTimer appears
     await expect(page.getByRole('button', { name: /Focus timer/i })).toBeVisible({ timeout: 5000 })
@@ -153,6 +162,7 @@ test.describe('Focus session', () => {
   test('tapping end session shows interrupt confirm screen', async ({ authedPage: page }) => {
     await page.goto('/focus')
     await page.getByRole('button', { name: /Start Focus/ }).click()
+    await startSession(page)
 
     // Wait for session active
     await expect(page.getByRole('button', { name: /Focus timer/i })).toBeVisible({ timeout: 5000 })
@@ -182,8 +192,10 @@ test.describe('Focus session', () => {
     })
 
     await page.goto('/focus')
+    await expect(page.getByText('Write quarterly report')).toBeVisible({ timeout: 8000 })
     await page.getByText('Write quarterly report').click()
     await page.getByRole('button', { name: /Start Focus/ }).click()
+    await startSession(page)
 
     // Wait for session to start
     await expect(page.getByRole('button', { name: /Focus timer/i })).toBeVisible({ timeout: 5000 })

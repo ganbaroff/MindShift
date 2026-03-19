@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { persist, subscribeWithSelector } from 'zustand/middleware'
+import { persist, createJSONStorage, subscribeWithSelector } from 'zustand/middleware'
 import type { Task, AudioPreset, SessionPhase, EnergyLevel, CognitiveMode, AppMode, Psychotype, ActiveSession, WeeklyStats, Achievement, WidgetConfig } from '@/types'
 import { ACHIEVEMENT_DEFINITIONS, WIDGET_DEFAULTS, WIDGET_DEFAULTS_GENERIC } from '@/types'
 import {
@@ -603,7 +603,7 @@ export const useStore = create<AppStore>()(
       }),
       {
         name: 'mindshift-store',
-        storage: idbStorage,
+        storage: createJSONStorage(() => idbStorage),
         // Prune completed tasks older than 30 days on every store rehydration.
         // Prevents localStorage from growing unboundedly while keeping recent
         // completed tasks visible in the "Done recently" section.

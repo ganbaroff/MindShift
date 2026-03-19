@@ -9,7 +9,7 @@
  */
 
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'motion/react'
+import { motion } from 'motion/react'
 import { X } from 'lucide-react'
 import type { FocusRoomState } from '@/shared/hooks/useFocusRoom'
 

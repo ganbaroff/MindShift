@@ -20,18 +20,19 @@ import type { StateStorage } from 'zustand/middleware'
 
 export const idbStorage: StateStorage = {
   getItem: async (name: string): Promise<string | null> => {
-    // Try IndexedDB first (post-migration)
-    const idbVal = await get<string>(name)
-    if (idbVal !== undefined) return idbVal
-
-    // Transparent migration: fall back to localStorage on first load
+    // Check localStorage FIRST (synchronous, fastest path).
+    // This covers: (a) pre-migration users, (b) E2E test seeding.
+    // If found, migrate to IDB in the background and return immediately.
     const lsVal = localStorage.getItem(name)
     if (lsVal !== null) {
-      // Migrate to idb and clean up localStorage
-      await set(name, lsVal)
-      localStorage.removeItem(name)
+      // Fire-and-forget migration to IDB
+      set(name, lsVal).then(() => localStorage.removeItem(name)).catch(() => {})
       return lsVal
     }
+
+    // Post-migration: read from IndexedDB
+    const idbVal = await get<string>(name)
+    if (idbVal !== undefined) return idbVal
 
     return null
   },

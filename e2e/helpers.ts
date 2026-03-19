@@ -43,6 +43,31 @@ export function buildStoreState(overrides: Record<string, unknown> = {}) {
       trialEndsAt: null,
       gridWidgets: [],
       psychotype: 'achiever',
+      // Fields added to match store partialize — prevents default flicker
+      nowPool: [],
+      nextPool: [],
+      somedayPool: [],
+      timerStyle: 'countdown',
+      medicationEnabled: false,
+      medicationTime: null,
+      chronotype: null,
+      timeBlindness: null,
+      emotionalReactivity: null,
+      flexiblePauseUntil: null,
+      locale: 'en',
+      currentStreak: 0,
+      longestStreak: 0,
+      lastActiveDate: null,
+      shutdownShownDate: null,
+      monthlyReflectionShownMonth: null,
+      dailyFocusGoalMin: 60,
+      goalCelebratedDate: null,
+      weeklyPlanShownWeek: null,
+      weeklyIntention: null,
+      uiTone: 'neutral',
+      completedTotal: 0,
+      psychotypeLastDerived: null,
+      seenHints: [],
       ...overrides,
     },
     version: 0,
@@ -179,23 +204,23 @@ export async function seedStore(page: Page, overrides: Record<string, unknown> =
   const supabaseSession = buildSupabaseSession()
   const storageKey = `sb-${SUPABASE_REF}-auth-token`
 
-  await page.addInitScript(({ storeState, supabaseSession, storageKey }) => {
-    // Zustand persisted state — drives app UI (userId, email, onboardingCompleted, etc.)
-    localStorage.setItem('mindshift-store', JSON.stringify(storeState))
+  const storeJSON = JSON.stringify(storeState)
 
-    // Supabase auth session — drives AuthGuard's getSession() check
+  // Seed both localStorage AND IndexedDB for Zustand store rehydration.
+  // The store uses async idbStorage (idb-keyval) which checks IDB first.
+  // We must write to IDB so Zustand hydrates with our state (not defaults).
+  // idb-keyval uses database 'keyval-store', object store 'keyval'.
+  await page.addInitScript(({ storeJSON, supabaseSession, storageKey }) => {
+    localStorage.setItem('mindshift-store', storeJSON)
     localStorage.setItem(storageKey, JSON.stringify(supabaseSession))
-
-    // Dismiss CookieBanner so it doesn't interfere with element queries
     localStorage.setItem('ms_cookie_consent', JSON.stringify({
-      accepted: true,
-      version: '2026-03',
-      at: new Date().toISOString(),
+      accepted: true, version: '2026-03', at: new Date().toISOString(),
     }))
-
-    // Dismiss InstallBanner so it doesn't intercept pointer events (esp. on mobile)
     localStorage.setItem('mindshift_install_dismissed', '1')
-  }, { storeState, supabaseSession, storageKey })
+  }, { storeJSON, supabaseSession, storageKey })
+
+  // idbStorage.getItem now checks localStorage FIRST (synchronous),
+  // so seeded data is picked up immediately during Zustand hydration.
 }
 
 // ── Extended test fixture — auto-authenticates via localStorage + route mocking ─

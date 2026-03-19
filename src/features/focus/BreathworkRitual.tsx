@@ -26,7 +26,6 @@ interface BreathworkRitualProps {
 
 const INHALE_MS = 1500
 const EXHALE_MS = 1500
-const CYCLE_MS  = INHALE_MS + EXHALE_MS
 const CYCLES    = 3
 
 type BreathPhase = 'inhale' | 'exhale'
