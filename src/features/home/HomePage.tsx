@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { useMotion } from '@/shared/hooks/useMotion';
 import TaskCard from '@/components/TaskCard';
 import MochiAvatar from '@/components/MochiAvatar';
 import EnergyPicker from '@/components/EnergyPicker';
@@ -62,9 +63,11 @@ export default function HomePage() {
     dailyFocusGoalMin,
     goalCelebratedDate, setGoalCelebratedDate,
     timeBlindness, emotionalReactivity, medicationEnabled, medicationTime,
+    completeTask, snoozeTask,
   } = useStore();
 
   const { copy } = useUITone();
+  const { shouldAnimate } = useMotion();
   const [showAddTask, setShowAddTask] = useState(false);
   const [mochiMsg, setMochiMsg] = useState<{ text: string; emoji: string } | null>(null);
   const [briefDismissed, setBriefDismissed] = useState(false);
@@ -74,8 +77,6 @@ export default function HomePage() {
   const nextTasks = useMemo(() => nextPool.filter(t => t.status === 'active'), [nextPool]);
   const nowMax = getNowPoolMax(appMode, seasonalMode);
   const { showNextOnHome, homeSubtitle } = APP_MODE_CONFIG[appMode];
-
-  const { completeTask, snoozeTask } = useStore();
 
   const focusMinutes = weeklyStats?.totalFocusMinutes ?? null;
 
@@ -149,7 +150,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen px-5 pb-36 pt-10" style={{ backgroundColor: '#0F1120' }}>
       {/* Header */}
-      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="flex items-start justify-between mb-5">
+      <motion.div initial={shouldAnimate ? { opacity: 0, y: -8 } : false} animate={shouldAnimate ? { opacity: 1, y: 0 } : false} className="flex items-start justify-between mb-5">
         <div>
           <h1 className="text-[24px] font-bold" style={{ color: '#E8E8F0' }}>{greeting}</h1>
           <p className="text-[13px] mt-0.5" style={{ color: '#8B8BA7' }}>
@@ -162,9 +163,9 @@ export default function HomePage() {
           <AnimatePresence>
             {mochiMsg && (
               <motion.div
-                initial={{ opacity: 0, scale: 0.8, y: 8 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.8, y: 8 }}
+                initial={shouldAnimate ? { opacity: 0, scale: 0.8, y: 8 } : false}
+                animate={shouldAnimate ? { opacity: 1, scale: 1, y: 0 } : false}
+                exit={shouldAnimate ? { opacity: 0, scale: 0.8, y: 8 } : undefined}
                 className="absolute right-0 bottom-full mb-2 w-52 rounded-2xl rounded-br-sm p-3 z-10"
                 style={{ backgroundColor: '#1E2136', border: '1px solid rgba(123,114,255,0.25)', boxShadow: '0 8px 24px rgba(0,0,0,0.3)' }}
               >
@@ -190,9 +191,9 @@ export default function HomePage() {
         <AnimatePresence>
           {showStreak && (
             <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
+              initial={shouldAnimate ? { opacity: 0, height: 0 } : false}
+              animate={shouldAnimate ? { opacity: 1, height: 'auto' } : false}
+              exit={shouldAnimate ? { opacity: 0, height: 0 } : undefined}
               className="overflow-hidden"
             >
               <div
@@ -217,9 +218,9 @@ export default function HomePage() {
         <AnimatePresence>
           {showBrief && (
             <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, height: 0 }}
+              initial={shouldAnimate ? { opacity: 0, y: 8 } : false}
+              animate={shouldAnimate ? { opacity: 1, y: 0 } : false}
+              exit={shouldAnimate ? { opacity: 0, height: 0 } : undefined}
               className="rounded-2xl p-3"
               style={{ backgroundColor: '#1E2136', border: '1px solid rgba(123,114,255,0.12)' }}
             >
@@ -257,8 +258,8 @@ export default function HomePage() {
         {/* Daily focus goal progress (P-1) — only show when we have session data */}
         {weeklyStats && (
           <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={shouldAnimate ? { opacity: 0, y: 8 } : false}
+            animate={shouldAnimate ? { opacity: 1, y: 0 } : false}
             className="rounded-2xl px-4 py-3"
             style={{ backgroundColor: '#1E2136' }}
           >
@@ -273,9 +274,9 @@ export default function HomePage() {
             <div className="h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: 'rgba(255,255,255,0.06)' }}>
               <motion.div
                 className="h-full rounded-full"
-                initial={{ width: 0 }}
+                initial={shouldAnimate ? { width: 0 } : false}
                 animate={{ width: `${goalProgress * 100}%` }}
-                transition={{ duration: 0.8, ease: 'easeOut' }}
+                transition={shouldAnimate ? { duration: 0.8, ease: 'easeOut' } : { duration: 0 }}
                 style={{ background: goalReached ? '#4ECDC4' : 'linear-gradient(90deg, #7B72FF, #9B8EFF)' }}
               />
             </div>
@@ -286,9 +287,9 @@ export default function HomePage() {
         <AnimatePresence>
           {isLowEnergy && (
             <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
+              initial={shouldAnimate ? { opacity: 0, y: 8 } : false}
+              animate={shouldAnimate ? { opacity: 1, y: 0 } : false}
+              exit={shouldAnimate ? { opacity: 0, y: -8 } : undefined}
               className="rounded-2xl p-3 border"
               style={{ backgroundColor: 'rgba(78,205,196,0.06)', borderColor: 'rgba(78,205,196,0.15)' }}
             >
@@ -303,9 +304,9 @@ export default function HomePage() {
         {/* Empty State — prompt to add first task */}
         {nowTasks.length === 0 && nextTasks.length === 0 && (
           <motion.button
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            whileTap={{ scale: 0.97 }}
+            initial={shouldAnimate ? { opacity: 0, y: 12 } : false}
+            animate={shouldAnimate ? { opacity: 1, y: 0 } : false}
+            whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
             onClick={() => setShowAddTask(true)}
             className="w-full rounded-2xl p-5 border text-left"
             style={{ backgroundColor: '#1E2136', borderColor: 'rgba(123,114,255,0.25)', boxShadow: '0 0 20px rgba(123,114,255,0.08)' }}
@@ -321,7 +322,7 @@ export default function HomePage() {
         )}
 
         {/* Energy Check-in */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+        <motion.div initial={shouldAnimate ? { opacity: 0, y: 12 } : false} animate={shouldAnimate ? { opacity: 1, y: 0 } : false} transition={shouldAnimate ? { delay: 0.1 } : undefined}>
           <p className="text-[15px] font-semibold mb-2" style={{ color: '#E8E8F0' }}>How's your energy right now?</p>
           <EnergyPicker
             selected={energyLevel - 1}
@@ -362,9 +363,9 @@ export default function HomePage() {
         {/* Up Next Preview — hidden in low-energy mode */}
         {showNextOnHome && !isLowEnergy && (
           <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
+            initial={shouldAnimate ? { opacity: 0, y: 12 } : false}
+            animate={shouldAnimate ? { opacity: 1, y: 0 } : false}
+            transition={shouldAnimate ? { delay: 0.15 } : undefined}
             className="rounded-2xl p-3"
             style={{ backgroundColor: '#1E2136' }}
           >
@@ -410,9 +411,9 @@ export default function HomePage() {
             ].map((card, i) => (
               <motion.div
                 key={i}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 + i * 0.05 }}
+                initial={shouldAnimate ? { opacity: 0, y: 12 } : false}
+                animate={shouldAnimate ? { opacity: 1, y: 0 } : false}
+                transition={shouldAnimate ? { delay: 0.2 + i * 0.05 } : undefined}
                 className="rounded-2xl p-3 flex flex-col items-center justify-center min-h-[80px]"
                 style={{ backgroundColor: '#1E2136' }}
               >
@@ -426,8 +427,8 @@ export default function HomePage() {
         {/* Low-energy gentle card — replaces dense bento grid */}
         {isLowEnergy && (
           <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={shouldAnimate ? { opacity: 0, y: 12 } : false}
+            animate={shouldAnimate ? { opacity: 1, y: 0 } : false}
             className="rounded-2xl p-4"
             style={{ backgroundColor: '#1E2136' }}
           >

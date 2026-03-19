@@ -10,6 +10,7 @@
 
 import { useState } from 'react'
 import { motion } from 'motion/react'
+import { useMotion } from '@/shared/hooks/useMotion'
 import { X } from 'lucide-react'
 import type { FocusRoomState } from '@/shared/hooks/useFocusRoom'
 
@@ -21,6 +22,7 @@ interface FocusRoomSheetProps {
 }
 
 export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) {
+  const { shouldAnimate } = useMotion()
   const [mode, setMode] = useState<'pick' | 'join'>('pick')
   const [codeInput, setCodeInput] = useState('')
   const [copied, setCopied] = useState(false)
@@ -59,19 +61,19 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
     <>
       {/* Backdrop */}
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
+        initial={shouldAnimate ? { opacity: 0 } : false}
+        animate={shouldAnimate ? { opacity: 1 } : false}
+        exit={shouldAnimate ? { opacity: 0 } : undefined}
         className="fixed inset-0 bg-black/60 z-40"
         onClick={onClose}
       />
 
       {/* Sheet */}
       <motion.div
-        initial={{ y: '100%' }}
-        animate={{ y: 0 }}
-        exit={{ y: '100%' }}
-        transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+        initial={shouldAnimate ? { y: '100%' } : false}
+        animate={shouldAnimate ? { y: 0 } : false}
+        exit={shouldAnimate ? { y: '100%' } : undefined}
+        transition={shouldAnimate ? { type: 'spring', damping: 28, stiffness: 300 } : { duration: 0 }}
         className="fixed bottom-0 left-0 right-0 z-50 rounded-t-3xl p-5 safe-bottom"
         style={{ background: '#1E2136', maxHeight: '80vh', overflowY: 'auto' }}
       >
@@ -95,7 +97,7 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
             </p>
 
             <motion.button
-              whileTap={{ scale: 0.97 }}
+              whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
               onClick={handleCreate}
               className="w-full py-3.5 rounded-2xl font-semibold text-[14px]"
               style={{ background: 'linear-gradient(135deg, #7B72FF, #8B7FF7)', color: '#fff' }}
@@ -104,7 +106,7 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
             </motion.button>
 
             <motion.button
-              whileTap={{ scale: 0.97 }}
+              whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
               onClick={() => setMode('join')}
               className="w-full py-3 rounded-2xl font-medium text-[14px]"
               style={{ background: '#252840', border: '1px solid rgba(255,255,255,0.06)', color: '#E8E8F0' }}
@@ -133,7 +135,7 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
               autoFocus
             />
             <motion.button
-              whileTap={{ scale: 0.97 }}
+              whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
               onClick={handleJoin}
               disabled={codeInput.trim().length < 4}
               className="w-full py-3.5 rounded-2xl font-semibold text-[14px] disabled:opacity-40"
@@ -150,7 +152,7 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
         {/* ── Connecting ───────────────────────────────────────────────────── */}
         {room.status === 'connecting' && (
           <div className="flex flex-col items-center py-8 gap-3">
-            <div className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: '#7B72FF', borderTopColor: 'transparent' }} />
+            <div className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin motion-reduce:animate-none motion-reduce:opacity-60" style={{ borderColor: '#7B72FF', borderTopColor: 'transparent' }} />
             <p className="text-[13px]" style={{ color: '#8B8BA7' }}>Joining room…</p>
           </div>
         )}
@@ -210,7 +212,7 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
             )}
 
             <motion.button
-              whileTap={{ scale: 0.97 }}
+              whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
               onClick={handleStart}
               className="w-full py-3.5 rounded-2xl font-semibold text-[14px]"
               style={{ background: 'linear-gradient(135deg, #7B72FF, #4ECDC4)', color: '#fff' }}

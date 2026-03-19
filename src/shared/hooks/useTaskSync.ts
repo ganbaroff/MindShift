@@ -43,6 +43,7 @@ function rowToTask(row: TaskRow): Task {
                        : 'task',
     reminderSentAt:  row.reminder_sent_at,
     repeat:          'none',
+    note:            row.note ?? undefined,
   }
 }
 
@@ -63,6 +64,7 @@ function taskToInsertRow(task: Task, userId: string): Omit<TaskRow, 'id' | 'crea
     due_time:          task.dueTime,
     task_type:         task.taskType ?? null,
     reminder_sent_at:  task.reminderSentAt,
+    note:              task.note ?? null,
   }
 }
 

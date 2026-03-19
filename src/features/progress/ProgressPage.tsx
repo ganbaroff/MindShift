@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Link } from 'react-router-dom';
+import { useMotion } from '@/shared/hooks/useMotion';
 import { useStore } from '@/store';
 import { ENERGY_EMOJI } from '@/shared/lib/constants';
 import { useSessionHistory } from '@/shared/hooks/useSessionHistory';
@@ -17,6 +18,7 @@ const PSYCHOTYPE_META = {
 } as const
 
 export default function ProgressPage() {
+  const { shouldAnimate } = useMotion();
   const {
     xpTotal, completedTotal, achievements, weeklyStats, burnoutScore,
     psychotype, setPsychotype, setPsychotypeLastDerived, resetGridToDefaults,
@@ -89,14 +91,14 @@ export default function ProgressPage() {
 
   return (
     <div className="min-h-screen px-5 pb-36 pt-10" style={{ backgroundColor: '#0F1120' }}>
-      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
+      <motion.div initial={shouldAnimate ? { opacity: 0, y: -8 } : false} animate={shouldAnimate ? { opacity: 1, y: 0 } : false}>
         <h1 className="text-[24px] font-bold" style={{ color: '#E8E8F0' }}>Your Progress 🌱</h1>
         <p className="text-[13px] mt-0.5" style={{ color: '#8B8BA7' }}>Every step counts, no matter how small.</p>
       </motion.div>
 
       <div className="space-y-4 mt-5">
         {/* XP Card */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl p-3" style={{ backgroundColor: '#1E2136' }}>
+        <motion.div initial={shouldAnimate ? { opacity: 0, y: 12 } : false} animate={shouldAnimate ? { opacity: 1, y: 0 } : false} className="rounded-2xl p-3" style={{ backgroundColor: '#1E2136' }}>
           <div className="flex items-center gap-3">
             <div className="w-14 h-14 rounded-full flex items-center justify-center text-[24px] shrink-0" style={{ background: 'linear-gradient(135deg, #7B72FF, #4ECDC4)', padding: 2 }}>
               <div className="w-full h-full rounded-full flex items-center justify-center" style={{ backgroundColor: '#1E2136' }}>🧠</div>
@@ -115,7 +117,7 @@ export default function ProgressPage() {
         </motion.div>
 
         {/* Weekly Bars */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="rounded-2xl p-3" style={{ backgroundColor: '#1E2136' }}>
+        <motion.div initial={shouldAnimate ? { opacity: 0, y: 12 } : false} animate={shouldAnimate ? { opacity: 1, y: 0 } : false} transition={shouldAnimate ? { delay: 0.05 } : undefined} className="rounded-2xl p-3" style={{ backgroundColor: '#1E2136' }}>
           <div className="flex items-center justify-between mb-2">
             <span className="text-[11px] uppercase tracking-widest" style={{ color: '#8B8BA7' }}>This week</span>
             <span className="text-[13px]" style={{ color: '#E8E8F0' }}>
@@ -126,9 +128,9 @@ export default function ProgressPage() {
             {weekData.map((d, i) => (
               <div key={i} className="flex-1 flex flex-col items-center gap-0.5">
                 <motion.div
-                  initial={{ height: 0 }}
-                  animate={{ height: `${Math.max((d.mins / maxMins) * 100, 4)}%` }}
-                  transition={{ delay: 0.1 + i * 0.05, duration: 0.4 }}
+                  initial={shouldAnimate ? { height: 0 } : false}
+                  animate={shouldAnimate ? { height: `${Math.max((d.mins / maxMins) * 100, 4)}%` } : { height: `${Math.max((d.mins / maxMins) * 100, 4)}%` }}
+                  transition={shouldAnimate ? { delay: 0.1 + i * 0.05, duration: 0.4 } : { duration: 0 }}
                   className="w-full rounded-t gradient-primary-teal"
                   style={{ minHeight: d.mins > 0 ? 4 : 2 }}
                 />
@@ -148,7 +150,7 @@ export default function ProgressPage() {
             { value: String(completedTotal), emoji: '✅', label: 'Tasks Done' },
             { value: String(burnoutScore), emoji: '🧠', label: 'Burnout score' },
           ].map((s, i) => (
-            <motion.div key={i} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 + i * 0.03 }} className="rounded-2xl p-2.5 flex flex-col items-center" style={{ backgroundColor: '#1E2136' }}>
+            <motion.div key={i} initial={shouldAnimate ? { opacity: 0, y: 12 } : false} animate={shouldAnimate ? { opacity: 1, y: 0 } : false} transition={shouldAnimate ? { delay: 0.1 + i * 0.03 } : undefined} className="rounded-2xl p-2.5 flex flex-col items-center" style={{ backgroundColor: '#1E2136' }}>
               <span className="text-[18px] font-bold" style={{ color: '#E8E8F0' }}>{s.value}</span>
               <span className="text-[14px]">{s.emoji}</span>
               <span className="text-[10px]" style={{ color: '#8B8BA7' }}>{s.label}</span>
@@ -158,9 +160,9 @@ export default function ProgressPage() {
 
         {/* Focus Score — composite health metric */}
         <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.13 }}
+          initial={shouldAnimate ? { opacity: 0, y: 12 } : false}
+          animate={shouldAnimate ? { opacity: 1, y: 0 } : false}
+          transition={shouldAnimate ? { delay: 0.13 } : undefined}
           className="rounded-2xl p-3"
           style={{ backgroundColor: '#1E2136' }}
         >
@@ -179,9 +181,9 @@ export default function ProgressPage() {
           <div className="h-2 rounded-full overflow-hidden" style={{ backgroundColor: 'rgba(255,255,255,0.06)' }}>
             <motion.div
               className="h-full rounded-full"
-              initial={{ width: 0 }}
+              initial={shouldAnimate ? { width: 0 } : false}
               animate={{ width: `${focusScore}%` }}
-              transition={{ duration: 0.9, ease: 'easeOut' }}
+              transition={shouldAnimate ? { duration: 0.9, ease: 'easeOut' } : { duration: 0 }}
               style={{
                 background: focusScore >= 70
                   ? 'linear-gradient(90deg, #4ECDC4, #7B72FF)'
@@ -196,7 +198,7 @@ export default function ProgressPage() {
         </motion.div>
 
         {/* Energy Trends */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="rounded-2xl p-3" style={{ backgroundColor: '#1E2136' }}>
+        <motion.div initial={shouldAnimate ? { opacity: 0, y: 12 } : false} animate={shouldAnimate ? { opacity: 1, y: 0 } : false} transition={shouldAnimate ? { delay: 0.15 } : undefined} className="rounded-2xl p-3" style={{ backgroundColor: '#1E2136' }}>
           <p className="text-[11px] uppercase tracking-widest mb-1.5" style={{ color: '#4ECDC4' }}>Energy after sessions</p>
           {energyTrendEmojis.length > 0 ? (
             <>
@@ -218,9 +220,9 @@ export default function ProgressPage() {
         {/* Peak Focus Window (O-12) — derived from session history */}
         {weeklyStats && weeklyStats.peakFocusTime !== 'Not enough data' && (
           <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.17 }}
+            initial={shouldAnimate ? { opacity: 0, y: 12 } : false}
+            animate={shouldAnimate ? { opacity: 1, y: 0 } : false}
+            transition={shouldAnimate ? { delay: 0.17 } : undefined}
             className="rounded-2xl p-3"
             style={{ backgroundColor: '#1E2136', border: '1px solid rgba(78,205,196,0.12)' }}
           >
@@ -247,9 +249,9 @@ export default function ProgressPage() {
         {/* Your Focus Style — O-7 psychotype re-derivation */}
         {psychotype && (
           <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.19 }}
+            initial={shouldAnimate ? { opacity: 0, y: 12 } : false}
+            animate={shouldAnimate ? { opacity: 1, y: 0 } : false}
+            transition={shouldAnimate ? { delay: 0.19 } : undefined}
             className="rounded-2xl p-3"
             style={{
               backgroundColor: '#1E2136',
@@ -306,10 +308,10 @@ export default function ProgressPage() {
         {/* Share this week — Web Share API / Capacitor Share */}
         {shareSupported && (
           <motion.button
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.18 }}
-            whileTap={{ scale: 0.97 }}
+            initial={shouldAnimate ? { opacity: 0, y: 12 } : false}
+            animate={shouldAnimate ? { opacity: 1, y: 0 } : false}
+            transition={shouldAnimate ? { delay: 0.18 } : undefined}
+            whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
             onClick={() => void handleShareWeek()}
             className="w-full py-3 rounded-2xl text-sm font-medium flex items-center justify-center gap-2 transition-all duration-200"
             style={{
@@ -361,10 +363,10 @@ export default function ProgressPage() {
               return (
                 <div key={a.key} className="relative">
                   <motion.button
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.2 + i * 0.03 }}
-                    whileTap={{ scale: 0.95 }}
+                    initial={shouldAnimate ? { opacity: 0, scale: 0.95 } : false}
+                    animate={shouldAnimate ? { opacity: 1, scale: 1 } : false}
+                    transition={shouldAnimate ? { delay: 0.2 + i * 0.03 } : undefined}
+                    whileTap={shouldAnimate ? { scale: 0.95 } : undefined}
                     onClick={() => setFocusedAchievement(isFocused ? null : a.key)}
                     className="w-full rounded-2xl p-2.5 flex flex-col items-center"
                     style={{
@@ -381,9 +383,9 @@ export default function ProgressPage() {
                   <AnimatePresence>
                     {isFocused && (
                       <motion.div
-                        initial={{ opacity: 0, y: 4 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 4 }}
+                        initial={shouldAnimate ? { opacity: 0, y: 4 } : false}
+                        animate={shouldAnimate ? { opacity: 1, y: 0 } : false}
+                        exit={shouldAnimate ? { opacity: 0, y: 4 } : undefined}
                         className="absolute left-0 right-0 top-full mt-1 z-10 rounded-xl px-2.5 py-2"
                         style={{ backgroundColor: '#252840', border: '1px solid rgba(123,114,255,0.20)' }}
                       >

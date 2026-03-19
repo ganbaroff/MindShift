@@ -1,4 +1,5 @@
 import { motion } from 'motion/react';
+import { useMotion } from '@/shared/hooks/useMotion';
 import { ENERGY_LABELS, ENERGY_EMOJI } from '@/shared/lib/constants';
 
 const energyOptions = ENERGY_LABELS.map((label, i) => ({ emoji: ENERGY_EMOJI[i], label }));
@@ -9,6 +10,7 @@ interface EnergyPickerProps {
   size?: number;
 }
 export default function EnergyPicker({ selected, onSelect, size = 40 }: EnergyPickerProps) {
+  const { shouldAnimate } = useMotion();
   return (
     <div className="flex items-center justify-between gap-1">
       {energyOptions.map((opt, i) => {
@@ -16,14 +18,14 @@ export default function EnergyPicker({ selected, onSelect, size = 40 }: EnergyPi
         return (
           <motion.button
             key={i}
-            whileTap={{ scale: 0.97 }}
+            whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
             onClick={() => onSelect(i)}
             aria-label={`${opt.label} energy${active ? ' (selected)' : ''}`}
             aria-pressed={active}
             className="flex flex-col items-center gap-0.5"
           >
             <motion.span
-              animate={active ? { scale: 1.15 } : { scale: 1 }}
+              animate={shouldAnimate ? (active ? { scale: 1.15 } : { scale: 1 }) : false}
               className="block"
               style={{
                 fontSize: size,

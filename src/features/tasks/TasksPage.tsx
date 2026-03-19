@@ -2,6 +2,7 @@ import { useState, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ChevronDown, Search, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useMotion } from '@/shared/hooks/useMotion';
 import {
   DndContext,
   closestCenter,
@@ -26,10 +27,10 @@ import { DIFFICULTY_MAP } from '@/types';
 import type { Task } from '@/types';
 import { getNowPoolMax } from '@/shared/lib/constants';
 
-const TODAY_ISO = new Date().toISOString().split('T')[0];
-
 export default function TasksPage() {
   const navigate = useNavigate();
+  const { shouldAnimate } = useMotion();
+  const todayIso = new Date().toISOString().split('T')[0];
   const [showAddTask, setShowAddTask] = useState(false);
   const [showSomeday, setShowSomeday] = useState(false);
   const [showDone, setShowDone] = useState(false);
@@ -65,25 +66,25 @@ export default function TasksPage() {
 
   const nowMax = getNowPoolMax(appMode, seasonalMode);
 
-  // Overdue task detection — tasks with a past due date still active
-  const overdueTasks = useMemo(() =>
+  // Past-date task detection — tasks with a past due date still active
+  const pastDateTasks = useMemo(() =>
     [...nowPool, ...nextPool].filter(
-      t => t.status === 'active' && t.dueDate && t.dueDate < TODAY_ISO
+      t => t.status === 'active' && t.dueDate && t.dueDate < todayIso
     ),
-    [nowPool, nextPool]
+    [nowPool, nextPool, todayIso]
   );
 
   return (
     <div className="min-h-screen px-5 pb-36 pt-10" style={{ backgroundColor: '#0F1120' }}>
-      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
+      <motion.div initial={shouldAnimate ? { opacity: 0, y: -8 } : false} animate={shouldAnimate ? { opacity: 1, y: 0 } : false}>
         <h1 className="text-[24px] font-bold" style={{ color: '#E8E8F0' }}>Your Tasks</h1>
         <p className="text-[13px] mt-0.5" style={{ color: '#8B8BA7' }}>{nowTasks.length + nextTasks.length} tasks in play</p>
       </motion.div>
 
       {/* Search bar */}
       <motion.div
-        initial={{ opacity: 0, y: 4 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={shouldAnimate ? { opacity: 0, y: 4 } : false}
+        animate={shouldAnimate ? { opacity: 1, y: 0 } : false}
         className="mt-3 flex items-center gap-2 px-3 rounded-2xl h-10"
         style={{ backgroundColor: '#1E2136', border: '1px solid rgba(255,255,255,0.06)' }}
       >
@@ -106,11 +107,11 @@ export default function TasksPage() {
 
         {/* Auto-reschedule banner — gentle, non-shaming */}
         <AnimatePresence>
-          {overdueTasks.length > 0 && (
+          {pastDateTasks.length > 0 && (
             <motion.button
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
+              initial={shouldAnimate ? { opacity: 0, y: -8 } : false}
+              animate={shouldAnimate ? { opacity: 1, y: 0 } : false}
+              exit={shouldAnimate ? { opacity: 0, y: -8 } : undefined}
               onClick={() => navigate('/calendar')}
               className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-left"
               style={{
@@ -121,7 +122,7 @@ export default function TasksPage() {
               <span className="text-base">🗓️</span>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium" style={{ color: '#F59E0B' }}>
-                  {overdueTasks.length} task{overdueTasks.length !== 1 ? 's' : ''} past their due date
+                  {pastDateTasks.length} task{pastDateTasks.length !== 1 ? 's' : ''} past their due date
                 </p>
                 <p className="text-xs mt-0.5" style={{ color: '#8B8BA7' }}>
                   No pressure — tap to set new dates when you're ready
@@ -156,8 +157,8 @@ export default function TasksPage() {
 
         {/* Energy hint */}
         <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={shouldAnimate ? { opacity: 0, y: 12 } : false}
+          animate={shouldAnimate ? { opacity: 1, y: 0 } : false}
           className="rounded-2xl p-3 border"
           style={{ backgroundColor: 'rgba(78,205,196,0.08)', borderColor: 'rgba(78,205,196,0.15)' }}
         >
@@ -198,7 +199,7 @@ export default function TasksPage() {
         </div>
 
         {/* Someday */}
-        <CollapsibleSection label="SOMEDAY" count={somedayTasks.length} open={showSomeday} onToggle={() => setShowSomeday(!showSomeday)}>
+        <CollapsibleSection label="SOMEDAY" count={somedayTasks.length} open={showSomeday} onToggle={() => setShowSomeday(!showSomeday)} shouldAnimate={shouldAnimate}>
           <div className="space-y-2 mt-2">
             {somedayTasks.map((t, i) => (
               <TaskCard key={t.id} task={t} index={i} onDone={(id) => completeTask(id)} onPark={(id) => snoozeTask(id)} />
@@ -207,7 +208,7 @@ export default function TasksPage() {
         </CollapsibleSection>
 
         {/* Done */}
-        <CollapsibleSection label="✓ Done recently" count={doneTasks.length} open={showDone} onToggle={() => setShowDone(!showDone)} labelColor="#4ECDC4">
+        <CollapsibleSection label="✓ Done recently" count={doneTasks.length} open={showDone} onToggle={() => setShowDone(!showDone)} labelColor="#4ECDC4" shouldAnimate={shouldAnimate}>
           <div className="space-y-1 mt-2">
             {doneTasks.map(t => {
               const diffConfig = DIFFICULTY_MAP[t.difficulty ?? 1];
@@ -262,19 +263,19 @@ function SortableTaskCard({ task, index, onDone, onPark }: {
   )
 }
 
-function CollapsibleSection({ label, count, open, onToggle, children, labelColor }: {
-  label: string; count: number; open: boolean; onToggle: () => void; children: React.ReactNode; labelColor?: string;
+function CollapsibleSection({ label, count, open, onToggle, children, labelColor, shouldAnimate = true }: {
+  label: string; count: number; open: boolean; onToggle: () => void; children: React.ReactNode; labelColor?: string; shouldAnimate?: boolean;
 }) {
   return (
     <div>
-      <motion.button whileTap={{ scale: 0.97 }} onClick={onToggle} aria-expanded={open} aria-label={`${open ? 'Collapse' : 'Expand'} ${label} section`} className="flex items-center gap-2 w-full py-1 focus-visible:ring-2 focus-visible:ring-ms-primary/50 focus-visible:outline-none rounded">
+      <motion.button whileTap={shouldAnimate ? { scale: 0.97 } : undefined} onClick={onToggle} aria-expanded={open} aria-label={`${open ? 'Collapse' : 'Expand'} ${label} section`} className="flex items-center gap-2 w-full py-1 focus-visible:ring-2 focus-visible:ring-ms-primary/50 focus-visible:outline-none rounded">
         <span className="text-[11px] uppercase tracking-widest font-semibold" style={{ color: labelColor || '#8B8BA7' }}>{label}</span>
         <span className="text-[11px] px-1.5 py-0.5 rounded-full" style={{ backgroundColor: '#252840', color: '#8B8BA7' }}>{count}</span>
         <ChevronDown size={14} className={`ml-auto transition-transform ${open ? 'rotate-180' : ''}`} style={{ color: '#8B8BA7' }} />
       </motion.button>
       <AnimatePresence>
         {open && (
-          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+          <motion.div initial={shouldAnimate ? { height: 0, opacity: 0 } : false} animate={shouldAnimate ? { height: 'auto', opacity: 1 } : false} exit={shouldAnimate ? { height: 0, opacity: 0 } : undefined} className="overflow-hidden">
             {children}
           </motion.div>
         )}

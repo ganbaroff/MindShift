@@ -619,8 +619,8 @@ export const useStore = create<AppStore>()(
         partialize: (s) => ({
           userId: s.userId,
           email: s.email,
-          cognitiveMode: s.cognitiveMode,
           appMode: s.appMode,
+          energyLevel: s.energyLevel,
           avatarId: s.avatarId,
           xpTotal: s.xpTotal,
           lastSessionAt: s.lastSessionAt,
