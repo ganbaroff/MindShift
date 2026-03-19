@@ -50,6 +50,7 @@ function makeSampleTask(
     dueTime: null,
     taskType: 'task',
     reminderSentAt: null,
+    repeat: 'none',
   }
 }
 

@@ -42,6 +42,7 @@ function rowToTask(row: TaskRow): Task {
                        ? row.task_type
                        : 'task',
     reminderSentAt:  row.reminder_sent_at,
+    repeat:          'none',
   }
 }
 

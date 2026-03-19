@@ -24,11 +24,12 @@ const TODAY    = toISODate(new Date());
 const TOMORROW = toISODate(new Date(Date.now() + 86_400_000));
 
 // SpeechRecognition browser compatibility
-type SpeechRecognitionCtor = typeof SpeechRecognition
-const SpeechRecognitionAPI: SpeechRecognitionCtor | null =
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type SpeechRecognitionInstance = any
+const SpeechRecognitionAPI: (new () => SpeechRecognitionInstance) | null =
   (typeof window !== 'undefined' &&
-    ((window as unknown as { SpeechRecognition?: SpeechRecognitionCtor }).SpeechRecognition ??
-     (window as unknown as { webkitSpeechRecognition?: SpeechRecognitionCtor }).webkitSpeechRecognition)) || null
+    ((window as unknown as { SpeechRecognition?: new () => SpeechRecognitionInstance }).SpeechRecognition ??
+     (window as unknown as { webkitSpeechRecognition?: new () => SpeechRecognitionInstance }).webkitSpeechRecognition)) || null
 
 type VoiceState = 'idle' | 'listening' | 'classifying'
 
@@ -67,7 +68,7 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
     }
   }, [difficulty]);
 
-  const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
 
   // Reset form when modal closes/opens
   useEffect(() => {
@@ -152,14 +153,14 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
 
     rec.onstart = () => setVoiceState('listening');
 
-    rec.onresult = (e: SpeechRecognitionEvent) => {
-      const transcript = Array.from(e.results)
-        .map(r => r[0].transcript)
+    rec.onresult = (e: { results: { [index: number]: { transcript: string }[] } & { length: number } }) => {
+      const transcript = Array.from({ length: e.results.length }, (_, i) => e.results[i])
+        .map((r: { transcript: string }[]) => r[0].transcript)
         .join(' ');
       void classifyTranscript(transcript);
     };
 
-    rec.onerror = (e: SpeechRecognitionErrorEvent) => {
+    rec.onerror = (e: { error: string }) => {
       if (e.error !== 'aborted') {
         setVoiceError(e.error === 'not-allowed'
           ? 'Microphone permission denied.'
@@ -170,7 +171,7 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
     };
 
     rec.onend = () => {
-      if (voiceState === 'listening') setVoiceState('idle');
+      setVoiceState((prev) => prev === 'listening' ? 'idle' : prev);
     };
 
     recognitionRef.current = rec;

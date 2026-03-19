@@ -14,13 +14,13 @@ import { useUITone } from '@/shared/hooks/useUITone'
 // Rules: no quantifying absence, no streaks, forward-looking, persona-voiced.
 // Fifth message explicitly reinforces resilient identity ("consistent returner").
 
-const FALLBACK_MESSAGES = [
-  "Welcome back 🌱 Your old tasks are safely stored — no pressure, no backlog.",
-  "Hey, you're here. That's what matters. 🌿 Fresh start, right now.",
-  "Good to see you 💙 Everything waited for you. Let's take it one step at a time.",
-  "Back again 🌸 Opening this app took courage. What's one thing we can do together?",
-  "You always come back. 💫 That's who you are — a consistent returner, not a perfect one.",
-]
+// Fallback messages kept as reference (Research #7: identity-reinforcing, shame-free).
+// Currently unused — AI-generated messages via mochi-respond are preferred.
+// "Welcome back 🌱 Your old tasks are safely stored — no pressure, no backlog."
+// "Hey, you're here. That's what matters. 🌿 Fresh start, right now."
+// "Good to see you 💙 Everything waited for you. Let's take it one step at a time."
+// "Back again 🌸 Opening this app took courage. What's one thing we can do together?"
+// "You always come back. 💫 That's who you are — a consistent returner, not a perfect one."
 
 // ── Micro-win suggestion chips (Research #7: pre-populated options lower barrier) ──
 // Low-stakes, achievable in minutes — generate immediate dopamine burst before backlog.
@@ -111,6 +111,7 @@ export function RecoveryProtocol({ onDismiss }: Props) {
             dueTime: null,
             taskType: 'task',
             reminderSentAt: null,
+            repeat: 'none',
           }
           addTask(stepTask)
           if (userId) {
@@ -150,6 +151,7 @@ export function RecoveryProtocol({ onDismiss }: Props) {
       dueTime: null,
       taskType: 'task',
       reminderSentAt: null,
+      repeat: 'none',
     }
 
     addTask(newTask)

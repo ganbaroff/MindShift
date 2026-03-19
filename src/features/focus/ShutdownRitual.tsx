@@ -88,6 +88,7 @@ export function ShutdownRitual({ onDismiss }: Props) {
       dueTime: null,
       taskType: 'task',
       reminderSentAt: null,
+      repeat: 'none',
     }
     addTask(newTask)
 

@@ -223,6 +223,7 @@ export function useFocusSession() {
       dueTime: null,
       taskType: 'task',
       reminderSentAt: null,
+      repeat: 'none',
     }
     addTask(task)
     if (userId) {

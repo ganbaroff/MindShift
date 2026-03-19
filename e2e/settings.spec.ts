@@ -27,10 +27,10 @@ test.describe('Settings screen', () => {
   })
 
   test('app mode shows 3 options and they are clickable', async ({ authedPage: page }) => {
-    // Three chip buttons
-    const minimal = page.getByRole('button', { name: /Minimal/i })
-    const habit = page.getByRole('button', { name: /Habit/i })
-    const system = page.getByRole('button', { name: /System/i })
+    // Three chip buttons (use exact emoji+label to avoid matching Interface Style section)
+    const minimal = page.getByRole('button', { name: '🎯 Minimal' })
+    const habit = page.getByRole('button', { name: '🌱 Habit' })
+    const system = page.getByRole('button', { name: '🗂️ System' })
 
     await expect(minimal).toBeVisible()
     await expect(habit).toBeVisible()
