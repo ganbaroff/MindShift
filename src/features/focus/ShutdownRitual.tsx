@@ -19,6 +19,7 @@ import { useMotion } from '@/shared/hooks/useMotion'
 import { useStore } from '@/store'
 import { supabase } from '@/shared/lib/supabase'
 import { logError } from '@/shared/lib/logger'
+import { todayISO, tomorrowISO } from '@/shared/lib/dateUtils'
 import type { Task } from '@/types'
 
 interface Props {
@@ -46,7 +47,7 @@ export function ShutdownRitual({ onDismiss }: Props) {
   )
 
   // Today's completed tasks
-  const today = new Date().toISOString().split('T')[0]
+  const today = todayISO()
   const todayWins = [...nowPool, ...nextPool, ...somedayPool].filter(
     t => t.status === 'completed' && t.completedAt?.startsWith(today)
   )
@@ -71,7 +72,7 @@ export function ShutdownRitual({ onDismiss }: Props) {
     if (!title || isSubmitting) return
     setIsSubmitting(true)
 
-    const tomorrow = new Date(Date.now() + 86_400_000).toISOString().split('T')[0]
+    const tomorrow = tomorrowISO()
     const newTask: Task = {
       id: crypto.randomUUID(),
       title,

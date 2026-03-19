@@ -5,15 +5,18 @@
  * computes WeeklyStats from real data, loads it into the store, and
  * fetches AI-generated insights from the `weekly-insight` edge function.
  *
- * Returns: { energyTrend, weeklyInsight, loading }
+ * Returns: { energyTrend, weeklyInsight, loading, sessions }
  *
  * Rules:
  *  - Guest users (userId starts with "guest_") → skip Supabase, return statics
- *  - AI edge function is called once per component mount (guarded by useRef)
+ *  - Uses React Query (`@tanstack/react-query`) to deduplicate fetches across
+ *    all consumers — only ONE Supabase query and ONE AI call regardless of how
+ *    many components call this hook.
  *  - All Supabase calls wrapped in try/catch — never blocks the UI
  */
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/shared/lib/supabase'
 import { useStore } from '@/store'
 import { logError } from '@/shared/lib/logger'
@@ -119,6 +122,90 @@ function computeWeeklyStats(sessions: FocusSessionRow[]): WeeklyStats {
   }
 }
 
+// ── Data types ───────────────────────────────────────────────────────────────
+
+interface SessionQueryResult {
+  sessions: FocusSessionRow[]
+  energyTrend: number[]
+  weeklyInsight: string[]
+  stats: WeeklyStats
+}
+
+// ── Query function ───────────────────────────────────────────────────────────
+
+async function fetchSessionHistory(
+  userId: string,
+  seasonalMode: string | undefined,
+): Promise<SessionQueryResult> {
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+
+  const { data, error } = await supabase
+    .from('focus_sessions')
+    .select('*')
+    .eq('user_id', userId)
+    .gte('started_at', thirtyDaysAgo)
+    .order('started_at', { ascending: false })
+
+  if (error) {
+    logError('useSessionHistory.fetch', error)
+    return {
+      sessions: [],
+      energyTrend: [],
+      weeklyInsight: FALLBACK_INSIGHTS,
+      stats: computeWeeklyStats([]),
+    }
+  }
+
+  const sessions: FocusSessionRow[] = (data ?? []) as FocusSessionRow[]
+
+  // Compute WeeklyStats
+  const stats = computeWeeklyStats(sessions)
+
+  // Energy trend — last 10 sessions with a non-null energy_after
+  const energyTrend = sessions
+    .map(s => s.energy_after)
+    .filter((e): e is number => e !== null)
+    .slice(0, 10)
+
+  // AI insights
+  let weeklyInsight = FALLBACK_INSIGHTS
+  if (sessions.length > 0) {
+    try {
+      const last7Days = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+      const recentSessions = sessions.filter(s => s.started_at >= last7Days)
+
+      const { data: insightData, error: insightError } = await supabase.functions
+        .invoke('weekly-insight', {
+          body: {
+            sessions: recentSessions.map(s => ({
+              duration_ms:   s.duration_ms,
+              phase_reached: s.phase_reached,
+              energy_before: s.energy_before,
+              energy_after:  s.energy_after,
+              audio_preset:  s.audio_preset,
+              started_at:    s.started_at,
+            })),
+            seasonalMode,
+          },
+        })
+
+      if (insightError) {
+        logError('useSessionHistory.insight', insightError)
+      } else {
+        const raw = insightData as { insights?: string[] } | null
+        const insights = raw?.insights
+        if (Array.isArray(insights) && insights.length > 0) {
+          weeklyInsight = insights
+        }
+      }
+    } catch (e) {
+      logError('useSessionHistory.insight', e)
+    }
+  }
+
+  return { sessions, energyTrend, weeklyInsight, stats }
+}
+
 // ── Hook ──────────────────────────────────────────────────────────────────────
 
 export interface SessionHistoryResult {
@@ -131,87 +218,34 @@ export interface SessionHistoryResult {
   sessions: FocusSessionRow[]
 }
 
+const EMPTY_SESSIONS: FocusSessionRow[] = []
+const EMPTY_ENERGY: number[] = []
+
 export function useSessionHistory(): SessionHistoryResult {
-  const { userId, seasonalMode, setWeeklyStats } = useStore()
+  const userId = useStore(s => s.userId)
+  const seasonalMode = useStore(s => s.seasonalMode)
+  const setWeeklyStats = useStore(s => s.setWeeklyStats)
 
-  const [energyTrend, setEnergyTrend] = useState<number[]>([])
-  const [weeklyInsight, setWeeklyInsight] = useState<string[]>(FALLBACK_INSIGHTS)
-  const [sessions, setSessions] = useState<FocusSessionRow[]>([])
-  const [loading, setLoading] = useState(false)
+  const isGuest = !userId || userId.startsWith('guest_')
 
-  // Guard: only call the AI edge function once per mount
-  const insightCalledRef = useRef(false)
+  const { data, isLoading } = useQuery({
+    queryKey: ['session-history', userId],
+    queryFn: () => fetchSessionHistory(userId!, seasonalMode),
+    enabled: !isGuest,
+    staleTime: 5 * 60 * 1000, // 5 minutes — matches QueryClient default
+  })
 
+  // Push WeeklyStats into Zustand store when data arrives
   useEffect(() => {
-    if (!userId || userId.startsWith('guest_')) return
+    if (data?.stats) {
+      setWeeklyStats(data.stats)
+    }
+  }, [data?.stats, setWeeklyStats])
 
-    setLoading(true)
-
-    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
-
-    supabase
-      .from('focus_sessions')
-      .select('*')
-      .eq('user_id', userId)
-      .gte('started_at', thirtyDaysAgo)
-      .order('started_at', { ascending: false })
-      .then(({ data, error }) => {
-        setLoading(false)
-        if (error) { logError('useSessionHistory.fetch', error); return }
-
-        const sessions: FocusSessionRow[] = (data ?? []) as FocusSessionRow[]
-
-        // Expose raw sessions for psychotype derivation (O-7)
-        setSessions(sessions)
-
-        // Compute and store WeeklyStats
-        const stats = computeWeeklyStats(sessions)
-        setWeeklyStats(stats)
-
-        // Energy trend — last 10 sessions with a non-null energy_after
-        const trend = sessions
-          .map(s => s.energy_after)
-          .filter((e): e is number => e !== null)
-          .slice(0, 10)
-        setEnergyTrend(trend)
-
-        // AI insights (once per mount)
-        if (!insightCalledRef.current && sessions.length > 0) {
-          insightCalledRef.current = true
-
-          const last7Days = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
-          const recentSessions = sessions.filter(s => s.started_at >= last7Days)
-
-          supabase.functions
-            .invoke('weekly-insight', {
-              body: {
-                sessions: recentSessions.map(s => ({
-                  duration_ms:   s.duration_ms,
-                  phase_reached: s.phase_reached,
-                  energy_before: s.energy_before,
-                  energy_after:  s.energy_after,
-                  audio_preset:  s.audio_preset,
-                  started_at:    s.started_at,
-                })),
-                seasonalMode,
-              },
-            })
-            .then(({ data: insightData, error: insightError }) => {
-              if (insightError) {
-                logError('useSessionHistory.insight', insightError)
-                return
-              }
-              // Edge function returns { insights: string[] }
-              const raw = insightData as { insights?: string[] } | null
-              const insights = raw?.insights
-              if (Array.isArray(insights) && insights.length > 0) {
-                setWeeklyInsight(insights)
-              }
-            })
-        }
-      })
-  }, [userId]) // eslint-disable-line react-hooks/exhaustive-deps
-  // Intentionally omitting seasonalMode/setWeeklyStats — re-fetch only on login
-
-  return { energyTrend, weeklyInsight, loading, sessions }
+  return useMemo(() => ({
+    energyTrend: data?.energyTrend ?? EMPTY_ENERGY,
+    weeklyInsight: data?.weeklyInsight ?? FALLBACK_INSIGHTS,
+    loading: isLoading,
+    sessions: data?.sessions ?? EMPTY_SESSIONS,
+  }), [data, isLoading])
 }

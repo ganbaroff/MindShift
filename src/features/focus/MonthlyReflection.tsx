@@ -17,6 +17,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { useStore } from '@/store'
+import { currentMonthISO } from '@/shared/lib/dateUtils'
 import { ShareCard } from '@/shared/ui/ShareCard'
 
 interface Props {
@@ -60,7 +61,7 @@ export function MonthlyReflection({ onDismiss }: Props) {
   const now = new Date()
   const monthName = MONTH_NAMES[now.getMonth()]
   const prevMonthName = MONTH_NAMES[(now.getMonth() + 11) % 12]
-  const currentMonth = now.toISOString().slice(0, 7)
+  const currentMonth = currentMonthISO()
 
   const handleDismiss = useCallback(() => {
     setMonthlyReflectionShownMonth(currentMonth)
