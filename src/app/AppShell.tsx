@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { lazy, Suspense, useState, useEffect, useRef, useCallback } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'motion/react'
 import { BottomNav } from './BottomNav'
@@ -6,6 +6,11 @@ import { useStore } from '@/store'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { useDeadlineReminders } from '@/shared/hooks/useDeadlineReminders'
 import { InstallBanner } from '@/shared/ui/InstallBanner'
+import { Mascot } from '@/shared/ui/Mascot'
+
+const LazyMochiChat = lazy(() =>
+  import('@/features/mochi/MochiChat').then(m => ({ default: m.MochiChat }))
+)
 
 // ── S-7 Anti-scroll friction nudge ────────────────────────────────────────────
 // Non-blocking: shows 5 s then disappears on its own.
@@ -41,6 +46,8 @@ function SessionFrictionNudge({ onDismiss }: { onDismiss: () => void }) {
 export function AppShell() {
   const sessionPhase = useStore(s => s.sessionPhase)
   const isInFocus = sessionPhase === 'flow' || sessionPhase === 'struggle' || sessionPhase === 'release'
+  const seenHints = useStore(s => s.seenHints)
+  const markHintSeen = useStore(s => s.markHintSeen)
   const { shouldAnimate, t } = useMotion()
   const location = useLocation()
   const prevPathRef = useRef(location.pathname)
@@ -48,7 +55,10 @@ export function AppShell() {
   const [isOnline, setIsOnline] = useState(navigator.onLine)
   const [showBackOnline, setShowBackOnline] = useState(false)
   const [showFriction, setShowFriction] = useState(false)
+  const [mochiChatOpen, setMochiChatOpen] = useState(false)
   const dismissFriction = useCallback(() => setShowFriction(false), [])
+
+  const hasSeenMochiHint = seenHints.includes('mochi_chat_hint')
 
   // Deadline reminders — gentle, tone-aware nudges for upcoming due dates
   useDeadlineReminders()
@@ -79,6 +89,17 @@ export function AppShell() {
       window.removeEventListener('online', handleOnline)
       window.removeEventListener('offline', handleOffline)
     }
+  }, [])
+
+  const handleMochiOpen = useCallback(() => {
+    setMochiChatOpen(true)
+    if (!hasSeenMochiHint) {
+      markHintSeen('mochi_chat_hint')
+    }
+  }, [hasSeenMochiHint, markHintSeen])
+
+  const handleMochiClose = useCallback(() => {
+    setMochiChatOpen(false)
   }, [])
 
   return (
@@ -119,6 +140,43 @@ export function AppShell() {
       <AnimatePresence>
         {showFriction && <SessionFrictionNudge onDismiss={dismissFriction} />}
       </AnimatePresence>
+
+      {/* Mochi chat FAB — visible when not in active focus session */}
+      {!isInFocus && (
+        <motion.button
+          onClick={handleMochiOpen}
+          className="fixed z-30 rounded-full focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
+          style={{
+            right: 16,
+            bottom: 'calc(72px + env(safe-area-inset-bottom))',
+            boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
+            background: '#252840',
+            padding: 6,
+          }}
+          aria-label="Chat with Mochi"
+          initial={shouldAnimate ? { scale: 0, opacity: 0 } : {}}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={shouldAnimate ? { type: 'spring', delay: 0.5, damping: 15 } : { duration: 0 }}
+        >
+          <Mascot state="idle" size={40} label="Mochi" />
+          {/* Pulse hint on first load — gated by useMotion */}
+          {shouldAnimate && !hasSeenMochiHint && (
+            <motion.div
+              className="absolute inset-0 rounded-full motion-reduce:animate-none"
+              style={{ border: '2px solid rgba(78,205,196,0.5)' }}
+              animate={{ scale: [1, 1.4, 1], opacity: [0.6, 0, 0.6] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            />
+          )}
+        </motion.button>
+      )}
+
+      {/* Mochi chat overlay — lazy loaded */}
+      {mochiChatOpen && (
+        <Suspense fallback={null}>
+          <LazyMochiChat open={mochiChatOpen} onClose={handleMochiClose} />
+        </Suspense>
+      )}
 
       {/* Hide bottom nav + install nudge during deep focus phases */}
       {!isInFocus && <BottomNav />}
