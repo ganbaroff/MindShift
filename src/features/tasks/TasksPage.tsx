@@ -39,7 +39,7 @@ export default function TasksPage() {
   const [showDone, setShowDone] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const { nowPool, nextPool, somedayPool, completeTask, snoozeTask, reorderPool, appMode, seasonalMode } = useStore();
+  const { nowPool, nextPool, somedayPool, completeTask, snoozeTask, removeTask, reorderPool, appMode, seasonalMode } = useStore();
 
   // dnd-kit sensors — pointer for desktop, touch for mobile
   const sensors = useSensors(
@@ -171,7 +171,7 @@ export default function TasksPage() {
               <SortableContext items={nowTasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
                 <div className="space-y-2">
                   {nowTasks.map((t, i) => (
-                    <SortableTaskCard key={t.id} task={t} index={i} onDone={completeTask} onPark={snoozeTask} />
+                    <SortableTaskCard key={t.id} task={t} index={i} onDone={completeTask} onPark={snoozeTask} onRemove={removeTask} />
                   ))}
                 </div>
               </SortableContext>
@@ -214,7 +214,7 @@ export default function TasksPage() {
               <SortableContext items={nextTasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
                 <div className="space-y-2">
                   {nextTasks.map((t, i) => (
-                    <SortableTaskCard key={t.id} task={t} index={i} onDone={completeTask} onPark={snoozeTask} />
+                    <SortableTaskCard key={t.id} task={t} index={i} onDone={completeTask} onPark={snoozeTask} onRemove={removeTask} />
                   ))}
                 </div>
               </SortableContext>
@@ -226,7 +226,7 @@ export default function TasksPage() {
         <CollapsibleSection label="SOMEDAY" count={somedayTasks.length} open={showSomeday} onToggle={() => setShowSomeday(!showSomeday)} shouldAnimate={shouldAnimate}>
           <div className="space-y-2 mt-2">
             {somedayTasks.map((t, i) => (
-              <TaskCard key={t.id} task={t} index={i} onDone={(id) => completeTask(id)} onPark={(id) => snoozeTask(id)} />
+              <TaskCard key={t.id} task={t} index={i} onDone={(id) => completeTask(id)} onPark={(id) => snoozeTask(id)} onRemove={(id) => removeTask(id)} />
             ))}
           </div>
         </CollapsibleSection>
@@ -266,8 +266,8 @@ export default function TasksPage() {
 }
 
 // ── Sortable wrapper for TaskCard ─────────────────────────────────────────────
-function SortableTaskCard({ task, index, onDone, onPark }: {
-  task: Task; index: number; onDone: (id: string) => void; onPark: (id: string) => void
+function SortableTaskCard({ task, index, onDone, onPark, onRemove }: {
+  task: Task; index: number; onDone: (id: string) => void; onPark: (id: string) => void; onRemove?: (id: string) => void
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: task.id })
   return (
@@ -282,7 +282,7 @@ function SortableTaskCard({ task, index, onDone, onPark }: {
     >
       {/* Drag handle overlay — long press activates via TouchSensor */}
       <div {...attributes} {...listeners} className="touch-none">
-        <TaskCard task={task} index={index} onDone={onDone} onPark={onPark} />
+        <TaskCard task={task} index={index} onDone={onDone} onPark={onPark} onRemove={onRemove} />
       </div>
     </div>
   )

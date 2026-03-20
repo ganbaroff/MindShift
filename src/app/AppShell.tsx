@@ -47,8 +47,8 @@ function SessionFrictionNudge({ onDismiss }: { onDismiss: () => void }) {
 export function AppShell() {
   const sessionPhase = useStore(s => s.sessionPhase)
   const isInFocus = sessionPhase === 'flow' || sessionPhase === 'struggle' || sessionPhase === 'release'
-  const seenHints = useStore(s => s.seenHints)
-  const markHintSeen = useStore(s => s.markHintSeen)
+  const mochiChatOpenCount = useStore(s => s.mochiChatOpenCount)
+  const incrementMochiChatOpen = useStore(s => s.incrementMochiChatOpen)
   const { shouldAnimate, t } = useMotion()
   const location = useLocation()
   const prevPathRef = useRef(location.pathname)
@@ -59,7 +59,7 @@ export function AppShell() {
   const [mochiChatOpen, setMochiChatOpen] = useState(false)
   const dismissFriction = useCallback(() => setShowFriction(false), [])
 
-  const hasSeenMochiHint = seenHints.includes('mochi_chat_hint')
+  const showMochiPulse = mochiChatOpenCount < 3
 
   // Deadline reminders — gentle, tone-aware nudges for upcoming due dates
   useDeadlineReminders()
@@ -94,10 +94,8 @@ export function AppShell() {
 
   const handleMochiOpen = useCallback(() => {
     setMochiChatOpen(true)
-    if (!hasSeenMochiHint) {
-      markHintSeen('mochi_chat_hint')
-    }
-  }, [hasSeenMochiHint, markHintSeen])
+    incrementMochiChatOpen()
+  }, [incrementMochiChatOpen])
 
   const handleMochiClose = useCallback(() => {
     setMochiChatOpen(false)
@@ -160,8 +158,8 @@ export function AppShell() {
           transition={shouldAnimate ? { type: 'spring', delay: 0.5, damping: 15 } : { duration: 0 }}
         >
           <Mascot state="idle" size={40} label="Mochi" />
-          {/* Pulse hint on first load — gated by useMotion */}
-          {shouldAnimate && !hasSeenMochiHint && (
+          {/* Pulse hint for first 3 opens — gated by useMotion */}
+          {shouldAnimate && showMochiPulse && (
             <motion.div
               className="absolute inset-0 rounded-full motion-reduce:animate-none"
               style={{ border: '2px solid rgba(78,205,196,0.5)' }}

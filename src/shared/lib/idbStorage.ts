@@ -63,3 +63,14 @@ export const idbStorage: StateStorage = {
     localStorage.removeItem(`${name}_backup`)
   },
 }
+
+// ── Cross-tab sync ─────────────────────────────────────────────────────────
+// When tab A saves state, the _backup key in localStorage changes.
+// Tab B detects this via the `storage` event and reloads to pick up fresh state.
+if (typeof window !== 'undefined') {
+  window.addEventListener('storage', (e: StorageEvent) => {
+    if (e.key?.endsWith('_backup') && e.newValue) {
+      window.location.reload()
+    }
+  })
+}

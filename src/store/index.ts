@@ -83,6 +83,7 @@ interface TaskSlice {
   completeTask: (taskId: string) => void
   snoozeTask: (taskId: string) => void  // now → next
   moveTask: (taskId: string, toPool: Task['pool']) => void
+  updateTask: (taskId: string, updates: Partial<Pick<Task, 'title' | 'note' | 'difficulty' | 'dueDate' | 'dueTime' | 'category'>>) => void
   removeTask: (taskId: string) => void
   setTasks: (tasks: Task[]) => void
   archiveAllOverdue: () => string[]     // returns archived ids
@@ -138,6 +139,9 @@ interface PreferencesSlice {
   // Progressive disclosure — tracks which coach marks have been seen
   seenHints: string[]
   markHintSeen: (id: string) => void
+  // Mochi chat open counter — pulse hint shows for first 3 opens
+  mochiChatOpenCount: number
+  incrementMochiChatOpen: () => void
   // Subscription state (trial mode — no actual charges)
   subscriptionTier: 'free' | 'pro_trial' | 'pro'
   trialEndsAt: string | null        // ISO timestamp
@@ -476,6 +480,16 @@ export const useStore = create<AppStore>()(
           }
         },
 
+        updateTask: (taskId, updates) => set((s) => {
+          const apply = (tasks: Task[]) =>
+            tasks.map(t => t.id === taskId ? { ...t, ...updates } : t)
+          return {
+            nowPool: apply(s.nowPool),
+            nextPool: apply(s.nextPool),
+            somedayPool: apply(s.somedayPool),
+          }
+        }),
+
         removeTask: (taskId) => set((s) => ({
           nowPool: s.nowPool.filter(t => t.id !== taskId),
           nextPool: s.nextPool.filter(t => t.id !== taskId),
@@ -645,6 +659,10 @@ export const useStore = create<AppStore>()(
         markHintSeen: (id) => set((s) => ({
           seenHints: s.seenHints.includes(id) ? s.seenHints : [...s.seenHints, id],
         })),
+        mochiChatOpenCount: 0,
+        incrementMochiChatOpen: () => set((s) => ({
+          mochiChatOpenCount: s.mochiChatOpenCount + 1,
+        })),
 
         subscriptionTier: 'free',
         trialEndsAt: null,
@@ -788,6 +806,7 @@ export const useStore = create<AppStore>()(
           reducedStimulation: s.reducedStimulation,
           hapticsEnabled: s.hapticsEnabled,
           seenHints: s.seenHints,
+          mochiChatOpenCount: s.mochiChatOpenCount,
           subscriptionTier: s.subscriptionTier,
           trialEndsAt: s.trialEndsAt,
           gridWidgets: s.gridWidgets,

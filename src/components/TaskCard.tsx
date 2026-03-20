@@ -1,5 +1,6 @@
-import { memo, useState, useRef, useEffect } from 'react';
+import { memo, useState, useRef, useEffect, useCallback } from 'react';
 import { motion } from 'motion/react';
+import { Pencil, Check, X } from 'lucide-react';
 import { useMotion } from '@/shared/hooks/useMotion';
 import { hapticDone } from '@/shared/lib/haptic';
 import { DIFFICULTY_MAP, TASK_TYPE_CONFIG, CATEGORY_CONFIG } from '@/types';
@@ -13,6 +14,7 @@ interface TaskCardProps {
   index?: number;
   onDone?: (id: string) => void;
   onPark?: (id: string) => void;
+  onRemove?: (id: string) => void;
 }
 
 function DifficultyDots({ difficulty }: { difficulty: 1 | 2 | 3 }) {
@@ -50,14 +52,73 @@ const COMPLETION_TOASTS: Record<string, string[]> = {
   ],
 }
 
-function TaskCardInner({ task, index = 0, onDone, onPark }: TaskCardProps) {
+function TaskCardInner({ task, index = 0, onDone, onPark, onRemove }: TaskCardProps) {
   const { shouldAnimate } = useMotion();
   const [justCompleted, setJustCompleted] = useState(false);
   const emotionalReactivity = useStore(s => s.emotionalReactivity);
+  const updateTask = useStore(s => s.updateTask);
   const config = DIFFICULTY_MAP[task.difficulty ?? 1];
   const isCarryOver = task.status === 'active' &&
-    (Date.now() - new Date(task.createdAt).getTime() > 24 * 60 * 60 * 1000);
+    (Date.now() - new Date(task.createdAt).getTime() >= 24 * 60 * 60 * 1000);
   const hasReminder = !!task.dueDate && reminders.has(task.id);
+
+  // ── Inline edit mode ────────────────────────────────────────────────────────
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState(task.title);
+  const [editNote, setEditNote] = useState(task.note ?? '');
+  const [editDueDate, setEditDueDate] = useState(task.dueDate ?? '');
+  const editInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (isEditing && editInputRef.current) {
+      editInputRef.current.focus();
+      editInputRef.current.select();
+    }
+  }, [isEditing]);
+
+  const handleEditSave = useCallback(() => {
+    const trimmedTitle = editTitle.trim();
+    if (!trimmedTitle) return;
+    updateTask(task.id, {
+      title: trimmedTitle,
+      note: editNote.trim() || undefined,
+      dueDate: editDueDate || null,
+    });
+    setIsEditing(false);
+  }, [editTitle, editNote, editDueDate, task.id, updateTask]);
+
+  const handleEditCancel = useCallback(() => {
+    setEditTitle(task.title);
+    setEditNote(task.note ?? '');
+    setEditDueDate(task.dueDate ?? '');
+    setIsEditing(false);
+  }, [task.title, task.note, task.dueDate]);
+
+  const handleEditKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') handleEditSave();
+    if (e.key === 'Escape') handleEditCancel();
+  }, [handleEditSave, handleEditCancel]);
+
+  // ── Delete confirmation — two-tap with 3s revert ───────────────────────────
+  const [confirmRemove, setConfirmRemove] = useState(false);
+  const removeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (removeTimerRef.current) clearTimeout(removeTimerRef.current);
+    };
+  }, []);
+
+  const handleRemoveTap = useCallback(() => {
+    if (confirmRemove) {
+      if (removeTimerRef.current) clearTimeout(removeTimerRef.current);
+      onRemove?.(task.id);
+      setConfirmRemove(false);
+    } else {
+      setConfirmRemove(true);
+      removeTimerRef.current = setTimeout(() => setConfirmRemove(false), 3000);
+    }
+  }, [confirmRemove, onRemove, task.id]);
 
   // Undo completion — 4s deferred window
   const undoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -113,6 +174,69 @@ function TaskCardInner({ task, index = 0, onDone, onPark }: TaskCardProps) {
     });
   };
 
+  // ── Edit mode rendering ─────────────────────────────────────────────────────
+  if (isEditing) {
+    return (
+      <motion.div
+        initial={shouldAnimate ? { opacity: 0, y: 8 } : false}
+        animate={shouldAnimate ? { opacity: 1, y: 0 } : false}
+        className="rounded-2xl p-3 overflow-hidden"
+        style={{
+          backgroundColor: '#1E2136',
+          borderLeft: `3px solid ${config.color}`,
+          border: '1px solid rgba(123,114,255,0.3)',
+        }}
+      >
+        <div className="space-y-2">
+          <input
+            ref={editInputRef}
+            value={editTitle}
+            onChange={e => setEditTitle(e.target.value)}
+            onKeyDown={handleEditKeyDown}
+            placeholder="Task title"
+            className="w-full bg-ms-raised rounded-lg px-3 h-9 text-[14px] text-ms-text placeholder:text-ms-muted border border-transparent focus:border-ms-primary outline-none"
+            aria-label="Edit task title"
+          />
+          <textarea
+            value={editNote}
+            onChange={e => setEditNote(e.target.value)}
+            onKeyDown={handleEditKeyDown}
+            placeholder="Note (optional)"
+            rows={2}
+            className="w-full bg-ms-raised rounded-lg px-3 py-2 text-[12px] text-ms-text placeholder:text-ms-muted border border-transparent focus:border-ms-primary outline-none resize-none"
+            aria-label="Edit task note"
+          />
+          <input
+            type="date"
+            value={editDueDate}
+            onChange={e => setEditDueDate(e.target.value)}
+            className="w-full bg-ms-raised rounded-lg px-3 h-9 text-[12px] text-ms-text border border-transparent focus:border-ms-primary outline-none"
+            aria-label="Edit due date"
+          />
+          <div className="flex gap-2">
+            <button
+              onClick={handleEditSave}
+              disabled={!editTitle.trim()}
+              className="flex-1 h-8 rounded-lg text-[12px] font-medium flex items-center justify-center gap-1 disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-ms-primary/50 focus-visible:outline-none"
+              style={{ backgroundColor: 'rgba(78,205,196,0.12)', color: '#4ECDC4' }}
+              aria-label="Save edit"
+            >
+              <Check size={14} /> Save
+            </button>
+            <button
+              onClick={handleEditCancel}
+              className="flex-1 h-8 rounded-lg text-[12px] font-medium flex items-center justify-center gap-1 focus-visible:ring-2 focus-visible:ring-ms-primary/50 focus-visible:outline-none"
+              style={{ backgroundColor: '#252840', color: '#8B8BA7' }}
+              aria-label="Cancel edit"
+            >
+              <X size={14} /> Cancel
+            </button>
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
   return (
     <motion.div
       initial={shouldAnimate ? { opacity: 0, y: 8 } : false}
@@ -160,6 +284,22 @@ function TaskCardInner({ task, index = 0, onDone, onPark }: TaskCardProps) {
             carry-over
           </span>
         )}
+        {/* Edit button */}
+        {task.status === 'active' && (
+          <button
+            onClick={() => {
+              setEditTitle(task.title);
+              setEditNote(task.note ?? '');
+              setEditDueDate(task.dueDate ?? '');
+              setIsEditing(true);
+            }}
+            className="ml-auto p-1 rounded-md focus-visible:ring-2 focus-visible:ring-ms-primary/50 focus-visible:outline-none"
+            style={{ color: '#8B8BA7' }}
+            aria-label="Edit task"
+          >
+            <Pencil size={13} />
+          </button>
+        )}
       </div>
 
       {/* Title */}
@@ -201,7 +341,7 @@ function TaskCardInner({ task, index = 0, onDone, onPark }: TaskCardProps) {
           } : undefined}
           transition={shouldAnimate ? { duration: 0.35, ease: 'easeOut' } : { duration: 0 }}
           onClick={() => handleDone(task.id)}
-          className="flex-1 h-9 rounded-xl text-[13px] font-medium"
+          className="flex-1 h-9 rounded-xl text-[13px] font-medium focus-visible:ring-2 focus-visible:ring-[#4ECDC4]/50 focus-visible:outline-none"
           style={{
             backgroundColor: justCompleted ? 'rgba(78,205,196,0.2)' : 'rgba(78,205,196,0.12)',
             border: '1px solid rgba(78,205,196,0.35)',
@@ -213,11 +353,26 @@ function TaskCardInner({ task, index = 0, onDone, onPark }: TaskCardProps) {
         <motion.button
           whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
           onClick={() => onPark?.(task.id)}
-          className="flex-1 h-9 rounded-xl text-[13px] font-medium"
+          className="flex-1 h-9 rounded-xl text-[13px] font-medium focus-visible:ring-2 focus-visible:ring-ms-primary/50 focus-visible:outline-none"
           style={{ backgroundColor: '#252840', color: '#8B8BA7' }}
         >
           Park it →
         </motion.button>
+        {onRemove && (
+          <motion.button
+            whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
+            onClick={handleRemoveTap}
+            className="h-9 px-3 rounded-xl text-[12px] font-medium focus-visible:ring-2 focus-visible:ring-[#F59E0B]/50 focus-visible:outline-none transition-colors"
+            style={{
+              backgroundColor: confirmRemove ? 'rgba(245,158,11,0.2)' : 'rgba(139,139,167,0.1)',
+              border: confirmRemove ? '1px solid rgba(245,158,11,0.4)' : '1px solid transparent',
+              color: confirmRemove ? '#F59E0B' : '#8B8BA7',
+            }}
+            aria-label={confirmRemove ? 'Confirm remove task' : 'Remove task'}
+          >
+            {confirmRemove ? 'Remove?' : '×'}
+          </motion.button>
+        )}
       </div>
     </motion.div>
   );
@@ -233,7 +388,8 @@ const TaskCard = memo(TaskCardInner, (prev, next) =>
   prev.task.estimatedMinutes === next.task.estimatedMinutes &&
   prev.task.taskType === next.task.taskType &&
   prev.task.category === next.task.category &&
-  prev.index === next.index
+  prev.index === next.index &&
+  prev.onRemove === next.onRemove
 );
 
 export default TaskCard;
