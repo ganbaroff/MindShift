@@ -161,6 +161,7 @@ export function useFocusSession() {
   // ── Park thought ─────────────────────────────────────────────────────────────
   const [parkOpen, setParkOpen] = useState(false)
   const [parkText, setParkText] = useState('')
+  const parkedCountRef = useRef(0)
 
   // Only 'task' type can have focus sessions — meetings/reminders/ideas are excluded
   const allTasks = [...nowPool, ...nextPool].filter(t => t.status === 'active' && t.taskType === 'task')
@@ -246,6 +247,7 @@ export function useFocusSession() {
         logError('FocusScreen.parkThought.insert', err, { taskId: task.id })
       }
     }
+    parkedCountRef.current += 1
     setParkText('')
     setParkOpen(false)
   }, [parkText, addTask, userId])
@@ -561,6 +563,7 @@ export function useFocusSession() {
     // Park thought
     parkOpen, setParkOpen,
     parkText, setParkText,
+    parkedThoughtsCount: parkedCountRef.current,
     // Derived
     progress, isFlow, elapsedMin, timerSize, energyLabel,
     // Timer style from store (for ArcTimer prop)
