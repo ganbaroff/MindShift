@@ -13,14 +13,14 @@
  * - Uses `useMotion()` for animation control
  */
 
-import { useState, useEffect, useRef, memo, useCallback } from 'react'
+import { useState, useEffect, useRef, memo, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { Mascot } from '@/shared/ui/Mascot'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { useStore } from '@/store'
 import { supabase } from '@/shared/lib/supabase'
 import { logError } from '@/shared/lib/logger'
-import type { SessionPhase, Psychotype } from '@/types'
+import type { SessionPhase, Psychotype, Task } from '@/types'
 import type { UITone } from '@/shared/lib/uiTone'
 import type { UserBehaviorProfile } from '@/shared/hooks/useUserBehavior'
 
@@ -373,6 +373,8 @@ interface MochiAIContext {
   emotionalReactivity: string | null
   recentStruggles: string | null
   seasonalMode: string
+  activeTaskTypes?: Record<string, number> | null
+  upcomingDeadlines?: { title: string; taskType: string; dueDate: string }[] | null
 }
 
 async function fetchMochiAISingle(
@@ -419,7 +421,32 @@ interface ActiveBubble {
 
 function MochiSessionCompanionInner({ elapsedSeconds, sessionPhase, behaviorProfile }: Props) {
   const { shouldAnimate, t } = useMotion()
-  const { psychotype, userId, energyLevel, currentStreak, seasonalMode, timeBlindness, emotionalReactivity, locale, uiTone } = useStore()
+  const { psychotype, userId, energyLevel, currentStreak, seasonalMode, timeBlindness, emotionalReactivity, locale, uiTone, nowPool } = useStore()
+
+  // Compute task context for AI — what the user is working on
+  const activeNowTasks = useMemo(() => nowPool.filter((task: Task) => task.status === 'active'), [nowPool])
+
+  const activeTaskTypes = useMemo(() => {
+    const counts: Record<string, number> = {}
+    for (const task of activeNowTasks) {
+      const type = task.taskType ?? 'task'
+      counts[type] = (counts[type] ?? 0) + 1
+    }
+    return Object.keys(counts).length > 0 ? counts : null
+  }, [activeNowTasks])
+
+  const upcomingDeadlines = useMemo(() => {
+    const now = Date.now()
+    const in24h = now + 24 * 60 * 60 * 1000
+    return activeNowTasks
+      .filter((task: Task) => task.dueDate && new Date(task.dueDate).getTime() <= in24h)
+      .slice(0, 5)
+      .map((task: Task) => ({
+        title: (task.title ?? '').slice(0, 40),
+        taskType: task.taskType ?? 'task',
+        dueDate: task.dueDate ?? '',
+      }))
+  }, [activeNowTasks])
 
   const [activeBubble, setActiveBubble] = useState<ActiveBubble | null>(null)
   const shownRef      = useRef<Set<string>>(new Set())
@@ -485,6 +512,8 @@ function MochiSessionCompanionInner({ elapsedSeconds, sessionPhase, behaviorProf
             emotionalReactivity,
             recentStruggles: behaviorProfile?.recentStruggles ?? null,
             seasonalMode,
+            activeTaskTypes,
+            upcomingDeadlines: upcomingDeadlines.length > 0 ? upcomingDeadlines : null,
           },
           locale,
         ).then(aiResp => {
@@ -500,7 +529,7 @@ function MochiSessionCompanionInner({ elapsedSeconds, sessionPhase, behaviorProf
 
       break  // one at a time
     }
-  }, [elapsedSeconds, getFallbackMessage, isGuest, psychotype, sessionPhase, energyLevel, currentStreak, behaviorProfile, timeBlindness, emotionalReactivity, seasonalMode, locale])
+  }, [elapsedSeconds, getFallbackMessage, isGuest, psychotype, sessionPhase, energyLevel, currentStreak, behaviorProfile, timeBlindness, emotionalReactivity, seasonalMode, locale, activeTaskTypes, upcomingDeadlines])
 
   // Cleanup timer on unmount
   useEffect(() => () => {

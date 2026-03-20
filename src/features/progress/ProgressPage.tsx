@@ -8,6 +8,7 @@ import { useSessionHistory } from '@/shared/hooks/useSessionHistory';
 import { nativeShare, canShare } from '@/shared/lib/native';
 import { deriveFromSessions } from '@/shared/lib/psychotype';
 import { AchievementGrid } from './AchievementGrid';
+import { BurnoutAlert } from '@/features/home/BurnoutAlert';
 import { PageTransition } from '@/shared/ui/PageTransition';
 
 const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -93,6 +94,9 @@ export default function ProgressPage() {
       </motion.div>
 
       <div className="space-y-4 mt-5">
+        {/* Burnout Alert — amber (41-65) or purple (66+) */}
+        <BurnoutAlert score={burnoutScore} />
+
         {/* XP Card */}
         <motion.div initial={shouldAnimate ? { opacity: 0, y: 12 } : false} animate={shouldAnimate ? { opacity: 1, y: 0 } : false} className="rounded-2xl p-3" style={{ backgroundColor: '#1E2136' }}>
           <div className="flex items-center gap-3">

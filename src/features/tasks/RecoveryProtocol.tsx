@@ -7,8 +7,10 @@ import Avatar from '@/features/progress/Avatar'
 import type { Task } from '@/types'
 import { RECOVERY_THRESHOLD_HOURS } from '@/shared/lib/constants'
 import { logError } from '@/shared/lib/logger'
-import { pushWelcomeBack } from '@/shared/lib/notify'
+import { pushWelcomeBack, notifyAchievement } from '@/shared/lib/notify'
 import { useUITone } from '@/shared/hooks/useUITone'
+import { getToneCopy } from '@/shared/lib/uiTone'
+import { ACHIEVEMENT_DEFINITIONS } from '@/types'
 
 // ── Fallback messages (Research #7: identity-reinforcing, shame-free) ────────
 // Rules: no quantifying absence, no streaks, forward-looking, persona-voiced.
@@ -38,7 +40,7 @@ interface Props {
 }
 
 export function RecoveryProtocol({ onDismiss }: Props) {
-  const { archiveAllOverdue, addTask, nowPool, userId, lastSessionAt, xpTotal, email } = useStore()
+  const { archiveAllOverdue, addTask, nowPool, userId, lastSessionAt, xpTotal, email, hasAchievement, unlockAchievement, uiTone } = useStore()
   const { t } = useMotion()
   const { copy } = useUITone()
   const [taskInput, setTaskInput] = useState('')
@@ -76,6 +78,18 @@ export function RecoveryProtocol({ onDismiss }: Props) {
     }).catch(() => { /* fallback already set */ }).finally(() => {
       setLoadingAi(false)
     })
+
+    // Achievements: comeback_kid + recover_rise — return after 3+ days absence
+    const tryUnlockRecovery = (key: string) => {
+      if (!hasAchievement(key)) {
+        unlockAchievement(key)
+        const toneCopy = getToneCopy(uiTone)
+        const def = ACHIEVEMENT_DEFINITIONS.find(a => a.key === key)
+        if (def) notifyAchievement(toneCopy.badgeUnlocked(def.name), def.emoji, def.description)
+      }
+    }
+    tryUnlockRecovery('comeback_kid')
+    tryUnlockRecovery('recover_rise')
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -91,6 +105,13 @@ export function RecoveryProtocol({ onDismiss }: Props) {
         body: { taskTitle: title, spiciness, locale },
       })
       if (data?.steps && Array.isArray(data.steps) && data.steps.length > 0) {
+        // Achievement: brain_trust — use AI decomposition
+        if (!hasAchievement('brain_trust')) {
+          unlockAchievement('brain_trust')
+          const toneCopy = getToneCopy(uiTone)
+          const def = ACHIEVEMENT_DEFINITIONS.find(a => a.key === 'brain_trust')
+          if (def) notifyAchievement(toneCopy.badgeUnlocked(def.name), def.emoji, def.description)
+        }
         // AI decomposed — add each step as a task
         const steps = data.steps as string[]
         const estMinutes = typeof data.estimatedMinutes === 'number' ? data.estimatedMinutes : 25

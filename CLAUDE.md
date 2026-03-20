@@ -2,7 +2,7 @@
 
 ## Project
 **MindShift** — ADHD-aware productivity PWA. Mobile-first, React + TypeScript + Supabase.
-Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ `4f3bec1`. Status: **production-ready**.
+Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ latest. Status: **production-ready v1.0**. Google Play launch pending account verification.
 
 ## Stable Production URL
 **`https://mind-shift-git-main-yusifg27-3093s-projects.vercel.app`**
@@ -22,6 +22,8 @@ Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ `4f3bec1`. Status: **p
 ## Sprint History
 | Sprint | Commit | What landed |
 |--------|--------|-------------|
+| Sprint BC "Decomposition" | `6b9acb3` | FocusScreen split → FocusScreen.tsx (orchestrator ~450 lines) + FocusSetup.tsx (~459 lines). dateUtils.ts centralised. useSessionHistory optimised with React Query. tsc -b ✅ |
+| Sprint BB "Hardening" | `e33f31c` | (1) Dead code removal: App.css, OnboardingFlow.tsx, useReducedMotion.ts, CoachMark.tsx (655 lines). (2) CORS hardened: ngrok wildcard → Vercel preview regex + stable production URL. (3) Store fix: cognitiveMode removed from partialize, energyLevel added. (4) Component updates: TaskCard/EnergyPicker/Fab/AddTaskModal a11y + motion fixes. (5) database.ts types extended. tsc -b ✅ |
 | Sprint AA "Google Auth + AI Mochi + User Memory" | pending | (1) Google OAuth — AuthScreen: "Continue with Google" button via `supabase.auth.signInWithOAuth({ provider: 'google' })`. Consent persisted before redirect. Requires Supabase Dashboard Google provider config. (2) User Behavior Memory — `useUserBehavior(sessions)` hook: aggregates focus_sessions into `UserBehaviorProfile` (avgSessionMinutes, flowRate, struggleDropRate, peakHour, energyTrend, recentStruggles, completedToday). (3) AI Mochi — `mochi-respond` edge function: Gemini 2.5 Flash generates personalized mascot messages using psychotype + behavior profile + session context + ADHD signals. 10 calls/day rate limit. (4) MochiSessionCompanion upgraded: shows hardcoded fallback instantly, then replaces with AI response when available. Guest users use hardcoded only. `encouraging` mascot state added. tsc ✅ |
 | Sprint Z "Session Log + S-7 + Rooms" | pending | (1) `/history` route — `HistoryPage.tsx`: session timeline grouped by date (duration/phase/energy delta emojis), summary strip (total sessions/min/flow count). Linked from ProgressPage "Session Log →". (2) S-7 Anti-scroll friction — `SessionFrictionNudge` in AppShell: 5s auto-dismiss nudge when user navigates away from /focus during active session. (3) Lazy `/history` route in App.tsx. tsc ✅ |
 | Sprint Y "Task Reordering" | pending | Drag-to-reorder tasks in NOW and NEXT pools. `SortableTaskCard` wrapper + `DndContext`/`SortableContext` in TasksPage. `reorderPool(pool, ordered[])` in store updates `position`. TouchSensor with 200ms delay. "hold to reorder" hint in header. tsc ✅ |
@@ -273,14 +275,11 @@ Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ `4f3bec1`. Status: **p
 - **Energy tracking:** `energy_before` now written from current `energyLevel` on session save. `energy_after` still pending PostSessionFlow wiring.
 
 ## Build Notes (important!)
-- Sprint 8: `npm run build` ✅, `vitest` 82/82 ✅, `tsc` ✅
-- Sprint 9: `tsc --noEmit` ✅ (Cowork session)
-- Cowork session: `tsc --noEmit` ✅ only (no rollup Linux binary in Cowork sandbox)
-- Always run `tsc --noEmit` before any commit from Cowork
-- Sprint A: `tsc --noEmit` ✅, deployed `e2f2220`
-- Sprint B: `tsc --noEmit` ✅, committed `4f7f9aa`
-- Sprint D–H: `tsc --noEmit` ✅, `npm run build` ✅ (38 precache entries), `npx playwright test` 132/132 ✅
-- Branch: `main` @ `4f3bec1`
+- **Gate command: `tsc -b`** (not `tsc --noEmit` — the latter misses `noUnusedLocals` and stricter generics)
+- Sprint D–H: `tsc -b` ✅, `npm run build` ✅ (38 precache entries), `npx playwright test` 132/132 ✅
+- Sprint BB: `tsc -b` ✅, dead code removed (655 lines), CORS hardened, store fixed
+- Sprint BC: `tsc -b` ✅, FocusScreen decomposed, dateUtils centralised
+- Always run `tsc -b` before any commit. Use `/verify` command in Claude Code.
 
 ## Production Status (as of Sprint H — 16 March 2026)
 | Item | Code | Deployed | Notes |
@@ -329,9 +328,39 @@ Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ `4f3bec1`. Status: **p
 - **Task search:** `searchQuery` state in TasksPage; filters all three pools simultaneously via useMemo with case-insensitive `.includes()`. Lucide `Search`/`X` icons.
 - **Ambient Orbit (S-2):** `useAmbientOrbit(active)` in `FocusScreen.tsx` — Supabase `count` query on `focus_sessions` WHERE `started_at > now()-30m`; refreshes every 5 min; teal pill fades in with 10s delay at 55% opacity; `pointer-events:none`.
 
+## AI Toolchain (for any AI agent picking up this project)
+| What | Where | Purpose |
+|------|-------|---------|
+| Rules | `.claude/rules/guardrails.md` | 10 hard rules: ADHD-safe, motion, a11y, store, copy, architecture |
+| Rules | `.claude/rules/typescript.md` | TS/React patterns, imports, CSS |
+| Rules | `.claude/rules/security.md` | Secrets, auth, GDPR, edge functions |
+| Rules | `.claude/rules/testing.md` | E2E/unit test patterns |
+| Skill | `.claude/skills/humanizer/SKILL.md` | Remove AI-isms from text (25 patterns) |
+| Agents | `.claude/agents/` | code-reviewer, build-error-resolver, e2e-runner |
+| Commands | `.claude/commands/` | /verify, /build-fix, /tdd, /e2e, /code-review |
+| Contexts | `.claude/contexts/` | dev (ship it), review (find bugs) |
+| Hooks | `.claude/hooks.json` | Auto-typecheck after edits, console.log detection |
+| Memory | `memory/` | glossary, architecture, design rules, people, projects |
+
+## Google Play Launch Status (as of 2026-03-20)
+| Item | Status | Notes |
+|------|--------|-------|
+| App code | ✅ | Production-ready v1.0 |
+| Privacy/Terms | ✅ | Public URLs |
+| Play Store listing text | ✅ | Ready |
+| CI/CD edge functions | ✅ | GitHub Action |
+| Telegram bot | ✅ | Code ready, migration applied |
+| Feature graphic 1024x500 | ❌ | Needs design |
+| 8 phone + 4 tablet screenshots | ❌ | Needs capture |
+| Android AAB build | ❌ | After account verification |
+| Google Play account | ⏳ | Waiting verification |
+| In-App Review API | ❌ | Trigger after 3rd session, not in low energy |
+| Home screen widget | ❌ | Post-launch (30 days) |
+
 ## Preferences (Yusif)
 - Russian comms OK in conversation; commit messages in English
 - ADHD-aware design = non-punitive, calm palette, no red/urgency
-- Always: `tsc --noEmit` before commit from Cowork
+- Always: `tsc -b` before commit (not `tsc --noEmit`)
+- Humanizer skill on all user-facing text
 → Full details: memory/
 

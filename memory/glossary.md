@@ -13,7 +13,7 @@
 | AppShell | Main layout wrapper with safe-area padding |
 | fab | Floating Action Button — add task, bottom-right |
 | mochi | Mascot mascot component on HomeScreen |
-| coach mark | CoachMark — progressive disclosure tooltip |
+| coach mark | DELETED (Sprint BB). Was progressive disclosure tooltip. |
 | energy widget | EnergyWidget (BentoGrid) |
 | now widget | NowPoolWidget (BentoGrid) |
 | quick focus | QuickFocusWidget — "just 5 minutes" CTA |
@@ -28,9 +28,9 @@
 | nowPool | Array<Task> — max 3 active tasks |
 | nextPool | Array<Task> — max 6 queued tasks |
 | somedayPool | Array<Task> — collapsed archive |
-| energyLevel | 1–5 scale set in onboarding/energy-check (not persisted) |
-| psychotype | Derived: achiever/explorer/connector/planner |
-| cognitiveMode | focused (1 task) or overview (full view) |
+| energyLevel | 1–5 scale set in onboarding/energy-check (persisted since Sprint BB) |
+| psychotype | Derived: achiever/explorer/connector/planner. Re-derivable from sessions (Sprint N) |
+| cognitiveMode | DEPRECATED (Sprint B). Store field kept for compat. Never read/set from UI. |
 | appMode | minimal/habit/system — onboarding choice |
 | completedTotal | Cumulative task counter — NOW persisted (was bug: not persisted before 2026-03-09) |
 | xpTotal | Total XP — persisted |
@@ -45,7 +45,7 @@
 | carry-over | Task >24h old — shows warm amber badge, no shame |
 | archive | Move to SOMEDAY, status='archived' |
 | overdue | Tasks in now/next that have been waiting (used in RecoveryProtocol) |
-| difficulty | 1=Easy (teal), 2=Medium (indigo), 3=Hard (gold) — never red |
+| difficulty | 1=Easy (teal #4ECDC4), 2=Medium (gold #F59E0B), 3=Hard (indigo #7B72FF) — never red. Source: DIFFICULTY_MAP in types/index.ts |
 | estimatedMinutes | User-set duration estimate |
 | pool | 'now' | 'next' | 'someday' |
 | decompose | AI breaks task into 2–4 subtasks via edge function |
@@ -100,7 +100,7 @@
 | platform issue | node_modules installed on Windows; Linux binaries absent. Fix: `npm install` on Linux |
 | idb-keyval | IndexedDB helper used for offline persistence tier |
 | offline queue | enqueue()/dequeue() pattern for offline Supabase writes |
-| tsc clean | `npx tsc --noEmit` — runs without rollup, always works |
+| tsc clean | `npx tsc -b` — stricter than `--noEmit` (catches noUnusedLocals). Required before commit. |
 | magic link | Supabase passwordless email auth |
 | consent pending | localStorage key stored before magic link redirect (GDPR consent flow) |
 | edge fn | Supabase Edge Function (Deno) |

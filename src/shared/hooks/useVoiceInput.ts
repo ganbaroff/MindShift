@@ -1,6 +1,12 @@
 import { useState, useRef, useCallback } from 'react';
+import { toast } from 'sonner';
 import { supabase } from '@/shared/lib/supabase';
 import { logError } from '@/shared/lib/logger';
+import { detectCrisis, getCrisisResources } from '@/shared/lib/crisisDetection';
+import { useStore } from '@/store';
+import { notifyAchievement } from '@/shared/lib/notify';
+import { getToneCopy } from '@/shared/lib/uiTone';
+import { ACHIEVEMENT_DEFINITIONS } from '@/types';
 
 // SpeechRecognition browser compatibility
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -47,6 +53,16 @@ export function useVoiceInput({ locale, onResult }: UseVoiceInputOptions): UseVo
   const classifyTranscript = useCallback(async (transcript: string) => {
     if (!transcript.trim()) { setVoiceState('idle'); return; }
 
+    // Crisis detection — show resources, skip AI, use raw text
+    if (detectCrisis(transcript)) {
+      const resources = getCrisisResources(locale);
+      toast(resources.primary, { duration: 10_000 });
+      toast(resources.international, { duration: 10_000 });
+      onResultRef.current({ title: transcript.trim().slice(0, 80) });
+      setVoiceState('idle');
+      return;
+    }
+
     setVoiceState('classifying');
     try {
       const { data } = await supabase.functions.invoke('classify-voice-input', {
@@ -72,6 +88,15 @@ export function useVoiceInput({ locale, onResult }: UseVoiceInputOptions): UseVo
         result.confidence = typeof data.confidence === 'number' ? data.confidence : undefined;
         setClassifyConfidence(result.confidence ?? null);
         onResultRef.current(result);
+
+        // Achievement: voice_input — add a task by voice
+        const s = useStore.getState();
+        if (!s.hasAchievement('voice_input')) {
+          s.unlockAchievement('voice_input');
+          const toneCopy = getToneCopy(s.uiTone);
+          const def = ACHIEVEMENT_DEFINITIONS.find(a => a.key === 'voice_input');
+          if (def) notifyAchievement(toneCopy.badgeUnlocked(def.name), def.emoji, def.description);
+        }
       }
     } catch (err) {
       logError('useVoiceInput.classifyTranscript', err);

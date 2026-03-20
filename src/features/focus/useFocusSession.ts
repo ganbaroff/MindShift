@@ -310,7 +310,8 @@ export function useFocusSession() {
     if (elapsedMin >= 1) pushFocusComplete(elapsedMin)
 
     if (wasCompleted) {
-      const toneCopy = getToneCopy(useStore.getState().uiTone)
+      const storeState = useStore.getState()
+      const toneCopy = getToneCopy(storeState.uiTone)
       const tryUnlock = (key: string) => {
         if (!hasAchievement(key)) {
           unlockAchievement(key)
@@ -320,7 +321,17 @@ export function useFocusSession() {
       }
       if (durationSecRef.current >= 52 * 60) tryUnlock('flow_rider')
       if (sessionPhase === 'flow') tryUnlock('full_cycle')
-      if (durationSecRef.current === 5 * 60)  tryUnlock('five_min_hero')
+      if (durationSecRef.current <= 5 * 60)  tryUnlock('five_min_hero')
+
+      // quiet_mind — complete a session with audio playing
+      if (isPlaying || activePreset !== null) tryUnlock('quiet_mind')
+
+      // BUG 1 fix: award XP based on session duration (was never called)
+      const sessionXP =
+        elapsedMin < 10  ? 5 :
+        elapsedMin <= 25 ? 15 :
+        elapsedMin <= 45 ? 25 : 40
+      storeState.addXP(sessionXP)
     }
 
     stopAudio()
