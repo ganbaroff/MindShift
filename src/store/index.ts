@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage, subscribeWithSelector } from 'zustand/middleware'
-import type { Task, AudioPreset, SessionPhase, EnergyLevel, CognitiveMode, AppMode, Psychotype, ActiveSession, WeeklyStats, Achievement, WidgetConfig } from '@/types'
+import type { Task, AudioPreset, SessionPhase, EnergyLevel, CognitiveMode, AppMode, Psychotype, ActiveSession, WeeklyStats, Achievement, WidgetConfig, TaskType, TaskCategory } from '@/types'
 import { ACHIEVEMENT_DEFINITIONS, WIDGET_DEFAULTS, WIDGET_DEFAULTS_GENERIC } from '@/types'
 import {
   VR_BUCKET_SIZE, VR_JACKPOT_THRESHOLD, VR_BONUS_THRESHOLD,
@@ -86,7 +86,8 @@ interface TaskSlice {
   setTasks: (tasks: Task[]) => void
   archiveAllOverdue: () => string[]     // returns archived ids
   setTaskDueDate: (id: string, dueDate: string | null, dueTime: string | null) => void
-  setTaskType: (id: string, type: 'task' | 'idea' | 'reminder') => void
+  setTaskType: (id: string, type: TaskType) => void
+  setTaskCategory: (id: string, category: TaskCategory | undefined) => void
   /** Reorder tasks within a pool — receives the full new ordered array */
   reorderPool: (pool: Task['pool'], ordered: Task[]) => void
 }
@@ -431,6 +432,16 @@ export const useStore = create<AppStore>()(
         setTaskType: (id, type) => set((s) => {
           const update = (tasks: Task[]) =>
             tasks.map(t => t.id === id ? { ...t, taskType: type } : t)
+          return {
+            nowPool: update(s.nowPool),
+            nextPool: update(s.nextPool),
+            somedayPool: update(s.somedayPool),
+          }
+        }),
+
+        setTaskCategory: (id, category) => set((s) => {
+          const update = (tasks: Task[]) =>
+            tasks.map(t => t.id === id ? { ...t, category } : t)
           return {
             nowPool: update(s.nowPool),
             nextPool: update(s.nextPool),

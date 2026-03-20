@@ -6,6 +6,8 @@ export type Pool = 'now' | 'next' | 'someday'
 export type CognitiveMode = 'focused' | 'overview'
 export type AppMode = 'minimal' | 'habit' | 'system'
 export type Psychotype = 'achiever' | 'explorer' | 'connector' | 'planner'
+export type TaskType = 'task' | 'idea' | 'reminder' | 'meeting'
+export type TaskCategory = 'work' | 'personal' | 'health' | 'learning' | 'finance'
 export type AudioPreset = 'brown' | 'lofi' | 'nature' | 'pink' | 'gamma'
 export type SessionPhase = 'idle' | 'struggle' | 'release' | 'flow' | 'recovery'
 export type EnergyLevel = 1 | 2 | 3 | 4 | 5
@@ -24,10 +26,11 @@ export interface Task {
   position: number
   dueDate: string | null          // ISO date string: "2026-03-15"
   dueTime: string | null          // "HH:MM" or null
-  taskType: 'task' | 'idea' | 'reminder'
+  taskType: TaskType
   reminderSentAt: string | null   // when reminder notification was sent
   repeat: 'none' | 'daily' | 'weekly'  // auto-recreates task on completion
   note?: string                         // optional context / extra detail
+  category?: TaskCategory               // optional task category
   /** @deprecated DEPRECATED: use difficulty (1|2|3) + DIFFICULTY_MAP instead (Sprint B A-2). */
   difficultyLevel?: 'easy' | 'medium' | 'hard'
 }
@@ -37,6 +40,23 @@ export const DIFFICULTY_MAP = {
   1: { label: 'Easy',   color: '#4ECDC4' },
   2: { label: 'Medium', color: '#F59E0B' },
   3: { label: 'Hard',   color: '#7B72FF' },
+} as const
+
+/** Canonical task type mapper — single source of truth for type display. */
+export const TASK_TYPE_CONFIG: Record<TaskType, { emoji: string; label: string; color: string }> = {
+  task:     { emoji: '✅', label: 'Task',     color: '#4ECDC4' },
+  idea:     { emoji: '💡', label: 'Idea',     color: '#F59E0B' },
+  reminder: { emoji: '🔔', label: 'Reminder', color: '#7B72FF' },
+  meeting:  { emoji: '🤝', label: 'Meeting',  color: '#7B72FF' },
+} as const
+
+/** Canonical category mapper — single source of truth for category display. */
+export const CATEGORY_CONFIG: Record<TaskCategory, { emoji: string; label: string }> = {
+  work:     { emoji: '💼', label: 'Work' },
+  personal: { emoji: '🏠', label: 'Personal' },
+  health:   { emoji: '💪', label: 'Health' },
+  learning: { emoji: '📚', label: 'Learning' },
+  finance:  { emoji: '💰', label: 'Finance' },
 } as const
 
 export interface ActiveSession {

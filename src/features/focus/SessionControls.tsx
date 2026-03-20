@@ -11,12 +11,15 @@
 
 import { memo } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
+import { Volume2, VolumeX } from 'lucide-react'
 import { toast } from 'sonner'
 import { useMotion } from '@/shared/hooks/useMotion'
 
 interface Props {
   isFlow: boolean
   isPlaying: boolean
+  audioVolume: number
+  onVolumeChange: (volume: number) => void
   parkOpen: boolean
   parkText: string
   onAudioToggle: () => void
@@ -30,6 +33,8 @@ interface Props {
 export const SessionControls = memo(function SessionControls({
   isFlow,
   isPlaying,
+  audioVolume,
+  onVolumeChange,
   parkOpen,
   parkText,
   onAudioToggle,
@@ -65,6 +70,25 @@ export const SessionControls = memo(function SessionControls({
             >
               {isPlaying ? '🔊 Sound on' : '🔇 Sound off'}
             </button>
+
+            {/* Volume slider — visible when audio is playing */}
+            {isPlaying && (
+              <div className="flex items-center gap-2.5 w-52">
+                <VolumeX size={14} style={{ color: '#8B8BA7', flexShrink: 0 }} />
+                <input
+                  type="range"
+                  min={0}
+                  max={1}
+                  step={0.01}
+                  value={audioVolume}
+                  onChange={(e) => onVolumeChange(parseFloat(e.target.value))}
+                  aria-label="Audio volume"
+                  className="w-full h-1.5 rounded-full appearance-none cursor-pointer"
+                  style={{ accentColor: '#4ECDC4' }}
+                />
+                <Volume2 size={14} style={{ color: '#4ECDC4', flexShrink: 0 }} />
+              </div>
+            )}
 
             {/* End session */}
             <button

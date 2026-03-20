@@ -112,13 +112,13 @@ export function useFocusSession() {
     activeSession, sessionPhase, energyLevel,
     startSession, endSession, setPhase, updateLastSession,
     hasAchievement, unlockAchievement,
-    focusAnchor, activePreset, setPreset,
+    focusAnchor, activePreset, setPreset, audioVolume, setVolume: setStoreVolume,
     timerStyle, flexiblePauseUntil, setEnergyLevel,
     addTask, userId,
   } = useStore()
 
   const { shouldAnimate, t } = useMotion()
-  const { play, stop: stopAudio, playAnchor, adaptToPhase, isPlaying } = useAudioEngine()
+  const { play, stop: stopAudio, playAnchor, adaptToPhase, isPlaying, setVolume: setAudioVolume } = useAudioEngine()
   const [searchParams] = useSearchParams()
 
   // ── Smart defaults ──────────────────────────────────────────────────────────
@@ -536,7 +536,8 @@ export function useFocusSession() {
     handlePostEnergy,
     startInterval, intervalRef,
     // Audio
-    isPlaying,
+    isPlaying, audioVolume,
+    handleVolumeChange: (v: number) => { setStoreVolume(v); setAudioVolume(v) },
     // Motion
     shouldAnimate, t,
     // TIMER_PRESETS re-exported for setup screen

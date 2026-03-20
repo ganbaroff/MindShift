@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import { motion } from 'motion/react';
 import { useMotion } from '@/shared/hooks/useMotion';
-import { DIFFICULTY_MAP } from '@/types';
+import { DIFFICULTY_MAP, TASK_TYPE_CONFIG, CATEGORY_CONFIG } from '@/types';
 import type { Task } from '@/types';
 import { reminders } from '@/shared/lib/reminders';
 
@@ -61,8 +61,11 @@ function TaskCardInner({ task, index = 0, onDone, onPark }: TaskCardProps) {
             {task.estimatedMinutes}m
           </span>
         )}
-        {task.taskType === 'idea' && <span className="text-[13px]">💡</span>}
-        {task.taskType === 'reminder' && <span className="text-[13px]">🔔</span>}
+        {task.taskType !== 'task' && (
+          <span className="text-[13px]" title={TASK_TYPE_CONFIG[task.taskType].label}>
+            {TASK_TYPE_CONFIG[task.taskType].emoji}
+          </span>
+        )}
         {hasReminder && task.taskType !== 'reminder' && <span className="text-[13px]" title="Reminder set">🔔</span>}
         {task.dueDate && (
           <span className="text-[10px] px-1.5 py-0.5 rounded-full ml-auto" style={{ backgroundColor: 'rgba(123,114,255,0.12)', color: '#7B72FF' }}>
@@ -92,6 +95,16 @@ function TaskCardInner({ task, index = 0, onDone, onPark }: TaskCardProps) {
         <p className="text-[11px] mb-2 line-clamp-1" style={{ color: '#5A5B72' }}>
           📝 {task.note}
         </p>
+      )}
+
+      {/* Category badge */}
+      {task.category && (
+        <span
+          className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full font-medium mb-2"
+          style={{ backgroundColor: 'rgba(123,114,255,0.12)', color: '#7B72FF' }}
+        >
+          {CATEGORY_CONFIG[task.category].emoji} {CATEGORY_CONFIG[task.category].label}
+        </span>
       )}
 
       {/* Actions */}
@@ -129,6 +142,8 @@ const TaskCard = memo(TaskCardInner, (prev, next) =>
   prev.task.dueDate === next.task.dueDate &&
   prev.task.difficulty === next.task.difficulty &&
   prev.task.estimatedMinutes === next.task.estimatedMinutes &&
+  prev.task.taskType === next.task.taskType &&
+  prev.task.category === next.task.category &&
   prev.index === next.index
 );
 

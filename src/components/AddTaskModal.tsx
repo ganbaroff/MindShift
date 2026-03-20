@@ -2,8 +2,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { X, Mic, MicOff, Loader2 } from 'lucide-react';
 import { useStore } from '@/store';
-import { DIFFICULTY_MAP } from '@/types';
-import type { Task } from '@/types';
+import { DIFFICULTY_MAP, TASK_TYPE_CONFIG, CATEGORY_CONFIG } from '@/types';
+import type { Task, TaskType, TaskCategory } from '@/types';
 import { getNowPoolMax } from '@/shared/lib/constants';
 import { reminders } from '@/shared/lib/reminders';
 import { todayISO, tomorrowISO } from '@/shared/lib/dateUtils';
@@ -37,6 +37,9 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
   const [minutes, setMinutes] = useState(SMART_DURATION[1]);
   const [dueDate, setDueDate] = useState<string | null>(null);
   const [repeat, setRepeat] = useState<'none' | 'daily' | 'weekly'>('none');
+  const [taskType, setTaskType] = useState<TaskType>('task');
+  const [category, setCategory] = useState<TaskCategory | undefined>(undefined);
+  const [showCategory, setShowCategory] = useState(false);
   const minutesManuallySet = useRef(false); // prevents smart duration override
 
   // Smart duration: auto-update when difficulty changes unless user picked manually
@@ -75,6 +78,9 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
       setMinutes(SMART_DURATION[1]);
       setDueDate(null);
       setRepeat('none');
+      setTaskType('task');
+      setCategory(undefined);
+      setShowCategory(false);
       minutesManuallySet.current = false;
       resetVoice();
     }
@@ -101,10 +107,11 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
       position: 0,
       dueDate: dueDate,
       dueTime: null,
-      taskType: 'task',
+      taskType,
       reminderSentAt: null,
       repeat,
       note: note.trim() || undefined,
+      category,
     };
     addTask(newTask);
     // Auto-schedule reminder 15 min before due date if permission granted
@@ -217,6 +224,99 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
                   </motion.p>
                 )}
               </AnimatePresence>
+
+              {/* Task type picker */}
+              <div>
+                <label className="text-caption text-ms-muted uppercase tracking-widest mb-2 block">Type</label>
+                <div className="flex gap-2">
+                  {(['task', 'idea', 'reminder', 'meeting'] as const).map(t => {
+                    const cfg = TASK_TYPE_CONFIG[t];
+                    const sel = taskType === t;
+                    return (
+                      <motion.button
+                        key={t}
+                        whileTap={{ scale: 0.97 }}
+                        onClick={() => setTaskType(t)}
+                        aria-pressed={sel}
+                        aria-label={`Type: ${cfg.label}`}
+                        className="flex-1 h-10 rounded-xl flex items-center justify-center gap-1.5 text-[12px] font-medium transition-all"
+                        style={{
+                          backgroundColor: sel ? `${cfg.color}20` : '#252840',
+                          borderWidth: sel ? 1.5 : 1,
+                          borderStyle: 'solid',
+                          borderColor: sel ? cfg.color : 'rgba(255,255,255,0.06)',
+                          color: sel ? cfg.color : '#8B8BA7',
+                        }}
+                      >
+                        <span>{cfg.emoji}</span>
+                        {cfg.label}
+                      </motion.button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Category picker (collapsible) */}
+              <div>
+                {!showCategory ? (
+                  <button
+                    type="button"
+                    onClick={() => setShowCategory(true)}
+                    className="text-xs flex items-center gap-1"
+                    style={{ color: '#5A5B72' }}
+                    aria-expanded={false}
+                  >
+                    <span>+</span> Add category (optional)
+                  </button>
+                ) : (
+                  <AnimatePresence>
+                    <motion.div
+                      initial={shouldAnimate ? { opacity: 0, height: 0 } : {}}
+                      animate={{ opacity: 1, height: 'auto' }}
+                    >
+                      <label className="text-caption text-ms-muted uppercase tracking-widest mb-2 block">Category</label>
+                      <div className="flex flex-wrap gap-2">
+                        {(['work', 'personal', 'health', 'learning', 'finance'] as const).map(c => {
+                          const cfg = CATEGORY_CONFIG[c];
+                          const sel = category === c;
+                          return (
+                            <motion.button
+                              key={c}
+                              whileTap={{ scale: 0.97 }}
+                              onClick={() => setCategory(sel ? undefined : c)}
+                              aria-pressed={sel}
+                              aria-label={`Category: ${cfg.label}`}
+                              className="h-9 px-3 rounded-xl flex items-center gap-1.5 text-[12px] font-medium transition-all"
+                              style={{
+                                backgroundColor: sel ? 'rgba(123,114,255,0.15)' : '#252840',
+                                borderWidth: sel ? 1.5 : 1,
+                                borderStyle: 'solid',
+                                borderColor: sel ? '#7B72FF' : 'rgba(255,255,255,0.06)',
+                                color: sel ? '#7B72FF' : '#8B8BA7',
+                              }}
+                            >
+                              <span>{cfg.emoji}</span>
+                              {cfg.label}
+                            </motion.button>
+                          );
+                        })}
+                      </div>
+                    </motion.div>
+                  </AnimatePresence>
+                )}
+              </div>
+
+              {/* Meeting: show due date more prominently */}
+              {taskType === 'meeting' && !dueDate && (
+                <motion.p
+                  initial={shouldAnimate ? { opacity: 0, y: -4 } : {}}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-xs -mt-2"
+                  style={{ color: '#7B72FF' }}
+                >
+                  🤝 Set a date and time for this meeting below
+                </motion.p>
+              )}
 
               {/* Optional note / context */}
               <div>
