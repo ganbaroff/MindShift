@@ -361,34 +361,51 @@ interface MochiAIResponse {
   mascotState: MascotState
 }
 
+interface MochiAIContext {
+  psychotype: Psychotype | null
+  sessionPhase: SessionPhase
+  elapsedMinutes: number
+  energyLevel: number
+  totalSessions: number
+  currentStreak: number
+  completedToday: number
+  timeBlindness: string | null
+  emotionalReactivity: string | null
+  recentStruggles: string | null
+  seasonalMode: string
+}
+
+async function fetchMochiAISingle(
+  trigger: string,
+  context: MochiAIContext,
+  locale: string,
+): Promise<MochiAIResponse | null> {
+  const { data, error } = await supabase.functions.invoke('mochi-respond', {
+    body: { trigger, context, locale },
+  })
+  if (error) throw error
+  const resp = data as MochiAIResponse | null
+  if (resp?.message) return resp
+  return null
+}
+
 async function fetchMochiAI(
   trigger: string,
-  context: {
-    psychotype: Psychotype | null
-    sessionPhase: SessionPhase
-    elapsedMinutes: number
-    energyLevel: number
-    totalSessions: number
-    currentStreak: number
-    completedToday: number
-    timeBlindness: string | null
-    emotionalReactivity: string | null
-    recentStruggles: string | null
-    seasonalMode: string
-  },
+  context: MochiAIContext,
   locale: string,
 ): Promise<MochiAIResponse | null> {
   try {
-    const { data, error } = await supabase.functions.invoke('mochi-respond', {
-      body: { trigger, context, locale },
-    })
-    if (error) throw error
-    const resp = data as MochiAIResponse | null
-    if (resp?.message) return resp
-    return null
+    return await fetchMochiAISingle(trigger, context, locale)
   } catch (err) {
     logError('MochiAI.fetch', err)
-    return null
+    // Single retry after 5 seconds — if it also fails, keep hardcoded fallback
+    try {
+      await new Promise(resolve => setTimeout(resolve, 5_000))
+      return await fetchMochiAISingle(trigger, context, locale)
+    } catch (retryErr) {
+      logError('MochiAI.retry', retryErr)
+      return null
+    }
   }
 }
 
