@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -60,6 +60,7 @@ export default function SettingsPage() {
     medicationTime, setMedicationTime,
     dailyFocusGoalMin, setDailyFocusGoalMin,
     uiTone, setUITone,
+    telegramLinkCode, telegramLinked, generateTelegramCode, setTelegramLinked,
   } = useStore();
 
   const { play, stop, isPlaying, setVolume: setEngineVolume } = useAudioEngine();
@@ -163,6 +164,15 @@ export default function SettingsPage() {
     const result = await Notification.requestPermission()
     setNotifPermission(result)
   }
+
+  // Telegram link code — copy to clipboard
+  const [codeCopied, setCodeCopied] = useState(false)
+  const handleCopyCode = useCallback(() => {
+    if (!telegramLinkCode) return
+    void navigator.clipboard.writeText(`/link ${telegramLinkCode}`)
+    setCodeCopied(true)
+    setTimeout(() => setCodeCopied(false), 2000)
+  }, [telegramLinkCode])
 
   const planLabel =
     subscriptionTier === 'pro' ? 'MindShift Pro' :
@@ -340,6 +350,79 @@ export default function SettingsPage() {
             >
               🔔 Enable reminders
             </motion.button>
+          )}
+        </Section>
+
+        {/* Telegram integration */}
+        <Section label="Telegram">
+          {telegramLinked ? (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="text-[16px]">✅</span>
+                <p className="text-[14px] font-medium" style={{ color: '#4ECDC4' }}>Telegram connected</p>
+              </div>
+              <p className="text-[12px]" style={{ color: '#8B8BA7' }}>
+                Send tasks and notes to{' '}
+                <a href="https://t.me/MindShiftBot" target="_blank" rel="noopener noreferrer" style={{ color: '#4ECDC4' }}>
+                  @MindShiftBot
+                </a>
+              </p>
+              <motion.button
+                whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
+                onClick={() => setTelegramLinked(false)}
+                className="w-full h-9 rounded-xl text-[13px] font-medium"
+                style={{ backgroundColor: 'rgba(139,139,167,0.12)', color: '#8B8BA7' }}
+              >
+                Disconnect
+              </motion.button>
+            </div>
+          ) : telegramLinkCode ? (
+            <div className="space-y-2">
+              <p className="text-[12px]" style={{ color: '#8B8BA7' }}>
+                Send this to{' '}
+                <a href="https://t.me/MindShiftBot" target="_blank" rel="noopener noreferrer" style={{ color: '#4ECDC4' }}>
+                  @MindShiftBot
+                </a>
+              </p>
+              <div className="flex items-center gap-2">
+                <div
+                  className="flex-1 h-10 rounded-xl flex items-center px-3 font-mono text-[15px] tracking-widest"
+                  style={{ backgroundColor: '#252840', color: '#E8E8F0', border: '1px solid rgba(78,205,196,0.2)' }}
+                >
+                  /link {telegramLinkCode}
+                </div>
+                <motion.button
+                  whileTap={shouldAnimate ? { scale: 0.93 } : undefined}
+                  onClick={handleCopyCode}
+                  className="h-10 px-3 rounded-xl text-[13px] font-medium"
+                  style={{
+                    backgroundColor: codeCopied ? 'rgba(78,205,196,0.2)' : 'rgba(78,205,196,0.12)',
+                    color: '#4ECDC4',
+                  }}
+                  aria-label="Copy link code"
+                >
+                  {codeCopied ? 'Copied' : 'Copy'}
+                </motion.button>
+              </div>
+              <p className="text-[11px]" style={{ color: '#8B8BA7' }}>
+                The code expires in 10 minutes
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <p className="text-[12px]" style={{ color: '#8B8BA7' }}>
+                Add tasks and notes by messaging our Telegram bot
+              </p>
+              <motion.button
+                whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
+                onClick={generateTelegramCode}
+                className="w-full h-10 rounded-xl text-[14px] font-medium"
+                style={{ backgroundColor: 'rgba(78,205,196,0.12)', color: '#4ECDC4' }}
+                aria-label="Connect Telegram"
+              >
+                Connect Telegram
+              </motion.button>
+            </div>
           )}
         </Section>
 
