@@ -12,6 +12,7 @@
 
 import { memo, useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
+import { useNavigate } from 'react-router-dom'
 import { useMotion } from '@/shared/hooks/useMotion'
 import type { EnergyLevel, SessionPhase } from '@/types'
 import { ENERGY_LABELS, ENERGY_EMOJI } from '@/shared/lib/constants'
@@ -66,6 +67,8 @@ interface NatureBufferProps {
   emotionalReactivity?: 'high' | 'moderate' | 'steady' | null
   /** Phase reached during the session — used with emotionalReactivity for tone */
   sessionPhase?: SessionPhase
+  /** Number of thoughts parked during this session */
+  parkedThoughtsCount?: number
 }
 
 const ENERGY_OPTIONS = [
@@ -78,7 +81,7 @@ const ENERGY_OPTIONS = [
 
 export const NatureBuffer = memo(function NatureBuffer({
   bufferSeconds, postEnergyLogged, onSetEnergyLevel, onSkip, sessionMinutes = 0,
-  emotionalReactivity, sessionPhase,
+  emotionalReactivity, sessionPhase, parkedThoughtsCount = 0,
 }: NatureBufferProps) {
   const { shouldAnimate, t } = useMotion()
   const [autopsyPick, setAutopsyPick] = useState<string | null>(null)
@@ -182,6 +185,9 @@ export const NatureBuffer = memo(function NatureBuffer({
           </div>
         )}
 
+        {/* Parked thoughts nudge — reminds user about thoughts captured during session */}
+        {parkedThoughtsCount > 0 && <ParkedThoughtsNudge count={parkedThoughtsCount} />}
+
         <button
           onClick={onSkip}
           className="px-6 py-2.5 rounded-xl text-sm font-medium transition-all duration-200"
@@ -198,6 +204,40 @@ export const NatureBuffer = memo(function NatureBuffer({
     </div>
   )
 })
+
+// ── Parked Thoughts Nudge ─────────────────────────────────────────────────────
+
+function ParkedThoughtsNudge({ count }: { count: number }) {
+  const navigate = useNavigate()
+  const { shouldAnimate, t } = useMotion()
+  const label = count === 1 ? '1 thought' : `${count} thoughts`
+
+  return (
+    <motion.button
+      initial={shouldAnimate ? { opacity: 0, y: 8 } : {}}
+      animate={{ opacity: 1, y: 0 }}
+      transition={t()}
+      onClick={() => navigate('/tasks')}
+      className="w-full max-w-xs mb-4 p-3 rounded-2xl flex items-center gap-3 text-left"
+      style={{
+        background: 'rgba(78,205,196,0.08)',
+        border: '1px solid rgba(78,205,196,0.2)',
+      }}
+      aria-label={`View ${label} saved to Someday`}
+    >
+      <span className="text-xl">💭</span>
+      <div className="flex-1">
+        <p className="text-[13px] font-medium" style={{ color: '#4ECDC4' }}>
+          {label} saved
+        </p>
+        <p className="text-[11px]" style={{ color: '#8B8BA7' }}>
+          Tap to see them in Someday
+        </p>
+      </div>
+      <span className="text-sm" style={{ color: '#8B8BA7' }}>→</span>
+    </motion.button>
+  )
+}
 
 // ── Recovery Lock Screen ──────────────────────────────────────────────────────
 

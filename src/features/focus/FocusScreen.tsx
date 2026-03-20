@@ -108,6 +108,7 @@ export default function FocusScreen() {
     bookmarkText, setBookmarkText,
     parkOpen, setParkOpen,
     parkText, setParkText,
+    parkedThoughtsCount,
     progress, isFlow, elapsedMin, timerSize, energyLabel,
     timerStyle, sessionPhase,
     handleStart, handleStop, handleResume, handleConfirmStop,
@@ -132,6 +133,7 @@ export default function FocusScreen() {
         sessionMinutes={elapsedMin}
         emotionalReactivity={emotionalReactivity}
         sessionPhase={sessionPhase}
+        parkedThoughtsCount={parkedThoughtsCount}
       />
     )
   }
