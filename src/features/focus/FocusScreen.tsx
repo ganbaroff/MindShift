@@ -14,7 +14,7 @@
  * Setup/pre-session UI lives in FocusSetup.tsx
  */
 
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { ArcTimer } from './ArcTimer'
 import { MochiSessionCompanion } from './MochiSessionCompanion'
@@ -27,7 +27,6 @@ import { nativeStatusBarHide, nativeStatusBarShow } from '@/shared/lib/native'
 import { supabase } from '@/shared/lib/supabase'
 import { useSessionHistory } from '@/shared/hooks/useSessionHistory'
 import { useUserBehavior } from '@/shared/hooks/useUserBehavior'
-import { useState } from 'react'
 
 // ── Ambient Orbit (S-2) ───────────────────────────────────────────────────────
 // Shows how many people are currently in a focus session — body-doubling signal.
@@ -160,6 +159,7 @@ export default function FocusScreen() {
         <div className="flex flex-col gap-3 w-full max-w-xs">
           <button
             onClick={handleResume}
+            aria-label="Resume focus session"
             className="w-full py-3.5 rounded-2xl font-semibold text-sm transition-all duration-200"
             style={{
               background: 'var(--color-primary-alpha)',
@@ -171,6 +171,7 @@ export default function FocusScreen() {
           </button>
           <button
             onClick={handleConfirmStop}
+            aria-label="End focus session"
             className="w-full py-3 rounded-2xl font-medium text-sm transition-all duration-200"
             style={{
               background: 'transparent',

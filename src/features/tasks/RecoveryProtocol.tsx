@@ -227,7 +227,7 @@ export function RecoveryProtocol({ onDismiss }: Props) {
             )}
             {archivedCount > 0 && (
               <p className="text-sm text-center" style={{ color: '#8B8BA7' }}>
-                🗃️ {archivedCount} old task{archivedCount !== 1 ? 's' : ''} tucked into your time capsule — they waited patiently. You can review them anytime.
+                🗃️ {archivedCount} old task{archivedCount !== 1 ? 's' : ''} moved to Someday. You can review them anytime.
               </p>
             )}
           </motion.div>

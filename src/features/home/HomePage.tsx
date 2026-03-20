@@ -19,29 +19,29 @@ import { toast } from 'sonner';
 
 const MOCHI_ENERGY_MESSAGES: Record<number, { text: string; emoji: string }[]> = {
   1: [
-    { text: "Rest is productive. One tiny thing today is enough.", emoji: '🌙' },
-    { text: "Drained days happen. I'm here. Take it slow.", emoji: '🛋️' },
-    { text: "Low fuel? Park the big stuff. Just breathe.", emoji: '💤' },
+    { text: "One tiny thing today is enough.", emoji: '🌙' },
+    { text: "Drained days happen. Take it slow.", emoji: '🛋️' },
+    { text: "Low fuel? Park the big stuff.", emoji: '💤' },
   ],
   2: [
-    { text: "Gentle energy — pick something easy to start.", emoji: '🌱' },
-    { text: "Small moves count. Let's find your lightest task.", emoji: '🌿' },
-    { text: "Not your sharpest day? Easy tasks still matter.", emoji: '🍃' },
+    { text: "Gentle energy — pick something easy.", emoji: '🌱' },
+    { text: "Small moves count.", emoji: '🌿' },
+    { text: "Not your sharpest day? Easy tasks still count.", emoji: '🍃' },
   ],
   3: [
-    { text: "Steady. Classic focus mode. You've got this.", emoji: '🎯' },
-    { text: "Okay energy is still energy. Let's roll.", emoji: '🙂' },
-    { text: "Middle-ground day — great for consistent progress.", emoji: '⚖️' },
+    { text: "Steady energy. Good for focused work.", emoji: '🎯' },
+    { text: "Okay energy is still energy.", emoji: '🙂' },
+    { text: "Middle-ground day. Consistent work fits here.", emoji: '⚖️' },
   ],
   4: [
-    { text: "Good energy! This is your window. Use it.", emoji: '✨' },
-    { text: "You're on. Tackle something that matters today.", emoji: '🚀' },
-    { text: "Riding a wave — ride it towards something real.", emoji: '🌊' },
+    { text: "Good energy. This is your window.", emoji: '✨' },
+    { text: "Good day for something that matters.", emoji: '🚀' },
+    { text: "Solid energy. Pick something real.", emoji: '🌊' },
   ],
   5: [
-    { text: "Wired! Channel this before it fades. Deep work time.", emoji: '⚡' },
-    { text: "Peak energy — a rare gift. Honour it with your hardest task.", emoji: '🔥' },
-    { text: "Full tank. You know what to do.", emoji: '💪' },
+    { text: "High energy. Good time for deep work.", emoji: '⚡' },
+    { text: "Peak energy. Try your hardest task.", emoji: '🔥' },
+    { text: "Full tank. Pick something big.", emoji: '💪' },
   ],
 };
 
@@ -116,8 +116,8 @@ export default function HomePage() {
     if (timeBlindness === 'often') return { emoji: '⏰', text: 'Time blindness day? Set one visible timer before you start.' }
     if (timeBlindness === 'sometimes') return { emoji: '⏰', text: 'Check the clock before diving in — surprises are harder to handle today.' }
     if (emotionalReactivity === 'high') return { emoji: '🛡️', text: 'High-reactivity mode: protect your first 30 min from interruptions.' }
-    if (emotionalReactivity === 'moderate') return { emoji: '🌿', text: 'Start slow, build momentum — emotions lead focus today.' }
-    if (medicationEnabled && medicationTime === 'morning') return { emoji: '⚡', text: 'Morning window open — this is your sharpest hour.' }
+    if (emotionalReactivity === 'moderate') return { emoji: '🌿', text: 'Start slow today. Emotions affect focus more than usual.' }
+    if (medicationEnabled && medicationTime === 'morning') return { emoji: '⚡', text: 'Morning window — good time for harder tasks.' }
     return { emoji: '🎯', text: 'Pick one task you\'d regret not starting. Just one.' }
   }, [timeBlindness, emotionalReactivity, medicationEnabled, medicationTime])
   const topNowTask = nowTasks[0] ?? null

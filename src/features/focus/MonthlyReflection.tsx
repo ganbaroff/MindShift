@@ -37,10 +37,10 @@ const INTENTION_SUGGESTIONS = [
 ]
 
 const CLOSING_MESSAGES = [
-  "New month, fresh slate. You've got this. 🌱",
-  "Every month is a new chance. Start small, go far. ✨",
-  "You're still here. That's the whole thing. 💙",
-  "A new month means a new version of your best effort. 🌸",
+  "New month, fresh slate. 🌱",
+  "Start small. That's enough. ✨",
+  "Still here. That counts. 💙",
+  "New month. Same you, new page. 🌸",
 ]
 
 export function MonthlyReflection({ onDismiss }: Props) {
@@ -189,6 +189,7 @@ export function MonthlyReflection({ onDismiss }: Props) {
                     onClick={() => setShowShareCard(true)}
                     className="w-full py-4 rounded-2xl font-semibold text-base"
                     style={{ background: '#7B72FF', color: '#FFFFFF' }}
+                    aria-label="Share monthly wrapped"
                   >
                     Share your wrapped ✨
                   </button>
@@ -196,6 +197,7 @@ export function MonthlyReflection({ onDismiss }: Props) {
                     onClick={() => setStep('recap')}
                     className="w-full py-3 text-sm"
                     style={{ color: '#8B8BA7' }}
+                    aria-label="Continue to recap"
                   >
                     Continue →
                   </button>
@@ -250,6 +252,7 @@ export function MonthlyReflection({ onDismiss }: Props) {
                     onClick={() => setStep('intention')}
                     className="w-full py-4 rounded-2xl font-semibold text-base"
                     style={{ background: '#4ECDC4', color: '#0F1117' }}
+                    aria-label="Set monthly intention"
                   >
                     Set {monthName}'s intention →
                   </button>
@@ -257,6 +260,7 @@ export function MonthlyReflection({ onDismiss }: Props) {
                     onClick={handleDismiss}
                     className="w-full py-3 text-sm"
                     style={{ color: '#8B8BA7' }}
+                    aria-label="Skip monthly reflection"
                   >
                     Skip — jump in
                   </button>
@@ -308,6 +312,7 @@ export function MonthlyReflection({ onDismiss }: Props) {
                       key={s}
                       type="button"
                       onClick={() => setIntention(s.split(' ')[0])}
+                      aria-label={`Set intention: ${s.split(' ')[0]}`}
                       className="text-xs px-3 py-1.5 rounded-xl transition-all duration-150"
                       style={{
                         background: intention.startsWith(s.split(' ')[0]) ? 'rgba(78,205,196,0.15)' : '#1E2136',
@@ -328,6 +333,7 @@ export function MonthlyReflection({ onDismiss }: Props) {
                       background: intention.trim() ? '#4ECDC4' : '#252840',
                       color: intention.trim() ? '#0F1117' : '#8B8BA7',
                     }}
+                    aria-label="Set monthly intention"
                   >
                     {intention.trim() ? `${monthName}: "${intention.trim()}" 🌱` : 'Set intention →'}
                   </button>
@@ -335,6 +341,7 @@ export function MonthlyReflection({ onDismiss }: Props) {
                     onClick={() => setStep('close')}
                     className="w-full py-3 text-sm"
                     style={{ color: '#8B8BA7' }}
+                    aria-label="Skip monthly reflection"
                   >
                     Skip
                   </button>

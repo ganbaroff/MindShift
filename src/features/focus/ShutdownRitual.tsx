@@ -29,7 +29,7 @@ interface Props {
 type Step = 'wins' | 'tomorrow' | 'goodnight'
 
 const GOODNIGHT_MESSAGES = [
-  "You showed up today. That's everything. 🌙",
+  "Done for today. 🌙",
   "Rest is productive too. See you tomorrow. ✨",
   "Today counted. Even the messy parts. 💙",
   "You did enough. Now breathe. 🌿",
@@ -201,6 +201,7 @@ export function ShutdownRitual({ onDismiss }: Props) {
                     onClick={() => setStep('tomorrow')}
                     className="w-full py-4 rounded-2xl font-semibold text-base transition-all duration-200"
                     style={{ background: '#4ECDC4', color: '#0F1117' }}
+                    aria-label="Set tomorrow's task"
                   >
                     Set tomorrow's focus →
                   </button>
@@ -208,6 +209,7 @@ export function ShutdownRitual({ onDismiss }: Props) {
                     onClick={handleSkip}
                     className="w-full py-3 text-sm"
                     style={{ color: '#8B8BA7' }}
+                    aria-label="Skip shutdown ritual"
                   >
                     Skip — just close
                   </button>
@@ -262,6 +264,7 @@ export function ShutdownRitual({ onDismiss }: Props) {
                   <button
                     onClick={() => void handleSetTomorrow()}
                     disabled={!tomorrowInput.trim() || isSubmitting}
+                    aria-label="Save tomorrow's task and rest"
                     className="w-full py-4 rounded-2xl font-semibold text-base transition-all duration-200"
                     style={{
                       background: tomorrowInput.trim() ? '#4ECDC4' : '#252840',
@@ -275,6 +278,7 @@ export function ShutdownRitual({ onDismiss }: Props) {
                     onClick={() => setStep('goodnight')}
                     className="w-full py-3 text-sm"
                     style={{ color: '#8B8BA7' }}
+                    aria-label="Skip and rest"
                   >
                     Skip — just rest
                   </button>

@@ -59,10 +59,10 @@ export const WeeklyPlanning = memo(function WeeklyPlanning({ onDismiss }: Weekly
 
   // Choose a warm, non-comparative recap message based on count
   const recapMsg =
-    completedTotal >= 50 ? "You've built something real here." :
-    completedTotal >= 20 ? "Look how far you've come." :
-    completedTotal >= 5  ? "You're getting into your stride." :
-    "Every task you finish is a win. That matters."
+    completedTotal >= 50 ? `${completedTotal} tasks done so far. Solid.` :
+    completedTotal >= 20 ? `${completedTotal} tasks finished. Not bad.` :
+    completedTotal >= 5  ? `${completedTotal} tasks down. Getting there.` :
+    "Each finished task is one less thing on your mind."
 
   return (
     <div
@@ -132,6 +132,7 @@ export const WeeklyPlanning = memo(function WeeklyPlanning({ onDismiss }: Weekly
                 color: '#fff',
                 boxShadow: '0 8px 24px rgba(123,114,255,0.25)',
               }}
+              aria-label="Set weekly intention"
             >
               Set my intention →
             </motion.button>
@@ -139,6 +140,7 @@ export const WeeklyPlanning = memo(function WeeklyPlanning({ onDismiss }: Weekly
               onClick={handleSkip}
               className="mt-3 w-full py-2 text-xs"
               style={{ color: '#5A5B72' }}
+              aria-label="Skip weekly planning"
             >
               Skip for now
             </button>
@@ -168,6 +170,8 @@ export const WeeklyPlanning = memo(function WeeklyPlanning({ onDismiss }: Weekly
                   key={key}
                   whileTap={{ scale: 0.97 }}
                   onClick={() => handleIntentionPick(key)}
+                  aria-pressed={chosen === key}
+                  aria-label={`Intention: ${label}`}
                   className="w-full text-left p-3.5 rounded-2xl flex items-center gap-3"
                   style={{
                     background: chosen === key ? 'rgba(123,114,255,0.15)' : '#1E2136',
@@ -187,6 +191,7 @@ export const WeeklyPlanning = memo(function WeeklyPlanning({ onDismiss }: Weekly
               onClick={handleSkip}
               className="mt-4 w-full py-2 text-xs text-center"
               style={{ color: '#5A5B72' }}
+              aria-label="Skip weekly planning"
             >
               Skip — I'll decide as I go
             </button>
@@ -210,8 +215,7 @@ export const WeeklyPlanning = memo(function WeeklyPlanning({ onDismiss }: Weekly
               {INTENTIONS.find(i => i.key === chosen)?.label ?? 'Intention set'}
             </h2>
             <p className="text-sm leading-relaxed mb-8" style={{ color: '#8B8BA7' }}>
-              You'll see this reminder when you start a focus session.
-              Small steps in this direction add up fast.
+              You'll see this when you start a focus session.
             </p>
 
             <motion.button
@@ -223,6 +227,7 @@ export const WeeklyPlanning = memo(function WeeklyPlanning({ onDismiss }: Weekly
                 color: '#fff',
                 boxShadow: '0 8px 24px rgba(123,114,255,0.22)',
               }}
+              aria-label="Finish weekly planning"
             >
               Let's go 🌿
             </motion.button>

@@ -9,6 +9,7 @@ import { reminders } from '@/shared/lib/reminders';
 import { supabase } from '@/shared/lib/supabase';
 import { logError } from '@/shared/lib/logger';
 import { todayISO, tomorrowISO } from '@/shared/lib/dateUtils';
+import { useMotion } from '@/shared/hooks/useMotion';
 
 const durationOptions = [5, 15, 25, 45, 60];
 
@@ -33,6 +34,7 @@ interface AddTaskModalProps {
 }
 
 export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
+  const { shouldAnimate } = useMotion();
   const { addTask, nowPool, nextPool, appMode, seasonalMode, locale } = useStore();
   const maxNow = getNowPoolMax(appMode, seasonalMode);
   const today = todayISO();
@@ -210,17 +212,17 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
       {open && (
         <>
           <motion.div
-            initial={{ opacity: 0 }}
+            initial={shouldAnimate ? { opacity: 0 } : {}}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            exit={shouldAnimate ? { opacity: 0 } : undefined}
             className="fixed inset-0 bg-black/60 z-40"
             onClick={handleClose}
           />
           <motion.div
-            initial={{ y: '100%' }}
+            initial={shouldAnimate ? { y: '100%' } : {}}
             animate={{ y: 0 }}
-            exit={{ y: '100%' }}
-            transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+            exit={shouldAnimate ? { y: '100%' } : undefined}
+            transition={shouldAnimate ? { type: 'spring', damping: 28, stiffness: 300 } : { duration: 0 }}
             className="fixed bottom-0 left-0 right-0 z-50 bg-ms-card rounded-t-3xl p-5 safe-bottom max-h-[85vh] overflow-y-auto"
           >
             <div className="w-10 h-1 rounded-full bg-ms-muted/30 mx-auto mb-4" />
@@ -275,9 +277,9 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
               <AnimatePresence>
                 {voiceState === 'listening' && (
                   <motion.p
-                    initial={{ opacity: 0, y: -4 }}
+                    initial={shouldAnimate ? { opacity: 0, y: -4 } : {}}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0 }}
+                    exit={shouldAnimate ? { opacity: 0 } : undefined}
                     className="text-xs flex items-center gap-1.5 -mt-3"
                     style={{ color: '#7B72FF' }}
                   >
@@ -287,9 +289,9 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
                 )}
                 {classifyConfidence !== null && classifyConfidence >= 0.7 && (
                   <motion.p
-                    initial={{ opacity: 0, y: -4 }}
+                    initial={shouldAnimate ? { opacity: 0, y: -4 } : {}}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0 }}
+                    exit={shouldAnimate ? { opacity: 0 } : undefined}
                     className="text-xs -mt-3"
                     style={{ color: '#4ECDC4' }}
                   >
@@ -298,9 +300,9 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
                 )}
                 {voiceError && (
                   <motion.p
-                    initial={{ opacity: 0, y: -4 }}
+                    initial={shouldAnimate ? { opacity: 0, y: -4 } : {}}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0 }}
+                    exit={shouldAnimate ? { opacity: 0 } : undefined}
                     className="text-xs -mt-3"
                     style={{ color: '#F59E0B' }}
                   >
@@ -317,13 +319,14 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
                     onClick={() => setShowNote(true)}
                     className="text-xs flex items-center gap-1 -mt-1"
                     style={{ color: '#5A5B72' }}
+                    aria-expanded={false}
                   >
                     <span>+</span> Add context (optional)
                   </button>
                 ) : (
                   <AnimatePresence>
                     <motion.textarea
-                      initial={{ opacity: 0, height: 0 }}
+                      initial={shouldAnimate ? { opacity: 0, height: 0 } : {}}
                       animate={{ opacity: 1, height: 'auto' }}
                       value={note}
                       onChange={e => setNote(e.target.value)}
@@ -347,6 +350,8 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
                         key={d}
                         whileTap={{ scale: 0.97 }}
                         onClick={() => { setDifficulty(d); }}
+                        aria-pressed={sel}
+                        aria-label={`Difficulty: ${c.label}`}
                         className="flex-1 h-11 rounded-xl flex items-center justify-center gap-2 text-secondary font-medium transition-all"
                         style={{
                           backgroundColor: sel ? `${c.color}20` : '#252840',
@@ -385,6 +390,8 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
                         key={d}
                         whileTap={{ scale: 0.97 }}
                         onClick={() => { setMinutes(d); minutesManuallySet.current = true; }}
+                        aria-pressed={sel}
+                        aria-label={`${d} minutes`}
                         className="flex-1 h-10 rounded-full text-secondary font-medium transition-all"
                         style={{
                           background: sel ? 'linear-gradient(135deg, #7B72FF, #8B7FF7)' : '#252840',
@@ -414,6 +421,8 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
                         key={value}
                         whileTap={{ scale: 0.97 }}
                         onClick={() => setDueDate(sel ? null : value)}
+                        aria-pressed={sel}
+                        aria-label={`Due date: ${label}`}
                         className="flex-1 h-9 rounded-xl text-secondary font-medium transition-all"
                         style={{
                           backgroundColor: sel ? 'rgba(78,205,196,0.15)' : '#252840',
@@ -443,7 +452,7 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
                 </div>
                 {dueDate && (
                   <motion.p
-                    initial={{ opacity: 0, y: -4 }}
+                    initial={shouldAnimate ? { opacity: 0, y: -4 } : {}}
                     animate={{ opacity: 1, y: 0 }}
                     className="text-xs"
                     style={{ color: '#4ECDC4' }}
@@ -462,6 +471,8 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
                       key={r}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setRepeat(r)}
+                      aria-pressed={repeat === r}
+                      aria-label={`Repeat: ${r === 'none' ? 'once' : r}`}
                       className="flex-1 h-8 rounded-full text-[12px] font-medium capitalize"
                       style={{
                         backgroundColor: repeat === r ? 'rgba(123,114,255,0.15)' : '#252840',
@@ -488,6 +499,7 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
                 whileTap={{ scale: 0.97 }}
                 onClick={handleSubmit}
                 disabled={!title.trim()}
+                aria-label={isFull ? 'Add task to Next pool' : 'Add task to Now pool'}
                 className="w-full h-[52px] rounded-xl gradient-primary text-primary-foreground font-semibold text-body shadow-primary disabled:opacity-40"
               >
                 {isFull ? 'Add to Next →' : 'Add to Now →'}
