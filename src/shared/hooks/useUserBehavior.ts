@@ -118,9 +118,11 @@ export function useUserBehavior(sessions: FocusSessionRow[]): UserBehaviorProfil
     // ── Completed today ───────────────────────────────────────────────
     const todayISO = new Date().toISOString().slice(0, 10)
     const allTasks = [...nowPool, ...nextPool, ...somedayPool]
+    // Only count 'task' type completions (not reminders/meetings/ideas)
     const completedToday = allTasks.filter(
       (t) =>
         t.status === 'completed' &&
+        t.taskType === 'task' &&
         t.completedAt != null &&
         t.completedAt.startsWith(todayISO)
     ).length

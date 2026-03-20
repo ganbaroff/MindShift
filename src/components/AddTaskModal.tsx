@@ -1,15 +1,20 @@
 import { motion, AnimatePresence } from 'motion/react';
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { X, Mic, MicOff, Loader2 } from 'lucide-react';
 import { useStore } from '@/store';
-import { DIFFICULTY_MAP, TASK_TYPE_CONFIG, CATEGORY_CONFIG } from '@/types';
+import { TASK_TYPE_CONFIG } from '@/types';
 import type { Task, TaskType, TaskCategory } from '@/types';
 import { getNowPoolMax } from '@/shared/lib/constants';
 import { reminders } from '@/shared/lib/reminders';
 import { todayISO, tomorrowISO } from '@/shared/lib/dateUtils';
 import { useMotion } from '@/shared/hooks/useMotion';
 import { useVoiceInput } from '@/shared/hooks/useVoiceInput';
-const durationOptions = [5, 15, 25, 45, 60];
+import {
+  FIELD_VISIBILITY, getPoolForType, durationOptions,
+  DifficultyPicker, DurationPicker, CategoryPicker,
+  RepeatPicker, DueDatePicker, DueTimePicker,
+} from '@/components/addTaskFields';
+
 // Smart duration defaults — difficulty predicts time needed (ADHD task-time perception)
 const SMART_DURATION: Record<1 | 2 | 3, number> = { 1: 15, 2: 25, 3: 45 };
 
@@ -27,99 +32,113 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
   const nowCount = nowPool.filter(t => t.status === 'active').length;
   const nextCount = nextPool.filter(t => t.status === 'active').length;
   const isFull = nowCount >= maxNow;
-  // Two-Thirds guardrail (B-9): NEXT pool >= 4 of 6 = filling up
   const nextNearFull = isFull && nextCount >= 4;
 
   const [title, setTitle] = useState('');
   const [note, setNote] = useState('');
   const [showNote, setShowNote] = useState(false);
-  const [difficulty, setDifficulty] = useState<1 | 2 | 3>(1);
-  const [minutes, setMinutes] = useState(SMART_DURATION[1]);
+  const [difficulty, setDifficulty] = useState<1 | 2 | 3 | undefined>(2);
+  const [minutes, setMinutes] = useState<number | undefined>(SMART_DURATION[2]);
   const [dueDate, setDueDate] = useState<string | null>(null);
+  const [dueTime, setDueTime] = useState<string | null>(null);
   const [repeat, setRepeat] = useState<'none' | 'daily' | 'weekly'>('none');
   const [taskType, setTaskType] = useState<TaskType>('task');
   const [category, setCategory] = useState<TaskCategory | undefined>(undefined);
   const [showCategory, setShowCategory] = useState(false);
-  const minutesManuallySet = useRef(false); // prevents smart duration override
+  const minutesManuallySet = useRef(false);
 
-  // Smart duration: auto-update when difficulty changes unless user picked manually
+  const fields = useMemo(() => FIELD_VISIBILITY[taskType], [taskType]);
+
+  // Smart duration: auto-update when difficulty changes (task type only)
   useEffect(() => {
-    if (!minutesManuallySet.current) {
+    if (!minutesManuallySet.current && difficulty && fields.duration) {
       setMinutes(SMART_DURATION[difficulty]);
     }
-  }, [difficulty]);
+  }, [difficulty, fields.duration]);
+
+  // Reset irrelevant fields when task type changes
+  const handleTypeChange = useCallback((newType: TaskType) => {
+    const prev = taskType;
+    if (newType === prev) return;
+    setTaskType(newType);
+    const nf = FIELD_VISIBILITY[newType];
+    const pf = FIELD_VISIBILITY[prev];
+    if (!nf.difficulty) setDifficulty(undefined);
+    else if (!pf.difficulty) { setDifficulty(2); }
+    if (!nf.duration) { setMinutes(undefined); minutesManuallySet.current = false; }
+    else if (!pf.duration) { setMinutes(SMART_DURATION[2]); minutesManuallySet.current = false; }
+    if (!nf.dueDate) { setDueDate(null); setDueTime(null); }
+    if (!nf.dueTime) setDueTime(null);
+    if (!nf.repeat) setRepeat('none');
+    if (!nf.category) { setCategory(undefined); setShowCategory(false); }
+  }, [taskType]);
 
   const handleVoiceResult = useCallback((result: { title: string; difficulty?: 1 | 2 | 3; minutes?: number; dueDate?: string }) => {
     setTitle(result.title);
-    if (result.difficulty) {
-      setDifficulty(result.difficulty);
-      // Smart duration: use AI estimated minutes if provided, else SMART_DURATION
-      if (result.minutes && result.minutes > 0 && durationOptions.includes(result.minutes)) {
-        setMinutes(result.minutes);
-        minutesManuallySet.current = true;
-      } else {
-        setMinutes(SMART_DURATION[result.difficulty]);
+    // Only apply difficulty/duration for task type
+    if (taskType === 'task') {
+      if (result.difficulty) {
+        setDifficulty(result.difficulty);
+        if (result.minutes && result.minutes > 0 && durationOptions.includes(result.minutes)) {
+          setMinutes(result.minutes);
+          minutesManuallySet.current = true;
+        } else {
+          setMinutes(SMART_DURATION[result.difficulty]);
+        }
       }
     }
-    if (result.dueDate) {
-      setDueDate(result.dueDate);
-    }
-  }, []);
+    if (result.dueDate && fields.dueDate) setDueDate(result.dueDate);
+  }, [taskType, fields.dueDate]);
 
   const { voiceState, voiceError, classifyConfidence, voiceSupported, handleVoiceTap, reset: resetVoice } =
     useVoiceInput({ locale, onResult: handleVoiceResult });
 
   useEffect(() => {
     if (!open) {
-      setTitle('');
-      setNote('');
-      setShowNote(false);
-      setDifficulty(1);
-      setMinutes(SMART_DURATION[1]);
-      setDueDate(null);
-      setRepeat('none');
-      setTaskType('task');
-      setCategory(undefined);
-      setShowCategory(false);
+      setTitle(''); setNote(''); setShowNote(false);
+      setDifficulty(2); setMinutes(SMART_DURATION[2]);
+      setDueDate(null); setDueTime(null); setRepeat('none');
+      setTaskType('task'); setCategory(undefined); setShowCategory(false);
       minutesManuallySet.current = false;
       resetVoice();
     }
   }, [open, resetVoice]);
 
-  const handleClose = () => {
-    resetVoice();
-    onClose();
-  };
+  const handleClose = () => { resetVoice(); onClose(); };
+
+  const pool = getPoolForType(taskType, isFull);
+  const dueDateMissing = fields.dueDateRequired && !dueDate;
+  const dueTimeMissing = fields.dueTimeRequired && !dueTime;
+  const canSubmit = title.trim() && !dueDateMissing && !dueTimeMissing;
 
   const handleSubmit = () => {
-    if (!title.trim()) return;
+    if (!canSubmit) return;
     const newTask: Task = {
       id: crypto.randomUUID(),
       title: title.trim(),
-      pool: isFull ? 'next' : 'now',
+      pool,
       status: 'active',
-      difficulty,
-      estimatedMinutes: minutes,
+      difficulty: difficulty ?? 2,
+      estimatedMinutes: minutes ?? 25,
       createdAt: new Date().toISOString(),
       completedAt: null,
       snoozeCount: 0,
       parentTaskId: null,
       position: 0,
-      dueDate: dueDate,
-      dueTime: null,
-      taskType,
-      reminderSentAt: null,
-      repeat,
+      dueDate, dueTime, taskType,
+      reminderSentAt: null, repeat,
       note: note.trim() || undefined,
       category,
     };
     addTask(newTask);
-    // Auto-schedule reminder 15 min before due date if permission granted
     if (newTask.dueDate && 'Notification' in window && Notification.permission === 'granted') {
       reminders.schedule(newTask, 15);
     }
     onClose();
   };
+
+  const poolLabel = pool === 'now' ? 'NOW' : pool === 'next' ? 'NEXT' : 'SOMEDAY';
+  const poolIcon = pool === 'someday' ? '💡' : pool === 'next' ? '💙' : '→';
 
   return (
     <AnimatePresence>
@@ -148,19 +167,15 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
             </div>
 
             <div className="space-y-5">
-              {/* Title + mic button */}
+              {/* Title + mic */}
               <div className="relative">
                 <input
                   value={title}
-                  onChange={e => { setTitle(e.target.value); }}
+                  onChange={e => setTitle(e.target.value)}
                   placeholder={voiceState === 'listening' ? 'Listening...' : "What's on your mind?"}
                   className="w-full bg-ms-raised rounded-xl px-4 h-12 text-body text-ms-text placeholder:text-ms-muted border border-transparent focus:border-ms-primary outline-none transition-colors pr-12"
-                  style={{
-                    borderColor: voiceState === 'listening' ? '#7B72FF' : undefined,
-                  }}
+                  style={{ borderColor: voiceState === 'listening' ? '#7B72FF' : undefined }}
                 />
-
-                {/* Voice mic button */}
                 {voiceSupported && (
                   <button
                     type="button"
@@ -169,20 +184,13 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
                     aria-label={voiceState === 'listening' ? 'Stop recording' : 'Start voice input'}
                     className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200"
                     style={{
-                      background: voiceState === 'listening'
-                        ? 'rgba(123,114,255,0.25)'
-                        : 'rgba(255,255,255,0.04)',
-                      color: voiceState === 'listening' ? '#7B72FF'
-                        : voiceState === 'classifying' ? '#4ECDC4'
-                        : '#8B8BA7',
+                      background: voiceState === 'listening' ? 'rgba(123,114,255,0.25)' : 'rgba(255,255,255,0.04)',
+                      color: voiceState === 'listening' ? '#7B72FF' : voiceState === 'classifying' ? '#4ECDC4' : '#8B8BA7',
                     }}
                   >
                     {voiceState === 'classifying'
                       ? <Loader2 size={15} className="animate-spin motion-reduce:animate-none" />
-                      : voiceState === 'listening'
-                        ? <MicOff size={15} />
-                        : <Mic size={15} />
-                    }
+                      : voiceState === 'listening' ? <MicOff size={15} /> : <Mic size={15} />}
                   </button>
                 )}
               </div>
@@ -190,36 +198,21 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
               {/* Voice feedback */}
               <AnimatePresence>
                 {voiceState === 'listening' && (
-                  <motion.p
-                    initial={shouldAnimate ? { opacity: 0, y: -4 } : {}}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={shouldAnimate ? { opacity: 0 } : undefined}
-                    className="text-xs flex items-center gap-1.5 -mt-3"
-                    style={{ color: '#7B72FF' }}
-                  >
+                  <motion.p initial={shouldAnimate ? { opacity: 0, y: -4 } : {}} animate={{ opacity: 1, y: 0 }}
+                    exit={shouldAnimate ? { opacity: 0 } : undefined} className="text-xs flex items-center gap-1.5 -mt-3" style={{ color: '#7B72FF' }}>
                     <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse motion-reduce:opacity-80" />
                     Listening — say your task...
                   </motion.p>
                 )}
                 {classifyConfidence !== null && classifyConfidence >= 0.7 && (
-                  <motion.p
-                    initial={shouldAnimate ? { opacity: 0, y: -4 } : {}}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={shouldAnimate ? { opacity: 0 } : undefined}
-                    className="text-xs -mt-3"
-                    style={{ color: '#4ECDC4' }}
-                  >
+                  <motion.p initial={shouldAnimate ? { opacity: 0, y: -4 } : {}} animate={{ opacity: 1, y: 0 }}
+                    exit={shouldAnimate ? { opacity: 0 } : undefined} className="text-xs -mt-3" style={{ color: '#4ECDC4' }}>
                     ✓ AI filled in the details — adjust if needed
                   </motion.p>
                 )}
                 {voiceError && (
-                  <motion.p
-                    initial={shouldAnimate ? { opacity: 0, y: -4 } : {}}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={shouldAnimate ? { opacity: 0 } : undefined}
-                    className="text-xs -mt-3"
-                    style={{ color: '#F59E0B' }}
-                  >
+                  <motion.p initial={shouldAnimate ? { opacity: 0, y: -4 } : {}} animate={{ opacity: 1, y: 0 }}
+                    exit={shouldAnimate ? { opacity: 0 } : undefined} className="text-xs -mt-3" style={{ color: '#F59E0B' }}>
                     ⚠ {voiceError}
                   </motion.p>
                 )}
@@ -233,17 +226,12 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
                     const cfg = TASK_TYPE_CONFIG[t];
                     const sel = taskType === t;
                     return (
-                      <motion.button
-                        key={t}
-                        whileTap={{ scale: 0.97 }}
-                        onClick={() => setTaskType(t)}
-                        aria-pressed={sel}
-                        aria-label={`Type: ${cfg.label}`}
+                      <motion.button key={t} whileTap={{ scale: 0.97 }} onClick={() => handleTypeChange(t)}
+                        aria-pressed={sel} aria-label={`Type: ${cfg.label}`}
                         className="flex-1 h-10 rounded-xl flex items-center justify-center gap-1.5 text-[12px] font-medium transition-all"
                         style={{
                           backgroundColor: sel ? `${cfg.color}20` : '#252840',
-                          borderWidth: sel ? 1.5 : 1,
-                          borderStyle: 'solid',
+                          borderWidth: sel ? 1.5 : 1, borderStyle: 'solid',
                           borderColor: sel ? cfg.color : 'rgba(255,255,255,0.06)',
                           color: sel ? cfg.color : '#8B8BA7',
                         }}
@@ -256,260 +244,82 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
                 </div>
               </div>
 
-              {/* Category picker (collapsible) */}
-              <div>
-                {!showCategory ? (
-                  <button
-                    type="button"
-                    onClick={() => setShowCategory(true)}
-                    className="text-xs flex items-center gap-1"
-                    style={{ color: '#5A5B72' }}
-                    aria-expanded={false}
-                  >
-                    <span>+</span> Add category (optional)
-                  </button>
-                ) : (
-                  <AnimatePresence>
-                    <motion.div
-                      initial={shouldAnimate ? { opacity: 0, height: 0 } : {}}
-                      animate={{ opacity: 1, height: 'auto' }}
-                    >
-                      <label className="text-caption text-ms-muted uppercase tracking-widest mb-2 block">Category</label>
-                      <div className="flex flex-wrap gap-2">
-                        {(['work', 'personal', 'health', 'learning', 'finance'] as const).map(c => {
-                          const cfg = CATEGORY_CONFIG[c];
-                          const sel = category === c;
-                          return (
-                            <motion.button
-                              key={c}
-                              whileTap={{ scale: 0.97 }}
-                              onClick={() => setCategory(sel ? undefined : c)}
-                              aria-pressed={sel}
-                              aria-label={`Category: ${cfg.label}`}
-                              className="h-9 px-3 rounded-xl flex items-center gap-1.5 text-[12px] font-medium transition-all"
-                              style={{
-                                backgroundColor: sel ? 'rgba(123,114,255,0.15)' : '#252840',
-                                borderWidth: sel ? 1.5 : 1,
-                                borderStyle: 'solid',
-                                borderColor: sel ? '#7B72FF' : 'rgba(255,255,255,0.06)',
-                                color: sel ? '#7B72FF' : '#8B8BA7',
-                              }}
-                            >
-                              <span>{cfg.emoji}</span>
-                              {cfg.label}
-                            </motion.button>
-                          );
-                        })}
-                      </div>
-                    </motion.div>
-                  </AnimatePresence>
-                )}
-              </div>
+              {/* Category */}
+              {fields.category && (
+                <CategoryPicker
+                  category={category} showCategory={showCategory}
+                  onToggle={() => setShowCategory(true)}
+                  onSelect={setCategory} shouldAnimate={shouldAnimate}
+                />
+              )}
 
-              {/* Meeting: show due date more prominently */}
-              {taskType === 'meeting' && !dueDate && (
-                <motion.p
-                  initial={shouldAnimate ? { opacity: 0, y: -4 } : {}}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="text-xs -mt-2"
-                  style={{ color: '#7B72FF' }}
-                >
-                  🤝 Set a date and time for this meeting below
+              {/* "When is this?" hint for meeting/reminder */}
+              {(taskType === 'meeting' || taskType === 'reminder') && !dueDate && (
+                <motion.p initial={shouldAnimate ? { opacity: 0, y: -4 } : {}} animate={{ opacity: 1, y: 0 }}
+                  className="text-xs -mt-2" style={{ color: '#4ECDC4' }}>
+                  {taskType === 'meeting' ? '🤝' : '🔔'} When is this?
                 </motion.p>
               )}
 
-              {/* Optional note / context */}
+              {/* Note */}
               <div>
                 {!showNote ? (
-                  <button
-                    type="button"
-                    onClick={() => setShowNote(true)}
-                    className="text-xs flex items-center gap-1 -mt-1"
-                    style={{ color: '#5A5B72' }}
-                    aria-expanded={false}
-                  >
+                  <button type="button" onClick={() => setShowNote(true)}
+                    className="text-xs flex items-center gap-1 -mt-1" style={{ color: '#5A5B72' }} aria-expanded={false}>
                     <span>+</span> Add context (optional)
                   </button>
                 ) : (
                   <AnimatePresence>
                     <motion.textarea
-                      initial={shouldAnimate ? { opacity: 0, height: 0 } : {}}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      value={note}
-                      onChange={e => setNote(e.target.value)}
-                      placeholder="Any extra detail, links, or context…"
-                      rows={2}
+                      initial={shouldAnimate ? { opacity: 0, height: 0 } : {}} animate={{ opacity: 1, height: 'auto' }}
+                      value={note} onChange={e => setNote(e.target.value)}
+                      placeholder="Any extra detail, links, or context…" rows={2}
                       className="w-full bg-ms-raised rounded-xl px-4 py-3 text-body text-ms-text placeholder:text-ms-muted border border-transparent focus:border-ms-primary outline-none transition-colors resize-none text-[13px]"
                     />
                   </AnimatePresence>
                 )}
               </div>
 
-              {/* Difficulty */}
-              <div>
-                <label className="text-caption text-ms-muted uppercase tracking-widest mb-2 block">Difficulty</label>
-                <div className="flex gap-2">
-                  {([1, 2, 3] as const).map(d => {
-                    const c = DIFFICULTY_MAP[d];
-                    const sel = difficulty === d;
-                    return (
-                      <motion.button
-                        key={d}
-                        whileTap={{ scale: 0.97 }}
-                        onClick={() => { setDifficulty(d); }}
-                        aria-pressed={sel}
-                        aria-label={`Difficulty: ${c.label}`}
-                        className="flex-1 h-11 rounded-xl flex items-center justify-center gap-2 text-secondary font-medium transition-all"
-                        style={{
-                          backgroundColor: sel ? `${c.color}20` : '#252840',
-                          borderWidth: sel ? 1.5 : 1,
-                          borderColor: sel ? c.color : 'rgba(255,255,255,0.06)',
-                          color: sel ? c.color : '#8B8BA7',
-                        }}
-                      >
-                        <div className="flex gap-0.5">
-                          {Array.from({ length: d }).map((_, i) => (
-                            <div key={i} className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: sel ? c.color : '#8B8BA7' }} />
-                          ))}
-                        </div>
-                        {c.label}
-                      </motion.button>
-                    );
-                  })}
-                </div>
-              </div>
+              {fields.difficulty && <DifficultyPicker difficulty={difficulty} onSelect={setDifficulty} />}
 
-              {/* Time */}
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <label className="text-caption text-ms-muted uppercase tracking-widest">Time</label>
-                  {!minutesManuallySet.current && (
-                    <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: 'rgba(123,114,255,0.12)', color: '#7B72FF' }}>
-                      ✨ smart
-                    </span>
-                  )}
-                </div>
-                <div className="flex gap-2">
-                  {durationOptions.map(d => {
-                    const sel = minutes === d;
-                    return (
-                      <motion.button
-                        key={d}
-                        whileTap={{ scale: 0.97 }}
-                        onClick={() => { setMinutes(d); minutesManuallySet.current = true; }}
-                        aria-pressed={sel}
-                        aria-label={`${d} minutes`}
-                        className="flex-1 h-10 rounded-full text-secondary font-medium transition-all"
-                        style={{
-                          background: sel ? 'linear-gradient(135deg, #7B72FF, #8B7FF7)' : '#252840',
-                          color: sel ? '#fff' : '#8B8BA7',
-                          borderWidth: sel ? 0 : 1,
-                          borderColor: 'rgba(255,255,255,0.06)',
-                        }}
-                      >
-                        {d}m
-                      </motion.button>
-                    );
-                  })}
-                </div>
-              </div>
+              {fields.duration && (
+                <DurationPicker
+                  minutes={minutes}
+                  onSelect={m => { setMinutes(m); minutesManuallySet.current = true; }}
+                  isSmartMode={!minutesManuallySet.current}
+                />
+              )}
 
-              {/* Due date */}
-              <div>
-                <label className="text-caption text-ms-muted uppercase tracking-widest mb-2 block">Due date <span style={{ color: '#4ECDC4' }}>(optional)</span></label>
-                <div className="flex gap-2 mb-2">
-                  {[
-                    { label: 'Today', value: today },
-                    { label: 'Tomorrow', value: tomorrow },
-                  ].map(({ label, value }) => {
-                    const sel = dueDate === value;
-                    return (
-                      <motion.button
-                        key={value}
-                        whileTap={{ scale: 0.97 }}
-                        onClick={() => setDueDate(sel ? null : value)}
-                        aria-pressed={sel}
-                        aria-label={`Due date: ${label}`}
-                        className="flex-1 h-9 rounded-xl text-secondary font-medium transition-all"
-                        style={{
-                          backgroundColor: sel ? 'rgba(78,205,196,0.15)' : '#252840',
-                          borderWidth: sel ? 1.5 : 1,
-                          borderStyle: 'solid',
-                          borderColor: sel ? '#4ECDC4' : 'rgba(255,255,255,0.06)',
-                          color: sel ? '#4ECDC4' : '#8B8BA7',
-                        }}
-                      >
-                        {label}
-                      </motion.button>
-                    );
-                  })}
-                  <input
-                    type="date"
-                    value={dueDate ?? ''}
-                    min={today}
-                    onChange={e => setDueDate(e.target.value || null)}
-                    className="flex-1 h-9 rounded-xl px-2 text-secondary outline-none transition-all"
-                    style={{
-                      backgroundColor: (dueDate && dueDate !== today && dueDate !== tomorrow) ? 'rgba(123,114,255,0.15)' : '#252840',
-                      border: `${(dueDate && dueDate !== today && dueDate !== tomorrow) ? 1.5 : 1}px solid ${(dueDate && dueDate !== today && dueDate !== tomorrow) ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
-                      color: (dueDate && dueDate !== today && dueDate !== tomorrow) ? '#7B72FF' : '#8B8BA7',
-                      colorScheme: 'dark',
-                    }}
-                  />
-                </div>
-                {dueDate && (
-                  <motion.p
-                    initial={shouldAnimate ? { opacity: 0, y: -4 } : {}}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="text-xs"
-                    style={{ color: '#4ECDC4' }}
-                  >
-                    📅 Will appear in Upcoming tab
-                  </motion.p>
-                )}
-              </div>
+              {fields.dueDate && (
+                <DueDatePicker
+                  dueDate={dueDate} required={fields.dueDateRequired}
+                  today={today} tomorrow={tomorrow}
+                  shouldAnimate={shouldAnimate} onSelect={setDueDate}
+                />
+              )}
 
-              {/* Repeat — auto-recreate on completion */}
-              <div>
-                <p className="text-[12px] mb-1.5" style={{ color: '#8B8BA7' }}>Repeat</p>
-                <div className="flex gap-2">
-                  {(['none', 'daily', 'weekly'] as const).map(r => (
-                    <motion.button
-                      key={r}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => setRepeat(r)}
-                      aria-pressed={repeat === r}
-                      aria-label={`Repeat: ${r === 'none' ? 'once' : r}`}
-                      className="flex-1 h-8 rounded-full text-[12px] font-medium capitalize"
-                      style={{
-                        backgroundColor: repeat === r ? 'rgba(123,114,255,0.15)' : '#252840',
-                        border: `${repeat === r ? 1.5 : 1}px solid ${repeat === r ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
-                        color: repeat === r ? '#7B72FF' : '#8B8BA7',
-                      }}
-                    >
-                      {r === 'none' ? 'Once' : r}
-                    </motion.button>
-                  ))}
-                </div>
-              </div>
+              {fields.dueTime && (
+                <DueTimePicker dueTime={dueTime} required={fields.dueTimeRequired} onSelect={setDueTime} />
+              )}
+
+              {fields.repeat && <RepeatPicker repeat={repeat} onSelect={setRepeat} />}
 
               <div className="text-secondary text-ms-muted">
-                {isFull ? '💙 NOW is full — landing in NEXT' : '→ Adding to NOW'}
+                {taskType === 'task' && isFull
+                  ? '💙 NOW is full — landing in NEXT'
+                  : `${poolIcon} Adding to ${poolLabel}`}
               </div>
-              {/* Two-Thirds guardrail (B-9) — gentle nudge, never blocking */}
-              {nextNearFull && (
+              {pool === 'next' && nextNearFull && (
                 <p className="text-xs -mt-2" style={{ color: '#F59E0B' }}>
                   🌿 Your queue is getting full — maybe park one before adding?
                 </p>
               )}
               <motion.button
-                whileTap={{ scale: 0.97 }}
-                onClick={handleSubmit}
-                disabled={!title.trim()}
-                aria-label={isFull ? 'Add task to Next pool' : 'Add task to Now pool'}
+                whileTap={{ scale: 0.97 }} onClick={handleSubmit} disabled={!canSubmit}
+                aria-label={`Add ${TASK_TYPE_CONFIG[taskType].label.toLowerCase()} to ${poolLabel} pool`}
                 className="w-full h-[52px] rounded-xl gradient-primary text-primary-foreground font-semibold text-body shadow-primary disabled:opacity-40"
               >
-                {isFull ? 'Add to Next →' : 'Add to Now →'}
+                Add to {poolLabel} →
               </motion.button>
             </div>
           </motion.div>

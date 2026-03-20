@@ -300,9 +300,20 @@ export const useStore = create<AppStore>()(
         somedayPool: [],
 
         addTask: (task) => set((s) => {
-          if (task.pool === 'now')  return { nowPool: [...s.nowPool, task] }
-          if (task.pool === 'next') return { nextPool: [...s.nextPool, task] }
-          return { somedayPool: [...s.somedayPool, task] }
+          // Pool assignment by task type:
+          //   task    → current logic (NOW if space, else NEXT)
+          //   meeting → always NEXT
+          //   reminder → always NEXT
+          //   idea    → always SOMEDAY
+          const effectivePool = (() => {
+            if (task.taskType === 'idea') return 'someday' as const
+            if (task.taskType === 'meeting' || task.taskType === 'reminder') return 'next' as const
+            return task.pool // 'task' type uses caller-assigned pool
+          })()
+          const assigned = { ...task, pool: effectivePool }
+          if (effectivePool === 'now')  return { nowPool: [...s.nowPool, assigned] }
+          if (effectivePool === 'next') return { nextPool: [...s.nextPool, assigned] }
+          return { somedayPool: [...s.somedayPool, assigned] }
         }),
 
         completeTask: (taskId) => {
@@ -332,8 +343,10 @@ export const useStore = create<AppStore>()(
           })() : {}
 
           // Recurring tasks — auto-create next occurrence in NEXT pool
+          // Only 'task' and 'reminder' types support recurrence; meetings and ideas don't recur.
           const recurTask: Task | null = (() => {
             if (!completedTask || !completedTask.repeat || completedTask.repeat === 'none') return null
+            if (completedTask.taskType === 'meeting' || completedTask.taskType === 'idea') return null
             const offsetDays = completedTask.repeat === 'daily' ? 1 : 7
             const nextDue = new Date(Date.now() + offsetDays * 86_400_000).toISOString().split('T')[0]
             return {
