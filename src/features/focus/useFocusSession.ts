@@ -172,6 +172,13 @@ export function useFocusSession() {
     if (bufferIntervalRef.current)   clearInterval(bufferIntervalRef.current)
   }, [])
 
+  // ── Reset session ref on user change ─────────────────────────────────────
+  // Prevents energy_after update from targeting a previous user's session row
+  useEffect(() => {
+    savedSessionIdRef.current = null
+    sessionSavedRef.current = false
+  }, [userId])
+
   // ── Phase-adaptive audio volume ────────────────────────────────────────────
   // Research #1: sound adapts to cognitive phase — full masking in struggle,
   // quiet ambient in flow to avoid disrupting hyperfocus state.
@@ -494,14 +501,15 @@ export function useFocusSession() {
     setEnergyLevel(level)
     setPostEnergyLogged(true)
     // Persist post-session energy to the focus_sessions row that was just created
-    if (savedSessionIdRef.current) {
+    // Guard: only update if we have a saved session ID and the user is still logged in
+    if (savedSessionIdRef.current && userId && !userId.startsWith('guest_')) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       void (supabase.from('focus_sessions') as any)
         .update({ energy_after: level })
         .eq('id', savedSessionIdRef.current)
         .then(({ error }: { error: unknown }) => { if (error) logError('useFocusSession.energy_after.update', error) })
     }
-  }, [setEnergyLevel])
+  }, [setEnergyLevel, userId])
 
   // ── Derived ──────────────────────────────────────────────────────────────────
   const progress  = durationSecRef.current > 0 ? 1 - remainingSeconds / durationSecRef.current : 0
