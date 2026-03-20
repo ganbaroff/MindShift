@@ -229,10 +229,10 @@ export default function OnboardingPage() {
       <AnimatePresence mode="wait">
         <motion.div
           key={step}
-          initial={shouldAnimate ? { opacity: 0, x: 40 } : false}
-          animate={shouldAnimate ? { opacity: 1, x: 0 } : false}
-          exit={shouldAnimate ? { opacity: 0, x: -40 } : undefined}
-          transition={shouldAnimate ? { duration: 0.2 } : { duration: 0 }}
+          initial={shouldAnimate ? { opacity: 0, x: 30, scale: 0.98 } : false}
+          animate={shouldAnimate ? { opacity: 1, x: 0, scale: 1 } : false}
+          exit={shouldAnimate ? { opacity: 0, x: -20, scale: 0.98 } : undefined}
+          transition={shouldAnimate ? { duration: 0.25, ease: [0.25, 0.1, 0.25, 1] } : { duration: 0 }}
           className="flex-1"
         >
           <h1 className="text-[24px] font-bold mb-1" style={{ color: '#E8E8F0' }}>{current.title}</h1>
@@ -333,6 +333,25 @@ export default function OnboardingPage() {
           </motion.button>
         </div>
       )}
+
+      {/* Step indicator dots — always visible at bottom */}
+      <div className="flex items-center justify-center gap-2 py-4">
+        {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
+          <motion.div
+            key={i}
+            animate={shouldAnimate ? {
+              width: i === step ? 20 : 8,
+              backgroundColor: i === step ? '#4ECDC4' : i < step ? '#7B72FF' : '#252840',
+            } : undefined}
+            transition={shouldAnimate ? { duration: 0.25, ease: 'easeOut' } : { duration: 0 }}
+            className="h-2 rounded-full"
+            style={{
+              width: i === step ? 20 : 8,
+              backgroundColor: i === step ? '#4ECDC4' : i < step ? '#7B72FF' : '#252840',
+            }}
+          />
+        ))}
+      </div>
     </div>
   );
 }

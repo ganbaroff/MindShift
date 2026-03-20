@@ -22,7 +22,7 @@ import {
   notifyFocusEnd, notifyAchievement, requestNotificationPermission,
   pushFocusComplete, pushRecoveryEnd,
 } from '@/shared/lib/notify'
-import { hapticDone } from '@/shared/lib/haptic'
+import { hapticDone, hapticPhase, hapticStart } from '@/shared/lib/haptic'
 import { getToneCopy } from '@/shared/lib/uiTone'
 import { ACHIEVEMENT_DEFINITIONS } from '@/types'
 import {
@@ -152,6 +152,7 @@ export function useFocusSession() {
   const quickStartedRef     = useRef(false)
   const softStopFiredRef    = useRef(false)
   const savedSessionIdRef   = useRef<string | null>(null)  // captures DB row id for energy_after UPDATE
+  const lastPhaseRef        = useRef<SessionPhase>('idle')  // tracks phase for haptic on transition
 
   // ── Interrupt bookmark ──────────────────────────────────────────────────────
   const [bookmarkText, setBookmarkText] = useState('')
@@ -368,7 +369,13 @@ export function useFocusSession() {
 
       setElapsed(elapsed)
       setRemaining(remaining)
-      setPhase(getPhase(elapsed / 60))
+
+      const newPhase = getPhase(elapsed / 60)
+      if (newPhase !== lastPhaseRef.current) {
+        lastPhaseRef.current = newPhase
+        hapticPhase() // tactile feedback on phase transition
+      }
+      setPhase(newPhase)
 
       if (remaining <= 0) handleSessionEnd(true)
     }, 250)
@@ -388,6 +395,8 @@ export function useFocusSession() {
     setPostEnergyLogged(false)
 
     void requestNotificationPermission()
+    hapticStart() // grounding pulse before focus begins
+    lastPhaseRef.current = 'struggle' // reset phase tracking
     startSession(selectedTask?.id ?? null, duration, focusAnchor ?? null)
 
     // Audio calls wrapped in try/catch — AudioContext can throw on iOS Safari

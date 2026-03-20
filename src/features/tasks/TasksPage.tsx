@@ -27,6 +27,7 @@ import { useStore } from '@/store';
 import { DIFFICULTY_MAP } from '@/types';
 import type { Task } from '@/types';
 import { getNowPoolMax } from '@/shared/lib/constants';
+import { PageTransition } from '@/shared/ui/PageTransition';
 
 export default function TasksPage() {
   const navigate = useNavigate();
@@ -76,6 +77,7 @@ export default function TasksPage() {
   );
 
   return (
+    <PageTransition>
     <div className="min-h-screen px-5 pb-36 pt-10" style={{ backgroundColor: '#0F1120' }}>
       <motion.div initial={shouldAnimate ? { opacity: 0, y: -8 } : false} animate={shouldAnimate ? { opacity: 1, y: 0 } : false}>
         <h1 className="text-[24px] font-bold" style={{ color: '#E8E8F0' }}>Your Tasks</h1>
@@ -238,6 +240,7 @@ export default function TasksPage() {
       <Fab onClick={() => setShowAddTask(true)} />
       <AddTaskModal open={showAddTask} onClose={() => setShowAddTask(false)} />
     </div>
+    </PageTransition>
   );
 }
 
