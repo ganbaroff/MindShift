@@ -158,3 +158,29 @@ export const nativeShare = async (data: ShareData): Promise<boolean> => {
 export const canShare = (): boolean => {
   return isNativeApp() || (typeof navigator !== 'undefined' && 'share' in navigator)
 }
+
+// ── Android Widget Bridge ────────────────────────────────────────────────────
+
+interface WidgetData {
+  nowTaskTitle: string
+  focusMinutesToday: number
+}
+
+/**
+ * Update Android home screen widget data via SharedPreferences bridge.
+ * Requires WidgetBridgePlugin registered in MainActivity (see docs/android-widget-guide.md).
+ * No-op on iOS, web, or when the plugin is not available.
+ */
+export const updateWidgetData = (data: WidgetData): void => {
+  if (!isNativeApp()) return
+  try {
+    const plugins = getPlugins() as CapPlugins & {
+      WidgetBridge?: { updateWidgetData: (opts: WidgetData) => Promise<void> }
+    }
+    if (plugins.WidgetBridge) {
+      void plugins.WidgetBridge.updateWidgetData(data)
+    }
+  } catch {
+    // Widget bridge not available — ignore silently
+  }
+}
