@@ -660,7 +660,26 @@ export const useStore = create<AppStore>()(
       }),
       {
         name: 'mindshift-store',
+        version: 1,
         storage: createJSONStorage(() => idbStorage),
+        // Merge persisted state with current defaults so new fields don't
+        // cause data loss. Without this, Zustand drops the entire persisted
+        // state when the shape changes between deploys.
+        merge: (persisted, current) => {
+          const p = persisted as Record<string, unknown> | undefined
+          if (!p) return current
+          return {
+            ...current,
+            ...p,
+            // Deep-merge pools: persisted pools take priority, but ensure
+            // they're always arrays (guard against corruption)
+            nowPool: Array.isArray(p.nowPool) ? p.nowPool : current.nowPool,
+            nextPool: Array.isArray(p.nextPool) ? p.nextPool : current.nextPool,
+            somedayPool: Array.isArray(p.somedayPool) ? p.somedayPool : current.somedayPool,
+            achievements: Array.isArray(p.achievements) ? p.achievements : current.achievements,
+            gridWidgets: Array.isArray(p.gridWidgets) ? p.gridWidgets : current.gridWidgets,
+          }
+        },
         // Prune completed tasks older than 30 days on every store rehydration.
         // Prevents localStorage from growing unboundedly while keeping recent
         // completed tasks visible in the "Done recently" section.
