@@ -16,8 +16,11 @@ import { toast } from 'sonner'
 import { supabase } from '@/shared/lib/supabase'
 import { useStore } from '@/store'
 import { logError } from '@/shared/lib/logger'
-import type { Task } from '@/types'
+import type { Task, TaskCategory } from '@/types'
 import type { TaskRow } from '@/types/database'
+
+// Valid TaskCategory values — used to safely cast DB strings
+const VALID_CATEGORIES = new Set<string>(['work', 'personal', 'health', 'learning', 'finance'])
 
 // ── Row → Task mapping ────────────────────────────────────────────────────────
 
@@ -42,10 +45,16 @@ function rowToTask(row: TaskRow): Task {
                        ? row.task_type
                        : 'task',
     reminderSentAt:  row.reminder_sent_at,
-    repeat:          'none',
+    repeat:          (() => {
+      const r = (row as unknown as Record<string, unknown>).repeat
+      return r === 'daily' || r === 'weekly' ? r : 'none'
+    })(),
     note:            row.note ?? undefined,
-    // category is client-only for now — DB column pending future migration
-    category:        undefined,
+    // category column may not exist yet — read gracefully with fallback
+    category:        (() => {
+      const c = (row as unknown as Record<string, unknown>).category
+      return typeof c === 'string' && VALID_CATEGORIES.has(c) ? c as TaskCategory : undefined
+    })(),
   }
 }
 
@@ -67,7 +76,9 @@ function taskToInsertRow(task: Task, userId: string): Omit<TaskRow, 'id' | 'crea
     task_type:         task.taskType ?? null,
     reminder_sent_at:  task.reminderSentAt,
     note:              task.note ?? null,
-  }
+    repeat:            task.repeat ?? 'none',
+    category:          task.category ?? null,
+  } as Omit<TaskRow, 'id' | 'created_at' | 'completed_at' | 'snooze_count'> & { id: string; user_id: string; repeat: string; category: string | null }
 }
 
 // ── Push local tasks to Supabase (first-device scenario) ─────────────────────

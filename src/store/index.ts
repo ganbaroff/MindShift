@@ -363,6 +363,16 @@ export const useStore = create<AppStore>()(
             }
           })()
 
+          // Sync recurring task to Supabase (fire-and-forget)
+          if (recurTask && s.userId && !s.userId.startsWith('guest_')) {
+            const capturedTask = recurTask
+            const capturedUserId = s.userId
+            // Defer import to avoid circular dependency — store cannot statically import useTaskSync
+            void import('@/shared/hooks/useTaskSync').then(({ syncTaskUpsert }) => {
+              syncTaskUpsert(capturedTask, capturedUserId)
+            })
+          }
+
           return {
             nowPool: complete(s.nowPool),
             nextPool: recurTask
@@ -431,13 +441,15 @@ export const useStore = create<AppStore>()(
 
         archiveAllOverdue: () => {
           const s = get()
-          const allActive = [...s.nowPool, ...s.nextPool]
-            .filter(t => t.status === 'active')
-          const ids = allActive.map(t => t.id)
+          const today = new Date().toISOString().split('T')[0]
+          const allOverdue = [...s.nowPool, ...s.nextPool]
+            .filter(t => t.status === 'active' && t.dueDate != null && t.dueDate < today)
+          const ids = allOverdue.map(t => t.id)
+          const overdueSet = new Set(ids)
           set((s) => ({
-            nowPool: s.nowPool.filter(t => t.status !== 'active'),
-            nextPool: s.nextPool.filter(t => t.status !== 'active'),
-            somedayPool: [...s.somedayPool, ...allActive.map(t => ({ ...t, pool: 'someday' as const }))],
+            nowPool: s.nowPool.filter(t => !overdueSet.has(t.id)),
+            nextPool: s.nextPool.filter(t => !overdueSet.has(t.id)),
+            somedayPool: [...s.somedayPool, ...allOverdue.map(t => ({ ...t, pool: 'someday' as const }))],
           }))
           return ids
         },

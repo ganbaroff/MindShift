@@ -9,6 +9,7 @@ import { reminders } from '@/shared/lib/reminders';
 import { todayISO, tomorrowISO } from '@/shared/lib/dateUtils';
 import { useMotion } from '@/shared/hooks/useMotion';
 import { useVoiceInput } from '@/shared/hooks/useVoiceInput';
+import { syncTaskUpsert } from '@/shared/hooks/useTaskSync';
 import {
   FIELD_VISIBILITY, getPoolForType, durationOptions,
   DifficultyPicker, DurationPicker, CategoryPicker,
@@ -25,7 +26,7 @@ interface AddTaskModalProps {
 
 export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
   const { shouldAnimate } = useMotion();
-  const { addTask, nowPool, nextPool, appMode, seasonalMode, locale } = useStore();
+  const { addTask, nowPool, nextPool, appMode, seasonalMode, locale, userId } = useStore();
   const maxNow = getNowPoolMax(appMode, seasonalMode);
   const today = todayISO();
   const tomorrow = tomorrowISO();
@@ -131,6 +132,10 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
       category,
     };
     addTask(newTask);
+    // Sync to Supabase for logged-in users (fire-and-forget)
+    if (userId && !userId.startsWith('guest_')) {
+      syncTaskUpsert(newTask, userId);
+    }
     if (newTask.dueDate && 'Notification' in window && Notification.permission === 'granted') {
       reminders.schedule(newTask, 15);
     }
