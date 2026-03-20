@@ -22,7 +22,7 @@ export default function EnergyPicker({ selected, onSelect, size = 40 }: EnergyPi
             onClick={() => onSelect(i)}
             aria-label={`${opt.label} energy${active ? ' (selected)' : ''}`}
             aria-pressed={active}
-            className="flex flex-col items-center gap-0.5"
+            className="flex flex-col items-center gap-0.5 min-h-[44px] min-w-[44px]"
           >
             <motion.span
               animate={shouldAnimate ? (active ? { scale: 1.15 } : { scale: 1 }) : false}

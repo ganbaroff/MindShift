@@ -24,9 +24,10 @@ function SessionFrictionNudge({ onDismiss }: { onDismiss: () => void }) {
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 8 }}
-      className="fixed bottom-20 left-1/2 z-40 -translate-x-1/2 px-4 py-2.5 rounded-2xl flex items-center gap-2"
+      className="fixed left-1/2 z-40 -translate-x-1/2 px-4 py-2.5 rounded-2xl flex items-center gap-2"
       style={{
-        maxWidth: 320, width: '90%',
+        bottom: 'calc(80px + env(safe-area-inset-bottom))',
+        maxWidth: 480, width: '90%',
         background: 'rgba(123,114,255,0.15)',
         border: '1px solid rgba(123,114,255,0.30)',
         backdropFilter: 'blur(8px)',

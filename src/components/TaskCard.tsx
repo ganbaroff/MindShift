@@ -1,4 +1,4 @@
-import { memo, useState } from 'react';
+import { memo, useState, useRef, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { useMotion } from '@/shared/hooks/useMotion';
 import { hapticDone } from '@/shared/lib/haptic';
@@ -59,15 +59,58 @@ function TaskCardInner({ task, index = 0, onDone, onPark }: TaskCardProps) {
     (Date.now() - new Date(task.createdAt).getTime() > 24 * 60 * 60 * 1000);
   const hasReminder = !!task.dueDate && reminders.has(task.id);
 
+  // Undo completion — 4s deferred window
+  const undoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingTaskIdRef = useRef<string | null>(null);
+
+  // Clean up timer on unmount
+  useEffect(() => {
+    return () => {
+      if (undoTimerRef.current) {
+        clearTimeout(undoTimerRef.current);
+        // If unmounting with a pending completion, execute it
+        if (pendingTaskIdRef.current) {
+          onDone?.(pendingTaskIdRef.current);
+        }
+      }
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleDone = (id: string) => {
     hapticDone();
     setJustCompleted(true);
-    // Show emotionally-adapted completion toast
-    const pool = COMPLETION_TOASTS[emotionalReactivity ?? 'moderate'] ?? COMPLETION_TOASTS.moderate;
-    const msg = pool[Math.floor(Math.random() * pool.length)];
-    toast(msg, { duration: emotionalReactivity === 'high' ? 4000 : 2500 });
-    // Brief delay so the user sees the celebration micro-interaction
-    setTimeout(() => onDone?.(id), 300);
+
+    // Show emotionally-adapted completion toast with Undo action
+    const msgPool = COMPLETION_TOASTS[emotionalReactivity ?? 'moderate'] ?? COMPLETION_TOASTS.moderate;
+    const msg = msgPool[Math.floor(Math.random() * msgPool.length)];
+
+    // Store pending completion
+    pendingTaskIdRef.current = id;
+
+    // Start 4s deferred completion timer
+    undoTimerRef.current = setTimeout(() => {
+      if (pendingTaskIdRef.current === id) {
+        onDone?.(id);
+        pendingTaskIdRef.current = null;
+      }
+    }, 4000);
+
+    toast(msg, {
+      duration: 4000,
+      action: {
+        label: 'Undo',
+        onClick: () => {
+          // Cancel deferred completion
+          if (undoTimerRef.current) {
+            clearTimeout(undoTimerRef.current);
+            undoTimerRef.current = null;
+          }
+          pendingTaskIdRef.current = null;
+          setJustCompleted(false);
+        },
+      },
+    });
   };
 
   return (

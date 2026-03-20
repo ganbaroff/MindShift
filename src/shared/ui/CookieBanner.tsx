@@ -66,12 +66,12 @@ export function CookieBanner() {
           transition={t()}
         >
           <div className="flex-1 min-w-0">
-            <p className="text-[11px] leading-relaxed" style={{ color: 'var(--color-text-subtle)' }}>
+            <p className="text-[10px] sm:text-[11px] leading-relaxed" style={{ color: 'var(--color-text-subtle)' }}>
               We save your preferences on-device.{' '}
               <strong style={{ color: 'var(--color-muted)' }}>No tracking cookies.</strong>{' '}
               <Link
                 to="/cookie-policy"
-                className="underline decoration-dotted"
+                className="underline decoration-dotted focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1E2136] rounded-sm"
                 style={{ color: 'var(--color-primary)' }}
                 onClick={dismiss}
               >
@@ -82,7 +82,7 @@ export function CookieBanner() {
           <button
             onClick={dismiss}
             aria-label="Dismiss cookie notice"
-            className="shrink-0 p-1 rounded-lg transition-colors hover:bg-white/5"
+            className="shrink-0 p-1 rounded-lg transition-colors hover:bg-white/5 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1E2136]"
             style={{ color: 'var(--color-text-subtle)' }}
           >
             <X size={14} />

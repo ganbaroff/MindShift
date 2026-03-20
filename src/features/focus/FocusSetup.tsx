@@ -400,6 +400,15 @@ export function FocusSetup({
         </div>
       )}
 
+      {/* No-task hint — subtle label when focusing freely */}
+      {allTasks.length > 0 && selectedTask === null && (
+        <div className="mx-5 mb-3 flex items-center gap-2">
+          <span className="text-[11px]" style={{ color: '#8B8BA7' }}>
+            No task selected — focusing freely
+          </span>
+        </div>
+      )}
+
       {/* Start button */}
       <div className="px-5 space-y-2">
         <button

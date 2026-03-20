@@ -102,7 +102,7 @@ export function DurationPicker({ minutes, onSelect, isSmartMode }: DurationPicke
               onClick={() => onSelect(d)}
               aria-pressed={sel}
               aria-label={`${d} minutes`}
-              className="flex-1 h-10 rounded-full text-secondary font-medium transition-all"
+              className="flex-1 h-11 rounded-full text-secondary font-medium transition-all"
               style={{
                 background: sel ? 'linear-gradient(135deg, #7B72FF, #8B7FF7)' : '#252840',
                 color: sel ? '#fff' : '#8B8BA7',

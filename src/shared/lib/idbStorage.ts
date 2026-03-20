@@ -34,12 +34,24 @@ export const idbStorage: StateStorage = {
     const idbVal = await get<string>(name)
     if (idbVal !== undefined) return idbVal
 
+    // Fallback: check localStorage backup (survives SW cache cleanup race conditions)
+    const backupKey = `${name}_backup`
+    const backup = localStorage.getItem(backupKey)
+    if (backup !== null) {
+      // Restore from backup into IDB
+      set(name, backup).catch(() => {})
+      return backup
+    }
+
     return null
   },
 
   setItem: async (name: string, value: string): Promise<void> => {
     await set(name, value)
-    // Ensure localStorage is cleaned up if it still exists (race condition safety)
+    // Backup critical data to localStorage as fallback against IDB wipe
+    // during Service Worker updates. localStorage survives SW lifecycle.
+    try { localStorage.setItem(`${name}_backup`, value) } catch { /* quota exceeded — non-fatal */ }
+    // Ensure primary localStorage key is cleaned up (migration artifact)
     if (localStorage.getItem(name) !== null) {
       localStorage.removeItem(name)
     }
@@ -48,5 +60,6 @@ export const idbStorage: StateStorage = {
   removeItem: async (name: string): Promise<void> => {
     await del(name)
     localStorage.removeItem(name)
+    localStorage.removeItem(`${name}_backup`)
   },
 }

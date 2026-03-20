@@ -72,9 +72,26 @@ export function useVoiceInput({ locale, onResult }: UseVoiceInputOptions): UseVo
 
     setVoiceState('classifying');
     try {
-      const { data } = await supabase.functions.invoke('classify-voice-input', {
+      // 10s timeout for AI classification — race against a timeout promise
+      const VOICE_TIMEOUT_MS = 10_000;
+      const timeoutPromise = new Promise<'timeout'>((resolve) =>
+        setTimeout(() => resolve('timeout'), VOICE_TIMEOUT_MS)
+      );
+
+      const invokePromise = supabase.functions.invoke('classify-voice-input', {
         body: { text: transcript.trim(), language: locale },
       });
+
+      const raceResult = await Promise.race([invokePromise, timeoutPromise]);
+
+      if (raceResult === 'timeout') {
+        toast('Voice input timed out. Try typing instead.', { duration: 3000 });
+        onResultRef.current({ title: transcript.trim().slice(0, 80) });
+        setVoiceState('idle');
+        return;
+      }
+
+      const { data } = raceResult;
 
       if (data?.title) {
         const result: VoiceResult = { title: data.title as string };

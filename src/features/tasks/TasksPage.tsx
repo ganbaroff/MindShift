@@ -23,6 +23,7 @@ import { CSS } from '@dnd-kit/utilities';
 import TaskCard from '@/components/TaskCard';
 import Fab from '@/components/Fab';
 import AddTaskModal from '@/components/AddTaskModal';
+import { EmptyState } from '@/shared/ui/EmptyState';
 import { useStore } from '@/store';
 import { DIFFICULTY_MAP } from '@/types';
 import type { Task } from '@/types';
@@ -56,10 +57,18 @@ export default function TasksPage() {
   }, [reorderPool])
 
   const q = searchQuery.toLowerCase().trim();
-  // NOW pool: only 'task' type (meetings/reminders/ideas don't go here)
-  const nowTasks = useMemo(() => nowPool.filter(t => t.status === 'active' && t.taskType === 'task' && (!q || t.title.toLowerCase().includes(q))), [nowPool, q]);
-  // NEXT pool: tasks, meetings, reminders — but not ideas
-  const nextTasks = useMemo(() => nextPool.filter(t => t.status === 'active' && t.taskType !== 'idea' && (!q || t.title.toLowerCase().includes(q))), [nextPool, q]);
+  // NOW pool: only 'task' type (meetings/reminders/ideas don't go here), sorted by position
+  const nowTasks = useMemo(() =>
+    nowPool
+      .filter(t => t.status === 'active' && t.taskType === 'task' && (!q || t.title.toLowerCase().includes(q)))
+      .sort((a, b) => (a.position ?? 0) - (b.position ?? 0)),
+    [nowPool, q]);
+  // NEXT pool: tasks, meetings, reminders — but not ideas, sorted by position
+  const nextTasks = useMemo(() =>
+    nextPool
+      .filter(t => t.status === 'active' && t.taskType !== 'idea' && (!q || t.title.toLowerCase().includes(q)))
+      .sort((a, b) => (a.position ?? 0) - (b.position ?? 0)),
+    [nextPool, q]);
   // SOMEDAY pool: all types
   const somedayTasks = useMemo(() => somedayPool.filter(t => t.status === 'active' && (!q || t.title.toLowerCase().includes(q))), [somedayPool, q]);
   const doneTasks = useMemo(() =>
@@ -146,19 +155,28 @@ export default function TasksPage() {
             <span className="text-[11px]" style={{ color: '#8B8BA7' }}>{nowTasks.length}/{nowMax}</span>
             {nowTasks.length > 1 && <span className="text-[10px]" style={{ color: '#3A3B52' }}>hold to reorder</span>}
           </div>
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={(e) => handleDragEnd(e, 'now', nowTasks)}
-          >
-            <SortableContext items={nowTasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
-              <div className="space-y-2">
-                {nowTasks.map((t, i) => (
-                  <SortableTaskCard key={t.id} task={t} index={i} onDone={completeTask} onPark={snoozeTask} />
-                ))}
-              </div>
-            </SortableContext>
-          </DndContext>
+          {nowTasks.length === 0 ? (
+            <EmptyState
+              emoji="🎯"
+              title="Ready when you are"
+              subtitle="Add a task to start focusing"
+              action={{ label: 'Add task', onClick: () => setShowAddTask(true) }}
+            />
+          ) : (
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={(e) => handleDragEnd(e, 'now', nowTasks)}
+            >
+              <SortableContext items={nowTasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
+                <div className="space-y-2">
+                  {nowTasks.map((t, i) => (
+                    <SortableTaskCard key={t.id} task={t} index={i} onDone={completeTask} onPark={snoozeTask} />
+                  ))}
+                </div>
+              </SortableContext>
+            </DndContext>
+          )}
         </div>
 
         {/* Energy hint */}
