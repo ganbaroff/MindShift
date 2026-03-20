@@ -38,12 +38,14 @@ function rowToTask(row: TaskRow): Task {
     dueTime:         row.due_time,
     // task_type from DB is a plain string; cast to the union expected by the
     // store — unknown values are normalised to 'task' as a safe fallback.
-    taskType:        (row.task_type === 'idea' || row.task_type === 'reminder')
+    taskType:        (row.task_type === 'idea' || row.task_type === 'reminder' || row.task_type === 'meeting')
                        ? row.task_type
                        : 'task',
     reminderSentAt:  row.reminder_sent_at,
     repeat:          'none',
     note:            row.note ?? undefined,
+    // category is client-only for now — DB column pending future migration
+    category:        undefined,
   }
 }
 

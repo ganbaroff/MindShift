@@ -113,7 +113,7 @@ export default function FocusScreen() {
     handleAudioToggle, handleParkThought,
     handleSessionEnd, handleBypassRecovery, handleBypassHardStop,
     handlePostEnergy,
-    isPlaying,
+    isPlaying, audioVolume, handleVolumeChange,
     shouldAnimate, t,
     TIMER_PRESETS,
     focusAnchor,
@@ -378,6 +378,8 @@ export default function FocusScreen() {
       <SessionControls
         isFlow={isFlow}
         isPlaying={isPlaying}
+        audioVolume={audioVolume}
+        onVolumeChange={handleVolumeChange}
         parkOpen={parkOpen}
         parkText={parkText}
         onAudioToggle={handleAudioToggle}
