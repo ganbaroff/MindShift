@@ -1,17 +1,17 @@
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Home, Timer, ListTodo, CalendarDays, Settings } from 'lucide-react'
+import { Sun, Timer, ListTodo, Home, Settings } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { usePalette } from '@/shared/hooks/usePalette'
 import { cn } from '@/shared/lib/cn'
 
-// Audio removed from primary nav — accessible within FocusScreen.
-// Upcoming (due dates) replaces Progress (Progress accessible from Home widget).
+// Today = Smart Daily View (default landing).
+// Home = original dashboard (accessible, not primary).
 const NAV_ITEMS = [
-  { path: '/',          icon: Home,         label: 'Home'     },
+  { path: '/today',     icon: Sun,          label: 'Today'    },
   { path: '/tasks',     icon: ListTodo,     label: 'Tasks'    },
   { path: '/focus',     icon: Timer,        label: 'Focus'    },
-  { path: '/calendar',  icon: CalendarDays, label: 'Upcoming' },
+  { path: '/home',      icon: Home,         label: 'Home'     },
   { path: '/settings',  icon: Settings,     label: 'Settings' },
 ] as const
 

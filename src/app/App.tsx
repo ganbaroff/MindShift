@@ -31,6 +31,7 @@ const ProgressPage     = lazy(() => import('@/features/progress/ProgressPage'))
 const SettingsPage     = lazy(() => import('@/features/settings/SettingsPage'))
 const DueDateScreen    = lazy(() => import('@/features/calendar/DueDateScreen'))
 const HistoryPage      = lazy(() => import('@/features/history/HistoryPage'))
+const TodayPage        = lazy(() => import('@/features/today/TodayPage'))
 const PrivacyPage      = lazy(() => import('@/features/legal/PrivacyPage'))
 const TermsPage        = lazy(() => import('@/features/legal/TermsPage'))
 const CookiePolicyPage = lazy(() => import('@/features/legal/CookiePolicyPage'))
@@ -93,7 +94,10 @@ export default function App() {
         updateLastSession()
 
         // ── Google Calendar: store provider tokens on OAuth callback ──────────
-        if (session.provider_token) {
+        // Only store tokens + enable sync when returning from calendar-scope auth
+        // (Settings toggle sets this flag before redirect)
+        if (session.provider_token && localStorage.getItem('ms_calendar_pending')) {
+          localStorage.removeItem('ms_calendar_pending')
           try {
             await supabase.functions.invoke('gcal-store-token', {
               body: {
@@ -102,7 +106,6 @@ export default function App() {
                 expiresIn: 3600, // Google tokens last 1 hour
               },
             })
-            // Enable calendar sync if this was a calendar-scope auth
             useStore.getState().setCalendarSyncEnabled(true)
           } catch (err) {
             logError('App.gcalTokenStore', err instanceof Error ? err : new Error(String(err)))
@@ -362,7 +365,13 @@ export default function App() {
               <Route path="/onboarding" element={<OnboardingPage />} />
 
               <Route element={<AppShell />}>
-                <Route index element={
+                <Route index element={<Navigate to="/today" replace />} />
+                <Route path="/today" element={
+                  <ErrorBoundary fallback={<RouteError label="Today" />}>
+                    <TodayPage />
+                  </ErrorBoundary>
+                } />
+                <Route path="/home" element={
                   <ErrorBoundary fallback={<RouteError label="Home" />}>
                     <HomePage />
                   </ErrorBoundary>

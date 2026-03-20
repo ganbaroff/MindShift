@@ -34,6 +34,12 @@ export const en = {
   'crisis.settings.en':      '988 Suicide & Crisis Lifeline (call or text 988)',
   'crisis.settings.intl':    'Crisis Text Line: Text HOME to 741741',
 
+  // ── Today screen ──────────────────────────────────────────────────────────
+  'today.energy.low':        'Low energy — one easy task is plenty today',
+  'today.energy.high':       'Good energy. Your window for deeper work.',
+  'today.evening.done':      "Today's wrap-up",
+  'today.empty':             'Clear day ahead',
+
   // ── Generic ───────────────────────────────────────────────────────────────
   'generic.skip':            'Skip',
   'generic.done':            'Done',
