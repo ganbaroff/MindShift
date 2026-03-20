@@ -461,7 +461,8 @@ export default function SettingsPage() {
                 <button
                   onClick={async () => {
                     if (!calendarSyncEnabled) {
-                      // Enable — need to request calendar scope via re-auth
+                      // Flag so App.tsx onAuthStateChange knows this was calendar auth
+                      localStorage.setItem('ms_calendar_pending', '1')
                       const { error } = await supabase.auth.signInWithOAuth({
                         provider: 'google',
                         options: {
