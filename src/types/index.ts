@@ -31,6 +31,7 @@ export interface Task {
   repeat: 'none' | 'daily' | 'weekly'  // auto-recreates task on completion
   note?: string                         // optional context / extra detail
   category?: TaskCategory               // optional task category
+  googleEventId?: string | null         // Google Calendar event ID for sync
   /** @deprecated DEPRECATED: use difficulty (1|2|3) + DIFFICULTY_MAP instead (Sprint B A-2). */
   difficultyLevel?: 'easy' | 'medium' | 'hard'
 }

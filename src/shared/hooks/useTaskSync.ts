@@ -55,6 +55,8 @@ function rowToTask(row: TaskRow): Task {
       const c = (row as unknown as Record<string, unknown>).category
       return typeof c === 'string' && VALID_CATEGORIES.has(c) ? c as TaskCategory : undefined
     })(),
+    // Google Calendar event ID — may not exist yet in older DBs
+    googleEventId:   row.google_event_id ?? null,
   }
 }
 
@@ -76,6 +78,7 @@ function taskToInsertRow(task: Task, userId: string): Omit<TaskRow, 'id' | 'crea
     task_type:         task.taskType ?? null,
     reminder_sent_at:  task.reminderSentAt,
     note:              task.note ?? null,
+    google_event_id:   task.googleEventId ?? null,
     repeat:            task.repeat ?? 'none',
     category:          task.category ?? null,
   } as Omit<TaskRow, 'id' | 'created_at' | 'completed_at' | 'snooze_count'> & { id: string; user_id: string; repeat: string; category: string | null }
