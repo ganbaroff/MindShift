@@ -7,6 +7,7 @@ import { useStore } from '@/store';
 import { notifyAchievement } from '@/shared/lib/notify';
 import { getToneCopy } from '@/shared/lib/uiTone';
 import { ACHIEVEMENT_DEFINITIONS } from '@/types';
+import type { TaskType, TaskCategory } from '@/types';
 
 // SpeechRecognition browser compatibility
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -18,11 +19,17 @@ const SpeechRecognitionAPI: (new () => SpeechRecognitionInstance) | null =
 
 export type VoiceState = 'idle' | 'listening' | 'classifying';
 
+const VALID_TASK_TYPES: readonly TaskType[] = ['task', 'idea', 'reminder', 'meeting'] as const;
+const VALID_CATEGORIES: readonly TaskCategory[] = ['work', 'personal', 'health', 'learning', 'finance'] as const;
+
 interface VoiceResult {
   title: string;
   difficulty?: 1 | 2 | 3;
   minutes?: number;
   dueDate?: string;
+  dueTime?: string;
+  taskType?: TaskType;
+  category?: TaskCategory;
   confidence?: number;
 }
 
@@ -83,6 +90,18 @@ export function useVoiceInput({ locale, onResult }: UseVoiceInputOptions): UseVo
 
         if (data.dueDate && typeof data.dueDate === 'string') {
           result.dueDate = data.dueDate;
+        }
+
+        if (data.dueTime && typeof data.dueTime === 'string') {
+          result.dueTime = data.dueTime;
+        }
+
+        if (typeof data.type === 'string' && VALID_TASK_TYPES.includes(data.type as TaskType)) {
+          result.taskType = data.type as TaskType;
+        }
+
+        if (typeof data.category === 'string' && VALID_CATEGORIES.includes(data.category as TaskCategory)) {
+          result.category = data.category as TaskCategory;
         }
 
         result.confidence = typeof data.confidence === 'number' ? data.confidence : undefined;

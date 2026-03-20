@@ -27,6 +27,7 @@ import { nativeStatusBarHide, nativeStatusBarShow } from '@/shared/lib/native'
 import { supabase } from '@/shared/lib/supabase'
 import { useSessionHistory } from '@/shared/hooks/useSessionHistory'
 import { useUserBehavior } from '@/shared/hooks/useUserBehavior'
+import { useStore } from '@/store'
 
 // ── Ambient Orbit (S-2) ───────────────────────────────────────────────────────
 // Shows how many people are currently in a focus session — body-doubling signal.
@@ -56,6 +57,7 @@ function useAmbientOrbit(active: boolean) {
 
 export default function FocusScreen() {
   const session = useFocusSession()
+  const { emotionalReactivity } = useStore()
   const orbitCount = useAmbientOrbit(session.screen === 'session')
   const room = useFocusRoom()
 
@@ -128,6 +130,8 @@ export default function FocusScreen() {
         onSetEnergyLevel={handlePostEnergy}
         onSkip={handleSkipBuffer}
         sessionMinutes={elapsedMin}
+        emotionalReactivity={emotionalReactivity}
+        sessionPhase={sessionPhase}
       />
     )
   }

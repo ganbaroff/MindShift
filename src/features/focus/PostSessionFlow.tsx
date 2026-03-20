@@ -13,7 +13,7 @@
 import { memo, useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useMotion } from '@/shared/hooks/useMotion'
-import type { EnergyLevel } from '@/types'
+import type { EnergyLevel, SessionPhase } from '@/types'
 import { ENERGY_LABELS, ENERGY_EMOJI } from '@/shared/lib/constants'
 
 // ── Hyperfocus Autopsy threshold (B-6 backlog item) ───────────────────────────
@@ -28,6 +28,31 @@ const AUTOPSY_OPTIONS = [
   { key: 'scattered',emoji: '🌀', label: 'Bit scattered',   desc: 'Distractions crept in' },
 ] as const
 
+// ── Emotionally-adaptive closing messages ────────────────────────────────────
+// emotionalReactivity shapes the post-session tone: high = extra-gentle,
+// steady = direct, moderate/null = default warm message.
+
+function getClosingMessage(
+  emotionalReactivity: 'high' | 'moderate' | 'steady' | null | undefined,
+  sessionMinutes: number,
+  sessionPhase: SessionPhase | undefined,
+): string {
+  const isShort = sessionMinutes < 10
+  const reachedFlow = sessionPhase === 'flow'
+
+  if (emotionalReactivity === 'high') {
+    if (isShort) return 'Short sessions count. Your brain needed a break, and you listened.'
+    if (reachedFlow) return 'You found your flow despite the noise. That takes real strength.'
+    return 'You showed up and did the work. Let your mind settle now.'
+  }
+  if (emotionalReactivity === 'steady') {
+    if (reachedFlow) return 'Flow reached. Good session. Rest up.'
+    return 'Session done. Take a beat before the next one.'
+  }
+  // moderate or null — default warm message
+  return 'Session done. Let your mind settle before the next one.'
+}
+
 // ── Nature Buffer Screen ───────────────────────────────────────────────────────
 
 interface NatureBufferProps {
@@ -37,6 +62,10 @@ interface NatureBufferProps {
   onSkip: () => void
   /** Session length in minutes — drives Hyperfocus Autopsy (B-6) */
   sessionMinutes?: number
+  /** Emotional reactivity level — adapts closing message tone */
+  emotionalReactivity?: 'high' | 'moderate' | 'steady' | null
+  /** Phase reached during the session — used with emotionalReactivity for tone */
+  sessionPhase?: SessionPhase
 }
 
 const ENERGY_OPTIONS = [
@@ -49,10 +78,14 @@ const ENERGY_OPTIONS = [
 
 export const NatureBuffer = memo(function NatureBuffer({
   bufferSeconds, postEnergyLogged, onSetEnergyLevel, onSkip, sessionMinutes = 0,
+  emotionalReactivity, sessionPhase,
 }: NatureBufferProps) {
   const { shouldAnimate, t } = useMotion()
   const [autopsyPick, setAutopsyPick] = useState<string | null>(null)
-  const showAutopsy = sessionMinutes >= HYPERFOCUS_THRESHOLD_MIN
+  // High emotional reactivity + short struggle session: hide autopsy (could feel judgmental)
+  const isShortStruggle = sessionMinutes < 10 && sessionPhase === 'struggle'
+  const hideAutopsyForReactivity = emotionalReactivity === 'high' && isShortStruggle
+  const showAutopsy = sessionMinutes >= HYPERFOCUS_THRESHOLD_MIN && !hideAutopsyForReactivity
   const bm = Math.floor(bufferSeconds / 60)
   const bs = bufferSeconds % 60
 
@@ -72,7 +105,7 @@ export const NatureBuffer = memo(function NatureBuffer({
           Time to breathe 🌿
         </h2>
         <p className="text-sm mb-8 max-w-xs leading-relaxed" style={{ color: '#8B8BA7' }}>
-          Session done. Let your mind settle before the next one.
+          {getClosingMessage(emotionalReactivity, sessionMinutes, sessionPhase)}
         </p>
 
         <div

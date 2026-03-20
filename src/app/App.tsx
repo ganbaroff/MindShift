@@ -150,7 +150,13 @@ export default function App() {
       avgSessionMinutes: 20,
       recentAvgEnergy,
     })
-    setBurnoutScore(computeBurnoutScore(behaviors))
+    const rawScore = computeBurnoutScore(behaviors)
+    // High emotional reactivity = feel burnout sooner (1.2x multiplier, capped at 100)
+    const emotionalReactivity = useStore.getState().emotionalReactivity
+    const adjustedScore = emotionalReactivity === 'high'
+      ? Math.min(100, Math.round(rawScore * 1.2))
+      : rawScore
+    setBurnoutScore(adjustedScore)
   }, [completedTotal, energyLevel, nowPool, nextPool, somedayPool, setBurnoutScore])
 
   // Shutdown ritual — triggers once per day after 9pm when onboarding done

@@ -75,22 +75,32 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
     if (!nf.category) { setCategory(undefined); setShowCategory(false); }
   }, [taskType]);
 
-  const handleVoiceResult = useCallback((result: { title: string; difficulty?: 1 | 2 | 3; minutes?: number; dueDate?: string }) => {
+  const handleVoiceResult = useCallback((result: { title: string; difficulty?: 1 | 2 | 3; minutes?: number; dueDate?: string; dueTime?: string; taskType?: TaskType; category?: TaskCategory }) => {
+    // Apply task type first so field visibility updates for subsequent assignments
+    if (result.taskType) {
+      handleTypeChange(result.taskType);
+    }
+
     setTitle(result.title);
-    // Only apply difficulty/duration for task type
-    if (taskType === 'task') {
-      if (result.difficulty) {
-        setDifficulty(result.difficulty);
-        if (result.minutes && result.minutes > 0 && durationOptions.includes(result.minutes)) {
-          setMinutes(result.minutes);
-          minutesManuallySet.current = true;
-        } else {
-          setMinutes(SMART_DURATION[result.difficulty]);
-        }
+
+    const effectiveType = result.taskType ?? taskType;
+    const effectiveFields = FIELD_VISIBILITY[effectiveType];
+
+    // Only apply difficulty/duration when the type supports them
+    if (effectiveFields.difficulty && result.difficulty) {
+      setDifficulty(result.difficulty);
+      if (effectiveFields.duration && result.minutes && result.minutes > 0 && durationOptions.includes(result.minutes)) {
+        setMinutes(result.minutes);
+        minutesManuallySet.current = true;
+      } else if (effectiveFields.duration) {
+        setMinutes(SMART_DURATION[result.difficulty]);
       }
     }
-    if (result.dueDate && fields.dueDate) setDueDate(result.dueDate);
-  }, [taskType, fields.dueDate]);
+
+    if (result.dueDate && effectiveFields.dueDate) setDueDate(result.dueDate);
+    if (result.dueTime && effectiveFields.dueTime) setDueTime(result.dueTime);
+    if (result.category && effectiveFields.category) setCategory(result.category);
+  }, [taskType, handleTypeChange]);
 
   const { voiceState, voiceError, classifyConfidence, voiceSupported, handleVoiceTap, reset: resetVoice } =
     useVoiceInput({ locale, onResult: handleVoiceResult });

@@ -5,6 +5,8 @@ import { hapticDone } from '@/shared/lib/haptic';
 import { DIFFICULTY_MAP, TASK_TYPE_CONFIG, CATEGORY_CONFIG } from '@/types';
 import type { Task } from '@/types';
 import { reminders } from '@/shared/lib/reminders';
+import { useStore } from '@/store';
+import { toast } from 'sonner';
 
 interface TaskCardProps {
   task: Task;
@@ -28,9 +30,30 @@ function DifficultyDots({ difficulty }: { difficulty: 1 | 2 | 3 }) {
   );
 }
 
+// ── Completion toast messages adapted by emotional reactivity ─────────────────
+const COMPLETION_TOASTS: Record<string, string[]> = {
+  high: [
+    "One more thing off your list. You're doing this.",
+    "Done. You showed up for that one, and it matters.",
+    "Finished. Give yourself a moment to feel that.",
+    "That's one less thing weighing on you.",
+  ],
+  moderate: [
+    "Done. Solid work.",
+    "One down. Keep your pace.",
+    "Finished. On to the next when you're ready.",
+  ],
+  steady: [
+    "Done.",
+    "Checked off.",
+    "Done. Next.",
+  ],
+}
+
 function TaskCardInner({ task, index = 0, onDone, onPark }: TaskCardProps) {
   const { shouldAnimate } = useMotion();
   const [justCompleted, setJustCompleted] = useState(false);
+  const emotionalReactivity = useStore(s => s.emotionalReactivity);
   const config = DIFFICULTY_MAP[task.difficulty ?? 1];
   const isCarryOver = task.status === 'active' &&
     (Date.now() - new Date(task.createdAt).getTime() > 24 * 60 * 60 * 1000);
@@ -39,6 +62,10 @@ function TaskCardInner({ task, index = 0, onDone, onPark }: TaskCardProps) {
   const handleDone = (id: string) => {
     hapticDone();
     setJustCompleted(true);
+    // Show emotionally-adapted completion toast
+    const pool = COMPLETION_TOASTS[emotionalReactivity ?? 'moderate'] ?? COMPLETION_TOASTS.moderate;
+    const msg = pool[Math.floor(Math.random() * pool.length)];
+    toast(msg, { duration: emotionalReactivity === 'high' ? 4000 : 2500 });
     // Brief delay so the user sees the celebration micro-interaction
     setTimeout(() => onDone?.(id), 300);
   };
