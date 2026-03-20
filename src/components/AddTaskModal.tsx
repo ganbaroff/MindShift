@@ -6,27 +6,12 @@ import { DIFFICULTY_MAP } from '@/types';
 import type { Task } from '@/types';
 import { getNowPoolMax } from '@/shared/lib/constants';
 import { reminders } from '@/shared/lib/reminders';
-import { supabase } from '@/shared/lib/supabase';
-import { logError } from '@/shared/lib/logger';
 import { todayISO, tomorrowISO } from '@/shared/lib/dateUtils';
 import { useMotion } from '@/shared/hooks/useMotion';
-
+import { useVoiceInput } from '@/shared/hooks/useVoiceInput';
 const durationOptions = [5, 15, 25, 45, 60];
-
-// Smart duration defaults — Research: difficulty predicts time needed
-// Easy tasks are often underestimated; hard tasks overestimated. These are
-// conservative midpoints that match ADHD task-time perception research.
+// Smart duration defaults — difficulty predicts time needed (ADHD task-time perception)
 const SMART_DURATION: Record<1 | 2 | 3, number> = { 1: 15, 2: 25, 3: 45 };
-
-// SpeechRecognition browser compatibility
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type SpeechRecognitionInstance = any
-const SpeechRecognitionAPI: (new () => SpeechRecognitionInstance) | null =
-  (typeof window !== 'undefined' &&
-    ((window as unknown as { SpeechRecognition?: new () => SpeechRecognitionInstance }).SpeechRecognition ??
-     (window as unknown as { webkitSpeechRecognition?: new () => SpeechRecognitionInstance }).webkitSpeechRecognition)) || null
-
-type VoiceState = 'idle' | 'listening' | 'classifying'
 
 interface AddTaskModalProps {
   open: boolean;
@@ -52,12 +37,7 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
   const [minutes, setMinutes] = useState(SMART_DURATION[1]);
   const [dueDate, setDueDate] = useState<string | null>(null);
   const [repeat, setRepeat] = useState<'none' | 'daily' | 'weekly'>('none');
-  const [voiceState, setVoiceState] = useState<VoiceState>('idle');
-  const [voiceError, setVoiceError] = useState<string | null>(null);
-  const [classifyConfidence, setClassifyConfidence] = useState<number | null>(null)
-
-  // Track whether the user manually picked a duration (prevents smart override)
-  const minutesManuallySet = useRef(false);
+  const minutesManuallySet = useRef(false); // prevents smart duration override
 
   // Smart duration: auto-update when difficulty changes unless user picked manually
   useEffect(() => {
@@ -66,9 +46,26 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
     }
   }, [difficulty]);
 
-  const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
+  const handleVoiceResult = useCallback((result: { title: string; difficulty?: 1 | 2 | 3; minutes?: number; dueDate?: string }) => {
+    setTitle(result.title);
+    if (result.difficulty) {
+      setDifficulty(result.difficulty);
+      // Smart duration: use AI estimated minutes if provided, else SMART_DURATION
+      if (result.minutes && result.minutes > 0 && durationOptions.includes(result.minutes)) {
+        setMinutes(result.minutes);
+        minutesManuallySet.current = true;
+      } else {
+        setMinutes(SMART_DURATION[result.difficulty]);
+      }
+    }
+    if (result.dueDate) {
+      setDueDate(result.dueDate);
+    }
+  }, []);
 
-  // Reset form when modal closes/opens
+  const { voiceState, voiceError, classifyConfidence, voiceSupported, handleVoiceTap, reset: resetVoice } =
+    useVoiceInput({ locale, onResult: handleVoiceResult });
+
   useEffect(() => {
     if (!open) {
       setTitle('');
@@ -78,103 +75,15 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
       setMinutes(SMART_DURATION[1]);
       setDueDate(null);
       setRepeat('none');
-      setVoiceState('idle');
-      setVoiceError(null);
-      setClassifyConfidence(null);
       minutesManuallySet.current = false;
-      recognitionRef.current?.abort();
+      resetVoice();
     }
-  }, [open]);
+  }, [open, resetVoice]);
 
   const handleClose = () => {
-    recognitionRef.current?.abort();
+    resetVoice();
     onClose();
   };
-
-  // ── Voice classification ──────────────────────────────────────────────────
-  const classifyTranscript = useCallback(async (transcript: string) => {
-    if (!transcript.trim()) { setVoiceState('idle'); return; }
-
-    setVoiceState('classifying');
-    try {
-      const { data } = await supabase.functions.invoke('classify-voice-input', {
-        body: { text: transcript.trim(), language: locale },
-      });
-
-      if (data?.title) {
-        setTitle(data.title as string);
-        if (data.difficulty && [1, 2, 3].includes(Number(data.difficulty))) {
-          const d = Number(data.difficulty) as 1 | 2 | 3;
-          setDifficulty(d);
-          // Smart duration: use AI estimated minutes if provided, else SMART_DURATION
-          const aiMinutes = Number(data.estimatedMinutes);
-          if (aiMinutes > 0 && durationOptions.includes(aiMinutes)) {
-            setMinutes(aiMinutes);
-            minutesManuallySet.current = true;
-          } else {
-            setMinutes(SMART_DURATION[d]);
-          }
-        }
-        if (data.dueDate && typeof data.dueDate === 'string') {
-          setDueDate(data.dueDate);
-        }
-        setClassifyConfidence(typeof data.confidence === 'number' ? data.confidence : null);
-      }
-    } catch (err) {
-      logError('AddTaskModal.classifyVoice', err);
-      // Fallback: use raw transcript as title
-      setTitle(transcript.trim().slice(0, 80));
-    } finally {
-      setVoiceState('idle');
-    }
-  }, [locale]);
-
-  const handleVoiceTap = useCallback(() => {
-    if (!SpeechRecognitionAPI) {
-      setVoiceError('Voice input not supported on this browser.');
-      return;
-    }
-
-    if (voiceState === 'listening') {
-      recognitionRef.current?.stop();
-      return;
-    }
-
-    if (voiceState === 'classifying') return;
-
-    setVoiceError(null);
-    setClassifyConfidence(null);
-    const rec = new SpeechRecognitionAPI();
-    rec.continuous = false;
-    rec.interimResults = false;
-    rec.lang = locale + '-' + locale.toUpperCase(); // e.g. en-EN (browser normalises)
-
-    rec.onstart = () => setVoiceState('listening');
-
-    rec.onresult = (e: { results: { [index: number]: { transcript: string }[] } & { length: number } }) => {
-      const transcript = Array.from({ length: e.results.length }, (_, i) => e.results[i])
-        .map((r: { transcript: string }[]) => r[0].transcript)
-        .join(' ');
-      void classifyTranscript(transcript);
-    };
-
-    rec.onerror = (e: { error: string }) => {
-      if (e.error !== 'aborted') {
-        setVoiceError(e.error === 'not-allowed'
-          ? 'Microphone permission denied.'
-          : 'Could not hear you. Try again?'
-        );
-      }
-      setVoiceState('idle');
-    };
-
-    rec.onend = () => {
-      setVoiceState((prev) => prev === 'listening' ? 'idle' : prev);
-    };
-
-    recognitionRef.current = rec;
-    rec.start();
-  }, [voiceState, locale, classifyTranscript]);
 
   const handleSubmit = () => {
     if (!title.trim()) return;
@@ -204,8 +113,6 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
     }
     onClose();
   };
-
-  const voiceSupported = !!SpeechRecognitionAPI;
 
   return (
     <AnimatePresence>
@@ -238,7 +145,7 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
               <div className="relative">
                 <input
                   value={title}
-                  onChange={e => { setTitle(e.target.value); setClassifyConfidence(null); }}
+                  onChange={e => { setTitle(e.target.value); }}
                   placeholder={voiceState === 'listening' ? 'Listening...' : "What's on your mind?"}
                   className="w-full bg-ms-raised rounded-xl px-4 h-12 text-body text-ms-text placeholder:text-ms-muted border border-transparent focus:border-ms-primary outline-none transition-colors pr-12"
                   style={{

@@ -11,6 +11,7 @@ import type { EnergyLevel } from '@/types';
 import { getNowPoolMax, APP_MODE_CONFIG, ENERGY_EMOJI } from '@/shared/lib/constants';
 import { useI18n } from '@/shared/hooks/useI18n';
 import { useUITone } from '@/shared/hooks/useUITone';
+import { BurnoutGauge } from './BurnoutGauge';
 import { toast } from 'sonner';
 
 // ── Mochi energy reaction messages ────────────────────────────────────────────
@@ -138,6 +139,37 @@ export default function HomePage() {
       toast.success(`🎯 Daily goal reached! ${dailyFocusGoalMin} min focused today`, { duration: 4000 })
     }
   }, [goalReached, goalCelebratedDate, todayISO, dailyFocusGoalMin, setGoalCelebratedDate])
+
+  // ── Bento grid cards (memoized) ──────────────────────────────────────────────
+  const bentoCards = useMemo(() => [
+    {
+      content: (
+        <>
+          <span className="text-[20px] font-bold" style={{ color: '#E8E8F0' }}>{completedTotal ?? 0}</span>
+          <span className="text-[11px] ml-1" style={{ color: '#8B8BA7' }}>done</span>
+          {focusMinutes !== null && (
+            <>
+              <span className="text-[11px] mx-1" style={{ color: '#8B8BA7' }}>·</span>
+              <span className="text-[20px] font-bold" style={{ color: '#E8E8F0' }}>{(focusMinutes / 60).toFixed(1)}h</span>
+            </>
+          )}
+        </>
+      ),
+      sub: `⚡ ${(xpTotal ?? 0).toLocaleString()} XP`,
+    },
+    {
+      content: <span className="text-[28px]">{ENERGY_EMOJI[energyLevel - 1]}</span>,
+      sub: 'Tap to update',
+    },
+    {
+      content: <span className="text-[20px] font-bold" style={{ color: '#E8E8F0' }}>✅ {completedTotal}</span>,
+      sub: 'tasks completed',
+    },
+    {
+      content: <BurnoutGauge score={isNaN(burnoutScore) ? 0 : (burnoutScore ?? 0)} />,
+      sub: 'Burnout gauge',
+    },
+  ], [completedTotal, focusMinutes, xpTotal, energyLevel, burnoutScore]);
 
   // Time-based greeting (i18n-aware)
   const { t } = useI18n();
@@ -380,35 +412,7 @@ export default function HomePage() {
         {/* Bento Grid — simplified in low-energy mode */}
         {!isLowEnergy && (
           <div className="grid grid-cols-2 gap-2">
-            {[
-              {
-                content: (
-                  <>
-                    <span className="text-[20px] font-bold" style={{ color: '#E8E8F0' }}>{completedTotal ?? 0}</span>
-                    <span className="text-[11px] ml-1" style={{ color: '#8B8BA7' }}>done</span>
-                    {focusMinutes !== null && (
-                      <>
-                        <span className="text-[11px] mx-1" style={{ color: '#8B8BA7' }}>·</span>
-                        <span className="text-[20px] font-bold" style={{ color: '#E8E8F0' }}>{(focusMinutes / 60).toFixed(1)}h</span>
-                      </>
-                    )}
-                  </>
-                ),
-                sub: `⚡ ${(xpTotal ?? 0).toLocaleString()} XP`,
-              },
-              {
-                content: <span className="text-[28px]">{ENERGY_EMOJI[energyLevel - 1]}</span>,
-                sub: 'Tap to update',
-              },
-              {
-                content: <span className="text-[20px] font-bold" style={{ color: '#E8E8F0' }}>✅ {completedTotal}</span>,
-                sub: 'tasks completed',
-              },
-              {
-                content: <BurnoutGauge score={isNaN(burnoutScore) ? 0 : (burnoutScore ?? 0)} />,
-                sub: 'Burnout gauge',
-              },
-            ].map((card, i) => (
+            {bentoCards.map((card, i) => (
               <motion.div
                 key={i}
                 initial={shouldAnimate ? { opacity: 0, y: 12 } : false}
@@ -451,26 +455,6 @@ export default function HomePage() {
 
       <Fab onClick={() => setShowAddTask(true)} />
       <AddTaskModal open={showAddTask} onClose={() => setShowAddTask(false)} />
-    </div>
-  );
-}
-
-function BurnoutGauge({ score }: { score: number }) {
-  const angle = (score / 100) * 180;
-  const r = 28;
-  const cx = 36;
-  const cy = 36;
-  const toRad = (deg: number) => (deg * Math.PI) / 180;
-  const endX = cx + r * Math.cos(toRad(180 - angle));
-  const endY = cy - r * Math.sin(toRad(180 - angle));
-  const largeArc = angle > 180 ? 1 : 0;
-  return (
-    <div className="relative">
-      <svg width="72" height="44" viewBox="0 0 72 44">
-        <path d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="5" strokeLinecap="round" />
-        <path d={`M ${cx - r} ${cy} A ${r} ${r} 0 ${largeArc} 1 ${endX} ${endY}`} fill="none" stroke="#4ECDC4" strokeWidth="5" strokeLinecap="round" />
-      </svg>
-      <span className="absolute bottom-0 left-1/2 -translate-x-1/2 text-[15px] font-bold" style={{ color: '#4ECDC4' }}>{score}</span>
     </div>
   );
 }
