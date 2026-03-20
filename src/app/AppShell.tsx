@@ -82,7 +82,7 @@ export function AppShell() {
   }, [])
 
   return (
-    <div className="flex flex-col h-full max-w-[480px] mx-auto relative">
+    <div className="flex flex-col h-full max-w-[480px] mx-auto relative sm:my-0 sm:rounded-none md:shadow-lg md:border-x md:border-[rgba(255,255,255,0.04)]">
       {/* Skip navigation link — keyboard users jump past bottom nav to main content */}
       <a
         href="#main-content"

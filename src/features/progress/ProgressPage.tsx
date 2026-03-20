@@ -8,6 +8,7 @@ import { useSessionHistory } from '@/shared/hooks/useSessionHistory';
 import { nativeShare, canShare } from '@/shared/lib/native';
 import { deriveFromSessions } from '@/shared/lib/psychotype';
 import { AchievementGrid } from './AchievementGrid';
+import { PageTransition } from '@/shared/ui/PageTransition';
 
 const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
@@ -84,6 +85,7 @@ export default function ProgressPage() {
     .map(e => ENERGY_EMOJI[Math.min(4, Math.max(0, e - 1))]);
 
   return (
+    <PageTransition>
     <div className="min-h-screen px-5 pb-36 pt-10" style={{ backgroundColor: '#0F1120' }}>
       <motion.div initial={shouldAnimate ? { opacity: 0, y: -8 } : false} animate={shouldAnimate ? { opacity: 1, y: 0 } : false}>
         <h1 className="text-[24px] font-bold" style={{ color: '#E8E8F0' }}>Your Progress 🌱</h1>
@@ -348,5 +350,6 @@ export default function ProgressPage() {
         <AchievementGrid achievements={achievements} />
       </div>
     </div>
+    </PageTransition>
   );
 }

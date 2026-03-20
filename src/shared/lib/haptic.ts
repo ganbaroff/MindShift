@@ -10,11 +10,15 @@
  *  - iOS: navigator.vibrate() silently does nothing (WebKit blocks it)
  *  - Android Chrome/Edge: full support after user gesture
  *
+ * Gated by `hapticsEnabled` in the store — users can disable via Settings.
  * All functions fail silently — haptics are enhancement, never critical path.
  */
 
+import { useStore } from '@/store'
+
 export function haptic(pattern: number | number[] = 150): void {
   try {
+    if (!useStore.getState().hapticsEnabled) return
     if ('vibrate' in navigator) {
       navigator.vibrate(pattern)
     }

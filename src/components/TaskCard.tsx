@@ -1,6 +1,7 @@
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import { motion } from 'motion/react';
 import { useMotion } from '@/shared/hooks/useMotion';
+import { hapticDone } from '@/shared/lib/haptic';
 import { DIFFICULTY_MAP, TASK_TYPE_CONFIG, CATEGORY_CONFIG } from '@/types';
 import type { Task } from '@/types';
 import { reminders } from '@/shared/lib/reminders';
@@ -29,10 +30,18 @@ function DifficultyDots({ difficulty }: { difficulty: 1 | 2 | 3 }) {
 
 function TaskCardInner({ task, index = 0, onDone, onPark }: TaskCardProps) {
   const { shouldAnimate } = useMotion();
+  const [justCompleted, setJustCompleted] = useState(false);
   const config = DIFFICULTY_MAP[task.difficulty ?? 1];
   const isCarryOver = task.status === 'active' &&
     (Date.now() - new Date(task.createdAt).getTime() > 24 * 60 * 60 * 1000);
   const hasReminder = !!task.dueDate && reminders.has(task.id);
+
+  const handleDone = (id: string) => {
+    hapticDone();
+    setJustCompleted(true);
+    // Brief delay so the user sees the celebration micro-interaction
+    setTimeout(() => onDone?.(id), 300);
+  };
 
   return (
     <motion.div
@@ -111,15 +120,24 @@ function TaskCardInner({ task, index = 0, onDone, onPark }: TaskCardProps) {
       <div className="flex gap-2">
         <motion.button
           whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
-          onClick={() => onDone?.(task.id)}
+          animate={shouldAnimate && justCompleted ? {
+            scale: [1, 1.02, 1],
+            boxShadow: [
+              '0 0 0px rgba(78,205,196,0)',
+              '0 0 12px rgba(78,205,196,0.4)',
+              '0 0 0px rgba(78,205,196,0)',
+            ],
+          } : undefined}
+          transition={shouldAnimate ? { duration: 0.35, ease: 'easeOut' } : { duration: 0 }}
+          onClick={() => handleDone(task.id)}
           className="flex-1 h-9 rounded-xl text-[13px] font-medium"
           style={{
-            backgroundColor: 'rgba(78,205,196,0.12)',
+            backgroundColor: justCompleted ? 'rgba(78,205,196,0.2)' : 'rgba(78,205,196,0.12)',
             border: '1px solid rgba(78,205,196,0.35)',
             color: '#4ECDC4',
           }}
         >
-          ✓ Done
+          {justCompleted ? '✓ Done!' : '✓ Done'}
         </motion.button>
         <motion.button
           whileTap={shouldAnimate ? { scale: 0.97 } : undefined}

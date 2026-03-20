@@ -12,6 +12,7 @@ import { getNowPoolMax, APP_MODE_CONFIG, ENERGY_EMOJI } from '@/shared/lib/const
 import { useI18n } from '@/shared/hooks/useI18n';
 import { useUITone } from '@/shared/hooks/useUITone';
 import { BurnoutGauge } from './BurnoutGauge';
+import { PageTransition } from '@/shared/ui/PageTransition';
 import { toast } from 'sonner';
 
 // ── Mochi energy reaction messages ────────────────────────────────────────────
@@ -76,6 +77,9 @@ export default function HomePage() {
 
   const nowTasks = useMemo(() => nowPool.filter(t => t.status === 'active'), [nowPool]);
   const nextTasks = useMemo(() => nextPool.filter(t => t.status === 'active'), [nextPool]);
+
+  // "Last refreshed" timestamp — gives a sense of data freshness
+  const [lastRefreshed] = useState(() => new Date());
   const nowMax = getNowPoolMax(appMode, seasonalMode);
   const { showNextOnHome, homeSubtitle } = APP_MODE_CONFIG[appMode];
 
@@ -180,7 +184,13 @@ export default function HomePage() {
     hour < 21 ? t('home.greeting.evening') : t('home.greeting.night');
 
   return (
+    <PageTransition>
     <div className="min-h-screen px-5 pb-36 pt-10" style={{ backgroundColor: '#0F1120' }}>
+      {/* Last synced indicator */}
+      <p className="text-[10px] mb-1" style={{ color: '#5A5B72' }}>
+        Updated {lastRefreshed.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+      </p>
+
       {/* Header */}
       <motion.div initial={shouldAnimate ? { opacity: 0, y: -8 } : false} animate={shouldAnimate ? { opacity: 1, y: 0 } : false} className="flex items-start justify-between mb-5">
         <div>
@@ -456,5 +466,6 @@ export default function HomePage() {
       <Fab onClick={() => setShowAddTask(true)} />
       <AddTaskModal open={showAddTask} onClose={() => setShowAddTask(false)} />
     </div>
+    </PageTransition>
   );
 }

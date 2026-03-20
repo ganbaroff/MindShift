@@ -10,6 +10,7 @@ import type { UITone } from '@/shared/lib/uiTone';
 import { TONE_LABELS, TONE_DESCRIPTIONS } from '@/shared/lib/uiTone';
 import { supabase } from '@/shared/lib/supabase';
 import { useAudioEngine } from '@/shared/hooks/useAudioEngine';
+import { PageTransition } from '@/shared/ui/PageTransition';
 
 const modeKeys = ['minimal', 'habit', 'system'] as const;
 const timerKeys = ['countdown', 'countup', 'surprise'] as const;
@@ -60,6 +61,7 @@ export default function SettingsPage() {
     medicationTime, setMedicationTime,
     dailyFocusGoalMin, setDailyFocusGoalMin,
     uiTone, setUITone,
+    hapticsEnabled, setHapticsEnabled,
     telegramLinkCode, telegramLinked, generateTelegramCode, setTelegramLinked,
   } = useStore();
 
@@ -180,6 +182,7 @@ export default function SettingsPage() {
     'MindShift Free';
 
   return (
+    <PageTransition>
     <div className="min-h-screen px-5 pb-36 pt-10" style={{ backgroundColor: '#0F1120' }}>
       <motion.div initial={shouldAnimate ? { opacity: 0, y: -8 } : false} animate={shouldAnimate ? { opacity: 1, y: 0 } : false}>
         <h1 className="text-[24px] font-bold" style={{ color: '#E8E8F0' }}>Settings</h1>
@@ -329,7 +332,10 @@ export default function SettingsPage() {
         </Section>
 
         <Section label="Accessibility">
-          <Toggle checked={reducedStimulation} onChange={setReducedStimulation} label="Reduced stimulation" />
+          <div className="space-y-3">
+            <Toggle checked={reducedStimulation} onChange={setReducedStimulation} label="Reduced stimulation" />
+            <Toggle checked={hapticsEnabled} onChange={setHapticsEnabled} label="Haptic feedback" />
+          </div>
         </Section>
 
         {/* Notifications */}
@@ -622,11 +628,18 @@ export default function SettingsPage() {
         <button onClick={handleSignOut} className="text-[13px] font-medium w-full text-center py-2" style={{ color: '#E8976B' }}>Sign out</button>
 
         <div className="text-center space-y-1 pt-2 pb-6">
-          <p className="text-[11px]" style={{ color: '#8B8BA7' }}>Privacy · Terms · Cookies</p>
-          <p className="text-[11px]" style={{ color: '#8B8BA7' }}>MindShift v1.0 — Built with 💜 for ADHD minds</p>
+          <p className="text-[11px]" style={{ color: '#8B8BA7' }}>
+            <button onClick={() => navigate('/privacy')} className="underline underline-offset-2 focus-visible:ring-2 focus-visible:ring-[#7B72FF] rounded" style={{ color: '#8B8BA7' }}>Privacy</button>
+            {' · '}
+            <button onClick={() => navigate('/terms')} className="underline underline-offset-2 focus-visible:ring-2 focus-visible:ring-[#7B72FF] rounded" style={{ color: '#8B8BA7' }}>Terms</button>
+            {' · '}
+            <button onClick={() => navigate('/cookie-policy')} className="underline underline-offset-2 focus-visible:ring-2 focus-visible:ring-[#7B72FF] rounded" style={{ color: '#8B8BA7' }}>Cookies</button>
+          </p>
+          <p className="text-[11px]" style={{ color: '#8B8BA7' }}>MindShift v1.0.0</p>
         </div>
       </div>
     </div>
+    </PageTransition>
   );
 }
 
