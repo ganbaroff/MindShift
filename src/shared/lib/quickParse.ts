@@ -60,17 +60,17 @@ function stripMatch(text: string, match: string): string {
 function extractDate(text: string): { date: string | null; cleaned: string } {
   const lower = text.toLowerCase()
 
-  // Today / Сегодня
-  if (/\b(today|сегодня)\b/i.test(text)) {
-    return { date: todayISO(), cleaned: text.replace(/\b(today|сегодня)\b/i, '').trim() }
+  // Today / Сегодня — \b works for ASCII, (?:^|\s) for Cyrillic
+  if (/\b(today)\b/i.test(text) || /(?:^|\s)(сегодня)(?:\s|$)/i.test(text)) {
+    return { date: todayISO(), cleaned: text.replace(/\b(today)\b|(?:^|\s)(сегодня)(?:\s|$)/gi, ' ').trim() }
   }
 
   // Tomorrow / Завтра
-  if (/\b(tomorrow|завтра)\b/i.test(text)) {
-    return { date: tomorrowISO(), cleaned: text.replace(/\b(tomorrow|завтра)\b/i, '').trim() }
+  if (/\b(tomorrow)\b/i.test(text) || /(?:^|\s)(завтра)(?:\s|$)/i.test(text)) {
+    return { date: tomorrowISO(), cleaned: text.replace(/\b(tomorrow)\b|(?:^|\s)(завтра)(?:\s|$)/gi, ' ').trim() }
   }
 
-  // "next Monday" / "в понедельник"
+  // "next Monday"
   const enNextDay = lower.match(/\bnext\s+(sunday|monday|tuesday|wednesday|thursday|friday|saturday|sun|mon|tue|wed|thu|fri|sat)\b/)
   if (enNextDay) {
     const dayNum = EN_DAYS[enNextDay[1]]
@@ -88,21 +88,21 @@ function extractDate(text: string): { date: string | null; cleaned: string } {
     }
   }
 
-  // Russian: "в пятницу", "в понедельник"
-  const ruDay = lower.match(/\bв\s+(воскресенье|понедельник|вторник|среду|четверг|пятницу|субботу)\b/)
+  // Russian: "в пятницу", "в понедельник" — \b doesn't work with Cyrillic
+  const ruDay = lower.match(/(?:^|\s)в\s+(воскресенье|понедельник|вторник|среду|четверг|пятницу|субботу)(?:\s|$)/)
   if (ruDay) {
     const dayNum = RU_DAYS[ruDay[1]]
     if (dayNum !== undefined) {
-      return { date: nextWeekday(dayNum), cleaned: stripMatch(text, ruDay[0]) }
+      return { date: nextWeekday(dayNum), cleaned: stripMatch(text, ruDay[0].trim()) }
     }
   }
 
   // Russian short: "в пн", "в ср"
-  const ruShortDay = lower.match(/\bв\s+(пн|вт|ср|чт|пт|сб|вс)\b/)
+  const ruShortDay = lower.match(/(?:^|\s)в\s+(пн|вт|ср|чт|пт|сб|вс)(?:\s|$)/)
   if (ruShortDay) {
     const dayNum = RU_DAYS[ruShortDay[1]]
     if (dayNum !== undefined) {
-      return { date: nextWeekday(dayNum), cleaned: stripMatch(text, ruShortDay[0]) }
+      return { date: nextWeekday(dayNum), cleaned: stripMatch(text, ruShortDay[0].trim()) }
     }
   }
 
@@ -126,30 +126,44 @@ function extractTime(text: string): { time: string | null; cleaned: string } {
     }
   }
 
-  // "at 15:00", "в 15:00", "at 9:30"
-  const militaryTime = text.match(/\b(?:at|в)\s+(\d{1,2}):(\d{2})\b/i)
-  if (militaryTime) {
-    const h = parseInt(militaryTime[1], 10)
-    const m = parseInt(militaryTime[2], 10)
+  // "at 15:00", "at 9:30" (English)
+  const enMilitary = text.match(/\bat\s+(\d{1,2}):(\d{2})\b/i)
+  if (enMilitary) {
+    const h = parseInt(enMilitary[1], 10)
+    const m = parseInt(enMilitary[2], 10)
     if (h >= 0 && h <= 23 && m >= 0 && m <= 59) {
       const time = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`
-      return { time, cleaned: stripMatch(text, militaryTime[0]) }
+      return { time, cleaned: stripMatch(text, enMilitary[0]) }
+    }
+  }
+
+  // "в 15:00", "в 9:30" (Russian) — \b doesn't match Cyrillic boundaries
+  const ruMilitary = text.match(/(?:^|\s)в\s+(\d{1,2}):(\d{2})(?:\s|$)/)
+  if (ruMilitary) {
+    const h = parseInt(ruMilitary[1], 10)
+    const m = parseInt(ruMilitary[2], 10)
+    if (h >= 0 && h <= 23 && m >= 0 && m <= 59) {
+      const time = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`
+      return { time, cleaned: stripMatch(text, ruMilitary[0].trim()) }
     }
   }
 
   // "в 3 часа", "в 15 часов"
-  const ruHour = text.match(/\bв\s+(\d{1,2})\s*(?:часа?|часов)\b/i)
+  const ruHour = text.match(/(?:^|\s)в\s+(\d{1,2})\s*(?:часа?|часов)(?:\s|$)/i)
   if (ruHour) {
     const h = parseInt(ruHour[1], 10)
     if (h >= 0 && h <= 23) {
       const time = `${h.toString().padStart(2, '0')}:00`
-      return { time, cleaned: stripMatch(text, ruHour[0]) }
+      return { time, cleaned: stripMatch(text, ruHour[0].trim()) }
     }
   }
 
   // "at noon" / "в полдень"
-  if (/\b(at\s+noon|в\s+полдень)\b/i.test(text)) {
-    return { time: '12:00', cleaned: text.replace(/\b(at\s+noon|в\s+полдень)\b/i, '').trim() }
+  if (/\bat\s+noon\b/i.test(text)) {
+    return { time: '12:00', cleaned: text.replace(/\bat\s+noon\b/i, '').trim() }
+  }
+  if (/(?:^|\s)в\s+полдень(?:\s|$)/i.test(text)) {
+    return { time: '12:00', cleaned: text.replace(/(?:^|\s)в\s+полдень(?:\s|$)/i, ' ').trim() }
   }
 
   return { time: null, cleaned: text }
@@ -160,8 +174,9 @@ function extractTime(text: string): { time: string | null; cleaned: string } {
 function extractType(text: string): { type: TaskType; cleaned: string } {
   const lower = text.toLowerCase()
 
-  // Meeting patterns
-  if (/\b(meeting\s+with|встреча\s+с|встреча|meeting|созвон)\b/i.test(text)) {
+  // Meeting patterns — ASCII \b for English, (?:^|\s) for Cyrillic
+  if (/\b(meeting\s+with|meeting)\b/i.test(text) ||
+      /(?:^|\s)(встреча\s+с|встреча|созвон)(?:\s|$)/i.test(lower)) {
     return { type: 'meeting', cleaned: text }
   }
 
@@ -178,7 +193,7 @@ function extractType(text: string): { type: TaskType; cleaned: string } {
   }
 
   // Check for call/звонок — treat as reminder
-  if (/\b(call|позвонить|звонок)\b/i.test(lower)) {
+  if (/\b(call)\b/i.test(lower) || /(?:^|\s)(позвонить|звонок)(?:\s|$)/i.test(lower)) {
     return { type: 'reminder', cleaned: text }
   }
 
