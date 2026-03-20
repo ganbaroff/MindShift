@@ -7,11 +7,10 @@
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui"],
   "background_color": "#0F1117",
-  "theme_color": "#7B72FF",
+  "theme_color": "#0F1117",
   "orientation": "portrait-primary",
   "lang": "en",
   "categories": ["productivity", "health", "lifestyle"],
-  "id": "com.mindshift.app",
 
   "icons": [
     {
@@ -19,6 +18,12 @@
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
+    },
+    {
+      "src": "/icon-192-maskable.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
     },
     {
       "src": "/icon-512.png",

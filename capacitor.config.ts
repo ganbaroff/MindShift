@@ -54,7 +54,7 @@ const config: CapacitorConfig = {
     },
 
     LocalNotifications: {
-      smallIcon: 'ic_stat_icon_config_sample',
+      smallIcon: 'ic_stat_mindshift',
       iconColor: '#7B72FF',                 // MindShift primary color
       sound: 'beep.wav',
     },
@@ -69,6 +69,10 @@ const config: CapacitorConfig = {
     allowsLinkPreview: false,
     scrollEnabled: true,
     backgroundColor: '#0F1117',
+  },
+
+  server: {
+    androidScheme: 'https',
   },
 
   android: {
