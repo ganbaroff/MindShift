@@ -172,12 +172,13 @@ export default function OnboardingPage() {
     }
   };
 
-  const select = (i: number) => {
+  const select = (i: number, isPointerClick: boolean) => {
     const s = [...selections];
     s[step] = i;
     setSelections(s);
     // Auto-advance on single-select steps after brief delay (except energy/notif)
-    if (!isEnergyStep && !isNotifStep) {
+    // Only auto-advance on pointer/touch clicks, not keyboard Enter
+    if (!isEnergyStep && !isNotifStep && isPointerClick) {
       setTimeout(() => {
         if (step < TOTAL_STEPS - 1) setStep(step + 1);
         else finish();
@@ -295,7 +296,7 @@ export default function OnboardingPage() {
                 <motion.button
                   key={i}
                   whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
-                  onClick={() => select(i)}
+                  onClick={(e) => select(i, e.detail > 0)}
                   className="w-full text-left p-3.5 rounded-2xl"
                   style={{
                     backgroundColor: selections[step] === i ? 'rgba(123,114,255,0.15)' : '#252840',

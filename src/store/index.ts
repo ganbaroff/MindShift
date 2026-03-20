@@ -5,6 +5,7 @@ import { ACHIEVEMENT_DEFINITIONS, WIDGET_DEFAULTS, WIDGET_DEFAULTS_GENERIC } fro
 import {
   VR_BUCKET_SIZE, VR_JACKPOT_THRESHOLD, VR_BONUS_THRESHOLD,
   VR_MULTIPLIER_JACKPOT, VR_MULTIPLIER_BONUS, VR_MULTIPLIER_BASE,
+  getNowPoolMax,
 } from '@/shared/lib/constants'
 import { idbStorage } from '@/shared/lib/idbStorage'
 import { notifyAchievement } from '@/shared/lib/notify'
@@ -225,10 +226,23 @@ export const useStore = create<AppStore>()(
           cognitiveMode: mode,
           psychotype: derivePsychotype(s.appMode, mode),
         })),
-        setAppMode: (mode) => set((s) => ({
-          appMode: mode,
-          psychotype: derivePsychotype(mode, s.cognitiveMode),
-        })),
+        setAppMode: (mode) => set((s) => {
+          const newMax = getNowPoolMax(mode, s.seasonalMode)
+          const activeNow = s.nowPool.filter(t => t.status === 'active')
+          if (activeNow.length <= newMax) {
+            return { appMode: mode, psychotype: derivePsychotype(mode, s.cognitiveMode) }
+          }
+          // Move excess tasks (last added first) to NEXT pool
+          const keep = activeNow.slice(0, newMax)
+          const overflow = activeNow.slice(newMax).map(t => ({ ...t, pool: 'next' as const }))
+          const completed = s.nowPool.filter(t => t.status !== 'active')
+          return {
+            appMode: mode,
+            psychotype: derivePsychotype(mode, s.cognitiveMode),
+            nowPool: [...keep, ...completed],
+            nextPool: [...s.nextPool, ...overflow],
+          }
+        }),
         setAvatarId: (id) => set({ avatarId: id }),
         setPsychotype: (type) => set({ psychotype: type }),
         setPsychotypeLastDerived: (date) => set({ psychotypeLastDerived: date }),
@@ -257,7 +271,22 @@ export const useStore = create<AppStore>()(
         setChronotype: (c) => set({ chronotype: c }),
         setTimeBlindness: (v) => set({ timeBlindness: v }),
         setEmotionalReactivity: (v) => set({ emotionalReactivity: v }),
-        setSeasonalMode: (m) => set({ seasonalMode: m }),
+        setSeasonalMode: (m) => set((s) => {
+          const newMax = getNowPoolMax(s.appMode, m)
+          const activeNow = s.nowPool.filter(t => t.status === 'active')
+          if (activeNow.length <= newMax) {
+            return { seasonalMode: m }
+          }
+          // Move excess tasks (last added first) to NEXT pool
+          const keep = activeNow.slice(0, newMax)
+          const overflow = activeNow.slice(newMax).map(t => ({ ...t, pool: 'next' as const }))
+          const completed = s.nowPool.filter(t => t.status !== 'active')
+          return {
+            seasonalMode: m,
+            nowPool: [...keep, ...completed],
+            nextPool: [...s.nextPool, ...overflow],
+          }
+        }),
         setBurnoutScore: (score) => set({ burnoutScore: score }),
         setFlexiblePauseUntil: (until) => set({ flexiblePauseUntil: until }),
         signOut: () => set({
@@ -706,29 +735,37 @@ export const useStore = create<AppStore>()(
         name: 'mindshift-store',
         version: 1,
         storage: createJSONStorage(() => idbStorage),
+        // migrate() ensures Zustand treats versioned state as recoverable
+        // rather than discarding it when the version matches.
+        migrate: (persistedState: unknown, _version: number) => {
+          const state = persistedState as Record<string, unknown>
+          return state as ReturnType<typeof Object>
+        },
         // Merge persisted state with current defaults so new fields don't
-        // cause data loss. Without this, Zustand drops the entire persisted
-        // state when the shape changes between deploys.
+        // cause data loss. Defensive against null/undefined persisted state
+        // which can happen during SW cache cleanup race conditions.
         merge: (persisted, current) => {
-          const p = persisted as Record<string, unknown> | undefined
-          if (!p) return current
-          return {
-            ...current,
-            ...p,
-            // Deep-merge pools: persisted pools take priority, but ensure
-            // they're always arrays (guard against corruption)
-            nowPool: Array.isArray(p.nowPool) ? p.nowPool : current.nowPool,
-            nextPool: Array.isArray(p.nextPool) ? p.nextPool : current.nextPool,
-            somedayPool: Array.isArray(p.somedayPool) ? p.somedayPool : current.somedayPool,
-            achievements: Array.isArray(p.achievements) ? p.achievements : current.achievements,
-            gridWidgets: Array.isArray(p.gridWidgets) ? p.gridWidgets : current.gridWidgets,
-          }
+          if (!persisted || typeof persisted !== 'object') return current
+          const p = persisted as Partial<AppStore>
+          const merged = { ...current, ...p }
+          // Ensure pools and arrays are always valid — guard against corruption
+          if (!Array.isArray(merged.nowPool)) merged.nowPool = []
+          if (!Array.isArray(merged.nextPool)) merged.nextPool = []
+          if (!Array.isArray(merged.somedayPool)) merged.somedayPool = []
+          if (!Array.isArray(merged.achievements)) merged.achievements = current.achievements
+          if (!Array.isArray(merged.gridWidgets)) merged.gridWidgets = current.gridWidgets
+          if (!Array.isArray(merged.seenHints)) merged.seenHints = current.seenHints
+          return merged
         },
         // Prune completed tasks older than 30 days on every store rehydration.
         // Prevents localStorage from growing unboundedly while keeping recent
         // completed tasks visible in the "Done recently" section.
         onRehydrateStorage: () => (state) => {
           if (!state) return
+          // Defensive: ensure pools are arrays even after rehydration
+          if (!Array.isArray(state.nowPool)) state.nowPool = []
+          if (!Array.isArray(state.nextPool)) state.nextPool = []
+          if (!Array.isArray(state.somedayPool)) state.somedayPool = []
           const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
           const prune = (tasks: Task[]) =>
             tasks.filter(t => !(t.status === 'completed' && t.completedAt && t.completedAt < cutoff))
