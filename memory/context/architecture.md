@@ -1,115 +1,106 @@
 # MindShift Architecture Context
+Updated: 2026-03-20 (Sprint BC complete)
 
 ## Tech Stack
 | Layer | Technology | Notes |
 |-------|-----------|-------|
-| UI | React 19 + TypeScript + Vite 7 | Strict mode |
-| Styling | Tailwind CSS v4 | Arbitrary values supported |
-| Animation | motion/react (Framer Motion) | Respects prefers-reduced-motion |
-| State | Zustand v5 | 6 slices + persist middleware |
-| Backend | Supabase | Auth + DB + Edge Functions (Deno) |
-| Audio | Web Audio API | AudioWorklet for brown noise |
-| PWA | vite-plugin-pwa + Workbox | Offline support |
-| Persistence | localStorage (Zustand) + IndexedDB (idb-keyval) + Supabase | 3-tier |
-| Testing | vitest v4 | 4 files, 78 tests |
-| E2E | Playwright | 6 spec files |
-| DnD | dnd-kit | TouchSensor 150ms delay, KeyboardSensor |
-| Forms | Native | No form library |
-| Routing | react-router-dom v7 | Lazy-loaded screens |
+| UI | React 19 + TypeScript 5.9 + Vite 7 | Strict mode, tsc -b |
+| Styling | Tailwind CSS v4 | @theme + @import "tailwindcss" |
+| Animation | motion/react v12 | useMotion() wraps prefers-reduced-motion |
+| State | Zustand v5 | 7 slices + persist + subscribeWithSelector |
+| Backend | Supabase | Auth + DB + Edge Functions (Deno) + Realtime |
+| Audio | Web Audio API | AudioWorklet for brown noise, buffer for others |
+| PWA | vite-plugin-pwa + Workbox | injectManifest, offline-first |
+| Persistence | IndexedDB (idbStorage) + Supabase | 2-tier (migrated from localStorage Sprint I) |
+| Unit tests | vitest v4 | src/**/__tests__/*.test.ts |
+| E2E | Playwright | chromium + mobile (iPhone 14), 132+ tests |
+| DnD | dnd-kit | TouchSensor 200ms, PointerSensor 6px |
+| Data fetching | @tanstack/react-query | Deduplication for Supabase queries |
+| Routing | react-router v7 | Lazy-loaded screens |
 
-## Directory Structure
+## Directory Structure (current)
 ```
 src/
-  app/           App.tsx, AppShell.tsx, BottomNav.tsx
+  app/           App.tsx, AppShell.tsx
   features/
-    auth/        AuthScreen.tsx
-    onboarding/  OnboardingFlow.tsx (3 steps)
-    home/        HomeScreen.tsx, BentoGrid.tsx, EnergyCheckin.tsx
-                 widgets/ (5 widget types)
-    tasks/       TaskCard.tsx, TasksScreen.tsx, AddTaskModal.tsx
+    auth/        AuthScreen.tsx (magic link + Google OAuth)
+    onboarding/  OnboardingPage.tsx (6-step wizard)
+    home/        HomePage.tsx, BentoGrid widgets/
+    tasks/       TasksPage.tsx, AddTaskModal.tsx, TaskCard.tsx
                  RecoveryProtocol.tsx, ContextRestore.tsx
-    focus/       FocusScreen.tsx (6-state machine), ArcTimer.tsx
-    audio/       AudioScreen.tsx
-    progress/    ProgressScreen.tsx
-    settings/    SettingsScreen.tsx
+    focus/       FocusScreen.tsx (thin orchestrator ~450 lines)
+                 FocusSetup.tsx (setup UI ~459 lines)
+                 useFocusSession.ts (FSM hook ~280 lines)
+                 SessionControls.tsx, PostSessionFlow.tsx
+                 ArcTimer.tsx, MochiSessionCompanion.tsx
+                 BreathworkRitual.tsx, ShutdownRitual.tsx
+                 WeeklyPlanning.tsx, MonthlyReflection.tsx
+                 FocusRoomSheet.tsx
+    history/     HistoryPage.tsx (session log)
+    calendar/    DueDateScreen.tsx
+    progress/    ProgressPage.tsx, Avatar.tsx
+    settings/    SettingsPage.tsx
+    preview/     PreviewScreen.tsx
+  components/    TaskCard, AddTaskModal, EnergyPicker, Fab, MochiAvatar, BottomNav
   shared/
-    hooks/       useAudioEngine, useMotion, usePalette, useInstallPrompt
-    ui/          CookieBanner, InstallBanner, Mascot, Confetti, CoachMark
-                 ErrorBoundary, LoadingScreen
-    lib/         constants.ts, haptic.ts, notify.ts, logger.ts
-                 offlineQueue.ts, motion.ts, cn.ts
-  store/         index.ts (all state)
-  types/         index.ts (domain), database.ts (Supabase generated)
+    hooks/       useMotion, usePalette, useAudioEngine, useSessionHistory,
+                 useTaskSync, useFocusRoom, useUserBehavior, useI18n
+    ui/          CookieBanner, InstallBanner, Mascot, Confetti, ShareCard,
+                 ErrorBoundary, LoadingScreen, Card, Input, Button
+    lib/         constants.ts, haptic.ts, native.ts, tokens.ts,
+                 burnout.ts, psychotype.ts, dateUtils.ts,
+                 idbStorage.ts, offlineQueue.ts, logger.ts,
+                 i18n/{en,ru,index}.ts
+  store/         index.ts (7 slices, all state)
+  types/         index.ts (domain), database.ts (Supabase)
 supabase/
-  functions/     5 Edge Functions (Deno)
-  migrations/    6 SQL migrations
+  functions/     7 Edge Functions (Deno): decompose-task, classify-voice-input,
+                 recovery-message, weekly-insight, mochi-respond, gdpr-export, gdpr-delete
+  migrations/    001_init.sql, 007_health_profile.sql
 ```
 
 ## State Machine: FocusScreen
 ```
-setup → session → interrupt-confirm → bookmark-capture → (back to session)
-                                    ↘ end session
-session → recovery-lock → nature-buffer → done
+setup → [breathwork?] → session → interrupt-confirm → bookmark-capture → (back to session)
+                                                     ↘ end session
+session → nature-buffer (2min) → recovery-lock (10min) → done
+session → hard-stop (90/120min) → nature-buffer → recovery-lock → done
 ```
 
 ## Auth Flow
 ```
-Email input → Supabase sendOTP → "Check inbox" screen
-  [email client] magic link click
-  → App.tsx onAuthStateChange → checkConsentPending()
-  → if !onboardingCompleted → /onboarding
-  → else → /
+Magic link: Email → Supabase sendOTP → "Check inbox" → link → onAuthStateChange → consent check
+Google OAuth: signInWithOAuth({ provider: 'google' }) → redirect → onAuthStateChange → consent check
+Guest mode: ms_signed_out flag, local-only store
 ```
 
-## Recovery Protocol Trigger
+## Persistence (2-tier, migrated Sprint I)
 ```
-App.tsx: lastSessionAt check on mount
-  if (Date.now() - lastSessionAt) > 72h → showRecovery=true
-  → RecoveryProtocol overlay (z-50)
-  → archiveAllOverdue() on mount
-  → recovery-message edge function (AI welcome)
+1. IndexedDB via idbStorage adapter (Zustand persist):
+   - All partialize() fields: userId, email, appMode, energyLevel, psychotype,
+     xpTotal, achievements, audioVolume, focusAnchor, gridWidgets,
+     completedTotal, weeklyIntention, monthlyReflectionShownMonth,
+     shutdownShownDate, weeklyPlanShownWeek, etc.
+   - Transparent migration from localStorage on first load
 
-  if 30h < elapsed < 72h → ContextRestore overlay (z-40)
-```
-
-## Audio Engine Architecture
-```
-useAudioEngine:
-  AudioContext (singleton)
-  Brown noise: AudioWorklet processor (seam-free leaky integrator)
-  Others: Buffer-based (decode → loop)
-  All nodes: → HPF (60Hz) → GainNode → destination
-  Crossfade: constant power (sine/cos), 1.5s
-  Gain mapping: logarithmic 0.001–0.10 (slider 0–1)
-  iOS: ctx.resume() on play() (suspended state fix)
+2. Supabase (server, logged-in users):
+   - tasks, focus_sessions, profiles, energy_logs
+   - edge_rate_limits (AI rate limiting)
+   - useTaskSync: bidirectional sync, server-wins-on-login
+   - useSessionHistory: React Query deduplication
 ```
 
-## Persistence Layers
-```
-1. Zustand persist (localStorage):
-   - userId, email, cognitiveMode, appMode, psychotype
-   - xpTotal, achievements, audioVolume, focusAnchor
-   - seenHints, gridWidgets, completedTotal (added 2026-03-09)
-
-2. IndexedDB (idb-keyval):
-   - Used by offline queue
-
-3. Supabase (server):
-   - users, tasks, focus_sessions, achievements, energy_logs
-   - Rate limits per user (edge_rate_limits table)
-```
-
-## Key Design Decisions (ADRs)
+## Key Design Decisions (ADRs in docs/adr/)
 - ADR-0001: DB-backed rate limiting for Edge Functions
-- ADR pending: Zustand over Redux (lighter, React 19 compatible)
-- ADR pending: AudioWorklet for brown noise (seam-free vs buffer gaps)
-- ADR pending: Bento grid with psychotype-driven defaults
-- ADR pending: Variable ratio XP (VR schedule for dopamine)
+- ADR-0002: Zustand over Redux/Jotai
+- ADR-0003: Offline-first pattern (enqueue/dequeue)
+- ADR-0004: PWA service worker (injectManifest)
+- ADR-0005: ADHD-safe color system (Research #8)
+- ADR-0006: AI edge functions via Gemini 2.5 Flash
+- ADR-0007: Accessibility (Sprint 9)
 
-## Known Platform Issue
-node_modules installed on Windows. Linux binaries missing:
-- @rollup/rollup-linux-x64-gnu (affects vite build + vitest)
-- @esbuild/linux-x64 (affects esbuild)
-Fix: `npm install` on Linux/macOS
-Workaround: created lazy-throwing rollup stub in node_modules
-tsc works fine (no native binary needed)
+## Build & Deploy
+- Build: `tsc -b && vite build` (both must pass)
+- Deploy: Vercel auto-deploy on push to main
+- Stable URL: https://mind-shift-git-main-yusifg27-3093s-projects.vercel.app
+- CI: GitHub Actions e2e-production.yml (fires on Vercel deployment_status)

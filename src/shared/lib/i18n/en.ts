@@ -28,6 +28,12 @@ export const en = {
   'settings.medication.subtitle': 'Highlight peak focus window',
   'settings.rerun_setup':         'Re-run setup wizard',
 
+  // ── Crisis / Mental Health ────────────────────────────────────────────────
+  'crisis.banner.message':   "You're not alone. These feelings are real, and help is available.",
+  'crisis.settings.title':   'If you or someone you know is struggling',
+  'crisis.settings.en':      '988 Suicide & Crisis Lifeline (call or text 988)',
+  'crisis.settings.intl':    'Crisis Text Line: Text HOME to 741741',
+
   // ── Generic ───────────────────────────────────────────────────────────────
   'generic.skip':            'Skip',
   'generic.done':            'Done',

@@ -1,13 +1,15 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useMotion } from '@/shared/hooks/useMotion';
+import { useI18n } from '@/shared/hooks/useI18n';
 import EnergyPicker from '@/components/EnergyPicker';
 import { useStore } from '@/store';
 import type { EnergyLevel, AudioPreset } from '@/types';
 import type { UITone } from '@/shared/lib/uiTone';
 import { TONE_LABELS, TONE_DESCRIPTIONS } from '@/shared/lib/uiTone';
+import { getCrisisResources } from '@/shared/lib/crisisDetection';
 import { supabase } from '@/shared/lib/supabase';
 import { useAudioEngine } from '@/shared/hooks/useAudioEngine';
 import { PageTransition } from '@/shared/ui/PageTransition';
@@ -175,6 +177,9 @@ export default function SettingsPage() {
     setCodeCopied(true)
     setTimeout(() => setCodeCopied(false), 2000)
   }, [telegramLinkCode])
+
+  const { t, locale } = useI18n();
+  const crisisResources = useMemo(() => getCrisisResources(locale), [locale]);
 
   const planLabel =
     subscriptionTier === 'pro' ? 'MindShift Pro' :
@@ -557,6 +562,29 @@ export default function SettingsPage() {
             <span>🔄</span>
             <span>Re-run setup wizard</span>
           </button>
+        </Section>
+
+        {/* Mental Health Resources — always visible */}
+        <Section label="Mental Health">
+          <div className="space-y-2">
+            <p className="text-[13px] leading-relaxed" style={{ color: '#E8E8F0' }}>
+              {t('crisis.settings.title')}
+            </p>
+            <div
+              className="rounded-xl p-3 space-y-1.5"
+              style={{
+                backgroundColor: 'rgba(78,205,196,0.06)',
+                border: '1px solid rgba(78,205,196,0.15)',
+              }}
+            >
+              <p className="text-[13px] font-medium" style={{ color: '#4ECDC4' }}>
+                {crisisResources.primary}
+              </p>
+              <p className="text-[12px]" style={{ color: '#8B8BA7' }}>
+                {crisisResources.international}
+              </p>
+            </div>
+          </div>
         </Section>
 
         {/* Feedback */}

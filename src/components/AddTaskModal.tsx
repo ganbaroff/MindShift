@@ -7,6 +7,7 @@ import type { Task, TaskType, TaskCategory } from '@/types';
 import { getNowPoolMax } from '@/shared/lib/constants';
 import { reminders } from '@/shared/lib/reminders';
 import { todayISO, tomorrowISO } from '@/shared/lib/dateUtils';
+import { detectCrisis, getCrisisResources } from '@/shared/lib/crisisDetection';
 import { useMotion } from '@/shared/hooks/useMotion';
 import { useVoiceInput } from '@/shared/hooks/useVoiceInput';
 import { syncTaskUpsert } from '@/shared/hooks/useTaskSync';
@@ -111,6 +112,10 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
   const dueDateMissing = fields.dueDateRequired && !dueDate;
   const dueTimeMissing = fields.dueTimeRequired && !dueTime;
   const canSubmit = title.trim() && !dueDateMissing && !dueTimeMissing;
+
+  // Crisis detection — show resources if user types concerning content
+  const showCrisisCard = useMemo(() => detectCrisis(title), [title]);
+  const crisisResources = useMemo(() => getCrisisResources(locale), [locale]);
 
   const handleSubmit = () => {
     if (!canSubmit) return;
@@ -319,6 +324,33 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
                   🌿 Your queue is getting full — maybe park one before adding?
                 </p>
               )}
+
+              {/* Crisis resource card — warm, non-blocking */}
+              <AnimatePresence>
+                {showCrisisCard && (
+                  <motion.div
+                    initial={shouldAnimate ? { opacity: 0, y: 8 } : {}}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={shouldAnimate ? { opacity: 0, y: 8 } : undefined}
+                    className="rounded-xl p-4 space-y-2"
+                    style={{
+                      backgroundColor: 'rgba(78,205,196,0.08)',
+                      border: '1px solid rgba(78,205,196,0.25)',
+                    }}
+                  >
+                    <p className="text-[13px] leading-relaxed" style={{ color: '#E8E8F0' }}>
+                      You're not alone. These feelings are real, and help is available.
+                    </p>
+                    <p className="text-[12px] font-medium" style={{ color: '#4ECDC4' }}>
+                      {crisisResources.primary}
+                    </p>
+                    <p className="text-[11px]" style={{ color: '#8B8BA7' }}>
+                      {crisisResources.international}
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
               <motion.button
                 whileTap={{ scale: 0.97 }} onClick={handleSubmit} disabled={!canSubmit}
                 aria-label={`Add ${TASK_TYPE_CONFIG[taskType].label.toLowerCase()} to ${poolLabel} pool`}

@@ -30,6 +30,12 @@ export const ru: Partial<Record<I18nKey, string>> = {
   'settings.medication.subtitle': 'Выделить окно пиковой концентрации',
   'settings.rerun_setup':         'Пройти настройку заново',
 
+  // ── Crisis / Mental Health ────────────────────────────────────────────────
+  'crisis.banner.message':   'Ты не одинок. Эти чувства реальны, и помощь доступна.',
+  'crisis.settings.title':   'Если тебе или кому-то из близких тяжело',
+  'crisis.settings.en':      'Телефон доверия: 8-800-2000-122 (бесплатно, круглосуточно)',
+  'crisis.settings.intl':    'Crisis Text Line: Text HOME to 741741',
+
   // ── Generic ───────────────────────────────────────────────────────────────
   'generic.skip':            'Пропустить',
   'generic.done':            'Готово',

@@ -403,6 +403,10 @@ export const useStore = create<AppStore>()(
           if (hour >= 21)      tryUnlock('night_owl')
           if (hour < 9)        tryUnlock('morning_mind')
           if (energyBefore <= 2) tryUnlock('gentle_start')
+          if (newTotal >= 5)   tryUnlock('deep_diver')
+
+          // BUG 1 fix: award XP on task completion (was never called)
+          s2.addXP(10)
         },
 
         snoozeTask: (taskId) => set((s) => {
@@ -414,18 +418,34 @@ export const useStore = create<AppStore>()(
           }
         }),
 
-        moveTask: (taskId, toPool) => set((s) => {
-          const allTasks = [...s.nowPool, ...s.nextPool, ...s.somedayPool]
+        moveTask: (taskId, toPool) => {
+          const before = get()
+          const allTasks = [...before.nowPool, ...before.nextPool, ...before.somedayPool]
           const task = allTasks.find(t => t.id === taskId)
-          if (!task) return s
-          const updated = { ...task, pool: toPool }
-          const filter = (tasks: Task[]) => tasks.filter(t => t.id !== taskId)
-          return {
-            nowPool:     toPool === 'now'     ? [...filter(s.nowPool), updated]     : filter(s.nowPool),
-            nextPool:    toPool === 'next'    ? [...filter(s.nextPool), updated]    : filter(s.nextPool),
-            somedayPool: toPool === 'someday' ? [...filter(s.somedayPool), updated] : filter(s.somedayPool),
+          if (!task) return
+          const fromPool = task.pool
+
+          set((s) => {
+            const updated = { ...task, pool: toPool }
+            const filter = (tasks: Task[]) => tasks.filter(t => t.id !== taskId)
+            return {
+              nowPool:     toPool === 'now'     ? [...filter(s.nowPool), updated]     : filter(s.nowPool),
+              nextPool:    toPool === 'next'    ? [...filter(s.nextPool), updated]    : filter(s.nextPool),
+              somedayPool: toPool === 'someday' ? [...filter(s.somedayPool), updated] : filter(s.somedayPool),
+            }
+          })
+
+          // Achievement: pool_shifter — move a task from Someday to Now
+          if (fromPool === 'someday' && toPool === 'now') {
+            const s2 = get()
+            if (!s2.hasAchievement('pool_shifter')) {
+              s2.unlockAchievement('pool_shifter')
+              const toneCopy = getToneCopy(s2.uiTone)
+              const def = ACHIEVEMENT_DEFINITIONS.find(a => a.key === 'pool_shifter')
+              if (def) notifyAchievement(toneCopy.badgeUnlocked(def.name), def.emoji, def.description)
+            }
           }
-        }),
+        },
 
         removeTask: (taskId) => set((s) => ({
           nowPool: s.nowPool.filter(t => t.id !== taskId),
@@ -544,7 +564,19 @@ export const useStore = create<AppStore>()(
         setPreset: (preset) => set({ activePreset: preset }),
         setVolume: (volume) => set({ audioVolume: Math.min(1.0, Math.max(0, volume)) }),
         setPlaying: (playing) => set({ audioPlaying: playing }),
-        setFocusAnchor: (preset) => set({ focusAnchor: preset }),
+        setFocusAnchor: (preset) => {
+          set({ focusAnchor: preset })
+          // Achievement: sonic_anchor — set a focus anchor sound
+          if (preset !== null) {
+            const s2 = get()
+            if (!s2.hasAchievement('sonic_anchor')) {
+              s2.unlockAchievement('sonic_anchor')
+              const toneCopy = getToneCopy(s2.uiTone)
+              const def = ACHIEVEMENT_DEFINITIONS.find(a => a.key === 'sonic_anchor')
+              if (def) notifyAchievement(toneCopy.badgeUnlocked(def.name), def.emoji, def.description)
+            }
+          }
+        },
         setTransitionBuffer: (active) => set({ transitionBufferActive: active }),
 
         // ── Progress ─────────────────────────────────────────────────────────

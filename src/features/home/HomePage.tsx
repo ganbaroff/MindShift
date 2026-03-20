@@ -12,6 +12,7 @@ import { getNowPoolMax, APP_MODE_CONFIG, ENERGY_EMOJI } from '@/shared/lib/const
 import { useI18n } from '@/shared/hooks/useI18n';
 import { useUITone } from '@/shared/hooks/useUITone';
 import { BurnoutGauge } from './BurnoutGauge';
+import { BurnoutNudgeCard } from './BurnoutNudgeCard';
 import { PageTransition } from '@/shared/ui/PageTransition';
 import { toast } from 'sonner';
 
@@ -343,6 +344,9 @@ export default function HomePage() {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Burnout nudge — proactive, non-shaming, 48h cooldown */}
+        <BurnoutNudgeCard score={burnoutScore} />
 
         {/* Empty State — prompt to add first task */}
         {nowTasks.length === 0 && nextTasks.length === 0 && (

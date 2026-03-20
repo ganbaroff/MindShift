@@ -21,6 +21,9 @@ import { supabase } from '@/shared/lib/supabase'
 import { useStore } from '@/store'
 import { logError } from '@/shared/lib/logger'
 import { getWeekStart } from '@/shared/lib/dateUtils'
+import { notifyAchievement } from '@/shared/lib/notify'
+import { getToneCopy } from '@/shared/lib/uiTone'
+import { ACHIEVEMENT_DEFINITIONS } from '@/types'
 import type { WeeklyStats, AudioPreset, EnergyLevel } from '@/types'
 import type { FocusSessionRow } from '@/types/database'
 
@@ -229,6 +232,16 @@ export function useSessionHistory(): SessionHistoryResult {
   useEffect(() => {
     if (data?.stats) {
       setWeeklyStats(data.stats)
+      // Achievement: week_warrior — active 5 out of 7 days
+      if (data.stats.consistencyScore >= 5 / 7) {
+        const s = useStore.getState()
+        if (!s.hasAchievement('week_warrior')) {
+          s.unlockAchievement('week_warrior')
+          const toneCopy = getToneCopy(s.uiTone)
+          const def = ACHIEVEMENT_DEFINITIONS.find(a => a.key === 'week_warrior')
+          if (def) notifyAchievement(toneCopy.badgeUnlocked(def.name), def.emoji, def.description)
+        }
+      }
     }
   }, [data?.stats, setWeeklyStats])
 
