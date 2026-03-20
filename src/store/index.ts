@@ -169,6 +169,11 @@ interface PreferencesSlice {
   // UI Tone — auto-derived from signals, user-overridable via Settings
   uiTone: 'gen_z' | 'millennial' | 'gen_x' | 'neutral'
   setUITone: (tone: 'gen_z' | 'millennial' | 'gen_x' | 'neutral') => void
+  // Telegram integration
+  telegramLinkCode: string | null
+  telegramLinked: boolean
+  generateTelegramCode: () => void
+  setTelegramLinked: (linked: boolean) => void
 }
 
 interface GridSlice {
@@ -282,6 +287,9 @@ export const useStore = create<AppStore>()(
           currentStreak: 0, longestStreak: 0, lastActiveDate: null,
           // UI tone reset
           uiTone: 'neutral' as const,
+          // Telegram reset
+          telegramLinkCode: null,
+          telegramLinked: false,
         }),
 
         // ── Tasks ───────────────────────────────────────────────────────────
@@ -611,6 +619,27 @@ export const useStore = create<AppStore>()(
         // UI Tone — auto-derived from ADHD signals, settable manually
         uiTone: 'neutral',
         setUITone: (tone) => set({ uiTone: tone }),
+
+        // Telegram integration
+        telegramLinkCode: null,
+        telegramLinked: false,
+        generateTelegramCode: () => {
+          const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+          let code = ''
+          for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)]
+          set({ telegramLinkCode: code })
+          // Write to Supabase telegram_links table (fire-and-forget)
+          const userId = get().userId
+          if (userId && !userId.startsWith('guest_')) {
+            import('@/shared/lib/supabase').then(({ supabase }) => {
+              void (supabase.from('telegram_links') as unknown as { upsert: (values: Record<string, unknown>, opts?: Record<string, unknown>) => unknown }).upsert({
+                user_id: userId,
+                link_code: code,
+              }, { onConflict: 'user_id' })
+            })
+          }
+        },
+        setTelegramLinked: (linked) => set({ telegramLinked: linked, telegramLinkCode: linked ? null : get().telegramLinkCode }),
       }),
       {
         name: 'mindshift-store',
@@ -673,6 +702,8 @@ export const useStore = create<AppStore>()(
           weeklyPlanShownWeek: s.weeklyPlanShownWeek,
           weeklyIntention: s.weeklyIntention,
           uiTone: s.uiTone,
+          telegramLinkCode: s.telegramLinkCode,
+          telegramLinked: s.telegramLinked,
         }),
       }
     )
