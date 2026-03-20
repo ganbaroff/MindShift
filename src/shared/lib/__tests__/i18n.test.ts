@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, afterEach } from 'vitest'
 import { resolveLocale, t } from '../i18n/index'
 
 describe('resolveLocale', () => {
@@ -52,8 +52,7 @@ describe('t (translate)', () => {
   it('falls back to English when ru key is missing', () => {
     // Use a key that exists in en but may not in ru
     const result = t('generic.done', 'ru')
-    const enResult = t('generic.done', 'en')
-    // If not in ru, falls back to en
+    // If not in ru, falls back to en — should still return something
     expect(result).toBeTruthy()
   })
 
