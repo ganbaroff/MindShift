@@ -66,14 +66,14 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
     const nf = FIELD_VISIBILITY[newType];
     const pf = FIELD_VISIBILITY[prev];
     if (!nf.difficulty) setDifficulty(undefined);
-    else if (!pf.difficulty) { setDifficulty(2); }
+    else if (!pf.difficulty || difficulty === undefined) { setDifficulty(2); }
     if (!nf.duration) { setMinutes(undefined); minutesManuallySet.current = false; }
-    else if (!pf.duration) { setMinutes(SMART_DURATION[2]); minutesManuallySet.current = false; }
+    else if (!pf.duration || minutes === undefined) { setMinutes(SMART_DURATION[2]); minutesManuallySet.current = false; }
     if (!nf.dueDate) { setDueDate(null); setDueTime(null); }
     if (!nf.dueTime) setDueTime(null);
     if (!nf.repeat) setRepeat('none');
     if (!nf.category) { setCategory(undefined); setShowCategory(false); }
-  }, [taskType]);
+  }, [taskType, difficulty, minutes]);
 
   const handleVoiceResult = useCallback((result: { title: string; difficulty?: 1 | 2 | 3; minutes?: number; dueDate?: string; dueTime?: string; taskType?: TaskType; category?: TaskCategory }) => {
     // Apply task type first so field visibility updates for subsequent assignments
