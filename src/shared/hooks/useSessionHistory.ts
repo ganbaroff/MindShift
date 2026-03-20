@@ -20,6 +20,7 @@ import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/shared/lib/supabase'
 import { useStore } from '@/store'
 import { logError } from '@/shared/lib/logger'
+import { getWeekStart } from '@/shared/lib/dateUtils'
 import type { WeeklyStats, AudioPreset, EnergyLevel } from '@/types'
 import type { FocusSessionRow } from '@/types/database'
 
@@ -32,17 +33,6 @@ const FALLBACK_INSIGHTS = [
 ]
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-
-/** Monday of the current week at 00:00 local time */
-function getWeekStart(): Date {
-  const now = new Date()
-  const day = now.getDay() // 0 = Sun
-  const daysToMonday = (day + 6) % 7
-  const monday = new Date(now)
-  monday.setDate(now.getDate() - daysToMonday)
-  monday.setHours(0, 0, 0, 0)
-  return monday
-}
 
 /** Mode of an array of strings — returns null for empty arrays */
 function modeOf(arr: string[]): string | null {

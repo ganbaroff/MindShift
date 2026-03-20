@@ -72,7 +72,7 @@ export const NatureBuffer = memo(function NatureBuffer({
           Time to breathe 🌿
         </h2>
         <p className="text-sm mb-8 max-w-xs leading-relaxed" style={{ color: '#8B8BA7' }}>
-          Great session. Let your mind settle before the next one.
+          Session done. Let your mind settle before the next one.
         </p>
 
         <div
@@ -157,6 +157,7 @@ export const NatureBuffer = memo(function NatureBuffer({
             border: '1px solid rgba(255,255,255,0.06)',
             color: '#8B8BA7',
           }}
+          aria-label="Skip nature buffer"
         >
           I'm ready
         </button>
@@ -233,6 +234,7 @@ export const RecoveryLock = memo(function RecoveryLock({
             border: '1px solid rgba(255,255,255,0.06)',
             color: '#8B8BA7',
           }}
+          aria-label="Bypass recovery suggestion"
         >
           I know — keep going →
         </button>

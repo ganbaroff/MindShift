@@ -220,6 +220,8 @@ export function FocusSetup({
           <div className="flex flex-col gap-2">
             <button
               onClick={() => setSelectedTask(null)}
+              aria-pressed={selectedTask === null}
+              aria-label="Open focus — no specific task"
               className="flex items-center gap-3 p-3 rounded-xl text-left transition-all duration-200"
               style={{
                 background: selectedTask === null ? 'var(--color-primary-alpha)' : 'var(--color-card)',
@@ -238,6 +240,8 @@ export function FocusSetup({
                 <button
                   key={task.id}
                   onClick={() => setSelectedTask(task)}
+                  aria-pressed={isSelected}
+                  aria-label={`Focus on: ${task.title}`}
                   className="flex items-center gap-3 p-3 rounded-xl text-left transition-all duration-200"
                   style={{
                     background: isSelected ? 'var(--color-primary-alpha)' : 'var(--color-card)',
@@ -291,6 +295,8 @@ export function FocusSetup({
               <button
                 key={min}
                 onClick={() => { setSelectedDuration(min); setShowCustom(false) }}
+                aria-pressed={isActive}
+                aria-label={`${min} minutes${isRecommended ? ' (recommended)' : ''}`}
                 className="flex-1 py-3 rounded-xl font-semibold text-sm transition-all duration-200 relative"
                 style={{
                   background:  isActive ? 'var(--color-primary-alpha)' : 'var(--color-card)',
@@ -312,6 +318,7 @@ export function FocusSetup({
           })}
           <button
             onClick={() => setShowCustom(true)}
+            aria-label="Custom duration"
             className="flex-1 py-3 rounded-xl font-semibold text-sm transition-all duration-200"
             style={{
               background: showCustom ? 'var(--color-primary-alpha)' : 'var(--color-card)',
@@ -397,6 +404,7 @@ export function FocusSetup({
       <div className="px-5 space-y-2">
         <button
           onClick={() => setShowBreathwork(true)}
+          aria-label="Start focus session with breathing ritual"
           className="w-full py-4 rounded-2xl font-bold text-base transition-all duration-200"
           style={{
             background: 'linear-gradient(135deg, #7B72FF, #8B7FF7)',
@@ -408,6 +416,7 @@ export function FocusSetup({
         </button>
         <button
           onClick={() => handleStart()}
+          aria-label="Skip breathing ritual and start focus session"
           className="w-full py-2 text-[12px]"
           style={{ color: '#8B8BA7' }}
         >

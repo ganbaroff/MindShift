@@ -66,10 +66,10 @@ const MOCHI_MESSAGES: Record<string, string[]> = {
     "Half hour of focus. You kept going. 🔥",
   ],
   milestone_60: [
-    "An hour. That's extraordinary 🌟",
+    "An hour. That was real. 🌟",
     "60 minutes. Genuine deep work. 🌟",
-    "One full hour. This is rare. 🌟",
-    "One hour. This was real. 🌟",
+    "One full hour. 🌟",
+    "One hour done. 🌟",
   ],
 }
 
@@ -79,28 +79,28 @@ const getRandomMessage = (messages: string[]): string =>
 // Psychotype flavor overlays — personalize fallback messages
 const PSYCHOTYPE_MESSAGES: Record<Psychotype, Record<string, string[]>> = {
   achiever: {
-    milestone_7:  ["7 minutes — another one in the books 💪", "You're crushing it. Keep the momentum."],
-    milestone_15: ["15 minutes of real progress. That's what you do. ✨", "Quarter hour down. You're on a roll."],
-    milestone_30: ["Half an hour. You showed up and delivered. 🔥", "30 minutes conquered. That's your style."],
-    milestone_60: ["One hour. You set the bar and cleared it. 🌟", "60 minutes. Extraordinary output today."],
+    milestone_7:  ["7 minutes in the books 💪", "Past the hard part. Keep going."],
+    milestone_15: ["15 minutes of real progress. ✨", "Quarter hour down. Solid."],
+    milestone_30: ["Half an hour. That's a real session. 🔥", "30 minutes done."],
+    milestone_60: ["One hour. Genuine deep work. 🌟", "60 minutes. That was real."],
   },
   explorer: {
-    milestone_7:  ["7 minutes in — what will you discover? 🔍", "Warming up the curiosity engine..."],
-    milestone_15: ["15 minutes of following that thread. ✨", "Still exploring — that's the good stuff."],
-    milestone_30: ["Half an hour deep in the rabbit hole. 🔥", "30 minutes of pure exploration."],
-    milestone_60: ["An hour of discovery. Where did it take you? 🌟", "60 minutes. What did you find?"],
+    milestone_7:  ["7 minutes in — warming up 🔍", "Getting into it..."],
+    milestone_15: ["15 minutes of following that thread. ✨", "Still exploring. Good."],
+    milestone_30: ["Half an hour deep. 🔥", "30 minutes of exploration."],
+    milestone_60: ["An hour. Where did it take you? 🌟", "60 minutes. What did you find?"],
   },
   connector: {
-    milestone_7:  ["7 minutes. Someone will appreciate this work 🌱", "Your consistency inspires."],
-    milestone_15: ["15 minutes. Real work that touches people. ✨", "Your effort matters to others."],
-    milestone_30: ["Half an hour of showing up. 🔥", "30 minutes. That's the kind of reliability people count on."],
-    milestone_60: ["One hour. Your work helps others, even when they don't see it. 🌟", "60 minutes. Quietly remarkable."],
+    milestone_7:  ["7 minutes. Steady. 🌱", "Still here."],
+    milestone_15: ["15 minutes of focused work. ✨", "Quarter hour. That counts."],
+    milestone_30: ["Half an hour. 🔥", "30 minutes of showing up."],
+    milestone_60: ["One hour. 🌟", "60 minutes. Real work."],
   },
   planner: {
-    milestone_7:  ["7 minutes — right on track. ✅", "The plan is working. Keep going."],
-    milestone_15: ["15 minutes. Just as planned. ✨", "Quarter hour in, still on schedule."],
-    milestone_30: ["Half an hour. Steady and structured. 🔥", "30 minutes. Exactly where you planned to be."],
-    milestone_60: ["One hour. Flawless execution. 🌟", "60 minutes — the plan, delivered."],
+    milestone_7:  ["7 minutes — on track. ✅", "The plan is working."],
+    milestone_15: ["15 minutes. On schedule. ✨", "Quarter hour in."],
+    milestone_30: ["Half an hour. Steady. 🔥", "30 minutes as planned."],
+    milestone_60: ["One hour. Plan delivered. 🌟", "60 minutes done."],
   },
 }
 
