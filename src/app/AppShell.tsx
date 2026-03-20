@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'motion/react'
 import { BottomNav } from './BottomNav'
 import { useStore } from '@/store'
 import { useMotion } from '@/shared/hooks/useMotion'
+import { useDeadlineReminders } from '@/shared/hooks/useDeadlineReminders'
 import { InstallBanner } from '@/shared/ui/InstallBanner'
 
 // ── S-7 Anti-scroll friction nudge ────────────────────────────────────────────
@@ -48,6 +49,9 @@ export function AppShell() {
   const [showBackOnline, setShowBackOnline] = useState(false)
   const [showFriction, setShowFriction] = useState(false)
   const dismissFriction = useCallback(() => setShowFriction(false), [])
+
+  // Deadline reminders — gentle, tone-aware nudges for upcoming due dates
+  useDeadlineReminders()
 
   // S-7: detect navigation away from /focus while session is active
   useEffect(() => {

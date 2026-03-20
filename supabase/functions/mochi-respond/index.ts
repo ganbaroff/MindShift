@@ -14,6 +14,8 @@
 //     emotionalReactivity: string | null,
 //     recentStruggles: string | null,
 //     seasonalMode: string,
+//     activeTaskTypes?: Record<string, number>,  // e.g. { task: 2, meeting: 1 }
+//     upcomingDeadlines?: { title: string, taskType: string, dueDate: string }[],
 //   },
 //   locale: string,
 // }
@@ -153,6 +155,21 @@ Deno.serve(async (req: Request) => {
       ? (ctx.seasonalMode as string)
       : 'maintain'
 
+    // ── Task-type awareness ─────────────────────────────────────────────────
+    const activeTaskTypes = (ctx.activeTaskTypes && typeof ctx.activeTaskTypes === 'object')
+      ? ctx.activeTaskTypes as Record<string, number>
+      : null
+
+    const upcomingDeadlines = Array.isArray(ctx.upcomingDeadlines)
+      ? (ctx.upcomingDeadlines as { title: string; taskType: string; dueDate: string }[])
+          .slice(0, 5)
+          .map(d => ({
+            title: String(d.title ?? '').slice(0, 60),
+            taskType: String(d.taskType ?? 'task').slice(0, 10),
+            dueDate: String(d.dueDate ?? '').slice(0, 10),
+          }))
+      : null
+
     const locale = typeof raw.locale === 'string' ? raw.locale.slice(0, 10) : 'en'
 
     // ── Build context for Gemini ─────────────────────────────────────────────
@@ -169,6 +186,10 @@ Deno.serve(async (req: Request) => {
       emotionalReactivity ? `Emotional reactivity: ${emotionalReactivity}` : null,
       recentStruggles ? `Recent patterns: ${recentStruggles}` : null,
       `Seasonal mode: ${seasonalMode}`,
+      activeTaskTypes ? `Active task types in NOW pool: ${Object.entries(activeTaskTypes).map(([t, n]) => `${n} ${t}(s)`).join(', ')}` : null,
+      upcomingDeadlines && upcomingDeadlines.length > 0
+        ? `Tasks due within 24h: ${upcomingDeadlines.map(d => `"${d.title}" (${d.taskType}, due ${d.dueDate})`).join('; ')}`
+        : null,
     ].filter(Boolean).join('\n')
 
     const psychotypeGuidance = psychotype
@@ -209,6 +230,9 @@ Rules (STRICT):
 - If the trigger is comeback, welcome back without guilt-tripping about the absence
 - If timeBlindness is "often", never reference specific time durations as pressure
 - If emotionalReactivity is "high", use softer language and extra validation
+- If the user has meetings due soon, you can gently mention it: "Your meeting is coming up — want to prep?" NEVER use urgency words like "hurry", "running out", "don't miss"
+- If the user has ideas in their list, you can warmly acknowledge them: "Nice idea in your list" or "That idea looks fun to explore"
+- If upcoming deadlines are present, mention them casually and warmly — never as pressure
 - Keep the tone like a cozy supportive friend, not corporate or clinical
 - IMPORTANT: Respond in the language with BCP-47 code "${locale}". If unsure, use English.
 
