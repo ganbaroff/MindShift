@@ -65,6 +65,8 @@ export default function SettingsPage() {
     uiTone, setUITone,
     hapticsEnabled, setHapticsEnabled,
     telegramLinkCode, telegramLinked, generateTelegramCode, setTelegramLinked,
+    calendarSyncEnabled, setCalendarSyncEnabled,
+    calendarFocusBlocks, setCalendarFocusBlocks,
   } = useStore();
 
   const { play, stop, isPlaying, setVolume: setEngineVolume } = useAudioEngine();
@@ -437,6 +439,74 @@ export default function SettingsPage() {
               >
                 Connect Telegram
               </motion.button>
+            </div>
+          )}
+        </Section>
+
+        {/* Google Calendar integration */}
+        <Section label="Google Calendar">
+          {isGuest ? (
+            <p className="text-[12px]" style={{ color: '#8B8BA7' }}>
+              Sign in with Google to sync meetings and reminders
+            </p>
+          ) : (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-[14px] font-medium" style={{ color: '#E8E8F0' }}>Sync to calendar</p>
+                  <p className="text-[12px] mt-0.5" style={{ color: '#8B8BA7' }}>
+                    Meetings and reminders with dates appear in Google Calendar
+                  </p>
+                </div>
+                <button
+                  onClick={async () => {
+                    if (!calendarSyncEnabled) {
+                      // Enable — need to request calendar scope via re-auth
+                      const { error } = await supabase.auth.signInWithOAuth({
+                        provider: 'google',
+                        options: {
+                          redirectTo: `${window.location.origin}/settings`,
+                          queryParams: { prompt: 'consent', access_type: 'offline' },
+                          scopes: 'https://www.googleapis.com/auth/calendar.events',
+                        },
+                      })
+                      if (error) {
+                        toast.error('Could not connect Google Calendar')
+                      }
+                      // After redirect + return, onAuthStateChange will store tokens and enable sync
+                    } else {
+                      setCalendarSyncEnabled(false)
+                      toast('Calendar sync disabled', { icon: '📅' })
+                    }
+                  }}
+                  className="w-11 h-6 rounded-full relative transition-colors duration-200"
+                  style={{ background: calendarSyncEnabled ? '#4ECDC4' : '#252840' }}
+                  aria-pressed={calendarSyncEnabled}
+                  aria-label="Toggle Google Calendar sync"
+                >
+                  <motion.div
+                    animate={shouldAnimate ? { x: calendarSyncEnabled ? 20 : 2 } : { x: calendarSyncEnabled ? 20 : 2 }}
+                    transition={shouldAnimate ? { type: 'spring', damping: 20, stiffness: 300 } : { duration: 0 }}
+                    className="absolute top-1 w-4 h-4 rounded-full bg-white"
+                  />
+                </button>
+              </div>
+              {calendarSyncEnabled && (
+                <motion.div
+                  initial={shouldAnimate ? { opacity: 0, height: 0 } : false}
+                  animate={shouldAnimate ? { opacity: 1, height: 'auto' } : false}
+                  className="overflow-hidden space-y-2"
+                >
+                  <Toggle
+                    checked={calendarFocusBlocks}
+                    onChange={setCalendarFocusBlocks}
+                    label="Add focus sessions as time blocks"
+                  />
+                  <p className="text-[11px]" style={{ color: '#8B8BA7' }}>
+                    Focus sessions will show as teal blocks in your calendar
+                  </p>
+                </motion.div>
+              )}
             </div>
           )}
         </Section>

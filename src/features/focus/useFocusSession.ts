@@ -272,6 +272,15 @@ export function useFocusSession() {
         .single()
       savedSessionIdRef.current = (saved as { id?: string } | null)?.id ?? null
       updateLastSession()
+
+      // Sync focus session as time block to Google Calendar (fire-and-forget)
+      import('@/shared/hooks/useCalendarSync').then(({ syncFocusSession }) => {
+        const taskTitle = activeSession.taskId
+          ? [...useStore.getState().nowPool, ...useStore.getState().nextPool]
+              .find(t => t.id === activeSession.taskId)?.title ?? null
+          : null
+        void syncFocusSession(activeSession.startedAt, elapsedMs, taskTitle)
+      })
     } catch (err) {
       logError('FocusScreen.handleSessionEnd.insert', err)
     }

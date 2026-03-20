@@ -181,6 +181,11 @@ interface PreferencesSlice {
   telegramLinked: boolean
   generateTelegramCode: () => void
   setTelegramLinked: (linked: boolean) => void
+  // Google Calendar integration
+  calendarSyncEnabled: boolean
+  setCalendarSyncEnabled: (val: boolean) => void
+  calendarFocusBlocks: boolean
+  setCalendarFocusBlocks: (val: boolean) => void
 }
 
 interface GridSlice {
@@ -325,6 +330,9 @@ export const useStore = create<AppStore>()(
           // Telegram reset
           telegramLinkCode: null,
           telegramLinked: false,
+          // Calendar reset
+          calendarSyncEnabled: false,
+          calendarFocusBlocks: false,
         }),
 
         // ── Tasks ───────────────────────────────────────────────────────────
@@ -748,6 +756,12 @@ export const useStore = create<AppStore>()(
           }
         },
         setTelegramLinked: (linked) => set({ telegramLinked: linked, telegramLinkCode: linked ? null : get().telegramLinkCode }),
+
+        // Google Calendar integration
+        calendarSyncEnabled: false,
+        setCalendarSyncEnabled: (val) => set({ calendarSyncEnabled: val }),
+        calendarFocusBlocks: false,
+        setCalendarFocusBlocks: (val) => set({ calendarFocusBlocks: val }),
       }),
       {
         name: 'mindshift-store',
@@ -841,6 +855,8 @@ export const useStore = create<AppStore>()(
           uiTone: s.uiTone,
           telegramLinkCode: s.telegramLinkCode,
           telegramLinked: s.telegramLinked,
+          calendarSyncEnabled: s.calendarSyncEnabled,
+          calendarFocusBlocks: s.calendarFocusBlocks,
         }),
       }
     )

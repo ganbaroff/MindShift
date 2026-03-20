@@ -16,6 +16,7 @@ import { useSessionHistory } from '@/shared/hooks/useSessionHistory'
 import { logError } from '@/shared/lib/logger'
 import { reminders } from '@/shared/lib/reminders'
 import { computeBurnoutScore, deriveBehaviors } from '@/shared/lib/burnout'
+import { useCalendarSync } from '@/shared/hooks/useCalendarSync'
 
 const CONSENT_PENDING_KEY = 'ms_consent_pending'
 
@@ -90,6 +91,24 @@ export default function App() {
         localStorage.removeItem('ms_signed_out')
         setUser(session.user.id, session.user.email ?? '')
         updateLastSession()
+
+        // ── Google Calendar: store provider tokens on OAuth callback ──────────
+        if (session.provider_token) {
+          try {
+            await supabase.functions.invoke('gcal-store-token', {
+              body: {
+                providerToken: session.provider_token,
+                providerRefreshToken: session.provider_refresh_token ?? null,
+                expiresIn: 3600, // Google tokens last 1 hour
+              },
+            })
+            // Enable calendar sync if this was a calendar-scope auth
+            useStore.getState().setCalendarSyncEnabled(true)
+          } catch (err) {
+            logError('App.gcalTokenStore', err instanceof Error ? err : new Error(String(err)))
+          }
+        }
+
         try {
           const raw = localStorage.getItem(CONSENT_PENDING_KEY)
           if (raw) {
@@ -214,6 +233,7 @@ export default function App() {
   useOfflineSync()
   useTaskSync()
   useSessionHistory()
+  useCalendarSync()
 
   const showRecovery = (() => {
     if (recoveryShown || !lastSessionAt) return false
