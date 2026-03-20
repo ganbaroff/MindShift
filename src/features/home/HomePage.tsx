@@ -75,7 +75,8 @@ export default function HomePage() {
   const [briefDismissed, setBriefDismissed] = useState(false);
   const prevEnergy = useRef<EnergyLevel>(energyLevel);
 
-  const nowTasks = useMemo(() => nowPool.filter(t => t.status === 'active'), [nowPool]);
+  // Only 'task' type items in NOW — meetings/reminders/ideas don't appear here
+  const nowTasks = useMemo(() => nowPool.filter(t => t.status === 'active' && t.taskType === 'task'), [nowPool]);
   const nextTasks = useMemo(() => nextPool.filter(t => t.status === 'active'), [nextPool]);
 
   // "Last refreshed" timestamp — gives a sense of data freshness

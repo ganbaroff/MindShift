@@ -56,8 +56,11 @@ export default function TasksPage() {
   }, [reorderPool])
 
   const q = searchQuery.toLowerCase().trim();
-  const nowTasks = useMemo(() => nowPool.filter(t => t.status === 'active' && (!q || t.title.toLowerCase().includes(q))), [nowPool, q]);
-  const nextTasks = useMemo(() => nextPool.filter(t => t.status === 'active' && (!q || t.title.toLowerCase().includes(q))), [nextPool, q]);
+  // NOW pool: only 'task' type (meetings/reminders/ideas don't go here)
+  const nowTasks = useMemo(() => nowPool.filter(t => t.status === 'active' && t.taskType === 'task' && (!q || t.title.toLowerCase().includes(q))), [nowPool, q]);
+  // NEXT pool: tasks, meetings, reminders — but not ideas
+  const nextTasks = useMemo(() => nextPool.filter(t => t.status === 'active' && t.taskType !== 'idea' && (!q || t.title.toLowerCase().includes(q))), [nextPool, q]);
+  // SOMEDAY pool: all types
   const somedayTasks = useMemo(() => somedayPool.filter(t => t.status === 'active' && (!q || t.title.toLowerCase().includes(q))), [somedayPool, q]);
   const doneTasks = useMemo(() =>
     [...nowPool, ...nextPool, ...somedayPool]

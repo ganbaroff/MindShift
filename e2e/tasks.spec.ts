@@ -45,20 +45,20 @@ test.describe('Task creation', () => {
     await expect(page.getByRole('button', { name: /Hard/i })).toBeVisible()
 
     // Time label and duration presets
-    await expect(page.getByText('Time')).toBeVisible()
-    await expect(page.getByRole('button', { name: '5m', exact: true })).toBeVisible()
-    await expect(page.getByRole('button', { name: '15m', exact: true })).toBeVisible()
-    await expect(page.getByRole('button', { name: '25m', exact: true })).toBeVisible()
-    await expect(page.getByRole('button', { name: '45m', exact: true })).toBeVisible()
-    await expect(page.getByRole('button', { name: '60m', exact: true })).toBeVisible()
+    await expect(page.getByText('Time', { exact: true })).toBeVisible()
+    await expect(page.getByRole('button', { name: '5 minutes', exact: true })).toBeVisible()
+    await expect(page.getByRole('button', { name: '15 minutes', exact: true })).toBeVisible()
+    await expect(page.getByRole('button', { name: '25 minutes', exact: true })).toBeVisible()
+    await expect(page.getByRole('button', { name: '45 minutes', exact: true })).toBeVisible()
+    await expect(page.getByRole('button', { name: '60 minutes', exact: true })).toBeVisible()
   })
 
   test('submit button says "Add to Now" by default', async ({ authedPage: page }) => {
     await page.goto('/tasks')
     await page.getByRole('button', { name: /add task/i }).click()
 
-    // Submit button is present with "Add to Now →" text
-    await expect(page.getByRole('button', { name: /Add to Now/i })).toBeVisible()
+    // Submit button is present with "Add to NOW →" text
+    await expect(page.getByRole('button', { name: /Add task to NOW/i })).toBeVisible()
 
     // Pool hint shows "Adding to NOW"
     await expect(page.getByText(/Adding to NOW/)).toBeVisible()
@@ -71,7 +71,7 @@ test.describe('Task creation', () => {
     await page.getByPlaceholder("What's on your mind?").fill('Test task')
 
     // Submit button should be visible
-    const submitBtn = page.getByRole('button', { name: /Add to Now/i })
+    const submitBtn = page.getByRole('button', { name: /Add task to NOW/i })
     await expect(submitBtn).toBeVisible()
   })
 
@@ -86,10 +86,10 @@ test.describe('Task creation', () => {
     await page.getByRole('button', { name: /Medium/i }).click()
 
     // Select duration
-    await page.getByRole('button', { name: '15m', exact: true }).click()
+    await page.getByRole('button', { name: '15 minutes', exact: true }).click()
 
     // Submit
-    await page.getByRole('button', { name: /Add to Now/i }).dispatchEvent('click')
+    await page.getByRole('button', { name: /Add task to NOW/i }).dispatchEvent('click')
 
     // Modal closes, task appears in NOW pool
     await expect(page.getByText('Buy groceries')).toBeVisible()
@@ -217,24 +217,24 @@ test.describe('Due date picker', () => {
     await expect(page.getByText(/Upcoming tab/)).not.toBeVisible()
 
     // Select Today
-    await page.getByRole('button', { name: 'Today', exact: true }).click()
+    await page.getByRole('button', { name: /Due date: Today/i }).click()
 
     // Hint should appear
     await expect(page.getByText(/Will appear in Upcoming tab/)).toBeVisible()
   })
 
   test('clicking Tomorrow shows upcoming hint', async ({ authedPage: page }) => {
-    await page.getByRole('button', { name: 'Tomorrow', exact: true }).click()
+    await page.getByRole('button', { name: /Due date: Tomorrow/i }).click()
     await expect(page.getByText(/Will appear in Upcoming tab/)).toBeVisible()
   })
 
   test('clicking selected date chip deselects it (toggles)', async ({ authedPage: page }) => {
     // Select Today
-    await page.getByRole('button', { name: 'Today', exact: true }).click()
+    await page.getByRole('button', { name: /Due date: Today/i }).click()
     await expect(page.getByText(/Will appear in Upcoming tab/)).toBeVisible()
 
     // Click again to deselect
-    await page.getByRole('button', { name: 'Today', exact: true }).click()
+    await page.getByRole('button', { name: /Due date: Today/i }).click()
     await expect(page.getByText(/Will appear in Upcoming tab/)).not.toBeVisible()
   })
 })
@@ -286,7 +286,7 @@ test.describe('Pool overflow', () => {
     // Overflow notice should be visible
     await expect(page.getByText(/NOW is full/i)).toBeVisible()
 
-    // Submit button should say "Add to Next →" (not "Add to Now →")
-    await expect(page.getByRole('button', { name: /Add to Next/i })).toBeVisible()
+    // Submit button should say "Add to NEXT →" (not "Add to NOW →")
+    await expect(page.getByRole('button', { name: /Add task to NEXT/i })).toBeVisible()
   })
 })

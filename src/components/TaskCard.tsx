@@ -56,7 +56,8 @@ function TaskCardInner({ task, index = 0, onDone, onPark }: TaskCardProps) {
     >
       {/* Header row */}
       <div className="flex items-center gap-2 mb-1.5">
-        <DifficultyDots difficulty={task.difficulty ?? 1} />
+        {/* Difficulty dots and duration only for 'task' type */}
+        {task.taskType === 'task' && <DifficultyDots difficulty={task.difficulty ?? 1} />}
         {task.pool !== 'now' && (
           <span
             className="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
@@ -65,7 +66,7 @@ function TaskCardInner({ task, index = 0, onDone, onPark }: TaskCardProps) {
             {task.pool.toUpperCase()}
           </span>
         )}
-        {task.estimatedMinutes && (
+        {task.taskType === 'task' && task.estimatedMinutes && (
           <span className="text-[11px] ml-auto" style={{ color: '#8B8BA7' }}>
             {task.estimatedMinutes}m
           </span>
@@ -75,7 +76,7 @@ function TaskCardInner({ task, index = 0, onDone, onPark }: TaskCardProps) {
             {TASK_TYPE_CONFIG[task.taskType].emoji}
           </span>
         )}
-        {hasReminder && task.taskType !== 'reminder' && <span className="text-[13px]" title="Reminder set">🔔</span>}
+        {hasReminder && <span className="text-[13px]" title="Reminder set">🔔</span>}
         {task.dueDate && (
           <span className="text-[10px] px-1.5 py-0.5 rounded-full ml-auto" style={{ backgroundColor: 'rgba(123,114,255,0.12)', color: '#7B72FF' }}>
             📅 {task.dueDate}

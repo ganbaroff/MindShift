@@ -162,7 +162,8 @@ export function useFocusSession() {
   const [parkOpen, setParkOpen] = useState(false)
   const [parkText, setParkText] = useState('')
 
-  const allTasks = [...nowPool, ...nextPool].filter(t => t.status === 'active')
+  // Only 'task' type can have focus sessions — meetings/reminders/ideas are excluded
+  const allTasks = [...nowPool, ...nextPool].filter(t => t.status === 'active' && t.taskType === 'task')
 
   // ── Cleanup on unmount ──────────────────────────────────────────────────────
   useEffect(() => () => {
