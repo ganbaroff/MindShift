@@ -36,6 +36,7 @@ import {
   SESSION_HARD_STOP_MINUTES,
 } from '@/shared/lib/constants'
 import { toast } from 'sonner'
+import i18n from '@/i18n'
 import { ARC_SIZE } from './ArcTimer'
 import type { SessionPhase, AudioPreset, Task, EnergyLevel } from '@/types'
 import type { FocusSessionInsert } from '@/types/database'
@@ -550,9 +551,9 @@ export function useFocusSession() {
   const timerSize = getTimerSize(sessionPhase)
 
   const energyLabel = useMemo(() => {
-    if (energyLevel <= 2) return { text: 'Low energy — starting small 🌱', color: '#4ECDC4' }
-    if (energyLevel === 3) return { text: 'Steady energy — classic focus 🎯', color: '#7B72FF' }
-    return { text: 'High energy — deep work time 🚀', color: '#F59E0B' }
+    if (energyLevel <= 2) return { text: i18n.t('focus.lowEnergy'), color: '#4ECDC4' }
+    if (energyLevel === 3) return { text: i18n.t('focus.steadyEnergy'), color: '#7B72FF' }
+    return { text: i18n.t('focus.highEnergy'), color: '#F59E0B' }
   }, [energyLevel])
 
   return {

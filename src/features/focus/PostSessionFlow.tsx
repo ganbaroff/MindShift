@@ -16,7 +16,7 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useMotion } from '@/shared/hooks/useMotion'
 import type { EnergyLevel, SessionPhase } from '@/types'
-import { ENERGY_LABELS, ENERGY_EMOJI } from '@/shared/lib/constants'
+import { ENERGY_EMOJI } from '@/shared/lib/constants'
 
 // ── Hyperfocus Autopsy threshold (B-6 backlog item) ───────────────────────────
 // Research: ADHD users in hyperfocus often lose awareness of time + body state.
@@ -73,13 +73,8 @@ interface NatureBufferProps {
   parkedThoughtsCount?: number
 }
 
-const ENERGY_OPTIONS = [
-  { level: 1 as EnergyLevel, emoji: ENERGY_EMOJI[0], label: ENERGY_LABELS[0] },
-  { level: 2 as EnergyLevel, emoji: ENERGY_EMOJI[1], label: ENERGY_LABELS[1] },
-  { level: 3 as EnergyLevel, emoji: ENERGY_EMOJI[2], label: ENERGY_LABELS[2] },
-  { level: 4 as EnergyLevel, emoji: ENERGY_EMOJI[3], label: ENERGY_LABELS[3] },
-  { level: 5 as EnergyLevel, emoji: ENERGY_EMOJI[4], label: ENERGY_LABELS[4] },
-]
+const ENERGY_LABEL_KEYS = ['energy.drained', 'energy.low', 'energy.okay', 'energy.good', 'energy.wired'] as const
+const ENERGY_OPTION_LEVELS: EnergyLevel[] = [1, 2, 3, 4, 5]
 
 export const NatureBuffer = memo(function NatureBuffer({
   bufferSeconds, postEnergyLogged, onSetEnergyLevel, onSkip, sessionMinutes = 0,
@@ -172,18 +167,21 @@ export const NatureBuffer = memo(function NatureBuffer({
               {t('focus.energyCheckIn')}
             </p>
             <div className="flex justify-between gap-1">
-              {ENERGY_OPTIONS.map(({ level, emoji, label }) => (
-                <button
-                  key={level}
-                  onClick={() => onSetEnergyLevel(level)}
-                  className="flex-1 flex flex-col items-center gap-0.5 py-2 rounded-xl text-xs transition-all duration-150 min-h-[52px]"
-                  style={{ background: '#252840', border: '1px solid rgba(255,255,255,0.06)' }}
-                  aria-label={`Post-session energy: ${label}`}
-                >
-                  <span className="text-lg leading-none">{emoji}</span>
-                  <span className="text-[9px]" style={{ color: '#8B8BA7' }}>{label}</span>
-                </button>
-              ))}
+              {ENERGY_OPTION_LEVELS.map((level, i) => {
+                const label = t(ENERGY_LABEL_KEYS[i])
+                return (
+                  <button
+                    key={level}
+                    onClick={() => onSetEnergyLevel(level)}
+                    className="flex-1 flex flex-col items-center gap-0.5 py-2 rounded-xl text-xs transition-all duration-150 min-h-[52px]"
+                    style={{ background: '#252840', border: '1px solid rgba(255,255,255,0.06)' }}
+                    aria-label={`Post-session energy: ${label}`}
+                  >
+                    <span className="text-lg leading-none">{ENERGY_EMOJI[i]}</span>
+                    <span className="text-[9px]" style={{ color: '#8B8BA7' }}>{label}</span>
+                  </button>
+                )
+              })}
             </div>
           </div>
         )}
