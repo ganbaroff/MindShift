@@ -279,16 +279,49 @@ export default function TodayPage() {
               </div>
             ) : activeTasks.length === 0 ? (
               <div
-                className="text-center py-6 rounded-2xl"
+                className="text-center py-6 rounded-2xl space-y-3"
                 style={{ background: 'rgba(78,205,196,0.05)' }}
               >
                 <p className="text-[28px] mb-1">🌿</p>
                 <p className="text-[14px] font-medium" style={{ color: '#E8E8F0' }}>
                   Clear day ahead
                 </p>
-                <p className="text-[12px] mt-1" style={{ color: '#8B8BA7' }}>
-                  Add something or start a free focus session
+                <p className="text-[12px]" style={{ color: '#8B8BA7' }}>
+                  Add something or try a sample task
                 </p>
+                {completedTotal === 0 && (
+                  <button
+                    onClick={() => {
+                      const sample: Task = {
+                        id: crypto.randomUUID(),
+                        title: 'Try a 5-minute focus session',
+                        pool: 'now',
+                        status: 'active',
+                        difficulty: 1,
+                        estimatedMinutes: 5,
+                        completedAt: null,
+                        createdAt: new Date().toISOString(),
+                        snoozeCount: 0,
+                        parentTaskId: null,
+                        position: 0,
+                        dueDate: todayStr,
+                        dueTime: null,
+                        taskType: 'task',
+                        reminderSentAt: null,
+                        repeat: 'none',
+                      }
+                      addTask(sample)
+                    }}
+                    className="mx-auto px-4 py-2 rounded-xl text-[13px] font-medium focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
+                    style={{
+                      background: 'rgba(123,114,255,0.12)',
+                      color: '#7B72FF',
+                      border: '1px solid rgba(123,114,255,0.2)',
+                    }}
+                  >
+                    Add a sample task
+                  </button>
+                )}
               </div>
             ) : null}
 
