@@ -39,7 +39,7 @@ export default function TasksPage() {
   const [showDone, setShowDone] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const { nowPool, nextPool, somedayPool, completeTask, snoozeTask, removeTask, reorderPool, appMode, seasonalMode } = useStore();
+  const { nowPool, nextPool, somedayPool, completeTask, snoozeTask, removeTask, reorderPool, moveTask, appMode, seasonalMode } = useStore();
 
   // dnd-kit sensors — pointer for desktop, touch for mobile
   const sensors = useSensors(
@@ -71,12 +71,12 @@ export default function TasksPage() {
     [nextPool, q]);
   // SOMEDAY pool: all types
   const somedayTasks = useMemo(() => somedayPool.filter(t => t.status === 'active' && (!q || t.title.toLowerCase().includes(q))), [somedayPool, q]);
-  const doneTasks = useMemo(() =>
-    [...nowPool, ...nextPool, ...somedayPool]
-      .filter(t => t.status === 'completed' && t.completedAt)
-      .sort((a, b) => new Date(b.completedAt!).getTime() - new Date(a.completedAt!).getTime()),
-    [nowPool, nextPool, somedayPool]
-  );
+  const doneTasks = useMemo(() => {
+    const sevenDaysAgo = new Date(Date.now() - 7 * 86_400_000).toISOString()
+    return [...nowPool, ...nextPool, ...somedayPool]
+      .filter(t => t.status === 'completed' && t.completedAt && t.completedAt > sevenDaysAgo)
+      .sort((a, b) => new Date(b.completedAt!).getTime() - new Date(a.completedAt!).getTime())
+  }, [nowPool, nextPool, somedayPool]);
 
   const nowMax = getNowPoolMax(appMode, seasonalMode);
 
@@ -171,7 +171,7 @@ export default function TasksPage() {
               <SortableContext items={nowTasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
                 <div className="space-y-2">
                   {nowTasks.map((t, i) => (
-                    <SortableTaskCard key={t.id} task={t} index={i} onDone={completeTask} onPark={snoozeTask} onRemove={removeTask} />
+                    <SortableTaskCard key={t.id} task={t} index={i} onDone={completeTask} onPark={snoozeTask} onRemove={removeTask} onMove={moveTask} currentPool="now" />
                   ))}
                 </div>
               </SortableContext>
@@ -214,7 +214,7 @@ export default function TasksPage() {
               <SortableContext items={nextTasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
                 <div className="space-y-2">
                   {nextTasks.map((t, i) => (
-                    <SortableTaskCard key={t.id} task={t} index={i} onDone={completeTask} onPark={snoozeTask} onRemove={removeTask} />
+                    <SortableTaskCard key={t.id} task={t} index={i} onDone={completeTask} onPark={snoozeTask} onRemove={removeTask} onMove={moveTask} currentPool="next" />
                   ))}
                 </div>
               </SortableContext>
@@ -265,11 +265,20 @@ export default function TasksPage() {
   );
 }
 
-// ── Sortable wrapper for TaskCard ─────────────────────────────────────────────
-function SortableTaskCard({ task, index, onDone, onPark, onRemove }: {
+// ── Sortable wrapper for TaskCard with pool move options ─────────────────────
+function SortableTaskCard({ task, index, onDone, onPark, onRemove, onMove, currentPool }: {
   task: Task; index: number; onDone: (id: string) => void; onPark: (id: string) => void; onRemove?: (id: string) => void
+  onMove?: (id: string, pool: Task['pool']) => void; currentPool?: Task['pool']
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: task.id })
+  const [showMoveOptions, setShowMoveOptions] = useState(false)
+
+  const poolOptions = [
+    { pool: 'now' as const,     label: 'NOW',     emoji: '🎯' },
+    { pool: 'next' as const,    label: 'NEXT',    emoji: '📋' },
+    { pool: 'someday' as const, label: 'SOMEDAY', emoji: '💭' },
+  ].filter(p => p.pool !== currentPool)
+
   return (
     <div
       ref={setNodeRef}
@@ -280,10 +289,48 @@ function SortableTaskCard({ task, index, onDone, onPark, onRemove }: {
         zIndex: isDragging ? 999 : 'auto',
       }}
     >
-      {/* Drag handle overlay — long press activates via TouchSensor */}
       <div {...attributes} {...listeners} className="touch-none">
         <TaskCard task={task} index={index} onDone={onDone} onPark={onPark} onRemove={onRemove} />
       </div>
+      {/* Move options row */}
+      {onMove && (
+        <AnimatePresence>
+          {showMoveOptions ? (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden flex gap-1.5 px-2 pb-1.5"
+            >
+              {poolOptions.map(({ pool, label, emoji }) => (
+                <button
+                  key={pool}
+                  onClick={() => { onMove(task.id, pool); setShowMoveOptions(false) }}
+                  className="text-[10px] px-2 py-0.5 rounded-lg focus-visible:ring-1 focus-visible:ring-[#7B72FF]"
+                  style={{ background: 'rgba(123,114,255,0.08)', color: '#8B8BA7' }}
+                >
+                  {emoji} {label}
+                </button>
+              ))}
+              <button
+                onClick={() => setShowMoveOptions(false)}
+                className="text-[10px] px-1 rounded"
+                style={{ color: '#8B8BA7' }}
+              >
+                ✕
+              </button>
+            </motion.div>
+          ) : (
+            <button
+              onClick={() => setShowMoveOptions(true)}
+              className="text-[10px] px-2 py-0.5 focus-visible:ring-1 focus-visible:ring-[#7B72FF] rounded"
+              style={{ color: '#3A3B52' }}
+            >
+              Move →
+            </button>
+          )}
+        </AnimatePresence>
+      )}
     </div>
   )
 }

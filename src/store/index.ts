@@ -8,6 +8,7 @@ import {
   getNowPoolMax,
 } from '@/shared/lib/constants'
 import { idbStorage } from '@/shared/lib/idbStorage'
+import { getRandomDiscovery } from '@/shared/lib/mochiDiscoveries'
 import { notifyAchievement } from '@/shared/lib/notify'
 import { deriveUITone, getToneCopy } from '@/shared/lib/uiTone'
 
@@ -142,6 +143,9 @@ interface PreferencesSlice {
   // Mochi chat open counter — pulse hint shows for first 3 opens
   mochiChatOpenCount: number
   incrementMochiChatOpen: () => void
+  // Mochi discoveries — variable reinforcement collectibles
+  mochiDiscoveries: string[]
+  addMochiDiscovery: (id: string) => void
   // Subscription state (trial mode — no actual charges)
   subscriptionTier: 'free' | 'pro_trial' | 'pro'
   trialEndsAt: string | null        // ISO timestamp
@@ -319,7 +323,7 @@ export const useStore = create<AppStore>()(
           // Progress slice
           achievements: initAchievements(), weeklyStats: null, completedTotal: 0,
           // Preferences slice — prevent Pro state leaking between users
-          reducedStimulation: false, hapticsEnabled: true, seenHints: [],
+          reducedStimulation: false, hapticsEnabled: true, seenHints: [], mochiDiscoveries: [],
           subscriptionTier: 'free' as const, trialEndsAt: null,
           // Grid slice
           gridWidgets: WIDGET_DEFAULTS_GENERIC,
@@ -448,6 +452,9 @@ export const useStore = create<AppStore>()(
 
           // BUG 1 fix: award XP on task completion (was never called)
           s2.addXP(10)
+
+          // Mochi discovery — variable reinforcement (Research #5)
+          s2.addMochiDiscovery(getRandomDiscovery().id)
         },
 
         snoozeTask: (taskId) => set((s) => {
@@ -671,6 +678,10 @@ export const useStore = create<AppStore>()(
         incrementMochiChatOpen: () => set((s) => ({
           mochiChatOpenCount: s.mochiChatOpenCount + 1,
         })),
+        mochiDiscoveries: [],
+        addMochiDiscovery: (id) => set((s) => ({
+          mochiDiscoveries: s.mochiDiscoveries.includes(id) ? s.mochiDiscoveries : [...s.mochiDiscoveries, id],
+        })),
 
         subscriptionTier: 'free',
         trialEndsAt: null,
@@ -804,6 +815,17 @@ export const useStore = create<AppStore>()(
           state.nowPool = prune(state.nowPool)
           state.nextPool = prune(state.nextPool)
           state.somedayPool = prune(state.somedayPool)
+
+          // Auto-reschedule overdue tasks — bump to today silently
+          const today = new Date().toISOString().split('T')[0]
+          const bump = (tasks: Task[]) =>
+            tasks.map(t =>
+              t.status === 'active' && t.dueDate && t.dueDate < today
+                ? { ...t, dueDate: today }
+                : t
+            )
+          state.nowPool = bump(state.nowPool)
+          state.nextPool = bump(state.nextPool)
         },
         partialize: (s) => ({
           userId: s.userId,
@@ -821,6 +843,7 @@ export const useStore = create<AppStore>()(
           hapticsEnabled: s.hapticsEnabled,
           seenHints: s.seenHints,
           mochiChatOpenCount: s.mochiChatOpenCount,
+          mochiDiscoveries: s.mochiDiscoveries,
           subscriptionTier: s.subscriptionTier,
           trialEndsAt: s.trialEndsAt,
           gridWidgets: s.gridWidgets,
