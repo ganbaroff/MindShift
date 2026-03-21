@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useMotion } from '@/shared/hooks/useMotion';
 import { useStore } from '@/store';
 import { ENERGY_EMOJI } from '@/shared/lib/constants';
@@ -14,15 +15,16 @@ import { PageTransition } from '@/shared/ui/PageTransition';
 
 const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-const PSYCHOTYPE_META = {
-  achiever:  { emoji: '🎯', label: 'Achiever',  desc: 'You dive deep and finish what you start' },
-  explorer:  { emoji: '🗺️', label: 'Explorer',  desc: 'You thrive on variety and follow curiosity' },
-  connector: { emoji: '💙', label: 'Connector', desc: 'You build momentum through consistency' },
-  planner:   { emoji: '📋', label: 'Planner',   desc: 'You focus best with a predictable rhythm' },
+const PSYCHOTYPE_EMOJI = {
+  achiever:  '🎯',
+  explorer:  '🗺️',
+  connector: '💙',
+  planner:   '📋',
 } as const
 
 export default function ProgressPage() {
   const { shouldAnimate } = useMotion();
+  const { t } = useTranslation();
   const {
     xpTotal, completedTotal, achievements, weeklyStats, burnoutScore,
     psychotype, setPsychotype, psychotypeLastDerived, setPsychotypeLastDerived, resetGridToDefaults,
@@ -99,8 +101,8 @@ export default function ProgressPage() {
     <PageTransition>
     <div className="min-h-screen px-5 pb-36 pt-10" style={{ backgroundColor: '#0F1120' }}>
       <motion.div initial={shouldAnimate ? { opacity: 0, y: -8 } : false} animate={shouldAnimate ? { opacity: 1, y: 0 } : false}>
-        <h1 className="text-[24px] font-bold" style={{ color: '#E8E8F0' }}>Your Progress 🌱</h1>
-        <p className="text-[13px] mt-0.5" style={{ color: '#8B8BA7' }}>Every step counts, no matter how small.</p>
+        <h1 className="text-[24px] font-bold" style={{ color: '#E8E8F0' }}>{t('progress.title')}</h1>
+        <p className="text-[13px] mt-0.5" style={{ color: '#8B8BA7' }}>{t('progress.subtitle')}</p>
       </motion.div>
 
       <div className="space-y-4 mt-5">
@@ -115,13 +117,13 @@ export default function ProgressPage() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-[15px] font-semibold" style={{ color: '#E8E8F0' }}>
-                Level {level} · {levelName}
+                {t('progress.level', { level, name: levelName })}
               </p>
               <p className="text-[13px]" style={{ color: '#7B72FF' }}>{xpSafe.toLocaleString()} XP</p>
               <div className="w-full h-1.5 rounded-full mt-1.5 overflow-hidden" style={{ backgroundColor: '#252840' }}>
                 <div className="h-full rounded-full gradient-primary-teal" style={{ width: `${(xpInLevel / xpToNext) * 100}%` }} />
               </div>
-              <p className="text-[11px] mt-0.5" style={{ color: '#8B8BA7' }}>{xpInLevel}/{xpToNext} XP to Level {level + 1}</p>
+              <p className="text-[11px] mt-0.5" style={{ color: '#8B8BA7' }}>{t('progress.xpToNext', { current: xpInLevel, next: xpToNext, level: level + 1 })}</p>
             </div>
           </div>
         </motion.div>
@@ -129,9 +131,9 @@ export default function ProgressPage() {
         {/* Weekly Bars */}
         <motion.div initial={shouldAnimate ? { opacity: 0, y: 12 } : false} animate={shouldAnimate ? { opacity: 1, y: 0 } : false} transition={shouldAnimate ? { delay: 0.05 } : undefined} className="rounded-2xl p-3" style={{ backgroundColor: '#1E2136' }}>
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] uppercase tracking-widest" style={{ color: '#8B8BA7' }}>This week</span>
+            <span className="text-[11px] uppercase tracking-widest" style={{ color: '#8B8BA7' }}>{t('progress.thisWeek')}</span>
             <span className="text-[13px]" style={{ color: '#E8E8F0' }}>
-              {loading ? 'Loading…' : 'Great week 💪'}
+              {loading ? t('progress.loading') : t('progress.greatWeek')}
             </span>
           </div>
           <div className="flex items-end justify-between h-20 gap-1.5">
@@ -149,16 +151,16 @@ export default function ProgressPage() {
             ))}
           </div>
           <p className="text-[11px] mt-1.5 text-center" style={{ color: '#8B8BA7' }}>
-            {weeklyStats ? `${weeklyStats.totalFocusMinutes}m focus this week` : 'No data yet'}
+            {weeklyStats ? t('progress.focusThisWeek', { min: weeklyStats.totalFocusMinutes }) : t('progress.noDataYet')}
           </p>
         </motion.div>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-3 gap-2">
           {[
-            { value: String(unlockedCount), emoji: '🏆', label: 'Achievements' },
-            { value: String(completedTotal), emoji: '✅', label: 'Tasks Done' },
-            { value: String(burnoutScore), emoji: '🧠', label: 'Burnout score' },
+            { value: String(unlockedCount), emoji: '🏆', label: t('progress.achievements') },
+            { value: String(completedTotal), emoji: '✅', label: t('progress.tasksDone') },
+            { value: String(burnoutScore), emoji: '🧠', label: t('progress.burnoutScoreLabel') },
           ].map((s, i) => (
             <motion.div key={i} initial={shouldAnimate ? { opacity: 0, y: 12 } : false} animate={shouldAnimate ? { opacity: 1, y: 0 } : false} transition={shouldAnimate ? { delay: 0.1 + i * 0.03 } : undefined} className="rounded-2xl p-2.5 flex flex-col items-center" style={{ backgroundColor: '#1E2136' }}>
               <span className="text-[18px] font-bold" style={{ color: '#E8E8F0' }}>{s.value}</span>
@@ -177,7 +179,7 @@ export default function ProgressPage() {
           style={{ backgroundColor: '#1E2136' }}
         >
           <div className="flex items-center justify-between mb-2">
-            <p className="text-[11px] uppercase tracking-widest" style={{ color: '#8B8BA7' }}>Focus health score</p>
+            <p className="text-[11px] uppercase tracking-widest" style={{ color: '#8B8BA7' }}>{t('progress.focusHealthScore')}</p>
             <span
               className="text-[12px] font-semibold px-2 py-0.5 rounded-full"
               style={{
@@ -185,7 +187,7 @@ export default function ProgressPage() {
                 color: focusScore >= 70 ? '#4ECDC4' : focusScore >= 40 ? '#7B72FF' : '#F59E0B',
               }}
             >
-              {focusScore >= 70 ? '🌿 Thriving' : focusScore >= 40 ? '🌱 Growing' : '🌾 Planting'}
+              {focusScore >= 70 ? t('progress.thriving') : focusScore >= 40 ? t('progress.growing') : t('progress.planting')}
             </span>
           </div>
           <div className="h-2 rounded-full overflow-hidden" style={{ backgroundColor: 'rgba(255,255,255,0.06)' }}>
@@ -202,14 +204,14 @@ export default function ProgressPage() {
             />
           </div>
           <div className="flex justify-between mt-1.5">
-            <p className="text-[11px]" style={{ color: '#8B8BA7' }}>Sessions · Consistency · Tasks</p>
+            <p className="text-[11px]" style={{ color: '#8B8BA7' }}>{t('progress.scoreComponents')}</p>
             <p className="text-[11px] font-medium" style={{ color: '#E8E8F0' }}>{focusScore}/100</p>
           </div>
         </motion.div>
 
         {/* Energy Trends */}
         <motion.div initial={shouldAnimate ? { opacity: 0, y: 12 } : false} animate={shouldAnimate ? { opacity: 1, y: 0 } : false} transition={shouldAnimate ? { delay: 0.15 } : undefined} className="rounded-2xl p-3" style={{ backgroundColor: '#1E2136' }}>
-          <p className="text-[11px] uppercase tracking-widest mb-1.5" style={{ color: '#4ECDC4' }}>Energy after sessions</p>
+          <p className="text-[11px] uppercase tracking-widest mb-1.5" style={{ color: '#4ECDC4' }}>{t('progress.energyAfterSessions')}</p>
           {energyTrendEmojis.length > 0 ? (
             <>
               <div className="flex gap-1 text-[22px]">
@@ -217,12 +219,12 @@ export default function ProgressPage() {
                   <span key={i}>{emoji}</span>
                 ))}
               </div>
-              <p className="text-[11px] mt-1" style={{ color: '#8B8BA7' }}>Last {energyTrendEmojis.length} sessions (most recent first)</p>
+              <p className="text-[11px] mt-1" style={{ color: '#8B8BA7' }}>{t('progress.lastSessions', { count: energyTrendEmojis.length })}</p>
             </>
           ) : (
             <>
-              <p className="text-[13px]" style={{ color: '#4ECDC4' }}>No post-session energy data yet</p>
-              <p className="text-[11px] mt-0.5" style={{ color: '#8B8BA7' }}>Complete a focus session to track your trend</p>
+              <p className="text-[13px]" style={{ color: '#4ECDC4' }}>{t('progress.noEnergyData')}</p>
+              <p className="text-[11px] mt-0.5" style={{ color: '#8B8BA7' }}>{t('progress.completeToTrack')}</p>
             </>
           )}
         </motion.div>
@@ -236,12 +238,12 @@ export default function ProgressPage() {
             className="rounded-2xl p-3"
             style={{ backgroundColor: '#1E2136', border: '1px solid rgba(78,205,196,0.12)' }}
           >
-            <p className="text-[11px] uppercase tracking-widest mb-2" style={{ color: '#4ECDC4' }}>⚡ Peak focus window</p>
+            <p className="text-[11px] uppercase tracking-widest mb-2" style={{ color: '#4ECDC4' }}>{t('progress.peakFocusWindow')}</p>
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-[20px] font-bold" style={{ color: '#4ECDC4' }}>{weeklyStats.peakFocusTime}</p>
                 <p className="text-[11px] mt-0.5" style={{ color: '#8B8BA7' }}>
-                  Your most productive time this week
+                  {t('progress.mostProductiveTime')}
                 </p>
               </div>
               {weeklyStats.consistencyScore > 0 && (
@@ -249,7 +251,7 @@ export default function ProgressPage() {
                   <p className="text-[18px] font-bold" style={{ color: '#7B72FF' }}>
                     {Math.round(weeklyStats.consistencyScore * 7)}/7
                   </p>
-                  <p className="text-[10px]" style={{ color: '#8B8BA7' }}>days active</p>
+                  <p className="text-[10px]" style={{ color: '#8B8BA7' }}>{t('progress.daysActive')}</p>
                 </div>
               )}
             </div>
@@ -271,16 +273,16 @@ export default function ProgressPage() {
             }}
           >
             <p className="text-[11px] uppercase tracking-widest mb-2" style={{ color: '#7B72FF' }}>
-              Your focus style
+              {t('progress.yourFocusStyle')}
             </p>
             <div className="flex items-center gap-3">
-              <span className="text-[28px]">{PSYCHOTYPE_META[psychotype].emoji}</span>
+              <span className="text-[28px]">{PSYCHOTYPE_EMOJI[psychotype]}</span>
               <div className="flex-1 min-w-0">
                 <p className="text-[15px] font-semibold" style={{ color: '#E8E8F0' }}>
-                  {PSYCHOTYPE_META[psychotype].label}
+                  {t(`progress.${psychotype}Label`)}
                 </p>
                 <p className="text-[11px] mt-0.5" style={{ color: '#8B8BA7' }}>
-                  {PSYCHOTYPE_META[psychotype].desc}
+                  {t(`progress.${psychotype}Desc`)}
                 </p>
               </div>
             </div>
@@ -293,10 +295,10 @@ export default function ProgressPage() {
               >
                 <div className="min-w-0 flex-1">
                   <p className="text-[12px] font-medium" style={{ color: '#F59E0B' }}>
-                    Your patterns suggest {PSYCHOTYPE_META[derivedPsychotype].label} {PSYCHOTYPE_META[derivedPsychotype].emoji}
+                    {t('progress.patternsSuggest', { type: t(`progress.${derivedPsychotype}Label`), emoji: PSYCHOTYPE_EMOJI[derivedPsychotype] })}
                   </p>
                   <p className="text-[10px] mt-0.5" style={{ color: '#8B8BA7' }}>
-                    Based on your last {sessions.length} sessions
+                    {t('progress.basedOnSessions', { count: sessions.length })}
                   </p>
                 </div>
                 <button
@@ -308,7 +310,7 @@ export default function ProgressPage() {
                     color: '#F59E0B',
                   }}
                 >
-                  Update
+                  {t('progress.update')}
                 </button>
               </div>
             )}
@@ -328,10 +330,10 @@ export default function ProgressPage() {
           >
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-[14px] font-semibold" style={{ color: '#E8E8F0' }}>
-                🌿 Mochi's Garden
+                {t('mochi.garden')}
               </h3>
               <span className="text-[11px]" style={{ color: '#8B8BA7' }}>
-                {mochiDiscoveries.length}/{DISCOVERIES.length} found
+                {t('mochi.found', { count: mochiDiscoveries.length, total: DISCOVERIES.length })}
               </span>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -374,7 +376,7 @@ export default function ProgressPage() {
             }}
           >
             <span>🔗</span>
-            Share this week
+            {t('progress.shareThisWeek')}
           </motion.button>
         )}
 
@@ -386,14 +388,14 @@ export default function ProgressPage() {
         >
           <div className="flex items-center gap-2">
             <span className="text-base">📋</span>
-            <span className="text-[14px] font-medium" style={{ color: '#E8E8F0' }}>Session Log</span>
+            <span className="text-[14px] font-medium" style={{ color: '#E8E8F0' }}>{t('progress.sessionLog')}</span>
           </div>
           <span className="text-[12px]" style={{ color: '#8B8BA7' }}>→</span>
         </Link>
 
         {/* AI Insights */}
         <div>
-          <p className="text-[11px] uppercase tracking-widest mb-2" style={{ color: '#F59E0B' }}>✨ Weekly insight</p>
+          <p className="text-[11px] uppercase tracking-widest mb-2" style={{ color: '#F59E0B' }}>{t('progress.weeklyInsight')}</p>
           <div className="space-y-1.5">
             {weeklyInsight.map((insight, i) => (
               <div key={i} className="rounded-xl p-2.5" style={{ backgroundColor: '#1E2136' }}>

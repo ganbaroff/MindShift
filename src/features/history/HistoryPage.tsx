@@ -10,6 +10,7 @@
 
 import { useMemo } from 'react'
 import { motion } from 'motion/react'
+import { useTranslation } from 'react-i18next'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { useStore } from '@/store'
 import { ENERGY_EMOJI } from '@/shared/lib/constants'
@@ -22,19 +23,19 @@ const PHASE_COLORS: Record<string, string> = {
   recovery: '#9B8EFF',
 }
 
-const PHASE_LABELS: Record<string, string> = {
-  flow:     'Flow 🌊',
-  release:  'Release 🌱',
-  struggle: 'Struggle 💪',
-  recovery: 'Recovery 🌿',
+const PHASE_LABEL_KEYS: Record<string, string> = {
+  flow:     'history.phaseFlow',
+  release:  'history.phaseRelease',
+  struggle: 'history.phaseStruggle',
+  recovery: 'history.phaseRecovery',
 }
 
-function formatDate(iso: string): string {
+function formatDate(iso: string, todayLabel: string, yesterdayLabel: string): string {
   const d = new Date(iso)
   const today = new Date()
   const diff = Math.floor((today.getTime() - d.getTime()) / 86400000)
-  if (diff === 0) return 'Today'
-  if (diff === 1) return 'Yesterday'
+  if (diff === 0) return todayLabel
+  if (diff === 1) return yesterdayLabel
   return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })
 }
 
@@ -49,6 +50,7 @@ function formatDuration(ms: number | null): string {
 
 export default function HistoryPage() {
   const { shouldAnimate } = useMotion()
+  const { t } = useTranslation()
   const { userId } = useStore()
   const { sessions, loading } = useSessionHistory()
 
@@ -75,8 +77,8 @@ export default function HistoryPage() {
   return (
     <div className="min-h-screen px-5 pb-36 pt-10" style={{ backgroundColor: '#0F1120' }}>
       <motion.div initial={shouldAnimate ? { opacity: 0, y: -8 } : false} animate={shouldAnimate ? { opacity: 1, y: 0 } : false}>
-        <h1 className="text-[24px] font-bold" style={{ color: '#E8E8F0' }}>Session Log 📋</h1>
-        <p className="text-[13px] mt-0.5" style={{ color: '#8B8BA7' }}>Last 30 days of focus</p>
+        <h1 className="text-[24px] font-bold" style={{ color: '#E8E8F0' }}>{t('history.title')}</h1>
+        <p className="text-[13px] mt-0.5" style={{ color: '#8B8BA7' }}>{t('history.subtitle')}</p>
       </motion.div>
 
       {isGuest ? (
@@ -88,9 +90,9 @@ export default function HistoryPage() {
           style={{ backgroundColor: '#1E2136', border: '1px solid rgba(123,114,255,0.12)' }}
         >
           <div className="text-4xl mb-3">📊</div>
-          <p className="text-[15px] font-semibold mb-1" style={{ color: '#E8E8F0' }}>Sign in to see your history</p>
+          <p className="text-[15px] font-semibold mb-1" style={{ color: '#E8E8F0' }}>{t('history.signInTitle')}</p>
           <p className="text-[13px] leading-relaxed" style={{ color: '#8B8BA7' }}>
-            Your sessions are saved to the cloud when you're logged in.
+            {t('history.signInDesc')}
           </p>
         </motion.div>
       ) : loading ? (
@@ -107,8 +109,8 @@ export default function HistoryPage() {
           style={{ backgroundColor: '#1E2136' }}
         >
           <div className="text-4xl mb-3">🌱</div>
-          <p className="text-[15px] font-semibold mb-1" style={{ color: '#E8E8F0' }}>No sessions yet</p>
-          <p className="text-[13px]" style={{ color: '#8B8BA7' }}>Start your first focus session to see it here.</p>
+          <p className="text-[15px] font-semibold mb-1" style={{ color: '#E8E8F0' }}>{t('history.noSessionsTitle')}</p>
+          <p className="text-[13px]" style={{ color: '#8B8BA7' }}>{t('history.noSessionsDesc')}</p>
         </motion.div>
       ) : (
         <>
@@ -120,9 +122,9 @@ export default function HistoryPage() {
             className="flex gap-2 mt-5 mb-6"
           >
             {[
-              { value: String(sessions.length), label: 'sessions', color: '#7B72FF' },
-              { value: `${totalMin}m`,          label: 'focused',  color: '#4ECDC4' },
-              { value: String(flowSessions),    label: 'flow',     color: '#F59E0B' },
+              { value: String(sessions.length), label: t('history.sessions'), color: '#7B72FF' },
+              { value: `${totalMin}m`,          label: t('history.focused'),  color: '#4ECDC4' },
+              { value: String(flowSessions),    label: t('history.flow'),     color: '#F59E0B' },
             ].map((s, i) => (
               <div key={i} className="flex-1 rounded-2xl p-2.5 text-center" style={{ backgroundColor: '#1E2136' }}>
                 <p className="text-[18px] font-bold" style={{ color: s.color }}>{s.value}</p>
@@ -141,7 +143,7 @@ export default function HistoryPage() {
                 transition={shouldAnimate ? { delay: 0.05 + gi * 0.03 } : undefined}
               >
                 <p className="text-[11px] uppercase tracking-widest mb-2 font-semibold" style={{ color: '#8B8BA7' }}>
-                  {formatDate(day)}
+                  {formatDate(day, t('history.today'), t('history.yesterday'))}
                 </p>
                 <div className="space-y-2">
                   {daySessions.map((s, si) => {
@@ -176,7 +178,7 @@ export default function HistoryPage() {
                         {/* Phase */}
                         <div className="flex-1 min-w-0">
                           <p className="text-[12px] font-medium" style={{ color: phaseColor }}>
-                            {PHASE_LABELS[phase] ?? phase}
+                            {PHASE_LABEL_KEYS[phase] ? t(PHASE_LABEL_KEYS[phase]) : phase}
                           </p>
                           {s.audio_preset && (
                             <p className="text-[10px] mt-0.5 capitalize" style={{ color: '#5A5B72' }}>
