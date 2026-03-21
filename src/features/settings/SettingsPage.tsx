@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -9,7 +9,7 @@ import { useStore } from '@/store';
 import type { EnergyLevel, AudioPreset } from '@/types';
 import type { UITone } from '@/shared/lib/uiTone';
 import { TONE_LABELS, TONE_DESCRIPTIONS } from '@/shared/lib/uiTone';
-import { getCrisisResources } from '@/shared/lib/crisisDetection';
+import { getCrisisResourcesByCountry, countryFromLocale } from '@/shared/lib/crisisHotlines';
 import { supabase } from '@/shared/lib/supabase';
 import { useAudioEngine } from '@/shared/hooks/useAudioEngine';
 import { PageTransition } from '@/shared/ui/PageTransition';
@@ -67,6 +67,9 @@ export default function SettingsPage() {
     telegramLinkCode, telegramLinked, generateTelegramCode, setTelegramLinked,
     calendarSyncEnabled, setCalendarSyncEnabled,
     calendarFocusBlocks, setCalendarFocusBlocks,
+    userLocale, setUserLocale,
+    userTheme, setUserTheme,
+    userCountry,
   } = useStore();
 
   const { play, stop, isPlaying, setVolume: setEngineVolume } = useAudioEngine();
@@ -184,8 +187,8 @@ export default function SettingsPage() {
     setTimeout(() => setCodeCopied(false), 2000)
   }, [telegramLinkCode])
 
-  const { t, locale } = useI18n();
-  const crisisResources = useMemo(() => getCrisisResources(locale), [locale]);
+  const { t } = useI18n();
+  // crisisResources now handled inline via getCrisisResourcesByCountry
 
   const planLabel =
     subscriptionTier === 'pro' ? 'MindShift Pro' :
@@ -205,6 +208,57 @@ export default function SettingsPage() {
         <div className="rounded-2xl p-3" style={{ backgroundColor: '#1E2136' }}>
           <p className="text-[15px]" style={{ color: '#E8E8F0' }}>🌱 {planLabel}</p>
         </div>
+
+        {/* Language */}
+        <Section label="Language">
+          <div className="flex flex-wrap gap-2">
+            {[
+              { code: null, label: 'Auto', desc: 'Browser default' },
+              { code: 'en', label: 'English', desc: '' },
+              { code: 'ru', label: 'Русский', desc: '' },
+            ].map(({ code, label }) => (
+              <button
+                key={code ?? 'auto'}
+                onClick={() => { setUserLocale(code); toast(`Language: ${label}`) }}
+                className="px-3 py-1.5 rounded-xl text-[13px] font-medium focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
+                style={{
+                  background: userLocale === code ? 'rgba(123,114,255,0.15)' : '#252840',
+                  color: userLocale === code ? '#7B72FF' : '#E8E8F0',
+                  border: userLocale === code ? '1px solid rgba(123,114,255,0.3)' : '1px solid transparent',
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </Section>
+
+        {/* Theme */}
+        <Section label="Theme">
+          <div className="flex gap-2">
+            {[
+              { key: 'dark' as const, label: '🌙 Dark' },
+              { key: 'light' as const, label: '☀️ Light' },
+              { key: 'system' as const, label: '⚙️ System' },
+            ].map(({ key, label }) => (
+              <button
+                key={key}
+                onClick={() => { setUserTheme(key); toast(`Theme: ${label}`) }}
+                className="flex-1 px-3 py-2 rounded-xl text-[13px] font-medium focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
+                style={{
+                  background: userTheme === key ? 'rgba(123,114,255,0.15)' : '#252840',
+                  color: userTheme === key ? '#7B72FF' : '#E8E8F0',
+                  border: userTheme === key ? '1px solid rgba(123,114,255,0.3)' : '1px solid transparent',
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <p className="text-[11px] mt-1.5" style={{ color: '#8B8BA7' }}>
+            Light theme coming soon — dark mode is best for ADHD focus
+          </p>
+        </Section>
 
         {/* App Mode */}
         <Section label="App Mode">
@@ -642,25 +696,33 @@ export default function SettingsPage() {
           </button>
         </Section>
 
-        {/* Mental Health Resources — always visible */}
+        {/* Mental Health Resources — localized by country */}
         <Section label="Mental Health">
           <div className="space-y-2">
             <p className="text-[13px] leading-relaxed" style={{ color: '#E8E8F0' }}>
               {t('crisis.settings.title')}
             </p>
             <div
-              className="rounded-xl p-3 space-y-1.5"
+              className="rounded-xl p-3 space-y-2"
               style={{
                 backgroundColor: 'rgba(78,205,196,0.06)',
                 border: '1px solid rgba(78,205,196,0.15)',
               }}
             >
-              <p className="text-[13px] font-medium" style={{ color: '#4ECDC4' }}>
-                {crisisResources.primary}
-              </p>
-              <p className="text-[12px]" style={{ color: '#8B8BA7' }}>
-                {crisisResources.international}
-              </p>
+              {getCrisisResourcesByCountry(userCountry ?? countryFromLocale(navigator.language)).map((r, i) => (
+                <div key={i}>
+                  <p className="text-[13px] font-medium" style={{ color: '#4ECDC4' }}>
+                    {r.name}
+                  </p>
+                  <p className="text-[12px]" style={{ color: '#8B8BA7' }}>
+                    {r.type === 'web' ? (
+                      <a href={`https://${r.number}`} target="_blank" rel="noopener noreferrer" style={{ color: '#7B72FF' }}>
+                        {r.number}
+                      </a>
+                    ) : r.number}
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
         </Section>
