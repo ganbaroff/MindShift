@@ -1,22 +1,24 @@
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Sun, Timer, ListTodo, CalendarDays, Settings } from 'lucide-react'
 import { motion } from 'motion/react'
+import { useTranslation } from 'react-i18next'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { usePalette } from '@/shared/hooks/usePalette'
 import { cn } from '@/shared/lib/cn'
 
 const NAV_ITEMS = [
-  { path: '/today',     icon: Sun,          label: 'Today'    },
-  { path: '/tasks',     icon: ListTodo,     label: 'Tasks'    },
-  { path: '/focus',     icon: Timer,        label: 'Focus'    },
-  { path: '/calendar',  icon: CalendarDays, label: 'Upcoming' },
-  { path: '/settings',  icon: Settings,     label: 'Settings' },
+  { path: '/today',     icon: Sun,          labelKey: 'nav.today'    },
+  { path: '/tasks',     icon: ListTodo,     labelKey: 'nav.tasks'    },
+  { path: '/focus',     icon: Timer,        labelKey: 'nav.focus'    },
+  { path: '/calendar',  icon: CalendarDays, labelKey: 'nav.upcoming' },
+  { path: '/settings',  icon: Settings,     labelKey: 'nav.settings' },
 ] as const
 
 export function BottomNav() {
   const location = useLocation()
   const navigate = useNavigate()
-  const { shouldAnimate, t } = useMotion()
+  const { shouldAnimate, t: transition } = useMotion()
+  const { t } = useTranslation()
   const palette = usePalette()
 
   return (
@@ -31,8 +33,9 @@ export function BottomNav() {
       }}
     >
       <div className="flex items-center justify-around px-2 py-2">
-        {NAV_ITEMS.map(({ path, icon: Icon, label }) => {
+        {NAV_ITEMS.map(({ path, icon: Icon, labelKey }) => {
           const active = location.pathname === path
+          const label = t(labelKey)
           return (
             <button
               key={path}
@@ -57,7 +60,7 @@ export function BottomNav() {
                       ? `0 0 12px ${palette.primary}26`   // 15% alpha glow
                       : 'none',
                   }}
-                  transition={shouldAnimate ? t() : { duration: 0 }}
+                  transition={shouldAnimate ? transition() : { duration: 0 }}
                 />
               )}
               <Icon size={20} strokeWidth={active ? 2.5 : 1.8} />
