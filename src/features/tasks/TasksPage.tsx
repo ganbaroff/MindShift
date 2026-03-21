@@ -2,6 +2,7 @@ import { useState, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ChevronDown, Search, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useMotion } from '@/shared/hooks/useMotion';
 import { todayISO } from '@/shared/lib/dateUtils';
 import {
@@ -33,6 +34,7 @@ import { PageTransition } from '@/shared/ui/PageTransition';
 export default function TasksPage() {
   const navigate = useNavigate();
   const { shouldAnimate } = useMotion();
+  const { t } = useTranslation();
   const todayIso = todayISO();
   const [showAddTask, setShowAddTask] = useState(false);
   const [showSomeday, setShowSomeday] = useState(false);
@@ -92,8 +94,8 @@ export default function TasksPage() {
     <PageTransition>
     <div className="min-h-screen px-5 pb-36 pt-10" style={{ backgroundColor: '#0F1120' }}>
       <motion.div initial={shouldAnimate ? { opacity: 0, y: -8 } : false} animate={shouldAnimate ? { opacity: 1, y: 0 } : false}>
-        <h1 className="text-[24px] font-bold" style={{ color: '#E8E8F0' }}>Your Tasks</h1>
-        <p className="text-[13px] mt-0.5" style={{ color: '#8B8BA7' }}>{nowTasks.length + nextTasks.length} tasks in play</p>
+        <h1 className="text-[24px] font-bold" style={{ color: '#E8E8F0' }}>{t('tasks.title')}</h1>
+        <p className="text-[13px] mt-0.5" style={{ color: '#8B8BA7' }}>{t('tasks.tasksInPlay', { count: nowTasks.length + nextTasks.length })}</p>
       </motion.div>
 
       {/* Search bar */}
@@ -107,7 +109,7 @@ export default function TasksPage() {
         <input
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
-          placeholder="Search tasks…"
+          placeholder={t('tasks.search')}
           className="flex-1 bg-transparent text-[13px] outline-none"
           style={{ color: '#E8E8F0' }}
         />
@@ -137,13 +139,13 @@ export default function TasksPage() {
               <span className="text-base">🗓️</span>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium" style={{ color: '#F59E0B' }}>
-                  {pastDateTasks.length} task{pastDateTasks.length !== 1 ? 's' : ''} past their due date
+                  {pastDateTasks.length === 1 ? t('tasks.pastDue', { count: pastDateTasks.length }) : t('tasks.pastDuePlural', { count: pastDateTasks.length })}
                 </p>
                 <p className="text-xs mt-0.5" style={{ color: '#8B8BA7' }}>
-                  No pressure — tap to set new dates when you're ready
+                  {t('tasks.noPressure')}
                 </p>
               </div>
-              <span className="text-xs" style={{ color: '#F59E0B' }}>Reschedule →</span>
+              <span className="text-xs" style={{ color: '#F59E0B' }}>{t('tasks.reschedule')}</span>
             </motion.button>
           )}
         </AnimatePresence>
@@ -151,16 +153,16 @@ export default function TasksPage() {
         {/* NOW */}
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="text-[11px] uppercase tracking-widest font-semibold" style={{ color: '#7B72FF' }}>NOW</span>
+            <span className="text-[11px] uppercase tracking-widest font-semibold" style={{ color: '#7B72FF' }}>{t('tasks.now')}</span>
             <span className="text-[11px]" style={{ color: '#8B8BA7' }}>{nowTasks.length}/{nowMax}</span>
-            {nowTasks.length > 1 && <span className="text-[10px]" style={{ color: '#3A3B52' }}>hold to reorder</span>}
+            {nowTasks.length > 1 && <span className="text-[10px]" style={{ color: '#3A3B52' }}>{t('tasks.holdToReorder')}</span>}
           </div>
           {nowTasks.length === 0 ? (
             <EmptyState
               emoji="🎯"
-              title="Ready when you are"
-              subtitle="Add a task to start focusing"
-              action={{ label: 'Add task', onClick: () => setShowAddTask(true) }}
+              title={t('tasks.readyWhenYouAre')}
+              subtitle={t('tasks.addToStart')}
+              action={{ label: t('tasks.addTask'), onClick: () => setShowAddTask(true) }}
             />
           ) : (
             <DndContext
@@ -187,24 +189,24 @@ export default function TasksPage() {
           style={{ backgroundColor: 'rgba(78,205,196,0.08)', borderColor: 'rgba(78,205,196,0.15)' }}
         >
           <p className="text-[13px]" style={{ color: '#4ECDC4' }}>
-            🌱 Low energy day? Start with an easy one — momentum builds from small wins.
+            🌱 {t('tasks.energyHint')}
           </p>
         </motion.div>
 
         {/* NEXT */}
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="text-[11px] uppercase tracking-widest font-semibold" style={{ color: '#8B8BA7' }}>NEXT</span>
+            <span className="text-[11px] uppercase tracking-widest font-semibold" style={{ color: '#8B8BA7' }}>{t('tasks.next')}</span>
             <span className="text-[11px]" style={{ color: '#8B8BA7' }}>{nextTasks.length}/6</span>
             {/* Two-Thirds guardrail — B-9: gentle nudge when queue is getting full */}
             {nextTasks.length >= 4 && (
               <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: 'rgba(245,158,11,0.10)', color: '#F59E0B' }}>
-                filling up
+                {t('tasks.fillingUp')}
               </span>
             )}
           </div>
           {nextTasks.length === 0 ? (
-            <p className="text-[13px] py-2" style={{ color: '#8B8BA7' }}>Queue tasks here — they'll be ready when NOW has room.</p>
+            <p className="text-[13px] py-2" style={{ color: '#8B8BA7' }}>{t('tasks.queueHere')}</p>
           ) : (
             <DndContext
               sensors={sensors}
@@ -223,7 +225,7 @@ export default function TasksPage() {
         </div>
 
         {/* Someday */}
-        <CollapsibleSection label="SOMEDAY" count={somedayTasks.length} open={showSomeday} onToggle={() => setShowSomeday(!showSomeday)} shouldAnimate={shouldAnimate}>
+        <CollapsibleSection label={t('tasks.someday')} count={somedayTasks.length} open={showSomeday} onToggle={() => setShowSomeday(!showSomeday)} shouldAnimate={shouldAnimate}>
           <div className="space-y-2 mt-2">
             {somedayTasks.map((t, i) => (
               <TaskCard key={t.id} task={t} index={i} onDone={(id) => completeTask(id)} onPark={(id) => snoozeTask(id)} onRemove={(id) => removeTask(id)} />
@@ -232,7 +234,7 @@ export default function TasksPage() {
         </CollapsibleSection>
 
         {/* Done */}
-        <CollapsibleSection label="✓ Done recently" count={doneTasks.length} open={showDone} onToggle={() => setShowDone(!showDone)} labelColor="#4ECDC4" shouldAnimate={shouldAnimate}>
+        <CollapsibleSection label={`✓ ${t('tasks.doneRecently')}`} count={doneTasks.length} open={showDone} onToggle={() => setShowDone(!showDone)} labelColor="#4ECDC4" shouldAnimate={shouldAnimate}>
           <div className="space-y-1 mt-2">
             {doneTasks.map(t => {
               const diffConfig = DIFFICULTY_MAP[t.difficulty ?? 1];
@@ -272,11 +274,12 @@ function SortableTaskCard({ task, index, onDone, onPark, onRemove, onMove, curre
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: task.id })
   const [showMoveOptions, setShowMoveOptions] = useState(false)
+  const { t } = useTranslation()
 
   const poolOptions = [
-    { pool: 'now' as const,     label: 'NOW',     emoji: '🎯' },
-    { pool: 'next' as const,    label: 'NEXT',    emoji: '📋' },
-    { pool: 'someday' as const, label: 'SOMEDAY', emoji: '💭' },
+    { pool: 'now' as const,     label: t('tasks.now'),     emoji: '🎯' },
+    { pool: 'next' as const,    label: t('tasks.next'),    emoji: '📋' },
+    { pool: 'someday' as const, label: t('tasks.someday'), emoji: '💭' },
   ].filter(p => p.pool !== currentPool)
 
   return (
@@ -326,7 +329,7 @@ function SortableTaskCard({ task, index, onDone, onPark, onRemove, onMove, curre
               className="text-[10px] px-2 py-0.5 focus-visible:ring-1 focus-visible:ring-[#7B72FF] rounded"
               style={{ color: '#3A3B52' }}
             >
-              Move →
+              {t('tasks.move')}
             </button>
           )}
         </AnimatePresence>

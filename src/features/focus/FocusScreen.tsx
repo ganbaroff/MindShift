@@ -16,6 +16,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
+import { useTranslation } from 'react-i18next'
 import { ArcTimer } from './ArcTimer'
 import { MochiSessionCompanion } from './MochiSessionCompanion'
 import { SessionControls } from './SessionControls'
@@ -57,6 +58,7 @@ function useAmbientOrbit(active: boolean) {
 
 export default function FocusScreen() {
   const session = useFocusSession()
+  const { t } = useTranslation()
   const { emotionalReactivity } = useStore()
   const orbitCount = useAmbientOrbit(session.screen === 'session')
   const room = useFocusRoom()
@@ -117,7 +119,7 @@ export default function FocusScreen() {
     handleSessionEnd, handleBypassRecovery, handleBypassHardStop,
     handlePostEnergy, handleAutopsyPick,
     isPlaying, audioVolume, handleVolumeChange,
-    shouldAnimate, t,
+    shouldAnimate, t: motionT,
     TIMER_PRESETS,
     focusAnchor,
   } = session
@@ -158,10 +160,10 @@ export default function FocusScreen() {
       >
         <div className="text-4xl mb-4">⏸️</div>
         <h2 className="text-xl font-bold mb-2" style={{ color: 'var(--color-text)' }}>
-          Leave focus session?
+          {t('focus.leaveSession')}
         </h2>
         <p className="text-sm mb-8 max-w-xs leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-          You've been focused for {elapsedMin}m. Your progress will be saved.
+          {t('focus.focusedFor', { min: elapsedMin })}
         </p>
         <div className="flex flex-col gap-3 w-full max-w-xs">
           <button
@@ -174,7 +176,7 @@ export default function FocusScreen() {
               color: 'var(--color-primary)',
             }}
           >
-            Keep going 🌿
+            {t('focus.keepGoing')}
           </button>
           <button
             onClick={handleConfirmStop}
@@ -186,7 +188,7 @@ export default function FocusScreen() {
               color: 'var(--color-muted)',
             }}
           >
-            End session
+            {t('focus.endSession')}
           </button>
         </div>
       </div>
@@ -203,21 +205,21 @@ export default function FocusScreen() {
         <motion.div
           initial={shouldAnimate ? { opacity: 0, scale: 0.95 } : {}}
           animate={{ opacity: 1, scale: 1 }}
-          transition={t()}
+          transition={motionT()}
           className="flex flex-col items-center w-full max-w-xs"
         >
           <div className="text-4xl mb-4">📌</div>
           <h2 className="text-xl font-bold mb-2" style={{ color: 'var(--color-text)' }}>
-            Park your progress
+            {t('focus.parkProgress')}
           </h2>
           <p className="text-sm mb-6 leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-            What were you working on? We'll remind you next time.
+            {t('focus.parkProgressDesc')}
           </p>
           <input
             value={bookmarkText}
             onChange={e => setBookmarkText(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter' && bookmarkText.trim()) handleBookmarkSave() }}
-            placeholder="e.g. Finishing the header layout..."
+            placeholder={t('focus.parkPlaceholder')}
             autoFocus
             className="w-full px-4 py-3 rounded-xl text-sm outline-none mb-4"
             style={{ background: 'var(--color-card)', border: '1px solid var(--color-border-subtle)', color: 'var(--color-text)' }}
@@ -233,7 +235,7 @@ export default function FocusScreen() {
                 color: bookmarkText.trim() ? 'var(--color-primary)' : 'var(--color-muted)',
               }}
             >
-              Save & Exit 📌
+              {t('focus.saveAndExit')}
             </button>
             <button
               onClick={handleBookmarkSkip}
@@ -244,7 +246,7 @@ export default function FocusScreen() {
                 color: 'var(--color-muted)',
               }}
             >
-              Skip
+              {t('common.skip')}
             </button>
           </div>
         </motion.div>
@@ -262,7 +264,7 @@ export default function FocusScreen() {
         <motion.div
           initial={shouldAnimate ? { opacity: 0, y: 40 } : {}}
           animate={{ opacity: 1, y: 0 }}
-          transition={t()}
+          transition={motionT()}
           className="w-full max-w-xs flex flex-col items-center text-center"
           style={{
             background: 'var(--color-card)',
@@ -273,11 +275,10 @@ export default function FocusScreen() {
         >
           <div className="text-5xl mb-4">🧘</div>
           <h2 className="text-xl font-bold mb-2" style={{ color: 'var(--color-text)' }}>
-            Two hours of deep work
+            {t('focus.twoHours')}
           </h2>
           <p className="text-sm leading-relaxed mb-6" style={{ color: 'var(--color-muted)' }}>
-            That's a serious session. Your brain consolidates everything during rest —
-            even 10 minutes away will help you do better next time.
+            {t('focus.twoHoursDesc')}
           </p>
 
           <button
@@ -289,7 +290,7 @@ export default function FocusScreen() {
               boxShadow: '0 8px 24px rgba(123,114,255,0.28)',
             }}
           >
-            End session & rest 🌿
+            {t('focus.endAndRest')}
           </button>
 
           <button
@@ -301,7 +302,7 @@ export default function FocusScreen() {
               color: 'var(--color-muted)',
             }}
           >
-            I know — let me keep going
+            {t('focus.letMeKeepGoing')}
           </button>
         </motion.div>
       </div>
@@ -347,7 +348,7 @@ export default function FocusScreen() {
             initial={shouldAnimate ? { opacity: 0, y: -8 } : {}}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
-            transition={t()}
+            transition={motionT()}
             className="text-sm mb-6 text-center"
             style={{ color: 'var(--color-muted)' }}
           >
@@ -373,7 +374,7 @@ export default function FocusScreen() {
       {selectedTask && (
         <motion.p
           animate={shouldAnimate ? { opacity: isFlow ? 0.3 : 1 } : { opacity: isFlow ? 0.3 : 1 }}
-          transition={shouldAnimate ? t() : { duration: 0 }}
+          transition={shouldAnimate ? motionT() : { duration: 0 }}
           className="text-base font-semibold mt-6 text-center max-w-xs leading-snug"
           style={{ color: 'var(--color-text)' }}
         >
@@ -418,7 +419,7 @@ export default function FocusScreen() {
             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full"
               style={{ backgroundColor: 'rgba(78,205,196,0.08)', border: '1px solid rgba(78,205,196,0.15)' }}
             >
-              <span className="text-[11px]" style={{ color: '#4ECDC4' }}>🤝 {room.peers.length + 1} in room</span>
+              <span className="text-[11px]" style={{ color: '#4ECDC4' }}>{t('focus.inRoom', { count: room.peers.length + 1 })}</span>
               {room.peers.map(p => (
                 <div key={p.userId} className="flex items-center gap-1">
                   <span className="text-[11px]">{p.emoji}</span>
@@ -453,7 +454,7 @@ export default function FocusScreen() {
                   color: '#4ECDC4',
                 }}
               >
-                🌍 {orbitCount} {orbitCount === 1 ? 'person' : 'people'} focusing now
+                {orbitCount === 1 ? t('focus.peopleFocusing', { count: orbitCount }) : t('focus.peopleFocusingPlural', { count: orbitCount })}
               </span>
             </motion.div>
           )}

@@ -9,6 +9,7 @@ import AddTaskModal from '@/components/AddTaskModal';
 import { useStore } from '@/store';
 import type { EnergyLevel } from '@/types';
 import { getNowPoolMax, APP_MODE_CONFIG, ENERGY_EMOJI } from '@/shared/lib/constants';
+import { useTranslation } from 'react-i18next';
 import { useI18n } from '@/shared/hooks/useI18n';
 import { useUITone } from '@/shared/hooks/useUITone';
 import { BurnoutGauge } from './BurnoutGauge';
@@ -105,8 +106,8 @@ export default function HomePage() {
   // Auto-dismiss Mochi message after 5s
   useEffect(() => {
     if (!mochiMsg) return;
-    const t = setTimeout(() => setMochiMsg(null), 5000);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setMochiMsg(null), 5000);
+    return () => clearTimeout(timer);
   }, [mochiMsg]);
 
   // ── Invisible streak ─────────────────────────────────────────────────────────
@@ -142,7 +143,7 @@ export default function HomePage() {
   useEffect(() => {
     if (goalReached && goalCelebratedDate !== todayISO) {
       setGoalCelebratedDate(todayISO)
-      toast.success(`🎯 Daily goal reached! ${dailyFocusGoalMin} min focused today`, { duration: 4000 })
+      toast.success(`🎯 ${t('home.goalReachedToast', { min: dailyFocusGoalMin })}`, { duration: 4000 })
     }
   }, [goalReached, goalCelebratedDate, todayISO, dailyFocusGoalMin, setGoalCelebratedDate])
 
@@ -177,13 +178,14 @@ export default function HomePage() {
     },
   ], [completedTotal, focusMinutes, xpTotal, energyLevel, burnoutScore]);
 
-  // Time-based greeting (i18n-aware)
-  const { t } = useI18n();
+  // Time-based greeting (i18n-aware — legacy system)
+  const { t: tLegacy } = useI18n();
+  const { t } = useTranslation();
   const greeting =
-    hour < 5  ? t('home.greeting.night') :
-    hour < 12 ? t('home.greeting.morning') :
-    hour < 17 ? t('home.greeting.afternoon') :
-    hour < 21 ? t('home.greeting.evening') : t('home.greeting.night');
+    hour < 5  ? tLegacy('home.greeting.night') :
+    hour < 12 ? tLegacy('home.greeting.morning') :
+    hour < 17 ? tLegacy('home.greeting.afternoon') :
+    hour < 21 ? tLegacy('home.greeting.evening') : tLegacy('home.greeting.night');
 
   return (
     <PageTransition>
@@ -250,7 +252,7 @@ export default function HomePage() {
                     {copy.streakGoing(currentStreak)}
                   </p>
                   {longestStreak > currentStreak && (
-                    <p className="text-[11px]" style={{ color: '#8B8BA7' }}>Best: {longestStreak} days</p>
+                    <p className="text-[11px]" style={{ color: '#8B8BA7' }}>{t('home.best', { count: longestStreak })}</p>
                   )}
                 </div>
               </div>
@@ -289,7 +291,7 @@ export default function HomePage() {
                   className="mt-2 pt-2 flex items-center gap-2"
                   style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}
                 >
-                  <span className="text-[11px]" style={{ color: '#8B8BA7' }}>Start with →</span>
+                  <span className="text-[11px]" style={{ color: '#8B8BA7' }}>{t('home.startWith')}</span>
                   <span className="text-[12px] font-medium truncate" style={{ color: '#7B72FF' }}>
                     {topNowTask.title}
                   </span>
@@ -309,7 +311,7 @@ export default function HomePage() {
           >
             <div className="flex items-center justify-between mb-2">
               <span className="text-[13px] font-semibold" style={{ color: goalReached ? '#4ECDC4' : '#E8E8F0' }}>
-                {goalReached ? '🎯 Goal reached!' : '🎯 Today\'s focus'}
+                {goalReached ? `🎯 ${t('home.goalReached')}` : `🎯 ${t('home.todaysFocus')}`}
               </span>
               <span className="text-[12px]" style={{ color: '#8B8BA7' }}>
                 {todayMin} / {dailyFocusGoalMin} min
@@ -338,8 +340,8 @@ export default function HomePage() {
               style={{ backgroundColor: 'rgba(78,205,196,0.06)', borderColor: 'rgba(78,205,196,0.15)' }}
             >
               <p className="text-[13px]" style={{ color: '#4ECDC4' }}>
-                🌿 Low energy detected — showing only what matters most.
-                {burnoutScore > 60 ? ' Burnout protection mode active.' : ''}
+                🌿 {t('home.lowEnergyDetected')}
+                {burnoutScore > 60 ? t('home.burnoutProtection') : ''}
               </p>
             </motion.div>
           )}
@@ -361,8 +363,8 @@ export default function HomePage() {
             <div className="flex items-center gap-3">
               <MochiAvatar size={36} />
               <div>
-                <p className="text-[15px] font-semibold" style={{ color: '#E8E8F0' }}>What's on your mind?</p>
-                <p className="text-[12px]" style={{ color: '#8B8BA7' }}>Tap to add your first task — just one is enough</p>
+                <p className="text-[15px] font-semibold" style={{ color: '#E8E8F0' }}>{t('home.whatsOnMind')}</p>
+                <p className="text-[12px]" style={{ color: '#8B8BA7' }}>{t('home.tapToAdd')}</p>
               </div>
             </div>
           </motion.button>
@@ -370,7 +372,7 @@ export default function HomePage() {
 
         {/* Energy Check-in */}
         <motion.div initial={shouldAnimate ? { opacity: 0, y: 12 } : false} animate={shouldAnimate ? { opacity: 1, y: 0 } : false} transition={shouldAnimate ? { delay: 0.1 } : undefined}>
-          <p className="text-[15px] font-semibold mb-2" style={{ color: '#E8E8F0' }}>How's your energy right now?</p>
+          <p className="text-[15px] font-semibold mb-2" style={{ color: '#E8E8F0' }}>{t('home.howsEnergy')}</p>
           <EnergyPicker
             selected={energyLevel - 1}
             onSelect={handleEnergySelect}
@@ -384,7 +386,7 @@ export default function HomePage() {
             <span className="text-[11px]" style={{ color: '#8B8BA7' }}>{nowTasks.length}/{nowMax}</span>
             {isLowEnergy && (
               <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ backgroundColor: 'rgba(78,205,196,0.12)', color: '#4ECDC4' }}>
-                gentle mode
+                {t('home.gentleMode')}
               </span>
             )}
           </div>
@@ -401,7 +403,7 @@ export default function HomePage() {
             ))}
             {isLowEnergy && nowTasks.length > 1 && (
               <p className="text-[12px] py-1" style={{ color: '#8B8BA7' }}>
-                +{nowTasks.length - 1} more — rest first, they'll wait 🌙
+                {t('home.moreRest', { count: nowTasks.length - 1 })} 🌙
               </p>
             )}
           </div>
@@ -416,11 +418,11 @@ export default function HomePage() {
             className="rounded-2xl p-3"
             style={{ backgroundColor: '#1E2136' }}
           >
-            <p className="text-[15px] font-semibold mb-1" style={{ color: '#E8E8F0' }}>📋 Up next · {nextTasks.length} tasks queued</p>
+            <p className="text-[15px] font-semibold mb-1" style={{ color: '#E8E8F0' }}>📋 {t('home.upNext', { count: nextTasks.length })}</p>
             {nextTasks.slice(0, 2).map(t => (
               <p key={t.id} className="text-[13px] truncate" style={{ color: '#8B8BA7' }}>{t.title}</p>
             ))}
-            <button className="text-[13px] font-medium mt-1" style={{ color: '#7B72FF' }}>See all →</button>
+            <button className="text-[13px] font-medium mt-1" style={{ color: '#7B72FF' }}>{t('home.seeAll')}</button>
           </motion.div>
         )}
 
@@ -459,8 +461,8 @@ export default function HomePage() {
                 </p>
                 <p className="text-[12px]" style={{ color: '#8B8BA7' }}>
                   {burnoutScore > 60
-                    ? 'You\'ve been working hard. Take care of yourself first.'
-                    : 'Easy does it today. Small steps still count.'}
+                    ? t('home.hardWork')
+                    : t('home.easyDoesIt')}
                 </p>
               </div>
             </div>
