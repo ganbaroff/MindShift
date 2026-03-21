@@ -328,12 +328,29 @@ export function MochiChat({ open, onClose }: MochiChatProps) {
                 {isGuest ? (
                   <div className="flex flex-col items-center justify-center h-full gap-3 py-8">
                     <Mascot state="idle" size={64} label="Mochi" />
-                    <p className="text-sm text-center" style={{ color: '#8B8BA7' }}>
-                      Sign in to chat with Mochi
+                    <p className="text-sm text-center" style={{ color: '#E8E8F0' }}>
+                      Mochi wants to help
                     </p>
                     <p className="text-xs text-center max-w-[240px]" style={{ color: '#8B8BA7' }}>
-                      Mochi needs to know your patterns to give personalized advice.
+                      Sign in so Mochi can learn your patterns and give personalized tips.
                     </p>
+                    <button
+                      onClick={() => { onClose(); window.location.href = '/auth' }}
+                      className="px-4 py-2 rounded-xl text-[13px] font-medium focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
+                      style={{
+                        background: 'linear-gradient(135deg, #7B72FF, #4ECDC4)',
+                        color: '#FFFFFF',
+                      }}
+                    >
+                      Sign in
+                    </button>
+                    <button
+                      onClick={onClose}
+                      className="text-[12px] focus-visible:ring-1 focus-visible:ring-[#7B72FF] rounded px-2 py-1"
+                      style={{ color: '#8B8BA7' }}
+                    >
+                      Maybe later
+                    </button>
                   </div>
                 ) : (
                   messages.map(msg => (
