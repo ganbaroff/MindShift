@@ -8,10 +8,14 @@
 
 import { useState, useCallback, useRef, useEffect, memo } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
-import { Send, X, ChevronDown } from 'lucide-react'
+import { Send, X, ChevronDown, Mic, MicOff } from 'lucide-react'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { parseQuickInput, type ParsedTask, type TaskType } from '@/shared/lib/quickParse'
 import { todayISO } from '@/shared/lib/dateUtils'
+
+// Voice input support detection
+const voiceSupported = typeof window !== 'undefined' &&
+  ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)
 
 const TYPE_CHIPS: Record<TaskType, { emoji: string; label: string }> = {
   task:     { emoji: '✅', label: 'Task' },
@@ -60,8 +64,38 @@ function QuickCaptureInner({ onSubmit, onExpand, placeholder }: QuickCaptureProp
   const { shouldAnimate, t } = useMotion()
   const [text, setText] = useState('')
   const [parsed, setParsed] = useState<ParsedTask | null>(null)
+  const [listening, setListening] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined)
   const inputRef = useRef<HTMLInputElement>(null)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const recognitionRef = useRef<any>(null)
+
+  // Voice input handler
+  const handleVoiceTap = useCallback(() => {
+    if (!voiceSupported) return
+    if (listening && recognitionRef.current) {
+      recognitionRef.current.stop()
+      setListening(false)
+      return
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+    const recognition = new SR()
+    recognition.lang = navigator.language || 'en-US'
+    recognition.interimResults = false
+    recognition.maxAlternatives = 1
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    recognition.onresult = (e: any) => {
+      const transcript = e.results[0][0].transcript as string
+      setText(prev => prev ? `${prev} ${transcript}` : transcript)
+      setListening(false)
+    }
+    recognition.onerror = () => setListening(false)
+    recognition.onend = () => setListening(false)
+    recognitionRef.current = recognition
+    recognition.start()
+    setListening(true)
+  }, [listening])
 
   // Debounced parse
   useEffect(() => {
@@ -147,6 +181,20 @@ function QuickCaptureInner({ onSubmit, onExpand, placeholder }: QuickCaptureProp
           style={{ color: '#E8E8F0' }}
           aria-label="Quick task input"
         />
+        {/* Mic button — voice input */}
+        {voiceSupported && !showSubmit && (
+          <button
+            onClick={handleVoiceTap}
+            className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
+            style={{
+              background: listening ? 'rgba(78,205,196,0.2)' : 'transparent',
+              border: listening ? '1px solid rgba(78,205,196,0.4)' : '1px solid rgba(123,114,255,0.15)',
+            }}
+            aria-label={listening ? 'Stop listening' : 'Voice input'}
+          >
+            {listening ? <MicOff size={14} color="#4ECDC4" /> : <Mic size={14} color="#8B8BA7" />}
+          </button>
+        )}
         <AnimatePresence>
           {showSubmit && (
             <motion.button

@@ -186,8 +186,29 @@ export default function OnboardingPage() {
     }
   };
 
+  // Quick Start — skip setup, use smart defaults, get into app immediately
+  const handleQuickStart = () => {
+    // Set sensible defaults without asking
+    setAppMode('minimal')
+    setEnergyLevel(3 as EnergyLevel)
+    setTimerStyle('countdown')
+    setOnboardingCompleted()
+    navigate('/')
+  }
+
   return (
     <div className="min-h-screen px-5 flex flex-col" style={{ backgroundColor: '#0F1120' }}>
+      {/* Quick start — Duolingo-style: try before you configure */}
+      {!isRevisit && step === 0 && (
+        <button
+          onClick={handleQuickStart}
+          className="mt-safe mt-4 self-end text-[13px] px-3 py-1.5 rounded-xl focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
+          style={{ color: '#8B8BA7' }}
+        >
+          Skip setup — jump in →
+        </button>
+      )}
+
       {/* Revisit banner */}
       {isRevisit && (
         <div
