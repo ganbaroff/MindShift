@@ -11,6 +11,7 @@ import { motion, AnimatePresence } from 'motion/react'
 import { useNavigate } from 'react-router-dom'
 import { Play, Plus, ChevronRight } from 'lucide-react'
 import { useMotion } from '@/shared/hooks/useMotion'
+import { useUITone } from '@/shared/hooks/useUITone'
 import { useStore } from '@/store'
 import { todayISO, tomorrowISO } from '@/shared/lib/dateUtils'
 import { ENERGY_EMOJI } from '@/shared/lib/constants'
@@ -40,9 +41,9 @@ const GREETINGS: Record<TimeBlock, { en: string; emoji: string }> = {
 
 // ── Energy advice ─────────────────────────────────────────────────────────────
 
-function getEnergyAdvice(level: EnergyLevel, taskCount: number): string | null {
-  if (level <= 2) return 'Low energy — one easy task is plenty today'
-  if (level >= 4 && taskCount > 0) return 'Good energy. Your window for deeper work.'
+function getEnergyAdvice(level: EnergyLevel, taskCount: number, copy: { lowEnergyNudge: string; highEnergyNudge: string }): string | null {
+  if (level <= 2) return copy.lowEnergyNudge
+  if (level >= 4 && taskCount > 0) return copy.highEnergyNudge
   return null
 }
 
@@ -51,6 +52,7 @@ function getEnergyAdvice(level: EnergyLevel, taskCount: number): string | null {
 export default function TodayPage() {
   const navigate = useNavigate()
   const { shouldAnimate, t } = useMotion()
+  const { copy, density } = useUITone()
   const {
     nowPool, nextPool, somedayPool,
     energyLevel,
@@ -113,7 +115,7 @@ export default function TodayPage() {
   }, [weeklyStats])
 
   const firstTask = activeTasks[0] ?? todayTasks[0] ?? null
-  const energyAdvice = getEnergyAdvice(energyLevel, todayTasks.length)
+  const energyAdvice = getEnergyAdvice(energyLevel, todayTasks.length, copy)
 
   // ── Handlers ──────────────────────────────────────────────────────────────
 
@@ -282,7 +284,7 @@ export default function TodayPage() {
                 <h2 className="text-[13px] font-semibold px-1" style={{ color: '#8B8BA7' }}>
                   In your NOW pool
                 </h2>
-                {activeTasks.slice(0, isLowEnergy ? 1 : 3).map(task => (
+                {activeTasks.slice(0, isLowEnergy ? 1 : density === 'compact' ? 2 : 3).map(task => (
                   <TaskCard
                     key={task.id}
                     task={task}
@@ -311,16 +313,18 @@ export default function TodayPage() {
               <div className="flex gap-4">
                 <RecapStat emoji="✅" value={completedToday.length} label="done" />
                 <RecapStat emoji="⏱" value={`${todayFocusMin}m`} label="focused" />
-                <RecapStat emoji="📊" value={completedTotal} label="total" />
+                {density !== 'compact' && (
+                  <RecapStat emoji="📊" value={completedTotal} label="total" />
+                )}
               </div>
               {completedToday.length === 0 && todayFocusMin === 0 && (
                 <p className="text-[12px]" style={{ color: '#8B8BA7' }}>
-                  Quiet day — that's okay too. Rest counts.
+                  {copy.streakBreak}
                 </p>
               )}
               {completedToday.length > 0 && (
                 <p className="text-[12px]" style={{ color: '#4ECDC4' }}>
-                  You showed up and got things done. Solid.
+                  {copy.mochiGreat}
                 </p>
               )}
             </div>
