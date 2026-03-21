@@ -12,6 +12,7 @@
 import { useState, useMemo } from 'react'
 import { AnimatePresence } from 'motion/react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { BreathworkRitual } from './BreathworkRitual'
 import { FocusRoomSheet } from './FocusRoomSheet'
 import { clearBookmark } from './useFocusSession'
@@ -76,6 +77,7 @@ export function FocusSetup({
 }: FocusSetupProps) {
   const [showBreathwork, setShowBreathwork] = useState(false)
   const [showRoomSheet, setShowRoomSheet] = useState(false)
+  const { t } = useTranslation()
 
   // Store values for setup-specific UI
   const { medicationEnabled, medicationTime, timeBlindness, emotionalReactivity, weeklyIntention, weeklyStats, completedTotal } = useStore()
@@ -110,7 +112,7 @@ export function FocusSetup({
     <div className="flex flex-col pb-28" style={{ background: 'var(--color-bg)' }}>
       <div className="px-5 pt-10 pb-4">
         <h1 className="text-2xl font-bold" style={{ color: 'var(--color-text)' }}>
-          Focus Session ⏱️
+          {t('focus.title')} ⏱️
         </h1>
         <p className="text-sm mt-1" style={{ color: energyLabel.color }}>
           {energyLabel.text}
@@ -125,12 +127,12 @@ export function FocusSetup({
         >
           {completedTotal > 0 && (
             <span className="text-[11px]" style={{ color: '#4ECDC4' }}>
-              ✓ {completedTotal} done all-time
+              ✓ {t('focus.doneAllTime', { count: completedTotal })}
             </span>
           )}
           {todayFocusMin > 0 && (
             <span className="text-[11px]" style={{ color: '#7B72FF' }}>
-              · {todayFocusMin}m focused today
+              {t('focus.focusedToday', { min: todayFocusMin })}
             </span>
           )}
           {weeklyIntention && (
@@ -166,7 +168,7 @@ export function FocusSetup({
           <div className="flex items-center gap-2 mb-2">
             <span>📌</span>
             <p className="text-xs font-medium" style={{ color: 'var(--color-muted)' }}>
-              PICK UP WHERE YOU LEFT OFF
+              {t('focus.pickUpWhere')}
             </p>
           </div>
           <p className="text-sm font-medium mb-3" style={{ color: 'var(--color-text)' }}>
@@ -183,7 +185,7 @@ export function FocusSetup({
                 className="flex-1 py-2 rounded-xl text-xs font-semibold"
                 style={{ background: 'var(--color-primary-alpha)', border: '1.5px solid var(--color-primary)', color: 'var(--color-primary)' }}
               >
-                Continue task →
+                {t('focus.continueTask')}
               </button>
             )}
             <button
@@ -191,7 +193,7 @@ export function FocusSetup({
               className="py-2 px-4 rounded-xl text-xs"
               style={{ color: 'var(--color-muted)', border: '1px solid var(--color-border-subtle)' }}
             >
-              Dismiss
+              {t('focus.dismiss')}
             </button>
           </div>
         </div>
@@ -203,21 +205,21 @@ export function FocusSetup({
           style={{ background: 'var(--color-card)', border: '1px solid var(--color-border-subtle)' }}
         >
           <span style={{ fontSize: 40 }} className="mb-3">🎯</span>
-          <p className="text-sm font-medium mb-1" style={{ color: 'var(--color-text)' }}>No tasks yet</p>
+          <p className="text-sm font-medium mb-1" style={{ color: 'var(--color-text)' }}>{t('focus.noTasksYet')}</p>
           <p className="text-xs mb-4 leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-            Pick a task to focus on — it gives your session direction.
+            {t('focus.pickATask')}
           </p>
           <Link
             to="/tasks"
             className="px-5 py-2.5 rounded-xl text-xs font-semibold transition-all"
             style={{ background: 'var(--color-primary-alpha)', border: '1.5px solid var(--color-primary)', color: 'var(--color-primary)' }}
           >
-            Go to Tasks →
+            {t('focus.goToTasks')}
           </Link>
         </div>
       ) : (
         <div className="px-5 mb-6">
-          <p className="text-xs font-medium mb-2" style={{ color: 'var(--color-muted)' }}>TASK (OPTIONAL)</p>
+          <p className="text-xs font-medium mb-2" style={{ color: 'var(--color-muted)' }}>{t('focus.taskOptional')}</p>
           <div className="flex flex-col gap-2">
             <button
               onClick={() => setSelectedTask(null)}
@@ -231,7 +233,7 @@ export function FocusSetup({
             >
               <span>🧠</span>
               <span className="text-sm" style={{ color: selectedTask === null ? 'var(--color-primary)' : 'var(--color-text)' }}>
-                Open focus — no specific task
+                {t('focus.openFocus')}
               </span>
             </button>
 
@@ -253,7 +255,7 @@ export function FocusSetup({
                     className="text-xs px-1.5 py-0.5 rounded-md font-medium"
                     style={{ background: 'var(--color-elevated)', color: 'var(--color-muted)' }}
                   >
-                    {task.pool === 'now' ? 'NOW' : 'NEXT'}
+                    {task.pool === 'now' ? t('tasks.now') : t('tasks.next')}
                   </span>
                   <span className="text-sm flex-1" style={{ color: isSelected ? 'var(--color-primary)' : 'var(--color-text)' }}>
                     {task.title}
@@ -273,9 +275,9 @@ export function FocusSetup({
         >
           <span className="text-xl">🎲</span>
           <div>
-            <p className="text-sm font-medium" style={{ color: 'var(--color-text)' }}>Surprise mode</p>
+            <p className="text-sm font-medium" style={{ color: 'var(--color-text)' }}>{t('focus.surpriseMode')}</p>
             <p className="text-xs mt-0.5" style={{ color: 'var(--color-muted)' }}>
-              Timer ends when it ends — just focus. No digits, no arc.
+              {t('focus.surpriseDesc')}
             </p>
           </div>
         </div>
@@ -283,9 +285,9 @@ export function FocusSetup({
       {timerStyle !== 'surprise' && (
       <div className="px-5 mb-6">
         <p className="text-xs font-medium mb-2" style={{ color: 'var(--color-muted)' }}>
-          DURATION
+          {t('focus.duration')}
           <span className="ml-2 font-normal" style={{ color: 'var(--color-primary)' }}>
-            (smart: {smartDuration}m)
+            ({t('focus.smart')}: {smartDuration}m)
           </span>
         </p>
         <div className="flex gap-2">
@@ -358,9 +360,9 @@ export function FocusSetup({
         >
           <span>🎯</span>
           <div>
-            <p className="text-xs font-medium" style={{ color: 'var(--color-text)' }}>Sound Anchor ready</p>
+            <p className="text-xs font-medium" style={{ color: 'var(--color-text)' }}>{t('focus.soundAnchorReady')}</p>
             <p className="text-xs" style={{ color: 'var(--color-muted)' }}>
-              {focusAnchor} noise will play automatically
+              {t('focus.soundAnchorDesc', { preset: focusAnchor })}
             </p>
           </div>
         </div>
@@ -405,7 +407,7 @@ export function FocusSetup({
       {allTasks.length > 0 && selectedTask === null && (
         <div className="mx-5 mb-3 flex items-center gap-2">
           <span className="text-[11px]" style={{ color: '#8B8BA7' }}>
-            No task selected — focusing freely
+            {t('focus.noTaskSelected')}
           </span>
         </div>
       )}
@@ -422,7 +424,7 @@ export function FocusSetup({
             boxShadow: '0 8px 32px rgba(123,114,255,0.3)',
           }}
         >
-          Start Focus →
+          {t('focus.startFocus')}
         </button>
         <button
           onClick={() => handleStart()}
@@ -430,7 +432,7 @@ export function FocusSetup({
           className="w-full py-2 text-[12px]"
           style={{ color: '#8B8BA7' }}
         >
-          Skip ritual & jump in
+          {t('focus.skipRitual')}
         </button>
         {/* Focus Rooms discovery hint */}
         <FeatureHint
@@ -446,7 +448,7 @@ export function FocusSetup({
             className="w-full py-1.5 text-[12px] flex items-center justify-center gap-1.5"
             style={{ color: '#5A5B72' }}
           >
-            🤝 Focus with someone
+            {t('focus.focusWithSomeone')}
           </button>
         )}
       </div>
