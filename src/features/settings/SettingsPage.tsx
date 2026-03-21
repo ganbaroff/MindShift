@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useMotion } from '@/shared/hooks/useMotion';
-import { useI18n } from '@/shared/hooks/useI18n';
+import { useTranslation } from 'react-i18next';
 import EnergyPicker from '@/components/EnergyPicker';
 import { useStore } from '@/store';
 import type { EnergyLevel, AudioPreset } from '@/types';
@@ -187,7 +187,7 @@ export default function SettingsPage() {
     setTimeout(() => setCodeCopied(false), 2000)
   }, [telegramLinkCode])
 
-  const { t } = useI18n();
+  const { t } = useTranslation();
   // crisisResources now handled inline via getCrisisResourcesByCountry
 
   const planLabel =
@@ -199,7 +199,7 @@ export default function SettingsPage() {
     <PageTransition>
     <div className="min-h-screen px-5 pb-36 pt-10" style={{ backgroundColor: '#0F1120' }}>
       <motion.div initial={shouldAnimate ? { opacity: 0, y: -8 } : false} animate={shouldAnimate ? { opacity: 1, y: 0 } : false}>
-        <h1 className="text-[24px] font-bold" style={{ color: '#E8E8F0' }}>Settings</h1>
+        <h1 className="text-[24px] font-bold" style={{ color: '#E8E8F0' }}>{t('settings.title')}</h1>
         <p className="text-[13px] mt-0.5" style={{ color: '#8B8BA7' }}>{email ?? 'Not signed in'}</p>
       </motion.div>
 
@@ -210,7 +210,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Language */}
-        <Section label="Language">
+        <Section label={t('settings.language')}>
           <div className="flex flex-wrap gap-2">
             {[
               { code: null, label: 'Auto', desc: 'Browser default' },
@@ -234,12 +234,12 @@ export default function SettingsPage() {
         </Section>
 
         {/* Theme */}
-        <Section label="Theme">
+        <Section label={t('settings.theme')}>
           <div className="flex gap-2">
             {[
-              { key: 'dark' as const, label: '🌙 Dark' },
-              { key: 'light' as const, label: '☀️ Light' },
-              { key: 'system' as const, label: '⚙️ System' },
+              { key: 'dark' as const, label: t('settings.darkTheme') },
+              { key: 'light' as const, label: t('settings.lightTheme') },
+              { key: 'system' as const, label: t('settings.systemTheme') },
             ].map(({ key, label }) => (
               <button
                 key={key}
@@ -256,12 +256,12 @@ export default function SettingsPage() {
             ))}
           </div>
           <p className="text-[11px] mt-1.5" style={{ color: '#8B8BA7' }}>
-            Light theme coming soon — dark mode is best for ADHD focus
+            {t('settings.lightComingSoon')}
           </p>
         </Section>
 
         {/* App Mode */}
-        <Section label="App Mode">
+        <Section label={t('settings.appMode')}>
           <div className="flex gap-1.5">
             {modeChips.map((c, i) => (
               <Chip key={i} selected={mode === i} onClick={() => setAppMode(modeKeys[i])} emoji={c.emoji} label={c.label} />
@@ -271,7 +271,7 @@ export default function SettingsPage() {
         </Section>
 
         {/* Timer */}
-        <Section label="Timer">
+        <Section label={t('settings.timer')}>
           <div className="flex gap-1.5">
             {timerChips.map((c, i) => (
               <Chip key={i} selected={timer === i} onClick={() => setTimerStyle(timerKeys[i])} emoji={c.emoji} label={c.label} />
@@ -281,7 +281,7 @@ export default function SettingsPage() {
         </Section>
 
         {/* Sound */}
-        <Section label="Sound">
+        <Section label={t('settings.sound')}>
           <p className="text-[11px] mb-2" style={{ color: '#8B8BA7' }}>
             Tap to preview · Press 🔒 to set as focus anchor
           </p>
@@ -425,7 +425,7 @@ export default function SettingsPage() {
         </Section>
 
         {/* Telegram integration */}
-        <Section label="Telegram">
+        <Section label={t('settings.telegram')}>
           {telegramLinked ? (
             <div className="space-y-2">
               <div className="flex items-center gap-2">
@@ -482,7 +482,7 @@ export default function SettingsPage() {
           ) : (
             <div className="space-y-2">
               <p className="text-[12px] leading-relaxed" style={{ color: '#8B8BA7' }}>
-                Send tasks to MindShift from Telegram. Just message the bot and your tasks appear here.
+                {t('settings.telegramDesc')}
               </p>
               <motion.button
                 whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
@@ -491,28 +491,28 @@ export default function SettingsPage() {
                 style={{ backgroundColor: 'rgba(78,205,196,0.12)', color: '#4ECDC4' }}
                 aria-label="Connect Telegram"
               >
-                Connect Telegram
+                {t('settings.connectTelegram')}
               </motion.button>
               <p className="text-[11px]" style={{ color: '#8B8BA7' }}>
-                You'll get a code to send to @MindShiftBot on Telegram
+                {t('settings.telegramHowTo')}
               </p>
             </div>
           )}
         </Section>
 
         {/* Google Calendar integration */}
-        <Section label="Google Calendar">
+        <Section label={t('settings.googleCalendar')}>
           {isGuest ? (
             <p className="text-[12px]" style={{ color: '#8B8BA7' }}>
-              Sign in with Google to sync meetings and reminders
+              {t('settings.signInForCalendar')}
             </p>
           ) : (
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-[14px] font-medium" style={{ color: '#E8E8F0' }}>Sync to calendar</p>
+                  <p className="text-[14px] font-medium" style={{ color: '#E8E8F0' }}>{t('settings.syncToCalendar')}</p>
                   <p className="text-[12px] mt-0.5" style={{ color: '#8B8BA7' }}>
-                    Meetings and reminders with dates appear in Google Calendar
+                    {t('settings.calendarDesc')}
                   </p>
                 </div>
                 <button
@@ -558,10 +558,10 @@ export default function SettingsPage() {
                   <Toggle
                     checked={calendarFocusBlocks}
                     onChange={setCalendarFocusBlocks}
-                    label="Add focus sessions as time blocks"
+                    label={t('settings.focusBlocks')}
                   />
                   <p className="text-[11px]" style={{ color: '#8B8BA7' }}>
-                    Focus sessions will show as teal blocks in your calendar
+                    {t('settings.focusBlocksDesc')}
                   </p>
                 </motion.div>
               )}
@@ -570,11 +570,11 @@ export default function SettingsPage() {
         </Section>
 
         {/* Medication peak window — B-12: show optimal focus window around med timing */}
-        <Section label="Medication">
+        <Section label={t('settings.medication')}>
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-[14px] font-medium" style={{ color: '#E8E8F0' }}>Peak window indicator</p>
+                <p className="text-[14px] font-medium" style={{ color: '#E8E8F0' }}>{t('settings.peakWindow')}</p>
                 <p className="text-[12px] mt-0.5" style={{ color: '#8B8BA7' }}>
                   Highlights your optimal focus window on the Focus screen
                 </p>
@@ -632,9 +632,9 @@ export default function SettingsPage() {
 
         {/* Setup revisit — O-11: re-run onboarding to update preferences */}
         {/* Daily focus goal — P-1 */}
-        <Section label="Daily Focus Goal">
+        <Section label={t('settings.dailyGoal')}>
           <p className="text-[12px] mb-2" style={{ color: '#8B8BA7' }}>
-            Target minutes of focused work per day
+            {t('settings.targetMinutes')}
           </p>
           <div className="flex gap-2">
             {([30, 45, 60, 90] as const).map(min => (
@@ -656,7 +656,7 @@ export default function SettingsPage() {
         </Section>
 
         {/* Interface Style — age-adaptive UI tone override */}
-        <Section label="Interface Style">
+        <Section label={t('settings.interfaceStyle')}>
           <div className="grid grid-cols-2 gap-1.5">
             {(['neutral', 'gen_z', 'millennial', 'gen_x'] as UITone[]).map(tone => {
               const sel = uiTone === tone;
@@ -685,22 +685,22 @@ export default function SettingsPage() {
           </div>
         </Section>
 
-        <Section label="Preferences">
+        <Section label={t('settings.preferences')}>
           <button
             onClick={() => navigate('/onboarding')}
             className="flex items-center gap-3 w-full h-10 rounded-xl px-3 text-[14px] font-medium"
             style={{ backgroundColor: 'rgba(78,205,196,0.08)', color: '#4ECDC4', border: '1px solid rgba(78,205,196,0.15)' }}
           >
             <span>🔄</span>
-            <span>Re-run setup wizard</span>
+            <span>{t('settings.rerunSetup')}</span>
           </button>
         </Section>
 
         {/* Mental Health Resources — localized by country */}
-        <Section label="Mental Health">
+        <Section label={t('settings.mentalHealth')}>
           <div className="space-y-2">
             <p className="text-[13px] leading-relaxed" style={{ color: '#E8E8F0' }}>
-              {t('crisis.settings.title')}
+              {t('settings.crisisTitle')}
             </p>
             <div
               className="rounded-xl p-3 space-y-2"
@@ -728,19 +728,19 @@ export default function SettingsPage() {
         </Section>
 
         {/* Feedback */}
-        <Section label="Feedback">
+        <Section label={t('settings.feedback')}>
           <a
             href="mailto:ganbarov.y@gmail.com?subject=MindShift%20Feedback&body=Hi%20Yusif%2C%0A%0A"
             className="flex items-center gap-3 w-full h-10 rounded-xl px-3 text-[14px] font-medium focus-visible:ring-2 focus-visible:ring-ms-primary/50 focus-visible:outline-none"
             style={{ backgroundColor: 'rgba(123,114,255,0.1)', color: '#7B72FF' }}
           >
             <span>📬</span>
-            <span>Send feedback</span>
+            <span>{t('settings.sendFeedback')}</span>
           </a>
         </Section>
 
         {/* Data */}
-        <Section label="Your Data">
+        <Section label={t('settings.yourData')}>
           <motion.button
             whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
             onClick={handleExport}

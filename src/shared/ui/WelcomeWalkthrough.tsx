@@ -10,38 +10,28 @@
  */
 
 import { useState, useCallback, memo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'motion/react'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { useStore } from '@/store'
 
-const STEPS = [
-  {
-    emoji: '🌿',
-    title: 'Your calm space',
-    body: 'No deadlines, no guilt. MindShift works with your brain, not against it.',
-  },
-  {
-    emoji: '🎯',
-    title: 'How it works',
-    body: 'Add a task → start a focus session → watch your progress grow. That\'s it.',
-  },
-  {
-    emoji: '🌱',
-    title: 'Start small',
-    body: 'One task today is enough. Tap the input above to add your first one.',
-  },
-]
+const STEP_KEYS = [
+  { emoji: '🌿', titleKey: 'welcome.step1Title', bodyKey: 'welcome.step1Body' },
+  { emoji: '🎯', titleKey: 'welcome.step2Title', bodyKey: 'welcome.step2Body' },
+  { emoji: '🌱', titleKey: 'welcome.step3Title', bodyKey: 'welcome.step3Body' },
+] as const
 
 function WelcomeWalkthroughInner() {
   const seenHints = useStore(s => s.seenHints)
   const markHintSeen = useStore(s => s.markHintSeen)
-  const { shouldAnimate, t } = useMotion()
+  const { shouldAnimate, t: transition } = useMotion()
+  const { t } = useTranslation()
   const [step, setStep] = useState(0)
 
   const alreadySeen = seenHints.includes('welcome_walkthrough')
 
   const handleNext = useCallback(() => {
-    if (step < STEPS.length - 1) {
+    if (step < STEP_KEYS.length - 1) {
       setStep(s => s + 1)
     } else {
       markHintSeen('welcome_walkthrough')
@@ -54,13 +44,13 @@ function WelcomeWalkthroughInner() {
 
   if (alreadySeen) return null
 
-  const current = STEPS[step]
+  const current = STEP_KEYS[step]
 
   return (
     <motion.div
       initial={shouldAnimate ? { opacity: 0, y: 12 } : false}
       animate={{ opacity: 1, y: 0 }}
-      transition={t()}
+      transition={transition()}
       className="rounded-2xl overflow-hidden"
       style={{
         background: 'linear-gradient(135deg, rgba(123,114,255,0.10), rgba(78,205,196,0.06))',
@@ -73,15 +63,15 @@ function WelcomeWalkthroughInner() {
           initial={shouldAnimate ? { opacity: 0, x: 20 } : false}
           animate={{ opacity: 1, x: 0 }}
           exit={shouldAnimate ? { opacity: 0, x: -20 } : {}}
-          transition={t()}
+          transition={transition()}
           className="p-4"
         >
           <p className="text-[24px] mb-1">{current.emoji}</p>
           <h3 className="text-[15px] font-semibold mb-1" style={{ color: '#E8E8F0' }}>
-            {current.title}
+            {t(current.titleKey)}
           </h3>
           <p className="text-[13px] leading-relaxed" style={{ color: '#8B8BA7' }}>
-            {current.body}
+            {t(current.bodyKey)}
           </p>
         </motion.div>
       </AnimatePresence>
@@ -89,7 +79,7 @@ function WelcomeWalkthroughInner() {
       <div className="flex items-center justify-between px-4 pb-3">
         {/* Progress dots */}
         <div className="flex gap-1.5">
-          {STEPS.map((_, i) => (
+          {STEP_KEYS.map((_, i) => (
             <div
               key={i}
               className="w-1.5 h-1.5 rounded-full transition-colors duration-200"
@@ -106,7 +96,7 @@ function WelcomeWalkthroughInner() {
             className="text-[12px] px-2 py-1 rounded-lg focus-visible:ring-1 focus-visible:ring-[#7B72FF]"
             style={{ color: '#8B8BA7' }}
           >
-            Skip
+            {t('welcome.skip')}
           </button>
           <button
             onClick={handleNext}
@@ -116,7 +106,7 @@ function WelcomeWalkthroughInner() {
               color: '#7B72FF',
             }}
           >
-            {step === STEPS.length - 1 ? 'Got it' : 'Next'}
+            {step === STEP_KEYS.length - 1 ? t('welcome.gotIt') : t('welcome.next')}
           </button>
         </div>
       </div>

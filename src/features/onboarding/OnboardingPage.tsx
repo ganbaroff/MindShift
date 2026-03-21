@@ -15,6 +15,7 @@
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useMotion } from '@/shared/hooks/useMotion';
 import EnergyPicker from '@/components/EnergyPicker';
 import { useStore } from '@/store';
@@ -32,54 +33,57 @@ const EMOTIONAL_REACTIVITY_MAP: EmotionalReactivity[] = ['high', 'moderate', 'st
 
 const TOTAL_STEPS = 6;
 
-const steps = [
-  // 0 — Intent
-  {
-    title: 'What brings you here today?',
-    options: [
-      { emoji: '🎯', label: 'One thing at a time', desc: 'Just need to focus on one task right now' },
-      { emoji: '🌱', label: 'Build daily habits',  desc: 'Consistency without overwhelm' },
-      { emoji: '🗂️', label: 'Full picture',        desc: 'Full visibility over my projects' },
-    ],
-  },
-  // 1 — Energy (rendered separately)
-  { title: "How's your brain right now?", options: [] },
-  // 2 — Timer style
-  {
-    title: 'How do you want to see your timer?',
-    options: [
-      { emoji: '⏱',  label: 'Countdown', desc: 'Classic timer counting down to zero' },
-      { emoji: '⬆️', label: 'Count-up',  desc: 'See how long you can stay in flow' },
-      { emoji: '🎲', label: 'Surprise',  desc: "Random — you'll focus until it rings" },
-    ],
-  },
-  // 3 — Time blindness (O-6)
-  {
-    title: 'How do you experience time? 🕰️',
-    subtitle: "There's no wrong answer — this helps us personalise your timer.",
-    options: [
-      { emoji: '😵', label: 'Time vanishes on me',          desc: 'An hour can feel like five minutes' },
-      { emoji: '🤔', label: 'I notice time slipping sometimes', desc: "Depends on what I'm doing" },
-      { emoji: '✅', label: 'I track time naturally',       desc: 'I usually know how long things take' },
-    ],
-  },
-  // 4 — Emotional reactivity (O-6)
-  {
-    title: 'When plans change unexpectedly... 🌊',
-    subtitle: 'How you respond helps us support you better on tough days.',
-    options: [
-      { emoji: '🌀', label: 'Throws me off completely', desc: 'Hard to refocus — RSD can hit hard' },
-      { emoji: '🌊', label: 'I notice it, then recover', desc: 'Some friction, but I bounce back' },
-      { emoji: '🌱', label: 'Rarely phases me',          desc: 'I adapt pretty smoothly' },
-    ],
-  },
-  // 5 — Notifications (rendered separately)
-  {
-    title: 'Want gentle reminders? 🔔',
-    subtitle: "We'll nudge you before tasks are due — nothing aggressive, just friendly taps.",
-    options: [],
-  },
-];
+function useSteps() {
+  const { t } = useTranslation();
+  return useMemo(() => [
+    // 0 — Intent
+    {
+      title: t('onboarding.whatBrings'),
+      options: [
+        { emoji: '🎯', label: t('onboarding.oneThingLabel'), desc: t('onboarding.oneThingDesc') },
+        { emoji: '🌱', label: t('onboarding.buildHabitsLabel'),  desc: t('onboarding.buildHabitsDesc') },
+        { emoji: '🗂️', label: t('onboarding.fullPictureLabel'),        desc: t('onboarding.fullPictureDesc') },
+      ],
+    },
+    // 1 — Energy (rendered separately)
+    { title: t('onboarding.howsBrain'), options: [] },
+    // 2 — Timer style
+    {
+      title: t('onboarding.timerPref'),
+      options: [
+        { emoji: '⏱',  label: t('onboarding.countdownLabel'), desc: t('onboarding.countdownDesc') },
+        { emoji: '⬆️', label: t('onboarding.countUpLabel'),  desc: t('onboarding.countUpDesc') },
+        { emoji: '🎲', label: t('onboarding.surpriseLabel'),  desc: t('onboarding.surpriseDesc') },
+      ],
+    },
+    // 3 — Time blindness (O-6)
+    {
+      title: t('onboarding.timeExperience'),
+      subtitle: t('onboarding.timeSubtitle'),
+      options: [
+        { emoji: '😵', label: t('onboarding.timeVanishesLabel'),          desc: t('onboarding.timeVanishesDesc') },
+        { emoji: '🤔', label: t('onboarding.timeSlipsLabel'), desc: t('onboarding.timeSlipsDesc') },
+        { emoji: '✅', label: t('onboarding.timeNaturalLabel'),       desc: t('onboarding.timeNaturalDesc') },
+      ],
+    },
+    // 4 — Emotional reactivity (O-6)
+    {
+      title: t('onboarding.plansChange'),
+      subtitle: t('onboarding.plansSubtitle'),
+      options: [
+        { emoji: '🌀', label: t('onboarding.throwsOffLabel'), desc: t('onboarding.throwsOffDesc') },
+        { emoji: '🌊', label: t('onboarding.recoverLabel'), desc: t('onboarding.recoverDesc') },
+        { emoji: '🌱', label: t('onboarding.rarelyPhasesLabel'),          desc: t('onboarding.rarelyPhasesDesc') },
+      ],
+    },
+    // 5 — Notifications (rendered separately)
+    {
+      title: t('onboarding.wantReminders'),
+      subtitle: t('onboarding.remindersSubtitle'),
+      options: [],
+    },
+  ], [t]);
+}
 
 // ── Helpers to pre-fill from store (revisit mode) ─────────────────────────────
 function modeToIdx(m: AppMode | string | undefined): number | null {
@@ -101,6 +105,8 @@ function erToIdx(v: EmotionalReactivity | null): number | null {
 export default function OnboardingPage() {
   const navigate = useNavigate();
   const { shouldAnimate } = useMotion();
+  const { t } = useTranslation();
+  const steps = useSteps();
   const {
     setAppMode, setEnergyLevel, setTimerStyle, setOnboardingCompleted,
     setTimeBlindness, setEmotionalReactivity,
@@ -205,7 +211,7 @@ export default function OnboardingPage() {
           className="mt-safe mt-4 self-end text-[13px] px-3 py-1.5 rounded-xl focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
           style={{ color: '#8B8BA7' }}
         >
-          Skip setup — jump in →
+          {t('onboarding.skipSetup')}
         </button>
       )}
 
@@ -217,7 +223,7 @@ export default function OnboardingPage() {
         >
           <span className="text-base">🔧</span>
           <p className="text-xs" style={{ color: '#C8C0FF' }}>
-            Refreshing your profile — changes apply immediately
+            {t('onboarding.refreshing')}
           </p>
         </div>
       )}
@@ -240,10 +246,10 @@ export default function OnboardingPage() {
         </div>
         <div className="flex items-center justify-between">
           {step > 0
-            ? <button onClick={() => setStep(step - 1)} className="text-[13px]" style={{ color: '#8B8BA7' }}>← Back</button>
+            ? <button onClick={() => setStep(step - 1)} className="text-[13px]" style={{ color: '#8B8BA7' }}>{t('onboarding.back')}</button>
             : <div />
           }
-          <span className="text-[11px]" style={{ color: '#8B8BA7' }}>Step {step + 1} of {TOTAL_STEPS}</span>
+          <span className="text-[11px]" style={{ color: '#8B8BA7' }}>{t('onboarding.step', { current: step + 1, total: TOTAL_STEPS })}</span>
         </div>
       </div>
 
@@ -282,22 +288,22 @@ export default function OnboardingPage() {
                   <div className="flex items-center gap-3">
                     <span className="text-[28px]">🔔</span>
                     <div>
-                      <p className="text-[15px] font-semibold" style={{ color: '#4ECDC4' }}>Enable reminders</p>
-                      <p className="text-[11px]" style={{ color: '#8B8BA7' }}>15 min before tasks are due</p>
+                      <p className="text-[15px] font-semibold" style={{ color: '#4ECDC4' }}>{t('onboarding.enableReminders')}</p>
+                      <p className="text-[11px]" style={{ color: '#8B8BA7' }}>{t('onboarding.remindersBefore')}</p>
                     </div>
                   </div>
                 </motion.button>
               )}
               {notifState === 'granted' && (
                 <div className="p-4 rounded-2xl" style={{ backgroundColor: 'rgba(78,205,196,0.12)', border: '1.5px solid rgba(78,205,196,0.35)' }}>
-                  <p className="text-[15px] font-semibold" style={{ color: '#4ECDC4' }}>✅ Reminders enabled</p>
-                  <p className="text-[13px] mt-0.5" style={{ color: '#8B8BA7' }}>We'll give you a gentle nudge before each due task.</p>
+                  <p className="text-[15px] font-semibold" style={{ color: '#4ECDC4' }}>✅ {t('onboarding.remindersEnabled')}</p>
+                  <p className="text-[13px] mt-0.5" style={{ color: '#8B8BA7' }}>{t('onboarding.remindersEnabledDesc')}</p>
                 </div>
               )}
               {notifState === 'denied' && (
                 <div className="p-4 rounded-2xl" style={{ backgroundColor: '#252840' }}>
-                  <p className="text-[15px] font-semibold" style={{ color: '#E8E8F0' }}>No worries 👋</p>
-                  <p className="text-[13px] mt-0.5" style={{ color: '#8B8BA7' }}>You can enable reminders later in Settings.</p>
+                  <p className="text-[15px] font-semibold" style={{ color: '#E8E8F0' }}>{t('onboarding.noWorries')}</p>
+                  <p className="text-[13px] mt-0.5" style={{ color: '#8B8BA7' }}>{t('onboarding.noWorriesDesc')}</p>
                 </div>
               )}
               <button
@@ -305,7 +311,7 @@ export default function OnboardingPage() {
                 className="w-full text-center py-2 text-[13px]"
                 style={{ color: '#8B8BA7' }}
               >
-                Skip for now
+                {t('onboarding.skipForNow')}
               </button>
             </div>
           )}
@@ -351,7 +357,7 @@ export default function OnboardingPage() {
             className="w-full h-[48px] rounded-xl gradient-primary font-semibold text-[15px] shadow-primary disabled:opacity-40"
             style={{ color: '#fff' }}
           >
-            Continue →
+            {t('onboarding.continue')}
           </motion.button>
         </div>
       )}

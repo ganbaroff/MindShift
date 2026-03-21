@@ -7,6 +7,7 @@
  */
 
 import { useEffect, memo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { motion } from 'motion/react'
 import { useMotion } from '@/shared/hooks/useMotion'
 import type { Discovery } from '@/shared/lib/mochiDiscoveries'
@@ -23,7 +24,8 @@ const RARITY_STYLES = {
 }
 
 function DiscoveryCardInner({ discovery, onDismiss }: DiscoveryCardProps) {
-  const { shouldAnimate, t } = useMotion()
+  const { shouldAnimate, t: transition } = useMotion()
+  const { t } = useTranslation()
   const style = RARITY_STYLES[discovery.rarity]
 
   useEffect(() => {
@@ -37,7 +39,7 @@ function DiscoveryCardInner({ discovery, onDismiss }: DiscoveryCardProps) {
       initial={shouldAnimate ? { opacity: 0, scale: 0.9, y: 8 } : false}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={shouldAnimate ? { opacity: 0, scale: 0.9, y: -8 } : {}}
-      transition={t('expressive')}
+      transition={transition('expressive')}
       className="w-full px-3 py-2.5 rounded-xl text-left cursor-pointer focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
       style={{
         background: style.bg,
@@ -47,8 +49,8 @@ function DiscoveryCardInner({ discovery, onDismiss }: DiscoveryCardProps) {
     >
       <p className="text-[13px]" style={{ color: '#E8E8F0' }}>
         <span className="text-[16px] mr-1">{discovery.emoji}</span>
-        Mochi found a <span className="font-medium">{discovery.name}</span>
-        {discovery.rarity === 'rare' && <span className="ml-1 text-[10px]" style={{ color: '#F59E0B' }}>Rare!</span>}
+        {t('mochi.foundItem', { name: '' })}<span className="font-medium">{discovery.name}</span>
+        {discovery.rarity === 'rare' && <span className="ml-1 text-[10px]" style={{ color: '#F59E0B' }}>{t('mochi.rare')}</span>}
       </p>
     </motion.button>
   )

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'motion/react'
 import { X } from 'lucide-react'
@@ -18,7 +19,8 @@ const CONSENT_VERSION = '2026-03'
  */
 export function CookieBanner() {
   const [visible, setVisible] = useState(false)
-  const { t, shouldAnimate } = useMotion()
+  const { t: transition, shouldAnimate } = useMotion()
+  const { t } = useTranslation()
 
   useEffect(() => {
     try {
@@ -63,19 +65,19 @@ export function CookieBanner() {
           initial={shouldAnimate ? { y: 40, opacity: 0 } : false}
           animate={shouldAnimate ? { y: 0, opacity: 1 } : { opacity: 1 }}
           exit={shouldAnimate ? { y: 40, opacity: 0 } : { opacity: 0 }}
-          transition={t()}
+          transition={transition()}
         >
           <div className="flex-1 min-w-0">
             <p className="text-[10px] sm:text-[11px] leading-relaxed" style={{ color: 'var(--color-text-subtle)' }}>
-              We save your preferences on-device.{' '}
-              <strong style={{ color: 'var(--color-muted)' }}>No tracking cookies.</strong>{' '}
+              {t('cookie.message')}{' '}
+              <strong style={{ color: 'var(--color-muted)' }}>{t('cookie.noTracking')}</strong>{' '}
               <Link
                 to="/cookie-policy"
                 className="underline decoration-dotted focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1E2136] rounded-sm"
                 style={{ color: 'var(--color-primary)' }}
                 onClick={dismiss}
               >
-                Learn more
+                {t('cookie.learnMore')}
               </Link>
             </p>
           </div>

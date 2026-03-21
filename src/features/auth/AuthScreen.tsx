@@ -2,6 +2,7 @@ import { useState, useRef, useCallback } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'motion/react'
 import { Mail, ArrowRight, CheckCircle2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { supabase } from '@/shared/lib/supabase'
 import { toast } from 'sonner'
 import { useMotion } from '@/shared/hooks/useMotion'
@@ -16,13 +17,13 @@ type Step = 'email' | 'check'
 
 // ── Mochi SVG Logo ────────────────────────────────────────────────────────────
 function MochiLogo() {
-  const { t, shouldAnimate } = useMotion()
+  const { t: transition, shouldAnimate } = useMotion()
   return (
     <motion.div
       className="relative w-16 h-16 mx-auto"
       initial={{ scale: 0.7, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
-      transition={{ ...t('expressive'), delay: 0.05 }}
+      transition={{ ...transition('expressive'), delay: 0.05 }}
     >
       {/* Subtle glow — only animates when motion is allowed */}
       <motion.div
@@ -98,7 +99,8 @@ function EmailStep({
   onGoogleSignIn: () => void
   googleLoading: boolean
 }) {
-  const { t } = useMotion()
+  const { t: transition } = useMotion()
+  const { t } = useTranslation()
   const inputRef = useRef<HTMLInputElement>(null)
   const [inputFocused, setInputFocused] = useState(false)
   const canSubmit = email.trim().length > 0 && consented
@@ -109,14 +111,14 @@ function EmailStep({
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -12 }}
-      transition={t()}
+      transition={transition()}
     >
       <h2 className="text-lg font-bold mb-1" style={{ color: '#E8E8F0' }}>
-        Welcome. Let's get started.
+        {t('auth.letsGetStarted')}
       </h2>
       <p className="text-[13px] mb-5 leading-relaxed" style={{ color: '#8B8BA7' }}>
-        Enter your email and we'll send a magic link.
-        <span style={{ color: '#6B7280' }}> No password. No friction.</span>
+        {t('auth.enterEmailDesc')}
+        <span style={{ color: '#6B7280' }}> {t('auth.noPasswordNoFriction')}</span>
       </p>
 
       {/* Email input */}
@@ -132,7 +134,7 @@ function EmailStep({
           id="auth-email"
           ref={inputRef}
           type="email"
-          placeholder="your@email.com"
+          placeholder={t('auth.enterEmail')}
           value={email}
           onChange={e => setEmail(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && onSubmit()}
@@ -217,20 +219,20 @@ function EmailStep({
           <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin motion-reduce:animate-none motion-reduce:opacity-60" />
         ) : (
           <>
-            Send magic link
+            {t('auth.sendLink')}
             <ArrowRight size={16} strokeWidth={2.5} />
           </>
         )}
       </motion.button>
 
       <p className="text-center text-[11px] mt-3" style={{ color: '#4A4D6A' }}>
-        No account? We'll create one automatically
+        {t('auth.noAccount')}
       </p>
 
       {/* Divider */}
       <div className="flex items-center gap-3 my-4">
         <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.06)' }} />
-        <span className="text-[11px]" style={{ color: '#4A4D6A' }}>or</span>
+        <span className="text-[11px]" style={{ color: '#4A4D6A' }}>{t('auth.or')}</span>
         <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.06)' }} />
       </div>
 
@@ -259,7 +261,7 @@ function EmailStep({
               <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
               <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
             </svg>
-            Continue with Google
+            {t('auth.continueWithGoogle')}
           </>
         )}
       </motion.button>
@@ -269,7 +271,8 @@ function EmailStep({
 
 // ── Check email step ──────────────────────────────────────────────────────────
 function CheckStep({ email, onBack }: { email: string; onBack: () => void }) {
-  const { t } = useMotion()
+  const { t: transition } = useMotion()
+  const { t } = useTranslation()
   return (
     <motion.div
       key="check-step"
@@ -277,7 +280,7 @@ function CheckStep({ email, onBack }: { email: string; onBack: () => void }) {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -12 }}
-      transition={t()}
+      transition={transition()}
     >
       {/* Animated checkmark */}
       <motion.div
@@ -285,24 +288,24 @@ function CheckStep({ email, onBack }: { email: string; onBack: () => void }) {
         style={{ background: 'rgba(78,205,196,0.12)', border: '1.5px solid rgba(78,205,196,0.35)' }}
         initial={{ scale: 0.5, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        transition={t('expressive')}
+        transition={transition('expressive')}
       >
         <CheckCircle2 size={38} color="#4ECDC4" strokeWidth={1.5} />
       </motion.div>
 
       <h2 className="text-xl font-bold mb-2" style={{ color: '#E8E8F0' }}>
-        Magic link on its way ✨
+        {t('auth.magicLinkOnWay')}
       </h2>
       <p className="text-sm leading-relaxed mb-1" style={{ color: '#8B8BA7' }}>
-        We sent a link to
+        {t('auth.weSentLink')}
       </p>
       <p className="text-sm font-semibold mb-5 px-4 py-1.5 rounded-lg"
          style={{ color: '#E8E8F0', background: '#252840' }}>
         {email}
       </p>
       <p className="text-xs leading-relaxed mb-6" style={{ color: '#6B7280' }}>
-        Tap the link in the email to sign in instantly.<br />
-        No password needed — ever.
+        {t('auth.tapLink')}<br />
+        {t('auth.noPasswordEver')}
       </p>
 
       <button
@@ -310,7 +313,7 @@ function CheckStep({ email, onBack }: { email: string; onBack: () => void }) {
         style={{ color: '#7B72FF' }}
         onClick={onBack}
       >
-        Wrong email? Go back
+        {t('auth.wrongEmail')}
       </button>
     </motion.div>
   )
@@ -318,7 +321,8 @@ function CheckStep({ email, onBack }: { email: string; onBack: () => void }) {
 
 // ── Main component ────────────────────────────────────────────────────────────
 export default function AuthScreen() {
-  const { t } = useMotion()
+  const { t: transition } = useMotion()
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [step, setStep]           = useState<Step>('email')
   const [email, setEmail]         = useState('')
@@ -412,7 +416,7 @@ export default function AuthScreen() {
           className="flex flex-col items-center mb-6"
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ ...t(), delay: 0.05 }}
+          transition={{ ...transition(), delay: 0.05 }}
         >
           <MochiLogo />
           <h1 className="text-2xl font-bold tracking-tight mt-3" style={{ color: '#E8E8F0' }}>
@@ -435,7 +439,7 @@ export default function AuthScreen() {
           }}
           initial={{ opacity: 0, y: 20, scale: 0.98 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ ...t(), delay: 0.15 }}
+          transition={{ ...transition(), delay: 0.15 }}
         >
           <AnimatePresence mode="wait">
             {step === 'email' ? (
@@ -466,9 +470,9 @@ export default function AuthScreen() {
           style={{ color: '#4A4D6A' }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ ...t(), delay: 0.4 }}
+          transition={{ ...transition(), delay: 0.4 }}
         >
-          Your data stays private. Always.{' '}
+          {t('auth.dataPrivate')}{' '}
           <Link to="/privacy" target="_blank" style={{ color: '#7B72FF' }} className="underline decoration-dotted opacity-60 hover:opacity-100 transition-opacity">
             Privacy Policy
           </Link>
@@ -481,9 +485,9 @@ export default function AuthScreen() {
           style={{ color: '#8B8BA7' }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ ...t(), delay: 0.5 }}
+          transition={{ ...transition(), delay: 0.5 }}
         >
-          Continue without account →
+          {t('auth.continueWithout')}
         </motion.button>
       </div>
 

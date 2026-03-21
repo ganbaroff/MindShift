@@ -7,6 +7,7 @@
  */
 
 import { useEffect, memo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { motion } from 'motion/react'
 import { Play } from 'lucide-react'
 import { useMotion } from '@/shared/hooks/useMotion'
@@ -19,7 +20,8 @@ interface TransitionNudgeProps {
 }
 
 function TransitionNudgeInner({ nextTask, onFocus, onDismiss }: TransitionNudgeProps) {
-  const { shouldAnimate, t } = useMotion()
+  const { shouldAnimate, t: transition } = useMotion()
+  const { t } = useTranslation()
 
   useEffect(() => {
     const timer = setTimeout(onDismiss, 5000)
@@ -31,7 +33,7 @@ function TransitionNudgeInner({ nextTask, onFocus, onDismiss }: TransitionNudgeP
       initial={shouldAnimate ? { opacity: 0, y: 8 } : false}
       animate={{ opacity: 1, y: 0 }}
       exit={shouldAnimate ? { opacity: 0, y: -8 } : {}}
-      transition={t()}
+      transition={transition()}
       className="px-3 py-2.5 rounded-xl flex items-center gap-2"
       style={{
         background: 'rgba(78,205,196,0.10)',
@@ -42,11 +44,11 @@ function TransitionNudgeInner({ nextTask, onFocus, onDismiss }: TransitionNudgeP
       <div className="flex-1 min-w-0">
         {nextTask ? (
           <p className="text-[12px] truncate" style={{ color: '#E8E8F0' }}>
-            Next: <span style={{ color: '#4ECDC4' }}>{nextTask.title}</span>
+            {t('transition.next', { title: '' })}<span style={{ color: '#4ECDC4' }}>{nextTask.title}</span>
           </p>
         ) : (
           <p className="text-[12px]" style={{ color: '#8B8BA7' }}>
-            All done for now. Nice work.
+            {t('transition.allDone')}
           </p>
         )}
       </div>
@@ -57,7 +59,7 @@ function TransitionNudgeInner({ nextTask, onFocus, onDismiss }: TransitionNudgeP
           style={{ background: 'rgba(78,205,196,0.15)', color: '#4ECDC4' }}
         >
           <Play size={10} fill="#4ECDC4" />
-          Focus
+          {t('today.focus')}
         </button>
       )}
       <button

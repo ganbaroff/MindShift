@@ -14,6 +14,7 @@
  */
 
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'motion/react'
 import { Send, X, Loader2 } from 'lucide-react'
 import { Mascot } from '@/shared/ui/Mascot'
@@ -114,7 +115,8 @@ async function fetchMochiChat(
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export function MochiChat({ open, onClose }: MochiChatProps) {
-  const { shouldAnimate, t } = useMotion()
+  const { shouldAnimate, t: transition } = useMotion()
+  const { t } = useTranslation()
   const {
     userId, psychotype, energyLevel, appMode, seasonalMode,
     timeBlindness, emotionalReactivity, completedTotal, currentStreak,
@@ -266,7 +268,7 @@ export function MochiChat({ open, onClose }: MochiChatProps) {
             initial={shouldAnimate ? { opacity: 0 } : {}}
             animate={{ opacity: 1 }}
             exit={shouldAnimate ? { opacity: 0 } : {}}
-            transition={t()}
+            transition={transition()}
             className="fixed inset-0 z-50"
             style={{ background: 'rgba(0,0,0,0.5)' }}
             onClick={onClose}
@@ -306,7 +308,7 @@ export function MochiChat({ open, onClose }: MochiChatProps) {
                     Mochi
                   </p>
                   <p className="text-[10px]" style={{ color: '#8B8BA7' }}>
-                    Your ADHD-aware companion
+                    {t('mochi.companion')}
                   </p>
                 </div>
                 <button
@@ -329,10 +331,10 @@ export function MochiChat({ open, onClose }: MochiChatProps) {
                   <div className="flex flex-col items-center justify-center h-full gap-3 py-8">
                     <Mascot state="idle" size={64} label="Mochi" />
                     <p className="text-sm text-center" style={{ color: '#E8E8F0' }}>
-                      Mochi wants to help
+                      {t('mochi.wantsToHelp')}
                     </p>
                     <p className="text-xs text-center max-w-[240px]" style={{ color: '#8B8BA7' }}>
-                      Sign in so Mochi can learn your patterns and give personalized tips.
+                      {t('mochi.signInForMochi')}
                     </p>
                     <button
                       onClick={() => { onClose(); window.location.href = '/auth' }}
@@ -342,14 +344,14 @@ export function MochiChat({ open, onClose }: MochiChatProps) {
                         color: '#FFFFFF',
                       }}
                     >
-                      Sign in
+                      {t('mochi.signIn')}
                     </button>
                     <button
                       onClick={onClose}
                       className="text-[12px] focus-visible:ring-1 focus-visible:ring-[#7B72FF] rounded px-2 py-1"
                       style={{ color: '#8B8BA7' }}
                     >
-                      Maybe later
+                      {t('mochi.maybeLater')}
                     </button>
                   </div>
                 ) : (

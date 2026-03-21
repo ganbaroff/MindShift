@@ -1,6 +1,7 @@
 import { lazy, Suspense, useState, useEffect, useRef, useCallback } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'motion/react'
+import { useTranslation } from 'react-i18next'
 import { BottomNav } from './BottomNav'
 import { useStore } from '@/store'
 import { useMotion } from '@/shared/hooks/useMotion'
@@ -15,6 +16,7 @@ const LazyMochiChat = lazy(() =>
 // ── S-7 Anti-scroll friction nudge ────────────────────────────────────────────
 // Non-blocking: shows 5 s then disappears on its own.
 function SessionFrictionNudge({ onDismiss }: { onDismiss: () => void }) {
+  const { t } = useTranslation()
   useEffect(() => {
     const id = setTimeout(onDismiss, 5000)
     return () => clearTimeout(id)
@@ -35,10 +37,10 @@ function SessionFrictionNudge({ onDismiss }: { onDismiss: () => void }) {
     >
       <span className="text-base">⏱️</span>
       <p className="text-[12px] flex-1 leading-snug" style={{ color: '#C8C0FF' }}>
-        Your focus session is still running 🌱
+        {t('appShell.sessionRunning')}
       </p>
       <button onClick={onDismiss} className="text-[10px] px-2 py-0.5 rounded-lg shrink-0" style={{ color: '#7B72FF' }}>
-        Got it
+        {t('appShell.gotIt')}
       </button>
     </motion.div>
   )
@@ -49,7 +51,8 @@ export function AppShell() {
   const isInFocus = sessionPhase === 'flow' || sessionPhase === 'struggle' || sessionPhase === 'release'
   const mochiChatOpenCount = useStore(s => s.mochiChatOpenCount)
   const incrementMochiChatOpen = useStore(s => s.incrementMochiChatOpen)
-  const { shouldAnimate, t } = useMotion()
+  const { shouldAnimate, t: transition } = useMotion()
+  const { t } = useTranslation()
   const location = useLocation()
   const prevPathRef = useRef(location.pathname)
 
@@ -118,7 +121,7 @@ export function AppShell() {
               initial={shouldAnimate ? { height: 0, opacity: 0 } : {}}
               animate={{ height: 'auto', opacity: 1 }}
               exit={shouldAnimate ? { height: 0, opacity: 0 } : {}}
-              transition={t()}
+              transition={transition()}
               className="overflow-hidden text-center text-xs py-1.5 px-4 sticky top-0 z-20"
               style={{
                 background: isOnline
@@ -128,8 +131,8 @@ export function AppShell() {
               }}
             >
               {isOnline
-                ? 'Back online — changes synced ✓'
-                : 'Offline — changes saved locally'}
+                ? t('appShell.backOnline')
+                : t('appShell.offline')}
             </motion.div>
           )}
         </AnimatePresence>

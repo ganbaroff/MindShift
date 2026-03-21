@@ -9,6 +9,7 @@
 import { useState, useMemo, useCallback } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Play, ChevronRight } from 'lucide-react'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { useUITone } from '@/shared/hooks/useUITone'
@@ -38,10 +39,16 @@ function getTimeBlock(): TimeBlock {
   return 'evening'
 }
 
-const GREETINGS: Record<TimeBlock, { en: string; emoji: string }> = {
-  morning:   { en: 'Good morning',   emoji: '☀️' },
-  afternoon: { en: 'Good afternoon', emoji: '🌤️' },
-  evening:   { en: 'Your day',       emoji: '🌙' },
+const GREETING_KEYS: Record<TimeBlock, string> = {
+  morning: 'today.morning',
+  afternoon: 'today.afternoon',
+  evening: 'today.evening',
+}
+
+const GREETING_EMOJI: Record<TimeBlock, string> = {
+  morning: '☀️',
+  afternoon: '🌤️',
+  evening: '🌙',
 }
 
 // ── Energy advice ─────────────────────────────────────────────────────────────
@@ -56,7 +63,8 @@ function getEnergyAdvice(level: EnergyLevel, taskCount: number, copy: { lowEnerg
 
 export default function TodayPage() {
   const navigate = useNavigate()
-  const { shouldAnimate, t } = useMotion()
+  const { shouldAnimate, t: transition } = useMotion()
+  const { t } = useTranslation()
   const { copy, density } = useUITone()
   const {
     nowPool, nextPool, somedayPool,
@@ -157,9 +165,7 @@ export default function TodayPage() {
   const handleCompleteTask = useCallback((taskId: string) => {
     const prevCount = mochiDiscoveries.length
     completeTask(taskId)
-    // Show transition nudge
     setJustCompleted(true)
-    // Check for new discovery (store updates synchronously)
     setTimeout(() => {
       const newDiscoveries = useStore.getState().mochiDiscoveries
       if (newDiscoveries.length > prevCount) {
@@ -174,8 +180,6 @@ export default function TodayPage() {
 
   // ── Render ────────────────────────────────────────────────────────────────
 
-  const greeting = GREETINGS[timeBlock]
-
   return (
     <PageTransition>
       <div className="px-4 pt-6 pb-4 space-y-4">
@@ -183,11 +187,11 @@ export default function TodayPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-[22px] font-bold" style={{ color: '#E8E8F0' }}>
-              {greeting.emoji} {greeting.en}
+              {GREETING_EMOJI[timeBlock]} {t(GREETING_KEYS[timeBlock])}
             </h1>
             {weeklyIntention && (
               <p className="text-[12px] mt-0.5" style={{ color: '#8B8BA7' }}>
-                This week: {weeklyIntention}
+                {t('today.thisWeek', { intention: weeklyIntention })}
               </p>
             )}
           </div>
@@ -202,7 +206,6 @@ export default function TodayPage() {
           </div>
         </div>
 
-        {/* ── Quick Capture ──────────────────────────────────────────────── */}
         {/* ── Welcome walkthrough (first time only) ────────────────────── */}
         <WelcomeWalkthrough />
 
@@ -210,14 +213,14 @@ export default function TodayPage() {
         <QuickCapture
           onSubmit={handleQuickSubmit}
           onExpand={handleQuickExpand}
-          placeholder="Add a task, reminder, or meeting..."
+          placeholder={t('quickCapture.placeholder')}
         />
 
         {/* ── First-time hints ───────────────────────────────────────────── */}
         <FeatureHint
           id="hint_quick_capture"
           icon="💡"
-          text="Try typing 'meeting with Roma tomorrow at 3pm' — it'll auto-detect the type, date, and time"
+          text={t('quickCapture.hint')}
           delay={2000}
         />
 
@@ -228,7 +231,7 @@ export default function TodayPage() {
               initial={shouldAnimate ? { opacity: 0, y: -8 } : false}
               animate={{ opacity: 1, y: 0 }}
               exit={shouldAnimate ? { opacity: 0, y: -8 } : {}}
-              transition={t()}
+              transition={transition()}
               className="px-3 py-2 rounded-xl"
               style={{
                 background: isLowEnergy
@@ -253,10 +256,10 @@ export default function TodayPage() {
               style={{ background: '#1E2136' }}
             >
               <div className="flex items-center gap-3">
-                <StatPill label="Tasks" value={todayTasks.length} color="#4ECDC4" />
-                <StatPill label="Focus" value={`${todayFocusMin}m`} color="#7B72FF" />
+                <StatPill label={t('today.tasks')} value={todayTasks.length} color="#4ECDC4" />
+                <StatPill label={t('today.focus')} value={`${todayFocusMin}m`} color="#7B72FF" />
                 {completedToday.length > 0 && (
-                  <StatPill label="Done" value={completedToday.length} color="#F59E0B" />
+                  <StatPill label={t('today.done')} value={completedToday.length} color="#F59E0B" />
                 )}
               </div>
               {dailyFocusGoalMin > 0 && (
@@ -281,7 +284,7 @@ export default function TodayPage() {
             {todayTasks.length > 0 ? (
               <div className="space-y-1.5">
                 <h2 className="text-[13px] font-semibold px-1" style={{ color: '#8B8BA7' }}>
-                  Today
+                  {t('today.todayLabel')}
                 </h2>
                 {(isLowEnergy ? todayTasks.slice(0, 2) : todayTasks).map(task => (
                   <TaskCard
@@ -293,7 +296,7 @@ export default function TodayPage() {
                 ))}
                 {isLowEnergy && todayTasks.length > 2 && (
                   <p className="text-[11px] px-1" style={{ color: '#8B8BA7' }}>
-                    +{todayTasks.length - 2} more — focus on these first
+                    {t('today.moreFirst', { count: todayTasks.length - 2 })}
                   </p>
                 )}
               </div>
@@ -304,17 +307,17 @@ export default function TodayPage() {
               >
                 <p className="text-[28px] mb-1">🌿</p>
                 <p className="text-[14px] font-medium" style={{ color: '#E8E8F0' }}>
-                  Clear day ahead
+                  {t('today.clearDay')}
                 </p>
                 <p className="text-[12px]" style={{ color: '#8B8BA7' }}>
-                  Add something or try a sample task
+                  {t('today.addOrSample')}
                 </p>
                 {completedTotal === 0 && (
                   <button
                     onClick={() => {
                       const sample: Task = {
                         id: crypto.randomUUID(),
-                        title: 'Try a 5-minute focus session',
+                        title: t('today.sampleTask'),
                         pool: 'now',
                         status: 'active',
                         difficulty: 1,
@@ -339,7 +342,7 @@ export default function TodayPage() {
                       border: '1px solid rgba(123,114,255,0.2)',
                     }}
                   >
-                    Add a sample task
+                    {t('today.addSample')}
                   </button>
                 )}
               </div>
@@ -349,7 +352,7 @@ export default function TodayPage() {
             {activeTasks.length > 0 && todayTasks.length === 0 && (
               <div className="space-y-1.5">
                 <h2 className="text-[13px] font-semibold px-1" style={{ color: '#8B8BA7' }}>
-                  In your NOW pool
+                  {t('today.nowPool')}
                 </h2>
                 {activeTasks.slice(0, isLowEnergy ? 1 : density === 'compact' ? 2 : 3).map(task => (
                   <TaskCard
@@ -375,18 +378,18 @@ export default function TodayPage() {
               }}
             >
               <h2 className="text-[15px] font-semibold" style={{ color: '#E8E8F0' }}>
-                Today's wrap-up
+                {t('today.wrapUp')}
               </h2>
               <div className="flex gap-4">
-                <RecapStat emoji="✅" value={completedToday.length} label="done" />
-                <RecapStat emoji="⏱" value={`${todayFocusMin}m`} label="focused" />
+                <RecapStat emoji="✅" value={completedToday.length} label={t('today.done')} />
+                <RecapStat emoji="⏱" value={`${todayFocusMin}m`} label={t('today.focused')} />
                 {density !== 'compact' && (
-                  <RecapStat emoji="📊" value={completedTotal} label="total" />
+                  <RecapStat emoji="📊" value={completedTotal} label={t('today.total')} />
                 )}
               </div>
               {completedToday.length === 0 && todayFocusMin === 0 && (
                 <p className="text-[12px]" style={{ color: '#8B8BA7' }}>
-                  {copy.streakBreak}
+                  {t('today.quietDay')}
                 </p>
               )}
               {completedToday.length > 0 && (
@@ -400,7 +403,7 @@ export default function TodayPage() {
             {tomorrowTasks.length > 0 && (
               <div className="space-y-1.5">
                 <h2 className="text-[13px] font-semibold px-1" style={{ color: '#8B8BA7' }}>
-                  Tomorrow
+                  {t('today.tomorrow')}
                 </h2>
                 {tomorrowTasks.slice(0, 3).map(task => (
                   <TaskCard
@@ -416,7 +419,7 @@ export default function TodayPage() {
                     className="text-[12px] flex items-center gap-1 px-1 focus-visible:ring-2 focus-visible:ring-[#7B72FF] rounded"
                     style={{ color: '#7B72FF' }}
                   >
-                    +{tomorrowTasks.length - 3} more <ChevronRight size={12} />
+                    {t('today.more', { count: tomorrowTasks.length - 3 })} <ChevronRight size={12} />
                   </button>
                 )}
               </div>
@@ -426,7 +429,7 @@ export default function TodayPage() {
             {activeTasks.length > 0 && (
               <div className="space-y-1.5">
                 <h2 className="text-[13px] font-semibold px-1" style={{ color: '#8B8BA7' }}>
-                  Still in NOW
+                  {t('today.stillInNow')}
                 </h2>
                 {activeTasks.slice(0, 2).map(task => (
                   <TaskCard
@@ -467,12 +470,12 @@ export default function TodayPage() {
             color: '#FFFFFF',
           }}
           whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
-          aria-label={firstTask ? `Start focusing on ${firstTask.title}` : 'Start a focus session'}
+          aria-label={firstTask ? t('today.focusOn', { title: firstTask.title }) : t('today.startFocus')}
         >
           <Play size={16} fill="white" />
           {firstTask
-            ? `Focus on: ${firstTask.title.length > 28 ? firstTask.title.slice(0, 28) + '...' : firstTask.title}`
-            : 'Start a focus session'
+            ? t('today.focusOn', { title: firstTask.title.length > 28 ? firstTask.title.slice(0, 28) + '...' : firstTask.title })
+            : t('today.startFocus')
           }
         </motion.button>
 
@@ -482,7 +485,7 @@ export default function TodayPage() {
           className="w-full py-2 rounded-xl text-[12px] font-medium text-center focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
           style={{ color: '#8B8BA7' }}
         >
-          View progress →
+          {t('today.viewProgress')}
         </button>
       </div>
 
@@ -521,4 +524,3 @@ function RecapStat({ emoji, value, label }: { emoji: string; value: string | num
     </div>
   )
 }
-
