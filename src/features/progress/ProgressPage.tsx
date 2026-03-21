@@ -24,15 +24,23 @@ export default function ProgressPage() {
   const { shouldAnimate } = useMotion();
   const {
     xpTotal, completedTotal, achievements, weeklyStats, burnoutScore,
-    psychotype, setPsychotype, setPsychotypeLastDerived, resetGridToDefaults,
+    psychotype, setPsychotype, psychotypeLastDerived, setPsychotypeLastDerived, resetGridToDefaults,
   } = useStore();
   const { energyTrend, weeklyInsight, loading, sessions } = useSessionHistory();
 
   const xpSafe = xpTotal ?? 0;
   const shareSupported = canShare();
 
-  // O-7: Derive psychotype from usage patterns once sessions load
-  const derivedPsychotype = useMemo(() => deriveFromSessions(sessions), [sessions])
+  // O-7: Derive psychotype from usage patterns — max once per 7 days
+  const derivationCooldown = (() => {
+    if (!psychotypeLastDerived) return false
+    const daysSince = (Date.now() - new Date(psychotypeLastDerived).getTime()) / 86_400_000
+    return daysSince < 7
+  })()
+  const derivedPsychotype = useMemo(
+    () => derivationCooldown ? null : deriveFromSessions(sessions),
+    [sessions, derivationCooldown],
+  )
   const psychotypeEvolved =
     derivedPsychotype !== null &&
     psychotype !== null &&

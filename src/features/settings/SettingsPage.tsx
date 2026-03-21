@@ -427,8 +427,8 @@ export default function SettingsPage() {
             </div>
           ) : (
             <div className="space-y-2">
-              <p className="text-[12px]" style={{ color: '#8B8BA7' }}>
-                Add tasks and notes by messaging our Telegram bot
+              <p className="text-[12px] leading-relaxed" style={{ color: '#8B8BA7' }}>
+                Send tasks to MindShift from Telegram. Just message the bot and your tasks appear here.
               </p>
               <motion.button
                 whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
@@ -439,6 +439,9 @@ export default function SettingsPage() {
               >
                 Connect Telegram
               </motion.button>
+              <p className="text-[11px]" style={{ color: '#8B8BA7' }}>
+                You'll get a code to send to @MindShiftBot on Telegram
+              </p>
             </div>
           )}
         </Section>
