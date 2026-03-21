@@ -6,6 +6,7 @@ import { BottomNav } from './BottomNav'
 import { useStore } from '@/store'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { useDeadlineReminders } from '@/shared/hooks/useDeadlineReminders'
+import { usePushSubscription } from '@/shared/hooks/usePushSubscription'
 import { InstallBanner } from '@/shared/ui/InstallBanner'
 import { Mascot } from '@/shared/ui/Mascot'
 
@@ -66,6 +67,8 @@ export function AppShell() {
 
   // Deadline reminders — gentle, tone-aware nudges for upcoming due dates
   useDeadlineReminders()
+  // Push subscription — persists Web Push sub to Supabase for background reminders
+  usePushSubscription()
 
   // S-7: detect navigation away from /focus while session is active
   useEffect(() => {
