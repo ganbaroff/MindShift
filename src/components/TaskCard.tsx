@@ -1,6 +1,7 @@
 import { memo, useState, useRef, useEffect, useCallback } from 'react';
 import { motion } from 'motion/react';
 import { Pencil, Check, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useMotion } from '@/shared/hooks/useMotion';
 import { hapticDone } from '@/shared/lib/haptic';
 import { DIFFICULTY_MAP, TASK_TYPE_CONFIG, CATEGORY_CONFIG } from '@/types';
@@ -54,6 +55,7 @@ const COMPLETION_TOASTS: Record<string, string[]> = {
 
 function TaskCardInner({ task, index = 0, onDone, onPark, onRemove }: TaskCardProps) {
   const { shouldAnimate } = useMotion();
+  const { t } = useTranslation();
   const [justCompleted, setJustCompleted] = useState(false);
   const emotionalReactivity = useStore(s => s.emotionalReactivity);
   const updateTask = useStore(s => s.updateTask);
@@ -160,7 +162,7 @@ function TaskCardInner({ task, index = 0, onDone, onPark, onRemove }: TaskCardPr
     toast(msg, {
       duration: 4000,
       action: {
-        label: 'Undo',
+        label: t('taskCard.undo'),
         onClick: () => {
           // Cancel deferred completion
           if (undoTimerRef.current) {
@@ -221,7 +223,7 @@ function TaskCardInner({ task, index = 0, onDone, onPark, onRemove }: TaskCardPr
               style={{ backgroundColor: 'rgba(78,205,196,0.12)', color: '#4ECDC4' }}
               aria-label="Save edit"
             >
-              <Check size={14} /> Save
+              <Check size={14} /> {t('taskCard.save')}
             </button>
             <button
               onClick={handleEditCancel}
@@ -229,7 +231,7 @@ function TaskCardInner({ task, index = 0, onDone, onPark, onRemove }: TaskCardPr
               style={{ backgroundColor: '#252840', color: '#8B8BA7' }}
               aria-label="Cancel edit"
             >
-              <X size={14} /> Cancel
+              <X size={14} /> {t('taskCard.cancel')}
             </button>
           </div>
         </div>
@@ -281,7 +283,7 @@ function TaskCardInner({ task, index = 0, onDone, onPark, onRemove }: TaskCardPr
             className="text-[10px] px-1.5 py-0.5 rounded-full"
             style={{ backgroundColor: 'rgba(245,158,11,0.15)', color: '#F59E0B' }}
           >
-            carry-over
+            {t('taskCard.carryOver')}
           </span>
         )}
         {/* Edit button */}
@@ -348,7 +350,7 @@ function TaskCardInner({ task, index = 0, onDone, onPark, onRemove }: TaskCardPr
             color: '#4ECDC4',
           }}
         >
-          {justCompleted ? '✓ Done!' : '✓ Done'}
+          {justCompleted ? t('taskCard.doneComplete') : t('taskCard.done')}
         </motion.button>
         <motion.button
           whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
@@ -356,7 +358,7 @@ function TaskCardInner({ task, index = 0, onDone, onPark, onRemove }: TaskCardPr
           className="flex-1 h-9 rounded-xl text-[13px] font-medium focus-visible:ring-2 focus-visible:ring-ms-primary/50 focus-visible:outline-none"
           style={{ backgroundColor: '#252840', color: '#8B8BA7' }}
         >
-          Park it →
+          {t('taskCard.parkIt')}
         </motion.button>
         {onRemove && (
           <motion.button
@@ -370,7 +372,7 @@ function TaskCardInner({ task, index = 0, onDone, onPark, onRemove }: TaskCardPr
             }}
             aria-label={confirmRemove ? 'Confirm remove task' : 'Remove task'}
           >
-            {confirmRemove ? 'Remove?' : '×'}
+            {confirmRemove ? t('taskCard.remove') : '×'}
           </motion.button>
         )}
       </div>

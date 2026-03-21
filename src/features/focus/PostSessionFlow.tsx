@@ -13,6 +13,7 @@
 import { memo, useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useMotion } from '@/shared/hooks/useMotion'
 import type { EnergyLevel, SessionPhase } from '@/types'
 import { ENERGY_LABELS, ENERGY_EMOJI } from '@/shared/lib/constants'
@@ -24,16 +25,16 @@ import { ENERGY_LABELS, ENERGY_EMOJI } from '@/shared/lib/constants'
 const HYPERFOCUS_THRESHOLD_MIN = 45
 
 const AUTOPSY_OPTIONS = [
-  { key: 'flow',     emoji: '🌊', label: 'Found my flow',   desc: 'Deep concentration, time flew' },
-  { key: 'steady',   emoji: '🌱', label: 'Steady progress', desc: 'Focused but aware of time' },
-  { key: 'scattered',emoji: '🌀', label: 'Bit scattered',   desc: 'Distractions crept in' },
+  { key: 'flow',     emoji: '🌊', i18nKey: 'focus.autopsyFlow' },
+  { key: 'steady',   emoji: '🌱', i18nKey: 'focus.autopsySteady' },
+  { key: 'scattered',emoji: '🌀', i18nKey: 'focus.autopsyScattered' },
 ] as const
 
 // ── Emotionally-adaptive closing messages ────────────────────────────────────
 // emotionalReactivity shapes the post-session tone: high = extra-gentle,
 // steady = direct, moderate/null = default warm message.
 
-function getClosingMessage(
+function getClosingMessageKey(
   emotionalReactivity: 'high' | 'moderate' | 'steady' | null | undefined,
   sessionMinutes: number,
   sessionPhase: SessionPhase | undefined,
@@ -42,16 +43,15 @@ function getClosingMessage(
   const reachedFlow = sessionPhase === 'flow'
 
   if (emotionalReactivity === 'high') {
-    if (isShort) return 'Short sessions count. Your brain needed a break, and you listened.'
-    if (reachedFlow) return 'You found your flow despite the noise. That takes real strength.'
-    return 'You showed up and did the work. Let your mind settle now.'
+    if (isShort) return 'focus.closingHighShort'
+    if (reachedFlow) return 'focus.closingHighFlow'
+    return 'focus.closingHighDefault'
   }
   if (emotionalReactivity === 'steady') {
-    if (reachedFlow) return 'Flow reached. Good session. Rest up.'
-    return 'Session done. Take a beat before the next one.'
+    if (reachedFlow) return 'focus.closingSteadyFlow'
+    return 'focus.closingSteadyDefault'
   }
-  // moderate or null — default warm message
-  return 'Session done. Let your mind settle before the next one.'
+  return 'focus.closingDefault'
 }
 
 // ── Nature Buffer Screen ───────────────────────────────────────────────────────
@@ -85,7 +85,8 @@ export const NatureBuffer = memo(function NatureBuffer({
   bufferSeconds, postEnergyLogged, onSetEnergyLevel, onSkip, sessionMinutes = 0,
   emotionalReactivity, sessionPhase, parkedThoughtsCount = 0, onAutopsyPick,
 }: NatureBufferProps) {
-  const { shouldAnimate, t } = useMotion()
+  const { shouldAnimate, t: transition } = useMotion()
+  const { t } = useTranslation()
   const [autopsyPick, setAutopsyPick] = useState<string | null>(null)
   // High emotional reactivity + short struggle session: hide autopsy (could feel judgmental)
   const isShortStruggle = sessionMinutes < 10 && sessionPhase === 'struggle'
@@ -102,15 +103,15 @@ export const NatureBuffer = memo(function NatureBuffer({
       <motion.div
         initial={shouldAnimate ? { opacity: 0, scale: 0.9 } : {}}
         animate={{ opacity: 1, scale: 1 }}
-        transition={t()}
+        transition={transition()}
         className="flex flex-col items-center"
       >
         <div className="text-5xl mb-6">🌿</div>
         <h2 className="text-2xl font-bold mb-2" style={{ color: '#4ECDC4' }}>
-          Time to breathe 🌿
+          {t('focus.breathe')}
         </h2>
         <p className="text-sm mb-8 max-w-xs leading-relaxed" style={{ color: '#8B8BA7' }}>
-          {getClosingMessage(emotionalReactivity, sessionMinutes, sessionPhase)}
+          {t(getClosingMessageKey(emotionalReactivity, sessionMinutes, sessionPhase))}
         </p>
 
         <div
@@ -120,7 +121,7 @@ export const NatureBuffer = memo(function NatureBuffer({
           <p className="font-mono text-3xl font-bold" style={{ color: '#4ECDC4' }}>
             {bm}:{bs.toString().padStart(2, '0')}
           </p>
-          <p className="text-xs mt-1" style={{ color: '#8B8BA7' }}>until next session</p>
+          <p className="text-xs mt-1" style={{ color: '#8B8BA7' }}>{t('focus.untilNext')}</p>
         </div>
 
         {/* Hyperfocus Autopsy — B-6: shown when session ≥ 45 min */}
@@ -129,18 +130,18 @@ export const NatureBuffer = memo(function NatureBuffer({
             <motion.div
               initial={shouldAnimate ? { opacity: 0, y: 12 } : {}}
               animate={{ opacity: 1, y: 0 }}
-              transition={t()}
+              transition={transition()}
               className="w-full max-w-xs mb-4 p-3 rounded-2xl"
               style={{ background: '#1E2136', border: '1px solid rgba(123,114,255,0.15)' }}
             >
               <p className="text-xs font-medium mb-1 text-center" style={{ color: '#7B72FF' }}>
-                {sessionMinutes}+ minutes — how did that feel? ✨
+                {t('focus.autopsyTitle', { min: sessionMinutes })}
               </p>
               <p className="text-[11px] mb-3 text-center" style={{ color: '#5A5B72' }}>
-                No right answer — just notice
+                {t('focus.autopsySubtitle')}
               </p>
               <div className="flex gap-2">
-                {AUTOPSY_OPTIONS.map(({ key, emoji, label }) => (
+                {AUTOPSY_OPTIONS.map(({ key, emoji, i18nKey }) => (
                   <button
                     key={key}
                     onClick={() => { setAutopsyPick(key); onAutopsyPick?.(key) }}
@@ -153,7 +154,7 @@ export const NatureBuffer = memo(function NatureBuffer({
                     aria-pressed={autopsyPick === key}
                   >
                     <span className="text-base leading-none">{emoji}</span>
-                    <span className="text-[10px] leading-tight text-center">{label}</span>
+                    <span className="text-[10px] leading-tight text-center">{t(i18nKey)}</span>
                   </button>
                 ))}
               </div>
@@ -168,7 +169,7 @@ export const NatureBuffer = memo(function NatureBuffer({
             style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)' }}
           >
             <p className="text-xs font-medium mb-2 text-center" style={{ color: '#8B8BA7' }}>
-              How do you feel after that session?
+              {t('focus.energyCheckIn')}
             </p>
             <div className="flex justify-between gap-1">
               {ENERGY_OPTIONS.map(({ level, emoji, label }) => (
@@ -200,7 +201,7 @@ export const NatureBuffer = memo(function NatureBuffer({
           }}
           aria-label="Skip nature buffer"
         >
-          I'm ready
+          {t('focus.imReady')}
         </button>
       </motion.div>
     </div>
@@ -211,29 +212,32 @@ export const NatureBuffer = memo(function NatureBuffer({
 
 function ParkedThoughtsNudge({ count }: { count: number }) {
   const navigate = useNavigate()
-  const { shouldAnimate, t } = useMotion()
-  const label = count === 1 ? '1 thought' : `${count} thoughts`
+  const { shouldAnimate, t: transition } = useMotion()
+  const { t } = useTranslation()
+  const label = count === 1
+    ? t('focus.thoughtsSaved', { count })
+    : t('focus.thoughtsSavedPlural', { count })
 
   return (
     <motion.button
       initial={shouldAnimate ? { opacity: 0, y: 8 } : {}}
       animate={{ opacity: 1, y: 0 }}
-      transition={t()}
+      transition={transition()}
       onClick={() => navigate('/tasks')}
       className="w-full max-w-xs mb-4 p-3 rounded-2xl flex items-center gap-3 text-left"
       style={{
         background: 'rgba(78,205,196,0.08)',
         border: '1px solid rgba(78,205,196,0.2)',
       }}
-      aria-label={`View ${label} saved to Someday`}
+      aria-label={label}
     >
       <span className="text-xl">💭</span>
       <div className="flex-1">
         <p className="text-[13px] font-medium" style={{ color: '#4ECDC4' }}>
-          {label} saved
+          {label}
         </p>
         <p className="text-[11px]" style={{ color: '#8B8BA7' }}>
-          Tap to see them in Someday
+          {t('focus.tapToSeeSomeday')}
         </p>
       </div>
       <span className="text-sm" style={{ color: '#8B8BA7' }}>→</span>
@@ -251,9 +255,17 @@ interface RecoveryLockProps {
 export const RecoveryLock = memo(function RecoveryLock({
   recoverySeconds, onBypass,
 }: RecoveryLockProps) {
-  const { shouldAnimate, t } = useMotion()
+  const { shouldAnimate, t: transition } = useMotion()
+  const { t } = useTranslation()
   const rm = Math.floor(recoverySeconds / 60)
   const rs = recoverySeconds % 60
+
+  const suggestions = [
+    t('focus.drinkWater'),
+    t('focus.lookAway'),
+    t('focus.deepBreaths'),
+    t('focus.stretchNeck'),
+  ]
 
   return (
     // Soft recovery suggestion (NOT a hard lock)
@@ -266,16 +278,15 @@ export const RecoveryLock = memo(function RecoveryLock({
       <motion.div
         initial={shouldAnimate ? { opacity: 0, scale: 0.9 } : {}}
         animate={{ opacity: 1, scale: 1 }}
-        transition={t()}
+        transition={transition()}
         className="flex flex-col items-center"
       >
         <div className="text-5xl mb-6">🌿</div>
         <h2 className="text-2xl font-bold mb-2" style={{ color: '#4ECDC4' }}>
-          90 minutes of deep focus 🌊
+          {t('focus.recoveryTitle')}
         </h2>
         <p className="text-sm mb-6 max-w-xs leading-relaxed" style={{ color: '#8B8BA7' }}>
-          You just did 90 minutes of deep focus. Your brain consolidates learning during rest —
-          even a short break helps.
+          {t('focus.recoveryDesc')}
         </p>
 
         {/* Gentle suggestions */}
@@ -283,8 +294,8 @@ export const RecoveryLock = memo(function RecoveryLock({
           className="w-full max-w-xs mb-6 p-4 rounded-2xl text-left"
           style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)' }}
         >
-          <p className="text-xs font-medium mb-3" style={{ color: '#8B8BA7' }}>Try one of these 🌱</p>
-          {['Drink a glass of water', 'Look away from the screen', 'Take 5 deep breaths', 'Stretch your neck and shoulders'].map(s => (
+          <p className="text-xs font-medium mb-3" style={{ color: '#8B8BA7' }}>{t('focus.trySuggestions')}</p>
+          {suggestions.map(s => (
             <p key={s} className="text-sm mb-1.5" style={{ color: '#E8E8F0' }}>· {s}</p>
           ))}
         </div>
@@ -297,7 +308,7 @@ export const RecoveryLock = memo(function RecoveryLock({
           <p className="font-mono text-2xl font-bold" style={{ color: '#4ECDC4' }}>
             {rm}:{rs.toString().padStart(2, '0')}
           </p>
-          <p className="text-xs mt-1" style={{ color: '#8B8BA7' }}>suggested rest time</p>
+          <p className="text-xs mt-1" style={{ color: '#8B8BA7' }}>{t('focus.suggestedRest')}</p>
         </div>
 
         {/* Continue anyway — hyperfocus support */}
@@ -311,7 +322,7 @@ export const RecoveryLock = memo(function RecoveryLock({
           }}
           aria-label="Bypass recovery suggestion"
         >
-          I know — keep going →
+          {t('focus.keepGoingBypass')}
         </button>
       </motion.div>
     </div>

@@ -5,6 +5,7 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'motion/react'
+import { useTranslation } from 'react-i18next'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { useStore } from '@/store'
 import { toast } from 'sonner'
@@ -66,19 +67,20 @@ interface RescheduleSheetProps {
 
 function RescheduleSheet({ task, onClose, onNavigate }: RescheduleSheetProps) {
   const { setTaskDueDate } = useStore()
+  const { t } = useTranslation()
   const [newDate, setNewDate] = useState(task.dueDate ?? '')
   const diffColor = DIFFICULTY_MAP[task.difficulty]?.color ?? '#7B72FF'
 
   const handleReschedule = () => {
     if (!newDate) return
     setTaskDueDate(task.id, newDate, task.dueTime)
-    toast('Due date updated 📅')
+    toast(t('calendar.dateUpdated'))
     onClose()
   }
 
   const handleClearDate = () => {
     setTaskDueDate(task.id, null, null)
-    toast('Due date removed')
+    toast(t('calendar.dateRemoved'))
     onClose()
   }
 
@@ -115,7 +117,7 @@ function RescheduleSheet({ task, onClose, onNavigate }: RescheduleSheetProps) {
 
         {/* Reschedule date input */}
         <label className="block text-xs mb-1" style={{ color: 'var(--color-muted)' }}>
-          Reschedule to
+          {t('calendar.rescheduleTo')}
         </label>
         <input
           type="date"
@@ -142,7 +144,7 @@ function RescheduleSheet({ task, onClose, onNavigate }: RescheduleSheetProps) {
               color: newDate && newDate !== task.dueDate ? 'var(--color-primary)' : 'var(--color-muted)',
             }}
           >
-            Save new date
+            {t('calendar.saveNewDate')}
           </button>
           <button
             onClick={onNavigate}
@@ -153,14 +155,14 @@ function RescheduleSheet({ task, onClose, onNavigate }: RescheduleSheetProps) {
               color: 'var(--color-text)',
             }}
           >
-            Go to task →
+            {t('calendar.goToTask')}
           </button>
           <button
             onClick={handleClearDate}
             className="w-full py-2 text-xs transition-all duration-200"
             style={{ color: 'var(--color-muted)' }}
           >
-            Remove due date
+            {t('calendar.removeDueDate')}
           </button>
         </div>
       </motion.div>
@@ -200,7 +202,8 @@ function TaskRow({ task, onTap }: { task: Task; onTap: (t: Task) => void }) {
 
 export default function DueDateScreen() {
   const { nowPool, nextPool, somedayPool } = useStore()
-  const { shouldAnimate, t } = useMotion()
+  const { shouldAnimate, t: transition } = useMotion()
+  const { t } = useTranslation()
   const navigate = useNavigate()
 
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
@@ -211,23 +214,23 @@ export default function DueDateScreen() {
   )
 
   const grouped = useMemo(() => groupTasksByDueDate(allTasks), [allTasks])
-  const hasDueTasks = allTasks.some(t => t.dueDate && t.status === 'active')
+  const hasDueTasks = allTasks.some(task => task.dueDate && task.status === 'active')
 
   return (
     <>
       <motion.div
         initial={shouldAnimate ? { opacity: 0, y: 10 } : {}}
         animate={{ opacity: 1, y: 0 }}
-        transition={t()}
+        transition={transition()}
         className="flex flex-col pb-[calc(112px+env(safe-area-inset-bottom))]"
       >
         {/* Header */}
         <div className="px-5 pt-10 pb-6">
           <h1 className="text-2xl font-bold" style={{ color: 'var(--color-text)' }}>
-            Upcoming
+            {t('calendar.upcoming')}
           </h1>
           <p className="text-sm mt-1" style={{ color: 'var(--color-muted)' }}>
-            Tap a task to reschedule
+            {t('calendar.tapToReschedule')}
           </p>
         </div>
 
@@ -236,10 +239,10 @@ export default function DueDateScreen() {
           <div className="px-5 py-12 flex flex-col items-center gap-3">
             <p className="text-4xl">📅</p>
             <p className="text-base font-medium text-center" style={{ color: 'var(--color-text)' }}>
-              No upcoming tasks
+              {t('calendar.noUpcoming')}
             </p>
             <p className="text-sm text-center" style={{ color: 'var(--color-muted)' }}>
-              Add a due date when creating a task.
+              {t('calendar.addDueDate')}
             </p>
           </div>
         )}
@@ -249,7 +252,7 @@ export default function DueDateScreen() {
           <div className="px-5 flex flex-col gap-5">
             {grouped.today.length > 0 && (
               <div>
-                <SectionHeader title="Today" color="#7B72FF" count={grouped.today.length} />
+                <SectionHeader title={t('calendar.today')} color="#7B72FF" count={grouped.today.length} />
                 <div className="flex flex-col gap-2">
                   {grouped.today.map(task => <TaskRow key={task.id} task={task} onTap={setSelectedTask} />)}
                 </div>
@@ -258,7 +261,7 @@ export default function DueDateScreen() {
 
             {grouped.tomorrow.length > 0 && (
               <div>
-                <SectionHeader title="Tomorrow" color="#4ECDC4" count={grouped.tomorrow.length} />
+                <SectionHeader title={t('calendar.tomorrow')} color="#4ECDC4" count={grouped.tomorrow.length} />
                 <div className="flex flex-col gap-2">
                   {grouped.tomorrow.map(task => <TaskRow key={task.id} task={task} onTap={setSelectedTask} />)}
                 </div>
@@ -267,7 +270,7 @@ export default function DueDateScreen() {
 
             {grouped.thisWeek.length > 0 && (
               <div>
-                <SectionHeader title="This Week" color="#E8E8F0" count={grouped.thisWeek.length} />
+                <SectionHeader title={t('calendar.thisWeek')} color="#E8E8F0" count={grouped.thisWeek.length} />
                 <div className="flex flex-col gap-2">
                   {grouped.thisWeek.map(task => <TaskRow key={task.id} task={task} onTap={setSelectedTask} />)}
                 </div>
@@ -276,7 +279,7 @@ export default function DueDateScreen() {
 
             {grouped.later.length > 0 && (
               <div>
-                <SectionHeader title="Later" color="#8B8BA7" count={grouped.later.length} />
+                <SectionHeader title={t('calendar.later')} color="#8B8BA7" count={grouped.later.length} />
                 <div className="flex flex-col gap-2">
                   {grouped.later.map(task => <TaskRow key={task.id} task={task} onTap={setSelectedTask} />)}
                 </div>
