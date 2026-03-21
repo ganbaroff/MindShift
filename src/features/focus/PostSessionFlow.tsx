@@ -67,6 +67,8 @@ interface NatureBufferProps {
   emotionalReactivity?: 'high' | 'moderate' | 'steady' | null
   /** Phase reached during the session — used with emotionalReactivity for tone */
   sessionPhase?: SessionPhase
+  /** Callback when user picks autopsy reflection — persists to store/DB */
+  onAutopsyPick?: (pick: string) => void
   /** Number of thoughts parked during this session */
   parkedThoughtsCount?: number
 }
@@ -81,7 +83,7 @@ const ENERGY_OPTIONS = [
 
 export const NatureBuffer = memo(function NatureBuffer({
   bufferSeconds, postEnergyLogged, onSetEnergyLevel, onSkip, sessionMinutes = 0,
-  emotionalReactivity, sessionPhase, parkedThoughtsCount = 0,
+  emotionalReactivity, sessionPhase, parkedThoughtsCount = 0, onAutopsyPick,
 }: NatureBufferProps) {
   const { shouldAnimate, t } = useMotion()
   const [autopsyPick, setAutopsyPick] = useState<string | null>(null)
@@ -141,7 +143,7 @@ export const NatureBuffer = memo(function NatureBuffer({
                 {AUTOPSY_OPTIONS.map(({ key, emoji, label }) => (
                   <button
                     key={key}
-                    onClick={() => setAutopsyPick(key)}
+                    onClick={() => { setAutopsyPick(key); onAutopsyPick?.(key) }}
                     className="flex-1 flex flex-col items-center gap-1 py-2 rounded-xl text-xs transition-all duration-150"
                     style={{
                       background: autopsyPick === key ? 'rgba(123,114,255,0.18)' : '#252840',

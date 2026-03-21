@@ -533,6 +533,16 @@ export function useFocusSession() {
     }
   }, [setEnergyLevel, userId])
 
+  // ── Autopsy pick persistence (B-6) ──────────────────────────────────────────
+  const handleAutopsyPick = useCallback((pick: string) => {
+    if (!savedSessionIdRef.current || !userId || userId.startsWith('guest_')) return
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    void (supabase.from('focus_sessions') as any)
+      .update({ phase_reached: pick })
+      .eq('id', savedSessionIdRef.current)
+      .then(({ error }: { error: unknown }) => { if (error) logError('useFocusSession.autopsy.update', error) })
+  }, [userId])
+
   // ── Derived ──────────────────────────────────────────────────────────────────
   const progress  = durationSecRef.current > 0 ? 1 - remainingSeconds / durationSecRef.current : 0
   const isFlow    = sessionPhase === 'flow'
@@ -575,6 +585,7 @@ export function useFocusSession() {
     handleAudioToggle, handleParkThought,
     handleSessionEnd, handleBypassRecovery, handleBypassHardStop,
     handlePostEnergy,
+    handleAutopsyPick,
     startInterval, intervalRef,
     // Audio
     isPlaying, audioVolume,
