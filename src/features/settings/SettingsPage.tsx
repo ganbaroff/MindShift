@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import i18n from '@/i18n';
 import { useMotion } from '@/shared/hooks/useMotion';
 import { useTranslation } from 'react-i18next';
 import EnergyPicker from '@/components/EnergyPicker';
@@ -227,7 +228,7 @@ export default function SettingsPage() {
                   setUserLocale(code)
                   // Switch i18n language immediately
                   const resolvedLang = code ?? navigator.language.split('-')[0]
-                  import('i18next').then(({ default: i18n }) => i18n.changeLanguage(resolvedLang))
+                  i18n.changeLanguage(resolvedLang)
                   toast(`Language: ${label}`)
                 }}
                 className="px-3 py-1.5 rounded-xl text-[13px] font-medium focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
