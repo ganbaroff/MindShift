@@ -112,6 +112,91 @@
   --color-teal-dark:     #2E7A77;
 }
 
+/* ── Light theme — ADHD-safe warm ivory ────────────────────── */
+/* Research: BDA style guide + CMU reading study → warm off-white */
+/* bg reduces glare vs pure #FFF; text avoids harsh #000        */
+[data-theme="light"] {
+  --color-bg:            #F5F3EE;
+  --color-surface:       #F5F3EE;
+  --color-card:          #FFFFFF;
+  --color-elevated:      #FFFFFF;
+  --color-surface-card:  #FFFFFF;
+  --color-surface-raised:#EBE8E2;
+
+  --color-text:          #1A1A2E;
+  --color-text-primary:  #1A1A2E;
+  --color-text-muted:    #5C5C6F;
+  --color-text-subtle:   #8B8B9E;
+  --color-muted:         #5C5C6F;
+
+  --color-primary:       #6C63FF;
+  --color-secondary:     #0EA89E;
+  --color-accent:        #D97706;
+  --color-teal:          #0EA89E;
+  --color-gold:          #D97706;
+  --color-warning:       #D97706;
+  --color-success:       #0EA89E;
+  --color-primary-dark:  #5B52E8;
+  --color-primary-light: #8B85FF;
+  --color-teal-dark:     #0C8A82;
+
+  --color-border:        #D8D5CE;
+  --color-border-subtle: rgba(0,0,0,0.06);
+  --color-banner-border: rgba(0,0,0,0.08);
+
+  --color-primary-alpha: rgba(108,99,255,0.10);
+  --color-border-accent: rgba(108,99,255,0.25);
+  --color-border-teal:   rgba(14,168,158,0.25);
+  --color-border-gold:   rgba(217,119,6,0.25);
+  --color-primary-ring:  rgba(108,99,255,0.25);
+  --color-teal-alpha:    rgba(14,168,158,0.12);
+  --color-gold-alpha:    rgba(217,119,6,0.10);
+  --color-glass-dark:    rgba(255,255,255,0.95);
+
+  --color-ms-primary:    #6C63FF;
+  --color-ms-teal:       #0EA89E;
+  --color-ms-gold:       #D97706;
+  --color-ms-purple:     #7C3AED;
+  --color-ms-bg:         #F5F3EE;
+  --color-ms-card:       #FFFFFF;
+  --color-ms-raised:     #EBE8E2;
+  --color-ms-text:       #1A1A2E;
+  --color-ms-muted:      #5C5C6F;
+
+  --background:          40 20% 95%;
+  --foreground:          233 30% 14%;
+  --card:                0 0% 100%;
+  --card-foreground:     233 30% 14%;
+  --card-raised:         35 15% 91%;
+  --popover:             0 0% 100%;
+  --popover-foreground:  233 30% 14%;
+  --primary:             244 100% 69%;
+  --primary-foreground:  0 0% 100%;
+  --secondary:           35 15% 91%;
+  --secondary-foreground:233 30% 14%;
+  --muted:               35 15% 91%;
+  --muted-foreground:    240 8% 40%;
+  --border:              35 10% 82%;
+  --input:               35 15% 91%;
+  --ring:                244 100% 69%;
+}
+
+/* Light + Calm — desaturated light palette */
+[data-theme="light"][data-mode="calm"] {
+  --color-primary:       #8080B8;
+  --color-teal:          #4A8A87;
+  --color-gold:          #9A7520;
+  --color-secondary:     #4A8A87;
+  --color-accent:        #9A7520;
+  --color-warning:       #9A7520;
+  --color-success:       #4A8A87;
+  --color-primary-dark:  #6060A0;
+  --color-primary-light: #A0A0CC;
+  --color-primary-alpha: rgba(128,128,184,0.10);
+  --color-border-accent: rgba(128,128,184,0.25);
+  --color-teal-dark:     #3A7A77;
+}
+
 /* ── Base ─────────────────────────────────────────────────── */
 @layer base {
   *, *::before, *::after {
@@ -155,7 +240,7 @@
 
 /* ── Utility classes ────────────────────────────────────── */
 .glass {
-  background: rgba(23, 26, 43, 0.95);
+  background: var(--color-glass-dark);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
 }
@@ -186,7 +271,7 @@
   #root {
     display: flex;
     justify-content: center;
-    background: #0A0C14;
+    background: var(--color-bg);
   }
 }
 

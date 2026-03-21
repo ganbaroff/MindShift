@@ -63,9 +63,9 @@ export const SessionControls = memo(function SessionControls({
               onClick={onAudioToggle}
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm transition-all duration-200"
               style={{
-                background: isPlaying ? 'rgba(78,205,196,0.12)' : '#1E2136',
-                border: `1.5px solid ${isPlaying ? '#4ECDC4' : 'rgba(255,255,255,0.06)'}`,
-                color: isPlaying ? '#4ECDC4' : '#8B8BA7',
+                background: isPlaying ? 'rgba(78,205,196,0.12)' : 'var(--color-surface-card)',
+                border: `1.5px solid ${isPlaying ? 'var(--color-teal)' : 'rgba(255,255,255,0.06)'}`,
+                color: isPlaying ? 'var(--color-teal)' : 'var(--color-text-muted)',
               }}
             >
               {isPlaying ? '🔊 Sound on' : '🔇 Sound off'}
@@ -74,7 +74,7 @@ export const SessionControls = memo(function SessionControls({
             {/* Volume slider — visible when audio is playing */}
             {isPlaying && (
               <div className="flex items-center gap-2.5 w-52">
-                <VolumeX size={14} style={{ color: '#8B8BA7', flexShrink: 0 }} />
+                <VolumeX size={14} style={{ color: 'var(--color-text-muted)', flexShrink: 0 }} />
                 <input
                   type="range"
                   min={0}
@@ -84,9 +84,9 @@ export const SessionControls = memo(function SessionControls({
                   onChange={(e) => onVolumeChange(parseFloat(e.target.value))}
                   aria-label="Audio volume"
                   className="w-full h-1.5 rounded-full appearance-none cursor-pointer"
-                  style={{ accentColor: '#4ECDC4' }}
+                  style={{ accentColor: 'var(--color-teal)' }}
                 />
-                <Volume2 size={14} style={{ color: '#4ECDC4', flexShrink: 0 }} />
+                <Volume2 size={14} style={{ color: 'var(--color-teal)', flexShrink: 0 }} />
               </div>
             )}
 
@@ -97,7 +97,7 @@ export const SessionControls = memo(function SessionControls({
               style={{
                 background: 'transparent',
                 border: '1px solid rgba(255,255,255,0.06)',
-                color: '#8B8BA7',
+                color: 'var(--color-text-muted)',
               }}
             >
               End session
@@ -115,9 +115,9 @@ export const SessionControls = memo(function SessionControls({
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 10, scale: 0.95 }}
               className="mb-3 p-3 rounded-2xl w-64"
-              style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)' }}
+              style={{ background: 'var(--color-surface-card)', border: '1px solid rgba(255,255,255,0.06)' }}
             >
-              <p className="text-xs font-medium mb-2" style={{ color: '#8B8BA7' }}>
+              <p className="text-xs font-medium mb-2" style={{ color: 'var(--color-text-muted)' }}>
                 💭 Park a thought (goes to Someday)
               </p>
               <input
@@ -127,7 +127,7 @@ export const SessionControls = memo(function SessionControls({
                 placeholder="Quick note..."
                 autoFocus
                 className="w-full px-3 py-2 rounded-xl text-sm outline-none mb-2"
-                style={{ background: '#252840', border: '1px solid rgba(255,255,255,0.06)', color: '#E8E8F0' }}
+                style={{ background: 'var(--color-surface-raised)', border: '1px solid rgba(255,255,255,0.06)', color: 'var(--color-text-primary)' }}
               />
               <div className="flex gap-2">
                 <button
@@ -139,14 +139,14 @@ export const SessionControls = memo(function SessionControls({
                   }}
                   disabled={!parkText.trim()}
                   className="flex-1 py-1.5 rounded-lg text-xs font-medium"
-                  style={{ background: parkText.trim() ? '#7B72FF' : '#252840', color: 'white' }}
+                  style={{ background: parkText.trim() ? 'var(--color-primary)' : 'var(--color-surface-raised)', color: 'white' }}
                 >
                   Save
                 </button>
                 <button
                   onClick={onParkDismiss}
                   className="py-1.5 px-3 rounded-lg text-xs"
-                  style={{ color: '#8B8BA7' }}
+                  style={{ color: 'var(--color-text-muted)' }}
                 >
                   ✕
                 </button>
@@ -158,8 +158,8 @@ export const SessionControls = memo(function SessionControls({
           onClick={onParkToggle}
           className="w-11 h-11 rounded-full flex items-center justify-center text-lg shadow-lg"
           style={{
-            background: parkOpen ? '#7B72FF' : '#1E2136',
-            border: `1.5px solid ${parkOpen ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
+            background: parkOpen ? 'var(--color-primary)' : 'var(--color-surface-card)',
+            border: `1.5px solid ${parkOpen ? 'var(--color-primary)' : 'rgba(255,255,255,0.06)'}`,
           }}
           aria-label="Park a thought"
         >

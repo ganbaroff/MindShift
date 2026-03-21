@@ -52,7 +52,30 @@ const CALM: Palette = {
   flatMode:  true,
 }
 
+// ── Light mode palettes ───────────────────────────────────────────────────────
+// Accents darkened for APCA contrast on warm ivory #F5F3EE background
+const LIGHT: Palette = {
+  primary:   '#6C63FF',
+  teal:      '#0EA89E',
+  gold:      '#D97706',
+  glowAlpha: 0.5,         // subtle glows on light backgrounds
+  flatMode:  false,
+}
+
+const LIGHT_CALM: Palette = {
+  primary:   '#8080B8',
+  teal:      '#4A8A87',
+  gold:      '#9A7520',
+  glowAlpha: 0.0,
+  flatMode:  true,
+}
+
 export function usePalette(): Palette {
   const reducedStimulation = useStore(s => s.reducedStimulation)
+  const userTheme = useStore(s => s.userTheme)
+  const isLight = userTheme === 'light' ||
+    (userTheme === 'system' && typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: light)').matches)
+
+  if (isLight) return reducedStimulation ? LIGHT_CALM : LIGHT
   return reducedStimulation ? CALM : NORMAL
 }

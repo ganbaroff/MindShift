@@ -55,15 +55,15 @@ export function DifficultyPicker({ difficulty, onSelect }: DifficultyPickerProps
               aria-label={`Difficulty: ${c.label}`}
               className="flex-1 h-11 rounded-xl flex items-center justify-center gap-2 text-secondary font-medium transition-all"
               style={{
-                backgroundColor: sel ? `${c.color}20` : '#252840',
+                backgroundColor: sel ? `${c.color}20` : 'var(--color-surface-raised)',
                 borderWidth: sel ? 1.5 : 1,
                 borderColor: sel ? c.color : 'rgba(255,255,255,0.06)',
-                color: sel ? c.color : '#8B8BA7',
+                color: sel ? c.color : 'var(--color-text-muted)',
               }}
             >
               <div className="flex gap-0.5">
                 {Array.from({ length: d }).map((_, i) => (
-                  <div key={i} className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: sel ? c.color : '#8B8BA7' }} />
+                  <div key={i} className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: sel ? c.color : 'var(--color-text-muted)' }} />
                 ))}
               </div>
               {c.label}
@@ -90,7 +90,7 @@ export function DurationPicker({ minutes, onSelect, isSmartMode }: DurationPicke
       <div className="flex items-center gap-2 mb-2">
         <label className="text-caption text-ms-muted uppercase tracking-widest">{t('addTaskFields.time')}</label>
         {isSmartMode && (
-          <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: 'rgba(123,114,255,0.12)', color: '#7B72FF' }}>
+          <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: 'rgba(123,114,255,0.12)', color: 'var(--color-primary)' }}>
             ✨ {t('addTaskFields.smart')}
           </span>
         )}
@@ -107,8 +107,8 @@ export function DurationPicker({ minutes, onSelect, isSmartMode }: DurationPicke
               aria-label={`${d} minutes`}
               className="flex-1 h-11 rounded-full text-secondary font-medium transition-all"
               style={{
-                background: sel ? 'linear-gradient(135deg, #7B72FF, #8B7FF7)' : '#252840',
-                color: sel ? '#fff' : '#8B8BA7',
+                background: sel ? 'linear-gradient(135deg, #7B72FF, #8B7FF7)' : 'var(--color-surface-raised)',
+                color: sel ? '#fff' : 'var(--color-text-muted)',
                 borderWidth: sel ? 0 : 1,
                 borderColor: 'rgba(255,255,255,0.06)',
               }}
@@ -168,11 +168,11 @@ export function CategoryPicker({ category, showCategory, onToggle, onSelect, sho
                   aria-label={`Category: ${cfg.label}`}
                   className="h-9 px-3 rounded-xl flex items-center gap-1.5 text-[12px] font-medium transition-all"
                   style={{
-                    backgroundColor: sel ? 'rgba(123,114,255,0.15)' : '#252840',
+                    backgroundColor: sel ? 'rgba(123,114,255,0.15)' : 'var(--color-surface-raised)',
                     borderWidth: sel ? 1.5 : 1,
                     borderStyle: 'solid',
-                    borderColor: sel ? '#7B72FF' : 'rgba(255,255,255,0.06)',
-                    color: sel ? '#7B72FF' : '#8B8BA7',
+                    borderColor: sel ? 'var(--color-primary)' : 'rgba(255,255,255,0.06)',
+                    color: sel ? 'var(--color-primary)' : 'var(--color-text-muted)',
                   }}
                 >
                   <span>{cfg.emoji}</span>
@@ -196,7 +196,7 @@ export function RepeatPicker({ repeat, onSelect }: RepeatPickerProps) {
   const { t } = useTranslation();
   return (
     <div>
-      <p className="text-[12px] mb-1.5" style={{ color: '#8B8BA7' }}>{t('addTaskFields.repeat')}</p>
+      <p className="text-[12px] mb-1.5" style={{ color: 'var(--color-text-muted)' }}>{t('addTaskFields.repeat')}</p>
       <div className="flex gap-2">
         {(['none', 'daily', 'weekly'] as const).map(r => (
           <motion.button
@@ -207,9 +207,9 @@ export function RepeatPicker({ repeat, onSelect }: RepeatPickerProps) {
             aria-label={`Repeat: ${r === 'none' ? 'once' : r}`}
             className="flex-1 h-8 rounded-full text-[12px] font-medium capitalize"
             style={{
-              backgroundColor: repeat === r ? 'rgba(123,114,255,0.15)' : '#252840',
-              border: `${repeat === r ? 1.5 : 1}px solid ${repeat === r ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
-              color: repeat === r ? '#7B72FF' : '#8B8BA7',
+              backgroundColor: repeat === r ? 'rgba(123,114,255,0.15)' : 'var(--color-surface-raised)',
+              border: `${repeat === r ? 1.5 : 1}px solid ${repeat === r ? 'var(--color-primary)' : 'rgba(255,255,255,0.06)'}`,
+              color: repeat === r ? 'var(--color-primary)' : 'var(--color-text-muted)',
             }}
           >
             {r === 'none' ? t('addTaskFields.once') : r}
@@ -236,8 +236,8 @@ export function DueDatePicker({ dueDate, required, today, tomorrow, shouldAnimat
       <label className="text-caption text-ms-muted uppercase tracking-widest mb-2 block">
         {t('addTaskFields.dueDate')}{' '}
         {required
-          ? <span style={{ color: '#7B72FF' }}>{t('addTaskFields.required')}</span>
-          : <span style={{ color: '#4ECDC4' }}>{t('addTaskFields.optional')}</span>
+          ? <span style={{ color: 'var(--color-primary)' }}>{t('addTaskFields.required')}</span>
+          : <span style={{ color: 'var(--color-teal)' }}>{t('addTaskFields.optional')}</span>
         }
       </label>
       <div className="flex gap-2 mb-2">
@@ -255,11 +255,11 @@ export function DueDatePicker({ dueDate, required, today, tomorrow, shouldAnimat
               aria-label={`Due date: ${label}`}
               className="flex-1 h-9 rounded-xl text-secondary font-medium transition-all"
               style={{
-                backgroundColor: sel ? 'rgba(78,205,196,0.15)' : '#252840',
+                backgroundColor: sel ? 'rgba(78,205,196,0.15)' : 'var(--color-surface-raised)',
                 borderWidth: sel ? 1.5 : 1,
                 borderStyle: 'solid',
-                borderColor: sel ? '#4ECDC4' : 'rgba(255,255,255,0.06)',
-                color: sel ? '#4ECDC4' : '#8B8BA7',
+                borderColor: sel ? 'var(--color-teal)' : 'rgba(255,255,255,0.06)',
+                color: sel ? 'var(--color-teal)' : 'var(--color-text-muted)',
               }}
             >
               {label}
@@ -273,9 +273,9 @@ export function DueDatePicker({ dueDate, required, today, tomorrow, shouldAnimat
           onChange={e => onSelect(e.target.value || null)}
           className="flex-1 h-9 rounded-xl px-2 text-secondary outline-none transition-all"
           style={{
-            backgroundColor: (dueDate && dueDate !== today && dueDate !== tomorrow) ? 'rgba(123,114,255,0.15)' : '#252840',
-            border: `${(dueDate && dueDate !== today && dueDate !== tomorrow) ? 1.5 : 1}px solid ${(dueDate && dueDate !== today && dueDate !== tomorrow) ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
-            color: (dueDate && dueDate !== today && dueDate !== tomorrow) ? '#7B72FF' : '#8B8BA7',
+            backgroundColor: (dueDate && dueDate !== today && dueDate !== tomorrow) ? 'rgba(123,114,255,0.15)' : 'var(--color-surface-raised)',
+            border: `${(dueDate && dueDate !== today && dueDate !== tomorrow) ? 1.5 : 1}px solid ${(dueDate && dueDate !== today && dueDate !== tomorrow) ? 'var(--color-primary)' : 'rgba(255,255,255,0.06)'}`,
+            color: (dueDate && dueDate !== today && dueDate !== tomorrow) ? 'var(--color-primary)' : 'var(--color-text-muted)',
             colorScheme: 'dark',
           }}
         />
@@ -285,7 +285,7 @@ export function DueDatePicker({ dueDate, required, today, tomorrow, shouldAnimat
           initial={shouldAnimate ? { opacity: 0, y: -4 } : {}}
           animate={{ opacity: 1, y: 0 }}
           className="text-xs"
-          style={{ color: '#4ECDC4' }}
+          style={{ color: 'var(--color-teal)' }}
         >
           📅 {t('addTaskFields.dueDateHint')}
         </motion.p>
@@ -307,8 +307,8 @@ export function DueTimePicker({ dueTime, required, onSelect }: DueTimePickerProp
       <label className="text-caption text-ms-muted uppercase tracking-widest mb-2 block">
         {t('addTaskFields.timeLabel')}{' '}
         {required
-          ? <span style={{ color: '#7B72FF' }}>{t('addTaskFields.required')}</span>
-          : <span style={{ color: '#4ECDC4' }}>{t('addTaskFields.optional')}</span>
+          ? <span style={{ color: 'var(--color-primary)' }}>{t('addTaskFields.required')}</span>
+          : <span style={{ color: 'var(--color-teal)' }}>{t('addTaskFields.optional')}</span>
         }
       </label>
       <input
@@ -317,9 +317,9 @@ export function DueTimePicker({ dueTime, required, onSelect }: DueTimePickerProp
         onChange={e => onSelect(e.target.value || null)}
         className="w-full h-9 rounded-xl px-4 text-secondary outline-none transition-all"
         style={{
-          backgroundColor: dueTime ? 'rgba(123,114,255,0.15)' : '#252840',
-          border: `${dueTime ? 1.5 : 1}px solid ${dueTime ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
-          color: dueTime ? '#7B72FF' : '#8B8BA7',
+          backgroundColor: dueTime ? 'rgba(123,114,255,0.15)' : 'var(--color-surface-raised)',
+          border: `${dueTime ? 1.5 : 1}px solid ${dueTime ? 'var(--color-primary)' : 'rgba(255,255,255,0.06)'}`,
+          color: dueTime ? 'var(--color-primary)' : 'var(--color-text-muted)',
           colorScheme: 'dark',
         }}
       />

@@ -203,13 +203,13 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen px-5 flex flex-col" style={{ backgroundColor: '#0F1120' }}>
+    <div className="min-h-screen px-5 flex flex-col" style={{ backgroundColor: 'var(--color-bg)' }}>
       {/* Quick start — Duolingo-style: try before you configure */}
       {!isRevisit && step === 0 && (
         <button
           onClick={handleQuickStart}
           className="mt-safe mt-4 self-end text-[13px] px-3 py-1.5 rounded-xl focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
-          style={{ color: '#8B8BA7' }}
+          style={{ color: 'var(--color-text-muted)' }}
         >
           {t('onboarding.skipSetup')}
         </button>
@@ -232,7 +232,7 @@ export default function OnboardingPage() {
       <div className={isRevisit ? 'pt-4 mb-6' : 'pt-10 mb-6'}>
         <div className="flex gap-1.5 mb-2">
           {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
-            <div key={i} className="flex-1 h-1 rounded-full overflow-hidden" style={{ backgroundColor: '#252840' }}>
+            <div key={i} className="flex-1 h-1 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--color-surface-raised)' }}>
               {i <= step && (
                 <motion.div
                   initial={shouldAnimate ? { width: 0 } : false}
@@ -246,10 +246,10 @@ export default function OnboardingPage() {
         </div>
         <div className="flex items-center justify-between">
           {step > 0
-            ? <button onClick={() => setStep(step - 1)} className="text-[13px]" style={{ color: '#8B8BA7' }}>{t('onboarding.back')}</button>
+            ? <button onClick={() => setStep(step - 1)} className="text-[13px]" style={{ color: 'var(--color-text-muted)' }}>{t('onboarding.back')}</button>
             : <div />
           }
-          <span className="text-[11px]" style={{ color: '#8B8BA7' }}>{t('onboarding.step', { current: step + 1, total: TOTAL_STEPS })}</span>
+          <span className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>{t('onboarding.step', { current: step + 1, total: TOTAL_STEPS })}</span>
         </div>
       </div>
 
@@ -263,9 +263,9 @@ export default function OnboardingPage() {
           transition={shouldAnimate ? { duration: 0.25, ease: [0.25, 0.1, 0.25, 1] } : { duration: 0 }}
           className="flex-1"
         >
-          <h1 className="text-[24px] font-bold mb-1" style={{ color: '#E8E8F0' }}>{current.title}</h1>
+          <h1 className="text-[24px] font-bold mb-1" style={{ color: 'var(--color-text-primary)' }}>{current.title}</h1>
           {'subtitle' in current && current.subtitle && (
-            <p className="text-[13px] mb-5" style={{ color: '#8B8BA7' }}>{current.subtitle}</p>
+            <p className="text-[13px] mb-5" style={{ color: 'var(--color-text-muted)' }}>{current.subtitle}</p>
           )}
 
           {/* Step 1: Energy picker */}
@@ -288,28 +288,28 @@ export default function OnboardingPage() {
                   <div className="flex items-center gap-3">
                     <span className="text-[28px]">🔔</span>
                     <div>
-                      <p className="text-[15px] font-semibold" style={{ color: '#4ECDC4' }}>{t('onboarding.enableReminders')}</p>
-                      <p className="text-[11px]" style={{ color: '#8B8BA7' }}>{t('onboarding.remindersBefore')}</p>
+                      <p className="text-[15px] font-semibold" style={{ color: 'var(--color-teal)' }}>{t('onboarding.enableReminders')}</p>
+                      <p className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>{t('onboarding.remindersBefore')}</p>
                     </div>
                   </div>
                 </motion.button>
               )}
               {notifState === 'granted' && (
                 <div className="p-4 rounded-2xl" style={{ backgroundColor: 'rgba(78,205,196,0.12)', border: '1.5px solid rgba(78,205,196,0.35)' }}>
-                  <p className="text-[15px] font-semibold" style={{ color: '#4ECDC4' }}>✅ {t('onboarding.remindersEnabled')}</p>
-                  <p className="text-[13px] mt-0.5" style={{ color: '#8B8BA7' }}>{t('onboarding.remindersEnabledDesc')}</p>
+                  <p className="text-[15px] font-semibold" style={{ color: 'var(--color-teal)' }}>✅ {t('onboarding.remindersEnabled')}</p>
+                  <p className="text-[13px] mt-0.5" style={{ color: 'var(--color-text-muted)' }}>{t('onboarding.remindersEnabledDesc')}</p>
                 </div>
               )}
               {notifState === 'denied' && (
-                <div className="p-4 rounded-2xl" style={{ backgroundColor: '#252840' }}>
-                  <p className="text-[15px] font-semibold" style={{ color: '#E8E8F0' }}>{t('onboarding.noWorries')}</p>
-                  <p className="text-[13px] mt-0.5" style={{ color: '#8B8BA7' }}>{t('onboarding.noWorriesDesc')}</p>
+                <div className="p-4 rounded-2xl" style={{ backgroundColor: 'var(--color-surface-raised)' }}>
+                  <p className="text-[15px] font-semibold" style={{ color: 'var(--color-text-primary)' }}>{t('onboarding.noWorries')}</p>
+                  <p className="text-[13px] mt-0.5" style={{ color: 'var(--color-text-muted)' }}>{t('onboarding.noWorriesDesc')}</p>
                 </div>
               )}
               <button
                 onClick={finish}
                 className="w-full text-center py-2 text-[13px]"
-                style={{ color: '#8B8BA7' }}
+                style={{ color: 'var(--color-text-muted)' }}
               >
                 {t('onboarding.skipForNow')}
               </button>
@@ -326,17 +326,17 @@ export default function OnboardingPage() {
                   onClick={(e) => select(i, e.detail > 0)}
                   className="w-full text-left p-3.5 rounded-2xl"
                   style={{
-                    backgroundColor: selections[step] === i ? 'rgba(123,114,255,0.15)' : '#252840',
+                    backgroundColor: selections[step] === i ? 'rgba(123,114,255,0.15)' : 'var(--color-surface-raised)',
                     borderWidth: selections[step] === i ? 1.5 : 1,
                     borderStyle: 'solid',
-                    borderColor: selections[step] === i ? '#7B72FF' : 'rgba(255,255,255,0.06)',
+                    borderColor: selections[step] === i ? 'var(--color-primary)' : 'rgba(255,255,255,0.06)',
                   }}
                 >
                   <div className="flex items-center gap-3">
                     <span className="text-[28px]">{opt.emoji}</span>
                     <div>
-                      <p className="text-[15px] font-semibold" style={{ color: selections[step] === i ? '#7B72FF' : '#E8E8F0' }}>{opt.label}</p>
-                      <p className="text-[11px]" style={{ color: '#8B8BA7' }}>{opt.desc}</p>
+                      <p className="text-[15px] font-semibold" style={{ color: selections[step] === i ? 'var(--color-primary)' : 'var(--color-text-primary)' }}>{opt.label}</p>
+                      <p className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>{opt.desc}</p>
                     </div>
                   </div>
                 </motion.button>
@@ -369,13 +369,13 @@ export default function OnboardingPage() {
             key={i}
             animate={shouldAnimate ? {
               width: i === step ? 20 : 8,
-              backgroundColor: i === step ? '#4ECDC4' : i < step ? '#7B72FF' : '#252840',
+              backgroundColor: i === step ? 'var(--color-teal)' : i < step ? 'var(--color-primary)' : 'var(--color-surface-raised)',
             } : undefined}
             transition={shouldAnimate ? { duration: 0.25, ease: 'easeOut' } : { duration: 0 }}
             className="h-2 rounded-full"
             style={{
               width: i === step ? 20 : 8,
-              backgroundColor: i === step ? '#4ECDC4' : i < step ? '#7B72FF' : '#252840',
+              backgroundColor: i === step ? 'var(--color-teal)' : i < step ? 'var(--color-primary)' : 'var(--color-surface-raised)',
             }}
           />
         ))}

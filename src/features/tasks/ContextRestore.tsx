@@ -54,17 +54,17 @@ export function ContextRestore({ onDismiss }: Props) {
           onClick={e => e.stopPropagation()}
           className="rounded-3xl p-5"
           style={{
-            background: '#1E2136',
+            background: 'var(--color-surface-card)',
             border: '1px solid rgba(255,255,255,0.06)',
             boxShadow: '0 -8px 40px rgba(123, 114, 255, 0.08)',
           }}
         >
           {/* Header */}
           <div className="mb-4">
-            <p className="text-xs font-semibold tracking-widest uppercase mb-1" style={{ color: '#7B72FF' }}>
+            <p className="text-xs font-semibold tracking-widest uppercase mb-1" style={{ color: 'var(--color-primary)' }}>
               {t('contextRestore.whereWereWe')}
             </p>
-            <p className="text-base font-bold" style={{ color: '#E8E8F0' }}>
+            <p className="text-base font-bold" style={{ color: 'var(--color-text-primary)' }}>
               {activeTasks.length > 0
                 ? t('contextRestore.hadInProgress')
                 : t('contextRestore.allCaughtUp')}
@@ -78,12 +78,12 @@ export function ContextRestore({ onDismiss }: Props) {
                 <div
                   key={task.id}
                   className="flex items-center gap-3 px-3 py-2.5 rounded-xl"
-                  style={{ background: '#252840', border: '1px solid rgba(255,255,255,0.06)' }}
+                  style={{ background: 'var(--color-surface-raised)', border: '1px solid rgba(255,255,255,0.06)' }}
                 >
-                  <span className="text-sm font-medium flex-1 leading-snug" style={{ color: '#E8E8F0' }}>
+                  <span className="text-sm font-medium flex-1 leading-snug" style={{ color: 'var(--color-text-primary)' }}>
                     {task.title}
                   </span>
-                  <span className="text-xs flex-shrink-0" style={{ color: '#8B8BA7' }}>
+                  <span className="text-xs flex-shrink-0" style={{ color: 'var(--color-text-muted)' }}>
                     ~{task.estimatedMinutes}m
                   </span>
                 </div>
@@ -96,14 +96,14 @@ export function ContextRestore({ onDismiss }: Props) {
             <button
               onClick={onDismiss}
               className="flex-1 py-3 rounded-2xl font-semibold text-sm"
-              style={{ background: '#7B72FF', color: '#FFFFFF' }}
+              style={{ background: 'var(--color-primary)', color: '#FFFFFF' }}
             >
               {activeTasks.length > 0 ? t('contextRestore.diveBack') : t('contextRestore.letsGo')}
             </button>
             <button
               onClick={onDismiss}
               className="px-4 py-3 rounded-2xl text-sm"
-              style={{ background: '#252840', border: '1px solid rgba(255,255,255,0.06)', color: '#8B8BA7' }}
+              style={{ background: 'var(--color-surface-raised)', border: '1px solid rgba(255,255,255,0.06)', color: 'var(--color-text-muted)' }}
             >
               {t('contextRestore.maybeLater')}
             </button>

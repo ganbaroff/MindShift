@@ -126,12 +126,12 @@ export function FocusSetup({
           style={{ background: 'var(--color-card)', border: '1px solid rgba(255,255,255,0.05)' }}
         >
           {completedTotal > 0 && (
-            <span className="text-[11px]" style={{ color: '#4ECDC4' }}>
+            <span className="text-[11px]" style={{ color: 'var(--color-teal)' }}>
               ✓ {t('focus.doneAllTime', { count: completedTotal })}
             </span>
           )}
           {todayFocusMin > 0 && (
-            <span className="text-[11px]" style={{ color: '#7B72FF' }}>
+            <span className="text-[11px]" style={{ color: 'var(--color-primary)' }}>
               {t('focus.focusedToday', { min: todayFocusMin })}
             </span>
           )}
@@ -153,7 +153,7 @@ export function FocusSetup({
           style={{ background: 'rgba(78,205,196,0.06)', border: '1px solid rgba(78,205,196,0.12)' }}
         >
           <span className="text-base">{adaptiveTip.emoji}</span>
-          <p className="text-[12px] leading-relaxed" style={{ color: '#8B8BA7' }}>
+          <p className="text-[12px] leading-relaxed" style={{ color: 'var(--color-text-muted)' }}>
             {adaptiveTip.text}
           </p>
         </div>
@@ -374,7 +374,7 @@ export function FocusSetup({
           className="mx-5 mb-4 px-3 py-2 rounded-xl flex items-center gap-2"
           style={{ background: 'rgba(123,114,255,0.10)', border: '1px solid rgba(123,114,255,0.20)' }}
         >
-          <span className="text-xs font-medium" style={{ color: '#7B72FF' }}>{medPeakLabel}</span>
+          <span className="text-xs font-medium" style={{ color: 'var(--color-primary)' }}>{medPeakLabel}</span>
         </div>
       )}
 
@@ -386,7 +386,7 @@ export function FocusSetup({
         >
           <span className="text-base">🤝</span>
           <div className="flex-1 min-w-0">
-            <p className="text-[12px] font-semibold" style={{ color: '#4ECDC4' }}>
+            <p className="text-[12px] font-semibold" style={{ color: 'var(--color-teal)' }}>
               Room {room.code} · {room.peers.length + 1} focusing
             </p>
             {room.peers.length === 0 && (
@@ -396,7 +396,7 @@ export function FocusSetup({
           <button
             onClick={() => setShowRoomSheet(true)}
             className="text-[10px] px-2 py-1 rounded-lg"
-            style={{ background: 'rgba(78,205,196,0.12)', color: '#4ECDC4' }}
+            style={{ background: 'rgba(78,205,196,0.12)', color: 'var(--color-teal)' }}
           >
             View
           </button>
@@ -406,7 +406,7 @@ export function FocusSetup({
       {/* No-task hint — subtle label when focusing freely */}
       {allTasks.length > 0 && selectedTask === null && (
         <div className="mx-5 mb-3 flex items-center gap-2">
-          <span className="text-[11px]" style={{ color: '#8B8BA7' }}>
+          <span className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>
             {t('focus.noTaskSelected')}
           </span>
         </div>
@@ -430,7 +430,7 @@ export function FocusSetup({
           onClick={() => handleStart()}
           aria-label="Skip breathing ritual and start focus session"
           className="w-full py-2 text-[12px]"
-          style={{ color: '#8B8BA7' }}
+          style={{ color: 'var(--color-text-muted)' }}
         >
           {t('focus.skipRitual')}
         </button>

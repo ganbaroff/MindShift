@@ -186,11 +186,11 @@ export default function TodayPage() {
         {/* ── Header ─────────────────────────────────────────────────────── */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-[22px] font-bold" style={{ color: '#E8E8F0' }}>
+            <h1 className="text-[22px] font-bold" style={{ color: 'var(--color-text-primary)' }}>
               {GREETING_EMOJI[timeBlock]} {t(GREETING_KEYS[timeBlock])}
             </h1>
             {weeklyIntention && (
-              <p className="text-[12px] mt-0.5" style={{ color: '#8B8BA7' }}>
+              <p className="text-[12px] mt-0.5" style={{ color: 'var(--color-text-muted)' }}>
                 {t('today.thisWeek', { intention: weeklyIntention })}
               </p>
             )}
@@ -200,7 +200,7 @@ export default function TodayPage() {
             style={{ background: 'rgba(78,205,196,0.1)' }}
           >
             <span className="text-[14px]">{energyEmoji}</span>
-            <span className="text-[11px] font-medium" style={{ color: '#4ECDC4' }}>
+            <span className="text-[11px] font-medium" style={{ color: 'var(--color-teal)' }}>
               {energyLevel}/5
             </span>
           </div>
@@ -240,7 +240,7 @@ export default function TodayPage() {
                 border: `1px solid ${isLowEnergy ? 'rgba(245,158,11,0.15)' : 'rgba(78,205,196,0.15)'}`,
               }}
             >
-              <p className="text-[12px]" style={{ color: isLowEnergy ? '#F59E0B' : '#4ECDC4' }}>
+              <p className="text-[12px]" style={{ color: isLowEnergy ? 'var(--color-gold)' : 'var(--color-teal)' }}>
                 {energyAdvice}
               </p>
             </motion.div>
@@ -253,27 +253,27 @@ export default function TodayPage() {
             {/* Summary strip */}
             <div
               className="flex items-center justify-between px-3 py-2.5 rounded-xl"
-              style={{ background: '#1E2136' }}
+              style={{ background: 'var(--color-surface-card)' }}
             >
               <div className="flex items-center gap-3">
-                <StatPill label={t('today.tasks')} value={todayTasks.length} color="#4ECDC4" />
-                <StatPill label={t('today.focus')} value={`${todayFocusMin}m`} color="#7B72FF" />
+                <StatPill label={t('today.tasks')} value={todayTasks.length} color="var(--color-teal)" />
+                <StatPill label={t('today.focus')} value={`${todayFocusMin}m`} color="var(--color-primary)" />
                 {completedToday.length > 0 && (
-                  <StatPill label={t('today.done')} value={completedToday.length} color="#F59E0B" />
+                  <StatPill label={t('today.done')} value={completedToday.length} color="var(--color-gold)" />
                 )}
               </div>
               {dailyFocusGoalMin > 0 && (
                 <div className="flex items-center gap-1.5">
-                  <div className="w-16 h-1.5 rounded-full overflow-hidden" style={{ background: '#252840' }}>
+                  <div className="w-16 h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--color-surface-raised)' }}>
                     <motion.div
                       className="h-full rounded-full"
-                      style={{ background: todayFocusMin >= dailyFocusGoalMin ? '#4ECDC4' : '#7B72FF' }}
+                      style={{ background: todayFocusMin >= dailyFocusGoalMin ? 'var(--color-teal)' : 'var(--color-primary)' }}
                       initial={false}
                       animate={{ width: `${Math.min(100, (todayFocusMin / dailyFocusGoalMin) * 100)}%` }}
                       transition={shouldAnimate ? { type: 'spring', damping: 20 } : { duration: 0 }}
                     />
                   </div>
-                  <span className="text-[10px]" style={{ color: '#8B8BA7' }}>
+                  <span className="text-[10px]" style={{ color: 'var(--color-text-muted)' }}>
                     {todayFocusMin}/{dailyFocusGoalMin}m
                   </span>
                 </div>
@@ -283,7 +283,7 @@ export default function TodayPage() {
             {/* Today's tasks */}
             {todayTasks.length > 0 ? (
               <div className="space-y-1.5">
-                <h2 className="text-[13px] font-semibold px-1" style={{ color: '#8B8BA7' }}>
+                <h2 className="text-[13px] font-semibold px-1" style={{ color: 'var(--color-text-muted)' }}>
                   {t('today.todayLabel')}
                 </h2>
                 {(isLowEnergy ? todayTasks.slice(0, 2) : todayTasks).map(task => (
@@ -295,7 +295,7 @@ export default function TodayPage() {
                   />
                 ))}
                 {isLowEnergy && todayTasks.length > 2 && (
-                  <p className="text-[11px] px-1" style={{ color: '#8B8BA7' }}>
+                  <p className="text-[11px] px-1" style={{ color: 'var(--color-text-muted)' }}>
                     {t('today.moreFirst', { count: todayTasks.length - 2 })}
                   </p>
                 )}
@@ -306,10 +306,10 @@ export default function TodayPage() {
                 style={{ background: 'rgba(78,205,196,0.05)' }}
               >
                 <p className="text-[28px] mb-1">🌿</p>
-                <p className="text-[14px] font-medium" style={{ color: '#E8E8F0' }}>
+                <p className="text-[14px] font-medium" style={{ color: 'var(--color-text-primary)' }}>
                   {t('today.clearDay')}
                 </p>
-                <p className="text-[12px]" style={{ color: '#8B8BA7' }}>
+                <p className="text-[12px]" style={{ color: 'var(--color-text-muted)' }}>
                   {t('today.addOrSample')}
                 </p>
                 {completedTotal === 0 && (
@@ -338,7 +338,7 @@ export default function TodayPage() {
                     className="mx-auto px-4 py-2 rounded-xl text-[13px] font-medium focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
                     style={{
                       background: 'rgba(123,114,255,0.12)',
-                      color: '#7B72FF',
+                      color: 'var(--color-primary)',
                       border: '1px solid rgba(123,114,255,0.2)',
                     }}
                   >
@@ -351,7 +351,7 @@ export default function TodayPage() {
             {/* NOW pool tasks (not date-specific) */}
             {activeTasks.length > 0 && todayTasks.length === 0 && (
               <div className="space-y-1.5">
-                <h2 className="text-[13px] font-semibold px-1" style={{ color: '#8B8BA7' }}>
+                <h2 className="text-[13px] font-semibold px-1" style={{ color: 'var(--color-text-muted)' }}>
                   {t('today.nowPool')}
                 </h2>
                 {activeTasks.slice(0, isLowEnergy ? 1 : density === 'compact' ? 2 : 3).map(task => (
@@ -377,7 +377,7 @@ export default function TodayPage() {
                 border: '1px solid rgba(123,114,255,0.12)',
               }}
             >
-              <h2 className="text-[15px] font-semibold" style={{ color: '#E8E8F0' }}>
+              <h2 className="text-[15px] font-semibold" style={{ color: 'var(--color-text-primary)' }}>
                 {t('today.wrapUp')}
               </h2>
               <div className="flex gap-4">
@@ -388,12 +388,12 @@ export default function TodayPage() {
                 )}
               </div>
               {completedToday.length === 0 && todayFocusMin === 0 && (
-                <p className="text-[12px]" style={{ color: '#8B8BA7' }}>
+                <p className="text-[12px]" style={{ color: 'var(--color-text-muted)' }}>
                   {t('today.quietDay')}
                 </p>
               )}
               {completedToday.length > 0 && (
-                <p className="text-[12px]" style={{ color: '#4ECDC4' }}>
+                <p className="text-[12px]" style={{ color: 'var(--color-teal)' }}>
                   {copy.mochiGreat}
                 </p>
               )}
@@ -402,7 +402,7 @@ export default function TodayPage() {
             {/* Tomorrow preview */}
             {tomorrowTasks.length > 0 && (
               <div className="space-y-1.5">
-                <h2 className="text-[13px] font-semibold px-1" style={{ color: '#8B8BA7' }}>
+                <h2 className="text-[13px] font-semibold px-1" style={{ color: 'var(--color-text-muted)' }}>
                   {t('today.tomorrow')}
                 </h2>
                 {tomorrowTasks.slice(0, 3).map(task => (
@@ -417,7 +417,7 @@ export default function TodayPage() {
                   <button
                     onClick={() => navigate('/tasks')}
                     className="text-[12px] flex items-center gap-1 px-1 focus-visible:ring-2 focus-visible:ring-[#7B72FF] rounded"
-                    style={{ color: '#7B72FF' }}
+                    style={{ color: 'var(--color-primary)' }}
                   >
                     {t('today.more', { count: tomorrowTasks.length - 3 })} <ChevronRight size={12} />
                   </button>
@@ -428,7 +428,7 @@ export default function TodayPage() {
             {/* Remaining active tasks */}
             {activeTasks.length > 0 && (
               <div className="space-y-1.5">
-                <h2 className="text-[13px] font-semibold px-1" style={{ color: '#8B8BA7' }}>
+                <h2 className="text-[13px] font-semibold px-1" style={{ color: 'var(--color-text-muted)' }}>
                   {t('today.stillInNow')}
                 </h2>
                 {activeTasks.slice(0, 2).map(task => (
@@ -466,7 +466,7 @@ export default function TodayPage() {
           onClick={handleStartFocus}
           className="w-full py-3.5 rounded-2xl flex items-center justify-center gap-2 font-semibold text-[15px] focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
           style={{
-            background: 'linear-gradient(135deg, #7B72FF, #4ECDC4)',
+            background: 'linear-gradient(135deg, var(--color-primary), var(--color-teal))',
             color: '#FFFFFF',
           }}
           whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
@@ -483,7 +483,7 @@ export default function TodayPage() {
         <button
           onClick={() => navigate('/progress')}
           className="w-full py-2 rounded-xl text-[12px] font-medium text-center focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
-          style={{ color: '#8B8BA7' }}
+          style={{ color: 'var(--color-text-muted)' }}
         >
           {t('today.viewProgress')}
         </button>
@@ -510,7 +510,7 @@ function StatPill({ label, value, color }: { label: string; value: string | numb
   return (
     <div className="flex items-center gap-1">
       <span className="text-[15px] font-bold" style={{ color }}>{value}</span>
-      <span className="text-[10px]" style={{ color: '#8B8BA7' }}>{label}</span>
+      <span className="text-[10px]" style={{ color: 'var(--color-text-muted)' }}>{label}</span>
     </div>
   )
 }
@@ -519,8 +519,8 @@ function RecapStat({ emoji, value, label }: { emoji: string; value: string | num
   return (
     <div className="text-center">
       <p className="text-[14px]">{emoji}</p>
-      <p className="text-[18px] font-bold" style={{ color: '#E8E8F0' }}>{value}</p>
-      <p className="text-[10px]" style={{ color: '#8B8BA7' }}>{label}</p>
+      <p className="text-[18px] font-bold" style={{ color: 'var(--color-text-primary)' }}>{value}</p>
+      <p className="text-[10px]" style={{ color: 'var(--color-text-muted)' }}>{label}</p>
     </div>
   )
 }

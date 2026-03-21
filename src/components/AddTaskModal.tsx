@@ -196,7 +196,7 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
                   onChange={e => setTitle(e.target.value)}
                   placeholder={voiceState === 'listening' ? t('addTask.placeholderListening') : t('addTask.placeholder')}
                   className="w-full bg-ms-raised rounded-xl px-4 h-12 text-body text-ms-text placeholder:text-ms-muted border border-transparent focus:border-ms-primary outline-none transition-colors pr-12"
-                  style={{ borderColor: voiceState === 'listening' ? '#7B72FF' : undefined }}
+                  style={{ borderColor: voiceState === 'listening' ? 'var(--color-primary)' : undefined }}
                 />
                 {voiceSupported && (
                   <button
@@ -207,7 +207,7 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
                     className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200"
                     style={{
                       background: voiceState === 'listening' ? 'rgba(123,114,255,0.25)' : 'rgba(255,255,255,0.04)',
-                      color: voiceState === 'listening' ? '#7B72FF' : voiceState === 'classifying' ? '#4ECDC4' : '#8B8BA7',
+                      color: voiceState === 'listening' ? 'var(--color-primary)' : voiceState === 'classifying' ? 'var(--color-teal)' : 'var(--color-text-muted)',
                     }}
                   >
                     {voiceState === 'classifying'
@@ -221,20 +221,20 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
               <AnimatePresence>
                 {voiceState === 'listening' && (
                   <motion.p initial={shouldAnimate ? { opacity: 0, y: -4 } : {}} animate={{ opacity: 1, y: 0 }}
-                    exit={shouldAnimate ? { opacity: 0 } : undefined} className="text-xs flex items-center gap-1.5 -mt-3" style={{ color: '#7B72FF' }}>
+                    exit={shouldAnimate ? { opacity: 0 } : undefined} className="text-xs flex items-center gap-1.5 -mt-3" style={{ color: 'var(--color-primary)' }}>
                     <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse motion-reduce:opacity-80" />
                     {t('addTask.listening')}
                   </motion.p>
                 )}
                 {classifyConfidence !== null && classifyConfidence >= 0.7 && (
                   <motion.p initial={shouldAnimate ? { opacity: 0, y: -4 } : {}} animate={{ opacity: 1, y: 0 }}
-                    exit={shouldAnimate ? { opacity: 0 } : undefined} className="text-xs -mt-3" style={{ color: '#4ECDC4' }}>
+                    exit={shouldAnimate ? { opacity: 0 } : undefined} className="text-xs -mt-3" style={{ color: 'var(--color-teal)' }}>
                     ✓ {t('addTask.aiFilled')}
                   </motion.p>
                 )}
                 {voiceError && (
                   <motion.p initial={shouldAnimate ? { opacity: 0, y: -4 } : {}} animate={{ opacity: 1, y: 0 }}
-                    exit={shouldAnimate ? { opacity: 0 } : undefined} className="text-xs -mt-3" style={{ color: '#F59E0B' }}>
+                    exit={shouldAnimate ? { opacity: 0 } : undefined} className="text-xs -mt-3" style={{ color: 'var(--color-gold)' }}>
                     ⚠ {voiceError}
                   </motion.p>
                 )}
@@ -252,10 +252,10 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
                         aria-pressed={sel} aria-label={`Type: ${cfg.label}`}
                         className="flex-1 h-10 rounded-xl flex items-center justify-center gap-1.5 text-[12px] font-medium transition-all"
                         style={{
-                          backgroundColor: sel ? `${cfg.color}20` : '#252840',
+                          backgroundColor: sel ? `${cfg.color}20` : 'var(--color-surface-raised)',
                           borderWidth: sel ? 1.5 : 1, borderStyle: 'solid',
                           borderColor: sel ? cfg.color : 'rgba(255,255,255,0.06)',
-                          color: sel ? cfg.color : '#8B8BA7',
+                          color: sel ? cfg.color : 'var(--color-text-muted)',
                         }}
                       >
                         <span>{cfg.emoji}</span>
@@ -278,7 +278,7 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
               {/* "When is this?" hint for meeting/reminder */}
               {(taskType === 'meeting' || taskType === 'reminder') && !dueDate && (
                 <motion.p initial={shouldAnimate ? { opacity: 0, y: -4 } : {}} animate={{ opacity: 1, y: 0 }}
-                  className="text-xs -mt-2" style={{ color: '#4ECDC4' }}>
+                  className="text-xs -mt-2" style={{ color: 'var(--color-teal)' }}>
                   {taskType === 'meeting' ? '🤝' : '🔔'} {taskType === 'meeting' ? t('addTask.whenMeeting') : t('addTask.whenReminder')}
                 </motion.p>
               )}
@@ -332,7 +332,7 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
                   : `${poolIcon} ${t('addTask.addingTo', { pool: poolLabel })}`}
               </div>
               {pool === 'next' && nextNearFull && (
-                <p className="text-xs -mt-2" style={{ color: '#F59E0B' }}>
+                <p className="text-xs -mt-2" style={{ color: 'var(--color-gold)' }}>
                   🌿 {t('addTask.queueFull')}
                 </p>
               )}
@@ -350,13 +350,13 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
                       border: '1px solid rgba(78,205,196,0.25)',
                     }}
                   >
-                    <p className="text-[13px] leading-relaxed" style={{ color: '#E8E8F0' }}>
+                    <p className="text-[13px] leading-relaxed" style={{ color: 'var(--color-text-primary)' }}>
                       {t('addTask.crisisMessage')}
                     </p>
-                    <p className="text-[12px] font-medium" style={{ color: '#4ECDC4' }}>
+                    <p className="text-[12px] font-medium" style={{ color: 'var(--color-teal)' }}>
                       {crisisResources.primary}
                     </p>
-                    <p className="text-[11px]" style={{ color: '#8B8BA7' }}>
+                    <p className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>
                       {crisisResources.international}
                     </p>
                   </motion.div>

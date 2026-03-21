@@ -201,6 +201,24 @@ function createGammaBuffer(ctx: AudioContext): AudioBuffer {
   return buf
 }
 
+/**
+ * 60 Hz gamma binaural beat — stereo buffer (L: 430 Hz, R: 490 Hz).
+ * Gentler than 40 Hz gamma — less jarring for extended sessions.
+ * Still in gamma band (30–100 Hz), supports focused attention.
+ */
+function createGamma60Buffer(ctx: AudioContext): AudioBuffer {
+  const size = ctx.sampleRate * BUFFER_SECONDS
+  const buf  = ctx.createBuffer(2, size, ctx.sampleRate)
+  const dataL = buf.getChannelData(0)
+  const dataR = buf.getChannelData(1)
+  for (let i = 0; i < size; i++) {
+    const t = i / ctx.sampleRate
+    dataL[i] = Math.sin(2 * Math.PI * 430 * t) * 0.22  // 430 Hz left ear
+    dataR[i] = Math.sin(2 * Math.PI * 490 * t) * 0.22  // 490 Hz right ear → 60 Hz phantom beat
+  }
+  return buf
+}
+
 function createNoiseBuffer(ctx: AudioContext, preset: AudioPreset): AudioBuffer {
   const size = ctx.sampleRate * BUFFER_SECONDS
   const buf  = ctx.createBuffer(1, size, ctx.sampleRate)
@@ -413,6 +431,13 @@ export function useAudioEngine() {
       node.loop = true
       node.start()
       source = node
+    } else if (preset === 'gamma60') {
+      // Stereo binaural beat: L=430Hz, R=490Hz → 60Hz gamma (gentler)
+      const node = ctx.createBufferSource()
+      node.buffer = createGamma60Buffer(ctx)
+      node.loop = true
+      node.start()
+      source = node
     } else {
       const node = ctx.createBufferSource()
       node.buffer = createNoiseBuffer(ctx, preset)
@@ -427,7 +452,7 @@ export function useAudioEngine() {
     // Default:  source → fade → HPF → master → out
     // Pink/Nature: source → fade → pinkLpf(285Hz) → HPF → master → out
     // Lo-fi:    source → fade → tapeSat → bassShelf → lofiLpf → HPF → master → out
-    // Gamma:    source → fade → HPF → master → out (stereo preserved)
+    // Gamma/Gamma60: source → fade → HPF → master → out (stereo preserved)
     source.connect(fade)
     if (tapeSat && bassShelf && lofiLpf) {
       fade.connect(tapeSat)

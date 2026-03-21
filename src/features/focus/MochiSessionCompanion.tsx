@@ -558,7 +558,7 @@ function MochiSessionCompanionInner({ elapsedSeconds, sessionPhase, behaviorProf
             onClick={handleDismiss}
             className="px-4 py-2.5 rounded-2xl max-w-[240px] text-center"
             style={{
-              background: '#1E2136',
+              background: 'var(--color-surface-card)',
               border: '1px solid rgba(123,114,255,0.25)',
               boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
             }}
@@ -570,10 +570,10 @@ function MochiSessionCompanionInner({ elapsedSeconds, sessionPhase, behaviorProf
               style={{
                 borderLeft:  '8px solid transparent',
                 borderRight: '8px solid transparent',
-                borderTop:   '8px solid #1E2136',
+                borderTop:   '8px solid var(--color-surface-card)',
               }}
             />
-            <p className="text-xs leading-relaxed" style={{ color: '#E8E8F0' }}>
+            <p className="text-xs leading-relaxed" style={{ color: 'var(--color-text-primary)' }}>
               {activeBubble.message}
             </p>
           </motion.button>

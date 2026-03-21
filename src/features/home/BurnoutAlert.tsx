@@ -55,7 +55,7 @@ export const BurnoutAlert = memo(function BurnoutAlert({ score }: BurnoutAlertPr
           <p className="text-[14px] font-semibold" style={{ color: textColor }}>
             {title}
           </p>
-          <p className="text-[12px] mt-0.5 leading-relaxed" style={{ color: '#8B8BA7' }}>
+          <p className="text-[12px] mt-0.5 leading-relaxed" style={{ color: 'var(--color-text-muted)' }}>
             {description}
           </p>
         </div>

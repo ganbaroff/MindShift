@@ -29,14 +29,14 @@ export function EmptyState({ emoji, title, subtitle, action }: EmptyStateProps) 
       <span className="text-[48px] mb-3" role="img">{emoji}</span>
       <h3
         className="text-[17px] font-semibold mb-1"
-        style={{ color: '#E8E8F0' }}
+        style={{ color: 'var(--color-text-primary)' }}
       >
         {title}
       </h3>
       {subtitle && (
         <p
           className="text-[13px] max-w-[260px]"
-          style={{ color: '#8B8BA7' }}
+          style={{ color: 'var(--color-text-muted)' }}
         >
           {subtitle}
         </p>
@@ -49,7 +49,7 @@ export function EmptyState({ emoji, title, subtitle, action }: EmptyStateProps) 
           style={{
             backgroundColor: 'rgba(78,205,196,0.15)',
             border: '1px solid rgba(78,205,196,0.35)',
-            color: '#4ECDC4',
+            color: 'var(--color-teal)',
           }}
           aria-label={action.label}
         >

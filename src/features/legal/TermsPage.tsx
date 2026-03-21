@@ -8,8 +8,8 @@ export const TERMS_VERSION = '2026-03'
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="flex flex-col gap-2">
-      <h2 className="text-base font-semibold" style={{ color: '#E8E8F0' }}>{title}</h2>
-      <div className="text-sm leading-relaxed flex flex-col gap-2" style={{ color: '#8B8BA7' }}>
+      <h2 className="text-base font-semibold" style={{ color: 'var(--color-text-primary)' }}>{title}</h2>
+      <div className="text-sm leading-relaxed flex flex-col gap-2" style={{ color: 'var(--color-text-muted)' }}>
         {children}
       </div>
     </section>
@@ -20,31 +20,31 @@ export default function TermsPage() {
   const navigate = useNavigate()
 
   return (
-    <div className="min-h-screen px-5 pb-20" style={{ background: '#0F1117' }}>
+    <div className="min-h-screen px-5 pb-20" style={{ background: 'var(--color-bg)' }}>
       {/* Header */}
       <div className="flex items-center gap-3 pt-10 pb-6">
         <button
           onClick={() => navigate(-1)}
           className="p-2 rounded-xl"
-          style={{ background: '#1E2136', color: '#8B8BA7' }}
+          style={{ background: 'var(--color-surface-card)', color: 'var(--color-text-muted)' }}
           aria-label="Go back"
         >
           <ArrowLeft size={18} />
         </button>
         <div>
-          <h1 className="text-xl font-bold" style={{ color: '#E8E8F0' }}>Terms of Service</h1>
-          <p className="text-xs mt-0.5" style={{ color: '#7B72FF' }}>Version {TERMS_VERSION} · Last updated: March 9, 2026</p>
+          <h1 className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>Terms of Service</h1>
+          <p className="text-xs mt-0.5" style={{ color: 'var(--color-primary)' }}>Version {TERMS_VERSION} · Last updated: March 9, 2026</p>
         </div>
       </div>
 
       <div className="flex flex-col gap-7 max-w-2xl">
 
         {/* Intro */}
-        <p className="text-sm leading-relaxed p-4 rounded-xl" style={{ color: '#8B8BA7', background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)' }}>
+        <p className="text-sm leading-relaxed p-4 rounded-xl" style={{ color: 'var(--color-text-muted)', background: 'var(--color-surface-card)', border: '1px solid rgba(255,255,255,0.06)' }}>
           Please read these Terms carefully before using MindShift. By creating an account or
           using the service, you confirm that you have read, understood, and agree to be bound
           by these Terms and our{' '}
-          <a href="/privacy" style={{ color: '#7B72FF' }}>Privacy Policy</a>.
+          <a href="/privacy" style={{ color: 'var(--color-primary)' }}>Privacy Policy</a>.
           If you do not agree, do not use MindShift.
         </p>
 
@@ -55,7 +55,7 @@ export default function TermsPage() {
             task decomposition, and motivational tools.
           </p>
           <p>
-            <strong style={{ color: '#E8E8F0' }}>MindShift is not a medical device</strong> and does
+            <strong style={{ color: 'var(--color-text-primary)' }}>MindShift is not a medical device</strong> and does
             not provide medical advice, diagnosis, or treatment of any kind. It is not a substitute
             for professional medical, psychological, or psychiatric care. Always consult a qualified
             healthcare professional regarding ADHD or other conditions.
@@ -64,7 +64,7 @@ export default function TermsPage() {
 
         <Section title="2. Eligibility">
           <p>
-            You must be at least <strong style={{ color: '#E8E8F0' }}>16 years old</strong> to use
+            You must be at least <strong style={{ color: 'var(--color-text-primary)' }}>16 years old</strong> to use
             MindShift. By creating an account, you represent that you meet this age requirement.
             If you are under 18, you represent that your parent or legal guardian has reviewed and
             agrees to these Terms on your behalf.
@@ -86,7 +86,7 @@ export default function TermsPage() {
             You agree to provide accurate and complete registration information and to update it
             promptly if it changes. You agree not to share your magic links with anyone. If you
             suspect unauthorised access to your account, contact us immediately at{' '}
-            <a href="mailto:hello@mindshift.app" style={{ color: '#7B72FF' }}>hello@mindshift.app</a>.
+            <a href="mailto:hello@mindshift.app" style={{ color: 'var(--color-primary)' }}>hello@mindshift.app</a>.
           </p>
           <p>
             We reserve the right to suspend or terminate accounts that violate these Terms,
@@ -120,7 +120,7 @@ export default function TermsPage() {
             Your subscription will automatically renew at the end of each billing period unless you
             cancel before the renewal date. You can cancel at any time through Settings → Subscription
             or by emailing{' '}
-            <a href="mailto:billing@mindshift.app" style={{ color: '#7B72FF' }}>billing@mindshift.app</a>.
+            <a href="mailto:billing@mindshift.app" style={{ color: 'var(--color-primary)' }}>billing@mindshift.app</a>.
             Cancellation takes effect at the end of the current billing period — you retain access
             until then.
           </p>
@@ -145,9 +145,9 @@ export default function TermsPage() {
         <Section title="7. Refund Policy">
           <p>
             If you are not satisfied with MindShift Pro, you may request a full refund within
-            <strong style={{ color: '#E8E8F0' }}> 14 days</strong> of your initial payment by
+            <strong style={{ color: 'var(--color-text-primary)' }}> 14 days</strong> of your initial payment by
             contacting{' '}
-            <a href="mailto:billing@mindshift.app" style={{ color: '#7B72FF' }}>billing@mindshift.app</a>.
+            <a href="mailto:billing@mindshift.app" style={{ color: 'var(--color-primary)' }}>billing@mindshift.app</a>.
             Refunds for subsequent billing periods are at our discretion and are not generally
             provided for partial months.
           </p>
@@ -165,7 +165,7 @@ export default function TermsPage() {
             power task decomposition, recovery messages, and weekly insights.
           </p>
           <p>
-            <strong style={{ color: '#E8E8F0' }}>AI outputs are suggestions only.</strong> They may
+            <strong style={{ color: 'var(--color-text-primary)' }}>AI outputs are suggestions only.</strong> They may
             be inaccurate, incomplete, or not appropriate for your specific situation. Never rely on
             AI-generated content as a substitute for professional judgement. MindShift is not
             responsible for decisions made based on AI-generated suggestions.
@@ -174,7 +174,7 @@ export default function TermsPage() {
             Your task titles and relevant context are sent to our backend and processed by Anthropic's
             API to generate responses. Please review{' '}
             <a href="https://www.anthropic.com/legal/privacy" target="_blank" rel="noopener noreferrer"
-               style={{ color: '#7B72FF' }}>Anthropic's Privacy Policy</a>{' '}
+               style={{ color: 'var(--color-primary)' }}>Anthropic's Privacy Policy</a>{' '}
             for information on how they handle data.
           </p>
         </Section>
@@ -195,8 +195,8 @@ export default function TermsPage() {
 
         <Section title="10. Disclaimers">
           <p>
-            MindShift is provided <strong style={{ color: '#E8E8F0' }}>"as is"</strong> and
-            <strong style={{ color: '#E8E8F0' }}> "as available"</strong> without warranty of any
+            MindShift is provided <strong style={{ color: 'var(--color-text-primary)' }}>"as is"</strong> and
+            <strong style={{ color: 'var(--color-text-primary)' }}> "as available"</strong> without warranty of any
             kind, express or implied, including but not limited to warranties of merchantability,
             fitness for a particular purpose, or non-infringement.
           </p>
@@ -243,13 +243,13 @@ export default function TermsPage() {
           </p>
           <p>
             We encourage you to contact us at{' '}
-            <a href="mailto:hello@mindshift.app" style={{ color: '#7B72FF' }}>hello@mindshift.app</a>{' '}
+            <a href="mailto:hello@mindshift.app" style={{ color: 'var(--color-primary)' }}>hello@mindshift.app</a>{' '}
             to resolve any dispute informally before initiating formal proceedings.
           </p>
           <p>
             If you are an EU/EEA consumer, you may also use the European Commission's{' '}
             <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer"
-               style={{ color: '#7B72FF' }}>Online Dispute Resolution platform</a>.
+               style={{ color: 'var(--color-primary)' }}>Online Dispute Resolution platform</a>.
           </p>
         </Section>
 
@@ -290,15 +290,15 @@ export default function TermsPage() {
         <Section title="17. Contact">
           <p>
             For general questions:{' '}
-            <a href="mailto:hello@mindshift.app" style={{ color: '#7B72FF' }}>hello@mindshift.app</a>
+            <a href="mailto:hello@mindshift.app" style={{ color: 'var(--color-primary)' }}>hello@mindshift.app</a>
           </p>
           <p>
             For privacy or data requests:{' '}
-            <a href="mailto:privacy@mindshift.app" style={{ color: '#7B72FF' }}>privacy@mindshift.app</a>
+            <a href="mailto:privacy@mindshift.app" style={{ color: 'var(--color-primary)' }}>privacy@mindshift.app</a>
           </p>
           <p>
             For billing questions:{' '}
-            <a href="mailto:billing@mindshift.app" style={{ color: '#7B72FF' }}>billing@mindshift.app</a>
+            <a href="mailto:billing@mindshift.app" style={{ color: 'var(--color-primary)' }}>billing@mindshift.app</a>
           </p>
         </Section>
 

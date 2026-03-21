@@ -68,7 +68,7 @@ export const BurnoutNudgeCard = memo(function BurnoutNudgeCard({ score }: Burnou
               <p className="text-[13px] font-semibold" style={{ color: '#C8C0FF' }}>
                 It has been a quiet few days
               </p>
-              <p className="text-[12px] mt-0.5 leading-relaxed" style={{ color: '#8B8BA7' }}>
+              <p className="text-[12px] mt-0.5 leading-relaxed" style={{ color: 'var(--color-text-muted)' }}>
                 Your body might be asking for a lighter load. That is okay.
               </p>
             </div>
@@ -76,7 +76,7 @@ export const BurnoutNudgeCard = memo(function BurnoutNudgeCard({ score }: Burnou
           <button
             onClick={handleDismiss}
             className="text-[11px] shrink-0 mt-0.5 focus-visible:ring-2"
-            style={{ color: '#8B8BA7' }}
+            style={{ color: 'var(--color-text-muted)' }}
             aria-label="Dismiss burnout nudge"
           >
             ✕

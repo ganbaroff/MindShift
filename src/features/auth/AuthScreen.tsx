@@ -113,10 +113,10 @@ function EmailStep({
       exit={{ opacity: 0, y: -12 }}
       transition={transition()}
     >
-      <h2 className="text-lg font-bold mb-1" style={{ color: '#E8E8F0' }}>
+      <h2 className="text-lg font-bold mb-1" style={{ color: 'var(--color-text-primary)' }}>
         {t('auth.letsGetStarted')}
       </h2>
-      <p className="text-[13px] mb-5 leading-relaxed" style={{ color: '#8B8BA7' }}>
+      <p className="text-[13px] mb-5 leading-relaxed" style={{ color: 'var(--color-text-muted)' }}>
         {t('auth.enterEmailDesc')}
         <span style={{ color: '#6B7280' }}> {t('auth.noPasswordNoFriction')}</span>
       </p>
@@ -143,7 +143,7 @@ function EmailStep({
           className="w-full pl-10 pr-4 rounded-xl text-sm outline-none transition-all duration-200 placeholder:text-[#484B68]"
           style={{
             background: inputFocused ? '#1C1F38' : '#191C30',
-            color: '#E8E8F0',
+            color: 'var(--color-text-primary)',
             border: `1.5px solid ${inputFocused ? 'rgba(123,114,255,0.5)' : 'rgba(40,43,70,0.8)'}`,
             boxShadow: inputFocused ? '0 0 12px rgba(123,114,255,0.15)' : 'none',
             height: 46,
@@ -181,18 +181,18 @@ function EmailStep({
             </AnimatePresence>
           </motion.div>
         </div>
-        <span className="text-xs leading-relaxed" style={{ color: '#8B8BA7' }}>
+        <span className="text-xs leading-relaxed" style={{ color: 'var(--color-text-muted)' }}>
           I'm <strong style={{ color: '#C4C4D4' }}>16 or older</strong> and agree to MindShift's{' '}
           <Link to="/terms" target="_blank" rel="noopener noreferrer"
             className="underline decoration-dotted hover:no-underline transition-all"
-            style={{ color: '#7B72FF' }}
+            style={{ color: 'var(--color-primary)' }}
             onClick={e => e.stopPropagation()}>
             Terms
           </Link>
           {' '}&{' '}
           <Link to="/privacy" target="_blank" rel="noopener noreferrer"
             className="underline decoration-dotted hover:no-underline transition-all"
-            style={{ color: '#7B72FF' }}
+            style={{ color: 'var(--color-primary)' }}
             onClick={e => e.stopPropagation()}>
             Privacy Policy
           </Link>
@@ -246,7 +246,7 @@ function EmailStep({
           height: 48,
           background: consented ? '#1C1F38' : 'rgba(28,31,56,0.5)',
           border: `1.5px solid ${consented ? 'rgba(255,255,255,0.10)' : 'rgba(255,255,255,0.04)'}`,
-          color: consented ? '#E8E8F0' : 'var(--color-muted)',
+          color: consented ? 'var(--color-text-primary)' : 'var(--color-muted)',
           cursor: consented && !googleLoading ? 'pointer' : 'not-allowed',
         }}
       >
@@ -293,14 +293,14 @@ function CheckStep({ email, onBack }: { email: string; onBack: () => void }) {
         <CheckCircle2 size={38} color="#4ECDC4" strokeWidth={1.5} />
       </motion.div>
 
-      <h2 className="text-xl font-bold mb-2" style={{ color: '#E8E8F0' }}>
+      <h2 className="text-xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
         {t('auth.magicLinkOnWay')}
       </h2>
-      <p className="text-sm leading-relaxed mb-1" style={{ color: '#8B8BA7' }}>
+      <p className="text-sm leading-relaxed mb-1" style={{ color: 'var(--color-text-muted)' }}>
         {t('auth.weSentLink')}
       </p>
       <p className="text-sm font-semibold mb-5 px-4 py-1.5 rounded-lg"
-         style={{ color: '#E8E8F0', background: '#252840' }}>
+         style={{ color: 'var(--color-text-primary)', background: 'var(--color-surface-raised)' }}>
         {email}
       </p>
       <p className="text-xs leading-relaxed mb-6" style={{ color: '#6B7280' }}>
@@ -310,7 +310,7 @@ function CheckStep({ email, onBack }: { email: string; onBack: () => void }) {
 
       <button
         className="text-xs underline decoration-dotted hover:no-underline transition-all min-h-[44px] px-4"
-        style={{ color: '#7B72FF' }}
+        style={{ color: 'var(--color-primary)' }}
         onClick={onBack}
       >
         {t('auth.wrongEmail')}
@@ -402,7 +402,7 @@ export default function AuthScreen() {
   return (
     <div
       className="fixed inset-0 flex flex-col items-center px-5 overflow-y-auto"
-      style={{ background: '#0F1117' }}
+      style={{ background: 'var(--color-bg)' }}
     >
       <BgOrbs />
 
@@ -419,10 +419,10 @@ export default function AuthScreen() {
           transition={{ ...transition(), delay: 0.05 }}
         >
           <MochiLogo />
-          <h1 className="text-2xl font-bold tracking-tight mt-3" style={{ color: '#E8E8F0' }}>
+          <h1 className="text-2xl font-bold tracking-tight mt-3" style={{ color: 'var(--color-text-primary)' }}>
             MindShift
           </h1>
-          <p className="text-xs mt-0.5" style={{ color: '#7B72FF', letterSpacing: '0.08em' }}>
+          <p className="text-xs mt-0.5" style={{ color: 'var(--color-primary)', letterSpacing: '0.08em' }}>
             Focus made kind
           </p>
         </motion.div>
@@ -473,7 +473,7 @@ export default function AuthScreen() {
           transition={{ ...transition(), delay: 0.4 }}
         >
           {t('auth.dataPrivate')}{' '}
-          <Link to="/privacy" target="_blank" style={{ color: '#7B72FF' }} className="underline decoration-dotted opacity-60 hover:opacity-100 transition-opacity">
+          <Link to="/privacy" target="_blank" style={{ color: 'var(--color-primary)' }} className="underline decoration-dotted opacity-60 hover:opacity-100 transition-opacity">
             Privacy Policy
           </Link>
         </motion.p>
@@ -482,7 +482,7 @@ export default function AuthScreen() {
         <motion.button
           onClick={handleContinueAsGuest}
           className="text-[13px] mt-4 transition-opacity hover:opacity-80"
-          style={{ color: '#8B8BA7' }}
+          style={{ color: 'var(--color-text-muted)' }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ ...transition(), delay: 0.5 }}

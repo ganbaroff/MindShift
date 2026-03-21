@@ -47,10 +47,10 @@ function DiscoveryCardInner({ discovery, onDismiss }: DiscoveryCardProps) {
       }}
       aria-label="Dismiss discovery"
     >
-      <p className="text-[13px]" style={{ color: '#E8E8F0' }}>
+      <p className="text-[13px]" style={{ color: 'var(--color-text-primary)' }}>
         <span className="text-[16px] mr-1">{discovery.emoji}</span>
         {t('mochi.foundItem', { name: '' })}<span className="font-medium">{discovery.name}</span>
-        {discovery.rarity === 'rare' && <span className="ml-1 text-[10px]" style={{ color: '#F59E0B' }}>{t('mochi.rare')}</span>}
+        {discovery.rarity === 'rare' && <span className="ml-1 text-[10px]" style={{ color: 'var(--color-gold)' }}>{t('mochi.rare')}</span>}
       </p>
     </motion.button>
   )

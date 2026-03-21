@@ -67,10 +67,10 @@ function WelcomeWalkthroughInner() {
           className="p-4"
         >
           <p className="text-[24px] mb-1">{current.emoji}</p>
-          <h3 className="text-[15px] font-semibold mb-1" style={{ color: '#E8E8F0' }}>
+          <h3 className="text-[15px] font-semibold mb-1" style={{ color: 'var(--color-text-primary)' }}>
             {t(current.titleKey)}
           </h3>
-          <p className="text-[13px] leading-relaxed" style={{ color: '#8B8BA7' }}>
+          <p className="text-[13px] leading-relaxed" style={{ color: 'var(--color-text-muted)' }}>
             {t(current.bodyKey)}
           </p>
         </motion.div>
@@ -84,7 +84,7 @@ function WelcomeWalkthroughInner() {
               key={i}
               className="w-1.5 h-1.5 rounded-full transition-colors duration-200"
               style={{
-                background: i === step ? '#7B72FF' : 'rgba(123,114,255,0.25)',
+                background: i === step ? 'var(--color-primary)' : 'rgba(123,114,255,0.25)',
               }}
             />
           ))}
@@ -94,7 +94,7 @@ function WelcomeWalkthroughInner() {
           <button
             onClick={handleSkip}
             className="text-[12px] px-2 py-1 rounded-lg focus-visible:ring-1 focus-visible:ring-[#7B72FF]"
-            style={{ color: '#8B8BA7' }}
+            style={{ color: 'var(--color-text-muted)' }}
           >
             {t('welcome.skip')}
           </button>
@@ -103,7 +103,7 @@ function WelcomeWalkthroughInner() {
             className="text-[12px] px-3 py-1 rounded-lg font-medium focus-visible:ring-1 focus-visible:ring-[#7B72FF]"
             style={{
               background: 'rgba(123,114,255,0.15)',
-              color: '#7B72FF',
+              color: 'var(--color-primary)',
             }}
           >
             {step === STEP_KEYS.length - 1 ? t('welcome.gotIt') : t('welcome.next')}

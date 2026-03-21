@@ -13,7 +13,7 @@ const CY = ARC_SIZE / 2
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS
 
 const PHASE_COLORS: Record<SessionPhase, string> = {
-  idle:     '#252840',
+  idle:     'var(--color-surface-raised)',
   struggle: '#7B72FF',   // indigo — getting into it
   release:  '#4ECDC4',   // teal — releasing resistance
   flow:     '#4ECDC4',   // teal — deep flow
@@ -163,7 +163,7 @@ function ArcTimerInner({
               {formatTime(displaySeconds)}
             </span>
             {isCountup && (
-              <span className="text-xs mt-0.5" style={{ color: '#8B8BA7' }}>elapsed</span>
+              <span className="text-xs mt-0.5" style={{ color: 'var(--color-text-muted)' }}>elapsed</span>
             )}
           </motion.div>
         ) : !effectiveDisable ? (
@@ -171,7 +171,7 @@ function ArcTimerInner({
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.3 }}
             className="text-xs"
-            style={{ color: '#8B8BA7' }}
+            style={{ color: 'var(--color-text-muted)' }}
           >
             tap
           </motion.div>
