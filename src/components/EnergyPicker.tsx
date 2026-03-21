@@ -1,8 +1,9 @@
 import { motion } from 'motion/react';
 import { useMotion } from '@/shared/hooks/useMotion';
-import { ENERGY_LABELS, ENERGY_EMOJI } from '@/shared/lib/constants';
+import { useTranslation } from 'react-i18next';
+import { ENERGY_EMOJI } from '@/shared/lib/constants';
 
-const energyOptions = ENERGY_LABELS.map((label, i) => ({ emoji: ENERGY_EMOJI[i], label }));
+const ENERGY_LABEL_KEYS = ['energy.drained', 'energy.low', 'energy.okay', 'energy.good', 'energy.wired'] as const;
 
 interface EnergyPickerProps {
   selected: number;
@@ -11,16 +12,18 @@ interface EnergyPickerProps {
 }
 export default function EnergyPicker({ selected, onSelect, size = 40 }: EnergyPickerProps) {
   const { shouldAnimate } = useMotion();
+  const { t } = useTranslation();
   return (
     <div className="flex items-center justify-between gap-1">
-      {energyOptions.map((opt, i) => {
+      {ENERGY_LABEL_KEYS.map((key, i) => {
         const active = selected === i;
+        const label = t(key);
         return (
           <motion.button
             key={i}
             whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
             onClick={() => onSelect(i)}
-            aria-label={`${opt.label} energy${active ? ' (selected)' : ''}`}
+            aria-label={`${label} energy${active ? ' (selected)' : ''}`}
             aria-pressed={active}
             className="flex flex-col items-center gap-0.5 min-h-[44px] min-w-[44px]"
           >
@@ -32,9 +35,9 @@ export default function EnergyPicker({ selected, onSelect, size = 40 }: EnergyPi
                 filter: active ? 'drop-shadow(0 0 8px rgba(123,114,255,0.5))' : 'none',
               }}
             >
-              {opt.emoji}
+              {ENERGY_EMOJI[i]}
             </motion.span>
-            <span className="text-[10px]" style={{ color: '#8B8BA7' }}>{opt.label}</span>
+            <span className="text-[10px]" style={{ color: '#8B8BA7' }}>{label}</span>
           </motion.button>
         );
       })}

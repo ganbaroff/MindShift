@@ -1,17 +1,13 @@
 import { motion } from 'motion/react'
 import { useMotion } from '@/shared/hooks/useMotion'
+import { useTranslation } from 'react-i18next'
 import type { EnergyLevel } from '@/types'
-import { ENERGY_LABELS, ENERGY_EMOJI } from '@/shared/lib/constants'
+import { ENERGY_EMOJI } from '@/shared/lib/constants'
 
-// ── Energy level options — canonical labels from constants.ts ─────────────────
+// ── Energy level options — labels resolved via i18n ──────────────────────────
 
-const ENERGY_OPTIONS: { level: EnergyLevel; emoji: string; label: string }[] = [
-  { level: 1, emoji: ENERGY_EMOJI[0], label: ENERGY_LABELS[0] },
-  { level: 2, emoji: ENERGY_EMOJI[1], label: ENERGY_LABELS[1] },
-  { level: 3, emoji: ENERGY_EMOJI[2], label: ENERGY_LABELS[2] },
-  { level: 4, emoji: ENERGY_EMOJI[3], label: ENERGY_LABELS[3] },
-  { level: 5, emoji: ENERGY_EMOJI[4], label: ENERGY_LABELS[4] },
-]
+const ENERGY_LEVELS: EnergyLevel[] = [1, 2, 3, 4, 5]
+const ENERGY_LABEL_KEYS = ['energy.drained', 'energy.low', 'energy.okay', 'energy.good', 'energy.wired'] as const
 
 interface Props {
   onSelect: (level: EnergyLevel) => void
@@ -20,18 +16,20 @@ interface Props {
 }
 
 export function EnergyCheckin({ onSelect, selected, compact = false }: Props) {
-  const { shouldAnimate, t } = useMotion()
+  const { shouldAnimate, t: transition } = useMotion()
+  const { t } = useTranslation()
 
   return (
     <div className="flex gap-2 justify-between">
-      {ENERGY_OPTIONS.map(({ level, emoji, label }, i) => {
+      {ENERGY_LEVELS.map((level, i) => {
         const isSelected = selected === level
+        const label = t(ENERGY_LABEL_KEYS[i])
         return (
           <motion.button
             key={level}
             initial={shouldAnimate ? { opacity: 0, y: 10 } : {}}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ ...t(), delay: i * 0.06 }}
+            transition={{ ...transition(), delay: i * 0.06 }}
             whileTap={shouldAnimate ? { scale: 0.90 } : {}}
             onClick={() => onSelect(level)}
             aria-label={`Energy level ${level} — ${label}`}
@@ -43,7 +41,7 @@ export function EnergyCheckin({ onSelect, selected, compact = false }: Props) {
               border: isSelected ? '2px solid #7B72FF' : '1px solid rgba(255,255,255,0.06)',
             }}
           >
-            <span style={{ fontSize: compact ? '1.5rem' : '2rem', lineHeight: 1 }}>{emoji}</span>
+            <span style={{ fontSize: compact ? '1.5rem' : '2rem', lineHeight: 1 }}>{ENERGY_EMOJI[i]}</span>
             {!compact && (
               <span
                 className="text-xs font-medium"
