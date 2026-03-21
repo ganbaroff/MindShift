@@ -656,5 +656,67 @@
     "close": "Bağlayın",
     "save": "Saxla",
     "auto": "Avtomatik"
+  },
+  "uiTone": {
+    "genZ": {
+      "mochiHey": "yo 👋",
+      "mochiGreat": "gözəl 🔥",
+      "mochiComeBack": "hey, qayıtdın 💜",
+      "badgeUnlocked": "{{name}} kilidi açıldı ✨",
+      "streakBreak": "stress yox, sabah da işləyir💜",
+      "streakGoing": "{{days}} gün qalır 🔥",
+      "recoveryWelcome": "geri qayıtdın - bütün məsələ budur 💜",
+      "errorGeneric": "vay, nəsə qırıldı 😅",
+      "lowEnergyNudge": "aşağı batareya rejimi - bir şey kifayətdir 🌿",
+      "highEnergyNudge": "yaxşı enerji, istifadə et ⚡",
+      "xpLabel": "XP",
+      "streakLabel": "zolaq",
+      "badgeLabel": "döş nişanları"
+    },
+    "millennial": {
+      "mochiHey": "salam 👋",
+      "mochiGreat": "bu gün yaxşı ✨",
+      "mochiComeBack": "xoş gəlmisiniz 👋",
+      "badgeUnlocked": "{{name}} kilidi açıldı 🏆",
+      "streakBreak": "zolaq dayandırıldı - hazır olduqda götürün",
+      "streakGoing": "{{days}}-günlük seriya 💪",
+      "recoveryWelcome": "xoş gəlmisiniz - qaldığınız yerdən davam edin",
+      "errorGeneric": "Nəsə xəta baş verdi. Yenidən cəhd edin.",
+      "lowEnergyNudge": "Asan gün - bir şey kifayətdir 🌿",
+      "highEnergyNudge": "Bu gün yaxşı enerji ✨",
+      "xpLabel": "XP",
+      "streakLabel": "zolaq",
+      "badgeLabel": "nailiyyətlər"
+    },
+    "genX": {
+      "mochiHey": "salam.",
+      "mochiGreat": "Əla.",
+      "mochiComeBack": "Yenidən xoş gəlmisiniz.",
+      "badgeUnlocked": "{{name}} tamamlandı",
+      "streakBreak": "Streak dayandırıldı. İstənilən vaxt davam edin.",
+      "streakGoing": "{{days}} ardıcıl günlər",
+      "recoveryWelcome": "Yenidən xoş gəlmisiniz. Siz olanda hazır olun.",
+      "errorGeneric": "Nəsə xəta baş verdi. Yenidən cəhd edin.",
+      "lowEnergyNudge": "İşıq günü - bir tapşırıq kifayətdir.",
+      "highEnergyNudge": "Yaxşı enerji. İstifadə edin.",
+      "xpLabel": "Tərəqqi",
+      "streakLabel": "Ardıcıl günlər",
+      "badgeLabel": "Mərhələlər"
+    },
+    "neutral": {
+      "mochiHey": "hey 👋",
+      "mochiGreat": "aferin ✨",
+      "mochiComeBack": "xoş gəlmisiniz 💙",
+      "badgeUnlocked": "{{name}} — kilidi açıldı ✨",
+      "streakBreak": "sabah təzə başlanğıcdır",
+      "streakGoing": "{{days}} gündür 💫",
+      "recoveryWelcome": "xoş gəlmisiniz 💙",
+      "errorGeneric": "Nəsə xəta baş verdi",
+      "lowEnergyNudge": "Bu gün bir şey - bu kifayətdir 🌿",
+      "highEnergyNudge": "Bu gün yaxşı enerji ✨",
+      "xpLabel": "XP",
+      "streakLabel": "zolaq",
+      "badgeLabel": "döş nişanları"
+    }
   }
 }

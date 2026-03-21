@@ -656,5 +656,67 @@
     "close": "Cerca",
     "save": "Ahorrar",
     "auto": "Auto"
+  },
+  "uiTone": {
+    "genZ": {
+      "mochiHey": "yo 👋",
+      "mochiGreat": "lindo 🔥",
+      "mochiComeBack": "oye volviste 💜",
+      "badgeUnlocked": "{{name}} desbloqueado ✨",
+      "streakBreak": "sin estrés, mañana también funciona 💜",
+      "streakGoing": "{{days}} días van 🔥",
+      "recoveryWelcome": "regresaste, ese es el punto 💜",
+      "errorGeneric": "Ups, algo se rompió 😅",
+      "lowEnergyNudge": "modo de batería baja: una cosa es suficiente 🌿",
+      "highEnergyNudge": "buena energía, úsala ⚡",
+      "xpLabel": "experiencia",
+      "streakLabel": "racha",
+      "badgeLabel": "insignias"
+    },
+    "millennial": {
+      "mochiHey": "hola 👋",
+      "mochiGreat": "bien hecho hoy ✨",
+      "mochiComeBack": "bienvenido de nuevo 👋",
+      "badgeUnlocked": "{{name}} desbloqueado 🏆",
+      "streakBreak": "racha en pausa: retoma cuando estés listo",
+      "streakGoing": "Racha de {{days}} días 💪",
+      "recoveryWelcome": "bienvenido de nuevo: continúa donde lo dejaste",
+      "errorGeneric": "Algo salió mal. Por favor inténtalo de nuevo.",
+      "lowEnergyNudge": "Día fácil: una cosa es suficiente 🌿",
+      "highEnergyNudge": "Buena energía hoy ✨",
+      "xpLabel": "experiencia",
+      "streakLabel": "racha",
+      "badgeLabel": "logros"
+    },
+    "genX": {
+      "mochiHey": "Hola.",
+      "mochiGreat": "Bien hecho.",
+      "mochiComeBack": "Bienvenido de nuevo.",
+      "badgeUnlocked": "{{name}} completado",
+      "streakBreak": "La racha hizo una pausa. Reanudar en cualquier momento.",
+      "streakGoing": "{{days}} días consecutivos",
+      "recoveryWelcome": "Bienvenido de nuevo. Listo cuando tú lo estés.",
+      "errorGeneric": "Algo salió mal. Por favor inténtalo de nuevo.",
+      "lowEnergyNudge": "Día de luz: una tarea es suficiente.",
+      "highEnergyNudge": "Buena energía. Úselo.",
+      "xpLabel": "Progreso",
+      "streakLabel": "Días consecutivos",
+      "badgeLabel": "Hitos"
+    },
+    "neutral": {
+      "mochiHey": "hola 👋",
+      "mochiGreat": "bien hecho ✨",
+      "mochiComeBack": "bienvenido de nuevo 💙",
+      "badgeUnlocked": "{{name}} - desbloqueado ✨",
+      "streakBreak": "mañana es un nuevo comienzo",
+      "streakGoing": "{{days}} días van 💫",
+      "recoveryWelcome": "bienvenido de nuevo 💙",
+      "errorGeneric": "algo salió mal",
+      "lowEnergyNudge": "Una cosa hoy: ya es suficiente 🌿",
+      "highEnergyNudge": "Buena energía hoy ✨",
+      "xpLabel": "experiencia",
+      "streakLabel": "racha",
+      "badgeLabel": "insignias"
+    }
   }
 }

@@ -656,5 +656,67 @@
     "close": "Закрыть",
     "save": "Сохранить",
     "auto": "Авто"
+  },
+  "uiTone": {
+    "genZ": {
+      "mochiHey": "йо 👋",
+      "mochiGreat": "красава 🔥",
+      "mochiComeBack": "эй, ты вернулся 💜",
+      "badgeUnlocked": "{{name}} разблокировано ✨",
+      "streakBreak": "без стресса, завтра тоже можно 💜",
+      "streakGoing": "{{days}} дней подряд 🔥",
+      "recoveryWelcome": "ты вернулся — в этом весь смысл 💜",
+      "errorGeneric": "упс, что-то сломалось 😅",
+      "lowEnergyNudge": "режим энергосбережения — одного дела хватит 🌿",
+      "highEnergyNudge": "хорошая энергия, используй ⚡",
+      "xpLabel": "XP",
+      "streakLabel": "серия",
+      "badgeLabel": "значки"
+    },
+    "millennial": {
+      "mochiHey": "привет 👋",
+      "mochiGreat": "хорошая работа сегодня ✨",
+      "mochiComeBack": "с возвращением 👋",
+      "badgeUnlocked": "{{name}} разблокировано 🏆",
+      "streakBreak": "серия на паузе — продолжите когда готовы",
+      "streakGoing": "{{days}}-дневная серия 💪",
+      "recoveryWelcome": "с возвращением — продолжите с того места",
+      "errorGeneric": "Что-то пошло не так. Попробуйте снова.",
+      "lowEnergyNudge": "Лёгкий день — одного дела достаточно 🌿",
+      "highEnergyNudge": "Хорошая энергия сегодня ✨",
+      "xpLabel": "XP",
+      "streakLabel": "серия",
+      "badgeLabel": "достижения"
+    },
+    "genX": {
+      "mochiHey": "Здравствуйте.",
+      "mochiGreat": "Хорошая работа.",
+      "mochiComeBack": "С возвращением.",
+      "badgeUnlocked": "{{name}} выполнено",
+      "streakBreak": "Серия на паузе. Продолжите в любое время.",
+      "streakGoing": "{{days}} дней подряд",
+      "recoveryWelcome": "С возвращением. Готовы когда вы готовы.",
+      "errorGeneric": "Что-то пошло не так. Попробуйте снова.",
+      "lowEnergyNudge": "Лёгкий день — одной задачи достаточно.",
+      "highEnergyNudge": "Хорошая энергия. Используйте её.",
+      "xpLabel": "Прогресс",
+      "streakLabel": "Дней подряд",
+      "badgeLabel": "Вехи"
+    },
+    "neutral": {
+      "mochiHey": "привет 👋",
+      "mochiGreat": "хорошая работа ✨",
+      "mochiComeBack": "с возвращением 💙",
+      "badgeUnlocked": "{{name}} — разблокировано ✨",
+      "streakBreak": "завтра — новый старт",
+      "streakGoing": "{{days}} дней подряд 💫",
+      "recoveryWelcome": "с возвращением 💙",
+      "errorGeneric": "Что-то пошло не так",
+      "lowEnergyNudge": "Одно дело на сегодня — этого достаточно 🌿",
+      "highEnergyNudge": "Хорошая энергия сегодня ✨",
+      "xpLabel": "XP",
+      "streakLabel": "серия",
+      "badgeLabel": "значки"
+    }
   }
 }

@@ -10,6 +10,8 @@
  * - User can override via Settings ("Interface style" picker)
  */
 
+import i18n from '@/i18n'
+
 export type UITone = 'gen_z' | 'millennial' | 'gen_x' | 'neutral'
 
 export type UIDensity = 'compact' | 'normal' | 'rich'
@@ -101,79 +103,35 @@ export interface ToneCopy {
   badgeLabel: string
 }
 
-const GEN_Z_COPY: ToneCopy = {
-  mochiHey: 'yo 👋',
-  mochiGreat: 'nice one 🔥',
-  mochiComeBack: 'hey, you came back 💜',
-  badgeUnlocked: (name) => `${name} unlocked ✨`,
-  streakBreak: 'no stress, tomorrow works too 💜',
-  streakGoing: (days) => `${days} days going 🔥`,
-  recoveryWelcome: "you came back — that's the whole point 💜",
-  errorGeneric: 'oops, something broke 😅',
-  lowEnergyNudge: 'low battery mode — one thing is enough 🌿',
-  highEnergyNudge: "good energy, use it ⚡",
-  xpLabel: 'XP',
-  streakLabel: 'streak',
-  badgeLabel: 'badges',
+/** i18n key prefix per tone */
+const TONE_I18N_PREFIX: Record<UITone, string> = {
+  gen_z: 'uiTone.genZ',
+  millennial: 'uiTone.millennial',
+  gen_x: 'uiTone.genX',
+  neutral: 'uiTone.neutral',
 }
 
-const MILLENNIAL_COPY: ToneCopy = {
-  mochiHey: 'hey there 👋',
-  mochiGreat: 'well done today ✨',
-  mochiComeBack: 'welcome back 👋',
-  badgeUnlocked: (name) => `${name} unlocked 🏆`,
-  streakBreak: 'streak paused — pick up when ready',
-  streakGoing: (days) => `${days}-day streak 💪`,
-  recoveryWelcome: "welcome back — pick up where you left off",
-  errorGeneric: 'Something went wrong. Please try again.',
-  lowEnergyNudge: 'Easy day — one thing is enough 🌿',
-  highEnergyNudge: "Good energy today ✨",
-  xpLabel: 'XP',
-  streakLabel: 'streak',
-  badgeLabel: 'achievements',
-}
-
-const GEN_X_COPY: ToneCopy = {
-  mochiHey: 'Hello.',
-  mochiGreat: 'Well done.',
-  mochiComeBack: 'Welcome back.',
-  badgeUnlocked: (name) => `${name} completed`,
-  streakBreak: 'Streak paused. Resume anytime.',
-  streakGoing: (days) => `${days} consecutive days`,
-  recoveryWelcome: 'Welcome back. Ready when you are.',
-  errorGeneric: 'Something went wrong. Please try again.',
-  lowEnergyNudge: 'Light day — one task is enough.',
-  highEnergyNudge: 'Good energy. Use it.',
-  xpLabel: 'Progress',
-  streakLabel: 'Consecutive days',
-  badgeLabel: 'Milestones',
-}
-
-const NEUTRAL_COPY: ToneCopy = {
-  mochiHey: 'hey 👋',
-  mochiGreat: 'well done ✨',
-  mochiComeBack: 'welcome back 💙',
-  badgeUnlocked: (name) => `${name} — unlocked ✨`,
-  streakBreak: 'tomorrow is a fresh start',
-  streakGoing: (days) => `${days} days going 💫`,
-  recoveryWelcome: 'welcome back 💙',
-  errorGeneric: 'Something went wrong',
-  lowEnergyNudge: 'One thing today — that\'s enough 🌿',
-  highEnergyNudge: 'Good energy today ✨',
-  xpLabel: 'XP',
-  streakLabel: 'streak',
-  badgeLabel: 'badges',
-}
-
-const TONE_MAP: Record<UITone, ToneCopy> = {
-  gen_z: GEN_Z_COPY,
-  millennial: MILLENNIAL_COPY,
-  gen_x: GEN_X_COPY,
-  neutral: NEUTRAL_COPY,
+function buildToneCopy(prefix: string): ToneCopy {
+  return {
+    mochiHey: i18n.t(`${prefix}.mochiHey`),
+    mochiGreat: i18n.t(`${prefix}.mochiGreat`),
+    mochiComeBack: i18n.t(`${prefix}.mochiComeBack`),
+    badgeUnlocked: (name: string) => i18n.t(`${prefix}.badgeUnlocked`, { name }),
+    streakBreak: i18n.t(`${prefix}.streakBreak`),
+    streakGoing: (days: number) => i18n.t(`${prefix}.streakGoing`, { days }),
+    recoveryWelcome: i18n.t(`${prefix}.recoveryWelcome`),
+    errorGeneric: i18n.t(`${prefix}.errorGeneric`),
+    lowEnergyNudge: i18n.t(`${prefix}.lowEnergyNudge`),
+    highEnergyNudge: i18n.t(`${prefix}.highEnergyNudge`),
+    xpLabel: i18n.t(`${prefix}.xpLabel`),
+    streakLabel: i18n.t(`${prefix}.streakLabel`),
+    badgeLabel: i18n.t(`${prefix}.badgeLabel`),
+  }
 }
 
 export function getToneCopy(tone: UITone): ToneCopy {
-  return TONE_MAP[tone] ?? NEUTRAL_COPY
+  const prefix = TONE_I18N_PREFIX[tone] ?? TONE_I18N_PREFIX.neutral
+  return buildToneCopy(prefix)
 }
 
 export function getDensity(tone: UITone): UIDensity {

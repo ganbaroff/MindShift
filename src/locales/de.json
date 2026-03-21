@@ -656,5 +656,67 @@
     "close": "Schließen",
     "save": "Speichern",
     "auto": "Auto"
+  },
+  "uiTone": {
+    "genZ": {
+      "mochiHey": "Yo 👋",
+      "mochiGreat": "schön 🔥",
+      "mochiComeBack": "hey, du bist zurückgekommen 💜",
+      "badgeUnlocked": "{{name}} freigeschaltet ✨",
+      "streakBreak": "Kein Stress, morgen klappt auch 💜",
+      "streakGoing": "{{days}} Tage gehen 🔥",
+      "recoveryWelcome": "Du bist zurückgekommen – das ist der springende Punkt 💜",
+      "errorGeneric": "Ups, da ist etwas kaputt gegangen 😅",
+      "lowEnergyNudge": "Low-Battery-Modus – eine Sache ist genug 🌿",
+      "highEnergyNudge": "Gute Energie, nutze sie ⚡",
+      "xpLabel": "XP",
+      "streakLabel": "Strähne",
+      "badgeLabel": "Abzeichen"
+    },
+    "millennial": {
+      "mochiHey": "Hallo 👋",
+      "mochiGreat": "gut gemacht heute ✨",
+      "mochiComeBack": "Willkommen zurück 👋",
+      "badgeUnlocked": "{{name}} freigeschaltet 🏆",
+      "streakBreak": "Streak pausiert – weitermachen, wenn Sie bereit sind",
+      "streakGoing": "{{days}}-Tagessträhne 💪",
+      "recoveryWelcome": "Willkommen zurück – machen Sie dort weiter, wo Sie aufgehört haben",
+      "errorGeneric": "Etwas ist schief gelaufen. Bitte versuchen Sie es erneut.",
+      "lowEnergyNudge": "Einfacher Tag – eine Sache ist genug 🌿",
+      "highEnergyNudge": "Gute Energie heute ✨",
+      "xpLabel": "XP",
+      "streakLabel": "Strähne",
+      "badgeLabel": "Erfolge"
+    },
+    "genX": {
+      "mochiHey": "Hallo.",
+      "mochiGreat": "Gut gemacht.",
+      "mochiComeBack": "Willkommen zurück.",
+      "badgeUnlocked": "{{name}} abgeschlossen",
+      "streakBreak": "Streak pausierte. Jederzeit fortfahren.",
+      "streakGoing": "{{days}} aufeinanderfolgende Tage",
+      "recoveryWelcome": "Willkommen zurück. Bereit, wenn Sie es sind.",
+      "errorGeneric": "Etwas ist schief gelaufen. Bitte versuchen Sie es erneut.",
+      "lowEnergyNudge": "Heller Tag – eine Aufgabe reicht.",
+      "highEnergyNudge": "Gute Energie. Benutze es.",
+      "xpLabel": "Fortschritt",
+      "streakLabel": "Aufeinanderfolgende Tage",
+      "badgeLabel": "Meilensteine"
+    },
+    "neutral": {
+      "mochiHey": "hey 👋",
+      "mochiGreat": "gut gemacht ✨",
+      "mochiComeBack": "Willkommen zurück 💙",
+      "badgeUnlocked": "{{name}} – entsperrt ✨",
+      "streakBreak": "Morgen ist ein Neuanfang",
+      "streakGoing": "{{days}} Tage gehen 💫",
+      "recoveryWelcome": "Willkommen zurück 💙",
+      "errorGeneric": "Etwas ist schief gelaufen",
+      "lowEnergyNudge": "Eines heute – das reicht 🌿",
+      "highEnergyNudge": "Gute Energie heute ✨",
+      "xpLabel": "XP",
+      "streakLabel": "Strähne",
+      "badgeLabel": "Abzeichen"
+    }
   }
 }
