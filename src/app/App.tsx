@@ -52,6 +52,9 @@ const LazyMonthlyReflection = lazy(() =>
 const LazyWeeklyPlanning = lazy(() =>
   import('@/features/focus/WeeklyPlanning').then(m => ({ default: m.WeeklyPlanning }))
 )
+const LazyFirstFocusTutorial = lazy(() =>
+  import('@/features/tutorial/FirstFocusTutorial')
+)
 
 export default function App() {
   const {
@@ -59,7 +62,7 @@ export default function App() {
     nowPool, nextPool, somedayPool,
     onboardingCompleted, setBurnoutScore, completedTotal, energyLevel,
     flexiblePauseUntil, setFlexiblePauseUntil,
-    reducedStimulation, userTheme,
+    reducedStimulation, userTheme, firstFocusTutorialCompleted,
     shutdownShownDate, setShutdownShownDate,
     monthlyReflectionShownMonth, setMonthlyReflectionShownMonth,
     weeklyPlanShownWeek, setWeeklyPlanShownWeek,
@@ -294,8 +297,15 @@ export default function App() {
             </Suspense>
           )}
 
+          {/* First-focus tutorial — shown once after onboarding, before rituals */}
+          {!showRecovery && !showContextRestore && onboardingCompleted && !firstFocusTutorialCompleted && (
+            <Suspense fallback={null}>
+              <LazyFirstFocusTutorial />
+            </Suspense>
+          )}
+
           {/* Shutdown ritual — end-of-day wind-down (9pm+, once per day) */}
-          {!showRecovery && !showContextRestore && showShutdown && (
+          {!showRecovery && !showContextRestore && firstFocusTutorialCompleted && showShutdown && (
             <Suspense fallback={null}>
               <LazyShutdownRitual onDismiss={() => {
                 setShowShutdown(false)
@@ -306,7 +316,7 @@ export default function App() {
           )}
 
           {/* Monthly reflection — first 5 days of new month, once per month */}
-          {!showRecovery && !showContextRestore && !showShutdown && showMonthly && (
+          {!showRecovery && !showContextRestore && firstFocusTutorialCompleted && !showShutdown && showMonthly && (
             <Suspense fallback={null}>
               <LazyMonthlyReflection onDismiss={() => {
                 setShowMonthly(false)
@@ -317,7 +327,7 @@ export default function App() {
           )}
 
           {/* Weekly planning — Sunday evening or Monday morning, once per ISO week */}
-          {!showRecovery && !showContextRestore && !showShutdown && !showMonthly && showWeeklyPlan && (
+          {!showRecovery && !showContextRestore && firstFocusTutorialCompleted && !showShutdown && !showMonthly && showWeeklyPlan && (
             <Suspense fallback={null}>
               <LazyWeeklyPlanning onDismiss={() => {
                 setShowWeeklyPlan(false)
