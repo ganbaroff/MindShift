@@ -9,7 +9,7 @@
 import { useState, useMemo, useCallback } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useNavigate } from 'react-router-dom'
-import { Play, Plus, ChevronRight } from 'lucide-react'
+import { Play, ChevronRight } from 'lucide-react'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { useUITone } from '@/shared/hooks/useUITone'
 import { useStore } from '@/store'
@@ -496,19 +496,7 @@ export default function TodayPage() {
         )}
       </AnimatePresence>
 
-      {/* Floating add button */}
-      <button
-        onClick={() => setShowAddTask(true)}
-        className="fixed z-20 w-12 h-12 rounded-full flex items-center justify-center shadow-lg focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
-        style={{
-          background: '#7B72FF',
-          right: 16,
-          bottom: 'calc(80px + env(safe-area-inset-bottom))',
-        }}
-        aria-label="Add task"
-      >
-        <Plus size={24} color="white" />
-      </button>
+      {/* No floating FAB — QuickCapture handles task addition on Today */}
     </PageTransition>
   )
 }

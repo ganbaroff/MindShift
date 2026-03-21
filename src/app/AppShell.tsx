@@ -147,7 +147,7 @@ export function AppShell() {
           className="fixed z-30 rounded-full focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
           style={{
             right: 16,
-            bottom: 'calc(72px + env(safe-area-inset-bottom))',
+            bottom: 'calc(130px + env(safe-area-inset-bottom))',
             boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
             background: '#252840',
             padding: 6,
