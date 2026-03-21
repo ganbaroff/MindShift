@@ -347,7 +347,342 @@
     "foundItem": "Mochi bir {{name}} buldu",
     "rare": "Nadir!",
     "garden": "🌿 Mochi'nin Bahçesi",
-    "found": "{{count}}/{{total}} bulundu"
+    "found": "{{count}}/{{total}} bulundu",
+    "neutral": {
+      "phase_release": {
+        "0": "Başlarken... en zor kısmı geçmiş oluyorsun 🌊",
+        "1": "Direnç kalkıyor. Ritmini buluyorsun.",
+        "2": "Zor kısmı geçtik. Akmasına izin verin. 🌊",
+        "3": "Mücadele aşaması tamamlandı. Sen geldin; hepsi bu.",
+        "4": "Başlamak en zor kısımdır. Zaten yaptın.",
+        "5": "Beyninizin ısınması için bir dakikaya ihtiyacı vardı. Bu normal. 🌊",
+        "6": "Hala burada seninle. Dişliler dönüyor.",
+        "7": "Sürtünme azalıyor. Yerleşiyorsun.",
+        "8": "O sıkışmışlık hissi mi? Geçti. Bunu atlattın. 🌊",
+        "9": "Bu işte birlikteyiz. Kendi hızınızda ilerlemeye devam edin."
+      },
+      "phase_flow": {
+        "0": "Derin odaklanma. Bana ihtiyacın olursa buradayım 🌙",
+        "1": "Akıştasın. Sessiz kalacağım. 🌙",
+        "2": "Tam akış modu. Devam etmekten başka yapacak bir şey yok.",
+        "3": "İşte bu. Şu anda derin bir çalışma yapılıyor. 🌙",
+        "4": "Hala burada seninle. Aceleye gerek yok.",
+        "5": "Beyniniz yolunu buldu. Sür onu. 🌙",
+        "6": "Akış durumu. Sizin hızınız, sizin yolunuz.",
+        "7": "Sessizce burada. Şu anda bana ihtiyacın yok. 🌙",
+        "8": "Bu odak sizindir. Sadece sana arkadaşlık ediyorum.",
+        "9": "Derinlerde. İşte bu böyle hissettiriyor. 🌙"
+      },
+      "milestone_7": {
+        "0": "7 dakika. İşin zor kısmı geride kaldı. 💪",
+        "1": "İlk duvarı geçtik. Güzel. 💪",
+        "2": "Başlamak en zor kısımdır. Zaten yaptın. 💪",
+        "3": "Beyniniz farklı çalışıyor. Bu bir hata değil. 💪",
+        "4": "7 dakika. Sen geldin; bu önemli.",
+        "5": "İlk birkaç dakika her zaman en zor olanıdır. Tamamlamak. 💪",
+        "6": "Hala buradayım. Hala gidiyorum. Bütün mesele bu.",
+        "7": "Aceleye gerek yok. Hızınız geçerli. 💪",
+        "8": "Odaklanmayı seçmek için 7 dakika. Bu gerçek.",
+        "9": "Geçmiş direniş. Gerisi buradan kolaylaşıyor. 💪"
+      },
+      "milestone_15": {
+        "0": "On beş dakika — bu gerçek odaklanmadır ✨",
+        "1": "15 dakika derin. Bu sayılır. ✨",
+        "2": "Çeyrek saatlik gerçek çalışma. Bunu sen yaptın. ✨",
+        "3": "15 dakika. Hiçbir şey değil. Bu bir şey. ✨",
+        "4": "Beyninin yerleşmek için zamana ihtiyacı vardı. Sorun çözüldü. ✨",
+        "5": "15 dakika sonra ortaya çıkıyor. Öyle görünüyor.",
+        "6": "Hala burada seninle. Sabit durmak. ✨",
+        "7": "Çeyrek saat içinde. Bunu senden kimse alamaz.",
+        "8": "Bu odak noktasıdır. Mükemmel değil, zorlama değil. Sadece gerçek. ✨",
+        "9": "15 dakika. Beyniniz işini yapıyor."
+      },
+      "milestone_30": {
+        "0": "Yarım saat. Sağlam seans 🌿",
+        "1": "30 dakika. Bu gerçek bir seans. 🌿",
+        "2": "30 inç. Hala buradayım. 🌿",
+        "3": "Yarım saatlik odaklanma. Devam ettin. 🌿",
+        "4": "30 dakika. Beyniniz buna takılı kaldı.",
+        "5": "Yarım saat. Bundan sonra ne olursa olsun bu önemliydi. 🌿",
+        "6": "Bu işte birlikteyiz. 30 dakika derin.",
+        "7": "30 dakikalık gerçek çalışma. Bu küçük değil. 🌿",
+        "8": "Yarım saat. Odak noktanız bugün ortaya çıktı.",
+        "9": "30 dakika. Sabit, sürekli, gerçek. 🌿"
+      },
+      "milestone_60": {
+        "0": "Bir saat. Bu gerçekti. 🌟",
+        "1": "60 dakika. Gerçek derin çalışma. 🌟",
+        "2": "Tam bir saat. 🌟",
+        "3": "Bir saat bitti. Bunu beyniniz yaptı. 🌟",
+        "4": "60 dakika odaklanma. Bu oturulacak bir şey. 🌟",
+        "5": "Bir saat. Hile yok, hack yok. Sadece sen ortaya çıkıyorsun.",
+        "6": "Bir saat. Hala burada seninle. 🌟",
+        "7": "60 dakika. Sürekli odaklanma böyle görünür.",
+        "8": "Bir saatlik derin çalışma. Hızınız sizi buraya getirdi. 🌟",
+        "9": "Bir saat. Bu gerçek ve senindir. 🌟"
+      }
+    },
+    "gen_z": {
+      "phase_release": {
+        "0": "zor kısmı geçtim 🌊",
+        "1": "beyin sonunda yükleniyor hahaha",
+        "2": "tamam şimdi taşınıyoruz 🌊",
+        "3": "Direniş sohbeti terk etti",
+        "4": "ısınma geçerlidir 🌊",
+        "5": "Mücadele aşaması temizlendi 💜",
+        "6": "bu işte birlikteyiz",
+        "7": "artık çarklar dönüyor"
+      },
+      "phase_flow": {
+        "0": "kilitli kaldın 🌙",
+        "1": "akış modu etkinleştirildi",
+        "2": "derinlerde rn 🌙",
+        "3": "beyin işini yapıyor",
+        "4": "sessizce buradasın 🌙",
+        "5": "ana karakterin odaklanma enerjisi",
+        "6": "burası bölge 🌙",
+        "7": "beyniniz yuvasını buldu"
+      },
+      "milestone_7": {
+        "0": "7 dakika 💪",
+        "1": "duvarı geç, güzel",
+        "2": "başlamak işin zor kısmıydı 💪",
+        "3": "beynin farklı çalışıyor, bu geçerli",
+        "4": "Gösterime 7 dakika kaldı 💪",
+        "5": "hâlâ buradayız, hâlâ gidiyoruz",
+        "6": "Acele etmeyin, temponuz geçerli 💪",
+        "7": "Direnç temizlendi 💪"
+      },
+      "milestone_15": {
+        "0": "15 dakika derinlik ✨",
+        "1": "çeyrek saat, bu sayılır",
+        "2": "gerçek odaklanma oluyor rn ✨",
+        "3": "15 dakika hiçbir şey değil.",
+        "4": "beyin yerleşti ✨",
+        "5": "işte bu, fr",
+        "6": "hala buradasın ✨",
+        "7": "15 dakikalık gerçek çalışma 💜"
+      },
+      "milestone_30": {
+        "0": "30 dakika 🌿 katı",
+        "1": "yarım saat, devam ettin",
+        "2": "Saat 30'da, hâlâ buradasın 🌿",
+        "3": "gerçek oturum tbh",
+        "4": "30 dakika sonra geliyoruz 🌿",
+        "5": "beyin buna takılmış 💜",
+        "6": "bu sayıldı, sınır yok 🌿",
+        "7": "yarım saat derinlik 🌿"
+      },
+      "milestone_60": {
+        "0": "bir saat 🌟 fr",
+        "1": "60 dakika, gerçek çalışma",
+        "2": "bir saat, bu gerçekti 🌟",
+        "3": "bunu beynin yaptı",
+        "4": "tam bir saat 🌟",
+        "5": "60 dakika, hile yok, sadece sen",
+        "6": "hala buradayız 🌟",
+        "7": "odak böyle görünüyor 🌟"
+      }
+    },
+    "millennial": {
+      "phase_release": {
+        "0": "Zor kısmı geçtim. Ritmini buldun. 🌊",
+        "1": "Direnç kalkıyor. İşte böyle başlıyor.",
+        "2": "Mücadele aşaması tamamlandı. Sen kendin için ortaya çıktın. 🌊",
+        "3": "Beyninizin harekete geçmesi için bir dakikaya ihtiyacı vardı. Bu şekilde çalışır.",
+        "4": "Sürtünme azalıyor. Sen buna alışıyorsun. 🌊",
+        "5": "Başlamak işin zor kısmıydı. Bunu zaten yaptın.",
+        "6": "Şimdi konuya giriyorum. Isınma bitti. 🌊",
+        "7": "Zor kısmı birlikte aştık."
+      },
+      "phase_flow": {
+        "0": "Akıştasın. Sessizce burada olacağım. 🌙",
+        "1": "Derin odak modu. Bu senin zamanın.",
+        "2": "Tarzını buldun. Sür onu. 🌙",
+        "3": "Akış durumu. Sizin yolunuz, sizin hızınız.",
+        "4": "Derinlerde. Sürekli odaklanmanın hissi budur. 🌙",
+        "5": "Bu odak sizindir. Sadece arkadaşlık için buradayım.",
+        "6": "Beyniniz şu anda en iyi yaptığı şeyi yapıyor. 🌙",
+        "7": "Sessizce burada. Bu sende var."
+      },
+      "milestone_7": {
+        "0": "7 dakika içinde. En zor kısım arkanızda. 💪",
+        "1": "İlk duvarı geçtik. Bu gerçekten çaba gerektirdi.",
+        "2": "Beyniniz farklı çalışıyor. Bu senin gücün. 💪",
+        "3": "Odaklanmayı seçmek için 7 dakika. Bu hiçbir şey değil.",
+        "4": "İlk birkaç dakika her zaman en zorlusudur. Onları atlattın. 💪",
+        "5": "Başlamak en zor kısımdır. Zaten hallettin.",
+        "6": "7 dakika. Bir seçim yaptın ve ona bağlı kaldın. 💪",
+        "7": "Hala buradayım. Hala gidiyorum. Önemli olan bu."
+      },
+      "milestone_15": {
+        "0": "15 dakikalık gerçek odaklanma. Bunu sen inşa ettin. ✨",
+        "1": "Çeyrek saat. İlerleme böyle görünüyor.",
+        "2": "15 dakika derin. Bu düşündüğünüzden daha önemli. ✨",
+        "3": "Beyninin yerleşmek için zamana ihtiyacı vardı. Öyle oldu.",
+        "4": "15 dakika kendiniz görünün. ✨",
+        "5": "Çeyrek saat içinde. Bu ivmeyi kazandınız.",
+        "6": "Bu odak noktasıdır. Mükemmel değil, sadece gerçek. ✨",
+        "7": "15 dakika. Beyniniz işini yapıyor."
+      },
+      "milestone_30": {
+        "0": "Yarım saat. Gerçek bir ivme yarattın. 🌿",
+        "1": "30 dakika sürekli odaklanma. Bu bir seans.",
+        "2": "30 inç. Hala buradayım. 🌿",
+        "3": "Yarım saat. Ne olursa olsun bu sayılırdı.",
+        "4": "30 dakika. Odak noktanız bugün ortaya çıktı. 🌿",
+        "5": "Yarım saatlik gerçek çalışma. Bu da mantıklı.",
+        "6": "30 dakika. Sabit ve sürekli. 🌿",
+        "7": "Bu işte birlikteyiz. 30 dakika derin."
+      },
+      "milestone_60": {
+        "0": "Bir saat. Bu gerçekten derin bir çalışmaydı. 🌟",
+        "1": "60 dakika. Bir saniyeliğine bununla oturmalısın.",
+        "2": "Tam bir saat odaklanma. Bu senin. 🌟",
+        "3": "Bir saat. Kısayol yok, sadece sen ortaya çıkıyorsun.",
+        "4": "60 dakika sürekli odaklanma. Bu bir şey. 🌟",
+        "5": "Bir saat. Hızınız sizi buraya getirdi.",
+        "6": "Bir saatlik derin çalışma. Gerçek ve kazanılmış. 🌟",
+        "7": "60 dakika. Görünüşe göre bu. 🌟"
+      }
+    },
+    "gen_x": {
+      "phase_release": {
+        "0": "Zor kısmı geçtim.",
+        "1": "Direnç temizliği. Ritmini bulmak.",
+        "2": "Isınma tamamlandı. İçeri girmek.",
+        "3": "Yerleştik. İlerliyoruz.",
+        "4": "Sürtünme geçti. Şimdi sabit ol.",
+        "5": "Geçmiş direniş. Gerisi daha kolaydır.",
+        "6": "Şimdi ilgi çekici.",
+        "7": "Mücadele aşaması temizlendi. İleri."
+      },
+      "phase_flow": {
+        "0": "Derin odaklanma. Hala buradayım.",
+        "1": "Akış modu. Sessiz kalmak.",
+        "2": "Bölgede. Devam etmek.",
+        "3": "Senin ritmin. Hızınız.",
+        "4": "Odaklanmış. Başka hiçbir şeye gerek yok.",
+        "5": "Kilitlendim. Burada olacağım.",
+        "6": "Derin çalışmalar yapılıyor.",
+        "7": "Sabit odaklanma. Devam et."
+      },
+      "milestone_7": {
+        "0": "7 dakika. Zor kısmı geçtim.",
+        "1": "İlk duvar temizlendi.",
+        "2": "7 dakika kaldı. Şimdi taşınıyorum.",
+        "3": "Başladı. İşin zor kısmı buydu.",
+        "4": "7 dakikalık odaklanma. Sağlam başlangıç.",
+        "5": "Geçmişteki ilk direnç.",
+        "6": "Hala gidiyorum. İyi.",
+        "7": "7 inç. Dinlenme kolaylaşıyor."
+      },
+      "milestone_15": {
+        "0": "15 dakika. Gerçek odaklanma.",
+        "1": "Çeyrek saat. Bu sayılır.",
+        "2": "15 inç. Sabit.",
+        "3": "15 dakikalık çalışma tamamlandı.",
+        "4": "Çeyrek saat. Yolda.",
+        "5": "15 dakika. Yerleştik.",
+        "6": "15'e odaklanıldı. Sağlam.",
+        "7": "Çeyrek saatlik gerçek çalışma."
+      },
+      "milestone_30": {
+        "0": "30 dakika. Gerçek oturum.",
+        "1": "Yarım saat. Sağlam iş.",
+        "2": "30 inç. Hala buradayım.",
+        "3": "Yarım saat bitti.",
+        "4": "30 dakika. Sayıldı.",
+        "5": "Yarım saate kadar.",
+        "6": "30 dakika. Sürekli odaklanma.",
+        "7": "Yarım saat. Sabit durmak."
+      },
+      "milestone_60": {
+        "0": "Bir saat. Tamamlamak.",
+        "1": "60 dakika. Gerçek iş.",
+        "2": "Bir saatlik odaklanma.",
+        "3": "60 inç. Katı.",
+        "4": "Bir saat. Bu önemliydi.",
+        "5": "Bir saat. Sürekli çaba.",
+        "6": "60 dakikalık derin çalışma.",
+        "7": "Saat bitti."
+      }
+    },
+    "psychotype": {
+      "achiever": {
+        "milestone_7": {
+          "0": "Kitaplarda 7 dakika 💪",
+          "1": "Zor kısmı geçtim. İnşa etmeye devam edin."
+        },
+        "milestone_15": {
+          "0": "15 dakikalık gerçek ilerleme. ✨",
+          "1": "Çeyrek saat aşağıda. Sağlam."
+        },
+        "milestone_30": {
+          "0": "Yarım saat. Bu gerçek bir seans. 🌿",
+          "1": "30 dakika tamamlandı. Momentum."
+        },
+        "milestone_60": {
+          "0": "Bir saat. Gerçek derin çalışma. 🌟",
+          "1": "60 dakika. Bu gerçekti."
+        }
+      },
+      "explorer": {
+        "milestone_7": {
+          "0": "7 dakika içinde — ısınıyoruz 🔍",
+          "1": "İçeri girmek. Merak yükleniyor."
+        },
+        "milestone_15": {
+          "0": "Bu konuyu 15 dakika takip ediyorum. ✨",
+          "1": "Hala araştırıyorum. İyi."
+        },
+        "milestone_30": {
+          "0": "Yarım saat derinlikte. 🌿",
+          "1": "30 dakikalık keşif."
+        },
+        "milestone_60": {
+          "0": "Bir saat. Seni nereye götürdü? 🌟",
+          "1": "60 dakika. Ne buldun?"
+        }
+      },
+      "connector": {
+        "milestone_7": {
+          "0": "7 dakika. Sabit durmak. 🌱",
+          "1": "Hala burada seninle."
+        },
+        "milestone_15": {
+          "0": "15 dakikalık odaklanmış çalışma. ✨",
+          "1": "Çeyrek saat. Bu önemli."
+        },
+        "milestone_30": {
+          "0": "Yarım saat. Bu işte birlikteyiz. 🌿",
+          "1": "30 dakika sonra ortaya çıkıyor."
+        },
+        "milestone_60": {
+          "0": "Bir saat. 🌟",
+          "1": "60 dakika. Birlikte gerçek iş."
+        }
+      },
+      "planner": {
+        "milestone_7": {
+          "0": "7 dakika - yolda. 🌱",
+          "1": "Plan işe yarıyor."
+        },
+        "milestone_15": {
+          "0": "15 dakika. Planlandığı gibi. ✨",
+          "1": "Çeyrek saat içinde. Sabit."
+        },
+        "milestone_30": {
+          "0": "Yarım saat. Tam hızda. 🌿",
+          "1": "Planlandığı gibi 30 dakika."
+        },
+        "milestone_60": {
+          "0": "Bir saat. Plan teslim edildi. 🌟",
+          "1": "60 dakika tamamlandı."
+        }
+      }
+    },
+    "fallback": "Hala burada seninle."
   },
   "transition": {
     "next": "Sonraki: {{title}}",
@@ -720,5 +1055,32 @@
       "streakLabel": "rüzgâr gibi geçmek",
       "badgeLabel": "rozetler"
     }
+  },
+  "tutorial": {
+    "skip": "Atlamak",
+    "introTitle": "Odaklanmayı deneyelim",
+    "introBody": "MindShift'in nasıl çalıştığını görmek için 2 dakikalık hızlı bir oturum. Beyniniz doğal aşamalardan geçer; size her birini göstereceğiz.",
+    "introHint": "2 dakika sürer. İstediğiniz zaman atlayabilirsiniz.",
+    "startButton": "2 dakikalık oturumu başlat",
+    "sampleTaskTitle": "2 dakika odaklanmayı deneyin",
+    "phaseStruggle": "Çabalamak",
+    "phaseRelease": "Serbest bırakmak",
+    "phaseFlow": "Akış",
+    "struggleExplain": "Bu normaldir. Beyniniz ısınıyor. İlk 30 saniye her zaman en zor olanıdır.",
+    "releaseExplain": "Direnç kalkıyor. Beyniniz göreve yerleşiyor.",
+    "flowExplain": "Akıştasın. Bu derin bir odaklanmadır. Ne kadar uzun süre kalırsanız o kadar kolaylaşır.",
+    "skipTimer": "Sonuçlara atla",
+    "celebrateTitle": "Sen yaptın",
+    "celebrateBody": "Bu gerçek bir odaklanma seansıydı. İşte beyninizin az önce yaşadığı şey:",
+    "struggleDesc": "Beyniniz başlamaya direnir. Bu DEHB, tembellik değil. Geçiyor.",
+    "releaseDesc": "Direnç kaybolur. Beyniniz görevle meşgul olmaya başlar.",
+    "flowDesc": "Derin odaklanma. Beyniniz yolunu buldu. Amaç bu.",
+    "continueButton": "Anladım",
+    "nextTitle": "hazırsın",
+    "nextBody": "MindShift'te odaklanmanın nasıl çalıştığını gördünüz. İşte bundan sonra deneyeceğiniz şey:",
+    "tip1": "ŞİMDİ havuzuna kendi görevlerinizi ekleyin",
+    "tip2": "Sesli daha uzun oturumları (15-25 dakika) deneyin",
+    "tip3": "Birkaç seanstan sonra ilerlemenizi kontrol edin",
+    "startForReal": "Gerçekten başla"
   }
 }
