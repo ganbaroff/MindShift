@@ -1,16 +1,15 @@
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Sun, Timer, ListTodo, Settings } from 'lucide-react'
+import { Sun, Timer, ListTodo, CalendarDays, Settings } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { usePalette } from '@/shared/hooks/usePalette'
 import { cn } from '@/shared/lib/cn'
 
-// Today = Smart Daily View (replaces Home as default).
-// Home still accessible at /home but not in primary nav.
 const NAV_ITEMS = [
   { path: '/today',     icon: Sun,          label: 'Today'    },
   { path: '/tasks',     icon: ListTodo,     label: 'Tasks'    },
   { path: '/focus',     icon: Timer,        label: 'Focus'    },
+  { path: '/calendar',  icon: CalendarDays, label: 'Upcoming' },
   { path: '/settings',  icon: Settings,     label: 'Settings' },
 ] as const
 
