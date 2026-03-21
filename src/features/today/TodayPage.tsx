@@ -156,7 +156,7 @@ export default function TodayPage() {
 
   return (
     <PageTransition>
-      <div className="px-4 pt-6 pb-24 space-y-4">
+      <div className="px-4 pt-6 pb-4 space-y-4">
         {/* ── Header ─────────────────────────────────────────────────────── */}
         <div className="flex items-center justify-between">
           <div>
@@ -265,10 +265,10 @@ export default function TodayPage() {
               </div>
             ) : activeTasks.length === 0 ? (
               <div
-                className="text-center py-8 rounded-2xl"
+                className="text-center py-6 rounded-2xl"
                 style={{ background: 'rgba(78,205,196,0.05)' }}
               >
-                <p className="text-[32px] mb-2">🌿</p>
+                <p className="text-[28px] mb-1">🌿</p>
                 <p className="text-[14px] font-medium" style={{ color: '#E8E8F0' }}>
                   Clear day ahead
                 </p>
@@ -392,12 +392,14 @@ export default function TodayPage() {
           }
         </motion.button>
 
-        {/* ── Quick links ────────────────────────────────────────────────── */}
-        <div className="flex gap-2">
-          <QuickLink label="All tasks" onClick={() => navigate('/tasks')} />
-          <QuickLink label="Progress" onClick={() => navigate('/progress')} />
-          <QuickLink label="Settings" onClick={() => navigate('/settings')} />
-        </div>
+        {/* Progress link — not in nav */}
+        <button
+          onClick={() => navigate('/progress')}
+          className="w-full py-2 rounded-xl text-[12px] font-medium text-center focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
+          style={{ color: '#8B8BA7' }}
+        >
+          View progress →
+        </button>
       </div>
 
       {/* Add Task modal */}
@@ -448,18 +450,3 @@ function RecapStat({ emoji, value, label }: { emoji: string; value: string | num
   )
 }
 
-function QuickLink({ label, onClick }: { label: string; onClick: () => void }) {
-  return (
-    <button
-      onClick={onClick}
-      className="flex-1 py-2 rounded-xl text-[12px] font-medium text-center transition-colors focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
-      style={{
-        background: 'rgba(37,40,64,0.6)',
-        color: '#8B8BA7',
-        border: '1px solid rgba(123,114,255,0.08)',
-      }}
-    >
-      {label}
-    </button>
-  )
-}
