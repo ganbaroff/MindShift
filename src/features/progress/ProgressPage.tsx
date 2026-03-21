@@ -7,6 +7,7 @@ import { ENERGY_EMOJI } from '@/shared/lib/constants';
 import { useSessionHistory } from '@/shared/hooks/useSessionHistory';
 import { nativeShare, canShare } from '@/shared/lib/native';
 import { deriveFromSessions } from '@/shared/lib/psychotype';
+import { DISCOVERIES } from '@/shared/lib/mochiDiscoveries';
 import { AchievementGrid } from './AchievementGrid';
 import { BurnoutAlert } from '@/features/home/BurnoutAlert';
 import { PageTransition } from '@/shared/ui/PageTransition';
@@ -25,6 +26,7 @@ export default function ProgressPage() {
   const {
     xpTotal, completedTotal, achievements, weeklyStats, burnoutScore,
     psychotype, setPsychotype, psychotypeLastDerived, setPsychotypeLastDerived, resetGridToDefaults,
+    mochiDiscoveries,
   } = useStore();
   const { energyTrend, weeklyInsight, loading, sessions } = useSessionHistory();
 
@@ -310,6 +312,49 @@ export default function ProgressPage() {
                 </button>
               </div>
             )}
+          </motion.div>
+        )}
+
+        {/* Mochi's Garden — discovered collectibles */}
+        {mochiDiscoveries.length > 0 && (
+          <motion.div
+            initial={shouldAnimate ? { opacity: 0, y: 12 } : false}
+            animate={shouldAnimate ? { opacity: 1, y: 0 } : false}
+            className="rounded-2xl p-4"
+            style={{
+              background: 'linear-gradient(135deg, rgba(78,205,196,0.06), rgba(123,114,255,0.04))',
+              border: '1px solid rgba(78,205,196,0.12)',
+            }}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-[14px] font-semibold" style={{ color: '#E8E8F0' }}>
+                🌿 Mochi's Garden
+              </h3>
+              <span className="text-[11px]" style={{ color: '#8B8BA7' }}>
+                {mochiDiscoveries.length}/{DISCOVERIES.length} found
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {DISCOVERIES.map(d => {
+                const found = mochiDiscoveries.includes(d.id)
+                return (
+                  <div
+                    key={d.id}
+                    className="w-8 h-8 rounded-lg flex items-center justify-center text-[16px]"
+                    style={{
+                      background: found
+                        ? d.rarity === 'rare' ? 'rgba(245,158,11,0.12)' : 'rgba(78,205,196,0.08)'
+                        : 'rgba(37,40,64,0.5)',
+                      border: found && d.rarity === 'rare' ? '1px solid rgba(245,158,11,0.3)' : '1px solid transparent',
+                      opacity: found ? 1 : 0.3,
+                    }}
+                    title={found ? `${d.emoji} ${d.name}` : '???'}
+                  >
+                    {found ? d.emoji : '?'}
+                  </div>
+                )
+              })}
+            </div>
           </motion.div>
         )}
 
