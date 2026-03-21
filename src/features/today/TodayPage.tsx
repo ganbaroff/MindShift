@@ -22,6 +22,9 @@ import type { ParsedTask } from '@/shared/lib/quickParse'
 import AddTaskModal from '@/components/AddTaskModal'
 import TaskCard from '@/components/TaskCard'
 import { WelcomeWalkthrough } from '@/shared/ui/WelcomeWalkthrough'
+import { TransitionNudge } from '@/shared/ui/TransitionNudge'
+import { DiscoveryCard } from '@/shared/ui/DiscoveryCard'
+import { getDiscoveryById } from '@/shared/lib/mochiDiscoveries'
 import { FeatureHint } from '@/shared/ui/FeatureHint'
 
 // ── Time blocks ───────────────────────────────────────────────────────────────
@@ -64,9 +67,12 @@ export default function TodayPage() {
     dailyFocusGoalMin,
     weeklyIntention,
     addTask, completeTask, snoozeTask,
+    mochiDiscoveries,
   } = useStore()
 
   const [showAddTask, setShowAddTask] = useState(false)
+  const [justCompleted, setJustCompleted] = useState(false)
+  const [lastDiscoveryId, setLastDiscoveryId] = useState<string | null>(null)
 
   const timeBlock = useMemo(getTimeBlock, [])
   const todayStr = useMemo(todayISO, [])
@@ -147,6 +153,20 @@ export default function TodayPage() {
   const handleQuickExpand = useCallback((_parsed: ParsedTask) => {
     setShowAddTask(true)
   }, [])
+
+  const handleCompleteTask = useCallback((taskId: string) => {
+    const prevCount = mochiDiscoveries.length
+    completeTask(taskId)
+    // Show transition nudge
+    setJustCompleted(true)
+    // Check for new discovery (store updates synchronously)
+    setTimeout(() => {
+      const newDiscoveries = useStore.getState().mochiDiscoveries
+      if (newDiscoveries.length > prevCount) {
+        setLastDiscoveryId(newDiscoveries[newDiscoveries.length - 1])
+      }
+    }, 50)
+  }, [completeTask, mochiDiscoveries.length])
 
   const handleStartFocus = useCallback(() => {
     navigate('/focus')
@@ -267,7 +287,7 @@ export default function TodayPage() {
                   <TaskCard
                     key={task.id}
                     task={task}
-                    onDone={completeTask}
+                    onDone={handleCompleteTask}
                     onPark={snoozeTask}
                   />
                 ))}
@@ -335,7 +355,7 @@ export default function TodayPage() {
                   <TaskCard
                     key={task.id}
                     task={task}
-                    onDone={completeTask}
+                    onDone={handleCompleteTask}
                     onPark={snoozeTask}
                   />
                 ))}
@@ -386,7 +406,7 @@ export default function TodayPage() {
                   <TaskCard
                     key={task.id}
                     task={task}
-                    onDone={completeTask}
+                    onDone={handleCompleteTask}
                     onPark={snoozeTask}
                   />
                 ))}
@@ -412,7 +432,7 @@ export default function TodayPage() {
                   <TaskCard
                     key={task.id}
                     task={task}
-                    onDone={completeTask}
+                    onDone={handleCompleteTask}
                     onPark={snoozeTask}
                   />
                 ))}
@@ -420,6 +440,23 @@ export default function TodayPage() {
             )}
           </div>
         )}
+
+        {/* ── Discovery + Transition nudge ─────────────────────────────── */}
+        <AnimatePresence>
+          {lastDiscoveryId && (() => {
+            const d = getDiscoveryById(lastDiscoveryId)
+            return d ? <DiscoveryCard discovery={d} onDismiss={() => setLastDiscoveryId(null)} /> : null
+          })()}
+        </AnimatePresence>
+        <AnimatePresence>
+          {justCompleted && (
+            <TransitionNudge
+              nextTask={firstTask}
+              onFocus={handleStartFocus}
+              onDismiss={() => setJustCompleted(false)}
+            />
+          )}
+        </AnimatePresence>
 
         {/* ── Focus CTA ──────────────────────────────────────────────────── */}
         <motion.button
