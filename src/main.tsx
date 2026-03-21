@@ -2,9 +2,7 @@ import * as Sentry from '@sentry/react'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { I18nProvider } from '@lingui/react'
-import { i18n, activateLocale, resolveLocale } from '@/shared/lib/i18nSetup'
-import { useStore } from '@/store'
+import './i18n' // Initialize i18next before anything renders
 import './index.css'
 import App from './app/App'
 import { logError } from '@/shared/lib/logger'
@@ -64,17 +62,10 @@ window.addEventListener('error', (event) => {
   }
 })
 
-// Activate locale before rendering
-const userLocale = useStore.getState().userLocale
-const locale = resolveLocale(userLocale)
-activateLocale(locale).then(() => {
-  createRoot(document.getElementById('root')!).render(
-    <StrictMode>
-      <I18nProvider i18n={i18n}>
-        <QueryClientProvider client={queryClient}>
-          <App />
-        </QueryClientProvider>
-      </I18nProvider>
-    </StrictMode>,
-  )
-})
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <QueryClientProvider client={queryClient}>
+      <App />
+    </QueryClientProvider>
+  </StrictMode>,
+)
