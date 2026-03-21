@@ -1,5 +1,6 @@
 import { memo } from 'react'
 import { motion } from 'motion/react'
+import { useTranslation } from 'react-i18next'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { useNavigate } from 'react-router-dom'
 
@@ -13,6 +14,7 @@ interface BurnoutAlertProps {
  */
 export const BurnoutAlert = memo(function BurnoutAlert({ score }: BurnoutAlertProps) {
   const { shouldAnimate } = useMotion()
+  const { t } = useTranslation()
   const navigate = useNavigate()
 
   if (score <= 40) return null
@@ -27,14 +29,14 @@ export const BurnoutAlert = memo(function BurnoutAlert({ score }: BurnoutAlertPr
   const textColor = isBurnout ? '#C8C0FF' : '#F59E0B'
   const emoji = isBurnout ? '🌙' : '🌿'
   const title = isBurnout
-    ? 'Your system needs a breather'
-    : 'Signs of fatigue showing up'
+    ? t('burnout.needsBreather')
+    : t('burnout.fatigueShowing')
   const description = isBurnout
-    ? 'You have been pushing hard. Rest is part of the process, not a failure.'
-    : 'Your recent patterns suggest building tension. Consider shorter sessions.'
+    ? t('burnout.pushingHard')
+    : t('burnout.buildingTension')
   const ctaLabel = isBurnout
-    ? 'Take a breather first'
-    : 'Try a 5-minute session'
+    ? t('burnout.takeBreather')
+    : t('burnout.tryFiveMin')
 
   const handleCTA = () => {
     navigate('/focus?quick=1')

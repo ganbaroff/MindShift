@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'motion/react';
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { X, Mic, MicOff, Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useStore } from '@/store';
 import { TASK_TYPE_CONFIG } from '@/types';
 import type { Task, TaskType, TaskCategory } from '@/types';
@@ -27,6 +28,7 @@ interface AddTaskModalProps {
 
 export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
   const { shouldAnimate } = useMotion();
+  const { t } = useTranslation();
   const { addTask, nowPool, nextPool, appMode, seasonalMode, locale, userId } = useStore();
   const maxNow = getNowPoolMax(appMode, seasonalMode);
   const today = todayISO();
@@ -180,7 +182,7 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
           >
             <div className="w-10 h-1 rounded-full bg-ms-muted/30 mx-auto mb-4" />
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-title text-ms-text">Add a task</h2>
+              <h2 className="text-title text-ms-text">{t('addTask.title')}</h2>
               <button onClick={handleClose} aria-label="Close modal" className="p-2 text-ms-muted">
                 <X size={20} />
               </button>
@@ -192,7 +194,7 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
                 <input
                   value={title}
                   onChange={e => setTitle(e.target.value)}
-                  placeholder={voiceState === 'listening' ? 'Listening...' : "What's on your mind?"}
+                  placeholder={voiceState === 'listening' ? t('addTask.placeholderListening') : t('addTask.placeholder')}
                   className="w-full bg-ms-raised rounded-xl px-4 h-12 text-body text-ms-text placeholder:text-ms-muted border border-transparent focus:border-ms-primary outline-none transition-colors pr-12"
                   style={{ borderColor: voiceState === 'listening' ? '#7B72FF' : undefined }}
                 />
@@ -221,13 +223,13 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
                   <motion.p initial={shouldAnimate ? { opacity: 0, y: -4 } : {}} animate={{ opacity: 1, y: 0 }}
                     exit={shouldAnimate ? { opacity: 0 } : undefined} className="text-xs flex items-center gap-1.5 -mt-3" style={{ color: '#7B72FF' }}>
                     <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse motion-reduce:opacity-80" />
-                    Listening — say your task...
+                    {t('addTask.listening')}
                   </motion.p>
                 )}
                 {classifyConfidence !== null && classifyConfidence >= 0.7 && (
                   <motion.p initial={shouldAnimate ? { opacity: 0, y: -4 } : {}} animate={{ opacity: 1, y: 0 }}
                     exit={shouldAnimate ? { opacity: 0 } : undefined} className="text-xs -mt-3" style={{ color: '#4ECDC4' }}>
-                    ✓ AI filled in the details — adjust if needed
+                    ✓ {t('addTask.aiFilled')}
                   </motion.p>
                 )}
                 {voiceError && (
@@ -240,7 +242,7 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
 
               {/* Task type picker */}
               <div>
-                <label className="text-caption text-ms-muted uppercase tracking-widest mb-2 block">Type</label>
+                <label className="text-caption text-ms-muted uppercase tracking-widest mb-2 block">{t('addTask.typeLabel')}</label>
                 <div className="flex gap-2">
                   {(['task', 'idea', 'reminder', 'meeting'] as const).map(t => {
                     const cfg = TASK_TYPE_CONFIG[t];
@@ -277,7 +279,7 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
               {(taskType === 'meeting' || taskType === 'reminder') && !dueDate && (
                 <motion.p initial={shouldAnimate ? { opacity: 0, y: -4 } : {}} animate={{ opacity: 1, y: 0 }}
                   className="text-xs -mt-2" style={{ color: '#4ECDC4' }}>
-                  {taskType === 'meeting' ? '🤝' : '🔔'} When is this?
+                  {taskType === 'meeting' ? '🤝' : '🔔'} {taskType === 'meeting' ? t('addTask.whenMeeting') : t('addTask.whenReminder')}
                 </motion.p>
               )}
 
@@ -286,14 +288,14 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
                 {!showNote ? (
                   <button type="button" onClick={() => setShowNote(true)}
                     className="text-xs flex items-center gap-1 -mt-1" style={{ color: '#5A5B72' }} aria-expanded={false}>
-                    <span>+</span> Add context (optional)
+                    {t('addTask.addContext')}
                   </button>
                 ) : (
                   <AnimatePresence>
                     <motion.textarea
                       initial={shouldAnimate ? { opacity: 0, height: 0 } : {}} animate={{ opacity: 1, height: 'auto' }}
                       value={note} onChange={e => setNote(e.target.value)}
-                      placeholder="Any extra detail, links, or context…" rows={2}
+                      placeholder={t('addTask.notePlaceholder')} rows={2}
                       className="w-full bg-ms-raised rounded-xl px-4 py-3 text-body text-ms-text placeholder:text-ms-muted border border-transparent focus:border-ms-primary outline-none transition-colors resize-none text-[13px]"
                     />
                   </AnimatePresence>
@@ -326,12 +328,12 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
 
               <div className="text-secondary text-ms-muted">
                 {taskType === 'task' && isFull
-                  ? '💙 NOW is full — landing in NEXT'
-                  : `${poolIcon} Adding to ${poolLabel}`}
+                  ? `💙 ${t('addTask.nowFullNext')}`
+                  : `${poolIcon} ${t('addTask.addingTo', { pool: poolLabel })}`}
               </div>
               {pool === 'next' && nextNearFull && (
                 <p className="text-xs -mt-2" style={{ color: '#F59E0B' }}>
-                  🌿 Your queue is getting full — maybe park one before adding?
+                  🌿 {t('addTask.queueFull')}
                 </p>
               )}
 
@@ -349,7 +351,7 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
                     }}
                   >
                     <p className="text-[13px] leading-relaxed" style={{ color: '#E8E8F0' }}>
-                      You're not alone. These feelings are real, and help is available.
+                      {t('addTask.crisisMessage')}
                     </p>
                     <p className="text-[12px] font-medium" style={{ color: '#4ECDC4' }}>
                       {crisisResources.primary}
@@ -366,7 +368,7 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
                 aria-label={`Add ${TASK_TYPE_CONFIG[taskType].label.toLowerCase()} to ${poolLabel} pool`}
                 className="w-full h-[52px] rounded-xl gradient-primary text-primary-foreground font-semibold text-body shadow-primary disabled:opacity-40"
               >
-                Add to {poolLabel} →
+                {t('addTask.addToPool', { pool: poolLabel })}
               </motion.button>
             </div>
           </motion.div>

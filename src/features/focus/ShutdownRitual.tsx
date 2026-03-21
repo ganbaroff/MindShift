@@ -15,6 +15,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
+import { useTranslation } from 'react-i18next'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { useStore } from '@/store'
 import { supabase } from '@/shared/lib/supabase'
@@ -28,28 +29,29 @@ interface Props {
 
 type Step = 'wins' | 'tomorrow' | 'goodnight'
 
-const GOODNIGHT_MESSAGES = [
-  "Done for today. 🌙",
-  "Rest is productive too. See you tomorrow. ✨",
-  "Today counted. Even the messy parts. 💙",
-  "You did enough. Now breathe. 🌿",
-  "Tomorrow is already set. Sleep well. 🌠",
-]
+const GOODNIGHT_KEYS = [
+  'shutdown.goodnightDone',
+  'shutdown.goodnightRest',
+  'shutdown.goodnightCounted',
+  'shutdown.goodnightEnough',
+  'shutdown.goodnightSleep',
+] as const
 
 export function ShutdownRitual({ onDismiss }: Props) {
   const { nowPool, nextPool, somedayPool, addTask, userId, setShutdownShownDate } = useStore()
-  const { t } = useMotion()
+  const { t: transition } = useMotion()
+  const { t } = useTranslation()
   const [step, setStep] = useState<Step>('wins')
   const [tomorrowInput, setTomorrowInput] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [goodnight] = useState(
-    () => GOODNIGHT_MESSAGES[Math.floor(Math.random() * GOODNIGHT_MESSAGES.length)]
+  const [goodnightKey] = useState(
+    () => GOODNIGHT_KEYS[Math.floor(Math.random() * GOODNIGHT_KEYS.length)]
   )
 
   // Today's completed tasks
   const today = todayISO()
   const todayWins = [...nowPool, ...nextPool, ...somedayPool].filter(
-    t => t.status === 'completed' && t.completedAt?.startsWith(today)
+    task => task.status === 'completed' && task.completedAt?.startsWith(today)
   )
 
   // Auto-dismiss from goodnight step after 3s
@@ -161,18 +163,18 @@ export function ShutdownRitual({ onDismiss }: Props) {
                 initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -16 }}
-                transition={{ ...t(), duration: 0.35 }}
+                transition={{ ...transition(), duration: 0.35 }}
                 className="flex flex-col gap-6"
               >
                 <div className="text-center">
                   <p className="text-4xl mb-3">🌙</p>
                   <h2 className="text-xl font-semibold" style={{ color: '#E8E8F0' }}>
-                    Time to wind down
+                    {t('shutdown.windDown')}
                   </h2>
                   <p className="text-sm mt-2" style={{ color: '#8B8BA7' }}>
                     {todayWins.length > 0
-                      ? `You finished ${todayWins.length} thing${todayWins.length !== 1 ? 's' : ''} today 💙`
-                      : "Opening this app was a step forward 💙"}
+                      ? `${t(todayWins.length !== 1 ? 'shutdown.finishedThingsPlural' : 'shutdown.finishedThings', { count: todayWins.length })} 💙`
+                      : `${t('shutdown.openedApp')} 💙`}
                   </p>
                 </div>
 
@@ -190,7 +192,7 @@ export function ShutdownRitual({ onDismiss }: Props) {
                     ))}
                     {todayWins.length > 4 && (
                       <p className="text-xs text-center" style={{ color: '#5A5B72' }}>
-                        +{todayWins.length - 4} more — all counted 🌟
+                        {t('shutdown.moreWins', { count: todayWins.length - 4 })} 🌟
                       </p>
                     )}
                   </div>
@@ -203,7 +205,7 @@ export function ShutdownRitual({ onDismiss }: Props) {
                     style={{ background: '#4ECDC4', color: '#0F1117' }}
                     aria-label="Set tomorrow's task"
                   >
-                    Set tomorrow's focus →
+                    {t('shutdown.setTomorrowFocus')}
                   </button>
                   <button
                     onClick={handleSkip}
@@ -211,7 +213,7 @@ export function ShutdownRitual({ onDismiss }: Props) {
                     style={{ color: '#8B8BA7' }}
                     aria-label="Skip shutdown ritual"
                   >
-                    Skip — just close
+                    {t('shutdown.skipClose')}
                   </button>
                 </div>
               </motion.div>
@@ -224,16 +226,16 @@ export function ShutdownRitual({ onDismiss }: Props) {
                 initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -16 }}
-                transition={{ ...t(), duration: 0.35 }}
+                transition={{ ...transition(), duration: 0.35 }}
                 className="flex flex-col gap-6"
               >
                 <div className="text-center">
                   <p className="text-4xl mb-3">🌅</p>
                   <h2 className="text-xl font-semibold" style={{ color: '#E8E8F0' }}>
-                    What's the ONE thing tomorrow?
+                    {t('shutdown.oneThingTomorrow')}
                   </h2>
                   <p className="text-sm mt-2" style={{ color: '#8B8BA7' }}>
-                    It'll be waiting in NEXT when you wake up.
+                    {t('shutdown.waitingInNext')}
                   </p>
                 </div>
 
@@ -246,7 +248,7 @@ export function ShutdownRitual({ onDismiss }: Props) {
                       void handleSetTomorrow()
                     }
                   }}
-                  placeholder="One thing for tomorrow..."
+                  placeholder={t('shutdown.tomorrowPlaceholder')}
                   rows={2}
                   autoFocus
                   className="w-full resize-none rounded-2xl px-4 py-3 text-base outline-none transition-all duration-200"
@@ -272,7 +274,7 @@ export function ShutdownRitual({ onDismiss }: Props) {
                       cursor: tomorrowInput.trim() ? 'pointer' : 'not-allowed',
                     }}
                   >
-                    {isSubmitting ? 'Saving...' : 'Save & rest 🌙'}
+                    {isSubmitting ? t('shutdown.saving') : `${t('shutdown.saveAndRest')} 🌙`}
                   </button>
                   <button
                     onClick={() => setStep('goodnight')}
@@ -280,7 +282,7 @@ export function ShutdownRitual({ onDismiss }: Props) {
                     style={{ color: '#8B8BA7' }}
                     aria-label="Skip and rest"
                   >
-                    Skip — just rest
+                    {t('shutdown.skipRest')}
                   </button>
                 </div>
               </motion.div>
@@ -293,7 +295,7 @@ export function ShutdownRitual({ onDismiss }: Props) {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ ...t('expressive'), duration: 0.5 }}
+                transition={{ ...transition('expressive'), duration: 0.5 }}
                 className="flex flex-col items-center gap-6 text-center"
               >
                 <motion.p
@@ -304,10 +306,10 @@ export function ShutdownRitual({ onDismiss }: Props) {
                   🌙
                 </motion.p>
                 <p className="text-xl font-medium leading-relaxed" style={{ color: '#E8E8F0' }}>
-                  {goodnight}
+                  {t(goodnightKey)}
                 </p>
                 <p className="text-xs" style={{ color: '#5A5B72' }}>
-                  Closing in a moment...
+                  {t('shutdown.closingInMoment')}
                 </p>
               </motion.div>
             )}

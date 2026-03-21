@@ -10,6 +10,7 @@
 
 import { useState } from 'react'
 import { motion } from 'motion/react'
+import { useTranslation } from 'react-i18next'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { X } from 'lucide-react'
 import type { FocusRoomState } from '@/shared/hooks/useFocusRoom'
@@ -23,6 +24,7 @@ interface FocusRoomSheetProps {
 
 export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) {
   const { shouldAnimate } = useMotion()
+  const { t } = useTranslation()
   const [mode, setMode] = useState<'pick' | 'join'>('pick')
   const [codeInput, setCodeInput] = useState('')
   const [copied, setCopied] = useState(false)
@@ -82,7 +84,7 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
 
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-[17px] font-bold" style={{ color: '#E8E8F0' }}>
-            Focus with someone 🤝
+            {t('focusRoom.title')} 🤝
           </h2>
           <button onClick={onClose} className="p-1.5 rounded-lg" style={{ color: '#8B8BA7' }}>
             <X size={18} />
@@ -93,7 +95,7 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
         {room.status === 'idle' && mode === 'pick' && (
           <div className="space-y-3">
             <p className="text-[13px] leading-relaxed mb-4" style={{ color: '#8B8BA7' }}>
-              Focus alongside someone else. You'll see their phase in real time — no chat, no distraction, just presence.
+              {t('focusRoom.description')}
             </p>
 
             <motion.button
@@ -102,7 +104,7 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
               className="w-full py-3.5 rounded-2xl font-semibold text-[14px]"
               style={{ background: 'linear-gradient(135deg, #7B72FF, #8B7FF7)', color: '#fff' }}
             >
-              Create a room ✦
+              {t('focusRoom.createRoom')} ✦
             </motion.button>
 
             <motion.button
@@ -111,7 +113,7 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
               className="w-full py-3 rounded-2xl font-medium text-[14px]"
               style={{ background: '#252840', border: '1px solid rgba(255,255,255,0.06)', color: '#E8E8F0' }}
             >
-              Join with a code
+              {t('focusRoom.joinWithCode')}
             </motion.button>
           </div>
         )}
@@ -119,11 +121,11 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
         {/* ── Join mode ────────────────────────────────────────────────────── */}
         {room.status === 'idle' && mode === 'join' && (
           <div className="space-y-3">
-            <p className="text-[12px] mb-2" style={{ color: '#8B8BA7' }}>Enter the 4-char code your partner shared:</p>
+            <p className="text-[12px] mb-2" style={{ color: '#8B8BA7' }}>{t('focusRoom.enterCode')}</p>
             <input
               value={codeInput}
               onChange={e => setCodeInput(e.target.value.toUpperCase().slice(0, 6))}
-              placeholder="e.g. K7M2"
+              placeholder={t('focusRoom.codePlaceholder')}
               maxLength={6}
               className="w-full rounded-xl px-4 h-12 text-center text-[20px] font-mono font-bold outline-none"
               style={{
@@ -141,10 +143,10 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
               className="w-full py-3.5 rounded-2xl font-semibold text-[14px] disabled:opacity-40"
               style={{ background: 'linear-gradient(135deg, #7B72FF, #8B7FF7)', color: '#fff' }}
             >
-              Join room →
+              {t('focusRoom.joinRoom')}
             </motion.button>
             <button onClick={() => setMode('pick')} className="w-full py-1.5 text-[12px]" style={{ color: '#5A5B72' }}>
-              ← Back
+              {t('focusRoom.back')}
             </button>
           </div>
         )}
@@ -153,7 +155,7 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
         {room.status === 'connecting' && (
           <div className="flex flex-col items-center py-8 gap-3">
             <div className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin motion-reduce:animate-none motion-reduce:opacity-60" style={{ borderColor: '#7B72FF', borderTopColor: 'transparent' }} />
-            <p className="text-[13px]" style={{ color: '#8B8BA7' }}>Joining room…</p>
+            <p className="text-[13px]" style={{ color: '#8B8BA7' }}>{t('focusRoom.joining')}</p>
           </div>
         )}
 
@@ -166,7 +168,7 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
               style={{ background: '#252840', border: '1px solid rgba(123,114,255,0.20)' }}
             >
               <div>
-                <p className="text-[10px] uppercase tracking-widest mb-0.5" style={{ color: '#8B8BA7' }}>Room code</p>
+                <p className="text-[10px] uppercase tracking-widest mb-0.5" style={{ color: '#8B8BA7' }}>{t('focusRoom.roomCode')}</p>
                 <p className="text-[24px] font-mono font-bold" style={{ color: '#7B72FF', letterSpacing: '0.12em' }}>
                   {room.code}
                 </p>
@@ -180,30 +182,30 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
                   color: copied ? '#4ECDC4' : '#7B72FF',
                 }}
               >
-                {copied ? '✓ Copied' : 'Copy'}
+                {copied ? `✓ ${t('focusRoom.copied')}` : t('focusRoom.copy')}
               </button>
             </div>
 
             {/* Peers */}
             {room.peers.length === 0 ? (
               <p className="text-[12px] text-center py-2" style={{ color: '#5A5B72' }}>
-                Waiting for someone to join… share your code 🌱
+                {t('focusRoom.waitingForSomeone')} 🌱
               </p>
             ) : (
               <div className="space-y-2">
                 <p className="text-[11px] uppercase tracking-widest" style={{ color: '#8B8BA7' }}>
-                  In the room ({room.peers.length + 1})
+                  {t('focusRoom.inTheRoom', { count: room.peers.length + 1 })}
                 </p>
                 {/* Self */}
                 <div className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{ background: '#252840' }}>
                   <span className="text-[16px]">🧠</span>
-                  <span className="text-[13px] flex-1" style={{ color: '#E8E8F0' }}>You</span>
+                  <span className="text-[13px] flex-1" style={{ color: '#E8E8F0' }}>{t('focusRoom.you')}</span>
                   <div className="w-2 h-2 rounded-full" style={{ background: '#4ECDC4' }} />
                 </div>
                 {room.peers.map(peer => (
                   <div key={peer.userId} className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{ background: '#252840' }}>
                     <span className="text-[16px]">{peer.emoji}</span>
-                    <span className="text-[13px] flex-1" style={{ color: '#E8E8F0' }}>Partner</span>
+                    <span className="text-[13px] flex-1" style={{ color: '#E8E8F0' }}>{t('focusRoom.partner')}</span>
                     <div className="w-2 h-2 rounded-full" style={{ background: phaseColor(peer.phase) }} />
                     <span className="text-[10px] capitalize" style={{ color: '#8B8BA7' }}>{peer.phase}</span>
                   </div>
@@ -217,7 +219,7 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
               className="w-full py-3.5 rounded-2xl font-semibold text-[14px]"
               style={{ background: 'linear-gradient(135deg, #7B72FF, #4ECDC4)', color: '#fff' }}
             >
-              Start session →
+              {t('focusRoom.startSession')}
             </motion.button>
 
             <button
@@ -225,7 +227,7 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
               className="w-full py-1.5 text-[12px] text-center"
               style={{ color: '#5A5B72' }}
             >
-              Leave room
+              {t('focusRoom.leaveRoom')}
             </button>
           </div>
         )}
@@ -233,14 +235,14 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
         {/* ── Error ────────────────────────────────────────────────────────── */}
         {room.status === 'error' && (
           <div className="text-center py-6 space-y-3">
-            <p className="text-[14px]" style={{ color: '#F59E0B' }}>⚠ Couldn't connect to room</p>
-            <p className="text-[12px]" style={{ color: '#8B8BA7' }}>Check your internet connection and try again.</p>
+            <p className="text-[14px]" style={{ color: '#F59E0B' }}>⚠ {t('focusRoom.connectionError')}</p>
+            <p className="text-[12px]" style={{ color: '#8B8BA7' }}>{t('focusRoom.checkInternet')}</p>
             <button
               onClick={() => { room.leave(); setMode('pick') }}
               className="px-4 py-2 rounded-xl text-[13px]"
               style={{ background: 'rgba(123,114,255,0.12)', border: '1px solid rgba(123,114,255,0.25)', color: '#7B72FF' }}
             >
-              Try again
+              {t('focusRoom.tryAgain')}
             </button>
           </div>
         )}
