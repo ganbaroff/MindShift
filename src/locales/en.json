@@ -1007,5 +1007,32 @@
       "streakLabel": "streak",
       "badgeLabel": "badges"
     }
+  },
+  "tutorial": {
+    "skip": "Skip",
+    "introTitle": "Let's try focusing",
+    "introBody": "A quick 2-minute session to see how MindShift works. Your brain goes through natural phases — we'll show you each one.",
+    "introHint": "Takes 2 minutes. You can skip anytime.",
+    "startButton": "Start 2-min session",
+    "sampleTaskTitle": "Try focusing for 2 minutes",
+    "phaseStruggle": "Struggle",
+    "phaseRelease": "Release",
+    "phaseFlow": "Flow",
+    "struggleExplain": "This is normal. Your brain is warming up. The first 30 seconds are always the hardest.",
+    "releaseExplain": "The resistance is lifting. Your brain is settling into the task.",
+    "flowExplain": "You're in flow. This is deep focus. It gets easier the longer you stay.",
+    "skipTimer": "Skip to results",
+    "celebrateTitle": "You did it",
+    "celebrateBody": "That was a real focus session. Here's what your brain just went through:",
+    "struggleDesc": "Your brain resists starting. This is ADHD — not laziness. It passes.",
+    "releaseDesc": "Resistance fades. Your brain starts to engage with the task.",
+    "flowDesc": "Deep focus. Your brain found its groove. This is the goal.",
+    "continueButton": "Got it",
+    "nextTitle": "You're ready",
+    "nextBody": "You've seen how focus works in MindShift. Here's what to try next:",
+    "tip1": "Add your own tasks to the NOW pool",
+    "tip2": "Try longer sessions (15-25 min) with sound",
+    "tip3": "Check your progress after a few sessions",
+    "startForReal": "Start for real"
   }
 }

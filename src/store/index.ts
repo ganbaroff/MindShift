@@ -184,6 +184,9 @@ interface PreferencesSlice {
   // Weekly intention — user's chosen focus area for the week (shown in FocusScreen)
   weeklyIntention: string | null
   setWeeklyIntention: (intention: string | null) => void
+  // First-focus tutorial — shown once after onboarding
+  firstFocusTutorialCompleted: boolean
+  setFirstFocusTutorialCompleted: () => void
   // UI Tone — auto-derived from signals, user-overridable via Settings
   uiTone: 'gen_z' | 'millennial' | 'gen_x' | 'neutral'
   setUITone: (tone: 'gen_z' | 'millennial' | 'gen_x' | 'neutral') => void
@@ -755,6 +758,8 @@ export const useStore = create<AppStore>()(
         setWeeklyPlanShownWeek: (week) => set({ weeklyPlanShownWeek: week }),
         weeklyIntention: null,
         setWeeklyIntention: (intention) => set({ weeklyIntention: intention }),
+        firstFocusTutorialCompleted: false,
+        setFirstFocusTutorialCompleted: () => set({ firstFocusTutorialCompleted: true }),
 
         // UI Tone — auto-derived from ADHD signals, settable manually
         uiTone: 'neutral',
@@ -891,6 +896,7 @@ export const useStore = create<AppStore>()(
           goalCelebratedDate: s.goalCelebratedDate,
           weeklyPlanShownWeek: s.weeklyPlanShownWeek,
           weeklyIntention: s.weeklyIntention,
+          firstFocusTutorialCompleted: s.firstFocusTutorialCompleted,
           uiTone: s.uiTone,
           telegramLinkCode: s.telegramLinkCode,
           telegramLinked: s.telegramLinked,
