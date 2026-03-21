@@ -137,6 +137,13 @@ interface PreferencesSlice {
   setReducedStimulation: (val: boolean) => void
   hapticsEnabled: boolean
   setHapticsEnabled: (val: boolean) => void
+  // Locale & theme — user-settable overrides
+  userLocale: string | null        // null = auto-detect from navigator
+  setUserLocale: (locale: string | null) => void
+  userTheme: 'dark' | 'light' | 'system'
+  setUserTheme: (theme: 'dark' | 'light' | 'system') => void
+  userCountry: string | null       // ISO 3166-1 alpha-2 (e.g. "AZ", "US", "RU")
+  setUserCountry: (country: string | null) => void
   // Progressive disclosure — tracks which coach marks have been seen
   seenHints: string[]
   markHintSeen: (id: string) => void
@@ -669,6 +676,12 @@ export const useStore = create<AppStore>()(
         setReducedStimulation: (val) => set({ reducedStimulation: val }),
         hapticsEnabled: true,
         setHapticsEnabled: (val) => set({ hapticsEnabled: val }),
+        userLocale: null,
+        setUserLocale: (locale) => set({ userLocale: locale }),
+        userTheme: 'dark',
+        setUserTheme: (theme) => set({ userTheme: theme }),
+        userCountry: null,
+        setUserCountry: (country) => set({ userCountry: country }),
 
         seenHints: [],
         markHintSeen: (id) => set((s) => ({
@@ -841,6 +854,9 @@ export const useStore = create<AppStore>()(
           audioVolume: s.audioVolume,
           reducedStimulation: s.reducedStimulation,
           hapticsEnabled: s.hapticsEnabled,
+          userLocale: s.userLocale,
+          userTheme: s.userTheme,
+          userCountry: s.userCountry,
           seenHints: s.seenHints,
           mochiChatOpenCount: s.mochiChatOpenCount,
           mochiDiscoveries: s.mochiDiscoveries,

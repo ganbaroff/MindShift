@@ -1,23 +1,21 @@
 /**
- * useI18n — thin React wrapper around the i18n engine.
+ * useI18n — React wrapper around the i18n engine.
  *
- * Returns:
- *   - `t(key, vars?)` — translate a key with optional interpolation
- *   - `locale`        — resolved two-letter locale code ('en' | 'ru' | …)
- *
- * Locale is resolved once per mount from `navigator.language`.
- * No state updates — the locale doesn't change within a session.
- *
- * @example
- *   const { t } = useI18n()
- *   <h1>{t('home.greeting.morning')}</h1>
+ * Reads userLocale from store (if set), falls back to navigator.language.
+ * Returns t(key, vars?) and the resolved locale code.
  */
 
 import { useMemo } from 'react'
+import { useStore } from '@/store'
 import { resolveLocale, t as translate, type I18nKey } from '@/shared/lib/i18n'
 
 export function useI18n() {
-  const locale = useMemo(() => resolveLocale(navigator.language), [])
+  const userLocale = useStore(s => s.userLocale)
+
+  const locale = useMemo(
+    () => userLocale ? resolveLocale(userLocale) : resolveLocale(navigator.language),
+    [userLocale],
+  )
 
   const t = useMemo(
     () =>
