@@ -92,10 +92,10 @@ export default function TasksPage() {
 
   return (
     <PageTransition>
-    <div className="min-h-screen px-5 pb-36 pt-10" style={{ backgroundColor: '#0F1120' }}>
+    <div className="min-h-screen px-5 pb-36 pt-10" style={{ backgroundColor: 'var(--color-bg)' }}>
       <motion.div initial={shouldAnimate ? { opacity: 0, y: -8 } : false} animate={shouldAnimate ? { opacity: 1, y: 0 } : false}>
-        <h1 className="text-[24px] font-bold" style={{ color: '#E8E8F0' }}>{t('tasks.title')}</h1>
-        <p className="text-[13px] mt-0.5" style={{ color: '#8B8BA7' }}>{t('tasks.tasksInPlay', { count: nowTasks.length + nextTasks.length })}</p>
+        <h1 className="text-[24px] font-bold" style={{ color: 'var(--color-text-primary)' }}>{t('tasks.title')}</h1>
+        <p className="text-[13px] mt-0.5" style={{ color: 'var(--color-text-muted)' }}>{t('tasks.tasksInPlay', { count: nowTasks.length + nextTasks.length })}</p>
       </motion.div>
 
       {/* Search bar */}
@@ -103,19 +103,19 @@ export default function TasksPage() {
         initial={shouldAnimate ? { opacity: 0, y: 4 } : false}
         animate={shouldAnimate ? { opacity: 1, y: 0 } : false}
         className="mt-3 flex items-center gap-2 px-3 rounded-2xl h-10"
-        style={{ backgroundColor: '#1E2136', border: '1px solid rgba(255,255,255,0.06)' }}
+        style={{ backgroundColor: 'var(--color-surface-card)', border: '1px solid rgba(255,255,255,0.06)' }}
       >
-        <Search size={14} style={{ color: '#8B8BA7', flexShrink: 0 }} />
+        <Search size={14} style={{ color: 'var(--color-text-muted)', flexShrink: 0 }} />
         <input
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
           placeholder={t('tasks.search')}
           className="flex-1 bg-transparent text-[13px] outline-none"
-          style={{ color: '#E8E8F0' }}
+          style={{ color: 'var(--color-text-primary)' }}
         />
         {searchQuery && (
           <button onClick={() => setSearchQuery('')} aria-label="Clear search">
-            <X size={13} style={{ color: '#8B8BA7' }} />
+            <X size={13} style={{ color: 'var(--color-text-muted)' }} />
           </button>
         )}
       </motion.div>
@@ -138,14 +138,14 @@ export default function TasksPage() {
             >
               <span className="text-base">🗓️</span>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium" style={{ color: '#F59E0B' }}>
+                <p className="text-sm font-medium" style={{ color: 'var(--color-gold)' }}>
                   {pastDateTasks.length === 1 ? t('tasks.pastDue', { count: pastDateTasks.length }) : t('tasks.pastDuePlural', { count: pastDateTasks.length })}
                 </p>
-                <p className="text-xs mt-0.5" style={{ color: '#8B8BA7' }}>
+                <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-muted)' }}>
                   {t('tasks.noPressure')}
                 </p>
               </div>
-              <span className="text-xs" style={{ color: '#F59E0B' }}>{t('tasks.reschedule')}</span>
+              <span className="text-xs" style={{ color: 'var(--color-gold)' }}>{t('tasks.reschedule')}</span>
             </motion.button>
           )}
         </AnimatePresence>
@@ -153,8 +153,8 @@ export default function TasksPage() {
         {/* NOW */}
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="text-[11px] uppercase tracking-widest font-semibold" style={{ color: '#7B72FF' }}>{t('tasks.now')}</span>
-            <span className="text-[11px]" style={{ color: '#8B8BA7' }}>{nowTasks.length}/{nowMax}</span>
+            <span className="text-[11px] uppercase tracking-widest font-semibold" style={{ color: 'var(--color-primary)' }}>{t('tasks.now')}</span>
+            <span className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>{nowTasks.length}/{nowMax}</span>
             {nowTasks.length > 1 && <span className="text-[10px]" style={{ color: '#3A3B52' }}>{t('tasks.holdToReorder')}</span>}
           </div>
           {nowTasks.length === 0 ? (
@@ -188,7 +188,7 @@ export default function TasksPage() {
           className="rounded-2xl p-3 border"
           style={{ backgroundColor: 'rgba(78,205,196,0.08)', borderColor: 'rgba(78,205,196,0.15)' }}
         >
-          <p className="text-[13px]" style={{ color: '#4ECDC4' }}>
+          <p className="text-[13px]" style={{ color: 'var(--color-teal)' }}>
             🌱 {t('tasks.energyHint')}
           </p>
         </motion.div>
@@ -196,17 +196,17 @@ export default function TasksPage() {
         {/* NEXT */}
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="text-[11px] uppercase tracking-widest font-semibold" style={{ color: '#8B8BA7' }}>{t('tasks.next')}</span>
-            <span className="text-[11px]" style={{ color: '#8B8BA7' }}>{nextTasks.length}/6</span>
+            <span className="text-[11px] uppercase tracking-widest font-semibold" style={{ color: 'var(--color-text-muted)' }}>{t('tasks.next')}</span>
+            <span className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>{nextTasks.length}/6</span>
             {/* Two-Thirds guardrail — B-9: gentle nudge when queue is getting full */}
             {nextTasks.length >= 4 && (
-              <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: 'rgba(245,158,11,0.10)', color: '#F59E0B' }}>
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: 'rgba(245,158,11,0.10)', color: 'var(--color-gold)' }}>
                 {t('tasks.fillingUp')}
               </span>
             )}
           </div>
           {nextTasks.length === 0 ? (
-            <p className="text-[13px] py-2" style={{ color: '#8B8BA7' }}>{t('tasks.queueHere')}</p>
+            <p className="text-[13px] py-2" style={{ color: 'var(--color-text-muted)' }}>{t('tasks.queueHere')}</p>
           ) : (
             <DndContext
               sensors={sensors}
@@ -240,8 +240,8 @@ export default function TasksPage() {
               const diffConfig = DIFFICULTY_MAP[t.difficulty ?? 1];
               return (
                 <div key={t.id} className="flex items-center gap-2 py-1.5">
-                  <span style={{ color: '#4ECDC4' }}>✓</span>
-                  <span className="text-[14px] line-through flex-1" style={{ color: '#8B8BA7' }}>{t.title}</span>
+                  <span style={{ color: 'var(--color-teal)' }}>✓</span>
+                  <span className="text-[14px] line-through flex-1" style={{ color: 'var(--color-text-muted)' }}>{t.title}</span>
                   <span
                     className="text-[11px] px-1.5 py-0.5 rounded-full"
                     style={{ backgroundColor: `${diffConfig.color}20`, color: diffConfig.color }}
@@ -249,7 +249,7 @@ export default function TasksPage() {
                     {diffConfig.label}
                   </span>
                   {t.completedAt && (
-                    <span className="text-[11px]" style={{ color: '#8B8BA7' }}>
+                    <span className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>
                       {new Date(t.completedAt).toLocaleDateString()}
                     </span>
                   )}
@@ -310,7 +310,7 @@ function SortableTaskCard({ task, index, onDone, onPark, onRemove, onMove, curre
                   key={pool}
                   onClick={() => { onMove(task.id, pool); setShowMoveOptions(false) }}
                   className="text-[10px] px-2 py-0.5 rounded-lg focus-visible:ring-1 focus-visible:ring-[#7B72FF]"
-                  style={{ background: 'rgba(123,114,255,0.08)', color: '#8B8BA7' }}
+                  style={{ background: 'rgba(123,114,255,0.08)', color: 'var(--color-text-muted)' }}
                 >
                   {emoji} {label}
                 </button>
@@ -318,7 +318,7 @@ function SortableTaskCard({ task, index, onDone, onPark, onRemove, onMove, curre
               <button
                 onClick={() => setShowMoveOptions(false)}
                 className="text-[10px] px-1 rounded"
-                style={{ color: '#8B8BA7' }}
+                style={{ color: 'var(--color-text-muted)' }}
               >
                 ✕
               </button>
@@ -344,9 +344,9 @@ function CollapsibleSection({ label, count, open, onToggle, children, labelColor
   return (
     <div>
       <motion.button whileTap={shouldAnimate ? { scale: 0.97 } : undefined} onClick={onToggle} aria-expanded={open} aria-label={`${open ? 'Collapse' : 'Expand'} ${label} section`} className="flex items-center gap-2 w-full py-1 focus-visible:ring-2 focus-visible:ring-ms-primary/50 focus-visible:outline-none rounded">
-        <span className="text-[11px] uppercase tracking-widest font-semibold" style={{ color: labelColor || '#8B8BA7' }}>{label}</span>
-        <span className="text-[11px] px-1.5 py-0.5 rounded-full" style={{ backgroundColor: '#252840', color: '#8B8BA7' }}>{count}</span>
-        <ChevronDown size={14} className={`ml-auto transition-transform ${open ? 'rotate-180' : ''}`} style={{ color: '#8B8BA7' }} />
+        <span className="text-[11px] uppercase tracking-widest font-semibold" style={{ color: labelColor || 'var(--color-text-muted)' }}>{label}</span>
+        <span className="text-[11px] px-1.5 py-0.5 rounded-full" style={{ backgroundColor: 'var(--color-surface-raised)', color: 'var(--color-text-muted)' }}>{count}</span>
+        <ChevronDown size={14} className={`ml-auto transition-transform ${open ? 'rotate-180' : ''}`} style={{ color: 'var(--color-text-muted)' }} />
       </motion.button>
       <AnimatePresence>
         {open && (

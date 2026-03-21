@@ -152,12 +152,12 @@ export default function HomePage() {
     {
       content: (
         <>
-          <span className="text-[20px] font-bold" style={{ color: '#E8E8F0' }}>{completedTotal ?? 0}</span>
-          <span className="text-[11px] ml-1" style={{ color: '#8B8BA7' }}>done</span>
+          <span className="text-[20px] font-bold" style={{ color: 'var(--color-text-primary)' }}>{completedTotal ?? 0}</span>
+          <span className="text-[11px] ml-1" style={{ color: 'var(--color-text-muted)' }}>done</span>
           {focusMinutes !== null && (
             <>
-              <span className="text-[11px] mx-1" style={{ color: '#8B8BA7' }}>·</span>
-              <span className="text-[20px] font-bold" style={{ color: '#E8E8F0' }}>{(focusMinutes / 60).toFixed(1)}h</span>
+              <span className="text-[11px] mx-1" style={{ color: 'var(--color-text-muted)' }}>·</span>
+              <span className="text-[20px] font-bold" style={{ color: 'var(--color-text-primary)' }}>{(focusMinutes / 60).toFixed(1)}h</span>
             </>
           )}
         </>
@@ -169,7 +169,7 @@ export default function HomePage() {
       sub: 'Tap to update',
     },
     {
-      content: <span className="text-[20px] font-bold" style={{ color: '#E8E8F0' }}>✅ {completedTotal}</span>,
+      content: <span className="text-[20px] font-bold" style={{ color: 'var(--color-text-primary)' }}>✅ {completedTotal}</span>,
       sub: 'tasks completed',
     },
     {
@@ -189,7 +189,7 @@ export default function HomePage() {
 
   return (
     <PageTransition>
-    <div className="min-h-screen px-5 pb-36 pt-10" style={{ backgroundColor: '#0F1120' }}>
+    <div className="min-h-screen px-5 pb-36 pt-10" style={{ backgroundColor: 'var(--color-bg)' }}>
       {/* Last synced indicator */}
       <p className="text-[10px] mb-1" style={{ color: '#5A5B72' }}>
         Updated {lastRefreshed.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -198,8 +198,8 @@ export default function HomePage() {
       {/* Header */}
       <motion.div initial={shouldAnimate ? { opacity: 0, y: -8 } : false} animate={shouldAnimate ? { opacity: 1, y: 0 } : false} className="flex items-start justify-between mb-5">
         <div>
-          <h1 className="text-[24px] font-bold" style={{ color: '#E8E8F0' }}>{greeting}</h1>
-          <p className="text-[13px] mt-0.5" style={{ color: '#8B8BA7' }}>
+          <h1 className="text-[24px] font-bold" style={{ color: 'var(--color-text-primary)' }}>{greeting}</h1>
+          <p className="text-[13px] mt-0.5" style={{ color: 'var(--color-text-muted)' }}>
             {isLowEnergy ? copy.lowEnergyNudge : homeSubtitle}
           </p>
         </div>
@@ -213,15 +213,15 @@ export default function HomePage() {
                 animate={shouldAnimate ? { opacity: 1, scale: 1, y: 0 } : false}
                 exit={shouldAnimate ? { opacity: 0, scale: 0.8, y: 8 } : undefined}
                 className="absolute right-0 bottom-full mb-2 w-52 rounded-2xl rounded-br-sm p-3 z-10"
-                style={{ backgroundColor: '#1E2136', border: '1px solid rgba(123,114,255,0.25)', boxShadow: '0 8px 24px rgba(0,0,0,0.3)' }}
+                style={{ backgroundColor: 'var(--color-surface-card)', border: '1px solid rgba(123,114,255,0.25)', boxShadow: '0 8px 24px rgba(0,0,0,0.3)' }}
               >
-                <p className="text-[12px]" style={{ color: '#E8E8F0' }}>
+                <p className="text-[12px]" style={{ color: 'var(--color-text-primary)' }}>
                   {mochiMsg.emoji} {mochiMsg.text}
                 </p>
                 <button
                   onClick={() => setMochiMsg(null)}
                   className="absolute top-1.5 right-2 text-[10px]"
-                  style={{ color: '#8B8BA7' }}
+                  style={{ color: 'var(--color-text-muted)' }}
                   aria-label="Dismiss Mochi message"
                 >
                   ✕
@@ -248,11 +248,11 @@ export default function HomePage() {
               >
                 <span className="text-[20px]">🔥</span>
                 <div>
-                  <p className="text-[13px] font-semibold" style={{ color: '#F59E0B' }}>
+                  <p className="text-[13px] font-semibold" style={{ color: 'var(--color-gold)' }}>
                     {copy.streakGoing(currentStreak)}
                   </p>
                   {longestStreak > currentStreak && (
-                    <p className="text-[11px]" style={{ color: '#8B8BA7' }}>{t('home.best', { count: longestStreak })}</p>
+                    <p className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>{t('home.best', { count: longestStreak })}</p>
                   )}
                 </div>
               </div>
@@ -268,19 +268,19 @@ export default function HomePage() {
               animate={shouldAnimate ? { opacity: 1, y: 0 } : false}
               exit={shouldAnimate ? { opacity: 0, height: 0 } : undefined}
               className="rounded-2xl p-3"
-              style={{ backgroundColor: '#1E2136', border: '1px solid rgba(123,114,255,0.12)' }}
+              style={{ backgroundColor: 'var(--color-surface-card)', border: '1px solid rgba(123,114,255,0.12)' }}
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-start gap-2.5 flex-1 min-w-0">
                   <span className="text-[18px] shrink-0">{briefTip.emoji}</span>
-                  <p className="text-[13px] leading-relaxed" style={{ color: '#E8E8F0' }}>
+                  <p className="text-[13px] leading-relaxed" style={{ color: 'var(--color-text-primary)' }}>
                     {briefTip.text}
                   </p>
                 </div>
                 <button
                   onClick={() => setBriefDismissed(true)}
                   className="text-[11px] shrink-0 mt-0.5"
-                  style={{ color: '#8B8BA7' }}
+                  style={{ color: 'var(--color-text-muted)' }}
                   aria-label="Dismiss daily brief"
                 >
                   ✕
@@ -291,8 +291,8 @@ export default function HomePage() {
                   className="mt-2 pt-2 flex items-center gap-2"
                   style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}
                 >
-                  <span className="text-[11px]" style={{ color: '#8B8BA7' }}>{t('home.startWith')}</span>
-                  <span className="text-[12px] font-medium truncate" style={{ color: '#7B72FF' }}>
+                  <span className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>{t('home.startWith')}</span>
+                  <span className="text-[12px] font-medium truncate" style={{ color: 'var(--color-primary)' }}>
                     {topNowTask.title}
                   </span>
                 </div>
@@ -307,13 +307,13 @@ export default function HomePage() {
             initial={shouldAnimate ? { opacity: 0, y: 8 } : false}
             animate={shouldAnimate ? { opacity: 1, y: 0 } : false}
             className="rounded-2xl px-4 py-3"
-            style={{ backgroundColor: '#1E2136' }}
+            style={{ backgroundColor: 'var(--color-surface-card)' }}
           >
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[13px] font-semibold" style={{ color: goalReached ? '#4ECDC4' : '#E8E8F0' }}>
+              <span className="text-[13px] font-semibold" style={{ color: goalReached ? 'var(--color-teal)' : 'var(--color-text-primary)' }}>
                 {goalReached ? `🎯 ${t('home.goalReached')}` : `🎯 ${t('home.todaysFocus')}`}
               </span>
-              <span className="text-[12px]" style={{ color: '#8B8BA7' }}>
+              <span className="text-[12px]" style={{ color: 'var(--color-text-muted)' }}>
                 {todayMin} / {dailyFocusGoalMin} min
               </span>
             </div>
@@ -323,7 +323,7 @@ export default function HomePage() {
                 initial={shouldAnimate ? { width: 0 } : false}
                 animate={{ width: `${goalProgress * 100}%` }}
                 transition={shouldAnimate ? { duration: 0.8, ease: 'easeOut' } : { duration: 0 }}
-                style={{ background: goalReached ? '#4ECDC4' : 'linear-gradient(90deg, #7B72FF, #9B8EFF)' }}
+                style={{ background: goalReached ? 'var(--color-teal)' : 'linear-gradient(90deg, var(--color-primary), #9B8EFF)' }}
               />
             </div>
           </motion.div>
@@ -339,7 +339,7 @@ export default function HomePage() {
               className="rounded-2xl p-3 border"
               style={{ backgroundColor: 'rgba(78,205,196,0.06)', borderColor: 'rgba(78,205,196,0.15)' }}
             >
-              <p className="text-[13px]" style={{ color: '#4ECDC4' }}>
+              <p className="text-[13px]" style={{ color: 'var(--color-teal)' }}>
                 🌿 {t('home.lowEnergyDetected')}
                 {burnoutScore > 60 ? t('home.burnoutProtection') : ''}
               </p>
@@ -358,13 +358,13 @@ export default function HomePage() {
             whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
             onClick={() => setShowAddTask(true)}
             className="w-full rounded-2xl p-5 border text-left"
-            style={{ backgroundColor: '#1E2136', borderColor: 'rgba(123,114,255,0.25)', boxShadow: '0 0 20px rgba(123,114,255,0.08)' }}
+            style={{ backgroundColor: 'var(--color-surface-card)', borderColor: 'rgba(123,114,255,0.25)', boxShadow: '0 0 20px rgba(123,114,255,0.08)' }}
           >
             <div className="flex items-center gap-3">
               <MochiAvatar size={36} />
               <div>
-                <p className="text-[15px] font-semibold" style={{ color: '#E8E8F0' }}>{t('home.whatsOnMind')}</p>
-                <p className="text-[12px]" style={{ color: '#8B8BA7' }}>{t('home.tapToAdd')}</p>
+                <p className="text-[15px] font-semibold" style={{ color: 'var(--color-text-primary)' }}>{t('home.whatsOnMind')}</p>
+                <p className="text-[12px]" style={{ color: 'var(--color-text-muted)' }}>{t('home.tapToAdd')}</p>
               </div>
             </div>
           </motion.button>
@@ -372,7 +372,7 @@ export default function HomePage() {
 
         {/* Energy Check-in */}
         <motion.div initial={shouldAnimate ? { opacity: 0, y: 12 } : false} animate={shouldAnimate ? { opacity: 1, y: 0 } : false} transition={shouldAnimate ? { delay: 0.1 } : undefined}>
-          <p className="text-[15px] font-semibold mb-2" style={{ color: '#E8E8F0' }}>{t('home.howsEnergy')}</p>
+          <p className="text-[15px] font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>{t('home.howsEnergy')}</p>
           <EnergyPicker
             selected={energyLevel - 1}
             onSelect={handleEnergySelect}
@@ -382,10 +382,10 @@ export default function HomePage() {
         {/* NOW Pool — low energy shows only 1 task */}
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="text-[11px] uppercase tracking-widest font-semibold" style={{ color: '#7B72FF' }}>NOW</span>
-            <span className="text-[11px]" style={{ color: '#8B8BA7' }}>{nowTasks.length}/{nowMax}</span>
+            <span className="text-[11px] uppercase tracking-widest font-semibold" style={{ color: 'var(--color-primary)' }}>NOW</span>
+            <span className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>{nowTasks.length}/{nowMax}</span>
             {isLowEnergy && (
-              <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ backgroundColor: 'rgba(78,205,196,0.12)', color: '#4ECDC4' }}>
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ backgroundColor: 'rgba(78,205,196,0.12)', color: 'var(--color-teal)' }}>
                 {t('home.gentleMode')}
               </span>
             )}
@@ -402,7 +402,7 @@ export default function HomePage() {
               />
             ))}
             {isLowEnergy && nowTasks.length > 1 && (
-              <p className="text-[12px] py-1" style={{ color: '#8B8BA7' }}>
+              <p className="text-[12px] py-1" style={{ color: 'var(--color-text-muted)' }}>
                 {t('home.moreRest', { count: nowTasks.length - 1 })} 🌙
               </p>
             )}
@@ -416,13 +416,13 @@ export default function HomePage() {
             animate={shouldAnimate ? { opacity: 1, y: 0 } : false}
             transition={shouldAnimate ? { delay: 0.15 } : undefined}
             className="rounded-2xl p-3"
-            style={{ backgroundColor: '#1E2136' }}
+            style={{ backgroundColor: 'var(--color-surface-card)' }}
           >
-            <p className="text-[15px] font-semibold mb-1" style={{ color: '#E8E8F0' }}>📋 {t('home.upNext', { count: nextTasks.length })}</p>
+            <p className="text-[15px] font-semibold mb-1" style={{ color: 'var(--color-text-primary)' }}>📋 {t('home.upNext', { count: nextTasks.length })}</p>
             {nextTasks.slice(0, 2).map(t => (
-              <p key={t.id} className="text-[13px] truncate" style={{ color: '#8B8BA7' }}>{t.title}</p>
+              <p key={t.id} className="text-[13px] truncate" style={{ color: 'var(--color-text-muted)' }}>{t.title}</p>
             ))}
-            <button className="text-[13px] font-medium mt-1" style={{ color: '#7B72FF' }}>{t('home.seeAll')}</button>
+            <button className="text-[13px] font-medium mt-1" style={{ color: 'var(--color-primary)' }}>{t('home.seeAll')}</button>
           </motion.div>
         )}
 
@@ -436,10 +436,10 @@ export default function HomePage() {
                 animate={shouldAnimate ? { opacity: 1, y: 0 } : false}
                 transition={shouldAnimate ? { delay: 0.2 + i * 0.05 } : undefined}
                 className="rounded-2xl p-3 flex flex-col items-center justify-center min-h-[80px]"
-                style={{ backgroundColor: '#1E2136' }}
+                style={{ backgroundColor: 'var(--color-surface-card)' }}
               >
                 <div className="flex items-baseline">{card.content}</div>
-                <p className="text-[11px] mt-0.5" style={{ color: '#8B8BA7' }}>{card.sub}</p>
+                <p className="text-[11px] mt-0.5" style={{ color: 'var(--color-text-muted)' }}>{card.sub}</p>
               </motion.div>
             ))}
           </div>
@@ -451,15 +451,15 @@ export default function HomePage() {
             initial={shouldAnimate ? { opacity: 0, y: 12 } : false}
             animate={shouldAnimate ? { opacity: 1, y: 0 } : false}
             className="rounded-2xl p-4"
-            style={{ backgroundColor: '#1E2136' }}
+            style={{ backgroundColor: 'var(--color-surface-card)' }}
           >
             <div className="flex items-center gap-3">
               <span className="text-[32px]">{ENERGY_EMOJI[energyLevel - 1]}</span>
               <div>
-                <p className="text-[15px] font-semibold" style={{ color: '#E8E8F0' }}>
+                <p className="text-[15px] font-semibold" style={{ color: 'var(--color-text-primary)' }}>
                   ⚡ {(xpTotal ?? 0).toLocaleString()} XP · {completedTotal ?? 0} done
                 </p>
-                <p className="text-[12px]" style={{ color: '#8B8BA7' }}>
+                <p className="text-[12px]" style={{ color: 'var(--color-text-muted)' }}>
                   {burnoutScore > 60
                     ? t('home.hardWork')
                     : t('home.easyDoesIt')}

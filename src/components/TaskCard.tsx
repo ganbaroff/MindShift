@@ -184,7 +184,7 @@ function TaskCardInner({ task, index = 0, onDone, onPark, onRemove }: TaskCardPr
         animate={shouldAnimate ? { opacity: 1, y: 0 } : false}
         className="rounded-2xl p-3 overflow-hidden"
         style={{
-          backgroundColor: '#1E2136',
+          backgroundColor: 'var(--color-surface-card)',
           borderLeft: `3px solid ${config.color}`,
           border: '1px solid rgba(123,114,255,0.3)',
         }}
@@ -220,7 +220,7 @@ function TaskCardInner({ task, index = 0, onDone, onPark, onRemove }: TaskCardPr
               onClick={handleEditSave}
               disabled={!editTitle.trim()}
               className="flex-1 h-8 rounded-lg text-[12px] font-medium flex items-center justify-center gap-1 disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-ms-primary/50 focus-visible:outline-none"
-              style={{ backgroundColor: 'rgba(78,205,196,0.12)', color: '#4ECDC4' }}
+              style={{ backgroundColor: 'rgba(78,205,196,0.12)', color: 'var(--color-teal)' }}
               aria-label="Save edit"
             >
               <Check size={14} /> {t('taskCard.save')}
@@ -228,7 +228,7 @@ function TaskCardInner({ task, index = 0, onDone, onPark, onRemove }: TaskCardPr
             <button
               onClick={handleEditCancel}
               className="flex-1 h-8 rounded-lg text-[12px] font-medium flex items-center justify-center gap-1 focus-visible:ring-2 focus-visible:ring-ms-primary/50 focus-visible:outline-none"
-              style={{ backgroundColor: '#252840', color: '#8B8BA7' }}
+              style={{ backgroundColor: 'var(--color-surface-raised)', color: 'var(--color-text-muted)' }}
               aria-label="Cancel edit"
             >
               <X size={14} /> {t('taskCard.cancel')}
@@ -246,7 +246,7 @@ function TaskCardInner({ task, index = 0, onDone, onPark, onRemove }: TaskCardPr
       transition={shouldAnimate ? { delay: index * 0.05 } : undefined}
       className="rounded-2xl p-3 overflow-hidden"
       style={{
-        backgroundColor: '#1E2136',
+        backgroundColor: 'var(--color-surface-card)',
         borderLeft: `3px solid ${config.color}`,
       }}
     >
@@ -257,13 +257,13 @@ function TaskCardInner({ task, index = 0, onDone, onPark, onRemove }: TaskCardPr
         {task.pool !== 'now' && (
           <span
             className="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
-            style={{ backgroundColor: 'rgba(123,114,255,0.15)', color: '#7B72FF' }}
+            style={{ backgroundColor: 'rgba(123,114,255,0.15)', color: 'var(--color-primary)' }}
           >
             {task.pool.toUpperCase()}
           </span>
         )}
         {task.taskType === 'task' && task.estimatedMinutes && (
-          <span className="text-[11px] ml-auto" style={{ color: '#8B8BA7' }}>
+          <span className="text-[11px] ml-auto" style={{ color: 'var(--color-text-muted)' }}>
             {task.estimatedMinutes}m
           </span>
         )}
@@ -274,14 +274,14 @@ function TaskCardInner({ task, index = 0, onDone, onPark, onRemove }: TaskCardPr
         )}
         {hasReminder && <span className="text-[13px]" title="Reminder set">🔔</span>}
         {task.dueDate && (
-          <span className="text-[10px] px-1.5 py-0.5 rounded-full ml-auto" style={{ backgroundColor: 'rgba(123,114,255,0.12)', color: '#7B72FF' }}>
+          <span className="text-[10px] px-1.5 py-0.5 rounded-full ml-auto" style={{ backgroundColor: 'rgba(123,114,255,0.12)', color: 'var(--color-primary)' }}>
             📅 {task.dueDate}
           </span>
         )}
         {isCarryOver && (
           <span
             className="text-[10px] px-1.5 py-0.5 rounded-full"
-            style={{ backgroundColor: 'rgba(245,158,11,0.15)', color: '#F59E0B' }}
+            style={{ backgroundColor: 'rgba(245,158,11,0.15)', color: 'var(--color-gold)' }}
           >
             {t('taskCard.carryOver')}
           </span>
@@ -296,7 +296,7 @@ function TaskCardInner({ task, index = 0, onDone, onPark, onRemove }: TaskCardPr
               setIsEditing(true);
             }}
             className="ml-auto p-1 rounded-md focus-visible:ring-2 focus-visible:ring-ms-primary/50 focus-visible:outline-none"
-            style={{ color: '#8B8BA7' }}
+            style={{ color: 'var(--color-text-muted)' }}
             aria-label="Edit task"
           >
             <Pencil size={13} />
@@ -307,7 +307,7 @@ function TaskCardInner({ task, index = 0, onDone, onPark, onRemove }: TaskCardPr
       {/* Title */}
       <p
         className="text-[15px] font-semibold mb-1.5 line-clamp-2"
-        style={{ color: '#E8E8F0' }}
+        style={{ color: 'var(--color-text-primary)' }}
       >
         {task.title}
       </p>
@@ -323,7 +323,7 @@ function TaskCardInner({ task, index = 0, onDone, onPark, onRemove }: TaskCardPr
       {task.category && (
         <span
           className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full font-medium mb-2"
-          style={{ backgroundColor: 'rgba(123,114,255,0.12)', color: '#7B72FF' }}
+          style={{ backgroundColor: 'rgba(123,114,255,0.12)', color: 'var(--color-primary)' }}
         >
           {CATEGORY_CONFIG[task.category].emoji} {CATEGORY_CONFIG[task.category].label}
         </span>
@@ -347,7 +347,7 @@ function TaskCardInner({ task, index = 0, onDone, onPark, onRemove }: TaskCardPr
           style={{
             backgroundColor: justCompleted ? 'rgba(78,205,196,0.2)' : 'rgba(78,205,196,0.12)',
             border: '1px solid rgba(78,205,196,0.35)',
-            color: '#4ECDC4',
+            color: 'var(--color-teal)',
           }}
         >
           {justCompleted ? t('taskCard.doneComplete') : t('taskCard.done')}
@@ -356,7 +356,7 @@ function TaskCardInner({ task, index = 0, onDone, onPark, onRemove }: TaskCardPr
           whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
           onClick={() => onPark?.(task.id)}
           className="flex-1 h-9 rounded-xl text-[13px] font-medium focus-visible:ring-2 focus-visible:ring-ms-primary/50 focus-visible:outline-none"
-          style={{ backgroundColor: '#252840', color: '#8B8BA7' }}
+          style={{ backgroundColor: 'var(--color-surface-raised)', color: 'var(--color-text-muted)' }}
         >
           {t('taskCard.parkIt')}
         </motion.button>
@@ -368,7 +368,7 @@ function TaskCardInner({ task, index = 0, onDone, onPark, onRemove }: TaskCardPr
             style={{
               backgroundColor: confirmRemove ? 'rgba(245,158,11,0.2)' : 'rgba(139,139,167,0.1)',
               border: confirmRemove ? '1px solid rgba(245,158,11,0.4)' : '1px solid transparent',
-              color: confirmRemove ? '#F59E0B' : '#8B8BA7',
+              color: confirmRemove ? 'var(--color-gold)' : 'var(--color-text-muted)',
             }}
             aria-label={confirmRemove ? 'Confirm remove task' : 'Remove task'}
           >

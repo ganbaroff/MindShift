@@ -4,8 +4,8 @@ import { ArrowLeft } from 'lucide-react'
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="flex flex-col gap-2">
-      <h2 className="text-base font-semibold" style={{ color: '#E8E8F0' }}>{title}</h2>
-      <div className="text-sm leading-relaxed flex flex-col gap-2" style={{ color: '#8B8BA7' }}>
+      <h2 className="text-base font-semibold" style={{ color: 'var(--color-text-primary)' }}>{title}</h2>
+      <div className="text-sm leading-relaxed flex flex-col gap-2" style={{ color: 'var(--color-text-muted)' }}>
         {children}
       </div>
     </section>
@@ -16,12 +16,12 @@ function StorageRow({ name, purpose, duration, type }: {
   name: string; purpose: string; duration: string; type: string
 }) {
   return (
-    <div className="p-3 rounded-lg flex flex-col gap-1" style={{ background: '#252840' }}>
+    <div className="p-3 rounded-lg flex flex-col gap-1" style={{ background: 'var(--color-surface-raised)' }}>
       <div className="flex items-center justify-between">
-        <code className="text-xs px-2 py-0.5 rounded" style={{ background: '#1E2136', color: '#7B72FF' }}>{name}</code>
-        <span className="text-xs px-2 py-0.5 rounded" style={{ background: '#1E2136', color: '#4ECDC4' }}>{type}</span>
+        <code className="text-xs px-2 py-0.5 rounded" style={{ background: 'var(--color-surface-card)', color: 'var(--color-primary)' }}>{name}</code>
+        <span className="text-xs px-2 py-0.5 rounded" style={{ background: 'var(--color-surface-card)', color: 'var(--color-teal)' }}>{type}</span>
       </div>
-      <p className="text-xs" style={{ color: '#8B8BA7' }}>{purpose}</p>
+      <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>{purpose}</p>
       <p className="text-xs" style={{ color: '#6B6B8A' }}>Expires: {duration}</p>
     </div>
   )
@@ -31,30 +31,30 @@ export default function CookiePolicyPage() {
   const navigate = useNavigate()
 
   return (
-    <div className="min-h-screen px-5 pb-20" style={{ background: '#0F1117' }}>
+    <div className="min-h-screen px-5 pb-20" style={{ background: 'var(--color-bg)' }}>
       {/* Header */}
       <div className="flex items-center gap-3 pt-10 pb-6">
         <button
           onClick={() => navigate(-1)}
           className="p-2 rounded-xl"
-          style={{ background: '#1E2136', color: '#8B8BA7' }}
+          style={{ background: 'var(--color-surface-card)', color: 'var(--color-text-muted)' }}
           aria-label="Go back"
         >
           <ArrowLeft size={18} />
         </button>
         <div>
-          <h1 className="text-xl font-bold" style={{ color: '#E8E8F0' }}>Cookie Policy</h1>
-          <p className="text-xs mt-0.5" style={{ color: '#7B72FF' }}>Last updated: March 9, 2026</p>
+          <h1 className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>Cookie Policy</h1>
+          <p className="text-xs mt-0.5" style={{ color: 'var(--color-primary)' }}>Last updated: March 9, 2026</p>
         </div>
       </div>
 
       <div className="flex flex-col gap-7 max-w-2xl">
 
         {/* Quick summary */}
-        <div className="p-4 rounded-xl" style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)' }}>
-          <p className="text-sm font-semibold mb-2" style={{ color: '#E8E8F0' }}>The short version</p>
-          <p className="text-sm" style={{ color: '#8B8BA7' }}>
-            MindShift does <strong style={{ color: '#4ECDC4' }}>not use tracking cookies</strong>.
+        <div className="p-4 rounded-xl" style={{ background: 'var(--color-surface-card)', border: '1px solid rgba(255,255,255,0.06)' }}>
+          <p className="text-sm font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>The short version</p>
+          <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
+            MindShift does <strong style={{ color: 'var(--color-teal)' }}>not use tracking cookies</strong>.
             We use your browser's localStorage to make the app work offline and remember your
             preferences. We use cookieless analytics that never identify you personally.
           </p>
@@ -66,8 +66,8 @@ export default function CookiePolicyPage() {
             widely used to make websites work, remember your preferences, and provide analytics.
           </p>
           <p>
-            MindShift is a Progressive Web App (PWA). We use <strong style={{ color: '#E8E8F0' }}>localStorage</strong>{' '}
-            and <strong style={{ color: '#E8E8F0' }}>sessionStorage</strong> (browser APIs, similar
+            MindShift is a Progressive Web App (PWA). We use <strong style={{ color: 'var(--color-text-primary)' }}>localStorage</strong>{' '}
+            and <strong style={{ color: 'var(--color-text-primary)' }}>sessionStorage</strong> (browser APIs, similar
             to cookies but not transmitted to servers with every request) rather than traditional
             HTTP cookies for most functionality.
           </p>
@@ -75,7 +75,7 @@ export default function CookiePolicyPage() {
 
         <Section title="2. HTTP Cookies We Set">
           <p>
-            MindShift sets <strong style={{ color: '#E8E8F0' }}>no third-party tracking cookies</strong>{' '}
+            MindShift sets <strong style={{ color: 'var(--color-text-primary)' }}>no third-party tracking cookies</strong>{' '}
             of any kind. The only HTTP cookies that may be set are:
           </p>
           <div className="flex flex-col gap-2">
@@ -87,7 +87,7 @@ export default function CookiePolicyPage() {
             />
           </div>
           <p>
-            This cookie is <strong style={{ color: '#E8E8F0' }}>essential</strong> — without it,
+            This cookie is <strong style={{ color: 'var(--color-text-primary)' }}>essential</strong> — without it,
             you cannot use MindShift. It cannot be disabled while using the app.
           </p>
         </Section>
@@ -131,10 +131,10 @@ export default function CookiePolicyPage() {
             in aggregate. Our analytics:
           </p>
           <ul className="list-disc pl-5 flex flex-col gap-1">
-            <li>Do <strong style={{ color: '#E8E8F0' }}>not</strong> set any cookies</li>
-            <li>Do <strong style={{ color: '#E8E8F0' }}>not</strong> track you across websites</li>
-            <li>Do <strong style={{ color: '#E8E8F0' }}>not</strong> fingerprint your device</li>
-            <li>Do <strong style={{ color: '#E8E8F0' }}>not</strong> collect your IP address</li>
+            <li>Do <strong style={{ color: 'var(--color-text-primary)' }}>not</strong> set any cookies</li>
+            <li>Do <strong style={{ color: 'var(--color-text-primary)' }}>not</strong> track you across websites</li>
+            <li>Do <strong style={{ color: 'var(--color-text-primary)' }}>not</strong> fingerprint your device</li>
+            <li>Do <strong style={{ color: 'var(--color-text-primary)' }}>not</strong> collect your IP address</li>
             <li>Collect only aggregate counts (page views, feature usage)</li>
             <li>Are fully blockable with any content blocker (uBlock Origin, AdGuard, etc.)</li>
           </ul>
@@ -151,11 +151,11 @@ export default function CookiePolicyPage() {
           </p>
           <ul className="list-disc pl-5 flex flex-col gap-1">
             <li>
-              <strong style={{ color: '#E8E8F0' }}>Supabase</strong> — authentication session cookies
+              <strong style={{ color: 'var(--color-text-primary)' }}>Supabase</strong> — authentication session cookies
               (essential, as described above)
             </li>
             <li>
-              <strong style={{ color: '#E8E8F0' }}>Vercel</strong> — may set minimal performance
+              <strong style={{ color: 'var(--color-text-primary)' }}>Vercel</strong> — may set minimal performance
               cookies for CDN routing. These are technical/essential cookies with no tracking purpose.
             </li>
           </ul>
@@ -170,10 +170,10 @@ export default function CookiePolicyPage() {
             You can control cookies and localStorage in your browser settings:
           </p>
           <ul className="list-disc pl-5 flex flex-col gap-1">
-            <li><strong style={{ color: '#E8E8F0' }}>Chrome:</strong> Settings → Privacy and security → Cookies</li>
-            <li><strong style={{ color: '#E8E8F0' }}>Firefox:</strong> Settings → Privacy & Security → Cookies and Site Data</li>
-            <li><strong style={{ color: '#E8E8F0' }}>Safari:</strong> Preferences → Privacy → Manage Website Data</li>
-            <li><strong style={{ color: '#E8E8F0' }}>Edge:</strong> Settings → Cookies and site permissions</li>
+            <li><strong style={{ color: 'var(--color-text-primary)' }}>Chrome:</strong> Settings → Privacy and security → Cookies</li>
+            <li><strong style={{ color: 'var(--color-text-primary)' }}>Firefox:</strong> Settings → Privacy & Security → Cookies and Site Data</li>
+            <li><strong style={{ color: 'var(--color-text-primary)' }}>Safari:</strong> Preferences → Privacy → Manage Website Data</li>
+            <li><strong style={{ color: 'var(--color-text-primary)' }}>Edge:</strong> Settings → Cookies and site permissions</li>
           </ul>
           <p>
             You can also clear MindShift's localStorage from within the app: Settings → Clear local data.
@@ -186,7 +186,7 @@ export default function CookiePolicyPage() {
         <Section title="7. Contact">
           <p>
             Questions about cookies or data storage?{' '}
-            <a href="mailto:privacy@mindshift.app" style={{ color: '#7B72FF' }}>
+            <a href="mailto:privacy@mindshift.app" style={{ color: 'var(--color-primary)' }}>
               privacy@mindshift.app
             </a>
           </p>

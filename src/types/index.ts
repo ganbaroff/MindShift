@@ -8,7 +8,7 @@ export type AppMode = 'minimal' | 'habit' | 'system'
 export type Psychotype = 'achiever' | 'explorer' | 'connector' | 'planner'
 export type TaskType = 'task' | 'idea' | 'reminder' | 'meeting'
 export type TaskCategory = 'work' | 'personal' | 'health' | 'learning' | 'finance'
-export type AudioPreset = 'brown' | 'lofi' | 'nature' | 'pink' | 'gamma'
+export type AudioPreset = 'brown' | 'lofi' | 'nature' | 'pink' | 'gamma' | 'gamma60'
 export type SessionPhase = 'idle' | 'struggle' | 'release' | 'flow' | 'recovery'
 export type EnergyLevel = 1 | 2 | 3 | 4 | 5
 

@@ -101,10 +101,10 @@ export function ShareCard({ emoji, title, subtitle, stat, onClose }: ShareCardPr
 
               {/* Title */}
               <div className="text-center relative z-10">
-                <h3 className="text-lg font-bold" style={{ color: '#E8E8F0' }}>
+                <h3 className="text-lg font-bold" style={{ color: 'var(--color-text-primary)' }}>
                   {title}
                 </h3>
-                <p className="text-sm mt-1.5" style={{ color: '#8B8BA7' }}>
+                <p className="text-sm mt-1.5" style={{ color: 'var(--color-text-muted)' }}>
                   {subtitle}
                 </p>
               </div>
@@ -115,13 +115,13 @@ export function ShareCard({ emoji, title, subtitle, stat, onClose }: ShareCardPr
                   className="px-4 py-2 rounded-xl relative z-10"
                   style={{ background: 'rgba(78,205,196,0.08)', border: '1px solid rgba(78,205,196,0.15)' }}
                 >
-                  <p className="text-sm font-medium" style={{ color: '#4ECDC4' }}>{stat}</p>
+                  <p className="text-sm font-medium" style={{ color: 'var(--color-teal)' }}>{stat}</p>
                 </div>
               )}
 
               {/* XP tier */}
               <div className="relative z-10 flex items-center gap-2">
-                <span className="text-xs" style={{ color: '#7B72FF' }}>🌱 {tierName}</span>
+                <span className="text-xs" style={{ color: 'var(--color-primary)' }}>🌱 {tierName}</span>
                 <span className="text-xs" style={{ color: '#5A5B72' }}>·</span>
                 <span className="text-xs" style={{ color: '#5A5B72' }}>{xpTotal} XP</span>
               </div>
@@ -140,14 +140,14 @@ export function ShareCard({ emoji, title, subtitle, stat, onClose }: ShareCardPr
             <button
               onClick={handleShare}
               className="flex-1 py-3 rounded-2xl font-semibold text-sm"
-              style={{ background: '#7B72FF', color: '#FFFFFF' }}
+              style={{ background: 'var(--color-primary)', color: '#FFFFFF' }}
             >
               {copied ? 'Copied!' : canShare() ? 'Share' : 'Copy text'}
             </button>
             <button
               onClick={onClose}
               className="py-3 px-5 rounded-2xl text-sm"
-              style={{ background: '#1E2136', color: '#8B8BA7' }}
+              style={{ background: 'var(--color-surface-card)', color: 'var(--color-text-muted)' }}
             >
               Close
             </button>

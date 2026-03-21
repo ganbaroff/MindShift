@@ -40,7 +40,7 @@ function Chip({ label, onRemove }: { label: string; onRemove?: () => void }) {
       className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-medium"
       style={{
         background: 'rgba(78,205,196,0.12)',
-        color: '#4ECDC4',
+        color: 'var(--color-teal)',
         border: '1px solid rgba(78,205,196,0.2)',
       }}
     >
@@ -178,7 +178,7 @@ function QuickCaptureInner({ onSubmit, onExpand, placeholder }: QuickCaptureProp
           onKeyDown={handleKeyDown}
           placeholder={placeholder ?? "What's on your mind?"}
           className="flex-1 bg-transparent text-[14px] outline-none placeholder:text-[#8B8BA7]"
-          style={{ color: '#E8E8F0' }}
+          style={{ color: 'var(--color-text-primary)' }}
           aria-label="Quick task input"
         />
         {/* Mic button — voice input */}
@@ -203,7 +203,7 @@ function QuickCaptureInner({ onSubmit, onExpand, placeholder }: QuickCaptureProp
               exit={shouldAnimate ? { scale: 0 } : {}}
               onClick={handleSubmit}
               className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
-              style={{ background: '#4ECDC4' }}
+              style={{ background: 'var(--color-teal)' }}
               aria-label="Add task"
             >
               <Send size={14} color="#1E2136" />
@@ -236,7 +236,7 @@ function QuickCaptureInner({ onSubmit, onExpand, placeholder }: QuickCaptureProp
                 <button
                   onClick={handleExpand}
                   className="text-[11px] flex items-center gap-0.5 px-1.5 py-0.5 rounded-lg focus-visible:ring-1 focus-visible:ring-[#7B72FF]"
-                  style={{ color: '#8B8BA7' }}
+                  style={{ color: 'var(--color-text-muted)' }}
                 >
                   <ChevronDown size={10} />
                   More options

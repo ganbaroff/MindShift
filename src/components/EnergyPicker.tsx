@@ -37,7 +37,7 @@ export default function EnergyPicker({ selected, onSelect, size = 40 }: EnergyPi
             >
               {ENERGY_EMOJI[i]}
             </motion.span>
-            <span className="text-[10px]" style={{ color: '#8B8BA7' }}>{label}</span>
+            <span className="text-[10px]" style={{ color: 'var(--color-text-muted)' }}>{label}</span>
           </motion.button>
         );
       })}

@@ -37,15 +37,15 @@ export function EnergyCheckin({ onSelect, selected, compact = false }: Props) {
             className="flex flex-col items-center gap-1 flex-1 rounded-2xl transition-all duration-200"
             style={{
               padding: compact ? '10px 4px' : '14px 4px',
-              background: isSelected ? 'rgba(123, 114, 255, 0.18)' : '#1E2136',
-              border: isSelected ? '2px solid #7B72FF' : '1px solid rgba(255,255,255,0.06)',
+              background: isSelected ? 'rgba(123, 114, 255, 0.18)' : 'var(--color-surface-card)',
+              border: isSelected ? '2px solid var(--color-primary)' : '1px solid rgba(255,255,255,0.06)',
             }}
           >
             <span style={{ fontSize: compact ? '1.5rem' : '2rem', lineHeight: 1 }}>{ENERGY_EMOJI[i]}</span>
             {!compact && (
               <span
                 className="text-xs font-medium"
-                style={{ color: isSelected ? '#7B72FF' : '#8B8BA7' }}
+                style={{ color: isSelected ? 'var(--color-primary)' : 'var(--color-text-muted)' }}
               >
                 {label}
               </span>

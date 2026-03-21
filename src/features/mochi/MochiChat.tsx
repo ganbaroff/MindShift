@@ -290,7 +290,7 @@ export function MochiChat({ open, onClose }: MochiChatProps) {
             <div
               className="w-full max-w-[480px] flex flex-col rounded-t-2xl overflow-hidden"
               style={{
-                background: '#1E2136',
+                background: 'var(--color-surface-card)',
                 maxHeight: '70vh',
                 border: '1px solid rgba(123,114,255,0.15)',
                 borderBottom: 'none',
@@ -304,17 +304,17 @@ export function MochiChat({ open, onClose }: MochiChatProps) {
               >
                 <Mascot state="encouraging" size={32} label="Mochi" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium" style={{ color: '#E8E8F0' }}>
+                  <p className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
                     Mochi
                   </p>
-                  <p className="text-[10px]" style={{ color: '#8B8BA7' }}>
+                  <p className="text-[10px]" style={{ color: 'var(--color-text-muted)' }}>
                     {t('mochi.companion')}
                   </p>
                 </div>
                 <button
                   onClick={onClose}
                   className="p-1.5 rounded-lg focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
-                  style={{ color: '#8B8BA7' }}
+                  style={{ color: 'var(--color-text-muted)' }}
                   aria-label="Close chat"
                 >
                   <X size={18} />
@@ -330,10 +330,10 @@ export function MochiChat({ open, onClose }: MochiChatProps) {
                 {isGuest ? (
                   <div className="flex flex-col items-center justify-center h-full gap-3 py-8">
                     <Mascot state="idle" size={64} label="Mochi" />
-                    <p className="text-sm text-center" style={{ color: '#E8E8F0' }}>
+                    <p className="text-sm text-center" style={{ color: 'var(--color-text-primary)' }}>
                       {t('mochi.wantsToHelp')}
                     </p>
-                    <p className="text-xs text-center max-w-[240px]" style={{ color: '#8B8BA7' }}>
+                    <p className="text-xs text-center max-w-[240px]" style={{ color: 'var(--color-text-muted)' }}>
                       {t('mochi.signInForMochi')}
                     </p>
                     <button
@@ -349,7 +349,7 @@ export function MochiChat({ open, onClose }: MochiChatProps) {
                     <button
                       onClick={onClose}
                       className="text-[12px] focus-visible:ring-1 focus-visible:ring-[#7B72FF] rounded px-2 py-1"
-                      style={{ color: '#8B8BA7' }}
+                      style={{ color: 'var(--color-text-muted)' }}
                     >
                       {t('mochi.maybeLater')}
                     </button>
@@ -368,16 +368,16 @@ export function MochiChat({ open, onClose }: MochiChatProps) {
                     </div>
                     <div
                       className="px-3 py-2 rounded-2xl rounded-bl-sm"
-                      style={{ background: '#252840' }}
+                      style={{ background: 'var(--color-surface-raised)' }}
                     >
                       <motion.div
                         className="flex gap-1"
                         animate={shouldAnimate ? { opacity: [0.4, 1, 0.4] } : {}}
                         transition={shouldAnimate ? { duration: 1.2, repeat: Infinity } : {}}
                       >
-                        <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#7B72FF' }} />
-                        <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#7B72FF' }} />
-                        <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#7B72FF' }} />
+                        <span className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--color-primary)' }} />
+                        <span className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--color-primary)' }} />
+                        <span className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--color-primary)' }} />
                       </motion.div>
                     </div>
                   </div>
@@ -387,7 +387,7 @@ export function MochiChat({ open, onClose }: MochiChatProps) {
               {/* Rate limit indicator */}
               {!isGuest && messageCount > 0 && (
                 <div className="px-4 py-1 text-center">
-                  <p className="text-[10px]" style={{ color: '#8B8BA7' }}>
+                  <p className="text-[10px]" style={{ color: 'var(--color-text-muted)' }}>
                     {atLimit
                       ? 'Chat limit reached for this session'
                       : `${messageCount}/${MAX_MESSAGES} messages`}
@@ -414,8 +414,8 @@ export function MochiChat({ open, onClose }: MochiChatProps) {
                     disabled={atLimit || loading}
                     className="flex-1 px-3 py-2 rounded-xl text-sm outline-none focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
                     style={{
-                      background: '#252840',
-                      color: '#E8E8F0',
+                      background: 'var(--color-surface-raised)',
+                      color: 'var(--color-text-primary)',
                       border: 'none',
                     }}
                     aria-label="Message to Mochi"
@@ -424,7 +424,7 @@ export function MochiChat({ open, onClose }: MochiChatProps) {
                     onClick={handleSend}
                     disabled={!input.trim() || atLimit || loading}
                     className="p-2 rounded-xl shrink-0 focus-visible:ring-2 focus-visible:ring-[#7B72FF] disabled:opacity-30"
-                    style={{ background: '#4ECDC4', color: '#1E2136' }}
+                    style={{ background: 'var(--color-teal)', color: 'var(--color-bg)' }}
                     aria-label="Send message"
                   >
                     {loading ? <Loader2 size={18} className="motion-reduce:animate-none animate-spin" /> : <Send size={18} />}
@@ -449,7 +449,7 @@ function MessageBubble({ message }: { message: ChatMessage }) {
       <div className="flex justify-end">
         <div
           className="px-3 py-2 rounded-2xl rounded-br-sm max-w-[80%]"
-          style={{ background: '#7B72FF' }}
+          style={{ background: 'var(--color-primary)' }}
         >
           <p className="text-sm leading-relaxed" style={{ color: '#FFFFFF' }}>
             {message.text}
@@ -473,7 +473,7 @@ function MessageBubble({ message }: { message: ChatMessage }) {
         style={{
           background: message.isCrisis
             ? 'rgba(78,205,196,0.12)'
-            : '#252840',
+            : 'var(--color-surface-raised)',
           border: message.isCrisis
             ? '1px solid rgba(78,205,196,0.3)'
             : 'none',
@@ -481,7 +481,7 @@ function MessageBubble({ message }: { message: ChatMessage }) {
       >
         <p
           className="text-sm leading-relaxed whitespace-pre-line"
-          style={{ color: '#E8E8F0' }}
+          style={{ color: 'var(--color-text-primary)' }}
         >
           {message.text}
         </p>

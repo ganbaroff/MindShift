@@ -43,11 +43,11 @@ function TransitionNudgeInner({ nextTask, onFocus, onDismiss }: TransitionNudgeP
       <span className="text-[14px]">✅</span>
       <div className="flex-1 min-w-0">
         {nextTask ? (
-          <p className="text-[12px] truncate" style={{ color: '#E8E8F0' }}>
-            {t('transition.next', { title: '' })}<span style={{ color: '#4ECDC4' }}>{nextTask.title}</span>
+          <p className="text-[12px] truncate" style={{ color: 'var(--color-text-primary)' }}>
+            {t('transition.next', { title: '' })}<span style={{ color: 'var(--color-teal)' }}>{nextTask.title}</span>
           </p>
         ) : (
-          <p className="text-[12px]" style={{ color: '#8B8BA7' }}>
+          <p className="text-[12px]" style={{ color: 'var(--color-text-muted)' }}>
             {t('transition.allDone')}
           </p>
         )}
@@ -56,7 +56,7 @@ function TransitionNudgeInner({ nextTask, onFocus, onDismiss }: TransitionNudgeP
         <button
           onClick={onFocus}
           className="shrink-0 flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium focus-visible:ring-1 focus-visible:ring-[#4ECDC4]"
-          style={{ background: 'rgba(78,205,196,0.15)', color: '#4ECDC4' }}
+          style={{ background: 'rgba(78,205,196,0.15)', color: 'var(--color-teal)' }}
         >
           <Play size={10} fill="#4ECDC4" />
           {t('today.focus')}
@@ -65,7 +65,7 @@ function TransitionNudgeInner({ nextTask, onFocus, onDismiss }: TransitionNudgeP
       <button
         onClick={onDismiss}
         className="shrink-0 text-[10px] px-1 focus-visible:ring-1 focus-visible:ring-[#7B72FF] rounded"
-        style={{ color: '#8B8BA7' }}
+        style={{ color: 'var(--color-text-muted)' }}
         aria-label="Dismiss"
       >
         ✕

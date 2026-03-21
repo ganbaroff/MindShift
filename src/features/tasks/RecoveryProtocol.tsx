@@ -240,18 +240,18 @@ export function RecoveryProtocol({ onDismiss }: Props) {
             </motion.div>
             {loadingAi ? (
               <div className="flex justify-center">
-                <span className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin motion-reduce:animate-none motion-reduce:opacity-60" style={{ color: '#7B72FF' }} />
+                <span className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin motion-reduce:animate-none motion-reduce:opacity-60" style={{ color: 'var(--color-primary)' }} />
               </div>
             ) : (
               <p
                 className="text-lg leading-relaxed text-center font-medium"
-                style={{ color: '#E8E8F0' }}
+                style={{ color: 'var(--color-text-primary)' }}
               >
                 {welcomeMsg}
               </p>
             )}
             {archivedCount > 0 && (
-              <p className="text-sm text-center" style={{ color: '#8B8BA7' }}>
+              <p className="text-sm text-center" style={{ color: 'var(--color-text-muted)' }}>
                 🗃️ {t(archivedCount !== 1 ? 'recovery.archivedTasksPlural' : 'recovery.archivedTasks', { count: archivedCount })}
               </p>
             )}
@@ -281,8 +281,8 @@ export function RecoveryProtocol({ onDismiss }: Props) {
                   onClick={() => setSpiciness(value)}
                   className="flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl transition-all duration-150"
                   style={{
-                    background: spiciness === value ? 'rgba(123,114,255,0.18)' : '#1E2136',
-                    border: `1px solid ${spiciness === value ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
+                    background: spiciness === value ? 'rgba(123,114,255,0.18)' : 'var(--color-surface-card)',
+                    border: `1px solid ${spiciness === value ? 'var(--color-primary)' : 'rgba(255,255,255,0.06)'}`,
                   }}
                   aria-pressed={spiciness === value}
                   aria-label={`Overwhelm level: ${t(labelKey)}`}
@@ -303,7 +303,7 @@ export function RecoveryProtocol({ onDismiss }: Props) {
           >
             <label
               className="text-sm font-medium"
-              style={{ color: '#8B8BA7' }}
+              style={{ color: 'var(--color-text-muted)' }}
               htmlFor="recovery-task"
             >
               {t('recovery.oneThingLabel')}
@@ -323,13 +323,13 @@ export function RecoveryProtocol({ onDismiss }: Props) {
               autoFocus
               className="w-full resize-none rounded-2xl px-4 py-3 text-base outline-none transition-all duration-200"
               style={{
-                background: '#1E2136',
+                background: 'var(--color-surface-card)',
                 border: '1px solid rgba(255,255,255,0.06)',
-                color: '#E8E8F0',
-                caretColor: '#7B72FF',
+                color: 'var(--color-text-primary)',
+                caretColor: 'var(--color-primary)',
               }}
               onFocus={(e) => {
-                e.currentTarget.style.borderColor = '#7B72FF'
+                e.currentTarget.style.borderColor = 'var(--color-primary)'
               }}
               onBlur={(e) => {
                 e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'
@@ -350,9 +350,9 @@ export function RecoveryProtocol({ onDismiss }: Props) {
                     onClick={() => setTaskInput(label)}
                     className="text-xs px-3 py-1.5 rounded-xl transition-all duration-150"
                     style={{
-                      background: taskInput === label ? 'rgba(123,114,255,0.18)' : '#1E2136',
-                      border: `1px solid ${taskInput === label ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
-                      color: taskInput === label ? '#C8C0FF' : '#8B8BA7',
+                      background: taskInput === label ? 'rgba(123,114,255,0.18)' : 'var(--color-surface-card)',
+                      border: `1px solid ${taskInput === label ? 'var(--color-primary)' : 'rgba(255,255,255,0.06)'}`,
+                      color: taskInput === label ? '#C8C0FF' : 'var(--color-text-muted)',
                     }}
                   >
                     {label}
@@ -374,8 +374,8 @@ export function RecoveryProtocol({ onDismiss }: Props) {
               disabled={!taskInput.trim() || isSubmitting}
               className="w-full py-4 rounded-2xl font-semibold text-base transition-all duration-200"
               style={{
-                background: taskInput.trim() ? '#7B72FF' : '#252840',
-                color: taskInput.trim() ? '#FFFFFF' : '#8B8BA7',
+                background: taskInput.trim() ? 'var(--color-primary)' : 'var(--color-surface-raised)',
+                color: taskInput.trim() ? '#FFFFFF' : 'var(--color-text-muted)',
                 cursor: taskInput.trim() ? 'pointer' : 'not-allowed',
               }}
             >
@@ -385,7 +385,7 @@ export function RecoveryProtocol({ onDismiss }: Props) {
             <button
               onClick={handleSkip}
               className="w-full py-3 text-sm transition-all duration-200"
-              style={{ color: '#8B8BA7' }}
+              style={{ color: 'var(--color-text-muted)' }}
             >
               {t('recovery.skipShowTasks')}
             </button>

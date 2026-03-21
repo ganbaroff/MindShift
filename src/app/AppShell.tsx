@@ -39,7 +39,7 @@ function SessionFrictionNudge({ onDismiss }: { onDismiss: () => void }) {
       <p className="text-[12px] flex-1 leading-snug" style={{ color: '#C8C0FF' }}>
         {t('appShell.sessionRunning')}
       </p>
-      <button onClick={onDismiss} className="text-[10px] px-2 py-0.5 rounded-lg shrink-0" style={{ color: '#7B72FF' }}>
+      <button onClick={onDismiss} className="text-[10px] px-2 py-0.5 rounded-lg shrink-0" style={{ color: 'var(--color-primary)' }}>
         {t('appShell.gotIt')}
       </button>
     </motion.div>
@@ -127,7 +127,7 @@ export function AppShell() {
                 background: isOnline
                   ? 'rgba(78,205,196,0.15)'
                   : 'rgba(245,158,11,0.15)',
-                color: isOnline ? '#4ECDC4' : '#F59E0B',
+                color: isOnline ? 'var(--color-teal)' : 'var(--color-gold)',
               }}
             >
               {isOnline
@@ -152,7 +152,7 @@ export function AppShell() {
             right: 16,
             bottom: 'calc(130px + env(safe-area-inset-bottom))',
             boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
-            background: '#252840',
+            background: 'var(--color-surface-raised)',
             padding: 6,
           }}
           aria-label="Chat with Mochi"

@@ -132,10 +132,10 @@ export function MonthlyReflection({ onDismiss }: Props) {
               >
                 <div className="text-center">
                   <p className="text-4xl mb-3">✨</p>
-                  <h2 className="text-xl font-semibold" style={{ color: '#E8E8F0' }}>
+                  <h2 className="text-xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>
                     {t('monthly.yourWrapped', { month: prevMonthName })}
                   </h2>
-                  <p className="text-sm mt-2" style={{ color: '#8B8BA7' }}>
+                  <p className="text-sm mt-2" style={{ color: 'var(--color-text-muted)' }}>
                     {t('monthly.whatYouBuilt')}
                   </p>
                 </div>
@@ -144,31 +144,31 @@ export function MonthlyReflection({ onDismiss }: Props) {
                 <div className="grid grid-cols-2 gap-3">
                   <div
                     className="flex flex-col items-center p-3 rounded-2xl"
-                    style={{ background: '#1E2136', border: '1px solid rgba(123,114,255,0.12)' }}
+                    style={{ background: 'var(--color-surface-card)', border: '1px solid rgba(123,114,255,0.12)' }}
                   >
-                    <span className="text-2xl font-bold" style={{ color: '#7B72FF' }}>{xpTotal}</span>
-                    <span className="text-[11px] mt-0.5 text-center" style={{ color: '#8B8BA7' }}>{t('monthly.totalXp')}</span>
+                    <span className="text-2xl font-bold" style={{ color: 'var(--color-primary)' }}>{xpTotal}</span>
+                    <span className="text-[11px] mt-0.5 text-center" style={{ color: 'var(--color-text-muted)' }}>{t('monthly.totalXp')}</span>
                   </div>
                   <div
                     className="flex flex-col items-center p-3 rounded-2xl"
-                    style={{ background: '#1E2136', border: '1px solid rgba(78,205,196,0.12)' }}
+                    style={{ background: 'var(--color-surface-card)', border: '1px solid rgba(78,205,196,0.12)' }}
                   >
-                    <span className="text-2xl font-bold" style={{ color: '#4ECDC4' }}>{completedTotal}</span>
-                    <span className="text-[11px] mt-0.5 text-center" style={{ color: '#8B8BA7' }}>{t('monthly.tasksDone')}</span>
+                    <span className="text-2xl font-bold" style={{ color: 'var(--color-teal)' }}>{completedTotal}</span>
+                    <span className="text-[11px] mt-0.5 text-center" style={{ color: 'var(--color-text-muted)' }}>{t('monthly.tasksDone')}</span>
                   </div>
                   <div
                     className="flex flex-col items-center p-3 rounded-2xl"
-                    style={{ background: '#1E2136', border: '1px solid rgba(78,205,196,0.12)' }}
+                    style={{ background: 'var(--color-surface-card)', border: '1px solid rgba(78,205,196,0.12)' }}
                   >
-                    <span className="text-2xl font-bold" style={{ color: '#4ECDC4' }}>{Math.max(currentStreak, longestStreak)}</span>
-                    <span className="text-[11px] mt-0.5 text-center" style={{ color: '#8B8BA7' }}>{t('monthly.bestStreak')} 🔥</span>
+                    <span className="text-2xl font-bold" style={{ color: 'var(--color-teal)' }}>{Math.max(currentStreak, longestStreak)}</span>
+                    <span className="text-[11px] mt-0.5 text-center" style={{ color: 'var(--color-text-muted)' }}>{t('monthly.bestStreak')} 🔥</span>
                   </div>
                   <div
                     className="flex flex-col items-center p-3 rounded-2xl"
-                    style={{ background: '#1E2136', border: '1px solid rgba(123,114,255,0.12)' }}
+                    style={{ background: 'var(--color-surface-card)', border: '1px solid rgba(123,114,255,0.12)' }}
                   >
-                    <span className="text-2xl font-bold" style={{ color: '#7B72FF' }}>{unlockedBadges.length}</span>
-                    <span className="text-[11px] mt-0.5 text-center" style={{ color: '#8B8BA7' }}>{t('monthly.badgesEarned')}</span>
+                    <span className="text-2xl font-bold" style={{ color: 'var(--color-primary)' }}>{unlockedBadges.length}</span>
+                    <span className="text-[11px] mt-0.5 text-center" style={{ color: 'var(--color-text-muted)' }}>{t('monthly.badgesEarned')}</span>
                   </div>
                 </div>
 
@@ -180,8 +180,8 @@ export function MonthlyReflection({ onDismiss }: Props) {
                   >
                     <span className="text-2xl">{topBadge.emoji}</span>
                     <div>
-                      <p className="text-sm font-medium" style={{ color: '#E8E8F0' }}>{topBadge.name}</p>
-                      <p className="text-xs" style={{ color: '#8B8BA7' }}>{t('monthly.latestBadge')}</p>
+                      <p className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>{topBadge.name}</p>
+                      <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>{t('monthly.latestBadge')}</p>
                     </div>
                   </div>
                 )}
@@ -190,7 +190,7 @@ export function MonthlyReflection({ onDismiss }: Props) {
                   <button
                     onClick={() => setShowShareCard(true)}
                     className="w-full py-4 rounded-2xl font-semibold text-base"
-                    style={{ background: '#7B72FF', color: '#FFFFFF' }}
+                    style={{ background: 'var(--color-primary)', color: '#FFFFFF' }}
                     aria-label="Share monthly wrapped"
                   >
                     {t('monthly.shareWrapped')} ✨
@@ -198,7 +198,7 @@ export function MonthlyReflection({ onDismiss }: Props) {
                   <button
                     onClick={() => setStep('recap')}
                     className="w-full py-3 text-sm"
-                    style={{ color: '#8B8BA7' }}
+                    style={{ color: 'var(--color-text-muted)' }}
                     aria-label="Continue to recap"
                   >
                     {t('monthly.continue')}
@@ -219,10 +219,10 @@ export function MonthlyReflection({ onDismiss }: Props) {
               >
                 <div className="text-center">
                   <p className="text-4xl mb-3">🌙</p>
-                  <h2 className="text-xl font-semibold" style={{ color: '#E8E8F0' }}>
+                  <h2 className="text-xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>
                     {t('monthly.monthIsHere', { month: monthName })}
                   </h2>
-                  <p className="text-sm mt-2 leading-relaxed" style={{ color: '#8B8BA7' }}>
+                  <p className="text-sm mt-2 leading-relaxed" style={{ color: 'var(--color-text-muted)' }}>
                     {t('monthly.welcomeNewMonth')}
                   </p>
                 </div>
@@ -231,17 +231,17 @@ export function MonthlyReflection({ onDismiss }: Props) {
                 <div className="grid grid-cols-2 gap-3">
                   <div
                     className="flex flex-col items-center p-3 rounded-2xl"
-                    style={{ background: '#1E2136', border: '1px solid rgba(78,205,196,0.12)' }}
+                    style={{ background: 'var(--color-surface-card)', border: '1px solid rgba(78,205,196,0.12)' }}
                   >
-                    <span className="text-2xl font-bold" style={{ color: '#4ECDC4' }}>{completedTotal}</span>
-                    <span className="text-[11px] mt-0.5 text-center" style={{ color: '#8B8BA7' }}>{t('monthly.tasksEverFinished')}</span>
+                    <span className="text-2xl font-bold" style={{ color: 'var(--color-teal)' }}>{completedTotal}</span>
+                    <span className="text-[11px] mt-0.5 text-center" style={{ color: 'var(--color-text-muted)' }}>{t('monthly.tasksEverFinished')}</span>
                   </div>
                   <div
                     className="flex flex-col items-center p-3 rounded-2xl"
-                    style={{ background: '#1E2136', border: '1px solid rgba(123,114,255,0.12)' }}
+                    style={{ background: 'var(--color-surface-card)', border: '1px solid rgba(123,114,255,0.12)' }}
                   >
-                    <span className="text-2xl font-bold" style={{ color: '#7B72FF' }}>{Math.max(currentStreak, longestStreak)}</span>
-                    <span className="text-[11px] mt-0.5 text-center" style={{ color: '#8B8BA7' }}>{t('monthly.longestStreak')} 🔥</span>
+                    <span className="text-2xl font-bold" style={{ color: 'var(--color-primary)' }}>{Math.max(currentStreak, longestStreak)}</span>
+                    <span className="text-[11px] mt-0.5 text-center" style={{ color: 'var(--color-text-muted)' }}>{t('monthly.longestStreak')} 🔥</span>
                   </div>
                 </div>
 
@@ -253,7 +253,7 @@ export function MonthlyReflection({ onDismiss }: Props) {
                   <button
                     onClick={() => setStep('intention')}
                     className="w-full py-4 rounded-2xl font-semibold text-base"
-                    style={{ background: '#4ECDC4', color: '#0F1117' }}
+                    style={{ background: 'var(--color-teal)', color: '#0F1117' }}
                     aria-label="Set monthly intention"
                   >
                     {t('monthly.setIntention', { month: monthName })}
@@ -261,7 +261,7 @@ export function MonthlyReflection({ onDismiss }: Props) {
                   <button
                     onClick={handleDismiss}
                     className="w-full py-3 text-sm"
-                    style={{ color: '#8B8BA7' }}
+                    style={{ color: 'var(--color-text-muted)' }}
                     aria-label="Skip monthly reflection"
                   >
                     {t('monthly.skipJumpIn')}
@@ -282,10 +282,10 @@ export function MonthlyReflection({ onDismiss }: Props) {
               >
                 <div className="text-center">
                   <p className="text-4xl mb-3">🌅</p>
-                  <h2 className="text-xl font-semibold" style={{ color: '#E8E8F0' }}>
+                  <h2 className="text-xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>
                     {t('monthly.oneWord', { month: monthName })}
                   </h2>
-                  <p className="text-sm mt-2" style={{ color: '#8B8BA7' }}>
+                  <p className="text-sm mt-2" style={{ color: 'var(--color-text-muted)' }}>
                     {t('monthly.whatFeel')}
                   </p>
                 </div>
@@ -298,9 +298,9 @@ export function MonthlyReflection({ onDismiss }: Props) {
                   autoFocus
                   className="w-full rounded-2xl px-4 py-3 text-base text-center outline-none transition-all duration-200"
                   style={{
-                    background: '#1E2136',
+                    background: 'var(--color-surface-card)',
                     border: '1px solid rgba(255,255,255,0.06)',
-                    color: '#E8E8F0',
+                    color: 'var(--color-text-primary)',
                     caretColor: '#4ECDC4',
                   }}
                   onFocus={e => { e.currentTarget.style.borderColor = '#4ECDC4' }}
@@ -317,9 +317,9 @@ export function MonthlyReflection({ onDismiss }: Props) {
                       aria-label={`Set intention: ${s.split(' ')[0]}`}
                       className="text-xs px-3 py-1.5 rounded-xl transition-all duration-150"
                       style={{
-                        background: intention.startsWith(s.split(' ')[0]) ? 'rgba(78,205,196,0.15)' : '#1E2136',
-                        border: `1px solid ${intention.startsWith(s.split(' ')[0]) ? '#4ECDC4' : 'rgba(255,255,255,0.06)'}`,
-                        color: intention.startsWith(s.split(' ')[0]) ? '#4ECDC4' : '#8B8BA7',
+                        background: intention.startsWith(s.split(' ')[0]) ? 'rgba(78,205,196,0.15)' : 'var(--color-surface-card)',
+                        border: `1px solid ${intention.startsWith(s.split(' ')[0]) ? 'var(--color-teal)' : 'var(--color-border-subtle)'}`,
+                        color: intention.startsWith(s.split(' ')[0]) ? 'var(--color-teal)' : 'var(--color-text-muted)',
                       }}
                     >
                       {s}
@@ -332,8 +332,8 @@ export function MonthlyReflection({ onDismiss }: Props) {
                     onClick={() => setStep('close')}
                     className="w-full py-4 rounded-2xl font-semibold text-base transition-all duration-200"
                     style={{
-                      background: intention.trim() ? '#4ECDC4' : '#252840',
-                      color: intention.trim() ? '#0F1117' : '#8B8BA7',
+                      background: intention.trim() ? 'var(--color-teal)' : 'var(--color-surface-raised)',
+                      color: intention.trim() ? 'var(--color-bg)' : 'var(--color-text-muted)',
                     }}
                     aria-label="Set monthly intention"
                   >
@@ -342,7 +342,7 @@ export function MonthlyReflection({ onDismiss }: Props) {
                   <button
                     onClick={() => setStep('close')}
                     className="w-full py-3 text-sm"
-                    style={{ color: '#8B8BA7' }}
+                    style={{ color: 'var(--color-text-muted)' }}
                     aria-label="Skip monthly reflection"
                   >
                     Skip
@@ -373,12 +373,12 @@ export function MonthlyReflection({ onDismiss }: Props) {
                     className="px-5 py-2.5 rounded-2xl"
                     style={{ background: 'rgba(78,205,196,0.10)', border: '1px solid rgba(78,205,196,0.20)' }}
                   >
-                    <p className="text-sm" style={{ color: '#4ECDC4' }}>
+                    <p className="text-sm" style={{ color: 'var(--color-teal)' }}>
                       {t('monthly.monthIntention', { month: monthName })} <strong>{intention.trim()}</strong>
                     </p>
                   </div>
                 )}
-                <p className="text-xl font-medium leading-relaxed" style={{ color: '#E8E8F0' }}>
+                <p className="text-xl font-medium leading-relaxed" style={{ color: 'var(--color-text-primary)' }}>
                   {t(closingKey)}
                 </p>
                 <p className="text-xs" style={{ color: '#5A5B72' }}>{t('monthly.closingMoment')}</p>

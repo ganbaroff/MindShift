@@ -80,7 +80,7 @@ export const WeeklyPlanning = memo(function WeeklyPlanning({ onDismiss }: Weekly
             style={{
               width: i === step ? 20 : 6,
               height: 6,
-              background: i <= step ? '#7B72FF' : '#252840',
+              background: i <= step ? 'var(--color-primary)' : 'var(--color-surface-raised)',
             }}
           />
         ))}
@@ -98,10 +98,10 @@ export const WeeklyPlanning = memo(function WeeklyPlanning({ onDismiss }: Weekly
             className="w-full max-w-xs text-center"
           >
             <div className="text-5xl mb-5">🌅</div>
-            <h2 className="text-2xl font-bold mb-2" style={{ color: '#E8E8F0' }}>
+            <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
               {t('weekly.newWeek')}
             </h2>
-            <p className="text-sm leading-relaxed mb-8" style={{ color: '#8B8BA7' }}>
+            <p className="text-sm leading-relaxed mb-8" style={{ color: 'var(--color-text-muted)' }}>
               {recapMsg}
             </p>
 
@@ -109,18 +109,18 @@ export const WeeklyPlanning = memo(function WeeklyPlanning({ onDismiss }: Weekly
             <div className="flex gap-3 mb-8">
               <div
                 className="flex-1 rounded-2xl p-3 text-center"
-                style={{ background: '#1E2136', border: '1px solid rgba(123,114,255,0.12)' }}
+                style={{ background: 'var(--color-surface-card)', border: '1px solid rgba(123,114,255,0.12)' }}
               >
-                <p className="text-2xl font-bold" style={{ color: '#7B72FF' }}>{completedTotal}</p>
-                <p className="text-[11px] mt-0.5" style={{ color: '#8B8BA7' }}>{t('weekly.tasksDone')}</p>
+                <p className="text-2xl font-bold" style={{ color: 'var(--color-primary)' }}>{completedTotal}</p>
+                <p className="text-[11px] mt-0.5" style={{ color: 'var(--color-text-muted)' }}>{t('weekly.tasksDone')}</p>
               </div>
               {currentStreak >= 2 && (
                 <div
                   className="flex-1 rounded-2xl p-3 text-center"
-                  style={{ background: '#1E2136', border: '1px solid rgba(78,205,196,0.12)' }}
+                  style={{ background: 'var(--color-surface-card)', border: '1px solid rgba(78,205,196,0.12)' }}
                 >
-                  <p className="text-2xl font-bold" style={{ color: '#4ECDC4' }}>{currentStreak}</p>
-                  <p className="text-[11px] mt-0.5" style={{ color: '#8B8BA7' }}>{t('weekly.dayStreak')}</p>
+                  <p className="text-2xl font-bold" style={{ color: 'var(--color-teal)' }}>{currentStreak}</p>
+                  <p className="text-[11px] mt-0.5" style={{ color: 'var(--color-text-muted)' }}>{t('weekly.dayStreak')}</p>
                 </div>
               )}
             </div>
@@ -159,10 +159,10 @@ export const WeeklyPlanning = memo(function WeeklyPlanning({ onDismiss }: Weekly
             transition={transition()}
             className="w-full max-w-xs"
           >
-            <h2 className="text-xl font-bold mb-1 text-center" style={{ color: '#E8E8F0' }}>
+            <h2 className="text-xl font-bold mb-1 text-center" style={{ color: 'var(--color-text-primary)' }}>
               {t('weekly.weekFocus')}
             </h2>
-            <p className="text-[13px] mb-6 text-center" style={{ color: '#8B8BA7' }}>
+            <p className="text-[13px] mb-6 text-center" style={{ color: 'var(--color-text-muted)' }}>
               {t('weekly.noWrongAnswers')}
             </p>
 
@@ -176,14 +176,14 @@ export const WeeklyPlanning = memo(function WeeklyPlanning({ onDismiss }: Weekly
                   aria-label={`Intention: ${t(labelKey)}`}
                   className="w-full text-left p-3.5 rounded-2xl flex items-center gap-3"
                   style={{
-                    background: chosen === key ? 'rgba(123,114,255,0.15)' : '#1E2136',
+                    background: chosen === key ? 'rgba(123,114,255,0.15)' : 'var(--color-surface-card)',
                     border: `1px solid ${chosen === key ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
                   }}
                 >
                   <span className="text-[26px]">{emoji}</span>
                   <div className="min-w-0">
-                    <p className="text-[14px] font-semibold" style={{ color: chosen === key ? '#C8C0FF' : '#E8E8F0' }}>{t(labelKey)}</p>
-                    <p className="text-[11px] mt-0.5" style={{ color: '#8B8BA7' }}>{t(descKey)}</p>
+                    <p className="text-[14px] font-semibold" style={{ color: chosen === key ? 'var(--color-primary-light)' : 'var(--color-text-primary)' }}>{t(labelKey)}</p>
+                    <p className="text-[11px] mt-0.5" style={{ color: 'var(--color-text-muted)' }}>{t(descKey)}</p>
                   </div>
                 </motion.button>
               ))}
@@ -213,10 +213,10 @@ export const WeeklyPlanning = memo(function WeeklyPlanning({ onDismiss }: Weekly
             <div className="text-5xl mb-4">
               {INTENTIONS.find(i => i.key === chosen)?.emoji ?? '🌱'}
             </div>
-            <h2 className="text-xl font-bold mb-2" style={{ color: '#E8E8F0' }}>
+            <h2 className="text-xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
               {INTENTIONS.find(i => i.key === chosen) ? t(INTENTIONS.find(i => i.key === chosen)!.labelKey) : t('weekly.intentionSet')}
             </h2>
-            <p className="text-sm leading-relaxed mb-8" style={{ color: '#8B8BA7' }}>
+            <p className="text-sm leading-relaxed mb-8" style={{ color: 'var(--color-text-muted)' }}>
               {t('weekly.intentionVisible')}
             </p>
 

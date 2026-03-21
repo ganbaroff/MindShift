@@ -132,7 +132,7 @@ export function BreathworkRitual({ onComplete, onSkip }: BreathworkRitualProps) 
             opacity: 0.15,
           }}
           transition={{ duration: phase === 'inhale' ? INHALE_MS / 1000 : EXHALE_MS / 1000, ease: 'easeInOut' }}
-          style={{ width: 160, height: 160, backgroundColor: '#7B72FF' }}
+          style={{ width: 160, height: 160, backgroundColor: 'var(--color-primary)' }}
         />
         {/* Core orb */}
         <motion.div
@@ -163,10 +163,10 @@ export function BreathworkRitual({ onComplete, onSkip }: BreathworkRitualProps) 
           exit={{ opacity: 0, y: -8 }}
           transition={{ duration: 0.25 }}
         >
-          <p className="text-[22px] font-semibold" style={{ color: '#E8E8F0' }}>
+          <p className="text-[22px] font-semibold" style={{ color: 'var(--color-text-primary)' }}>
             {phase === 'inhale' ? t('breathwork.breatheIn') : t('breathwork.breatheOut')}
           </p>
-          <p className="text-[14px] mt-1" style={{ color: '#8B8BA7' }}>
+          <p className="text-[14px] mt-1" style={{ color: 'var(--color-text-muted)' }}>
             {done ? `${t('breathwork.readyToFocus')} 🎯` : t('breathwork.breathCount', { current: cycle + 1, total: CYCLES })}
           </p>
         </motion.div>
@@ -178,7 +178,7 @@ export function BreathworkRitual({ onComplete, onSkip }: BreathworkRitualProps) 
           className="h-full rounded-full"
           animate={{ width: `${progress * 100}%` }}
           transition={{ duration: 0.3 }}
-          style={{ backgroundColor: '#7B72FF' }}
+          style={{ backgroundColor: 'var(--color-primary)' }}
         />
       </div>
 
@@ -187,7 +187,7 @@ export function BreathworkRitual({ onComplete, onSkip }: BreathworkRitualProps) 
         whileTap={{ scale: 0.97 }}
         onClick={handleSkip}
         className="mt-10 text-[13px] px-6 py-2 rounded-full"
-        style={{ color: '#8B8BA7', backgroundColor: 'rgba(255,255,255,0.05)' }}
+        style={{ color: 'var(--color-text-muted)', backgroundColor: 'rgba(255,255,255,0.05)' }}
         aria-label="Skip breathing ritual"
       >
         {t('breathwork.skip')}

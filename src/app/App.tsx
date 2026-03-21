@@ -59,7 +59,7 @@ export default function App() {
     nowPool, nextPool, somedayPool,
     onboardingCompleted, setBurnoutScore, completedTotal, energyLevel,
     flexiblePauseUntil, setFlexiblePauseUntil,
-    reducedStimulation,
+    reducedStimulation, userTheme,
     shutdownShownDate, setShutdownShownDate,
     monthlyReflectionShownMonth, setMonthlyReflectionShownMonth,
     weeklyPlanShownWeek, setWeeklyPlanShownWeek,
@@ -75,6 +75,14 @@ export default function App() {
       reducedStimulation ? 'calm' : 'normal'
     )
   }, [reducedStimulation])
+
+  // ── Apply theme to DOM ──────────────────────────────────────────────────────
+  useEffect(() => {
+    const resolved = userTheme === 'system'
+      ? (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
+      : userTheme
+    document.documentElement.setAttribute('data-theme', resolved)
+  }, [userTheme])
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -263,9 +271,9 @@ export default function App() {
         position="top-center"
         toastOptions={{
           style: {
-            background: '#1E2136',
+            background: 'var(--color-surface-card)',
             border: '1px solid rgba(255,255,255,0.06)',
-            color: '#E8E8F0',
+            color: 'var(--color-text-primary)',
             fontSize: '14px',
           },
         }}
@@ -339,7 +347,7 @@ export default function App() {
               role="status"
               aria-label="Rest mode active"
             >
-              <p className="text-xs font-medium" style={{ color: '#E8E8F0' }}>
+              <p className="text-xs font-medium" style={{ color: 'var(--color-text-primary)' }}>
                 🌙 Rest mode active until {flexPauseUntilLabel}
               </p>
               <button
@@ -348,7 +356,7 @@ export default function App() {
                 style={{
                   background: 'rgba(123,114,255,0.15)',
                   border: '1px solid rgba(123,114,255,0.35)',
-                  color: '#7B72FF',
+                  color: 'var(--color-primary)',
                 }}
               >
                 Wake up early
@@ -421,10 +429,10 @@ export default function App() {
 function RouteError({ label }: { label: string }) {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen gap-4 px-6 text-center">
-      <p className="text-base font-semibold" style={{ color: '#E8E8F0' }}>{label} had a hiccup</p>
-      <p className="text-sm" style={{ color: '#8B8BA7' }}>Don't worry — your data is safe.</p>
+      <p className="text-base font-semibold" style={{ color: 'var(--color-text-primary)' }}>{label} had a hiccup</p>
+      <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>Don't worry — your data is safe.</p>
       <a href="/" className="px-5 py-2.5 rounded-xl text-sm font-semibold"
-        style={{ background: 'rgba(123,114,255,0.15)', border: '1.5px solid #7B72FF', color: '#7B72FF' }}>
+        style={{ background: 'rgba(123,114,255,0.15)', border: '1.5px solid var(--color-primary)', color: 'var(--color-primary)' }}>
         Go home
       </a>
     </div>

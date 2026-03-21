@@ -168,10 +168,10 @@ export function ShutdownRitual({ onDismiss }: Props) {
               >
                 <div className="text-center">
                   <p className="text-4xl mb-3">🌙</p>
-                  <h2 className="text-xl font-semibold" style={{ color: '#E8E8F0' }}>
+                  <h2 className="text-xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>
                     {t('shutdown.windDown')}
                   </h2>
-                  <p className="text-sm mt-2" style={{ color: '#8B8BA7' }}>
+                  <p className="text-sm mt-2" style={{ color: 'var(--color-text-muted)' }}>
                     {todayWins.length > 0
                       ? `${t(todayWins.length !== 1 ? 'shutdown.finishedThingsPlural' : 'shutdown.finishedThings', { count: todayWins.length })} 💙`
                       : `${t('shutdown.openedApp')} 💙`}
@@ -186,7 +186,7 @@ export function ShutdownRitual({ onDismiss }: Props) {
                         className="flex items-center gap-2 px-3 py-2 rounded-xl"
                         style={{ background: 'rgba(78,205,196,0.06)', border: '1px solid rgba(78,205,196,0.12)' }}
                       >
-                        <span style={{ color: '#4ECDC4' }}>✓</span>
+                        <span style={{ color: 'var(--color-teal)' }}>✓</span>
                         <span className="text-sm" style={{ color: '#C8C8E0' }}>{task.title}</span>
                       </div>
                     ))}
@@ -202,7 +202,7 @@ export function ShutdownRitual({ onDismiss }: Props) {
                   <button
                     onClick={() => setStep('tomorrow')}
                     className="w-full py-4 rounded-2xl font-semibold text-base transition-all duration-200"
-                    style={{ background: '#4ECDC4', color: '#0F1117' }}
+                    style={{ background: 'var(--color-teal)', color: '#0F1117' }}
                     aria-label="Set tomorrow's task"
                   >
                     {t('shutdown.setTomorrowFocus')}
@@ -210,7 +210,7 @@ export function ShutdownRitual({ onDismiss }: Props) {
                   <button
                     onClick={handleSkip}
                     className="w-full py-3 text-sm"
-                    style={{ color: '#8B8BA7' }}
+                    style={{ color: 'var(--color-text-muted)' }}
                     aria-label="Skip shutdown ritual"
                   >
                     {t('shutdown.skipClose')}
@@ -231,10 +231,10 @@ export function ShutdownRitual({ onDismiss }: Props) {
               >
                 <div className="text-center">
                   <p className="text-4xl mb-3">🌅</p>
-                  <h2 className="text-xl font-semibold" style={{ color: '#E8E8F0' }}>
+                  <h2 className="text-xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>
                     {t('shutdown.oneThingTomorrow')}
                   </h2>
-                  <p className="text-sm mt-2" style={{ color: '#8B8BA7' }}>
+                  <p className="text-sm mt-2" style={{ color: 'var(--color-text-muted)' }}>
                     {t('shutdown.waitingInNext')}
                   </p>
                 </div>
@@ -253,9 +253,9 @@ export function ShutdownRitual({ onDismiss }: Props) {
                   autoFocus
                   className="w-full resize-none rounded-2xl px-4 py-3 text-base outline-none transition-all duration-200"
                   style={{
-                    background: '#1E2136',
+                    background: 'var(--color-surface-card)',
                     border: '1px solid rgba(255,255,255,0.06)',
-                    color: '#E8E8F0',
+                    color: 'var(--color-text-primary)',
                     caretColor: '#4ECDC4',
                   }}
                   onFocus={e => { e.currentTarget.style.borderColor = '#4ECDC4' }}
@@ -269,8 +269,8 @@ export function ShutdownRitual({ onDismiss }: Props) {
                     aria-label="Save tomorrow's task and rest"
                     className="w-full py-4 rounded-2xl font-semibold text-base transition-all duration-200"
                     style={{
-                      background: tomorrowInput.trim() ? '#4ECDC4' : '#252840',
-                      color: tomorrowInput.trim() ? '#0F1117' : '#8B8BA7',
+                      background: tomorrowInput.trim() ? 'var(--color-teal)' : 'var(--color-surface-raised)',
+                      color: tomorrowInput.trim() ? 'var(--color-bg)' : 'var(--color-text-muted)',
                       cursor: tomorrowInput.trim() ? 'pointer' : 'not-allowed',
                     }}
                   >
@@ -279,7 +279,7 @@ export function ShutdownRitual({ onDismiss }: Props) {
                   <button
                     onClick={() => setStep('goodnight')}
                     className="w-full py-3 text-sm"
-                    style={{ color: '#8B8BA7' }}
+                    style={{ color: 'var(--color-text-muted)' }}
                     aria-label="Skip and rest"
                   >
                     {t('shutdown.skipRest')}
@@ -305,7 +305,7 @@ export function ShutdownRitual({ onDismiss }: Props) {
                 >
                   🌙
                 </motion.p>
-                <p className="text-xl font-medium leading-relaxed" style={{ color: '#E8E8F0' }}>
+                <p className="text-xl font-medium leading-relaxed" style={{ color: 'var(--color-text-primary)' }}>
                   {t(goodnightKey)}
                 </p>
                 <p className="text-xs" style={{ color: '#5A5B72' }}>

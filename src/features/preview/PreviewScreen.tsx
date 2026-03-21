@@ -16,11 +16,11 @@ const DEMO_DURATION = 30 // seconds
 const PHASE_THRESHOLDS = { release: 10, flow: 20 } // simplified for demo
 
 const PHASE_COLORS: Record<SessionPhase, string> = {
-  idle:     '#252840',
-  struggle: '#7B72FF',
-  release:  '#4ECDC4',
-  flow:     '#4ECDC4',
-  recovery: '#F59E0B',
+  idle:     'var(--color-surface-raised)',
+  struggle: 'var(--color-primary)',
+  release:  'var(--color-teal)',
+  flow:     'var(--color-teal)',
+  recovery: 'var(--color-gold)',
 }
 
 const PHASE_LABELS: Record<string, { label: string; desc: string }> = {
@@ -88,7 +88,7 @@ export default function PreviewScreen() {
   return (
     <div
       className="fixed inset-0 flex flex-col items-center overflow-y-auto"
-      style={{ background: '#0F1117' }}
+      style={{ background: 'var(--color-bg)' }}
     >
       {/* Ambient glow */}
       <motion.div
@@ -110,8 +110,8 @@ export default function PreviewScreen() {
           animate={{ opacity: 1, y: 0 }}
           transition={t()}
         >
-          <h1 className="text-xl font-bold" style={{ color: '#E8E8F0' }}>MindShift</h1>
-          <p className="text-[11px] mt-0.5" style={{ color: '#7B72FF', letterSpacing: '0.08em' }}>
+          <h1 className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>MindShift</h1>
+          <p className="text-[11px] mt-0.5" style={{ color: 'var(--color-primary)', letterSpacing: '0.08em' }}>
             Try it — 30 seconds
           </p>
         </motion.div>
@@ -178,7 +178,7 @@ export default function PreviewScreen() {
             <p className="text-sm font-semibold" style={{ color: phaseColor }}>
               {PHASE_LABELS[phase]?.label ?? ''}
             </p>
-            <p className="text-xs mt-1" style={{ color: '#8B8BA7' }}>
+            <p className="text-xs mt-1" style={{ color: 'var(--color-text-muted)' }}>
               {PHASE_LABELS[phase]?.desc ?? ''}
             </p>
           </motion.div>
@@ -193,9 +193,9 @@ export default function PreviewScreen() {
               exit={{ opacity: 0, y: -8 }}
               transition={t()}
               className="w-full rounded-2xl p-4"
-              style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)' }}
+              style={{ background: 'var(--color-surface-card)', border: '1px solid rgba(255,255,255,0.06)' }}
             >
-              <p className="text-xs text-center mb-3" style={{ color: '#8B8BA7' }}>
+              <p className="text-xs text-center mb-3" style={{ color: 'var(--color-text-muted)' }}>
                 How's your energy right now?
               </p>
               <div className="flex justify-center gap-3">
@@ -205,7 +205,7 @@ export default function PreviewScreen() {
                     onClick={() => setEnergy(level)}
                     className="w-11 h-11 rounded-full text-xl flex items-center justify-center transition-all"
                     style={{
-                      background: energy === level ? 'rgba(78,205,196,0.15)' : '#252840',
+                      background: energy === level ? 'rgba(78,205,196,0.15)' : 'var(--color-surface-raised)',
                       border: `1.5px solid ${energy === level ? '#4ECDC4' : 'rgba(255,255,255,0.06)'}`,
                     }}
                     aria-label={`Energy level ${level}`}
@@ -228,7 +228,7 @@ export default function PreviewScreen() {
               className="rounded-2xl px-4 py-3 text-center"
               style={{ background: 'rgba(78,205,196,0.08)', border: '1px solid rgba(78,205,196,0.15)' }}
             >
-              <p className="text-sm" style={{ color: '#4ECDC4' }}>
+              <p className="text-sm" style={{ color: 'var(--color-teal)' }}>
                 {energy <= 2 ? "Low energy? MindShift adapts — fewer tasks, gentler pace."
                   : energy >= 4 ? "High energy! MindShift will match your momentum."
                   : "MindShift adjusts to exactly where you are."}
@@ -247,14 +247,14 @@ export default function PreviewScreen() {
           <button
             onClick={handleContinue}
             className="w-full py-4 rounded-2xl font-semibold text-base"
-            style={{ background: '#7B72FF', color: '#FFFFFF' }}
+            style={{ background: 'var(--color-primary)', color: '#FFFFFF' }}
           >
             Save your progress →
           </button>
           <button
             onClick={handleSkipToApp}
             className="w-full py-3 text-sm"
-            style={{ color: '#8B8BA7' }}
+            style={{ color: 'var(--color-text-muted)' }}
           >
             Try without account
           </button>

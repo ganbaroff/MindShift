@@ -93,7 +93,7 @@ export const NatureBuffer = memo(function NatureBuffer({
   return (
     <div
       className="flex flex-col items-center justify-center min-h-screen px-6 text-center"
-      style={{ background: '#0F1117' }}
+      style={{ background: 'var(--color-bg)' }}
     >
       <motion.div
         initial={shouldAnimate ? { opacity: 0, scale: 0.9 } : {}}
@@ -102,21 +102,21 @@ export const NatureBuffer = memo(function NatureBuffer({
         className="flex flex-col items-center"
       >
         <div className="text-5xl mb-6">🌿</div>
-        <h2 className="text-2xl font-bold mb-2" style={{ color: '#4ECDC4' }}>
+        <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--color-teal)' }}>
           {t('focus.breathe')}
         </h2>
-        <p className="text-sm mb-8 max-w-xs leading-relaxed" style={{ color: '#8B8BA7' }}>
+        <p className="text-sm mb-8 max-w-xs leading-relaxed" style={{ color: 'var(--color-text-muted)' }}>
           {t(getClosingMessageKey(emotionalReactivity, sessionMinutes, sessionPhase))}
         </p>
 
         <div
           className="px-8 py-4 rounded-2xl mb-6"
-          style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)' }}
+          style={{ background: 'var(--color-surface-card)', border: '1px solid rgba(255,255,255,0.06)' }}
         >
-          <p className="font-mono text-3xl font-bold" style={{ color: '#4ECDC4' }}>
+          <p className="font-mono text-3xl font-bold" style={{ color: 'var(--color-teal)' }}>
             {bm}:{bs.toString().padStart(2, '0')}
           </p>
-          <p className="text-xs mt-1" style={{ color: '#8B8BA7' }}>{t('focus.untilNext')}</p>
+          <p className="text-xs mt-1" style={{ color: 'var(--color-text-muted)' }}>{t('focus.untilNext')}</p>
         </div>
 
         {/* Hyperfocus Autopsy — B-6: shown when session ≥ 45 min */}
@@ -127,9 +127,9 @@ export const NatureBuffer = memo(function NatureBuffer({
               animate={{ opacity: 1, y: 0 }}
               transition={transition()}
               className="w-full max-w-xs mb-4 p-3 rounded-2xl"
-              style={{ background: '#1E2136', border: '1px solid rgba(123,114,255,0.15)' }}
+              style={{ background: 'var(--color-surface-card)', border: '1px solid rgba(123,114,255,0.15)' }}
             >
-              <p className="text-xs font-medium mb-1 text-center" style={{ color: '#7B72FF' }}>
+              <p className="text-xs font-medium mb-1 text-center" style={{ color: 'var(--color-primary)' }}>
                 {t('focus.autopsyTitle', { min: sessionMinutes })}
               </p>
               <p className="text-[11px] mb-3 text-center" style={{ color: '#5A5B72' }}>
@@ -142,9 +142,9 @@ export const NatureBuffer = memo(function NatureBuffer({
                     onClick={() => { setAutopsyPick(key); onAutopsyPick?.(key) }}
                     className="flex-1 flex flex-col items-center gap-1 py-2 rounded-xl text-xs transition-all duration-150"
                     style={{
-                      background: autopsyPick === key ? 'rgba(123,114,255,0.18)' : '#252840',
-                      border: `1px solid ${autopsyPick === key ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
-                      color: autopsyPick === key ? '#C8C0FF' : '#8B8BA7',
+                      background: autopsyPick === key ? 'rgba(123,114,255,0.18)' : 'var(--color-surface-raised)',
+                      border: `1px solid ${autopsyPick === key ? 'var(--color-primary)' : 'rgba(255,255,255,0.06)'}`,
+                      color: autopsyPick === key ? '#C8C0FF' : 'var(--color-text-muted)',
                     }}
                     aria-pressed={autopsyPick === key}
                   >
@@ -161,9 +161,9 @@ export const NatureBuffer = memo(function NatureBuffer({
         {!postEnergyLogged && (
           <div
             className="w-full max-w-xs mb-4 p-3 rounded-2xl"
-            style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)' }}
+            style={{ background: 'var(--color-surface-card)', border: '1px solid rgba(255,255,255,0.06)' }}
           >
-            <p className="text-xs font-medium mb-2 text-center" style={{ color: '#8B8BA7' }}>
+            <p className="text-xs font-medium mb-2 text-center" style={{ color: 'var(--color-text-muted)' }}>
               {t('focus.energyCheckIn')}
             </p>
             <div className="flex justify-between gap-1">
@@ -174,11 +174,11 @@ export const NatureBuffer = memo(function NatureBuffer({
                     key={level}
                     onClick={() => onSetEnergyLevel(level)}
                     className="flex-1 flex flex-col items-center gap-0.5 py-2 rounded-xl text-xs transition-all duration-150 min-h-[52px]"
-                    style={{ background: '#252840', border: '1px solid rgba(255,255,255,0.06)' }}
+                    style={{ background: 'var(--color-surface-raised)', border: '1px solid rgba(255,255,255,0.06)' }}
                     aria-label={`Post-session energy: ${label}`}
                   >
                     <span className="text-lg leading-none">{ENERGY_EMOJI[i]}</span>
-                    <span className="text-[9px]" style={{ color: '#8B8BA7' }}>{label}</span>
+                    <span className="text-[9px]" style={{ color: 'var(--color-text-muted)' }}>{label}</span>
                   </button>
                 )
               })}
@@ -195,7 +195,7 @@ export const NatureBuffer = memo(function NatureBuffer({
           style={{
             background: 'transparent',
             border: '1px solid rgba(255,255,255,0.06)',
-            color: '#8B8BA7',
+            color: 'var(--color-text-muted)',
           }}
           aria-label="Skip nature buffer"
         >
@@ -231,14 +231,14 @@ function ParkedThoughtsNudge({ count }: { count: number }) {
     >
       <span className="text-xl">💭</span>
       <div className="flex-1">
-        <p className="text-[13px] font-medium" style={{ color: '#4ECDC4' }}>
+        <p className="text-[13px] font-medium" style={{ color: 'var(--color-teal)' }}>
           {label}
         </p>
-        <p className="text-[11px]" style={{ color: '#8B8BA7' }}>
+        <p className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>
           {t('focus.tapToSeeSomeday')}
         </p>
       </div>
-      <span className="text-sm" style={{ color: '#8B8BA7' }}>→</span>
+      <span className="text-sm" style={{ color: 'var(--color-text-muted)' }}>→</span>
     </motion.button>
   )
 }
@@ -271,7 +271,7 @@ export const RecoveryLock = memo(function RecoveryLock({
     // We strongly suggest a break, but allow bypass for hyperfocus states.
     <div
       className="flex flex-col items-center justify-center min-h-screen px-6 text-center"
-      style={{ background: '#0F1117' }}
+      style={{ background: 'var(--color-bg)' }}
     >
       <motion.div
         initial={shouldAnimate ? { opacity: 0, scale: 0.9 } : {}}
@@ -280,33 +280,33 @@ export const RecoveryLock = memo(function RecoveryLock({
         className="flex flex-col items-center"
       >
         <div className="text-5xl mb-6">🌿</div>
-        <h2 className="text-2xl font-bold mb-2" style={{ color: '#4ECDC4' }}>
+        <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--color-teal)' }}>
           {t('focus.recoveryTitle')}
         </h2>
-        <p className="text-sm mb-6 max-w-xs leading-relaxed" style={{ color: '#8B8BA7' }}>
+        <p className="text-sm mb-6 max-w-xs leading-relaxed" style={{ color: 'var(--color-text-muted)' }}>
           {t('focus.recoveryDesc')}
         </p>
 
         {/* Gentle suggestions */}
         <div
           className="w-full max-w-xs mb-6 p-4 rounded-2xl text-left"
-          style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)' }}
+          style={{ background: 'var(--color-surface-card)', border: '1px solid rgba(255,255,255,0.06)' }}
         >
-          <p className="text-xs font-medium mb-3" style={{ color: '#8B8BA7' }}>{t('focus.trySuggestions')}</p>
+          <p className="text-xs font-medium mb-3" style={{ color: 'var(--color-text-muted)' }}>{t('focus.trySuggestions')}</p>
           {suggestions.map(s => (
-            <p key={s} className="text-sm mb-1.5" style={{ color: '#E8E8F0' }}>· {s}</p>
+            <p key={s} className="text-sm mb-1.5" style={{ color: 'var(--color-text-primary)' }}>· {s}</p>
           ))}
         </div>
 
         {/* Timer — informational, not a gate */}
         <div
           className="px-8 py-3 rounded-2xl mb-6"
-          style={{ background: '#1E2136', border: '1px solid rgba(255,255,255,0.06)' }}
+          style={{ background: 'var(--color-surface-card)', border: '1px solid rgba(255,255,255,0.06)' }}
         >
-          <p className="font-mono text-2xl font-bold" style={{ color: '#4ECDC4' }}>
+          <p className="font-mono text-2xl font-bold" style={{ color: 'var(--color-teal)' }}>
             {rm}:{rs.toString().padStart(2, '0')}
           </p>
-          <p className="text-xs mt-1" style={{ color: '#8B8BA7' }}>{t('focus.suggestedRest')}</p>
+          <p className="text-xs mt-1" style={{ color: 'var(--color-text-muted)' }}>{t('focus.suggestedRest')}</p>
         </div>
 
         {/* Continue anyway — hyperfocus support */}
@@ -316,7 +316,7 @@ export const RecoveryLock = memo(function RecoveryLock({
           style={{
             background: 'transparent',
             border: '1px solid rgba(255,255,255,0.06)',
-            color: '#8B8BA7',
+            color: 'var(--color-text-muted)',
           }}
           aria-label="Bypass recovery suggestion"
         >

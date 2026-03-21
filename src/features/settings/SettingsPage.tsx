@@ -23,6 +23,7 @@ const audioPresetKeys: { key: AudioPreset; emoji: string; labelKey: string; desc
   { key: 'nature',emoji: '🌿', labelKey: 'settings.soundNature', descKey: 'settings.soundNatureDesc' },
   { key: 'lofi',  emoji: '🎵', labelKey: 'settings.soundLofi',  descKey: 'settings.soundLofiDesc' },
   { key: 'gamma', emoji: '⚡', labelKey: 'settings.soundGamma',  descKey: 'settings.soundGammaDesc' },
+  { key: 'gamma60', emoji: '🧠', labelKey: 'settings.soundGamma60', descKey: 'settings.soundGamma60Desc' },
 ];
 
 const modeChipKeys = [
@@ -197,16 +198,16 @@ export default function SettingsPage() {
 
   return (
     <PageTransition>
-    <div className="min-h-screen px-5 pb-36 pt-10" style={{ backgroundColor: '#0F1120' }}>
+    <div className="min-h-screen px-5 pb-36 pt-10" style={{ backgroundColor: 'var(--color-bg)' }}>
       <motion.div initial={shouldAnimate ? { opacity: 0, y: -8 } : false} animate={shouldAnimate ? { opacity: 1, y: 0 } : false}>
-        <h1 className="text-[24px] font-bold" style={{ color: '#E8E8F0' }}>{t('settings.title')}</h1>
-        <p className="text-[13px] mt-0.5" style={{ color: '#8B8BA7' }}>{email ?? t('settings.notSignedIn')}</p>
+        <h1 className="text-[24px] font-bold" style={{ color: 'var(--color-text-primary)' }}>{t('settings.title')}</h1>
+        <p className="text-[13px] mt-0.5" style={{ color: 'var(--color-text-muted)' }}>{email ?? t('settings.notSignedIn')}</p>
       </motion.div>
 
       <div className="space-y-3 mt-5">
         {/* Plan */}
-        <div className="rounded-2xl p-3" style={{ backgroundColor: '#1E2136' }}>
-          <p className="text-[15px]" style={{ color: '#E8E8F0' }}>🌱 {planLabel}</p>
+        <div className="rounded-2xl p-3" style={{ backgroundColor: 'var(--color-surface-card)' }}>
+          <p className="text-[15px]" style={{ color: 'var(--color-text-primary)' }}>🌱 {planLabel}</p>
         </div>
 
         {/* Language */}
@@ -232,8 +233,8 @@ export default function SettingsPage() {
                 }}
                 className="px-3 py-1.5 rounded-xl text-[13px] font-medium focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
                 style={{
-                  background: userLocale === code ? 'rgba(123,114,255,0.15)' : '#252840',
-                  color: userLocale === code ? '#7B72FF' : '#E8E8F0',
+                  background: userLocale === code ? 'rgba(123,114,255,0.15)' : 'var(--color-surface-raised)',
+                  color: userLocale === code ? 'var(--color-primary)' : 'var(--color-text-primary)',
                   border: userLocale === code ? '1px solid rgba(123,114,255,0.3)' : '1px solid transparent',
                 }}
               >
@@ -256,18 +257,15 @@ export default function SettingsPage() {
                 onClick={() => { setUserTheme(key); toast(`Theme: ${label}`) }}
                 className="flex-1 px-3 py-2 rounded-xl text-[13px] font-medium focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
                 style={{
-                  background: userTheme === key ? 'rgba(123,114,255,0.15)' : '#252840',
-                  color: userTheme === key ? '#7B72FF' : '#E8E8F0',
-                  border: userTheme === key ? '1px solid rgba(123,114,255,0.3)' : '1px solid transparent',
+                  background: userTheme === key ? 'var(--color-primary-alpha)' : 'var(--color-surface-raised)',
+                  color: userTheme === key ? 'var(--color-primary)' : 'var(--color-text-primary)',
+                  border: userTheme === key ? '1px solid var(--color-border-accent)' : '1px solid transparent',
                 }}
               >
                 {label}
               </button>
             ))}
           </div>
-          <p className="text-[11px] mt-1.5" style={{ color: '#8B8BA7' }}>
-            {t('settings.lightComingSoon')}
-          </p>
         </Section>
 
         {/* App Mode */}
@@ -277,7 +275,7 @@ export default function SettingsPage() {
               <Chip key={i} selected={mode === i} onClick={() => setAppMode(modeKeys[i])} emoji={c.emoji} label={t(c.labelKey)} />
             ))}
           </div>
-          <p className="text-[11px] mt-1.5" style={{ color: '#8B8BA7' }}>{t(modeChipKeys[mode]?.descKey ?? '')}</p>
+          <p className="text-[11px] mt-1.5" style={{ color: 'var(--color-text-muted)' }}>{t(modeChipKeys[mode]?.descKey ?? '')}</p>
         </Section>
 
         {/* Timer */}
@@ -287,12 +285,12 @@ export default function SettingsPage() {
               <Chip key={i} selected={timer === i} onClick={() => setTimerStyle(timerKeys[i])} emoji={c.emoji} label={t(c.labelKey)} />
             ))}
           </div>
-          <p className="text-[11px] mt-1.5" style={{ color: '#8B8BA7' }}>{t(timerChipKeys[timer]?.descKey ?? '')}</p>
+          <p className="text-[11px] mt-1.5" style={{ color: 'var(--color-text-muted)' }}>{t(timerChipKeys[timer]?.descKey ?? '')}</p>
         </Section>
 
         {/* Sound */}
         <Section label={t('settings.sound')}>
-          <p className="text-[11px] mb-2" style={{ color: '#8B8BA7' }}>
+          <p className="text-[11px] mb-2" style={{ color: 'var(--color-text-muted)' }}>
             {t('settings.soundPreviewHint')}
           </p>
           <div className="space-y-1.5">
@@ -307,30 +305,30 @@ export default function SettingsPage() {
                     onClick={() => handlePresetPreview(p.key)}
                     className="flex-1 flex items-center gap-2 h-10 rounded-xl px-3 text-left"
                     style={{
-                      backgroundColor: isPreviewing ? 'rgba(123,114,255,0.15)' : '#252840',
+                      backgroundColor: isPreviewing ? 'rgba(123,114,255,0.15)' : 'var(--color-surface-raised)',
                       borderWidth: isPreviewing ? 1.5 : 1,
                       borderStyle: 'solid',
-                      borderColor: isPreviewing ? '#7B72FF' : 'rgba(255,255,255,0.06)',
+                      borderColor: isPreviewing ? 'var(--color-primary)' : 'var(--color-border-subtle)',
                     }}
                     aria-label={`${isPreviewing ? 'Stop' : 'Preview'} ${label} noise`}
                     aria-pressed={isPreviewing}
                   >
                     <span className="text-[16px]">{p.emoji}</span>
                     <div className="flex-1">
-                      <p className="text-[13px] font-medium leading-none" style={{ color: isPreviewing ? '#7B72FF' : '#E8E8F0' }}>{label}</p>
-                      <p className="text-[10px] mt-0.5" style={{ color: '#8B8BA7' }}>{t(p.descKey)}</p>
+                      <p className="text-[13px] font-medium leading-none" style={{ color: isPreviewing ? 'var(--color-primary)' : 'var(--color-text-primary)' }}>{label}</p>
+                      <p className="text-[10px] mt-0.5" style={{ color: 'var(--color-text-muted)' }}>{t(p.descKey)}</p>
                     </div>
-                    {isPreviewing && <span className="text-[10px]" style={{ color: '#7B72FF' }}>▶ {t('settings.soundPlaying')}</span>}
+                    {isPreviewing && <span className="text-[10px]" style={{ color: 'var(--color-primary)' }}>▶ {t('settings.soundPlaying')}</span>}
                   </motion.button>
                   <motion.button
                     whileTap={shouldAnimate ? { scale: 0.9 } : undefined}
                     onClick={() => handleSetFocusAnchor(p.key)}
                     className="w-9 h-10 rounded-xl flex items-center justify-center text-[16px]"
                     style={{
-                      backgroundColor: isAnchor ? 'rgba(78,205,196,0.15)' : '#252840',
+                      backgroundColor: isAnchor ? 'rgba(78,205,196,0.15)' : 'var(--color-surface-raised)',
                       borderWidth: isAnchor ? 1.5 : 1,
                       borderStyle: 'solid',
-                      borderColor: isAnchor ? '#4ECDC4' : 'rgba(255,255,255,0.06)',
+                      borderColor: isAnchor ? 'var(--color-teal)' : 'var(--color-border-subtle)',
                     }}
                     aria-label={isAnchor ? `Remove ${label} as focus anchor` : `Set ${label} as focus anchor`}
                     aria-pressed={isAnchor}
@@ -344,8 +342,8 @@ export default function SettingsPage() {
           {/* Volume slider */}
           <div className="mt-3">
             <div className="flex items-center justify-between mb-1">
-              <p className="text-[11px] uppercase tracking-widest" style={{ color: '#8B8BA7' }}>{t('settings.volume')}</p>
-              <p className="text-[11px]" style={{ color: '#8B8BA7' }}>{Math.round(audioVolume * 100)}%</p>
+              <p className="text-[11px] uppercase tracking-widest" style={{ color: 'var(--color-text-muted)' }}>{t('settings.volume')}</p>
+              <p className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>{Math.round(audioVolume * 100)}%</p>
             </div>
             <input
               type="range"
@@ -384,15 +382,15 @@ export default function SettingsPage() {
                 onClick={() => setSeasonalMode(phaseKeys[i])}
                 className="p-2.5 rounded-xl text-left"
                 style={{
-                  backgroundColor: phase === i ? 'rgba(123,114,255,0.15)' : '#252840',
+                  backgroundColor: phase === i ? 'rgba(123,114,255,0.15)' : 'var(--color-surface-raised)',
                   borderWidth: phase === i ? 1.5 : 1,
                   borderStyle: 'solid',
-                  borderColor: phase === i ? '#7B72FF' : 'rgba(255,255,255,0.06)',
+                  borderColor: phase === i ? 'var(--color-primary)' : 'var(--color-border-subtle)',
                 }}
               >
                 <span className="text-[18px]">{c.emoji}</span>
-                <p className="text-[13px] font-semibold mt-0.5" style={{ color: phase === i ? '#7B72FF' : '#E8E8F0' }}>{t(c.labelKey)}</p>
-                <p className="text-[11px]" style={{ color: '#8B8BA7' }}>{t(c.descKey)}</p>
+                <p className="text-[13px] font-semibold mt-0.5" style={{ color: phase === i ? 'var(--color-primary)' : 'var(--color-text-primary)' }}>{t(c.labelKey)}</p>
+                <p className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>{t(c.descKey)}</p>
               </motion.button>
             ))}
           </div>
@@ -419,16 +417,16 @@ export default function SettingsPage() {
           {notifPermission === 'granted' ? (
             <div className="flex items-center gap-2">
               <span className="text-[20px]">🔔</span>
-              <p className="text-[14px]" style={{ color: '#4ECDC4' }}>{t('settings.remindersEnabled')}</p>
+              <p className="text-[14px]" style={{ color: 'var(--color-teal)' }}>{t('settings.remindersEnabled')}</p>
             </div>
           ) : notifPermission === 'denied' ? (
-            <p className="text-[13px]" style={{ color: '#8B8BA7' }}>{t('settings.remindersBlocked')}</p>
+            <p className="text-[13px]" style={{ color: 'var(--color-text-muted)' }}>{t('settings.remindersBlocked')}</p>
           ) : (
             <motion.button
               whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
               onClick={requestNotifications}
               className="w-full h-10 rounded-xl text-[14px] font-medium"
-              style={{ backgroundColor: 'rgba(78,205,196,0.12)', color: '#4ECDC4' }}
+              style={{ backgroundColor: 'rgba(78,205,196,0.12)', color: 'var(--color-teal)' }}
             >
               🔔 {t('settings.enableReminders')}
             </motion.button>
@@ -441,11 +439,11 @@ export default function SettingsPage() {
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <span className="text-[16px]">✅</span>
-                <p className="text-[14px] font-medium" style={{ color: '#4ECDC4' }}>{t('settings.telegramConnected')}</p>
+                <p className="text-[14px] font-medium" style={{ color: 'var(--color-teal)' }}>{t('settings.telegramConnected')}</p>
               </div>
-              <p className="text-[12px]" style={{ color: '#8B8BA7' }}>
+              <p className="text-[12px]" style={{ color: 'var(--color-text-muted)' }}>
                 {t('settings.telegramSendTo')}{' '}
-                <a href="https://t.me/MindShiftBot" target="_blank" rel="noopener noreferrer" style={{ color: '#4ECDC4' }}>
+                <a href="https://t.me/MindShiftBot" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-teal)' }}>
                   @MindShiftBot
                 </a>
               </p>
@@ -453,23 +451,23 @@ export default function SettingsPage() {
                 whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
                 onClick={() => setTelegramLinked(false)}
                 className="w-full h-9 rounded-xl text-[13px] font-medium"
-                style={{ backgroundColor: 'rgba(139,139,167,0.12)', color: '#8B8BA7' }}
+                style={{ backgroundColor: 'rgba(139,139,167,0.12)', color: 'var(--color-text-muted)' }}
               >
                 {t('settings.telegramDisconnect')}
               </motion.button>
             </div>
           ) : telegramLinkCode ? (
             <div className="space-y-2">
-              <p className="text-[12px]" style={{ color: '#8B8BA7' }}>
+              <p className="text-[12px]" style={{ color: 'var(--color-text-muted)' }}>
                 {t('settings.telegramSendThis')}{' '}
-                <a href="https://t.me/MindShiftBot" target="_blank" rel="noopener noreferrer" style={{ color: '#4ECDC4' }}>
+                <a href="https://t.me/MindShiftBot" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-teal)' }}>
                   @MindShiftBot
                 </a>
               </p>
               <div className="flex items-center gap-2">
                 <div
                   className="flex-1 h-10 rounded-xl flex items-center px-3 font-mono text-[15px] tracking-widest"
-                  style={{ backgroundColor: '#252840', color: '#E8E8F0', border: '1px solid rgba(78,205,196,0.2)' }}
+                  style={{ backgroundColor: 'var(--color-surface-raised)', color: 'var(--color-text-primary)', border: '1px solid rgba(78,205,196,0.2)' }}
                 >
                   /link {telegramLinkCode}
                 </div>
@@ -479,32 +477,32 @@ export default function SettingsPage() {
                   className="h-10 px-3 rounded-xl text-[13px] font-medium"
                   style={{
                     backgroundColor: codeCopied ? 'rgba(78,205,196,0.2)' : 'rgba(78,205,196,0.12)',
-                    color: '#4ECDC4',
+                    color: 'var(--color-teal)',
                   }}
                   aria-label="Copy link code"
                 >
                   {codeCopied ? t('settings.telegramCodeCopied') : t('settings.telegramCodeCopy')}
                 </motion.button>
               </div>
-              <p className="text-[11px]" style={{ color: '#8B8BA7' }}>
+              <p className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>
                 {t('settings.telegramCodeExpires')}
               </p>
             </div>
           ) : (
             <div className="space-y-2">
-              <p className="text-[12px] leading-relaxed" style={{ color: '#8B8BA7' }}>
+              <p className="text-[12px] leading-relaxed" style={{ color: 'var(--color-text-muted)' }}>
                 {t('settings.telegramDesc')}
               </p>
               <motion.button
                 whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
                 onClick={generateTelegramCode}
                 className="w-full h-10 rounded-xl text-[14px] font-medium"
-                style={{ backgroundColor: 'rgba(78,205,196,0.12)', color: '#4ECDC4' }}
+                style={{ backgroundColor: 'rgba(78,205,196,0.12)', color: 'var(--color-teal)' }}
                 aria-label="Connect Telegram"
               >
                 {t('settings.connectTelegram')}
               </motion.button>
-              <p className="text-[11px]" style={{ color: '#8B8BA7' }}>
+              <p className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>
                 {t('settings.telegramHowTo')}
               </p>
             </div>
@@ -514,15 +512,15 @@ export default function SettingsPage() {
         {/* Google Calendar integration */}
         <Section label={t('settings.googleCalendar')}>
           {isGuest ? (
-            <p className="text-[12px]" style={{ color: '#8B8BA7' }}>
+            <p className="text-[12px]" style={{ color: 'var(--color-text-muted)' }}>
               {t('settings.signInForCalendar')}
             </p>
           ) : (
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-[14px] font-medium" style={{ color: '#E8E8F0' }}>{t('settings.syncToCalendar')}</p>
-                  <p className="text-[12px] mt-0.5" style={{ color: '#8B8BA7' }}>
+                  <p className="text-[14px] font-medium" style={{ color: 'var(--color-text-primary)' }}>{t('settings.syncToCalendar')}</p>
+                  <p className="text-[12px] mt-0.5" style={{ color: 'var(--color-text-muted)' }}>
                     {t('settings.calendarDesc')}
                   </p>
                 </div>
@@ -549,7 +547,7 @@ export default function SettingsPage() {
                     }
                   }}
                   className="w-11 h-6 rounded-full relative transition-colors duration-200"
-                  style={{ background: calendarSyncEnabled ? '#4ECDC4' : '#252840' }}
+                  style={{ background: calendarSyncEnabled ? 'var(--color-teal)' : 'var(--color-surface-raised)' }}
                   aria-pressed={calendarSyncEnabled}
                   aria-label="Toggle Google Calendar sync"
                 >
@@ -571,7 +569,7 @@ export default function SettingsPage() {
                     onChange={setCalendarFocusBlocks}
                     label={t('settings.focusBlocks')}
                   />
-                  <p className="text-[11px]" style={{ color: '#8B8BA7' }}>
+                  <p className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>
                     {t('settings.focusBlocksDesc')}
                   </p>
                 </motion.div>
@@ -585,15 +583,15 @@ export default function SettingsPage() {
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-[14px] font-medium" style={{ color: '#E8E8F0' }}>{t('settings.peakWindow')}</p>
-                <p className="text-[12px] mt-0.5" style={{ color: '#8B8BA7' }}>
+                <p className="text-[14px] font-medium" style={{ color: 'var(--color-text-primary)' }}>{t('settings.peakWindow')}</p>
+                <p className="text-[12px] mt-0.5" style={{ color: 'var(--color-text-muted)' }}>
                   {t('settings.medHighlights')}
                 </p>
               </div>
               <button
                 onClick={() => setMedicationEnabled(!medicationEnabled)}
                 className="w-11 h-6 rounded-full relative transition-colors duration-200"
-                style={{ background: medicationEnabled ? '#7B72FF' : '#252840' }}
+                style={{ background: medicationEnabled ? 'var(--color-primary)' : 'var(--color-surface-raised)' }}
                 aria-pressed={medicationEnabled}
                 aria-label="Toggle medication peak indicator"
               >
@@ -610,7 +608,7 @@ export default function SettingsPage() {
                 animate={shouldAnimate ? { opacity: 1, height: 'auto' } : false}
                 className="overflow-hidden"
               >
-                <p className="text-[12px] mb-2" style={{ color: '#8B8BA7' }}>{t('settings.medWhenTake')}</p>
+                <p className="text-[12px] mb-2" style={{ color: 'var(--color-text-muted)' }}>{t('settings.medWhenTake')}</p>
                 <div className="flex gap-2">
                   {([
                     { key: 'morning', labelKey: 'settings.medMorning', subKey: 'settings.medMorningSub', emoji: '🌅' },
@@ -624,9 +622,9 @@ export default function SettingsPage() {
                         onClick={() => setMedicationTime(sel ? null : key)}
                         className="flex-1 flex flex-col items-center gap-0.5 py-2.5 rounded-xl transition-all text-xs"
                         style={{
-                          background: sel ? 'rgba(123,114,255,0.18)' : '#252840',
+                          background: sel ? 'rgba(123,114,255,0.18)' : 'var(--color-surface-raised)',
                           border: `1px solid ${sel ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
-                          color: sel ? '#C8C0FF' : '#8B8BA7',
+                          color: sel ? 'var(--color-primary-light)' : 'var(--color-text-muted)',
                         }}
                       >
                         <span className="text-base">{emoji}</span>
@@ -644,7 +642,7 @@ export default function SettingsPage() {
         {/* Setup revisit — O-11: re-run onboarding to update preferences */}
         {/* Daily focus goal — P-1 */}
         <Section label={t('settings.dailyGoal')}>
-          <p className="text-[12px] mb-2" style={{ color: '#8B8BA7' }}>
+          <p className="text-[12px] mb-2" style={{ color: 'var(--color-text-muted)' }}>
             {t('settings.targetMinutes')}
           </p>
           <div className="flex gap-2">
@@ -655,9 +653,9 @@ export default function SettingsPage() {
                 onClick={() => setDailyFocusGoalMin(min)}
                 className="flex-1 h-9 rounded-full text-[13px] font-medium"
                 style={{
-                  backgroundColor: dailyFocusGoalMin === min ? 'rgba(123,114,255,0.15)' : '#252840',
+                  backgroundColor: dailyFocusGoalMin === min ? 'rgba(123,114,255,0.15)' : 'var(--color-surface-raised)',
                   border: `${dailyFocusGoalMin === min ? 1.5 : 1}px solid ${dailyFocusGoalMin === min ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
-                  color: dailyFocusGoalMin === min ? '#7B72FF' : '#8B8BA7',
+                  color: dailyFocusGoalMin === min ? 'var(--color-primary)' : 'var(--color-text-muted)',
                 }}
               >
                 {min}m
@@ -683,16 +681,16 @@ export default function SettingsPage() {
                   onClick={() => setUITone(tone)}
                   className="p-2.5 rounded-xl text-left"
                   style={{
-                    backgroundColor: sel ? 'rgba(123,114,255,0.15)' : '#252840',
+                    backgroundColor: sel ? 'rgba(123,114,255,0.15)' : 'var(--color-surface-raised)',
                     borderWidth: sel ? 1.5 : 1,
                     borderStyle: 'solid',
-                    borderColor: sel ? '#7B72FF' : 'rgba(255,255,255,0.06)',
+                    borderColor: sel ? 'var(--color-primary)' : 'var(--color-border-subtle)',
                   }}
                 >
-                  <p className="text-[13px] font-semibold" style={{ color: sel ? '#7B72FF' : '#E8E8F0' }}>
+                  <p className="text-[13px] font-semibold" style={{ color: sel ? 'var(--color-primary)' : 'var(--color-text-primary)' }}>
                     {t(labelKey)}
                   </p>
-                  <p className="text-[10px] mt-0.5" style={{ color: '#8B8BA7' }}>
+                  <p className="text-[10px] mt-0.5" style={{ color: 'var(--color-text-muted)' }}>
                     {t(descKey)}
                   </p>
                 </motion.button>
@@ -705,7 +703,7 @@ export default function SettingsPage() {
           <button
             onClick={() => navigate('/onboarding')}
             className="flex items-center gap-3 w-full h-10 rounded-xl px-3 text-[14px] font-medium"
-            style={{ backgroundColor: 'rgba(78,205,196,0.08)', color: '#4ECDC4', border: '1px solid rgba(78,205,196,0.15)' }}
+            style={{ backgroundColor: 'rgba(78,205,196,0.08)', color: 'var(--color-teal)', border: '1px solid rgba(78,205,196,0.15)' }}
           >
             <span>🔄</span>
             <span>{t('settings.rerunSetup')}</span>
@@ -715,7 +713,7 @@ export default function SettingsPage() {
         {/* Mental Health Resources — localized by country */}
         <Section label={t('settings.mentalHealth')}>
           <div className="space-y-2">
-            <p className="text-[13px] leading-relaxed" style={{ color: '#E8E8F0' }}>
+            <p className="text-[13px] leading-relaxed" style={{ color: 'var(--color-text-primary)' }}>
               {t('settings.crisisTitle')}
             </p>
             <div
@@ -727,12 +725,12 @@ export default function SettingsPage() {
             >
               {getCrisisResourcesByCountry(userCountry ?? countryFromLocale(navigator.language)).map((r, i) => (
                 <div key={i}>
-                  <p className="text-[13px] font-medium" style={{ color: '#4ECDC4' }}>
+                  <p className="text-[13px] font-medium" style={{ color: 'var(--color-teal)' }}>
                     {r.name}
                   </p>
-                  <p className="text-[12px]" style={{ color: '#8B8BA7' }}>
+                  <p className="text-[12px]" style={{ color: 'var(--color-text-muted)' }}>
                     {r.type === 'web' ? (
-                      <a href={`https://${r.number}`} target="_blank" rel="noopener noreferrer" style={{ color: '#7B72FF' }}>
+                      <a href={`https://${r.number}`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-primary)' }}>
                         {r.number}
                       </a>
                     ) : r.number}
@@ -748,7 +746,7 @@ export default function SettingsPage() {
           <a
             href="mailto:ganbarov.y@gmail.com?subject=MindShift%20Feedback&body=Hi%20Yusif%2C%0A%0A"
             className="flex items-center gap-3 w-full h-10 rounded-xl px-3 text-[14px] font-medium focus-visible:ring-2 focus-visible:ring-ms-primary/50 focus-visible:outline-none"
-            style={{ backgroundColor: 'rgba(123,114,255,0.1)', color: '#7B72FF' }}
+            style={{ backgroundColor: 'rgba(123,114,255,0.1)', color: 'var(--color-primary)' }}
           >
             <span>📬</span>
             <span>{t('settings.sendFeedback')}</span>
@@ -762,7 +760,7 @@ export default function SettingsPage() {
             onClick={handleExport}
             disabled={exportLoading}
             className="w-full h-10 rounded-xl text-[14px] font-medium disabled:opacity-50"
-            style={{ backgroundColor: 'rgba(78,205,196,0.12)', color: '#4ECDC4' }}
+            style={{ backgroundColor: 'rgba(78,205,196,0.12)', color: 'var(--color-teal)' }}
           >
             {exportLoading ? t('settings.exporting') : `📦 ${t('settings.exportJson')}`}
           </motion.button>
@@ -783,16 +781,16 @@ export default function SettingsPage() {
               animate={shouldAnimate ? { opacity: 1, height: 'auto' } : false}
               exit={shouldAnimate ? { opacity: 0, height: 0 } : undefined}
               className="rounded-2xl p-4 space-y-3"
-              style={{ backgroundColor: '#1E2136', border: '1px solid rgba(245,158,11,0.3)' }}
+              style={{ backgroundColor: 'var(--color-surface-card)', border: '1px solid rgba(245,158,11,0.3)' }}
             >
-              <p className="text-[13px]" style={{ color: '#E8E8F0' }}>
+              <p className="text-[13px]" style={{ color: 'var(--color-text-primary)' }}>
                 {t('settings.deleteConfirm')}
               </p>
               <div className="flex gap-2">
                 <button
                   onClick={() => setShowDeleteConfirm(false)}
                   className="flex-1 h-9 rounded-xl text-[13px] font-medium"
-                  style={{ backgroundColor: 'rgba(139,139,167,0.15)', color: '#8B8BA7' }}
+                  style={{ backgroundColor: 'rgba(139,139,167,0.15)', color: 'var(--color-text-muted)' }}
                 >
                   {t('common.cancel')}
                 </button>
@@ -812,14 +810,14 @@ export default function SettingsPage() {
         <button onClick={handleSignOut} className="text-[13px] font-medium w-full text-center py-2" style={{ color: '#E8976B' }}>{t('settings.signOut')}</button>
 
         <div className="text-center space-y-1 pt-2 pb-6">
-          <p className="text-[11px]" style={{ color: '#8B8BA7' }}>
-            <button onClick={() => navigate('/privacy')} className="underline underline-offset-2 focus-visible:ring-2 focus-visible:ring-[#7B72FF] rounded" style={{ color: '#8B8BA7' }}>{t('settings.privacy')}</button>
+          <p className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>
+            <button onClick={() => navigate('/privacy')} className="underline underline-offset-2 focus-visible:ring-2 focus-visible:ring-[#7B72FF] rounded" style={{ color: 'var(--color-text-muted)' }}>{t('settings.privacy')}</button>
             {' · '}
-            <button onClick={() => navigate('/terms')} className="underline underline-offset-2 focus-visible:ring-2 focus-visible:ring-[#7B72FF] rounded" style={{ color: '#8B8BA7' }}>{t('settings.terms')}</button>
+            <button onClick={() => navigate('/terms')} className="underline underline-offset-2 focus-visible:ring-2 focus-visible:ring-[#7B72FF] rounded" style={{ color: 'var(--color-text-muted)' }}>{t('settings.terms')}</button>
             {' · '}
-            <button onClick={() => navigate('/cookie-policy')} className="underline underline-offset-2 focus-visible:ring-2 focus-visible:ring-[#7B72FF] rounded" style={{ color: '#8B8BA7' }}>{t('settings.cookies')}</button>
+            <button onClick={() => navigate('/cookie-policy')} className="underline underline-offset-2 focus-visible:ring-2 focus-visible:ring-[#7B72FF] rounded" style={{ color: 'var(--color-text-muted)' }}>{t('settings.cookies')}</button>
           </p>
-          <p className="text-[11px]" style={{ color: '#8B8BA7' }}>MindShift v1.0.0</p>
+          <p className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>MindShift v1.0.0</p>
         </div>
       </div>
     </div>
@@ -830,8 +828,8 @@ export default function SettingsPage() {
 function Section({ label, children }: { label: string; children: React.ReactNode }) {
   const { shouldAnimate } = useMotion();
   return (
-    <motion.div initial={shouldAnimate ? { opacity: 0, y: 12 } : false} animate={shouldAnimate ? { opacity: 1, y: 0 } : false} className="rounded-2xl p-3" style={{ backgroundColor: '#1E2136' }}>
-      <p className="text-[11px] uppercase tracking-widest mb-2" style={{ color: '#8B8BA7' }}>{label}</p>
+    <motion.div initial={shouldAnimate ? { opacity: 0, y: 12 } : false} animate={shouldAnimate ? { opacity: 1, y: 0 } : false} className="rounded-2xl p-3" style={{ backgroundColor: 'var(--color-surface-card)' }}>
+      <p className="text-[11px] uppercase tracking-widest mb-2" style={{ color: 'var(--color-text-muted)' }}>{label}</p>
       {children}
     </motion.div>
   );
@@ -845,11 +843,11 @@ function Chip({ selected, onClick, emoji, label }: { selected: boolean; onClick:
       onClick={onClick}
       className="flex-1 h-9 rounded-full flex items-center justify-center gap-1 text-[13px] font-medium"
       style={{
-        backgroundColor: selected ? 'rgba(123,114,255,0.15)' : '#252840',
+        backgroundColor: selected ? 'rgba(123,114,255,0.15)' : 'var(--color-surface-raised)',
         borderWidth: selected ? 1.5 : 1,
         borderStyle: 'solid',
-        borderColor: selected ? '#7B72FF' : 'rgba(255,255,255,0.06)',
-        color: selected ? '#7B72FF' : '#8B8BA7',
+        borderColor: selected ? 'var(--color-primary)' : 'var(--color-border-subtle)',
+        color: selected ? 'var(--color-primary)' : 'var(--color-text-muted)',
       }}
     >
       {emoji} {label}
@@ -861,9 +859,9 @@ function Toggle({ checked, onChange, label }: { checked: boolean; onChange: (v: 
   const { shouldAnimate } = useMotion();
   return (
     <button onClick={() => onChange(!checked)} className="flex items-center justify-between w-full">
-      <span className="text-[14px]" style={{ color: '#E8E8F0' }}>{label}</span>
-      <div className="w-11 h-6 rounded-full p-0.5 transition-colors" style={{ backgroundColor: checked ? '#7B72FF' : '#252840' }}>
-        <motion.div animate={{ x: checked ? 20 : 0 }} transition={shouldAnimate ? undefined : { duration: 0 }} className="w-5 h-5 rounded-full" style={{ backgroundColor: '#E8E8F0' }} />
+      <span className="text-[14px]" style={{ color: 'var(--color-text-primary)' }}>{label}</span>
+      <div className="w-11 h-6 rounded-full p-0.5 transition-colors" style={{ backgroundColor: checked ? 'var(--color-primary)' : 'var(--color-surface-raised)' }}>
+        <motion.div animate={{ x: checked ? 20 : 0 }} transition={shouldAnimate ? undefined : { duration: 0 }} className="w-5 h-5 rounded-full" style={{ backgroundColor: '#FFFFFF' }} />
       </div>
     </button>
   );
