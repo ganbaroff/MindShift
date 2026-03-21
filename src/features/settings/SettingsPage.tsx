@@ -213,13 +213,23 @@ export default function SettingsPage() {
         <Section label={t('settings.language')}>
           <div className="flex flex-wrap gap-2">
             {[
-              { code: null, label: 'Auto', desc: 'Browser default' },
-              { code: 'en', label: 'English', desc: '' },
-              { code: 'ru', label: 'Русский', desc: '' },
+              { code: null, label: t('common.auto') },
+              { code: 'en', label: 'English' },
+              { code: 'ru', label: 'Русский' },
+              { code: 'az', label: 'Azərbaycanca' },
+              { code: 'tr', label: 'Türkçe' },
+              { code: 'de', label: 'Deutsch' },
+              { code: 'es', label: 'Español' },
             ].map(({ code, label }) => (
               <button
                 key={code ?? 'auto'}
-                onClick={() => { setUserLocale(code); toast(`Language: ${label}`) }}
+                onClick={() => {
+                  setUserLocale(code)
+                  // Switch i18n language immediately
+                  const resolvedLang = code ?? navigator.language.split('-')[0]
+                  import('i18next').then(({ default: i18n }) => i18n.changeLanguage(resolvedLang))
+                  toast(`Language: ${label}`)
+                }}
                 className="px-3 py-1.5 rounded-xl text-[13px] font-medium focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
                 style={{
                   background: userLocale === code ? 'rgba(123,114,255,0.15)' : '#252840',
