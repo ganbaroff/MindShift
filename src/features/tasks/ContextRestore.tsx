@@ -16,6 +16,7 @@
  */
 
 import { motion, AnimatePresence } from 'motion/react'
+import { useTranslation } from 'react-i18next'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { useStore } from '@/store'
 
@@ -30,10 +31,11 @@ interface Props {
 
 export function ContextRestore({ onDismiss }: Props) {
   const nowPool = useStore(s => s.nowPool)
-  const { shouldAnimate, t } = useMotion()
+  const { shouldAnimate, t: transition } = useMotion()
+  const { t } = useTranslation()
 
   // Show up to 2 active NOW tasks — cognitive load limit
-  const activeTasks = nowPool.filter(t => t.status === 'active').slice(0, 2)
+  const activeTasks = nowPool.filter(task => task.status === 'active').slice(0, 2)
 
   return (
     <AnimatePresence>
@@ -48,7 +50,7 @@ export function ContextRestore({ onDismiss }: Props) {
         <motion.div
           initial={shouldAnimate ? { y: 32, opacity: 0 } : {}}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ ...t(), delay: 0.1 }}
+          transition={{ ...transition(), delay: 0.1 }}
           onClick={e => e.stopPropagation()}
           className="rounded-3xl p-5"
           style={{
@@ -60,12 +62,12 @@ export function ContextRestore({ onDismiss }: Props) {
           {/* Header */}
           <div className="mb-4">
             <p className="text-xs font-semibold tracking-widest uppercase mb-1" style={{ color: '#7B72FF' }}>
-              Where were we?
+              {t('contextRestore.whereWereWe')}
             </p>
             <p className="text-base font-bold" style={{ color: '#E8E8F0' }}>
               {activeTasks.length > 0
-                ? 'You had these in progress:'
-                : "You're all caught up — ready for what's next?"}
+                ? t('contextRestore.hadInProgress')
+                : t('contextRestore.allCaughtUp')}
             </p>
           </div>
 
@@ -96,14 +98,14 @@ export function ContextRestore({ onDismiss }: Props) {
               className="flex-1 py-3 rounded-2xl font-semibold text-sm"
               style={{ background: '#7B72FF', color: '#FFFFFF' }}
             >
-              {activeTasks.length > 0 ? 'Dive back in →' : "Let's go →"}
+              {activeTasks.length > 0 ? t('contextRestore.diveBack') : t('contextRestore.letsGo')}
             </button>
             <button
               onClick={onDismiss}
               className="px-4 py-3 rounded-2xl text-sm"
               style={{ background: '#252840', border: '1px solid rgba(255,255,255,0.06)', color: '#8B8BA7' }}
             >
-              Maybe later
+              {t('contextRestore.maybeLater')}
             </button>
           </div>
         </motion.div>

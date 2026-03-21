@@ -7,13 +7,15 @@
 
 import { motion, AnimatePresence } from 'motion/react'
 import { X, Share, Plus, Download } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useInstallPrompt } from '@/shared/hooks/useInstallPrompt'
 import { hapticTap } from '@/shared/lib/haptic'
 import { useMotion } from '@/shared/hooks/useMotion'
 
 export function InstallBanner() {
   const { state, install, dismiss } = useInstallPrompt()
-  const { t, shouldAnimate } = useMotion()
+  const { t: transition, shouldAnimate } = useMotion()
+  const { t } = useTranslation()
 
   const handleInstall = () => {
     hapticTap()
@@ -34,7 +36,7 @@ export function InstallBanner() {
           initial={shouldAnimate ? { opacity: 0, y: 80 } : false}
           animate={shouldAnimate ? { opacity: 1, y: 0 } : { opacity: 1 }}
           exit={shouldAnimate ? { opacity: 0, y: 80 } : { opacity: 0 }}
-          transition={t()}
+          transition={transition()}
           role="banner"
           aria-label="Install MindShift as an app"
           className="fixed left-0 right-0 z-40 px-4 pointer-events-none bottom-[calc(64px+env(safe-area-inset-bottom))]"
@@ -62,10 +64,10 @@ export function InstallBanner() {
               {state === 'android' ? (
                 <>
                   <p className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>
-                    Install MindShift
+                    {t('install.installMindShift')}
                   </p>
                   <p className="text-xs mt-0.5 leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-                    Works offline · No browser bar · Full screen
+                    {t('install.installBenefits')}
                   </p>
                   <button
                     onClick={handleInstall}
@@ -73,32 +75,32 @@ export function InstallBanner() {
                     style={{ background: 'var(--color-primary)', color: '#fff' }}
                   >
                     <Download size={13} />
-                    Install app
+                    {t('install.installApp')}
                   </button>
                 </>
               ) : (
                 <>
                   <p className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>
-                    Add to Home Screen
+                    {t('install.addToHomeScreen')}
                   </p>
                   <p className="text-xs mt-1 leading-relaxed" style={{ color: 'var(--color-muted)' }}>
-                    Tap{' '}
+                    {t('install.tapShare')}{' '}
                     <span
                       className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded"
                       style={{ background: 'var(--color-elevated)', color: 'var(--color-text)' }}
                     >
                       <Share size={10} />
-                      Share
+                      {t('install.share')}
                     </span>
-                    , then{' '}
+                    {t('install.thenAdd')}{' '}
                     <span
                       className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded"
                       style={{ background: 'var(--color-elevated)', color: 'var(--color-text)' }}
                     >
                       <Plus size={10} />
-                      Add to Home Screen
+                      {t('install.addToHomeScreen')}
                     </span>
-                    . Opens like a real app — no browser bar.
+                    {t('install.opensLikeApp')}
                   </p>
                 </>
               )}

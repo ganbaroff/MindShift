@@ -1,4 +1,5 @@
 import { motion, AnimatePresence } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 import { DIFFICULTY_MAP, CATEGORY_CONFIG } from '@/types';
 import type { TaskType, TaskCategory } from '@/types';
 
@@ -37,9 +38,10 @@ interface DifficultyPickerProps {
 }
 
 export function DifficultyPicker({ difficulty, onSelect }: DifficultyPickerProps) {
+  const { t } = useTranslation();
   return (
     <div>
-      <label className="text-caption text-ms-muted uppercase tracking-widest mb-2 block">Difficulty</label>
+      <label className="text-caption text-ms-muted uppercase tracking-widest mb-2 block">{t('addTaskFields.difficulty')}</label>
       <div className="flex gap-2">
         {([1, 2, 3] as const).map(d => {
           const c = DIFFICULTY_MAP[d];
@@ -82,13 +84,14 @@ interface DurationPickerProps {
 const durationOptions = [5, 15, 25, 45, 60];
 
 export function DurationPicker({ minutes, onSelect, isSmartMode }: DurationPickerProps) {
+  const { t } = useTranslation();
   return (
     <div>
       <div className="flex items-center gap-2 mb-2">
-        <label className="text-caption text-ms-muted uppercase tracking-widest">Time</label>
+        <label className="text-caption text-ms-muted uppercase tracking-widest">{t('addTaskFields.time')}</label>
         {isSmartMode && (
           <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: 'rgba(123,114,255,0.12)', color: '#7B72FF' }}>
-            ✨ smart
+            ✨ {t('addTaskFields.smart')}
           </span>
         )}
       </div>
@@ -128,6 +131,7 @@ interface CategoryPickerProps {
 }
 
 export function CategoryPicker({ category, showCategory, onToggle, onSelect, shouldAnimate }: CategoryPickerProps) {
+  const { t } = useTranslation();
   if (!showCategory) {
     return (
       <div>
@@ -138,7 +142,7 @@ export function CategoryPicker({ category, showCategory, onToggle, onSelect, sho
           style={{ color: '#5A5B72' }}
           aria-expanded={false}
         >
-          <span>+</span> Add category (optional)
+          {t('addTaskFields.addCategory')}
         </button>
       </div>
     );
@@ -150,7 +154,7 @@ export function CategoryPicker({ category, showCategory, onToggle, onSelect, sho
           initial={shouldAnimate ? { opacity: 0, height: 0 } : {}}
           animate={{ opacity: 1, height: 'auto' }}
         >
-          <label className="text-caption text-ms-muted uppercase tracking-widest mb-2 block">Category</label>
+          <label className="text-caption text-ms-muted uppercase tracking-widest mb-2 block">{t('addTaskFields.category')}</label>
           <div className="flex flex-wrap gap-2">
             {(['work', 'personal', 'health', 'learning', 'finance'] as const).map(c => {
               const cfg = CATEGORY_CONFIG[c];
@@ -189,9 +193,10 @@ interface RepeatPickerProps {
 }
 
 export function RepeatPicker({ repeat, onSelect }: RepeatPickerProps) {
+  const { t } = useTranslation();
   return (
     <div>
-      <p className="text-[12px] mb-1.5" style={{ color: '#8B8BA7' }}>Repeat</p>
+      <p className="text-[12px] mb-1.5" style={{ color: '#8B8BA7' }}>{t('addTaskFields.repeat')}</p>
       <div className="flex gap-2">
         {(['none', 'daily', 'weekly'] as const).map(r => (
           <motion.button
@@ -207,7 +212,7 @@ export function RepeatPicker({ repeat, onSelect }: RepeatPickerProps) {
               color: repeat === r ? '#7B72FF' : '#8B8BA7',
             }}
           >
-            {r === 'none' ? 'Once' : r}
+            {r === 'none' ? t('addTaskFields.once') : r}
           </motion.button>
         ))}
       </div>
@@ -225,19 +230,20 @@ interface DueDatePickerProps {
 }
 
 export function DueDatePicker({ dueDate, required, today, tomorrow, shouldAnimate, onSelect }: DueDatePickerProps) {
+  const { t } = useTranslation();
   return (
     <div>
       <label className="text-caption text-ms-muted uppercase tracking-widest mb-2 block">
-        Due date{' '}
+        {t('addTaskFields.dueDate')}{' '}
         {required
-          ? <span style={{ color: '#7B72FF' }}>(required)</span>
-          : <span style={{ color: '#4ECDC4' }}>(optional)</span>
+          ? <span style={{ color: '#7B72FF' }}>{t('addTaskFields.required')}</span>
+          : <span style={{ color: '#4ECDC4' }}>{t('addTaskFields.optional')}</span>
         }
       </label>
       <div className="flex gap-2 mb-2">
         {[
-          { label: 'Today', value: today },
-          { label: 'Tomorrow', value: tomorrow },
+          { label: t('addTaskFields.today'), value: today },
+          { label: t('addTaskFields.tomorrow'), value: tomorrow },
         ].map(({ label, value }) => {
           const sel = dueDate === value;
           return (
@@ -281,7 +287,7 @@ export function DueDatePicker({ dueDate, required, today, tomorrow, shouldAnimat
           className="text-xs"
           style={{ color: '#4ECDC4' }}
         >
-          📅 Will appear in Upcoming tab
+          📅 {t('addTaskFields.dueDateHint')}
         </motion.p>
       )}
     </div>
@@ -295,13 +301,14 @@ interface DueTimePickerProps {
 }
 
 export function DueTimePicker({ dueTime, required, onSelect }: DueTimePickerProps) {
+  const { t } = useTranslation();
   return (
     <div>
       <label className="text-caption text-ms-muted uppercase tracking-widest mb-2 block">
-        Time{' '}
+        {t('addTaskFields.timeLabel')}{' '}
         {required
-          ? <span style={{ color: '#7B72FF' }}>(required)</span>
-          : <span style={{ color: '#4ECDC4' }}>(optional)</span>
+          ? <span style={{ color: '#7B72FF' }}>{t('addTaskFields.required')}</span>
+          : <span style={{ color: '#4ECDC4' }}>{t('addTaskFields.optional')}</span>
         }
       </label>
       <input

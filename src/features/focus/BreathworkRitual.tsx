@@ -16,6 +16,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
+import { useTranslation } from 'react-i18next'
 import { hapticBreathe } from '@/shared/lib/haptic'
 import { useMotion } from '@/shared/hooks/useMotion'
 
@@ -32,6 +33,7 @@ type BreathPhase = 'inhale' | 'exhale'
 
 export function BreathworkRitual({ onComplete, onSkip }: BreathworkRitualProps) {
   const { shouldAnimate } = useMotion()
+  const { t } = useTranslation()
   const [cycle, setCycle]       = useState(0)          // 0-indexed
   const [phase, setPhase]       = useState<BreathPhase>('inhale')
   const [done, setDone]         = useState(false)
@@ -162,10 +164,10 @@ export function BreathworkRitual({ onComplete, onSkip }: BreathworkRitualProps) 
           transition={{ duration: 0.25 }}
         >
           <p className="text-[22px] font-semibold" style={{ color: '#E8E8F0' }}>
-            {phase === 'inhale' ? 'Breathe in...' : 'Breathe out...'}
+            {phase === 'inhale' ? t('breathwork.breatheIn') : t('breathwork.breatheOut')}
           </p>
           <p className="text-[14px] mt-1" style={{ color: '#8B8BA7' }}>
-            {done ? 'Ready to focus 🎯' : `Breath ${cycle + 1} of ${CYCLES}`}
+            {done ? `${t('breathwork.readyToFocus')} 🎯` : t('breathwork.breathCount', { current: cycle + 1, total: CYCLES })}
           </p>
         </motion.div>
       </AnimatePresence>
@@ -188,7 +190,7 @@ export function BreathworkRitual({ onComplete, onSkip }: BreathworkRitualProps) 
         style={{ color: '#8B8BA7', backgroundColor: 'rgba(255,255,255,0.05)' }}
         aria-label="Skip breathing ritual"
       >
-        Skip →
+        {t('breathwork.skip')}
       </motion.button>
     </motion.div>
   )

@@ -16,6 +16,7 @@
 
 import { memo, useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
+import { useTranslation } from 'react-i18next'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { useStore } from '@/store'
 
@@ -24,10 +25,10 @@ interface WeeklyPlanningProps {
 }
 
 const INTENTIONS = [
-  { key: 'consistent',  emoji: '🌱', label: 'Stay consistent',     desc: 'Show up every day, even briefly' },
-  { key: 'challenge',   emoji: '🔥', label: 'Take on a challenge', desc: 'Push my edge a little further' },
-  { key: 'recover',     emoji: '🌊', label: 'Rest & recover',       desc: 'Gentle pace, recharge this week' },
-  { key: 'explore',     emoji: '🗺️', label: 'Follow curiosity',    desc: 'Explore without a fixed plan' },
+  { key: 'consistent',  emoji: '🌱', labelKey: 'weekly.consistentLabel',  descKey: 'weekly.consistentDesc' },
+  { key: 'challenge',   emoji: '🔥', labelKey: 'weekly.challengeLabel',   descKey: 'weekly.challengeDesc' },
+  { key: 'recover',     emoji: '🌊', labelKey: 'weekly.recoverLabel',     descKey: 'weekly.recoverDesc' },
+  { key: 'explore',     emoji: '🗺️', labelKey: 'weekly.exploreLabel',    descKey: 'weekly.exploreDesc' },
 ] as const
 
 type IntentionKey = typeof INTENTIONS[number]['key']
@@ -35,7 +36,8 @@ type IntentionKey = typeof INTENTIONS[number]['key']
 const TOTAL_STEPS = 3
 
 export const WeeklyPlanning = memo(function WeeklyPlanning({ onDismiss }: WeeklyPlanningProps) {
-  const { shouldAnimate, t } = useMotion()
+  const { shouldAnimate, t: transition } = useMotion()
+  const { t } = useTranslation()
   const { completedTotal, currentStreak, setWeeklyIntention } = useStore()
 
   const [step, setStep] = useState(0)
@@ -53,7 +55,7 @@ export const WeeklyPlanning = memo(function WeeklyPlanning({ onDismiss }: Weekly
 
   const handleFinish = () => {
     const intent = INTENTIONS.find(i => i.key === chosen)
-    setWeeklyIntention(intent ? `${intent.emoji} ${intent.label}` : null)
+    setWeeklyIntention(intent ? `${intent.emoji} ${t(intent.labelKey)}` : null)
     onDismiss()
   }
 
@@ -92,12 +94,12 @@ export const WeeklyPlanning = memo(function WeeklyPlanning({ onDismiss }: Weekly
             initial={shouldAnimate ? { opacity: 0, y: 24 } : {}}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -16 }}
-            transition={t()}
+            transition={transition()}
             className="w-full max-w-xs text-center"
           >
             <div className="text-5xl mb-5">🌅</div>
             <h2 className="text-2xl font-bold mb-2" style={{ color: '#E8E8F0' }}>
-              New week, fresh start
+              {t('weekly.newWeek')}
             </h2>
             <p className="text-sm leading-relaxed mb-8" style={{ color: '#8B8BA7' }}>
               {recapMsg}
@@ -110,7 +112,7 @@ export const WeeklyPlanning = memo(function WeeklyPlanning({ onDismiss }: Weekly
                 style={{ background: '#1E2136', border: '1px solid rgba(123,114,255,0.12)' }}
               >
                 <p className="text-2xl font-bold" style={{ color: '#7B72FF' }}>{completedTotal}</p>
-                <p className="text-[11px] mt-0.5" style={{ color: '#8B8BA7' }}>tasks done</p>
+                <p className="text-[11px] mt-0.5" style={{ color: '#8B8BA7' }}>{t('weekly.tasksDone')}</p>
               </div>
               {currentStreak >= 2 && (
                 <div
@@ -118,7 +120,7 @@ export const WeeklyPlanning = memo(function WeeklyPlanning({ onDismiss }: Weekly
                   style={{ background: '#1E2136', border: '1px solid rgba(78,205,196,0.12)' }}
                 >
                   <p className="text-2xl font-bold" style={{ color: '#4ECDC4' }}>{currentStreak}</p>
-                  <p className="text-[11px] mt-0.5" style={{ color: '#8B8BA7' }}>day streak</p>
+                  <p className="text-[11px] mt-0.5" style={{ color: '#8B8BA7' }}>{t('weekly.dayStreak')}</p>
                 </div>
               )}
             </div>
@@ -134,7 +136,7 @@ export const WeeklyPlanning = memo(function WeeklyPlanning({ onDismiss }: Weekly
               }}
               aria-label="Set weekly intention"
             >
-              Set my intention →
+              {t('weekly.setIntention')}
             </motion.button>
             <button
               onClick={handleSkip}
@@ -142,7 +144,7 @@ export const WeeklyPlanning = memo(function WeeklyPlanning({ onDismiss }: Weekly
               style={{ color: '#5A5B72' }}
               aria-label="Skip weekly planning"
             >
-              Skip for now
+              {t('weekly.skipForNow')}
             </button>
           </motion.div>
         )}
@@ -154,24 +156,24 @@ export const WeeklyPlanning = memo(function WeeklyPlanning({ onDismiss }: Weekly
             initial={shouldAnimate ? { opacity: 0, y: 24 } : {}}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -16 }}
-            transition={t()}
+            transition={transition()}
             className="w-full max-w-xs"
           >
             <h2 className="text-xl font-bold mb-1 text-center" style={{ color: '#E8E8F0' }}>
-              What's your focus this week?
+              {t('weekly.weekFocus')}
             </h2>
             <p className="text-[13px] mb-6 text-center" style={{ color: '#8B8BA7' }}>
-              Pick one — no wrong answers.
+              {t('weekly.noWrongAnswers')}
             </p>
 
             <div className="space-y-2">
-              {INTENTIONS.map(({ key, emoji, label, desc }) => (
+              {INTENTIONS.map(({ key, emoji, labelKey, descKey }) => (
                 <motion.button
                   key={key}
                   whileTap={{ scale: 0.97 }}
                   onClick={() => handleIntentionPick(key)}
                   aria-pressed={chosen === key}
-                  aria-label={`Intention: ${label}`}
+                  aria-label={`Intention: ${t(labelKey)}`}
                   className="w-full text-left p-3.5 rounded-2xl flex items-center gap-3"
                   style={{
                     background: chosen === key ? 'rgba(123,114,255,0.15)' : '#1E2136',
@@ -180,8 +182,8 @@ export const WeeklyPlanning = memo(function WeeklyPlanning({ onDismiss }: Weekly
                 >
                   <span className="text-[26px]">{emoji}</span>
                   <div className="min-w-0">
-                    <p className="text-[14px] font-semibold" style={{ color: chosen === key ? '#C8C0FF' : '#E8E8F0' }}>{label}</p>
-                    <p className="text-[11px] mt-0.5" style={{ color: '#8B8BA7' }}>{desc}</p>
+                    <p className="text-[14px] font-semibold" style={{ color: chosen === key ? '#C8C0FF' : '#E8E8F0' }}>{t(labelKey)}</p>
+                    <p className="text-[11px] mt-0.5" style={{ color: '#8B8BA7' }}>{t(descKey)}</p>
                   </div>
                 </motion.button>
               ))}
@@ -193,7 +195,7 @@ export const WeeklyPlanning = memo(function WeeklyPlanning({ onDismiss }: Weekly
               style={{ color: '#5A5B72' }}
               aria-label="Skip weekly planning"
             >
-              Skip — I'll decide as I go
+              {t('weekly.skipDecide')}
             </button>
           </motion.div>
         )}
@@ -205,17 +207,17 @@ export const WeeklyPlanning = memo(function WeeklyPlanning({ onDismiss }: Weekly
             initial={shouldAnimate ? { opacity: 0, scale: 0.95 } : {}}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0 }}
-            transition={t()}
+            transition={transition()}
             className="w-full max-w-xs text-center"
           >
             <div className="text-5xl mb-4">
               {INTENTIONS.find(i => i.key === chosen)?.emoji ?? '🌱'}
             </div>
             <h2 className="text-xl font-bold mb-2" style={{ color: '#E8E8F0' }}>
-              {INTENTIONS.find(i => i.key === chosen)?.label ?? 'Intention set'}
+              {INTENTIONS.find(i => i.key === chosen) ? t(INTENTIONS.find(i => i.key === chosen)!.labelKey) : t('weekly.intentionSet')}
             </h2>
             <p className="text-sm leading-relaxed mb-8" style={{ color: '#8B8BA7' }}>
-              You'll see this when you start a focus session.
+              {t('weekly.intentionVisible')}
             </p>
 
             <motion.button
@@ -229,7 +231,7 @@ export const WeeklyPlanning = memo(function WeeklyPlanning({ onDismiss }: Weekly
               }}
               aria-label="Finish weekly planning"
             >
-              Let's go 🌿
+              {t('weekly.letsGo')} 🌿
             </motion.button>
           </motion.div>
         )}
