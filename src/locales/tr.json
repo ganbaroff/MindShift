@@ -656,5 +656,67 @@
     "close": "Kapalı",
     "save": "Kaydetmek",
     "auto": "Otomatik"
+  },
+  "uiTone": {
+    "genZ": {
+      "mochiHey": "sen 👋",
+      "mochiGreat": "güzel bir şey 🔥",
+      "mochiComeBack": "hey geri döndün 💜",
+      "badgeUnlocked": "{{name}} kilidi açıldı ✨",
+      "streakBreak": "stres yok, yarın da çalışıyor 💜",
+      "streakGoing": "{{days}} gün gidiyor 🔥",
+      "recoveryWelcome": "geri döndün — bütün mesele bu 💜",
+      "errorGeneric": "ah, bir şey bozuldu 😅",
+      "lowEnergyNudge": "Düşük pil modu — tek bir şey yeterli 🌿",
+      "highEnergyNudge": "güzel enerji, kullan ⚡",
+      "xpLabel": "XP",
+      "streakLabel": "rüzgâr gibi geçmek",
+      "badgeLabel": "rozetler"
+    },
+    "millennial": {
+      "mochiHey": "merhaba 👋",
+      "mochiGreat": "bugün iyi iş çıkardın ✨",
+      "mochiComeBack": "tekrar hoş geldiniz 👋",
+      "badgeUnlocked": "{{name}} kilidi açıldı 🏆",
+      "streakBreak": "seri duraklatıldı — hazır olduğunuzda alın",
+      "streakGoing": "{{days}} günlük seri 💪",
+      "recoveryWelcome": "tekrar hoş geldiniz — kaldığınız yerden devam edin",
+      "errorGeneric": "Bir şeyler ters gitti. Lütfen tekrar deneyin.",
+      "lowEnergyNudge": "Kolay bir gün — bir şey yeter 🌿",
+      "highEnergyNudge": "Bugünün enerjisi güzel ✨",
+      "xpLabel": "XP",
+      "streakLabel": "rüzgâr gibi geçmek",
+      "badgeLabel": "başarılar"
+    },
+    "genX": {
+      "mochiHey": "Merhaba.",
+      "mochiGreat": "Tebrikler.",
+      "mochiComeBack": "Tekrar hoşgeldiniz.",
+      "badgeUnlocked": "{{name}} tamamlandı",
+      "streakBreak": "Streak durakladı. Dilediğiniz zaman devam edin.",
+      "streakGoing": "{{days}} ardışık günler",
+      "recoveryWelcome": "Tekrar hoşgeldiniz. Hazır olduğunuzda hazır olun.",
+      "errorGeneric": "Bir şeyler ters gitti. Lütfen tekrar deneyin.",
+      "lowEnergyNudge": "Işık günü — bir görev yeterlidir.",
+      "highEnergyNudge": "İyi enerji. Kullan onu.",
+      "xpLabel": "İlerlemek",
+      "streakLabel": "Ardışık günler",
+      "badgeLabel": "Kilometre Taşları"
+    },
+    "neutral": {
+      "mochiHey": "selam 👋",
+      "mochiGreat": "aferin ✨",
+      "mochiComeBack": "tekrar hoş geldin 💙",
+      "badgeUnlocked": "{{name}} — kilidi açıldı ✨",
+      "streakBreak": "yarın yeni bir başlangıç",
+      "streakGoing": "{{days}} gün gidiyor 💫",
+      "recoveryWelcome": "tekrar hoş geldin 💙",
+      "errorGeneric": "Bir şeyler ters gitti",
+      "lowEnergyNudge": "Bugün tek bir şey var; bu kadar yeter 🌿",
+      "highEnergyNudge": "Bugünün enerjisi güzel ✨",
+      "xpLabel": "XP",
+      "streakLabel": "rüzgâr gibi geçmek",
+      "badgeLabel": "rozetler"
+    }
   }
 }
