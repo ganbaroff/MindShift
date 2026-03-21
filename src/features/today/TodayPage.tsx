@@ -21,6 +21,8 @@ import type { Task, EnergyLevel } from '@/types'
 import type { ParsedTask } from '@/shared/lib/quickParse'
 import AddTaskModal from '@/components/AddTaskModal'
 import TaskCard from '@/components/TaskCard'
+import { WelcomeWalkthrough } from '@/shared/ui/WelcomeWalkthrough'
+import { FeatureHint } from '@/shared/ui/FeatureHint'
 
 // ── Time blocks ───────────────────────────────────────────────────────────────
 
@@ -181,10 +183,22 @@ export default function TodayPage() {
         </div>
 
         {/* ── Quick Capture ──────────────────────────────────────────────── */}
+        {/* ── Welcome walkthrough (first time only) ────────────────────── */}
+        <WelcomeWalkthrough />
+
+        {/* ── Quick Capture ──────────────────────────────────────────────── */}
         <QuickCapture
           onSubmit={handleQuickSubmit}
           onExpand={handleQuickExpand}
           placeholder="Add a task, reminder, or meeting..."
+        />
+
+        {/* ── First-time hints ───────────────────────────────────────────── */}
+        <FeatureHint
+          id="hint_quick_capture"
+          icon="💡"
+          text="Try typing 'meeting with Roma tomorrow at 3pm' — it'll auto-detect the type, date, and time"
+          delay={2000}
         />
 
         {/* ── Energy advice ──────────────────────────────────────────────── */}

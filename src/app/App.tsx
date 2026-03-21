@@ -17,6 +17,7 @@ import { logError } from '@/shared/lib/logger'
 import { reminders } from '@/shared/lib/reminders'
 import { computeBurnoutScore, deriveBehaviors } from '@/shared/lib/burnout'
 import { useCalendarSync } from '@/shared/hooks/useCalendarSync'
+import { useInAppReview } from '@/shared/hooks/useInAppReview'
 
 const CONSENT_PENDING_KEY = 'ms_consent_pending'
 
@@ -237,6 +238,7 @@ export default function App() {
   useTaskSync()
   useSessionHistory()
   useCalendarSync()
+  useInAppReview()
 
   const showRecovery = (() => {
     if (recoveryShown || !lastSessionAt) return false
