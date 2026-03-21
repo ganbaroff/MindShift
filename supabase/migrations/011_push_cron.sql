@@ -1,0 +1,23 @@
+-- Schedule push notification checks every 15 minutes (Sprint CE)
+-- Requires pg_cron extension enabled in Supabase Dashboard.
+--
+-- To enable: Supabase Dashboard → Database → Extensions → pg_cron → Enable
+-- The cron job calls the scheduled-push edge function via pg_net.
+--
+-- NOTE: Replace <project-ref> with your Supabase project reference
+-- and <service-role-key> with your service role key.
+-- These should be set manually via Supabase SQL editor, not in migration.
+
+-- Uncomment and configure when pg_cron + pg_net are enabled:
+--
+-- SELECT cron.schedule(
+--   'send-push-reminders',
+--   '*/15 * * * *',
+--   $$
+--   SELECT net.http_post(
+--     url := 'https://<project-ref>.supabase.co/functions/v1/scheduled-push',
+--     headers := '{"Authorization": "Bearer <service-role-key>"}'::jsonb,
+--     body := '{}'::jsonb
+--   );
+--   $$
+-- );
