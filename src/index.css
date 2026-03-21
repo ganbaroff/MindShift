@@ -212,6 +212,8 @@
     width: 100%;
     background: var(--color-bg);
     color: var(--color-text);
+    /* Smooth theme transition — gentle for ADHD (no harsh flash) */
+    transition: background-color 0.4s ease, color 0.35s ease;
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -236,6 +238,14 @@
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* ── Theme transition — applies to surfaces on theme change ── */
+/* Scoped to key elements only (not *) to avoid perf hit     */
+[data-theme] .rounded-2xl,
+[data-theme] nav,
+[data-theme] .min-h-screen {
+  transition: background-color 0.35s ease, border-color 0.35s ease, color 0.3s ease;
 }
 
 /* ── Utility classes ────────────────────────────────────── */
