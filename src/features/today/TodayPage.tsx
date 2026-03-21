@@ -154,7 +154,7 @@ export default function TodayPage() {
 
   return (
     <PageTransition>
-      <div className="px-4 pt-6 pb-4 space-y-4">
+      <div className="px-4 pt-6 pb-24 space-y-4">
         {/* ── Header ─────────────────────────────────────────────────────── */}
         <div className="flex items-center justify-between">
           <div>
