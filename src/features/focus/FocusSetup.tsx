@@ -18,6 +18,7 @@ import { clearBookmark } from './useFocusSession'
 import { useStore } from '@/store'
 import type { Task, AudioPreset } from '@/types'
 import type { FocusRoomState } from '@/shared/hooks/useFocusRoom'
+import { FeatureHint } from '@/shared/ui/FeatureHint'
 
 // ── Medication peak window helper (B-12) ──────────────────────────────────────
 const MED_PEAK_HOURS: Record<string, [number, number]> = {
@@ -431,6 +432,13 @@ export function FocusSetup({
         >
           Skip ritual & jump in
         </button>
+        {/* Focus Rooms discovery hint */}
+        <FeatureHint
+          id="hint_focus_rooms"
+          icon="🤝"
+          text="Focus with a friend — create a room and share the code. You'll see each other's progress."
+          delay={3000}
+        />
         {/* Focus with someone — S-3/S-4 */}
         {room.status === 'idle' && (
           <button

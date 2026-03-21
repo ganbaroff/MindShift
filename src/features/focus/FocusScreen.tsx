@@ -115,7 +115,7 @@ export default function FocusScreen() {
     handleBookmarkSave, handleBookmarkSkip, handleSkipBuffer,
     handleAudioToggle, handleParkThought,
     handleSessionEnd, handleBypassRecovery, handleBypassHardStop,
-    handlePostEnergy,
+    handlePostEnergy, handleAutopsyPick,
     isPlaying, audioVolume, handleVolumeChange,
     shouldAnimate, t,
     TIMER_PRESETS,
@@ -134,6 +134,7 @@ export default function FocusScreen() {
         emotionalReactivity={emotionalReactivity}
         sessionPhase={sessionPhase}
         parkedThoughtsCount={parkedThoughtsCount}
+        onAutopsyPick={handleAutopsyPick}
       />
     )
   }
