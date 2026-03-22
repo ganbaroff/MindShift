@@ -66,7 +66,7 @@ export function DifficultyPicker({ difficulty, onSelect }: DifficultyPickerProps
                   <div key={i} className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: sel ? c.color : 'var(--color-text-muted)' }} />
                 ))}
               </div>
-              {c.label}
+              {t(`difficulty.${c.label.toLowerCase()}`, c.label)}
             </motion.button>
           );
         })}
@@ -176,7 +176,7 @@ export function CategoryPicker({ category, showCategory, onToggle, onSelect, sho
                   }}
                 >
                   <span>{cfg.emoji}</span>
-                  {cfg.label}
+                  {t(`category.${c}`, cfg.label)}
                 </motion.button>
               );
             })}

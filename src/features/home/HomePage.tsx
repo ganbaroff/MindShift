@@ -201,7 +201,7 @@ export default function HomePage() {
         <div>
           <h1 className="text-[24px] font-bold" style={{ color: 'var(--color-text-primary)' }}>{greeting}</h1>
           <p className="text-[13px] mt-0.5" style={{ color: 'var(--color-text-muted)' }}>
-            {isLowEnergy ? copy.lowEnergyNudge : homeSubtitle}
+            {isLowEnergy ? copy.lowEnergyNudge : t(`appMode.${appMode}Subtitle`, homeSubtitle)}
           </p>
         </div>
         {/* Mochi with speech bubble */}
