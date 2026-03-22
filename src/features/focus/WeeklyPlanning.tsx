@@ -61,10 +61,10 @@ export const WeeklyPlanning = memo(function WeeklyPlanning({ onDismiss }: Weekly
 
   // Choose a warm, non-comparative recap message based on count
   const recapMsg =
-    completedTotal >= 50 ? `${completedTotal} tasks done so far. Solid.` :
-    completedTotal >= 20 ? `${completedTotal} tasks finished. Not bad.` :
-    completedTotal >= 5  ? `${completedTotal} tasks down. Getting there.` :
-    "Each finished task is one less thing on your mind."
+    completedTotal >= 50 ? t('weekly.recap50', { count: String(completedTotal) }) :
+    completedTotal >= 20 ? t('weekly.recap20', { count: String(completedTotal) }) :
+    completedTotal >= 5  ? t('weekly.recap5', { count: String(completedTotal) }) :
+    t('weekly.recapDefault')
 
   return (
     <div

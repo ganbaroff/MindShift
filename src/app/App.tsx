@@ -85,6 +85,9 @@ export default function App() {
       ? (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
       : userTheme
     document.documentElement.setAttribute('data-theme', resolved)
+    // Sync browser chrome color with theme
+    const meta = document.querySelector('meta[name="theme-color"]')
+    if (meta) meta.setAttribute('content', resolved === 'light' ? '#F5F3EE' : '#0F1117')
   }, [userTheme])
 
   useEffect(() => {

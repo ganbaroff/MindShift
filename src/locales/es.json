@@ -930,7 +930,11 @@
     "skipDecide": "Saltar: decidiré sobre la marcha",
     "intentionSet": "conjunto de intenciones",
     "intentionVisible": "Verás esto cuando inicies una sesión de concentración.",
-    "letsGo": "Vamos"
+    "letsGo": "Vamos",
+    "recap50": "{{count}} tareas hechas. Sólido.",
+    "recap20": "{{count}} tareas completadas. Nada mal.",
+    "recap5": "{{count}} tareas cerradas. Avanzando.",
+    "recapDefault": "Cada tarea cerrada es una preocupación menos."
   },
   "recovery": {
     "overwhelmQuestion": "¿Qué tan abrumado estás ahora?",
@@ -1082,5 +1086,15 @@
     "tip2": "Pruebe sesiones más largas (15-25 min) con sonido",
     "tip3": "Comprueba tu progreso después de algunas sesiones.",
     "startForReal": "empezar de verdad"
+  },
+  "reminders": {
+    "oneHour": "\"{{title}}\" — en aproximadamente una hora",
+    "thirtyMin": "\"{{title}}\" — en 30 minutos",
+    "fifteenMin": "\"{{title}}\" — empieza en 15 minutos",
+    "overdue": "\"{{title}}\" — se pasó la fecha. ¿Aún quieres hacerlo?",
+    "meetingThirty": "\"{{title}}\" empieza en 30 minutos",
+    "meetingFifteen": "\"{{title}}\" empieza en 15 minutos",
+    "viewTasks": "Ver tareas",
+    "startFocus": "Empezar foco"
   }
 }

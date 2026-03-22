@@ -882,7 +882,11 @@
     "skipDecide": "Skip — I'll decide as I go",
     "intentionSet": "Intention set",
     "intentionVisible": "You'll see this when you start a focus session.",
-    "letsGo": "Let's go"
+    "letsGo": "Let's go",
+    "recap50": "{{count}} tasks done so far. Solid.",
+    "recap20": "{{count}} tasks finished. Not bad.",
+    "recap5": "{{count}} tasks down. Getting there.",
+    "recapDefault": "Each finished task is one less thing on your mind."
   },
   "recovery": {
     "overwhelmQuestion": "How overwhelmed are you right now?",
@@ -1034,5 +1038,15 @@
     "tip2": "Try longer sessions (15-25 min) with sound",
     "tip3": "Check your progress after a few sessions",
     "startForReal": "Start for real"
+  },
+  "reminders": {
+    "oneHour": "\"{{title}}\" is coming up in about an hour",
+    "thirtyMin": "\"{{title}}\" is in about 30 minutes",
+    "fifteenMin": "\"{{title}}\" starts in 15 minutes",
+    "overdue": "\"{{title}}\" was due recently. Still want to do it?",
+    "meetingThirty": "\"{{title}}\" starts in 30 minutes",
+    "meetingFifteen": "\"{{title}}\" starts in 15 minutes",
+    "viewTasks": "View tasks",
+    "startFocus": "Start focus"
   }
 }

@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
-    <meta name="theme-color" content="#0F1117" />
+    <meta name="theme-color" content="#0F1117" /> <!-- updated dynamically by early theme script -->
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="description" content="ADHD-aware AI productivity co-pilot. Guilt-free focus, one task at a time." />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -52,6 +52,32 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 
     <title>MindShift — Focus made kind</title>
+
+    <!-- Early theme detection: prevents dark→light flash (FOUC) on load.
+         Reads persisted theme from IDB/localStorage BEFORE React hydrates.
+         Sets data-theme + theme-color meta immediately. -->
+    <script>
+    (function(){
+      try {
+        // Try localStorage first (fast, sync) — Zustand may have migrated to IDB but localStorage often has the last value
+        var raw = localStorage.getItem('mindshift-storage');
+        var theme = 'dark'; // default
+        if (raw) {
+          var parsed = JSON.parse(raw);
+          var userTheme = (parsed && parsed.state && parsed.state.theme) || 'dark';
+          if (userTheme === 'system') {
+            theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+          } else {
+            theme = userTheme;
+          }
+        }
+        document.documentElement.setAttribute('data-theme', theme);
+        // Update theme-color meta for browser chrome
+        var meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.setAttribute('content', theme === 'light' ? '#F5F3EE' : '#0F1117');
+      } catch(e) { /* fallback: dark theme, React will fix on hydrate */ }
+    })();
+    </script>
 
     <!-- JSON-LD structured data (SoftwareApplication) -->
     <script type="application/ld+json">

@@ -1,5 +1,5 @@
 /**
- * useDeadlineReminders — Gentle AI-powered deadline reminder system
+ * useDeadlineReminders — Gentle deadline reminder system
  *
  * Periodically scans active tasks (NOW + NEXT pools) for upcoming deadlines
  * and shows warm, ADHD-friendly, tone-aware reminders via sonner toasts.
@@ -14,15 +14,15 @@
  *   - Never uses urgency language ("hurry", "urgent", "running out", etc.)
  *   - Never shames ("You missed", "You forgot", "Still haven't done")
  *   - Tracks shown reminders in a session-only Set (no duplicate toasts)
- *   - Uses UI tone system for age-adaptive copy
  *   - Fires browser push notification when app is backgrounded
+ *   - All copy comes from i18n locale files
  */
 
 import { useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { useStore } from '@/store'
 import type { Task, TaskType } from '@/types'
-import type { UITone } from '@/shared/lib/uiTone'
 
 // ── Constants ──────────────────────────────────────────────────────────────────
 
@@ -33,52 +33,6 @@ const INITIAL_DELAY_MS = 5_000            // 5s after mount (let app settle)
 const WINDOW_1H = 60
 const WINDOW_30M = 30
 const WINDOW_15M = 15
-
-// ── Tone-aware copy ────────────────────────────────────────────────────────────
-
-interface ReminderCopy {
-  oneHour: (title: string) => string
-  thirtyMin: (title: string) => string
-  fifteenMin: (title: string) => string
-  overdue: (title: string) => string
-  meetingThirty: (title: string) => string
-  meetingFifteen: (title: string) => string
-}
-
-const REMINDER_COPY: Record<UITone, ReminderCopy> = {
-  gen_z: {
-    oneHour: (t) => `hey, "${t}" is in ~1hr`,
-    thirtyMin: (t) => `"${t}" is in about 30 min`,
-    fifteenMin: (t) => `"${t}" starts in 15 min, you got this`,
-    overdue: (t) => `"${t}" was due earlier. still want to do it?`,
-    meetingThirty: (t) => `"${t}" starts in 30 min`,
-    meetingFifteen: (t) => `"${t}" starts in 15 min, you got this`,
-  },
-  millennial: {
-    oneHour: (t) => `Heads up — "${t}" is coming up in about an hour`,
-    thirtyMin: (t) => `"${t}" is in about 30 minutes`,
-    fifteenMin: (t) => `"${t}" starts in 15 minutes`,
-    overdue: (t) => `"${t}" was due recently. Want to reschedule or tackle it now?`,
-    meetingThirty: (t) => `"${t}" starts in 30 minutes`,
-    meetingFifteen: (t) => `"${t}" starts in 15 minutes`,
-  },
-  gen_x: {
-    oneHour: (t) => `"${t}" — 1 hour.`,
-    thirtyMin: (t) => `"${t}" — 30 minutes.`,
-    fifteenMin: (t) => `"${t}" — 15 minutes.`,
-    overdue: (t) => `"${t}" — past due. Still on your list.`,
-    meetingThirty: (t) => `"${t}" — 30 minutes.`,
-    meetingFifteen: (t) => `"${t}" — 15 minutes.`,
-  },
-  neutral: {
-    oneHour: (t) => `"${t}" is coming up in about an hour`,
-    thirtyMin: (t) => `"${t}" is coming up in about 30 minutes`,
-    fifteenMin: (t) => `"${t}" starts soon`,
-    overdue: (t) => `"${t}" was due yesterday. Still want to do it?`,
-    meetingThirty: (t) => `"${t}" starts in 30 minutes`,
-    meetingFifteen: (t) => `"${t}" starts soon`,
-  },
-}
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -122,15 +76,18 @@ function isMeeting(taskType: TaskType): boolean {
   return taskType === 'meeting'
 }
 
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+type TFn = (key: string, opts?: Record<string, string>) => string
+
 // ── Core check logic ───────────────────────────────────────────────────────────
 
 function checkDeadlines(
   tasks: Task[],
-  tone: UITone,
+  t: TFn,
   shownSet: Set<string>,
 ): void {
   const now = Date.now()
-  const copy = REMINDER_COPY[tone] ?? REMINDER_COPY.neutral
 
   for (const task of tasks) {
     if (task.status !== 'active') continue
@@ -146,11 +103,11 @@ function checkDeadlines(
       const key = reminderKey(task.id, 'overdue')
       if (!shownSet.has(key)) {
         shownSet.add(key)
-        const message = copy.overdue(task.title)
+        const message = t('reminders.overdue', { title: task.title })
         toast(message, {
           duration: 10_000,
           action: {
-            label: 'View tasks',
+            label: t('reminders.viewTasks'),
             onClick: () => { window.location.hash = '' ; window.location.pathname = '/tasks' },
           },
         })
@@ -165,12 +122,12 @@ function checkDeadlines(
       if (!shownSet.has(key)) {
         shownSet.add(key)
         const message = meeting
-          ? copy.meetingFifteen(task.title)
-          : copy.fifteenMin(task.title)
+          ? t('reminders.meetingFifteen', { title: task.title })
+          : t('reminders.fifteenMin', { title: task.title })
         toast(message, {
           duration: 8000,
           action: {
-            label: 'Start focus',
+            label: t('reminders.startFocus'),
             onClick: () => { window.location.hash = '' ; window.location.pathname = '/focus' },
           },
         })
@@ -184,11 +141,11 @@ function checkDeadlines(
       const key = reminderKey(task.id, '30m')
       if (!shownSet.has(key)) {
         shownSet.add(key)
-        const message = copy.meetingThirty(task.title)
+        const message = t('reminders.meetingThirty', { title: task.title })
         toast(message, {
           duration: 8000,
           action: {
-            label: 'Start focus',
+            label: t('reminders.startFocus'),
             onClick: () => { window.location.hash = '' ; window.location.pathname = '/focus' },
           },
         })
@@ -202,13 +159,11 @@ function checkDeadlines(
       const key = reminderKey(task.id, '1h')
       if (!shownSet.has(key)) {
         shownSet.add(key)
-        const message = meeting
-          ? copy.oneHour(task.title)
-          : copy.oneHour(task.title)
+        const message = t('reminders.oneHour', { title: task.title })
         toast(message, {
           duration: 6000,
           action: {
-            label: 'Start focus',
+            label: t('reminders.startFocus'),
             onClick: () => { window.location.hash = '' ; window.location.pathname = '/focus' },
           },
         })
@@ -222,13 +177,13 @@ function checkDeadlines(
 
 /**
  * Runs a deadline reminder check every 15 minutes.
- * Call once in App.tsx or AppShell.tsx.
+ * Call once in AppShell.tsx.
  */
 export function useDeadlineReminders(): void {
   const nowPool = useStore(s => s.nowPool)
   const nextPool = useStore(s => s.nextPool)
-  const uiTone = useStore(s => s.uiTone)
   const onboardingCompleted = useStore(s => s.onboardingCompleted)
+  const { t } = useTranslation()
 
   // Session-only dedup set — survives re-renders but not page reloads
   const shownRef = useRef(new Set<string>())
@@ -242,7 +197,7 @@ export function useDeadlineReminders(): void {
     if (activeTasks.length === 0) return
 
     const runCheck = () => {
-      checkDeadlines(activeTasks, uiTone, shownRef.current)
+      checkDeadlines(activeTasks, t, shownRef.current)
     }
 
     // Initial check after a short delay (let the app settle)
@@ -255,5 +210,5 @@ export function useDeadlineReminders(): void {
       clearTimeout(initialTimer)
       clearInterval(interval)
     }
-  }, [nowPool, nextPool, uiTone, onboardingCompleted])
+  }, [nowPool, nextPool, onboardingCompleted, t])
 }

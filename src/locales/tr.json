@@ -930,7 +930,11 @@
     "skipDecide": "Atla — Gittikçe karar vereceğim",
     "intentionSet": "Niyet seti",
     "intentionVisible": "Odaklanma oturumu başlattığınızda bunu göreceksiniz.",
-    "letsGo": "Hadi gidelim"
+    "letsGo": "Hadi gidelim",
+    "recap50": "{{count}} görev tamamlandı. Sağlam.",
+    "recap20": "{{count}} görev bitti. Fena değil.",
+    "recap5": "{{count}} görev hazır. İlerliyorsun.",
+    "recapDefault": "Bitirilen her görev — bir endişe daha az."
   },
   "recovery": {
     "overwhelmQuestion": "Şu anda ne kadar bunaldınız?",
@@ -1082,5 +1086,15 @@
     "tip2": "Sesli daha uzun oturumları (15-25 dakika) deneyin",
     "tip3": "Birkaç seanstan sonra ilerlemenizi kontrol edin",
     "startForReal": "Gerçekten başla"
+  },
+  "reminders": {
+    "oneHour": "\"{{title}}\" — yaklaşık 1 saat sonra",
+    "thirtyMin": "\"{{title}}\" — 30 dakika sonra",
+    "fifteenMin": "\"{{title}}\" — 15 dakika sonra başlıyor",
+    "overdue": "\"{{title}}\" — süresi geçti. Hâlâ yapmak istiyor musun?",
+    "meetingThirty": "\"{{title}}\" 30 dakika sonra başlıyor",
+    "meetingFifteen": "\"{{title}}\" 15 dakika sonra başlıyor",
+    "viewTasks": "Görevlere bak",
+    "startFocus": "Odaklanmaya başla"
   }
 }
