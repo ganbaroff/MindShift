@@ -114,7 +114,7 @@ export function AppShell() {
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:rounded-lg focus:text-sm focus:font-medium focus:bg-[#7B72FF] focus:text-white"
       >
-        Skip to main content
+        {t('nav.skipToContent', 'Skip to main content')}
       </a>
       <main id="main-content" className="flex-1 overflow-y-auto pb-[calc(64px+env(safe-area-inset-bottom))]">
         {/* Offline status indicator — top of content area */}

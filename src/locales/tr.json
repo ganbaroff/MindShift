@@ -330,7 +330,8 @@
     "tasks": "Görevler",
     "focus": "Odak",
     "upcoming": "Yaklaşan",
-    "settings": "Ayarlar"
+    "settings": "Ayarlar",
+    "skipToContent": "Ana içeriğe atla"
   },
   "appShell": {
     "backOnline": "Tekrar çevrimiçi — değişiklikler senkronize edildi ✓",

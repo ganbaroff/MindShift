@@ -330,7 +330,8 @@
     "tasks": "Tapşırıqlar",
     "focus": "Fokus",
     "upcoming": "Qarşıdan gələn",
-    "settings": "Parametrlər"
+    "settings": "Parametrlər",
+    "skipToContent": "Əsas məzmuna keç"
   },
   "appShell": {
     "backOnline": "Geri onlayn — dəyişikliklər sinxronlaşdırıldı ✓",

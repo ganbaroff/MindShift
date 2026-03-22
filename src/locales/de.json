@@ -330,7 +330,8 @@
     "tasks": "Aufgaben",
     "focus": "Fokus",
     "upcoming": "Demnächst",
-    "settings": "Einstellungen"
+    "settings": "Einstellungen",
+    "skipToContent": "Zum Inhalt springen"
   },
   "appShell": {
     "backOnline": "Zurück online – Änderungen synchronisiert ✓",
