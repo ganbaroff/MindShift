@@ -930,7 +930,11 @@
     "skipDecide": "Überspringen – ich entscheide im Laufe der Zeit",
     "intentionSet": "Absicht gesetzt",
     "intentionVisible": "Sie werden dies sehen, wenn Sie eine Fokussitzung starten.",
-    "letsGo": "Lass uns gehen"
+    "letsGo": "Lass uns gehen",
+    "recap50": "{{count}} Aufgaben erledigt. Solide.",
+    "recap20": "{{count}} Aufgaben fertig. Nicht schlecht.",
+    "recap5": "{{count}} Aufgaben geschafft. Läuft.",
+    "recapDefault": "Jede erledigte Aufgabe ist eine Sorge weniger."
   },
   "recovery": {
     "overwhelmQuestion": "Wie überfordert bist du gerade?",
@@ -1082,5 +1086,15 @@
     "tip2": "Probieren Sie längere Sitzungen (15–25 Minuten) mit Ton aus",
     "tip3": "Überprüfen Sie Ihren Fortschritt nach einigen Sitzungen",
     "startForReal": "Fangen Sie wirklich an"
+  },
+  "reminders": {
+    "oneHour": "\"{{title}}\" — in etwa einer Stunde",
+    "thirtyMin": "\"{{title}}\" — in 30 Minuten",
+    "fifteenMin": "\"{{title}}\" — beginnt in 15 Minuten",
+    "overdue": "\"{{title}}\" — Frist vorbei. Noch erledigen?",
+    "meetingThirty": "\"{{title}}\" beginnt in 30 Minuten",
+    "meetingFifteen": "\"{{title}}\" beginnt in 15 Minuten",
+    "viewTasks": "Aufgaben ansehen",
+    "startFocus": "Fokus starten"
   }
 }

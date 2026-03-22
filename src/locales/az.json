@@ -930,7 +930,11 @@
     "skipDecide": "Keç - getdikcə qərar verəcəm",
     "intentionSet": "Niyyət dəsti",
     "intentionVisible": "Fokus sessiyasına başladığınız zaman bunu görəcəksiniz.",
-    "letsGo": "gedək"
+    "letsGo": "gedək",
+    "recap50": "{{count}} tapşırıq tamamlandı. Möhkəm.",
+    "recap20": "{{count}} tapşırıq bitdi. Pis deyil.",
+    "recap5": "{{count}} tapşırıq hazır. İrəliləyirsən.",
+    "recapDefault": "Hər bitən tapşırıq — bir narahatlıq az."
   },
   "recovery": {
     "overwhelmQuestion": "İndi nə qədər sıxılmısınız?",
@@ -1055,5 +1059,42 @@
       "streakLabel": "zolaq",
       "badgeLabel": "döş nişanları"
     }
+  },
+  "tutorial": {
+    "skip": "Keç",
+    "introTitle": "Fokuslanmağa çalışaq",
+    "introBody": "MindShift-in necə işlədiyini görmək üçün qısa 2 dəqiqəlik sessiya. Beyniniz təbii mərhələlərdən keçir — hər birini göstərəcəyik.",
+    "introHint": "2 dəqiqə çəkir. İstənilən vaxt keçə bilərsiniz.",
+    "startButton": "2 dəq sessiyanı başlat",
+    "sampleTaskTitle": "2 dəqiqə fokuslanmağı yoxla",
+    "phaseStruggle": "Müqavimət",
+    "phaseRelease": "Buraxma",
+    "phaseFlow": "Axın",
+    "struggleExplain": "Bu normaldır. Beyniniz qızınır. İlk 30 saniyə həmişə ən çətinidir.",
+    "releaseExplain": "Müqavimət azalır. Beyniniz tapşırığa qoşulur.",
+    "flowExplain": "Axındasan. Bu dərin fokusdur. Nə qədər çox qalsan, o qədər asanlaşır.",
+    "skipTimer": "Nəticələrə keç",
+    "celebrateTitle": "Bacardın",
+    "celebrateBody": "Bu əsl fokus sessiyası idi. Beyninizin keçdiyi mərhələlər:",
+    "struggleDesc": "Beyin başlamağa müqavimət göstərir. Bu ADHD-dir — tənbəllik deyil. Keçir.",
+    "releaseDesc": "Müqavimət əriyi. Beyin tapşırıqla işləməyə başlayır.",
+    "flowDesc": "Dərin fokus. Beyin öz ritmini tapdı. Hədəf bu idi.",
+    "continueButton": "Anladım",
+    "nextTitle": "Hazırsan",
+    "nextBody": "MindShift-də fokusun necə işlədiyini gördün. Növbəti addımlar:",
+    "tip1": "İNDİ hovuzuna öz tapşırıqlarını əlavə et",
+    "tip2": "Səslə daha uzun sessiyalar yoxla (15-25 dəq)",
+    "tip3": "Bir neçə sessiyadan sonra proqresini yoxla",
+    "startForReal": "Əsl işə başla"
+  },
+  "reminders": {
+    "oneHour": "\"{{title}}\" — təxminən 1 saata",
+    "thirtyMin": "\"{{title}}\" — 30 dəqiqəyə",
+    "fifteenMin": "\"{{title}}\" — 15 dəqiqəyə başlayır",
+    "overdue": "\"{{title}}\" — vaxtı keçib. Hələ etmək istəyirsən?",
+    "meetingThirty": "\"{{title}}\" 30 dəqiqəyə başlayır",
+    "meetingFifteen": "\"{{title}}\" 15 dəqiqəyə başlayır",
+    "viewTasks": "Tapşırıqlara bax",
+    "startFocus": "Fokusa başla"
   }
 }
