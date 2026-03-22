@@ -71,9 +71,10 @@ export default function ProgressPage() {
   const xpToNext = 1000;
 
   // Named XP tiers — calm growth language, no competitive framing
-  const LEVEL_NAMES = ['Seedling', 'Sprout', 'Grower', 'Bloomer', 'Flourisher',
-    'Cultivator', 'Nurturer', 'Luminary', 'Pathfinder', 'Sage'] as const
-  const levelName = LEVEL_NAMES[Math.min(level - 1, LEVEL_NAMES.length - 1)]
+  const LEVEL_KEYS = ['seedling', 'sprout', 'grower', 'bloomer', 'flourisher',
+    'cultivator', 'nurturer', 'luminary', 'pathfinder', 'sage'] as const
+  const levelKey = LEVEL_KEYS[Math.min(level - 1, LEVEL_KEYS.length - 1)]
+  const levelName = t(`levels.${levelKey}`)
 
   // Focus score — composite metric (0-100): sessions + tasks + consistency
   const focusScore = useMemo(() => {
@@ -399,7 +400,7 @@ export default function ProgressPage() {
           <div className="space-y-1.5">
             {weeklyInsight.map((insight, i) => (
               <div key={i} className="rounded-xl p-2.5" style={{ backgroundColor: 'var(--color-surface-card)' }}>
-                <p className="text-[13px]" style={{ color: 'var(--color-text-primary)' }}>{insight}</p>
+                <p className="text-[13px]" style={{ color: 'var(--color-text-primary)' }}>{insight.startsWith('progress.') ? t(insight) : insight}</p>
               </div>
             ))}
           </div>

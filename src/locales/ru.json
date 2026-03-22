@@ -756,6 +756,9 @@
     "shareThisWeek": "Поделиться неделей",
     "sessionLog": "Журнал сессий",
     "weeklyInsight": "✨ Недельный инсайт",
+    "insightPeakFocus": "🧠 Пиковый фокус: 14-16ч",
+    "insightShortSessions": "💡 Попробуй 15-мин сессии в тяжёлые дни",
+    "insightOneStep": "🎯 Ты закрываешь задачи шаг за шагом",
     "achieverLabel": "Достигатор",
     "achieverDesc": "Вы погружаетесь глубоко и доводите дело до конца",
     "explorerLabel": "Исследователь",
@@ -1107,5 +1110,91 @@
     "meetingFifteen": "\"{{title}}\" начинается через 15 минут",
     "viewTasks": "К задачам",
     "startFocus": "Начать фокус"
+  },
+  "achievements": {
+    "first_seed": "Первое зерно",
+    "five_min_hero": "Герой 5 минут",
+    "flow_rider": "Волна потока",
+    "comeback_kid": "Возвращение",
+    "deep_diver": "Глубокий нырок",
+    "quiet_mind": "Тихий ум",
+    "task_sniper": "Снайпер задач",
+    "sonic_anchor": "Звуковой якорь",
+    "week_warrior": "Воин недели",
+    "brain_trust": "Мозговой центр",
+    "micro_master": "Мастер микро",
+    "gentle_start": "Мягкий старт",
+    "recover_rise": "Подъём после паузы",
+    "pool_shifter": "Перемещатель",
+    "night_owl": "Ночная сова",
+    "morning_mind": "Утренний ум",
+    "voice_input": "Голосовой ввод",
+    "full_cycle": "Полный цикл",
+    "first_seed_desc": "Выполни первую задачу",
+    "five_min_hero_desc": "Начни задачу по правилу 5 минут",
+    "flow_rider_desc": "Завершить 52-минутную фокус-сессию",
+    "comeback_kid_desc": "Вернуться после 3+ дней и выполнить задачу",
+    "deep_diver_desc": "Завершить 5 фокус-сессий",
+    "quiet_mind_desc": "Использовать звук в 3 сессиях",
+    "task_sniper_desc": "Выполнить 10 задач",
+    "sonic_anchor_desc": "Установить звуковой якорь",
+    "week_warrior_desc": "Быть активным 5 из 7 дней",
+    "brain_trust_desc": "Использовать AI декомпозицию 10 раз",
+    "micro_master_desc": "Выполнить 50 микро-задач",
+    "gentle_start_desc": "Выполнить задачу при низкой энергии (1-2)",
+    "recover_rise_desc": "Вернуться после перерыва и сфокусироваться",
+    "pool_shifter_desc": "Переместить задачу из Когда-нибудь в Сейчас",
+    "night_owl_desc": "Выполнить задачу после 21:00",
+    "morning_mind_desc": "Выполнить задачу до 9:00",
+    "voice_input_desc": "Добавить задачу голосом",
+    "full_cycle_desc": "Пройти все 4 фазы фокуса за одну сессию"
+  },
+  "levels": {
+    "seedling": "Росток",
+    "sprout": "Побег",
+    "grower": "Растущий",
+    "bloomer": "Цветущий",
+    "flourisher": "Процветающий",
+    "cultivator": "Культиватор",
+    "nurturer": "Наставник",
+    "luminary": "Светило",
+    "pathfinder": "Следопыт",
+    "sage": "Мудрец"
+  },
+  "difficulty": {
+    "easy": "Легко",
+    "medium": "Средне",
+    "hard": "Сложно"
+  },
+  "taskType": {
+    "task": "Задача",
+    "idea": "Идея",
+    "reminder": "Напоминание",
+    "meeting": "Встреча"
+  },
+  "category": {
+    "work": "Работа",
+    "personal": "Личное",
+    "health": "Здоровье",
+    "learning": "Обучение",
+    "finance": "Финансы"
+  },
+  "energy": {
+    "drained": "Без сил",
+    "low": "Мало",
+    "okay": "Нормально",
+    "good": "Хорошо",
+    "wired": "На подъёме"
+  },
+  "appMode": {
+    "minimalSubtitle": "Одна задача за раз. Что важнее всего?",
+    "habitSubtitle": "Строим рутину, шаг за шагом.",
+    "systemSubtitle": "Всё на виду. Ты управляешь."
+  },
+  "seasonalMode": {
+    "launch": "Запуск",
+    "maintain": "Поддержка",
+    "recover": "Восстановление",
+    "sandbox": "Песочница"
   }
 }

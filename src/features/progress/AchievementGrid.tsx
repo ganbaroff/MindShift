@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'motion/react'
 import { useMotion } from '@/shared/hooks/useMotion'
 import type { Achievement } from '@/types'
@@ -9,19 +10,22 @@ interface AchievementGridProps {
 
 export function AchievementGrid({ achievements }: AchievementGridProps) {
   const { shouldAnimate } = useMotion()
+  const { t } = useTranslation()
   const [focusedAchievement, setFocusedAchievement] = useState<string | null>(null)
   const unlockedCount = achievements.filter(a => a.unlockedAt).length
 
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
-        <p className="text-[11px] uppercase tracking-widest" style={{ color: 'var(--color-text-muted)' }}>Achievements</p>
+        <p className="text-[11px] uppercase tracking-widest" style={{ color: 'var(--color-text-muted)' }}>{t('progress.achievements')}</p>
         <p className="text-[11px]" style={{ color: 'var(--color-primary)' }}>{unlockedCount}/{achievements.length}</p>
       </div>
       <div className="grid grid-cols-3 gap-2">
         {achievements.map((a, i) => {
           const unlocked = !!a.unlockedAt
           const isFocused = focusedAchievement === a.key
+          const name = t(`achievements.${a.key}`, a.name)
+          const desc = t(`achievements.${a.key}_desc`, a.description)
           return (
             <div key={a.key} className="relative">
               <motion.button
@@ -37,10 +41,10 @@ export function AchievementGrid({ achievements }: AchievementGridProps) {
                   opacity: unlocked ? 1 : 0.38,
                   filter: unlocked ? 'none' : 'grayscale(1)',
                 }}
-                aria-label={`${a.name}: ${a.description}`}
+                aria-label={`${name}: ${desc}`}
               >
                 <span className="text-[24px]">{a.emoji}</span>
-                <span className="text-[10px] text-center mt-0.5" style={{ color: 'var(--color-text-muted)' }}>{a.name}</span>
+                <span className="text-[10px] text-center mt-0.5" style={{ color: 'var(--color-text-muted)' }}>{name}</span>
               </motion.button>
               <AnimatePresence>
                 {isFocused && (
@@ -52,7 +56,7 @@ export function AchievementGrid({ achievements }: AchievementGridProps) {
                     style={{ backgroundColor: 'var(--color-surface-raised)', border: '1px solid rgba(123,114,255,0.20)' }}
                   >
                     <p className="text-[11px] leading-relaxed" style={{ color: unlocked ? 'var(--color-text-primary)' : 'var(--color-text-muted)' }}>
-                      {a.description}
+                      {desc}
                     </p>
                     {unlocked && a.unlockedAt && (
                       <p className="text-[10px] mt-0.5" style={{ color: 'var(--color-primary)' }}>
