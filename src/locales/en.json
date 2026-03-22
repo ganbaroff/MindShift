@@ -131,7 +131,11 @@
     "deepBreaths": "Take 5 deep breaths",
     "stretchNeck": "Stretch your neck and shoulders",
     "suggestedRest": "suggested rest time",
-    "keepGoingBypass": "I know — keep going →"
+    "keepGoingBypass": "I know — keep going →",
+    "tipTimeOften": "Time slips fast for you — one visible timer is enough.",
+    "tipTimeSometimes": "Check the clock before you start — then forget about it.",
+    "tipEmotionHigh": "Block your first 15 min from interruptions. Start small.",
+    "tipEmotionModerate": "If distracted, pause and return. That counts too."
   },
   "settings": {
     "title": "Settings",
@@ -330,7 +334,8 @@
     "tasks": "Tasks",
     "focus": "Focus",
     "upcoming": "Upcoming",
-    "settings": "Settings"
+    "settings": "Settings",
+    "skipToContent": "Skip to main content"
   },
   "appShell": {
     "backOnline": "Back online — changes synced ✓",
@@ -663,7 +668,13 @@
     "hardWork": "You've been working hard. Take care of yourself first.",
     "easyDoesIt": "Easy does it today. Small steps still count.",
     "nothingHereYet": "Nothing here yet",
-    "goalReachedToast": "Daily goal reached! {{min}} min focused today"
+    "goalReachedToast": "Daily goal reached! {{min}} min focused today",
+    "briefTimeOften": "Time blindness day? Set one visible timer before you start.",
+    "briefTimeSometimes": "Check the clock before diving in — surprises are harder to handle today.",
+    "briefEmotionHigh": "High-reactivity mode: protect your first 30 min from interruptions.",
+    "briefEmotionModerate": "Start slow today. Emotions affect focus more than usual.",
+    "briefMedMorning": "Morning window — good time for harder tasks.",
+    "briefDefault": "Pick one task you'd regret not starting. Just one."
   },
   "progress": {
     "title": "Your Progress 🌱",

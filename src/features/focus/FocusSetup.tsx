@@ -91,15 +91,15 @@ export function FocusSetup({
   // ── Adaptive ADHD tip (W) ─────────────────────────────────────────────────
   const adaptiveTip = useMemo<{ emoji: string; text: string } | null>(() => {
     if (timeBlindness === 'often')
-      return { emoji: '⏰', text: 'Time slips fast for you — one visible timer is enough.' }
+      return { emoji: '⏰', text: t('focus.tipTimeOften') }
     if (timeBlindness === 'sometimes')
-      return { emoji: '🕐', text: 'Check the clock before you start — then forget about it.' }
+      return { emoji: '🕐', text: t('focus.tipTimeSometimes') }
     if (emotionalReactivity === 'high')
-      return { emoji: '🛡️', text: 'Block your first 15 min from interruptions. Start small.' }
+      return { emoji: '🛡️', text: t('focus.tipEmotionHigh') }
     if (emotionalReactivity === 'moderate')
-      return { emoji: '🌿', text: 'If distracted, pause and return. That counts too.' }
+      return { emoji: '🌿', text: t('focus.tipEmotionModerate') }
     return null
-  }, [timeBlindness, emotionalReactivity])
+  }, [timeBlindness, emotionalReactivity, t])
 
   // ── Today's progress strip (W) ────────────────────────────────────────────
   const todayFocusMin = useMemo(() => {

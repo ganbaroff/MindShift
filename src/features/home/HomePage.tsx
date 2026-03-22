@@ -116,18 +116,19 @@ export default function HomePage() {
 
   // hour declared early — used by greeting AND daily brief
   const hour = new Date().getHours();
+  const { t } = useTranslation();
 
   // ── Daily brief (Sprint T) ────────────────────────────────────────────────────
   // A personalised tip based on the user's ADHD profile, shown once per session.
   // Visible in the morning (before 12) or afternoon; dismissed by user.
   const briefTip = useMemo(() => {
-    if (timeBlindness === 'often') return { emoji: '⏰', text: 'Time blindness day? Set one visible timer before you start.' }
-    if (timeBlindness === 'sometimes') return { emoji: '⏰', text: 'Check the clock before diving in — surprises are harder to handle today.' }
-    if (emotionalReactivity === 'high') return { emoji: '🛡️', text: 'High-reactivity mode: protect your first 30 min from interruptions.' }
-    if (emotionalReactivity === 'moderate') return { emoji: '🌿', text: 'Start slow today. Emotions affect focus more than usual.' }
-    if (medicationEnabled && medicationTime === 'morning') return { emoji: '⚡', text: 'Morning window — good time for harder tasks.' }
-    return { emoji: '🎯', text: 'Pick one task you\'d regret not starting. Just one.' }
-  }, [timeBlindness, emotionalReactivity, medicationEnabled, medicationTime])
+    if (timeBlindness === 'often') return { emoji: '⏰', text: t('home.briefTimeOften') }
+    if (timeBlindness === 'sometimes') return { emoji: '⏰', text: t('home.briefTimeSometimes') }
+    if (emotionalReactivity === 'high') return { emoji: '🛡️', text: t('home.briefEmotionHigh') }
+    if (emotionalReactivity === 'moderate') return { emoji: '🌿', text: t('home.briefEmotionModerate') }
+    if (medicationEnabled && medicationTime === 'morning') return { emoji: '⚡', text: t('home.briefMedMorning') }
+    return { emoji: '🎯', text: t('home.briefDefault') }
+  }, [timeBlindness, emotionalReactivity, medicationEnabled, medicationTime, t])
   const topNowTask = nowTasks[0] ?? null
   const showBrief = !briefDismissed && hour < 17 && !isLowEnergy
 
@@ -180,7 +181,7 @@ export default function HomePage() {
 
   // Time-based greeting (i18n-aware — legacy system)
   const { t: tLegacy } = useI18n();
-  const { t } = useTranslation();
+  // NOTE: { t } from useTranslation is hoisted above briefTip useMemo
   const greeting =
     hour < 5  ? tLegacy('home.greeting.night') :
     hour < 12 ? tLegacy('home.greeting.morning') :

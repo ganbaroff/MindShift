@@ -330,7 +330,8 @@
     "tasks": "Tareas",
     "focus": "Enfocar",
     "upcoming": "Próximo",
-    "settings": "Ajustes"
+    "settings": "Ajustes",
+    "skipToContent": "Saltar al contenido"
   },
   "appShell": {
     "backOnline": "Volver a estar en línea: cambios sincronizados ✓",
