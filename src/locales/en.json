@@ -708,6 +708,9 @@
     "shareThisWeek": "Share this week",
     "sessionLog": "Session Log",
     "weeklyInsight": "✨ Weekly insight",
+    "insightPeakFocus": "🧠 Peak focus: 2-4pm",
+    "insightShortSessions": "💡 Try 15-min sessions on low days",
+    "insightOneStep": "🎯 You finish tasks one step at a time",
     "achieverLabel": "Achiever",
     "achieverDesc": "You dive deep and finish what you start",
     "explorerLabel": "Explorer",
@@ -1059,5 +1062,91 @@
     "meetingFifteen": "\"{{title}}\" starts in 15 minutes",
     "viewTasks": "View tasks",
     "startFocus": "Start focus"
+  },
+  "achievements": {
+    "first_seed": "First Seed",
+    "five_min_hero": "5-Minute Hero",
+    "flow_rider": "Flow Rider",
+    "comeback_kid": "Comeback Kid",
+    "deep_diver": "Deep Diver",
+    "quiet_mind": "Quiet Mind",
+    "task_sniper": "Task Sniper",
+    "sonic_anchor": "Sonic Anchor",
+    "week_warrior": "Week Warrior",
+    "brain_trust": "Brain Trust",
+    "micro_master": "Micro Master",
+    "gentle_start": "Gentle Start",
+    "recover_rise": "Recover & Rise",
+    "pool_shifter": "Pool Shifter",
+    "night_owl": "Night Owl",
+    "morning_mind": "Morning Mind",
+    "voice_input": "Voice Input",
+    "full_cycle": "Full Cycle",
+    "first_seed_desc": "Complete your first task",
+    "five_min_hero_desc": "Start a task using the 5-minute rule",
+    "flow_rider_desc": "Complete a 52-minute focus session",
+    "comeback_kid_desc": "Return after 3+ days and complete a task",
+    "deep_diver_desc": "Complete 5 focus sessions",
+    "quiet_mind_desc": "Use audio for 3 focus sessions",
+    "task_sniper_desc": "Complete 10 tasks",
+    "sonic_anchor_desc": "Set a focus anchor sound",
+    "week_warrior_desc": "Active 5 out of 7 days",
+    "brain_trust_desc": "Use AI task decomposition 10 times",
+    "micro_master_desc": "Complete 50 micro-tasks",
+    "gentle_start_desc": "Complete a task at low energy (1-2)",
+    "recover_rise_desc": "Come back after a break and focus",
+    "pool_shifter_desc": "Move a task from Someday to Now",
+    "night_owl_desc": "Complete a task after 9 PM",
+    "morning_mind_desc": "Complete a task before 9 AM",
+    "voice_input_desc": "Add a task by voice",
+    "full_cycle_desc": "Complete all 4 focus phases in one session"
+  },
+  "levels": {
+    "seedling": "Seedling",
+    "sprout": "Sprout",
+    "grower": "Grower",
+    "bloomer": "Bloomer",
+    "flourisher": "Flourisher",
+    "cultivator": "Cultivator",
+    "nurturer": "Nurturer",
+    "luminary": "Luminary",
+    "pathfinder": "Pathfinder",
+    "sage": "Sage"
+  },
+  "difficulty": {
+    "easy": "Easy",
+    "medium": "Medium",
+    "hard": "Hard"
+  },
+  "taskType": {
+    "task": "Task",
+    "idea": "Idea",
+    "reminder": "Reminder",
+    "meeting": "Meeting"
+  },
+  "category": {
+    "work": "Work",
+    "personal": "Personal",
+    "health": "Health",
+    "learning": "Learning",
+    "finance": "Finance"
+  },
+  "energy": {
+    "drained": "Drained",
+    "low": "Low",
+    "okay": "Okay",
+    "good": "Good",
+    "wired": "Wired"
+  },
+  "appMode": {
+    "minimalSubtitle": "One task at a time. What matters most?",
+    "habitSubtitle": "Build your routine, one step at a time.",
+    "systemSubtitle": "Everything visible. You're in control."
+  },
+  "seasonalMode": {
+    "launch": "Launch",
+    "maintain": "Maintain",
+    "recover": "Recover",
+    "sandbox": "Sandbox"
   }
 }

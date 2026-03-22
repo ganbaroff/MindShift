@@ -29,10 +29,11 @@ import type { FocusSessionRow } from '@/types/database'
 
 // ── Static fallback insights ──────────────────────────────────────────────────
 
+// i18n keys — resolved at render time via t() in ProgressPage
 const FALLBACK_INSIGHTS = [
-  '🧠 Peak focus: 2-4pm',
-  '💡 Try 15-min sessions on low days',
-  '🎯 You finish tasks one step at a time',
+  'progress.insightPeakFocus',
+  'progress.insightShortSessions',
+  'progress.insightOneStep',
 ]
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
