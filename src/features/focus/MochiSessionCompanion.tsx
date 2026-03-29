@@ -154,9 +154,21 @@ function MochiSessionCompanionInner({ elapsedSeconds, sessionPhase, behaviorProf
   }, [activeNowTasks])
 
   const [activeBubble, setActiveBubble] = useState<ActiveBubble | null>(null)
-  const shownRef      = useRef<Set<string>>(new Set())
-  const lastShownAtRef = useRef<number>(0)
-  const dismissTimer  = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const shownRef        = useRef<Set<string>>(new Set())
+  const lastShownAtRef  = useRef<number>(0)
+  const dismissTimer    = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // Mirror elapsedSeconds in a ref so the trigger effect can read it without
+  // listing it as a dependency (prevents running on every 1-second tick).
+  const elapsedSecondsRef = useRef(elapsedSeconds)
+  useEffect(() => { elapsedSecondsRef.current = elapsedSeconds }, [elapsedSeconds])
+
+  // Bucket value that advances only when elapsed crosses a trigger threshold.
+  // This replaces elapsedSeconds in the trigger effect's dep array — reducing
+  // runs from ~3600/hour (every tick) to ≤4 (once per threshold crossing).
+  const elapsedBucket = useMemo(
+    () => BUBBLE_TRIGGERS.filter(t => elapsedSeconds >= t.minElapsed).length,
+    [elapsedSeconds],
+  )
 
   const isGuest = !userId || userId.startsWith('guest_')
 
@@ -192,14 +204,17 @@ function MochiSessionCompanionInner({ elapsedSeconds, sessionPhase, behaviorProf
   }, [psychotype, uiTone, getPool])
 
   // ── Trigger logic ───────────────────────────────────────────────────────────
+  // Runs at most once per threshold crossing (4 thresholds total) rather than
+  // every second — elapsedBucket changes only when elapsed crosses 7/15/30/60 min.
   useEffect(() => {
+    const elapsed = elapsedSecondsRef.current
     for (const trigger of BUBBLE_TRIGGERS) {
       if (shownRef.current.has(trigger.id)) continue
-      if (elapsedSeconds < trigger.minElapsed) continue
-      if (lastShownAtRef.current > 0 && elapsedSeconds - lastShownAtRef.current < MIN_GAP_SECONDS) continue
+      if (elapsed < trigger.minElapsed) continue
+      if (lastShownAtRef.current > 0 && elapsed - lastShownAtRef.current < MIN_GAP_SECONDS) continue
 
       shownRef.current.add(trigger.id)
-      lastShownAtRef.current = elapsedSeconds
+      lastShownAtRef.current = elapsed
 
       // Show fallback immediately so user sees something fast
       const fallback = getFallbackMessage(trigger)
@@ -211,7 +226,7 @@ function MochiSessionCompanionInner({ elapsedSeconds, sessionPhase, behaviorProf
 
       // If authenticated, fire AI request to upgrade the message
       if (!isGuest) {
-        const elapsedMin = Math.floor(elapsedSeconds / 60)
+        const elapsedMin = Math.floor(elapsed / 60)
         fetchMochiAI(
           trigger.messagePool,
           {
@@ -243,7 +258,8 @@ function MochiSessionCompanionInner({ elapsedSeconds, sessionPhase, behaviorProf
 
       break  // one at a time
     }
-  }, [elapsedSeconds, getFallbackMessage, isGuest, psychotype, sessionPhase, energyLevel, currentStreak, behaviorProfile, timeBlindness, emotionalReactivity, seasonalMode, locale, activeTaskTypes, upcomingDeadlines])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [elapsedBucket, getFallbackMessage, isGuest, psychotype, sessionPhase, energyLevel, currentStreak, behaviorProfile, timeBlindness, emotionalReactivity, seasonalMode, locale, activeTaskTypes, upcomingDeadlines])
 
   // Cleanup timer on unmount
   useEffect(() => () => {

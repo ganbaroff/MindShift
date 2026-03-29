@@ -7,6 +7,7 @@ import { useStore } from '@/store'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { useDeadlineReminders } from '@/shared/hooks/useDeadlineReminders'
 import { usePushSubscription } from '@/shared/hooks/usePushSubscription'
+import { usePendingSessionRecovery } from '@/shared/hooks/usePendingSessionRecovery'
 import { InstallBanner } from '@/shared/ui/InstallBanner'
 import { Mascot } from '@/shared/ui/Mascot'
 
@@ -76,6 +77,8 @@ export function AppShell() {
   useDeadlineReminders()
   // Push subscription — persists Web Push sub to Supabase for background reminders
   usePushSubscription()
+  // Pending session recovery — toasts if a session was interrupted by tab close
+  usePendingSessionRecovery()
 
   // S-7: detect navigation away from /focus while session is active
   useEffect(() => {
