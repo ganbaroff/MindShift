@@ -59,15 +59,20 @@
     <script>
     (function(){
       try {
-        // Try localStorage first (fast, sync) — Zustand may have migrated to IDB but localStorage often has the last value
-        var raw = localStorage.getItem('mindshift-storage');
+        // idbStorage writes a localStorage backup at 'mindshift-store_backup' on every save.
+        // After IDB migration the primary 'mindshift-store' key is deleted from localStorage,
+        // so we read the backup first (post-migration path), then fall back to the primary key
+        // (pre-migration / first load path).
+        var raw = localStorage.getItem('mindshift-store_backup')
+               || localStorage.getItem('mindshift-store');
         var theme = 'dark'; // default
         if (raw) {
           var parsed = JSON.parse(raw);
-          var userTheme = (parsed && parsed.state && parsed.state.theme) || 'dark';
+          // Store field is 'userTheme', not 'theme'
+          var userTheme = (parsed && parsed.state && parsed.state.userTheme) || 'dark';
           if (userTheme === 'system') {
             theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-          } else {
+          } else if (userTheme === 'light' || userTheme === 'dark') {
             theme = userTheme;
           }
         }

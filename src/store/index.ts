@@ -210,7 +210,13 @@ interface GridSlice {
   resetGridToDefaults: () => void
 }
 
-export type AppStore = UserSlice & TaskSlice & SessionSlice & AudioSlice & ProgressSlice & PreferencesSlice & GridSlice
+// Non-persisted runtime flag — true once IDB hydration completes (or fails).
+// Gates App.tsx render to prevent default-state flash on initial load.
+interface HydrationSlice {
+  _hasHydrated: boolean
+}
+
+export type AppStore = UserSlice & TaskSlice & SessionSlice & AudioSlice & ProgressSlice & PreferencesSlice & GridSlice & HydrationSlice
 
 // ── Store ─────────────────────────────────────────────────────────────────────
 
@@ -219,6 +225,9 @@ export const useStore = create<AppStore>()(
     persist(
       (set, get) => ({
         // ── User ────────────────────────────────────────────────────────────
+        // Hydration flag — starts false, set to true by onRehydrateStorage (not persisted)
+        _hasHydrated: false,
+
         userId: null,
         email: null,
         cognitiveMode: 'focused',
@@ -822,6 +831,12 @@ export const useStore = create<AppStore>()(
         // Prevents localStorage from growing unboundedly while keeping recent
         // completed tasks visible in the "Done recently" section.
         onRehydrateStorage: () => (state) => {
+          // Always signal hydration complete — even if state is null (IDB failure).
+          // useStore.setState triggers a subscriber notification so App.tsx re-renders
+          // and lifts the LoadingScreen gate. Called after Zustand's merge() completes,
+          // so useStore is guaranteed to be assigned at this point.
+          useStore.setState({ _hasHydrated: true })
+
           if (!state) return
           // Defensive: ensure pools are arrays even after rehydration
           if (!Array.isArray(state.nowPool)) state.nowPool = []

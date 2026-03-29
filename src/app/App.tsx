@@ -66,6 +66,7 @@ export default function App() {
     shutdownShownDate, setShutdownShownDate,
     monthlyReflectionShownMonth, setMonthlyReflectionShownMonth,
     weeklyPlanShownWeek, setWeeklyPlanShownWeek,
+    _hasHydrated,
   } = useStore()
   const [showContextRestore, setShowContextRestore] = useState(false)
   const [showShutdown, setShowShutdown] = useState(false)
@@ -273,6 +274,10 @@ export default function App() {
     if (!flexiblePauseUntil) return ''
     return new Date(flexiblePauseUntil).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
   }, [flexiblePauseUntil])
+
+  // Block render until IDB hydration completes — prevents default-state flash
+  // (e.g. onboardingCompleted: false briefly before persisted true loads from IDB)
+  if (!_hasHydrated) return <LoadingScreen />
 
   return (
     <BrowserRouter>
