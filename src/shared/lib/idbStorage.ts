@@ -66,11 +66,19 @@ export const idbStorage: StateStorage = {
 
 // ── Cross-tab sync ─────────────────────────────────────────────────────────
 // When tab A saves state, the _backup key in localStorage changes.
-// Tab B detects this via the `storage` event and reloads to pick up fresh state.
+// Tab B detects this via the `storage` event and merges state instead of
+// reloading — a full reload would interrupt in-progress focus sessions,
+// abort API calls, and reset scroll position. (BUG-D4 fix)
 if (typeof window !== 'undefined') {
   window.addEventListener('storage', (e: StorageEvent) => {
     if (e.key?.endsWith('_backup') && e.newValue) {
-      window.location.reload()
+      try {
+        // Dynamically import store to avoid circular dependency at module init
+        import('@/store').then(({ useStore }) => {
+          const parsed = JSON.parse(e.newValue!) as { state?: Record<string, unknown> }
+          if (parsed?.state) useStore.setState(parsed.state)
+        }).catch(() => { /* non-critical — tab will sync on next interaction */ })
+      } catch { /* non-critical */ }
     }
   })
 }
