@@ -40,6 +40,9 @@ export default function TasksPage() {
   const [showSomeday, setShowSomeday] = useState(false);
   const [showDone, setShowDone] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showPoolGuide, setShowPoolGuide] = useState(() => {
+    return !localStorage.getItem('ms_pools_explained')
+  });
 
   const { nowPool, nextPool, somedayPool, completeTask, snoozeTask, removeTask, reorderPool, moveTask, appMode, seasonalMode } = useStore();
 
@@ -119,6 +122,41 @@ export default function TasksPage() {
           </button>
         )}
       </motion.div>
+
+      {/* Pool explanation for first-time users */}
+      <AnimatePresence>
+        {showPoolGuide && (
+          <motion.div
+            initial={shouldAnimate ? { opacity: 0, height: 0 } : false}
+            animate={shouldAnimate ? { opacity: 1, height: 'auto' } : false}
+            exit={shouldAnimate ? { opacity: 0, height: 0 } : undefined}
+            className="mt-4 rounded-2xl p-4 overflow-hidden"
+            style={{ backgroundColor: 'rgba(78,205,196,0.08)', border: '1px solid rgba(78,205,196,0.15)' }}
+          >
+            <div className="flex items-start justify-between mb-2">
+              <p className="text-[13px] font-semibold" style={{ color: 'var(--color-teal)' }}>
+                {t('tasks.poolGuide.title', { defaultValue: 'How tasks work here' })}
+              </p>
+              <button
+                onClick={() => {
+                  localStorage.setItem('ms_pools_explained', '1')
+                  setShowPoolGuide(false)
+                }}
+                className="text-[11px] px-2 py-0.5 rounded-lg"
+                style={{ color: 'var(--color-text-muted)', backgroundColor: 'rgba(255,255,255,0.05)' }}
+                aria-label="Dismiss"
+              >
+                {t('generic.gotIt', { defaultValue: 'Got it' })}
+              </button>
+            </div>
+            <div className="space-y-1.5 text-[12px]" style={{ color: 'var(--color-text-primary)' }}>
+              <p><span style={{ color: 'var(--color-teal)' }}>NOW</span> — {t('tasks.poolGuide.now', { defaultValue: 'up to 3 tasks you do right now. Less choice = less paralysis.' })}</p>
+              <p><span style={{ color: 'var(--color-primary)' }}>NEXT</span> — {t('tasks.poolGuide.next', { defaultValue: 'queued up. Move here when ready.' })}</p>
+              <p><span style={{ color: 'var(--color-text-muted)' }}>SOMEDAY</span> — {t('tasks.poolGuide.someday', { defaultValue: 'parked ideas. No pressure, no deadline.' })}</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="space-y-5 mt-5">
 
