@@ -223,7 +223,7 @@ export function useSessionHistory(): SessionHistoryResult {
   const isGuest = !userId || userId.startsWith('guest_')
 
   const { data, isLoading } = useQuery({
-    queryKey: ['session-history', userId],
+    queryKey: ['session-history', userId, seasonalMode],
     queryFn: () => fetchSessionHistory(userId!, seasonalMode),
     enabled: !isGuest,
     staleTime: 5 * 60 * 1000, // 5 minutes — matches QueryClient default

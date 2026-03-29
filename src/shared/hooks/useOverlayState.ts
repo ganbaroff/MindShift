@@ -85,8 +85,7 @@ export function useOverlayState(): OverlayState {
     if (shutdownShownDate === today) return
     const id = setTimeout(() => setShowShutdown(true), 1200)
     return () => clearTimeout(id)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onboardingCompleted])
+  }, [onboardingCompleted, shutdownShownDate])
 
   // ── MonthlyReflection: first 5 days of each month, once per month ────────────
   useEffect(() => {
@@ -98,8 +97,7 @@ export function useOverlayState(): OverlayState {
     if (monthlyReflectionShownMonth === currentMonth) return
     const id = setTimeout(() => setShowMonthly(true), 2000)
     return () => clearTimeout(id)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onboardingCompleted, completedTotal])
+  }, [onboardingCompleted, completedTotal, monthlyReflectionShownMonth])
 
   // ── WeeklyPlanning: Sunday 18pm+ or Monday before noon, once per ISO week ────
   useEffect(() => {
@@ -112,8 +110,7 @@ export function useOverlayState(): OverlayState {
     if (weeklyPlanShownWeek === getIsoWeekKey(now)) return
     const id = setTimeout(() => setShowWeeklyPlan(true), 2500)
     return () => clearTimeout(id)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onboardingCompleted])
+  }, [onboardingCompleted, completedTotal, weeklyPlanShownWeek])
 
   // ── Derived ───────────────────────────────────────────────────────────────────
   const showRecovery = (() => {

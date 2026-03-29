@@ -62,6 +62,7 @@ export default function App() {
     setUser, updateLastSession,
     nowPool, nextPool, somedayPool,
     onboardingCompleted, setBurnoutScore, completedTotal, energyLevel,
+    emotionalReactivity,
     setFlexiblePauseUntil,
     reducedStimulation, userTheme, firstFocusTutorialCompleted,
     setRecoveryShown,
@@ -184,12 +185,11 @@ export default function App() {
     })
     const rawScore = computeBurnoutScore(behaviors)
     // High emotional reactivity = feel burnout sooner (1.2x multiplier, capped at 100)
-    const emotionalReactivity = useStore.getState().emotionalReactivity
     const adjustedScore = emotionalReactivity === 'high'
       ? Math.min(100, Math.round(rawScore * 1.2))
       : rawScore
     setBurnoutScore(adjustedScore)
-  }, [completedTotal, energyLevel, nowPool, nextPool, somedayPool, setBurnoutScore])
+  }, [completedTotal, energyLevel, nowPool, nextPool, somedayPool, setBurnoutScore, emotionalReactivity])
 
   // VOLAURA: broadcast streak update whenever streak changes (once per streak value per session)
   const lastSentStreakRef = useRef(0)

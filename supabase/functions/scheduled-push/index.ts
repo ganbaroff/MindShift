@@ -127,10 +127,21 @@ async function sendPush(
 
 // ── Main handler ──────────────────────────────────────────────────────────────
 
+// Shared secret set in Supabase edge function env vars — prevents arbitrary
+// internet callers from triggering push sends.  pg_cron sets this header.
+const CRON_SECRET = Deno.env.get('CRON_SECRET') ?? ''
+
 Deno.serve(async (req) => {
   // Only accept POST (from pg_cron or manual invocation)
   if (req.method !== 'POST') {
     return new Response('Method not allowed', { status: 405 })
+  }
+
+  // Reject unauthenticated callers — only pg_cron (or admin scripts that
+  // know the CRON_SECRET) should trigger this endpoint.
+  const authHeader = req.headers.get('Authorization') ?? ''
+  if (CRON_SECRET && authHeader !== `Bearer ${CRON_SECRET}`) {
+    return new Response('Unauthorized', { status: 401 })
   }
 
   const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY)
