@@ -127,6 +127,9 @@ interface ProgressSlice {
   weeklyStats: WeeklyStats | null
   /** Lifetime total of completed tasks — incremented on each completeTask call */
   completedTotal: number
+  /** Lifetime total of completed focus sessions — used for In-App Review gate */
+  completedFocusSessions: number
+  incrementFocusSessions: () => void
   unlockAchievement: (key: string) => void
   setWeeklyStats: (stats: WeeklyStats) => void
   hasAchievement: (key: string) => boolean
@@ -340,7 +343,7 @@ export const useStore = create<AppStore>()(
           activePreset: null, audioPlaying: false, audioVolume: 0.55,
           focusAnchor: null, transitionBufferActive: false,
           // Progress slice
-          achievements: initAchievements(), weeklyStats: null, completedTotal: 0,
+          achievements: initAchievements(), weeklyStats: null, completedTotal: 0, completedFocusSessions: 0,
           // Preferences slice — prevent Pro state leaking between users
           reducedStimulation: false, hapticsEnabled: true, seenHints: [], mochiDiscoveries: [],
           subscriptionTier: 'free' as const, trialEndsAt: null,
@@ -660,6 +663,7 @@ export const useStore = create<AppStore>()(
         achievements: initAchievements(),
         weeklyStats: null,
         completedTotal: 0,
+        completedFocusSessions: 0,
 
         unlockAchievement: (key) => set((s) => ({
           achievements: s.achievements.map(a =>
@@ -671,6 +675,7 @@ export const useStore = create<AppStore>()(
 
         setWeeklyStats: (stats) => set({ weeklyStats: stats }),
         hasAchievement: (key) => !!get().achievements.find(a => a.key === key)?.unlockedAt,
+        incrementFocusSessions: () => set((s) => ({ completedFocusSessions: s.completedFocusSessions + 1 })),
 
         // ── Grid ─────────────────────────────────────────────────────────
         gridWidgets: WIDGET_DEFAULTS_GENERIC,
@@ -886,6 +891,7 @@ export const useStore = create<AppStore>()(
           psychotype: s.psychotype,
           psychotypeLastDerived: s.psychotypeLastDerived,
           completedTotal: s.completedTotal,
+          completedFocusSessions: s.completedFocusSessions,
           // Persist task pools so tasks survive page reload in guest mode
           nowPool: s.nowPool,
           nextPool: s.nextPool,

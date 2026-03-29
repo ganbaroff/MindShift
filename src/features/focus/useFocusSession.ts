@@ -346,6 +346,7 @@ export function useFocusSession() {
         elapsedMin <= 25 ? 15 :
         elapsedMin <= 45 ? 25 : 40
       storeState.addXP(sessionXP)
+      storeState.incrementFocusSessions()
 
       // VOLAURA: fire XP event — best-effort, never blocks UX
       if (isVolauraConfigured() && storeState.userId && !storeState.userId.startsWith('guest_')) {
@@ -355,7 +356,7 @@ export function useFocusSession() {
             durationMinutes: elapsedMin,
             phase: sessionPhase,
             energyBefore: energyBeforeRef.current ?? 3,
-            energyAfter: energyBeforeRef.current ?? 3, // updated when user picks post-session energy
+            energyAfter: energyBeforeRef.current ?? 3, // approximate; vital_logged event sends the real post-session energy separately
             psychotype: storeState.psychotype ?? null,
           })
         })
