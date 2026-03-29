@@ -233,6 +233,8 @@
     "remindersEnabled": "Erinnerungen aktiviert",
     "remindersBlocked": "Vom Browser blockiert – aktivieren Sie diese Option in den Browsereinstellungen, um Hinweise zum Fälligkeitsdatum zu erhalten.",
     "enableReminders": "Aktivieren Sie Erinnerungen",
+    "iosInstallTitle": "Zuerst zum Startbildschirm hinzufügen",
+    "iosInstallDesc": "iPhone Safari kann keine Benachrichtigungen über eine Browser-Registerkarte senden. Tippen Sie auf die Schaltfläche „Teilen“ → „Zum Startbildschirm hinzufügen“ und öffnen Sie dann MindShift von dort aus.",
     "medHighlights": "Hebt Ihr optimales Fokusfenster auf dem Fokusbildschirm hervor",
     "medWhenTake": "Wann nimmst du es?",
     "medMorning": "Morgen",
