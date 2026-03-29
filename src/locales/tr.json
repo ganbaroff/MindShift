@@ -233,6 +233,8 @@
     "remindersEnabled": "Hatırlatıcılar etkinleştirildi",
     "remindersBlocked": "Tarayıcı tarafından engellendi — Son tarih uyarıları almak için tarayıcı ayarlarında etkinleştirin.",
     "enableReminders": "Hatırlatıcıları etkinleştir",
+    "iosInstallTitle": "Önce Ana Ekrana Ekle",
+    "iosInstallDesc": "iPhone Safari, tarayıcı sekmesinden bildirim gönderemez. Paylaş düğmesine → \"Ana Ekrana Ekle\"ye dokunun, ardından MindShift'i buradan açın.",
     "medHighlights": "Odak ekranında en uygun odak pencerenizi vurgular",
     "medWhenTake": "Ne zaman alırsın?",
     "medMorning": "Sabah",

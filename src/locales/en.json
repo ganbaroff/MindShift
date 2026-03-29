@@ -233,6 +233,8 @@
     "remindersEnabled": "Reminders enabled",
     "remindersBlocked": "Blocked by browser — enable in browser settings to get due-date nudges.",
     "enableReminders": "Enable reminders",
+    "iosInstallTitle": "Add to Home Screen first",
+    "iosInstallDesc": "iPhone Safari can't send notifications from a browser tab. Tap the share button → \"Add to Home Screen\", then open MindShift from there.",
     "medHighlights": "Highlights your optimal focus window on the Focus screen",
     "medWhenTake": "When do you take it?",
     "medMorning": "Morning",
@@ -318,7 +320,11 @@
     "noWorries": "No worries 👋",
     "noWorriesDesc": "You can enable reminders later in Settings.",
     "skipForNow": "Skip for now",
-    "remindersBefore": "15 min before tasks are due"
+    "remindersBefore": "15 min before tasks are due",
+    "readyTitle": "You're all set.",
+    "readyDesc": "Mochi's here when you need focus. Add your first task to get started.",
+    "letsStart": "Let's start →",
+    "recalibrate": "Updating your setup"
   },
   "auth": {
     "welcomeBack": "Welcome back",
@@ -343,7 +349,11 @@
     "continueWithout": "Continue without account →",
     "consentAge": "16 or older",
     "consentTerms": "Terms",
-    "consentPrivacy": "Privacy Policy"
+    "consentPrivacy": "Privacy Policy",
+    "consentFirst": "Agree to the terms first — tap the checkbox above",
+    "orUseEmail": "or use email",
+    "resendLink": "Resend link",
+    "checkSpam": "Check your spam folder if you don't see it within a minute."
   },
   "nav": {
     "today": "Today",

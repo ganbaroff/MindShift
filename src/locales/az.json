@@ -233,6 +233,8 @@
     "remindersEnabled": "Xatırlatmalar aktivləşdirildi",
     "remindersBlocked": "Brauzer tərəfindən bloklandı — bitmə tarixləri əldə etmək üçün brauzer parametrlərində aktivləşdirin.",
     "enableReminders": "Xatırlatmaları aktivləşdirin",
+    "iosInstallTitle": "Əvvəlcə Əsas Ekrana əlavə edin",
+    "iosInstallDesc": "iPhone Safari brauzer nişanından bildirişlər göndərə bilmir. Paylaş düyməsini → \"Əsas ekrana əlavə et\" üzərinə toxunun, sonra oradan MindShift-i açın.",
     "medHighlights": "Fokus ekranında optimal fokus pəncərənizi vurğulayır",
     "medWhenTake": "Nə vaxt götürürsən?",
     "medMorning": "Səhər",

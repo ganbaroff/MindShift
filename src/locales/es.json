@@ -233,6 +233,8 @@
     "remindersEnabled": "Recordatorios habilitados",
     "remindersBlocked": "Bloqueado por el navegador: habilítelo en la configuración del navegador para obtener avisos sobre la fecha de vencimiento.",
     "enableReminders": "Habilitar recordatorios",
+    "iosInstallTitle": "Agregar primero a la pantalla de inicio",
+    "iosInstallDesc": "iPhone Safari no puede enviar notificaciones desde una pestaña del navegador. Toque el botón compartir → \"Agregar a la pantalla de inicio\", luego abra MindShift desde allí.",
     "medHighlights": "Resalta su ventana de enfoque óptima en la pantalla de enfoque",
     "medWhenTake": "¿Cuándo lo tomas?",
     "medMorning": "Mañana",

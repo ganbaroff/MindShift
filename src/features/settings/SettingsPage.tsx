@@ -77,6 +77,13 @@ export default function SettingsPage() {
     setNotifPermission(result);
   };
 
+  // C4 — iOS PWA: Web Push requires standalone mode (Add to Home Screen).
+  // Safari tab cannot receive push notifications even with permission granted.
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !('MSStream' in window)
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+    || (window.navigator as unknown as { standalone?: boolean }).standalone === true
+  const needsIOSInstall = isIOS && !isStandalone
+
   const planLabel =
     subscriptionTier === 'pro'       ? 'MindShift Pro' :
     subscriptionTier === 'pro_trial' ? 'MindShift Pro Trial' :
@@ -239,7 +246,19 @@ export default function SettingsPage() {
 
         {/* Notifications */}
         <Section label={t('settings.reminders')}>
-          {notifPermission === 'granted' ? (
+          {needsIOSInstall ? (
+            <div
+              className="p-3 rounded-xl"
+              style={{ background: 'rgba(78,205,196,0.08)', border: '1px solid rgba(78,205,196,0.2)' }}
+            >
+              <p className="text-[13px] font-medium mb-0.5" style={{ color: 'var(--color-teal)' }}>
+                {t('settings.iosInstallTitle')}
+              </p>
+              <p className="text-[12px] leading-relaxed" style={{ color: 'var(--color-text-muted)' }}>
+                {t('settings.iosInstallDesc')}
+              </p>
+            </div>
+          ) : notifPermission === 'granted' ? (
             <div className="flex items-center gap-2">
               <span className="text-[20px]">🔔</span>
               <p className="text-[14px]" style={{ color: 'var(--color-teal)' }}>{t('settings.remindersEnabled')}</p>
