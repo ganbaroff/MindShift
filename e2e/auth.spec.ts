@@ -18,6 +18,12 @@ async function clickConsentCheckbox(page: import('@playwright/test').Page) {
   await label.locator('div').first().click()
 }
 
+/** Helper: expand the collapsed email input by clicking "or use email →". */
+async function expandEmailInput(page: import('@playwright/test').Page) {
+  await page.getByRole('button', { name: /or use email/i }).click()
+  await expect(page.getByPlaceholder('Enter your email')).toBeVisible({ timeout: 3000 })
+}
+
 test.describe('Auth screen', () => {
   test.beforeEach(async ({ page }) => {
     // Intercept the Supabase OTP call so it never hits a real server
@@ -54,7 +60,8 @@ test.describe('Auth screen', () => {
     // Heading (copy: Welcome. Let's get started.)
     await expect(page.getByText("Welcome. Let's get started.")).toBeVisible()
 
-    // Email field
+    // Email input is collapsed by default — expand it first
+    await expandEmailInput(page)
     const emailInput = page.getByPlaceholder('Enter your email')
     await expect(emailInput).toBeVisible()
 
@@ -71,6 +78,7 @@ test.describe('Auth screen', () => {
   })
 
   test('submit button remains disabled without consent', async ({ page }) => {
+    await expandEmailInput(page)
     const emailInput = page.getByPlaceholder('Enter your email')
     await emailInput.fill('test@example.com')
 
@@ -80,6 +88,7 @@ test.describe('Auth screen', () => {
   })
 
   test('submit button enables when email + consent provided', async ({ page }) => {
+    await expandEmailInput(page)
     const emailInput = page.getByPlaceholder('Enter your email')
     await emailInput.fill('user@example.com')
 
@@ -100,6 +109,7 @@ test.describe('Auth screen', () => {
       })
     )
 
+    await expandEmailInput(page)
     const emailInput = page.getByPlaceholder('Enter your email')
     await emailInput.fill('user@example.com')
     await clickConsentCheckbox(page)
@@ -114,6 +124,7 @@ test.describe('Auth screen', () => {
 
   test('"wrong email? go back" returns to email input', async ({ page }) => {
     // Submit first
+    await expandEmailInput(page)
     await page.getByPlaceholder('Enter your email').fill('user@example.com')
     await clickConsentCheckbox(page)
     await page.getByRole('button', { name: /send magic link/i }).click()
@@ -121,9 +132,11 @@ test.describe('Auth screen', () => {
     // Go back — copy: "Wrong email? Go back"
     await page.getByText(/wrong email/i).click()
 
-    // Should be back on email step
-    await expect(page.getByPlaceholder('Enter your email')).toBeVisible()
+    // Should be back on email step — heading visible
     await expect(page.getByText("Welcome. Let's get started.")).toBeVisible()
+    // Email input is collapsed again by default — expand to verify it works
+    await expandEmailInput(page)
+    await expect(page.getByPlaceholder('Enter your email')).toBeVisible()
   })
 
   test('MindShift branding is visible', async ({ page }) => {
