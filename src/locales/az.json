@@ -45,6 +45,12 @@
     "title": "Tapşırıqlarınız",
     "tasksInPlay": "{{count}} tapşırıqlar oyunda",
     "search": "Tapşırıqları axtarın...",
+    "poolGuide": {
+      "title": "Tapşırıqlar necə işləyir",
+      "now": "hazırda etdiyiniz 3-ə qədər tapşırıq. Az seçim = az iflic.",
+      "next": "növbədə. Hazır olanda bura köçür.",
+      "someday": "saxlanmış fikirlər. Təzyiq yox, son tarix yox."
+    },
     "now": "İNDİ",
     "next": "NÖVBƏTİ",
     "someday": "BİR GÜN",

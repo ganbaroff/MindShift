@@ -45,6 +45,12 @@
     "title": "Tus tareas",
     "tasksInPlay": "{{count}} tareas en juego",
     "search": "Buscar tareas...",
+    "poolGuide": {
+      "title": "Como funcionan las tareas",
+      "now": "hasta 3 tareas que haces ahora mismo. Menos opciones = menos bloqueo.",
+      "next": "en cola. Mueve aqui cuando estes listo.",
+      "someday": "ideas aparcadas. Sin presion, sin fecha limite."
+    },
     "now": "AHORA",
     "next": "PRÓXIMO",
     "someday": "ALGÚN DÍA",
