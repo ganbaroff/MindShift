@@ -135,7 +135,7 @@ async function fetchSessionHistory(
 
   const { data, error } = await supabase
     .from('focus_sessions')
-    .select('*')
+    .select('id,user_id,task_id,started_at,duration_ms,phase_reached,energy_before,energy_after,audio_preset,created_at')
     .eq('user_id', userId)
     .gte('started_at', thirtyDaysAgo)
     .order('started_at', { ascending: false })

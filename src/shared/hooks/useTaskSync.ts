@@ -117,14 +117,21 @@ export function useTaskSync(): void {
         }
 
         const serverTasks: Task[] = (data ?? []).map(rowToTask)
+        const localTasks = [...nowPool, ...nextPool, ...somedayPool]
 
         if (serverTasks.length === 0) {
-          const localTasks = [...nowPool, ...nextPool, ...somedayPool]
+          // First-device scenario: push local tasks to server
           if (localTasks.length > 0) {
             pushLocalTasksToSupabase(localTasks, userId)
           }
         } else {
-          setTasks(serverTasks)
+          // Merge: keep server tasks + any local tasks not yet on server (by id)
+          const serverIds = new Set(serverTasks.map(t => t.id))
+          const localOnly = localTasks.filter(t => !serverIds.has(t.id))
+          if (localOnly.length > 0) {
+            pushLocalTasksToSupabase(localOnly, userId)
+          }
+          setTasks([...serverTasks, ...localOnly])
         }
       })
   }, [userId]) // eslint-disable-line react-hooks/exhaustive-deps
