@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'motion/react'
 import { Mail, ArrowRight, CheckCircle2 } from 'lucide-react'
@@ -25,14 +25,12 @@ function MochiLogo() {
       animate={{ scale: 1, opacity: 1 }}
       transition={{ ...transition('expressive'), delay: 0.05 }}
     >
-      {/* Subtle glow — only animates when motion is allowed */}
       <motion.div
         className="absolute -inset-3 rounded-full pointer-events-none"
         style={{ background: 'radial-gradient(circle, rgba(123,114,255,0.25) 0%, transparent 70%)' }}
         animate={shouldAnimate ? { scale: [1, 1.06, 1] } : {}}
         transition={{ duration: 4, repeat: shouldAnimate ? Infinity : 0, ease: 'easeInOut' }}
       />
-      {/* Icon container */}
       <div
         className="relative w-16 h-16 rounded-2xl flex items-center justify-center"
         style={{
@@ -87,23 +85,34 @@ function BgOrbs() {
 }
 
 // ── Email step ────────────────────────────────────────────────────────────────
+// Layout order (research-backed for ADHD):
+//   1. Consent checkbox — visible FIRST, above all CTAs
+//   2. Google SSO — primary, one-tap, no friction
+//   3. Continue without account — secondary, co-equal visibility
+//   4. Divider + email input — tertiary
+//
+// Why: ADHD users tap the first big button they see. If Google is gated
+// behind a silent disabled state, they exit. Consent is prominent above
+// all buttons so users see it before tapping. If they tap Google without
+// consenting, the checkbox highlights instead of silently doing nothing.
 function EmailStep({
-  email, setEmail, consented, setConsented, loading, onSubmit, onGoogleSignIn, googleLoading,
+  email, setEmail, consented, setConsented, consentHighlighted,
+  loading, onSubmit, onGoogleSignIn, googleLoading, onContinueAsGuest,
 }: {
   email: string
   setEmail: (v: string) => void
   consented: boolean
   setConsented: (v: boolean) => void
+  consentHighlighted: boolean
   loading: boolean
   onSubmit: () => void
   onGoogleSignIn: () => void
   googleLoading: boolean
+  onContinueAsGuest: () => void
 }) {
   const { t: transition } = useMotion()
   const { t } = useTranslation()
-  const inputRef = useRef<HTMLInputElement>(null)
-  const [inputFocused, setInputFocused] = useState(false)
-  const canSubmit = email.trim().length > 0 && consented
+  const [showEmail, setShowEmail] = useState(false)
 
   return (
     <motion.div
@@ -121,40 +130,16 @@ function EmailStep({
         <span style={{ color: '#6B7280' }}> {t('auth.noPasswordNoFriction')}</span>
       </p>
 
-      {/* Email input */}
-      <div className="relative mb-4">
-        <label htmlFor="auth-email" className="sr-only">Email address</label>
-        <Mail
-          className="absolute left-3.5 top-1/2 -translate-y-1/2 transition-colors duration-200 pointer-events-none"
-          size={16}
-          color={inputFocused ? '#7B72FF' : '#505370'}
-          strokeWidth={2}
-        />
-        <input
-          id="auth-email"
-          ref={inputRef}
-          type="email"
-          placeholder={t('auth.enterEmail')}
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && onSubmit()}
-          onFocus={() => setInputFocused(true)}
-          onBlur={() => setInputFocused(false)}
-          className="w-full pl-10 pr-4 rounded-xl text-sm outline-none transition-all duration-200 placeholder:text-[#484B68]"
-          style={{
-            background: inputFocused ? '#1C1F38' : '#191C30',
-            color: 'var(--color-text-primary)',
-            border: `1.5px solid ${inputFocused ? 'rgba(123,114,255,0.5)' : 'rgba(40,43,70,0.8)'}`,
-            boxShadow: inputFocused ? '0 0 12px rgba(123,114,255,0.15)' : 'none',
-            height: 46,
-          }}
-          autoFocus
-          autoComplete="email"
-        />
-      </div>
-
-      {/* Consent */}
-      <label className="flex items-start gap-3 mb-5 cursor-pointer select-none group">
+      {/* ── 1. Consent — prominent, above all CTAs ── */}
+      <motion.label
+        className="flex items-start gap-3 mb-5 cursor-pointer select-none rounded-xl px-3 py-2.5 -mx-1"
+        animate={consentHighlighted ? {
+          backgroundColor: ['rgba(78,205,196,0)', 'rgba(78,205,196,0.12)', 'rgba(78,205,196,0)'],
+          borderColor: ['rgba(78,205,196,0)', 'rgba(78,205,196,0.5)', 'rgba(78,205,196,0)'],
+        } : {}}
+        transition={{ duration: 0.6 }}
+        style={{ border: '1px solid transparent' }}
+      >
         <div className="relative shrink-0 mt-0.5" onClick={() => setConsented(!consented)}>
           <motion.div
             className="w-5 h-5 rounded-md flex items-center justify-center"
@@ -182,79 +167,41 @@ function EmailStep({
           </motion.div>
         </div>
         <span className="text-xs leading-relaxed" style={{ color: 'var(--color-text-muted)' }}>
-          I'm <strong style={{ color: '#C4C4D4' }}>16 or older</strong> and agree to MindShift's{' '}
+          I'm <strong style={{ color: '#C4C4D4' }}>{t('auth.consentAge')}</strong> and agree to MindShift's{' '}
           <Link to="/terms" target="_blank" rel="noopener noreferrer"
             className="underline decoration-dotted hover:no-underline transition-all"
             style={{ color: 'var(--color-primary)' }}
             onClick={e => e.stopPropagation()}>
-            Terms
+            {t('auth.consentTerms')}
           </Link>
           {' '}&{' '}
           <Link to="/privacy" target="_blank" rel="noopener noreferrer"
             className="underline decoration-dotted hover:no-underline transition-all"
             style={{ color: 'var(--color-primary)' }}
             onClick={e => e.stopPropagation()}>
-            Privacy Policy
+            {t('auth.consentPrivacy')}
           </Link>
         </span>
-      </label>
+      </motion.label>
 
-      {/* CTA */}
-      <motion.button
-        onClick={onSubmit}
-        disabled={!canSubmit || loading}
-        whileTap={{ scale: canSubmit ? 0.97 : 1 }}
-        className="w-full rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all duration-300"
-        style={{
-          height: 48,
-          background: canSubmit
-            ? 'linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%)'
-            : 'linear-gradient(135deg, var(--color-primary-alpha) 0%, rgba(91,82,232,0.08) 100%)',
-          color: canSubmit ? '#fff' : 'var(--color-muted)',
-          boxShadow: canSubmit ? '0 4px 24px rgba(123,114,255,0.4), 0 0 0 1px rgba(123,114,255,0.3)' : '0 0 0 1px rgba(45,49,80,0.6)',
-          cursor: canSubmit && !loading ? 'pointer' : 'not-allowed',
-        }}
-      >
-        {loading ? (
-          <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin motion-reduce:animate-none motion-reduce:opacity-60" />
-        ) : (
-          <>
-            {t('auth.sendLink')}
-            <ArrowRight size={16} strokeWidth={2.5} />
-          </>
-        )}
-      </motion.button>
-
-      <p className="text-center text-[11px] mt-3" style={{ color: '#4A4D6A' }}>
-        {t('auth.noAccount')}
-      </p>
-
-      {/* Divider */}
-      <div className="flex items-center gap-3 my-4">
-        <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.06)' }} />
-        <span className="text-[11px]" style={{ color: '#4A4D6A' }}>{t('auth.or')}</span>
-        <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.06)' }} />
-      </div>
-
-      {/* Google Sign-In */}
+      {/* ── 2. Google SSO — primary CTA, always visually active ── */}
       <motion.button
         onClick={onGoogleSignIn}
-        disabled={!consented || googleLoading}
-        whileTap={{ scale: consented ? 0.97 : 1 }}
-        className="w-full rounded-xl font-semibold text-sm flex items-center justify-center gap-2.5 transition-all duration-300"
+        disabled={googleLoading}
+        whileTap={{ scale: 0.97 }}
+        className="w-full rounded-xl font-semibold text-sm flex items-center justify-center gap-2.5 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-ms-primary/50 focus-visible:outline-none"
         style={{
           height: 48,
-          background: consented ? '#1C1F38' : 'rgba(28,31,56,0.5)',
-          border: `1.5px solid ${consented ? 'rgba(255,255,255,0.10)' : 'rgba(255,255,255,0.04)'}`,
-          color: consented ? 'var(--color-text-primary)' : 'var(--color-muted)',
-          cursor: consented && !googleLoading ? 'pointer' : 'not-allowed',
+          background: '#1C1F38',
+          border: '1.5px solid rgba(255,255,255,0.10)',
+          color: 'var(--color-text-primary)',
         }}
+        aria-label={t('auth.continueWithGoogle')}
       >
         {googleLoading ? (
           <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin motion-reduce:animate-none motion-reduce:opacity-60" />
         ) : (
           <>
-            {/* Google icon */}
             <svg width="18" height="18" viewBox="0 0 24 24">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
               <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
@@ -265,14 +212,104 @@ function EmailStep({
           </>
         )}
       </motion.button>
+
+      {/* ── 3. Continue without account — secondary, co-equal visibility ── */}
+      <button
+        onClick={onContinueAsGuest}
+        className="w-full mt-2.5 rounded-xl font-medium text-sm flex items-center justify-center gap-2 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-ms-primary/50 focus-visible:outline-none"
+        style={{
+          height: 44,
+          background: 'transparent',
+          border: '1px solid rgba(255,255,255,0.06)',
+          color: 'var(--color-text-muted)',
+        }}
+      >
+        {t('auth.continueWithout')}
+      </button>
+
+      {/* ── 4. Email input — tertiary / collapsed by default ── */}
+      <div className="mt-4">
+        {!showEmail ? (
+          <button
+            onClick={() => setShowEmail(true)}
+            className="w-full text-center text-[12px] py-1 focus-visible:outline-none focus-visible:underline"
+            style={{ color: '#4A4D6A' }}
+          >
+            {t('auth.orUseEmail')} →
+          </button>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            className="overflow-hidden"
+          >
+            <div className="flex items-center gap-2 mb-2 pt-1">
+              <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.06)' }} />
+              <span className="text-[11px]" style={{ color: '#4A4D6A' }}>{t('auth.or')}</span>
+              <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.06)' }} />
+            </div>
+
+            <label htmlFor="auth-email" className="sr-only">Email address</label>
+            <div className="relative mb-3">
+              <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" size={16} color="#505370" strokeWidth={2} />
+              <input
+                id="auth-email"
+                type="email"
+                placeholder={t('auth.enterEmail')}
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && onSubmit()}
+                autoFocus
+                autoComplete="email"
+                className="w-full pl-10 pr-4 rounded-xl text-sm outline-none transition-all duration-200 placeholder:text-[#484B68] focus:ring-2 focus:ring-ms-primary/40"
+                style={{
+                  background: '#191C30',
+                  color: 'var(--color-text-primary)',
+                  border: '1.5px solid rgba(40,43,70,0.8)',
+                  height: 46,
+                }}
+              />
+            </div>
+
+            <motion.button
+              onClick={onSubmit}
+              disabled={!email.trim() || !consented || loading}
+              whileTap={{ scale: email.trim() && consented ? 0.97 : 1 }}
+              className="w-full rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all duration-300 focus-visible:ring-2 focus-visible:ring-ms-primary/50 focus-visible:outline-none"
+              style={{
+                height: 44,
+                background: email.trim() && consented
+                  ? 'linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%)'
+                  : 'rgba(123,114,255,0.12)',
+                color: email.trim() && consented ? '#fff' : 'var(--color-muted)',
+                cursor: email.trim() && consented && !loading ? 'pointer' : 'not-allowed',
+              }}
+            >
+              {loading ? (
+                <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin motion-reduce:animate-none motion-reduce:opacity-60" />
+              ) : (
+                <>{t('auth.sendLink')}<ArrowRight size={16} strokeWidth={2.5} /></>
+              )}
+            </motion.button>
+          </motion.div>
+        )}
+      </div>
     </motion.div>
   )
 }
 
 // ── Check email step ──────────────────────────────────────────────────────────
-function CheckStep({ email, onBack }: { email: string; onBack: () => void }) {
+function CheckStep({ email, onBack, onResend }: { email: string; onBack: () => void; onResend: () => void }) {
   const { t: transition } = useMotion()
   const { t } = useTranslation()
+  const [resent, setResent] = useState(false)
+
+  const handleResend = () => {
+    onResend()
+    setResent(true)
+    setTimeout(() => setResent(false), 4000)
+  }
+
   return (
     <motion.div
       key="check-step"
@@ -282,7 +319,6 @@ function CheckStep({ email, onBack }: { email: string; onBack: () => void }) {
       exit={{ opacity: 0, y: -12 }}
       transition={transition()}
     >
-      {/* Animated checkmark */}
       <motion.div
         className="w-20 h-20 rounded-full flex items-center justify-center mb-5"
         style={{ background: 'rgba(78,205,196,0.12)', border: '1.5px solid rgba(78,205,196,0.35)' }}
@@ -299,22 +335,39 @@ function CheckStep({ email, onBack }: { email: string; onBack: () => void }) {
       <p className="text-sm leading-relaxed mb-1" style={{ color: 'var(--color-text-muted)' }}>
         {t('auth.weSentLink')}
       </p>
-      <p className="text-sm font-semibold mb-5 px-4 py-1.5 rounded-lg"
+      <p className="text-sm font-semibold mb-3 px-4 py-1.5 rounded-lg"
          style={{ color: 'var(--color-text-primary)', background: 'var(--color-surface-raised)' }}>
         {email}
       </p>
-      <p className="text-xs leading-relaxed mb-6" style={{ color: '#6B7280' }}>
-        {t('auth.tapLink')}<br />
-        {t('auth.noPasswordEver')}
+
+      {/* Spam hint — helps ADHD users who won't find it otherwise */}
+      <p className="text-xs leading-relaxed mb-5 px-2" style={{ color: '#6B7280' }}>
+        {t('auth.checkSpam')}
       </p>
 
-      <button
-        className="text-xs underline decoration-dotted hover:no-underline transition-all min-h-[44px] px-4"
-        style={{ color: 'var(--color-primary)' }}
-        onClick={onBack}
-      >
-        {t('auth.wrongEmail')}
-      </button>
+      <div className="flex flex-col items-center gap-3 w-full">
+        {/* Resend button */}
+        <button
+          onClick={handleResend}
+          disabled={resent}
+          className="text-sm font-medium px-5 py-2 rounded-xl transition-all focus-visible:ring-2 focus-visible:ring-ms-primary/50 focus-visible:outline-none"
+          style={{
+            background: resent ? 'rgba(78,205,196,0.12)' : 'var(--color-surface-raised)',
+            color: resent ? 'var(--color-teal)' : 'var(--color-text-muted)',
+            border: '1px solid rgba(255,255,255,0.06)',
+          }}
+        >
+          {resent ? '✓ Link resent' : t('auth.resendLink')}
+        </button>
+
+        <button
+          className="text-xs underline decoration-dotted hover:no-underline transition-all min-h-[44px] px-4"
+          style={{ color: 'var(--color-primary)' }}
+          onClick={onBack}
+        >
+          {t('auth.wrongEmail')}
+        </button>
+      </div>
     </motion.div>
   )
 }
@@ -324,37 +377,43 @@ export default function AuthScreen() {
   const { t: transition } = useMotion()
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const [step, setStep]           = useState<Step>('email')
-  const [email, setEmail]         = useState('')
-  const [loading, setLoading]     = useState(false)
-  const [googleLoading, setGoogleLoading] = useState(false)
-  const [consented, setConsented] = useState(false)
+  const [step, setStep]                     = useState<Step>('email')
+  const [email, setEmail]                   = useState('')
+  const [loading, setLoading]               = useState(false)
+  const [googleLoading, setGoogleLoading]   = useState(false)
+  const [consented, setConsented]           = useState(false)
+  const [consentHighlighted, setConsentHL]  = useState(false)
+
+  // Highlight the consent checkbox briefly when user taps an auth button without consenting
+  const highlightConsent = useCallback(() => {
+    setConsentHL(true)
+    toast.info(t('auth.consentFirst'), { duration: 3000 })
+    setTimeout(() => setConsentHL(false), 800)
+  }, [t])
 
   const handleContinueAsGuest = useCallback(() => {
     localStorage.removeItem('ms_signed_out')
     const guestId = `guest_${crypto.randomUUID()}`
     localStorage.setItem('ms_guest_id', guestId)
-    // Store will pick up guest on next getSession check — navigate immediately
     navigate('/')
-    // Force reload so App.tsx re-runs session check and creates guest user
     window.location.reload()
   }, [navigate])
 
-  const handleGoogleSignIn = useCallback(async () => {
-    if (!consented) return
-
-    // Persist consent before redirect — survives OAuth redirect
+  const persistConsent = useCallback(() => {
     try {
       localStorage.setItem(CONSENT_PENDING_KEY, JSON.stringify({
         terms_accepted_at: new Date().toISOString(),
         terms_version:     TERMS_VERSION,
         age_confirmed:     true,
       }))
-    } catch {
-      // localStorage unavailable — proceed anyway
-    }
-
+    } catch { /* localStorage unavailable */ }
     localStorage.removeItem('ms_signed_out')
+  }, [])
+
+  const handleGoogleSignIn = useCallback(async () => {
+    if (!consented) { highlightConsent(); return }
+
+    persistConsent()
     setGoogleLoading(true)
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
@@ -364,26 +423,13 @@ export default function AuthScreen() {
       },
     })
     setGoogleLoading(false)
+    if (error) toast.error("Couldn't connect to Google. Try again or use email instead.")
+  }, [consented, highlightConsent, persistConsent])
 
-    if (error) {
-      toast.error("Couldn't connect to Google. Try again or use email instead.")
-    }
-  }, [consented])
-
-  const handleSendLink = async () => {
+  const sendMagicLink = useCallback(async () => {
     if (!email.trim() || !consented) return
 
-    // Persist consent before we send the link — survives magic-link redirect
-    try {
-      localStorage.setItem(CONSENT_PENDING_KEY, JSON.stringify({
-        terms_accepted_at: new Date().toISOString(),
-        terms_version:     TERMS_VERSION,
-        age_confirmed:     true,
-      }))
-    } catch {
-      // localStorage unavailable — proceed anyway; consent given in session
-    }
-
+    persistConsent()
     setLoading(true)
     const { error } = await supabase.auth.signInWithOtp({
       email: email.trim(),
@@ -395,9 +441,17 @@ export default function AuthScreen() {
       toast.error("Couldn't send your link. Check the email address and try again.")
       return
     }
-
     setStep('check')
-  }
+  }, [email, consented, persistConsent])
+
+  const handleResend = useCallback(async () => {
+    if (!email.trim()) return
+    persistConsent()
+    await supabase.auth.signInWithOtp({
+      email: email.trim(),
+      options: { emailRedirectTo: `${window.location.origin}/` },
+    })
+  }, [email, persistConsent])
 
   return (
     <div
@@ -406,12 +460,11 @@ export default function AuthScreen() {
     >
       <BgOrbs />
 
-      {/* Vertically center content with flex spacers */}
       <div className="flex-1 min-h-[40px]" />
 
       <div className="relative z-10 w-full max-w-[360px] flex flex-col items-center py-6">
 
-        {/* Logo + Brand — compact header */}
+        {/* Logo + Brand */}
         <motion.div
           className="flex flex-col items-center mb-6"
           initial={{ opacity: 0, y: 12 }}
@@ -427,7 +480,7 @@ export default function AuthScreen() {
           </p>
         </motion.div>
 
-        {/* Card — glass effect */}
+        {/* Card */}
         <motion.div
           className="w-full rounded-2xl p-5"
           style={{
@@ -449,22 +502,24 @@ export default function AuthScreen() {
                 setEmail={setEmail}
                 consented={consented}
                 setConsented={setConsented}
+                consentHighlighted={consentHighlighted}
                 loading={loading}
-                onSubmit={handleSendLink}
+                onSubmit={sendMagicLink}
                 onGoogleSignIn={handleGoogleSignIn}
                 googleLoading={googleLoading}
+                onContinueAsGuest={handleContinueAsGuest}
               />
             ) : (
               <CheckStep
                 key="check"
                 email={email}
                 onBack={() => setStep('email')}
+                onResend={handleResend}
               />
             )}
           </AnimatePresence>
         </motion.div>
 
-        {/* Footer */}
         <motion.p
           className="text-center text-[11px] mt-5"
           style={{ color: '#4A4D6A' }}
@@ -477,18 +532,6 @@ export default function AuthScreen() {
             Privacy Policy
           </Link>
         </motion.p>
-
-        {/* Continue as guest */}
-        <motion.button
-          onClick={handleContinueAsGuest}
-          className="text-[13px] mt-4 transition-opacity hover:opacity-80"
-          style={{ color: 'var(--color-text-muted)' }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ ...transition(), delay: 0.5 }}
-        >
-          {t('auth.continueWithout')}
-        </motion.button>
       </div>
 
       <div className="flex-1 min-h-[60px]" />
