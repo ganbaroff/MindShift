@@ -18,8 +18,8 @@ import { test, expect, seedStore } from './helpers'
 
 /** Helper: start a focus session by skipping the breathwork ritual */
 async function startSession(page: import('@playwright/test').Page) {
-  // BreathworkRitual is a z-50 overlay with its own Skip button
-  await page.getByRole('button', { name: /Skip breathing ritual/i }).click()
+  // BreathworkRitual is a z-50 overlay — click its exact "Skip breathing ritual" button (not the setup "skip")
+  await page.getByRole('button', { name: 'Skip breathing ritual', exact: true }).click()
 }
 
 test.describe('Focus setup screen', () => {
@@ -37,17 +37,17 @@ test.describe('Focus setup screen', () => {
     await expect(page.getByText('DURATION')).toBeVisible()
     await expect(page.getByText(/smart:/i)).toBeVisible()
 
-    // TIMER_PRESETS = [5, 25, 52, 90] → shown with "m" suffix
-    await expect(page.getByRole('button', { name: /^5m/ })).toBeVisible()
-    await expect(page.getByRole('button', { name: /^25m/ })).toBeVisible()
-    await expect(page.getByRole('button', { name: /^52m/ })).toBeVisible()
-    await expect(page.getByRole('button', { name: /^90m/ })).toBeVisible()
+    // TIMER_PRESETS = [5, 25, 52, 90] — aria-labels are "X minutes" (+ optional "(recommended)")
+    await expect(page.getByRole('button', { name: /^5 minutes/ })).toBeVisible()
+    await expect(page.getByRole('button', { name: /^25 minutes/ })).toBeVisible()
+    await expect(page.getByRole('button', { name: /^52 minutes/ })).toBeVisible()
+    await expect(page.getByRole('button', { name: /^90 minutes/ })).toBeVisible()
 
-    // Custom duration button (✎ pencil)
-    await expect(page.getByRole('button', { name: '✎' })).toBeVisible()
+    // Custom duration button (✎ pencil) — aria-label is "Custom duration"
+    await expect(page.getByRole('button', { name: 'Custom duration' })).toBeVisible()
 
     // Start button
-    await expect(page.getByRole('button', { name: /Start Focus/ })).toBeVisible()
+    await expect(page.getByRole('button', { name: /^Start focus session with/i })).toBeVisible()
   })
 
   test('shows "No tasks yet" empty state when pool is empty', async ({ authedPage: page }) => {
@@ -89,6 +89,8 @@ test.describe('Focus setup screen', () => {
         position: 0,
         createdAt: new Date().toISOString(),
         userId: 'e2e-test-user-00000000-0000-0000-0000-000000000001',
+        taskType: 'task',
+        repeat: 'none',
       }],
     })
 
@@ -105,7 +107,7 @@ test.describe('Focus setup screen', () => {
   test('selecting a duration preset highlights it', async ({ authedPage: page }) => {
     await page.goto('/focus')
 
-    const preset90 = page.getByRole('button', { name: /^90m/ })
+    const preset90 = page.getByRole('button', { name: /^90 minutes/ })
     await preset90.click()
 
     await expect(preset90).toBeVisible()
@@ -114,7 +116,7 @@ test.describe('Focus setup screen', () => {
   test('custom duration input appears when ✎ clicked', async ({ authedPage: page }) => {
     await page.goto('/focus')
 
-    await page.getByRole('button', { name: '✎' }).click()
+    await page.getByRole('button', { name: 'Custom duration' }).click()
 
     await expect(page.getByPlaceholder('Minutes...')).toBeVisible()
   })
@@ -123,7 +125,7 @@ test.describe('Focus setup screen', () => {
 test.describe('Focus session', () => {
   test('starting a session shows the active timer view', async ({ authedPage: page }) => {
     await page.goto('/focus')
-    await page.getByRole('button', { name: /Start Focus/ }).click()
+    await page.getByRole('button', { name: /^Start focus session with/i }).click()
     await startSession(page)
 
     // ArcTimer is present — check for the ArcTimer button's aria-label
@@ -132,7 +134,7 @@ test.describe('Focus session', () => {
 
   test('active session shows struggle phase label', async ({ authedPage: page }) => {
     await page.goto('/focus')
-    await page.getByRole('button', { name: /Start Focus/ }).click()
+    await page.getByRole('button', { name: /^Start focus session with/i }).click()
     await startSession(page)
 
     // PHASE_LABELS.struggle = "Getting into it... 💪"
@@ -141,7 +143,7 @@ test.describe('Focus session', () => {
 
   test('active session shows audio and end session controls', async ({ authedPage: page }) => {
     await page.goto('/focus')
-    await page.getByRole('button', { name: /Start Focus/ }).click()
+    await page.getByRole('button', { name: /^Start focus session with/i }).click()
     await startSession(page)
 
     // Wait for active session — ArcTimer appears
@@ -161,15 +163,15 @@ test.describe('Focus session', () => {
 
   test('tapping end session shows interrupt confirm screen', async ({ authedPage: page }) => {
     await page.goto('/focus')
-    await page.getByRole('button', { name: /Start Focus/ }).click()
+    await page.getByRole('button', { name: /^Start focus session with/i }).click()
     await startSession(page)
 
     // Wait for session active
     await expect(page.getByRole('button', { name: /Focus timer/i })).toBeVisible({ timeout: 5000 })
     await page.getByRole('button', { name: 'End session', exact: true }).click()
 
-    // Interrupt confirm: "Keep going 🌿" to resume
-    await expect(page.getByRole('button', { name: /Keep going/i })).toBeVisible({ timeout: 5000 })
+    // Interrupt confirm: "Keep going 🌿" to resume (aria-label is "Resume focus session")
+    await expect(page.getByRole('button', { name: /Resume focus session/i })).toBeVisible({ timeout: 5000 })
   })
 
   test('active session shows task title when task is selected', async ({ authedPage: page }) => {
@@ -188,13 +190,15 @@ test.describe('Focus session', () => {
         position: 0,
         createdAt: new Date().toISOString(),
         userId: 'e2e-test-user-00000000-0000-0000-0000-000000000001',
+        taskType: 'task',
+        repeat: 'none',
       }],
     })
 
     await page.goto('/focus')
     await expect(page.getByText('Write quarterly report')).toBeVisible({ timeout: 8000 })
     await page.getByText('Write quarterly report').click()
-    await page.getByRole('button', { name: /Start Focus/ }).click()
+    await page.getByRole('button', { name: /^Start focus session with/i }).click()
     await startSession(page)
 
     // Wait for session to start

@@ -55,7 +55,7 @@ test.describe('Auth screen', () => {
     await expect(page.getByText("Welcome. Let's get started.")).toBeVisible()
 
     // Email field
-    const emailInput = page.getByPlaceholder('your@email.com')
+    const emailInput = page.getByPlaceholder('Enter your email')
     await expect(emailInput).toBeVisible()
 
     // Consent checkbox — UI says "Terms" (not "Terms of Service") and "Privacy Policy"
@@ -71,7 +71,7 @@ test.describe('Auth screen', () => {
   })
 
   test('submit button remains disabled without consent', async ({ page }) => {
-    const emailInput = page.getByPlaceholder('your@email.com')
+    const emailInput = page.getByPlaceholder('Enter your email')
     await emailInput.fill('test@example.com')
 
     const submitBtn = page.getByRole('button', { name: /send magic link/i })
@@ -80,7 +80,7 @@ test.describe('Auth screen', () => {
   })
 
   test('submit button enables when email + consent provided', async ({ page }) => {
-    const emailInput = page.getByPlaceholder('your@email.com')
+    const emailInput = page.getByPlaceholder('Enter your email')
     await emailInput.fill('user@example.com')
 
     // Check the consent checkbox by clicking the visual checkbox div
@@ -100,7 +100,7 @@ test.describe('Auth screen', () => {
       })
     )
 
-    const emailInput = page.getByPlaceholder('your@email.com')
+    const emailInput = page.getByPlaceholder('Enter your email')
     await emailInput.fill('user@example.com')
     await clickConsentCheckbox(page)
 
@@ -114,7 +114,7 @@ test.describe('Auth screen', () => {
 
   test('"wrong email? go back" returns to email input', async ({ page }) => {
     // Submit first
-    await page.getByPlaceholder('your@email.com').fill('user@example.com')
+    await page.getByPlaceholder('Enter your email').fill('user@example.com')
     await clickConsentCheckbox(page)
     await page.getByRole('button', { name: /send magic link/i }).click()
 
@@ -122,7 +122,7 @@ test.describe('Auth screen', () => {
     await page.getByText(/wrong email/i).click()
 
     // Should be back on email step
-    await expect(page.getByPlaceholder('your@email.com')).toBeVisible()
+    await expect(page.getByPlaceholder('Enter your email')).toBeVisible()
     await expect(page.getByText("Welcome. Let's get started.")).toBeVisible()
   })
 
@@ -162,8 +162,9 @@ test.describe('Auth bypass (AuthGuard disabled)', () => {
     })
 
     await page.goto('/')
-    // Should stay on / and render the home screen (not redirect to /auth)
-    await expect(page).toHaveURL(/\/$/)
-    await expect(page.getByRole('button', { name: /add task/i })).toBeVisible()
+    // / redirects to /today — verify we stay within the app (not /auth)
+    await expect(page).toHaveURL(/\/(today)?$/)
+    // TodayPage renders — check the page loaded successfully (not /auth)
+    await expect(page.getByRole('navigation')).toBeVisible()
   })
 })

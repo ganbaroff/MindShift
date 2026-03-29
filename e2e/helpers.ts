@@ -68,6 +68,11 @@ export function buildStoreState(overrides: Record<string, unknown> = {}) {
       completedTotal: 0,
       psychotypeLastDerived: null,
       seenHints: [],
+      // Prevents FirstFocusTutorial overlay from blocking tests
+      firstFocusTutorialCompleted: true,
+      // i18n + theme fields added in recent sprints
+      userLocale: 'en',
+      userTheme: 'dark',
       ...overrides,
     },
     version: 0,

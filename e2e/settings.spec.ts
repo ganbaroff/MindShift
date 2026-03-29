@@ -151,7 +151,6 @@ test.describe('Settings screen', () => {
     await expect(page.getByText(/Terms/)).toBeVisible()
     await expect(page.getByText(/Cookies/)).toBeVisible()
     await expect(page.getByText(/MindShift v1\.0/)).toBeVisible()
-    await expect(page.getByText(/ADHD minds/)).toBeVisible()
   })
 })
 

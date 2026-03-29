@@ -155,6 +155,9 @@ test.describe('HistoryPage', () => {
         completedTotal: 0,
         psychotypeLastDerived: null,
         seenHints: [],
+        firstFocusTutorialCompleted: true,
+        userLocale: 'en',
+        userTheme: 'dark',
       },
       version: 0,
     })
@@ -204,7 +207,7 @@ test.describe('TasksPage search', () => {
     await expect(page.getByText('Fix bug')).toBeVisible()
 
     // Type search query
-    await page.getByPlaceholder('Search tasks…').fill('buy')
+    await page.getByPlaceholder('Search tasks...').fill('buy')
 
     // Only matching task visible
     await expect(page.getByText('Buy groceries')).toBeVisible()
@@ -224,7 +227,7 @@ test.describe('TasksPage search', () => {
     await expect(page.getByText('Alpha task')).toBeVisible({ timeout: 8000 })
 
     // Search to filter
-    await page.getByPlaceholder('Search tasks…').fill('alpha')
+    await page.getByPlaceholder('Search tasks...').fill('alpha')
     await expect(page.getByText('Beta task')).not.toBeVisible()
 
     // Clear search
@@ -258,13 +261,13 @@ test.describe('Two-Thirds guardrail', () => {
 
 test.describe('HomePage', () => {
   test('shows energy picker on first load', async ({ authedPage: page }) => {
-    await page.goto('/')
+    await page.goto('/home')
     await expect(page.getByText("How's your energy right now?")).toBeVisible()
   })
 
   test('shows low energy banner when energyLevel is 2', async ({ authedPage: page }) => {
     await seedStore(page, { energyLevel: 2 })
-    await page.goto('/')
+    await page.goto('/home')
 
     await expect(page.getByText(/Low energy detected/)).toBeVisible({ timeout: 8000 })
     await expect(page.getByText('gentle mode')).toBeVisible()
@@ -279,7 +282,7 @@ test.describe('HomePage', () => {
         makeTask({ id: 'low-3', title: 'Third task', position: 2 }),
       ],
     })
-    await page.goto('/')
+    await page.goto('/home')
 
     // First task visible
     await expect(page.getByText('First task')).toBeVisible({ timeout: 8000 })
@@ -289,7 +292,7 @@ test.describe('HomePage', () => {
   })
 
   test('shows daily focus goal card', async ({ authedPage: page }) => {
-    await page.goto('/')
+    await page.goto('/home')
     // The daily focus goal card always shows when weeklyStats exist
     // The mocked Supabase returns empty arrays, so weeklyStats may be null
     // But the card shows "Today's focus" text
@@ -297,7 +300,7 @@ test.describe('HomePage', () => {
   })
 
   test('shows NOW pool header with counter', async ({ authedPage: page }) => {
-    await page.goto('/')
+    await page.goto('/home')
     await expect(page.getByText('NOW', { exact: true })).toBeVisible()
     await expect(page.getByText('0/3')).toBeVisible()
   })
@@ -308,7 +311,7 @@ test.describe('HomePage', () => {
 test.describe('AddTaskModal features', () => {
   test('shows Add context link that expands note textarea', async ({ authedPage: page }) => {
     await page.goto('/tasks')
-    await page.getByRole('button', { name: /add task/i }).click()
+    await page.getByRole('button', { name: /add task/i }).last().click()
 
     // "Add context" link visible
     const contextLink = page.getByText(/Add context/)
@@ -323,7 +326,7 @@ test.describe('AddTaskModal features', () => {
 
   test('shows repeat picker with Once/Daily/Weekly options', async ({ authedPage: page }) => {
     await page.goto('/tasks')
-    await page.getByRole('button', { name: /add task/i }).click()
+    await page.getByRole('button', { name: /add task/i }).last().click()
 
     // Repeat section visible
     await expect(page.getByText('Repeat')).toBeVisible()
@@ -364,10 +367,10 @@ test.describe('Settings extended', () => {
     await page.goto('/settings')
     await expect(page.getByText('Daily Focus Goal')).toBeVisible()
 
-    // Duration chip options
-    await expect(page.getByRole('button', { name: /30/i })).toBeVisible()
-    await expect(page.getByRole('button', { name: /60/i })).toBeVisible()
-    await expect(page.getByRole('button', { name: /90/i })).toBeVisible()
+    // Duration chip options — use exact button text to avoid matching Sound presets
+    await expect(page.getByRole('button', { name: '30m', exact: true })).toBeVisible()
+    await expect(page.getByRole('button', { name: '60m', exact: true })).toBeVisible()
+    await expect(page.getByRole('button', { name: '90m', exact: true })).toBeVisible()
   })
 
   test('shows Re-run setup wizard button in Preferences', async ({ authedPage: page }) => {
