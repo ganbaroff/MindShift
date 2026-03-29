@@ -193,7 +193,9 @@ Deno.serve(async (req: Request) => {
           }))
       : null
 
-    const locale = typeof raw.locale === 'string' ? raw.locale.slice(0, 10) : 'en'
+    // Validate BCP-47 format to prevent prompt injection via locale parameter
+    const VALID_LOCALE = /^[a-z]{2}(?:-[A-Z]{2,4})?$/
+    const locale = (typeof raw.locale === 'string' && VALID_LOCALE.test(raw.locale)) ? raw.locale : 'en'
 
     // ── Chat-specific context fields ──────────────────────────────────────
     const recentTasks = Array.isArray(ctx.recentTasks)

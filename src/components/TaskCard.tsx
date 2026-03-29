@@ -219,7 +219,7 @@ function TaskCardInner({ task, index = 0, onDone, onPark, onRemove }: TaskCardPr
             <button
               onClick={handleEditSave}
               disabled={!editTitle.trim()}
-              className="flex-1 h-8 rounded-lg text-[12px] font-medium flex items-center justify-center gap-1 disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-ms-primary/50 focus-visible:outline-none"
+              className="flex-1 h-8 rounded-lg text-[12px] font-medium flex items-center justify-center gap-1 disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-ms-primary focus-visible:outline-none"
               style={{ backgroundColor: 'rgba(78,205,196,0.12)', color: 'var(--color-teal)' }}
               aria-label="Save edit"
             >
@@ -227,7 +227,7 @@ function TaskCardInner({ task, index = 0, onDone, onPark, onRemove }: TaskCardPr
             </button>
             <button
               onClick={handleEditCancel}
-              className="flex-1 h-8 rounded-lg text-[12px] font-medium flex items-center justify-center gap-1 focus-visible:ring-2 focus-visible:ring-ms-primary/50 focus-visible:outline-none"
+              className="flex-1 h-8 rounded-lg text-[12px] font-medium flex items-center justify-center gap-1 focus-visible:ring-2 focus-visible:ring-ms-primary focus-visible:outline-none"
               style={{ backgroundColor: 'var(--color-surface-raised)', color: 'var(--color-text-muted)' }}
               aria-label="Cancel edit"
             >
@@ -295,7 +295,7 @@ function TaskCardInner({ task, index = 0, onDone, onPark, onRemove }: TaskCardPr
               setEditDueDate(task.dueDate ?? '');
               setIsEditing(true);
             }}
-            className="ml-auto p-1 rounded-md focus-visible:ring-2 focus-visible:ring-ms-primary/50 focus-visible:outline-none"
+            className="ml-auto p-1 rounded-md focus-visible:ring-2 focus-visible:ring-ms-primary focus-visible:outline-none"
             style={{ color: 'var(--color-text-muted)' }}
             aria-label="Edit task"
           >
@@ -343,7 +343,7 @@ function TaskCardInner({ task, index = 0, onDone, onPark, onRemove }: TaskCardPr
           } : undefined}
           transition={shouldAnimate ? { duration: 0.35, ease: 'easeOut' } : { duration: 0 }}
           onClick={() => handleDone(task.id)}
-          className="flex-1 h-9 rounded-xl text-[13px] font-medium focus-visible:ring-2 focus-visible:ring-[#4ECDC4]/50 focus-visible:outline-none"
+          className="flex-1 h-9 rounded-xl text-[13px] font-medium focus-visible:ring-2 focus-visible:ring-[#4ECDC4] focus-visible:outline-none"
           style={{
             backgroundColor: justCompleted ? 'rgba(78,205,196,0.2)' : 'rgba(78,205,196,0.12)',
             border: '1px solid rgba(78,205,196,0.35)',
@@ -355,7 +355,7 @@ function TaskCardInner({ task, index = 0, onDone, onPark, onRemove }: TaskCardPr
         <motion.button
           whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
           onClick={() => onPark?.(task.id)}
-          className="flex-1 h-9 rounded-xl text-[13px] font-medium focus-visible:ring-2 focus-visible:ring-ms-primary/50 focus-visible:outline-none"
+          className="flex-1 h-9 rounded-xl text-[13px] font-medium focus-visible:ring-2 focus-visible:ring-ms-primary focus-visible:outline-none"
           style={{ backgroundColor: 'var(--color-surface-raised)', color: 'var(--color-text-muted)' }}
         >
           {t('taskCard.parkIt')}
@@ -364,7 +364,7 @@ function TaskCardInner({ task, index = 0, onDone, onPark, onRemove }: TaskCardPr
           <motion.button
             whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
             onClick={handleRemoveTap}
-            className="h-9 px-3 rounded-xl text-[12px] font-medium focus-visible:ring-2 focus-visible:ring-[#F59E0B]/50 focus-visible:outline-none transition-colors"
+            className="h-9 px-3 rounded-xl text-[12px] font-medium focus-visible:ring-2 focus-visible:ring-[#F59E0B] focus-visible:outline-none transition-colors"
             style={{
               backgroundColor: confirmRemove ? 'rgba(245,158,11,0.2)' : 'rgba(139,139,167,0.1)',
               border: confirmRemove ? '1px solid rgba(245,158,11,0.4)' : '1px solid transparent',
@@ -372,7 +372,7 @@ function TaskCardInner({ task, index = 0, onDone, onPark, onRemove }: TaskCardPr
             }}
             aria-label={confirmRemove ? 'Confirm remove task' : 'Remove task'}
           >
-            {confirmRemove ? t('taskCard.remove') : '×'}
+            {confirmRemove ? t('taskCard.remove') : <><span aria-hidden="true">×</span><span className="sr-only">{t('taskCard.delete', 'Delete')}</span></>}
           </motion.button>
         )}
       </div>

@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState, useMemo, useRef } from 'react'
+import { lazy, Suspense, useEffect, useRef } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from 'sonner'
 import { useStore } from '@/store'
@@ -7,9 +7,8 @@ import { AppShell } from './AppShell'
 import { LoadingScreen } from '@/shared/ui/LoadingScreen'
 import { AuthGuard } from './AuthGuard'
 import { ErrorBoundary } from '@/shared/ui/ErrorBoundary'
-import { writeLastActive, shouldShowContextRestore } from '@/features/tasks/contextRestoreUtils'
+import { useOverlayState } from '@/shared/hooks/useOverlayState'
 import { CookieBanner } from '@/shared/ui/CookieBanner'
-import { RECOVERY_THRESHOLD_HOURS } from '@/shared/lib/constants'
 import { useOfflineSync } from '@/shared/hooks/useOfflineSync'
 import { useTaskSync } from '@/shared/hooks/useTaskSync'
 import { useSessionHistory } from '@/shared/hooks/useSessionHistory'
@@ -17,6 +16,7 @@ import { logError } from '@/shared/lib/logger'
 import { sendStreakUpdate, isVolauraConfigured } from '@/shared/lib/volaura-bridge'
 import { reminders } from '@/shared/lib/reminders'
 import { computeBurnoutScore, deriveBehaviors } from '@/shared/lib/burnout'
+import { RECOVERY_THRESHOLD_HOURS } from '@/shared/lib/constants'
 import { useCalendarSync } from '@/shared/hooks/useCalendarSync'
 import { useInAppReview } from '@/shared/hooks/useInAppReview'
 
@@ -59,21 +59,22 @@ const LazyFirstFocusTutorial = lazy(() =>
 
 export default function App() {
   const {
-    setUser, updateLastSession, lastSessionAt, recoveryShown, setRecoveryShown,
+    setUser, updateLastSession,
     nowPool, nextPool, somedayPool,
     onboardingCompleted, setBurnoutScore, completedTotal, energyLevel,
-    flexiblePauseUntil, setFlexiblePauseUntil,
+    setFlexiblePauseUntil,
     reducedStimulation, userTheme, firstFocusTutorialCompleted,
-    shutdownShownDate, setShutdownShownDate,
-    monthlyReflectionShownMonth, setMonthlyReflectionShownMonth,
-    weeklyPlanShownWeek, setWeeklyPlanShownWeek,
+    setRecoveryShown,
     currentStreak, userId,
     _hasHydrated,
   } = useStore()
-  const [showContextRestore, setShowContextRestore] = useState(false)
-  const [showShutdown, setShowShutdown] = useState(false)
-  const [showMonthly, setShowMonthly] = useState(false)
-  const [showWeeklyPlan, setShowWeeklyPlan] = useState(false)
+
+  const {
+    showRecovery,
+    flexPauseActive, flexPauseUntilLabel,
+    showContextRestore, showShutdown, showMonthly, showWeeklyPlan,
+    dismissContextRestore, dismissShutdown, dismissMonthly, dismissWeeklyPlan,
+  } = useOverlayState()
 
   useEffect(() => {
     document.documentElement.setAttribute(
@@ -109,7 +110,14 @@ export default function App() {
       if (session?.user) {
         localStorage.removeItem('ms_signed_out')
         setUser(session.user.id, session.user.email ?? '')
-        updateLastSession()
+        // Guard: don't reset lastSessionAt when the recovery protocol should show.
+        // RecoveryProtocol uses lastSessionAt to compute daysAbsent — calling
+        // updateLastSession() here would zero out the 72h gap before the overlay renders.
+        // updateLastSession() is called instead from the RecoveryProtocol onDismiss handler.
+        const s = useStore.getState()
+        const isLongAbsence = s.lastSessionAt && !s.recoveryShown &&
+          (Date.now() - new Date(s.lastSessionAt).getTime()) / 3_600_000 >= RECOVERY_THRESHOLD_HOURS
+        if (!isLongAbsence) updateLastSession()
 
         // ── Google Calendar: store provider tokens on OAuth callback ──────────
         // Only store tokens + enable sync when returning from calendar-scope auth
@@ -157,22 +165,6 @@ export default function App() {
     return () => subscription.unsubscribe()
   }, [setUser, updateLastSession])
 
-  useEffect(() => {
-    const hasActiveTasks = nowPool.some(t => t.status === 'active')
-    const onVisibilityChange = () => {
-      if (document.visibilityState === 'hidden') {
-        writeLastActive()
-      } else if (document.visibilityState === 'visible') {
-        if (onboardingCompleted && hasActiveTasks && shouldShowContextRestore()) {
-          setShowContextRestore(true)
-        }
-        writeLastActive()
-      }
-    }
-    document.addEventListener('visibilitychange', onVisibilityChange)
-    return () => document.removeEventListener('visibilitychange', onVisibilityChange)
-  }, [nowPool, onboardingCompleted])
-
   useEffect(() => { reminders.restore() }, [])
 
   useEffect(() => {
@@ -199,62 +191,6 @@ export default function App() {
     setBurnoutScore(adjustedScore)
   }, [completedTotal, energyLevel, nowPool, nextPool, somedayPool, setBurnoutScore])
 
-  // Shutdown ritual — triggers once per day after 9pm when onboarding done
-  useEffect(() => {
-    if (!onboardingCompleted) return
-    const hour = new Date().getHours()
-    if (hour < 21) return
-    const today = new Date().toISOString().split('T')[0]
-    if (shutdownShownDate === today) return
-    // Small delay so the main UI renders first
-    const t = setTimeout(() => setShowShutdown(true), 1200)
-    return () => clearTimeout(t)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onboardingCompleted])
-
-  // Monthly reflection — first 5 days of each new month, once per month
-  // Gate: skip for brand-new users who haven't completed enough tasks yet
-  useEffect(() => {
-    if (!onboardingCompleted) return
-    if (completedTotal < 3) return
-    const now = new Date()
-    const currentDay = now.getDate()
-    const currentMonth = now.toISOString().slice(0, 7) // 'YYYY-MM'
-    if (currentDay > 5) return
-    if (monthlyReflectionShownMonth === currentMonth) return
-    const t = setTimeout(() => setShowMonthly(true), 2000)
-    return () => clearTimeout(t)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onboardingCompleted, completedTotal])
-
-  // Weekly planning ritual — Sunday 18pm+ or Monday before noon, once per ISO week
-  // Gate: skip for brand-new users who haven't completed enough tasks yet
-  useEffect(() => {
-    if (!onboardingCompleted) return
-    if (completedTotal < 3) return
-    const now = new Date()
-    const day = now.getDay()   // 0=Sun, 1=Mon
-    const hour = now.getHours()
-    const isSundayEvening = day === 0 && hour >= 18
-    const isMondayMorning  = day === 1 && hour < 12
-    if (!isSundayEvening && !isMondayMorning) return
-    // ISO week key: YYYY-Www  (ISO week starts Mon — for Sunday use next week's key)
-    const isoWeek = (() => {
-      const d = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()))
-      // For Sunday, advance 1 day so we get the upcoming week's key
-      if (now.getDay() === 0) d.setUTCDate(d.getUTCDate() + 1)
-      const dayNum = d.getUTCDay() || 7
-      d.setUTCDate(d.getUTCDate() + 4 - dayNum)
-      const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1))
-      const weekNum = Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7)
-      return `${d.getUTCFullYear()}-W${weekNum.toString().padStart(2, '0')}`
-    })()
-    if (weeklyPlanShownWeek === isoWeek) return
-    const timer = setTimeout(() => setShowWeeklyPlan(true), 2500)
-    return () => clearTimeout(timer)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onboardingCompleted])
-
   // VOLAURA: broadcast streak update whenever streak changes (once per streak value per session)
   const lastSentStreakRef = useRef(0)
   useEffect(() => {
@@ -274,22 +210,6 @@ export default function App() {
   useSessionHistory()
   useCalendarSync()
   useInAppReview()
-
-  const showRecovery = (() => {
-    if (recoveryShown || !lastSessionAt) return false
-    const hoursSinceLast = (Date.now() - new Date(lastSessionAt).getTime()) / 3_600_000
-    return hoursSinceLast >= RECOVERY_THRESHOLD_HOURS
-  })()
-
-  const flexPauseActive = useMemo(() => {
-    if (!flexiblePauseUntil) return false
-    return new Date(flexiblePauseUntil) > new Date()
-  }, [flexiblePauseUntil])
-
-  const flexPauseUntilLabel = useMemo(() => {
-    if (!flexiblePauseUntil) return ''
-    return new Date(flexiblePauseUntil).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-  }, [flexiblePauseUntil])
 
   // Block render until IDB hydration completes — prevents default-state flash
   // (e.g. onboardingCompleted: false briefly before persisted true loads from IDB)
@@ -315,13 +235,13 @@ export default function App() {
 
           {showRecovery && (
             <Suspense fallback={null}>
-              <LazyRecoveryProtocol onDismiss={setRecoveryShown} />
+              <LazyRecoveryProtocol onDismiss={() => { setRecoveryShown(); updateLastSession() }} />
             </Suspense>
           )}
 
           {!showRecovery && showContextRestore && (
             <Suspense fallback={null}>
-              <LazyContextRestore onDismiss={() => setShowContextRestore(false)} />
+              <LazyContextRestore onDismiss={dismissContextRestore} />
             </Suspense>
           )}
 
@@ -335,40 +255,21 @@ export default function App() {
           {/* Shutdown ritual — end-of-day wind-down (9pm+, once per day) */}
           {!showRecovery && !showContextRestore && firstFocusTutorialCompleted && showShutdown && (
             <Suspense fallback={null}>
-              <LazyShutdownRitual onDismiss={() => {
-                setShowShutdown(false)
-                const today = new Date().toISOString().split('T')[0]
-                setShutdownShownDate(today)
-              }} />
+              <LazyShutdownRitual onDismiss={dismissShutdown} />
             </Suspense>
           )}
 
           {/* Monthly reflection — first 5 days of new month, once per month */}
           {!showRecovery && !showContextRestore && firstFocusTutorialCompleted && !showShutdown && showMonthly && (
             <Suspense fallback={null}>
-              <LazyMonthlyReflection onDismiss={() => {
-                setShowMonthly(false)
-                const currentMonth = new Date().toISOString().slice(0, 7)
-                setMonthlyReflectionShownMonth(currentMonth)
-              }} />
+              <LazyMonthlyReflection onDismiss={dismissMonthly} />
             </Suspense>
           )}
 
           {/* Weekly planning — Sunday evening or Monday morning, once per ISO week */}
           {!showRecovery && !showContextRestore && firstFocusTutorialCompleted && !showShutdown && !showMonthly && showWeeklyPlan && (
             <Suspense fallback={null}>
-              <LazyWeeklyPlanning onDismiss={() => {
-                setShowWeeklyPlan(false)
-                // Compute the same ISO week key as the trigger useEffect
-                const now = new Date()
-                const d = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()))
-                if (now.getDay() === 0) d.setUTCDate(d.getUTCDate() + 1)
-                const dayNum = d.getUTCDay() || 7
-                d.setUTCDate(d.getUTCDate() + 4 - dayNum)
-                const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1))
-                const weekNum = Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7)
-                setWeeklyPlanShownWeek(`${d.getUTCFullYear()}-W${weekNum.toString().padStart(2, '0')}`)
-              }} />
+              <LazyWeeklyPlanning onDismiss={dismissWeeklyPlan} />
             </Suspense>
           )}
 

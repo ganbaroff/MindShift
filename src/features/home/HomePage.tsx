@@ -10,7 +10,6 @@ import { useStore } from '@/store';
 import type { EnergyLevel } from '@/types';
 import { getNowPoolMax, APP_MODE_CONFIG, ENERGY_EMOJI } from '@/shared/lib/constants';
 import { useTranslation } from 'react-i18next';
-import { useI18n } from '@/shared/hooks/useI18n';
 import { useUITone } from '@/shared/hooks/useUITone';
 import { BurnoutGauge } from './BurnoutGauge';
 import { BurnoutNudgeCard } from './BurnoutNudgeCard';
@@ -179,14 +178,12 @@ export default function HomePage() {
     },
   ], [completedTotal, focusMinutes, xpTotal, energyLevel, burnoutScore]);
 
-  // Time-based greeting (i18n-aware — legacy system)
-  const { t: tLegacy } = useI18n();
-  // NOTE: { t } from useTranslation is hoisted above briefTip useMemo
+  // Time-based greeting — keys live in en.json home.greeting.*
   const greeting =
-    hour < 5  ? tLegacy('home.greeting.night') :
-    hour < 12 ? tLegacy('home.greeting.morning') :
-    hour < 17 ? tLegacy('home.greeting.afternoon') :
-    hour < 21 ? tLegacy('home.greeting.evening') : tLegacy('home.greeting.night');
+    hour < 5  ? t('home.greeting.night') :
+    hour < 12 ? t('home.greeting.morning') :
+    hour < 17 ? t('home.greeting.afternoon') :
+    hour < 21 ? t('home.greeting.evening') : t('home.greeting.night');
 
   return (
     <PageTransition>

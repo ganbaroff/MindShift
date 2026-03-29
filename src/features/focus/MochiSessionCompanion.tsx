@@ -259,7 +259,12 @@ function MochiSessionCompanionInner({ elapsedSeconds, sessionPhase, behaviorProf
   }
 
   return (
-    <div className="flex flex-col items-center gap-2 mt-6">
+    <div className="flex flex-col items-center gap-2 mt-6" aria-label="Mochi focus companion">
+      {/* Screen reader: announce new Mochi messages when they appear */}
+      <span className="sr-only" aria-live="polite" aria-atomic="true">
+        {activeBubble ? `Mochi says: ${activeBubble.message}` : ''}
+      </span>
+
       {/* Speech bubble */}
       <AnimatePresence>
         {activeBubble && (

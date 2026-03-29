@@ -75,6 +75,13 @@ function ArcTimerInner({
   const effectiveDisable = isSurprise ? true : disableToggle
   const handleClick = effectiveDisable ? undefined : onToggleDigits
 
+  // Screen reader: announce phase transitions (only fires when phase text changes)
+  const phaseLabel =
+    phase === 'struggle' ? 'Focus phase: getting started' :
+    phase === 'release'  ? 'Focus phase: momentum building' :
+    phase === 'flow'     ? 'Focus phase: deep flow' :
+    phase === 'recovery' ? 'Focus phase: recovery' : ''
+
   return (
     <motion.button
       onClick={handleClick}
@@ -89,6 +96,8 @@ function ArcTimerInner({
         effectiveShowDigits ? 'Focus timer — tap to hide digits' : 'Focus timer — tap to show digits'
       }
     >
+      {/* Announce phase transitions to screen readers — content only changes on phase transition, not per-second */}
+      <span className="sr-only" aria-live="polite" aria-atomic="true">{phaseLabel}</span>
       {/* Struggle phase pulsing glow */}
       {isPulsing && (
         <motion.div
@@ -153,6 +162,8 @@ function ArcTimerInner({
             className="flex flex-col items-center"
           >
             <span
+              role="timer"
+              aria-label={isCountup ? `${formatTime(displaySeconds)} elapsed` : `${formatTime(displaySeconds)} remaining`}
               className="font-mono font-bold tabular-nums"
               style={{
                 fontSize: ARC_SIZE * 0.18 * scale,
@@ -189,7 +200,7 @@ function ArcTimerInner({
             className="absolute bottom-0 translate-y-full mt-2 text-xs text-center whitespace-nowrap"
             style={{ color: 'var(--color-text-muted)' }}
           >
-            Tap to toggle digits
+            Tap or press Space to toggle digits
           </motion.p>
         )}
       </AnimatePresence>

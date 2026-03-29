@@ -79,7 +79,9 @@ Deno.serve(async (req: Request) => {
 
     const days   = Math.min(365, Math.max(0, Math.floor(Number(body.daysAbsent  ?? 0))))
     const tasks  = Math.min(999, Math.max(0, Math.floor(Number(body.incompleteCount ?? 0))))
-    const targetLocale = ((body.locale as string | undefined) ?? 'en').slice(0, 10)
+    const VALID_LOCALE = /^[a-z]{2}(?:-[A-Z]{2,4})?$/
+    const rawLocale = body.locale as string | undefined
+    const targetLocale = rawLocale && VALID_LOCALE.test(rawLocale) ? rawLocale : 'en'
     const VALID_ER = ['high', 'moderate', 'steady']
     const emotionalReactivity = VALID_ER.includes(body.emotionalReactivity as string)
       ? (body.emotionalReactivity as string)

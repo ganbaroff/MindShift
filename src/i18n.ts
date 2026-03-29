@@ -13,7 +13,6 @@
 
 import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
-import { useStore } from '@/store'
 
 import en from './locales/en.json'
 import ru from './locales/ru.json'
@@ -40,8 +39,9 @@ function resolveLocale(userLocale?: string | null): string {
   return SUPPORTED_LOCALES.includes(browserLang as SupportedLocale) ? browserLang : 'en'
 }
 
-// Initial language — may be overridden after store hydration
-const initialLng = resolveLocale(useStore.getState().userLocale)
+// Initial language from browser only — store may not be initialized yet.
+// The subscribe() below syncs to store.userLocale after IDB hydration completes.
+const initialLng = resolveLocale(null)
 
 i18n.use(initReactI18next).init({
   resources: {
@@ -58,15 +58,24 @@ i18n.use(initReactI18next).init({
   react: { useSuspense: false },
 })
 
-// After IndexedDB hydration, sync locale if store has a different value
-useStore.subscribe(
-  (state) => state.userLocale,
-  (userLocale) => {
-    const resolved = resolveLocale(userLocale)
-    if (i18n.language !== resolved) {
-      i18n.changeLanguage(resolved)
-    }
-  },
-)
+// Defer store subscription until after all modules finish initializing.
+// Static import of useStore here causes a circular-init ReferenceError because
+// store/index.ts imports i18n indirectly. Dynamic import + setTimeout(0) breaks the cycle.
+setTimeout(() => {
+  import('@/store').then(({ useStore }) => {
+    // Sync once immediately in case IDB has already hydrated
+    const resolved = resolveLocale(useStore.getState().userLocale)
+    if (i18n.language !== resolved) i18n.changeLanguage(resolved)
+
+    // Then keep in sync with future store changes (e.g. user changes language in Settings)
+    useStore.subscribe(
+      (state) => state.userLocale,
+      (userLocale) => {
+        const r = resolveLocale(userLocale)
+        if (i18n.language !== r) i18n.changeLanguage(r)
+      },
+    )
+  })
+}, 0)
 
 export default i18n

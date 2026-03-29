@@ -728,7 +728,13 @@
     "briefEmotionHigh": "Yüksək reaktivlik rejimi: ilk 30 dəqiqənizi fasilələrdən qoruyun.",
     "briefEmotionModerate": "Bu gün yavaş başlayın. Duyğular diqqətə həmişəkindən daha çox təsir edir.",
     "briefMedMorning": "Səhər pəncərəsi - daha çətin tapşırıqlar üçün yaxşı vaxt.",
-    "briefDefault": "Başlamamağa peşman olacağınız bir işi seçin. Sadəcə bir."
+    "briefDefault": "Başlamamağa peşman olacağınız bir işi seçin. Sadəcə bir.",
+    "greeting": {
+      "morning": "Sabahınız xeyir ☀️",
+      "afternoon": "Günortanız xeyir 🌤️",
+      "evening": "Axşamınız xeyir 🌙",
+      "night": "Gecəniz xeyir 🌃"
+    }
   },
   "progress": {
     "title": "Tərəqqiniz 🌱",
