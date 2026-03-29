@@ -197,6 +197,10 @@ export function useFocusSession() {
   useEffect(() => {
     if (screen !== 'session') return
     if (softStopFiredRef.current) return
+    // BUG-D2: guard against firing simultaneously with hard-stop effect when
+    // app returns from background after 120+ min (both effects see screen==='session'
+    // in the same render cycle before setScreen('hard-stop') takes effect)
+    if (elapsedSeconds >= SESSION_HARD_STOP_MINUTES * 60) return
     const isFlexPauseActive = !!flexiblePauseUntil && new Date(flexiblePauseUntil) > new Date()
     if (isFlexPauseActive) return
     if (elapsedSeconds >= SESSION_SOFT_STOP_MINUTES * 60) {
@@ -212,9 +216,11 @@ export function useFocusSession() {
     if (isFlexPauseActive) return
     if (elapsedSeconds >= SESSION_HARD_STOP_MINUTES * 60) {
       if (intervalRef.current) clearInterval(intervalRef.current)
+      stopAudio()    // BUG-D1: audio was continuing to play on hard-stop screen
+      setPreset(null)
       setScreen('hard-stop')
     }
-  }, [elapsedSeconds, screen, flexiblePauseUntil])
+  }, [elapsedSeconds, screen, flexiblePauseUntil, stopAudio, setPreset])
 
   // ── Park thought handler ────────────────────────────────────────────────────
   const handleParkThought = useCallback(async () => {
@@ -409,6 +415,9 @@ export function useFocusSession() {
 
   // ── Interval runner ──────────────────────────────────────────────────────────
   const startInterval = useCallback(() => {
+    // BUG-D3: clear any orphaned interval before creating a new one —
+    // rapid taps on "bypass hard-stop" could stack multiple intervals
+    if (intervalRef.current) clearInterval(intervalRef.current)
     const durationSec = durationSecRef.current
     intervalRef.current = setInterval(() => {
       const netElapsedMs = Date.now() - startTimeRef.current - pausedMsRef.current
