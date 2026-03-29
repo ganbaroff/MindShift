@@ -372,6 +372,16 @@ export function FocusSetup({
               max="180"
               value={customDuration}
               onChange={e => setCustomDuration(e.target.value)}
+              onBlur={() => {
+                const v = parseInt(customDuration)
+                if (v >= 1 && v <= 180) setSelectedDuration(v)
+              }}
+              onKeyDown={e => {
+                if (e.key === 'Enter') {
+                  const v = parseInt(customDuration)
+                  if (v >= 1 && v <= 180) { setSelectedDuration(v); setShowCustom(false) }
+                }
+              }}
               placeholder={t('focus.minutesPlaceholder')}
               autoFocus
               className="flex-1 px-4 py-2.5 rounded-xl text-sm focus:outline-none"
@@ -410,7 +420,7 @@ export function FocusSetup({
             )}
           </div>
           <motion.span
-            animate={shouldAnimate ? { rotate: soundPickerOpen ? 180 : 0 } : { rotate: soundPickerOpen ? 180 : 0 }}
+            animate={{ rotate: soundPickerOpen ? 180 : 0 }}
             transition={shouldAnimate ? { duration: 0.2 } : { duration: 0 }}
             className="text-xs"
             style={{ color: 'var(--color-muted)' }}

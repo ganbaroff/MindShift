@@ -190,11 +190,11 @@ export default function HistoryPage() {
                         {/* Energy delta */}
                         {(energyBefore || energyAfter) && (
                           <div className="flex items-center gap-1 text-[14px]">
-                            {energyBefore && <span title="Energy before">{energyBefore}</span>}
+                            {energyBefore && <span title={t('history.energyBefore')}>{energyBefore}</span>}
                             {energyBefore && energyAfter && (
                               <span style={{ color: '#3A3B52', fontSize: 10 }}>→</span>
                             )}
-                            {energyAfter && <span title="Energy after">{energyAfter}</span>}
+                            {energyAfter && <span title={t('history.energyAfter')}>{energyAfter}</span>}
                           </div>
                         )}
                       </div>
