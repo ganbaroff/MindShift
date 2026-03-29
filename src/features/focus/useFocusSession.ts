@@ -18,6 +18,7 @@ import { useAudioEngine } from '@/shared/hooks/useAudioEngine'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { supabase } from '@/shared/lib/supabase'
 import { logError } from '@/shared/lib/logger'
+import { sendFocusSession, sendVitals, isVolauraConfigured } from '@/shared/lib/volaura-bridge'
 import {
   notifyFocusEnd, notifyAchievement, requestNotificationPermission,
   pushFocusComplete, pushRecoveryEnd,
@@ -154,6 +155,7 @@ export function useFocusSession() {
   const softStopFiredRef    = useRef(false)
   const savedSessionIdRef   = useRef<string | null>(null)  // captures DB row id for energy_after UPDATE
   const lastPhaseRef        = useRef<SessionPhase>('idle')  // tracks phase for haptic on transition
+  const energyBeforeRef     = useRef<EnergyLevel | null>(null) // captured at session start for VOLAURA event
 
   // ── Interrupt bookmark ──────────────────────────────────────────────────────
   const [bookmarkText, setBookmarkText] = useState('')
@@ -344,6 +346,20 @@ export function useFocusSession() {
         elapsedMin <= 25 ? 15 :
         elapsedMin <= 45 ? 25 : 40
       storeState.addXP(sessionXP)
+
+      // VOLAURA: fire XP event — best-effort, never blocks UX
+      if (isVolauraConfigured() && storeState.userId && !storeState.userId.startsWith('guest_')) {
+        void supabase.auth.getSession().then(({ data }) => {
+          const token = data.session?.access_token
+          if (token) void sendFocusSession(token, {
+            durationMinutes: elapsedMin,
+            phase: sessionPhase,
+            energyBefore: energyBeforeRef.current ?? 3,
+            energyAfter: energyBeforeRef.current ?? 3, // updated when user picks post-session energy
+            psychotype: storeState.psychotype ?? null,
+          })
+        })
+      }
     }
 
     stopAudio()
@@ -423,6 +439,7 @@ export function useFocusSession() {
     pausedMsRef.current    = 0
     sessionSavedRef.current  = false
     softStopFiredRef.current = false
+    energyBeforeRef.current  = energyLevel
     setPostEnergyLogged(false)
 
     void requestNotificationPermission()
@@ -531,6 +548,14 @@ export function useFocusSession() {
         .update({ energy_after: level })
         .eq('id', savedSessionIdRef.current)
         .then(({ error }: { error: unknown }) => { if (error) logError('useFocusSession.energy_after.update', error) })
+
+      // VOLAURA: send vitals event — best-effort
+      if (isVolauraConfigured()) {
+        void supabase.auth.getSession().then(({ data }) => {
+          const token = data.session?.access_token
+          if (token) void sendVitals(token, level, useStore.getState().burnoutScore)
+        })
+      }
     }
   }, [setEnergyLevel, userId])
 

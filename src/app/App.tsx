@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState, useMemo } from 'react'
+import { lazy, Suspense, useEffect, useState, useMemo, useRef } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from 'sonner'
 import { useStore } from '@/store'
@@ -14,6 +14,7 @@ import { useOfflineSync } from '@/shared/hooks/useOfflineSync'
 import { useTaskSync } from '@/shared/hooks/useTaskSync'
 import { useSessionHistory } from '@/shared/hooks/useSessionHistory'
 import { logError } from '@/shared/lib/logger'
+import { sendStreakUpdate, isVolauraConfigured } from '@/shared/lib/volaura-bridge'
 import { reminders } from '@/shared/lib/reminders'
 import { computeBurnoutScore, deriveBehaviors } from '@/shared/lib/burnout'
 import { useCalendarSync } from '@/shared/hooks/useCalendarSync'
@@ -66,6 +67,7 @@ export default function App() {
     shutdownShownDate, setShutdownShownDate,
     monthlyReflectionShownMonth, setMonthlyReflectionShownMonth,
     weeklyPlanShownWeek, setWeeklyPlanShownWeek,
+    currentStreak, userId,
     _hasHydrated,
   } = useStore()
   const [showContextRestore, setShowContextRestore] = useState(false)
@@ -252,6 +254,20 @@ export default function App() {
     return () => clearTimeout(timer)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onboardingCompleted])
+
+  // VOLAURA: broadcast streak update whenever streak changes (once per streak value per session)
+  const lastSentStreakRef = useRef(0)
+  useEffect(() => {
+    if (!isVolauraConfigured()) return
+    if (!userId || userId.startsWith('guest_')) return
+    if (currentStreak < 2) return                    // invisible streaks < 2 → not worth sending
+    if (currentStreak === lastSentStreakRef.current) return
+    lastSentStreakRef.current = currentStreak
+    void supabase.auth.getSession().then(({ data }) => {
+      const token = data.session?.access_token
+      if (token) void sendStreakUpdate(token, currentStreak)
+    })
+  }, [currentStreak, userId])
 
   useOfflineSync()
   useTaskSync()
