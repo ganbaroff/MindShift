@@ -44,7 +44,25 @@ function flatten(obj, prefix = '') {
   return result
 }
 
-// Unflatten back to nested
+// Convert objects with sequential numeric keys ("0","1","2",...) back to arrays.
+// flatten() encodes arrays as {"0":x,"1":y,...} — this restores the original structure.
+function restoreArrays(obj) {
+  if (typeof obj !== 'object' || obj === null || Array.isArray(obj)) return obj
+  const keys = Object.keys(obj)
+  const isNumericSequential =
+    keys.length > 0 &&
+    keys.every((k, i) => k === String(i))
+  if (isNumericSequential) {
+    return keys.map(k => restoreArrays(obj[k]))
+  }
+  const result = {}
+  for (const [k, v] of Object.entries(obj)) {
+    result[k] = restoreArrays(v)
+  }
+  return result
+}
+
+// Unflatten back to nested, then restore arrays from numeric-key objects
 function unflatten(obj) {
   const result = {}
   for (const [key, value] of Object.entries(obj)) {
@@ -56,7 +74,7 @@ function unflatten(obj) {
     }
     current[parts[parts.length - 1]] = value
   }
-  return result
+  return restoreArrays(result)
 }
 
 // Check if key already translated

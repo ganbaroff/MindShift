@@ -137,7 +137,11 @@
     "deepBreaths": "Atme 5 Mal tief durch",
     "stretchNeck": "Dehnen Sie Ihren Nacken und Ihre Schultern",
     "suggestedRest": "Empfohlene Ruhezeit",
-    "keepGoingBypass": "Ich weiß – weitermachen →"
+    "keepGoingBypass": "Ich weiß – weitermachen →",
+    "tipTimeOften": "Die Zeit vergeht schnell – ein sichtbarer Timer reicht aus.",
+    "tipTimeSometimes": "Schauen Sie auf die Uhr, bevor Sie beginnen – und vergessen Sie es dann.",
+    "tipEmotionHigh": "Blockieren Sie Ihre ersten 15 Minuten vor Unterbrechungen. Fangen Sie klein an.",
+    "tipEmotionModerate": "Wenn Sie abgelenkt sind, halten Sie inne und kehren Sie zurück. Das zählt auch."
   },
   "settings": {
     "title": "Einstellungen",
@@ -356,337 +360,337 @@
     "garden": "🌿 Mochis Garten",
     "found": "{{count}}/{{total}} gefunden",
     "neutral": {
-      "phase_release": {
-        "0": "Wenn du dich darauf einlässt, hast du den schwierigsten Teil hinter dir 🌊",
-        "1": "Der Widerstand lässt nach. Du findest deinen Rhythmus.",
-        "2": "Der schwierige Teil ist vorbei. Lass es fließen. 🌊",
-        "3": "Kampfphase abgeschlossen. Du bist aufgetaucht – das ist alles.",
-        "4": "Der Anfang ist der schwierigste Teil. Du hast es bereits getan.",
-        "5": "Ihr Gehirn brauchte eine Minute zum Aufwärmen. Das ist normal. 🌊",
-        "6": "Immer noch hier bei dir. Die Zahnräder drehen sich.",
-        "7": "Die Reibung lässt nach. Du gewöhnst dich gerade ein.",
-        "8": "Dieses festgefahrene Gefühl? Es ist vergangen. Du hast es durch. 🌊",
-        "9": "Wir stecken da zusammen drin. Machen Sie weiter in Ihrem Tempo."
-      },
-      "phase_flow": {
-        "0": "Tiefer Fokus. Ich bin da, wenn du mich brauchst 🌙",
-        "1": "Du bist im Flow. Ich bleibe ruhig. 🌙",
-        "2": "Vollflussmodus. Es bleibt uns nichts anderes übrig, als weiterzumachen.",
-        "3": "Das ist es. Im Moment wird viel Arbeit geleistet. 🌙",
-        "4": "Immer noch hier bei dir. Keine Eile.",
-        "5": "Dein Gehirn hat seinen Rhythmus gefunden. Fahr damit. 🌙",
-        "6": "Fließzustand. Dein Tempo, dein Weg.",
-        "7": "Ruhig hier. Du brauchst mich jetzt nicht. 🌙",
-        "8": "Dieser Fokus liegt bei Ihnen. Ich leiste dir nur Gesellschaft.",
-        "9": "Tief drin. So fühlt sich das an. 🌙"
-      },
-      "milestone_7": {
-        "0": "7 Minuten später. Der schwierige Teil liegt hinter Ihnen. 💪",
-        "1": "Vorbei an der ersten Wand. Hübsch. 💪",
-        "2": "Der Anfang ist der schwierigste Teil. Du hast es bereits getan. 💪",
-        "3": "Ihr Gehirn funktioniert anders. Das ist kein Fehler. 💪",
-        "4": "7 Minuten. Du bist aufgetaucht – das zählt.",
-        "5": "Die ersten paar Minuten sind immer die schwierigsten. Erledigt. 💪",
-        "6": "Immer noch hier. Geht immer noch. Das ist die ganze Sache.",
-        "7": "Keine Eile. Ihr Tempo ist gültig. 💪",
-        "8": "7 Minuten, in denen man sich dafür entscheidet, sich zu konzentrieren. Das ist echt.",
-        "9": "Vergangener Widerstand. Der Rest wird von hier aus einfacher. 💪"
-      },
-      "milestone_15": {
-        "0": "Fünfzehn Minuten – das ist echter Fokus ✨",
-        "1": "15 Minuten tief. Das zählt. ✨",
-        "2": "Eine Viertelstunde echte Arbeit. Das hast du getan. ✨",
-        "3": "15 Minuten. Nicht nichts. Das ist etwas. ✨",
-        "4": "Ihr Gehirn brauchte Zeit, um sich zu beruhigen. Es hat sich gelegt. ✨",
-        "5": "15 Minuten nach dem Auftauchen. So sieht es aus.",
-        "6": "Immer noch hier bei dir. Stetig. ✨",
-        "7": "Eine Viertelstunde später. Niemand kann dir das nehmen.",
-        "8": "Das ist Fokus. Nicht perfekt, nicht erzwungen. Einfach echt. ✨",
-        "9": "15 Minuten. Dein Gehirn macht seine Sache."
-      },
-      "milestone_30": {
-        "0": "Eine halbe Stunde. Solide Sitzung 🌿",
-        "1": "30 Minuten. Das ist eine echte Sitzung. 🌿",
-        "2": "30 Zoll. Immer noch hier bei dir. 🌿",
-        "3": "Eine halbe Stunde Fokus. Du hast weitergemacht. 🌿",
-        "4": "30 Minuten. Dein Gehirn blieb dabei.",
-        "5": "Eine halbe Stunde. Egal, was als nächstes passiert, das zählte. 🌿",
-        "6": "Wir stecken da zusammen drin. 30 Minuten tief.",
-        "7": "30 Minuten echte Arbeit. Das ist nicht klein. 🌿",
-        "8": "Eine halbe Stunde. Ihr Fokus zeigte sich heute.",
-        "9": "30 Minuten. Stetig, nachhaltig, echt. 🌿"
-      },
-      "milestone_60": {
-        "0": "Eine Stunde. Das war echt. 🌟",
-        "1": "60 Minuten. Echte Tiefenarbeit. 🌟",
-        "2": "Eine volle Stunde. 🌟",
-        "3": "Eine Stunde geschafft. Dein Gehirn hat das getan. 🌟",
-        "4": "60 Minuten Konzentration. Das ist etwas, mit dem man sitzen kann. 🌟",
-        "5": "Eine Stunde. Keine Tricks, keine Hacks. Du tauchst einfach auf.",
-        "6": "Eine Stunde. Immer noch hier bei dir. 🌟",
-        "7": "60 Minuten. So sieht nachhaltige Konzentration aus.",
-        "8": "Eine Stunde intensiver Arbeit. Dein Tempo hat dich hierher gebracht. 🌟",
-        "9": "Eine Stunde. Das ist echt, und es gehört dir. 🌟"
-      }
+      "phase_release": [
+        "Wenn du dich darauf einlässt, hast du den schwierigsten Teil hinter dir 🌊",
+        "Der Widerstand lässt nach. Du findest deinen Rhythmus.",
+        "Der schwierige Teil ist vorbei. Lass es fließen. 🌊",
+        "Kampfphase abgeschlossen. Du bist aufgetaucht – das ist alles.",
+        "Der Anfang ist der schwierigste Teil. Du hast es bereits getan.",
+        "Ihr Gehirn brauchte eine Minute zum Aufwärmen. Das ist normal. 🌊",
+        "Immer noch hier bei dir. Die Zahnräder drehen sich.",
+        "Die Reibung lässt nach. Du gewöhnst dich gerade ein.",
+        "Dieses festgefahrene Gefühl? Es ist vergangen. Du hast es durch. 🌊",
+        "Wir stecken da zusammen drin. Machen Sie weiter in Ihrem Tempo."
+      ],
+      "phase_flow": [
+        "Tiefer Fokus. Ich bin da, wenn du mich brauchst 🌙",
+        "Du bist im Flow. Ich bleibe ruhig. 🌙",
+        "Vollflussmodus. Es bleibt uns nichts anderes übrig, als weiterzumachen.",
+        "Das ist es. Im Moment wird viel Arbeit geleistet. 🌙",
+        "Immer noch hier bei dir. Keine Eile.",
+        "Dein Gehirn hat seinen Rhythmus gefunden. Fahr damit. 🌙",
+        "Fließzustand. Dein Tempo, dein Weg.",
+        "Ruhig hier. Du brauchst mich jetzt nicht. 🌙",
+        "Dieser Fokus liegt bei Ihnen. Ich leiste dir nur Gesellschaft.",
+        "Tief drin. So fühlt sich das an. 🌙"
+      ],
+      "milestone_7": [
+        "7 Minuten später. Der schwierige Teil liegt hinter Ihnen. 💪",
+        "Vorbei an der ersten Wand. Hübsch. 💪",
+        "Der Anfang ist der schwierigste Teil. Du hast es bereits getan. 💪",
+        "Ihr Gehirn funktioniert anders. Das ist kein Fehler. 💪",
+        "7 Minuten. Du bist aufgetaucht – das zählt.",
+        "Die ersten paar Minuten sind immer die schwierigsten. Erledigt. 💪",
+        "Immer noch hier. Geht immer noch. Das ist die ganze Sache.",
+        "Keine Eile. Ihr Tempo ist gültig. 💪",
+        "7 Minuten, in denen man sich dafür entscheidet, sich zu konzentrieren. Das ist echt.",
+        "Vergangener Widerstand. Der Rest wird von hier aus einfacher. 💪"
+      ],
+      "milestone_15": [
+        "Fünfzehn Minuten – das ist echter Fokus ✨",
+        "15 Minuten tief. Das zählt. ✨",
+        "Eine Viertelstunde echte Arbeit. Das hast du getan. ✨",
+        "15 Minuten. Nicht nichts. Das ist etwas. ✨",
+        "Ihr Gehirn brauchte Zeit, um sich zu beruhigen. Es hat sich gelegt. ✨",
+        "15 Minuten nach dem Auftauchen. So sieht es aus.",
+        "Immer noch hier bei dir. Stetig. ✨",
+        "Eine Viertelstunde später. Niemand kann dir das nehmen.",
+        "Das ist Fokus. Nicht perfekt, nicht erzwungen. Einfach echt. ✨",
+        "15 Minuten. Dein Gehirn macht seine Sache."
+      ],
+      "milestone_30": [
+        "Eine halbe Stunde. Solide Sitzung 🌿",
+        "30 Minuten. Das ist eine echte Sitzung. 🌿",
+        "30 Zoll. Immer noch hier bei dir. 🌿",
+        "Eine halbe Stunde Fokus. Du hast weitergemacht. 🌿",
+        "30 Minuten. Dein Gehirn blieb dabei.",
+        "Eine halbe Stunde. Egal, was als nächstes passiert, das zählte. 🌿",
+        "Wir stecken da zusammen drin. 30 Minuten tief.",
+        "30 Minuten echte Arbeit. Das ist nicht klein. 🌿",
+        "Eine halbe Stunde. Ihr Fokus zeigte sich heute.",
+        "30 Minuten. Stetig, nachhaltig, echt. 🌿"
+      ],
+      "milestone_60": [
+        "Eine Stunde. Das war echt. 🌟",
+        "60 Minuten. Echte Tiefenarbeit. 🌟",
+        "Eine volle Stunde. 🌟",
+        "Eine Stunde geschafft. Dein Gehirn hat das getan. 🌟",
+        "60 Minuten Konzentration. Das ist etwas, mit dem man sitzen kann. 🌟",
+        "Eine Stunde. Keine Tricks, keine Hacks. Du tauchst einfach auf.",
+        "Eine Stunde. Immer noch hier bei dir. 🌟",
+        "60 Minuten. So sieht nachhaltige Konzentration aus.",
+        "Eine Stunde intensiver Arbeit. Dein Tempo hat dich hierher gebracht. 🌟",
+        "Eine Stunde. Das ist echt, und es gehört dir. 🌟"
+      ]
     },
     "gen_z": {
-      "phase_release": {
-        "0": "den schwierigen Teil hinter uns 🌊",
-        "1": "Das Gehirn wird endlich geladen, lol",
-        "2": "ok, wir ziehen jetzt um 🌊",
-        "3": "Der Widerstand hat den Chat verlassen",
-        "4": "Aufwärmen gilt 🌊",
-        "5": "Kampfphase abgeschlossen 💜",
-        "6": "wir stecken hier zusammen drin",
-        "7": "Jetzt dreht sich der Gang"
-      },
-      "phase_flow": {
-        "0": "du bist eingesperrt 🌙",
-        "1": "Flow-Modus aktiviert",
-        "2": "tief drin rn 🌙",
-        "3": "Das Gehirn macht sein Ding",
-        "4": "Leise hier bei Dir 🌙",
-        "5": "Hauptfigur konzentriert sich auf Energie",
-        "6": "das ist die Zone 🌙",
-        "7": "Dein Gehirn hat seinen Rhythmus gefunden"
-      },
-      "milestone_7": {
-        "0": "7 Minuten in 💪",
-        "1": "an der Wand vorbei, schön",
-        "2": "Der Anfang war der schwierige Teil 💪",
-        "3": "Dein Gehirn funktioniert anders, das stimmt",
-        "4": "7 Minuten des Auftauchens 💪",
-        "5": "immer noch hier, immer noch unterwegs",
-        "6": "Keine Eile, dein Tempo ist gültig 💪",
-        "7": "Widerstand beseitigt 💪"
-      },
-      "milestone_15": {
-        "0": "15 Min. tief ✨",
-        "1": "Viertelstunde, das zählt",
-        "2": "echter Fokus geschieht rn ✨",
-        "3": "15 Min. nicht nichts.",
-        "4": "Gehirn hat sich eingelebt ✨",
-        "5": "das ist es, fr",
-        "6": "Immer noch hier bei dir ✨",
-        "7": "15 Minuten echte Arbeit 💜"
-      },
-      "milestone_30": {
-        "0": "30 Min. 🌿 solide",
-        "1": "Eine halbe Stunde, du hast weitergemacht",
-        "2": "30 Zoll, immer noch da bei dir 🌿",
-        "3": "Ehrlich gesagt, eine echte Sitzung",
-        "4": "30 Minuten Auftauchen 🌿",
-        "5": "Das Gehirn ist dabei geblieben 💜",
-        "6": "das zählte, keine Obergrenze 🌿",
-        "7": "eine halbe Stunde tief 🌿"
-      },
-      "milestone_60": {
-        "0": "eine Stunde 🌟 fr",
-        "1": "60 Minuten, echte Arbeit",
-        "2": "eine Stunde, das war echt 🌟",
-        "3": "Dein Gehirn hat das getan",
-        "4": "eine ganze Stunde 🌟",
-        "5": "60 Minuten, keine Tricks, nur du",
-        "6": "immer noch da 🌟",
-        "7": "So sieht Fokus aus 🌟"
-      }
+      "phase_release": [
+        "den schwierigen Teil hinter uns 🌊",
+        "Das Gehirn wird endlich geladen, lol",
+        "ok, wir ziehen jetzt um 🌊",
+        "Der Widerstand hat den Chat verlassen",
+        "Aufwärmen gilt 🌊",
+        "Kampfphase abgeschlossen 💜",
+        "wir stecken hier zusammen drin",
+        "Jetzt dreht sich der Gang"
+      ],
+      "phase_flow": [
+        "du bist eingesperrt 🌙",
+        "Flow-Modus aktiviert",
+        "tief drin rn 🌙",
+        "Das Gehirn macht sein Ding",
+        "Leise hier bei Dir 🌙",
+        "Hauptfigur konzentriert sich auf Energie",
+        "das ist die Zone 🌙",
+        "Dein Gehirn hat seinen Rhythmus gefunden"
+      ],
+      "milestone_7": [
+        "7 Minuten in 💪",
+        "an der Wand vorbei, schön",
+        "Der Anfang war der schwierige Teil 💪",
+        "Dein Gehirn funktioniert anders, das stimmt",
+        "7 Minuten des Auftauchens 💪",
+        "immer noch hier, immer noch unterwegs",
+        "Keine Eile, dein Tempo ist gültig 💪",
+        "Widerstand beseitigt 💪"
+      ],
+      "milestone_15": [
+        "15 Min. tief ✨",
+        "Viertelstunde, das zählt",
+        "echter Fokus geschieht rn ✨",
+        "15 Min. nicht nichts.",
+        "Gehirn hat sich eingelebt ✨",
+        "das ist es, fr",
+        "Immer noch hier bei dir ✨",
+        "15 Minuten echte Arbeit 💜"
+      ],
+      "milestone_30": [
+        "30 Min. 🌿 solide",
+        "Eine halbe Stunde, du hast weitergemacht",
+        "30 Zoll, immer noch da bei dir 🌿",
+        "Ehrlich gesagt, eine echte Sitzung",
+        "30 Minuten Auftauchen 🌿",
+        "Das Gehirn ist dabei geblieben 💜",
+        "das zählte, keine Obergrenze 🌿",
+        "eine halbe Stunde tief 🌿"
+      ],
+      "milestone_60": [
+        "eine Stunde 🌟 fr",
+        "60 Minuten, echte Arbeit",
+        "eine Stunde, das war echt 🌟",
+        "Dein Gehirn hat das getan",
+        "eine ganze Stunde 🌟",
+        "60 Minuten, keine Tricks, nur du",
+        "immer noch da 🌟",
+        "So sieht Fokus aus 🌟"
+      ]
     },
     "millennial": {
-      "phase_release": {
-        "0": "Hinter dem schwierigen Teil. Du hast deinen Rhythmus gefunden. 🌊",
-        "1": "Der Widerstand lässt nach. So fängt es an.",
-        "2": "Kampfphase abgeschlossen. Du bist für dich selbst aufgetaucht. 🌊",
-        "3": "Ihr Gehirn brauchte eine Minute, um sich zu engagieren. So funktioniert es.",
-        "4": "Die Reibung lässt nach. Du gewöhnst dich daran. 🌊",
-        "5": "Der Anfang war der schwierige Teil. Das hast du bereits getan.",
-        "6": "Ich fange jetzt damit an. Das Aufwärmen ist vorbei. 🌊",
-        "7": "Gemeinsam haben wir den schwierigen Teil hinter uns."
-      },
-      "phase_flow": {
-        "0": "Du bist im Flow. Ich werde ruhig hier sein. 🌙",
-        "1": "Tiefenfokusmodus. Dies ist Ihre Zeit.",
-        "2": "Du hast deinen Groove gefunden. Fahr damit. 🌙",
-        "3": "Fließzustand. Dein Weg, dein Tempo.",
-        "4": "Tief drin. So fühlt sich anhaltende Konzentration an. 🌙",
-        "5": "Dieser Fokus liegt bei Ihnen. Ich bin nur aus Gesellschaftsgründen hier.",
-        "6": "Ihr Gehirn tut gerade das, was es am besten kann. 🌙",
-        "7": "Ruhig hier. Du hast das."
-      },
-      "milestone_7": {
-        "0": "7 Minuten später. Der schwierigste Teil liegt hinter dir. 💪",
-        "1": "Vorbei an der ersten Wand. Das hat wirklich Mühe gekostet.",
-        "2": "Ihr Gehirn funktioniert anders. Das ist deine Stärke. 💪",
-        "3": "7 Minuten Fokusauswahl. Das ist nicht nichts.",
-        "4": "Die ersten paar Minuten sind immer am schwierigsten. Du hast sie überstanden. 💪",
-        "5": "Der Anfang ist der schwierigste Teil. Du hast es bereits erledigt.",
-        "6": "7 Minuten. Du hast eine Wahl getroffen und bist dabei geblieben. 💪",
-        "7": "Immer noch hier. Geht immer noch. Das ist es, worauf es ankommt."
-      },
-      "milestone_15": {
-        "0": "15 Minuten voller Konzentration. Du hast das gebaut. ✨",
-        "1": "Viertelstunde. So sieht Fortschritt aus.",
-        "2": "15 Minuten tief. Das zählt mehr als Sie denken. ✨",
-        "3": "Ihr Gehirn brauchte Zeit, um sich zu beruhigen. Das tat es.",
-        "4": "15 Minuten, in denen Sie sich selbst zeigen. ✨",
-        "5": "Viertelstunde später. Du hast dir diesen Schwung verdient.",
-        "6": "Das ist Fokus. Nicht perfekt, einfach echt. ✨",
-        "7": "15 Minuten. Dein Gehirn macht seine Sache."
-      },
-      "milestone_30": {
-        "0": "Eine halbe Stunde. Du hast richtig Schwung aufgebaut. 🌿",
-        "1": "30 Minuten anhaltende Konzentration. Das ist eine Sitzung.",
-        "2": "30 Zoll. Immer noch hier bei dir. 🌿",
-        "3": "Eine halbe Stunde. Egal was passierte, das zählte.",
-        "4": "30 Minuten. Ihr Fokus zeigte sich heute. 🌿",
-        "5": "Eine halbe Stunde echte Arbeit. Das summiert sich.",
-        "6": "30 Minuten. Stetig und nachhaltig. 🌿",
-        "7": "Wir stecken da zusammen drin. 30 Minuten tief."
-      },
-      "milestone_60": {
-        "0": "Eine Stunde. Das war wirklich tiefe Arbeit. 🌟",
-        "1": "60 Minuten. Sie sollten sich einen Moment damit beschäftigen.",
-        "2": "Eine volle Stunde Konzentration. Das ist deins. 🌟",
-        "3": "Eine Stunde. Keine Verknüpfungen, nur Sie werden angezeigt.",
-        "4": "60 Minuten anhaltende Konzentration. Das ist etwas. 🌟",
-        "5": "Eine Stunde. Dein Tempo hat dich hierher gebracht.",
-        "6": "Eine Stunde intensiver Arbeit. Echt und verdient. 🌟",
-        "7": "60 Minuten. So sieht es aus. 🌟"
-      }
+      "phase_release": [
+        "Hinter dem schwierigen Teil. Du hast deinen Rhythmus gefunden. 🌊",
+        "Der Widerstand lässt nach. So fängt es an.",
+        "Kampfphase abgeschlossen. Du bist für dich selbst aufgetaucht. 🌊",
+        "Ihr Gehirn brauchte eine Minute, um sich zu engagieren. So funktioniert es.",
+        "Die Reibung lässt nach. Du gewöhnst dich daran. 🌊",
+        "Der Anfang war der schwierige Teil. Das hast du bereits getan.",
+        "Ich fange jetzt damit an. Das Aufwärmen ist vorbei. 🌊",
+        "Gemeinsam haben wir den schwierigen Teil hinter uns."
+      ],
+      "phase_flow": [
+        "Du bist im Flow. Ich werde ruhig hier sein. 🌙",
+        "Tiefenfokusmodus. Dies ist Ihre Zeit.",
+        "Du hast deinen Groove gefunden. Fahr damit. 🌙",
+        "Fließzustand. Dein Weg, dein Tempo.",
+        "Tief drin. So fühlt sich anhaltende Konzentration an. 🌙",
+        "Dieser Fokus liegt bei Ihnen. Ich bin nur aus Gesellschaftsgründen hier.",
+        "Ihr Gehirn tut gerade das, was es am besten kann. 🌙",
+        "Ruhig hier. Du hast das."
+      ],
+      "milestone_7": [
+        "7 Minuten später. Der schwierigste Teil liegt hinter dir. 💪",
+        "Vorbei an der ersten Wand. Das hat wirklich Mühe gekostet.",
+        "Ihr Gehirn funktioniert anders. Das ist deine Stärke. 💪",
+        "7 Minuten Fokusauswahl. Das ist nicht nichts.",
+        "Die ersten paar Minuten sind immer am schwierigsten. Du hast sie überstanden. 💪",
+        "Der Anfang ist der schwierigste Teil. Du hast es bereits erledigt.",
+        "7 Minuten. Du hast eine Wahl getroffen und bist dabei geblieben. 💪",
+        "Immer noch hier. Geht immer noch. Das ist es, worauf es ankommt."
+      ],
+      "milestone_15": [
+        "15 Minuten voller Konzentration. Du hast das gebaut. ✨",
+        "Viertelstunde. So sieht Fortschritt aus.",
+        "15 Minuten tief. Das zählt mehr als Sie denken. ✨",
+        "Ihr Gehirn brauchte Zeit, um sich zu beruhigen. Das tat es.",
+        "15 Minuten, in denen Sie sich selbst zeigen. ✨",
+        "Viertelstunde später. Du hast dir diesen Schwung verdient.",
+        "Das ist Fokus. Nicht perfekt, einfach echt. ✨",
+        "15 Minuten. Dein Gehirn macht seine Sache."
+      ],
+      "milestone_30": [
+        "Eine halbe Stunde. Du hast richtig Schwung aufgebaut. 🌿",
+        "30 Minuten anhaltende Konzentration. Das ist eine Sitzung.",
+        "30 Zoll. Immer noch hier bei dir. 🌿",
+        "Eine halbe Stunde. Egal was passierte, das zählte.",
+        "30 Minuten. Ihr Fokus zeigte sich heute. 🌿",
+        "Eine halbe Stunde echte Arbeit. Das summiert sich.",
+        "30 Minuten. Stetig und nachhaltig. 🌿",
+        "Wir stecken da zusammen drin. 30 Minuten tief."
+      ],
+      "milestone_60": [
+        "Eine Stunde. Das war wirklich tiefe Arbeit. 🌟",
+        "60 Minuten. Sie sollten sich einen Moment damit beschäftigen.",
+        "Eine volle Stunde Konzentration. Das ist deins. 🌟",
+        "Eine Stunde. Keine Verknüpfungen, nur Sie werden angezeigt.",
+        "60 Minuten anhaltende Konzentration. Das ist etwas. 🌟",
+        "Eine Stunde. Dein Tempo hat dich hierher gebracht.",
+        "Eine Stunde intensiver Arbeit. Echt und verdient. 🌟",
+        "60 Minuten. So sieht es aus. 🌟"
+      ]
     },
     "gen_x": {
-      "phase_release": {
-        "0": "Hinter dem schwierigen Teil.",
-        "1": "Widerstandsbeseitigung. Finden Sie Ihren Rhythmus.",
-        "2": "Aufwärmen geschafft. Sich darauf einlassen.",
-        "3": "Eingelebt. Weiter geht es.",
-        "4": "Die Reibung verging. Jetzt stabil.",
-        "5": "Vergangener Widerstand. Der Rest ist einfacher.",
-        "6": "Jetzt engagieren.",
-        "7": "Kampfphase abgeschlossen. Weiter."
-      },
-      "phase_flow": {
-        "0": "Tiefer Fokus. Immer noch hier.",
-        "1": "Flow-Modus. Ruhig bleiben.",
-        "2": "In der Zone. Weitermachen.",
-        "3": "Dein Groove. Dein Tempo.",
-        "4": "Konzentriert. Mehr ist nicht nötig.",
-        "5": "Eingesperrt. Ich werde hier sein.",
-        "6": "Es findet intensive Arbeit statt.",
-        "7": "Kontinuierlicher Fokus. Weitermachen."
-      },
-      "milestone_7": {
-        "0": "7 Minuten. Hinter dem schwierigen Teil.",
-        "1": "Erste Wand geräumt.",
-        "2": "7 Minuten vergangen. Jetzt geht es los.",
-        "3": "Begonnen. Das war der schwierige Teil.",
-        "4": "7 Minuten Konzentration. Solider Anfang.",
-        "5": "Vorbei an anfänglichem Widerstand.",
-        "6": "Geht immer noch. Gut.",
-        "7": "7 Zoll. Ruhe wird einfacher."
-      },
-      "milestone_15": {
-        "0": "15 Minuten. Echter Fokus.",
-        "1": "Viertelstunde. Das zählt.",
-        "2": "15 Zoll. Stabil.",
-        "3": "15 Minuten Arbeit erledigt.",
-        "4": "Viertelstunde. Auf dem richtigen Weg.",
-        "5": "15 Minuten. Eingelebt.",
-        "6": "Konzentriert für 15. Solide.",
-        "7": "Eine Viertelstunde echte Arbeit."
-      },
-      "milestone_30": {
-        "0": "30 Minuten. Echte Sitzung.",
-        "1": "Eine halbe Stunde. Solide Arbeit.",
-        "2": "30 Zoll. Immer noch hier.",
-        "3": "Eine halbe Stunde geschafft.",
-        "4": "30 Minuten. Gezählt.",
-        "5": "Eine halbe bis eine Stunde.",
-        "6": "30 Minuten. Nachhaltiger Fokus.",
-        "7": "Eine halbe Stunde. Stetig."
-      },
-      "milestone_60": {
-        "0": "Eine Stunde. Erledigt.",
-        "1": "60 Minuten. Echte Arbeit.",
-        "2": "Eine Stunde Konzentration.",
-        "3": "60 Zoll. Massiv.",
-        "4": "Eine Stunde. Das zählte.",
-        "5": "Eine Stunde. Nachhaltiger Einsatz.",
-        "6": "60 Minuten intensive Arbeit.",
-        "7": "Stunde geschafft."
-      }
+      "phase_release": [
+        "Hinter dem schwierigen Teil.",
+        "Widerstandsbeseitigung. Finden Sie Ihren Rhythmus.",
+        "Aufwärmen geschafft. Sich darauf einlassen.",
+        "Eingelebt. Weiter geht es.",
+        "Die Reibung verging. Jetzt stabil.",
+        "Vergangener Widerstand. Der Rest ist einfacher.",
+        "Jetzt engagieren.",
+        "Kampfphase abgeschlossen. Weiter."
+      ],
+      "phase_flow": [
+        "Tiefer Fokus. Immer noch hier.",
+        "Flow-Modus. Ruhig bleiben.",
+        "In der Zone. Weitermachen.",
+        "Dein Groove. Dein Tempo.",
+        "Konzentriert. Mehr ist nicht nötig.",
+        "Eingesperrt. Ich werde hier sein.",
+        "Es findet intensive Arbeit statt.",
+        "Kontinuierlicher Fokus. Weitermachen."
+      ],
+      "milestone_7": [
+        "7 Minuten. Hinter dem schwierigen Teil.",
+        "Erste Wand geräumt.",
+        "7 Minuten vergangen. Jetzt geht es los.",
+        "Begonnen. Das war der schwierige Teil.",
+        "7 Minuten Konzentration. Solider Anfang.",
+        "Vorbei an anfänglichem Widerstand.",
+        "Geht immer noch. Gut.",
+        "7 Zoll. Ruhe wird einfacher."
+      ],
+      "milestone_15": [
+        "15 Minuten. Echter Fokus.",
+        "Viertelstunde. Das zählt.",
+        "15 Zoll. Stabil.",
+        "15 Minuten Arbeit erledigt.",
+        "Viertelstunde. Auf dem richtigen Weg.",
+        "15 Minuten. Eingelebt.",
+        "Konzentriert für 15. Solide.",
+        "Eine Viertelstunde echte Arbeit."
+      ],
+      "milestone_30": [
+        "30 Minuten. Echte Sitzung.",
+        "Eine halbe Stunde. Solide Arbeit.",
+        "30 Zoll. Immer noch hier.",
+        "Eine halbe Stunde geschafft.",
+        "30 Minuten. Gezählt.",
+        "Eine halbe bis eine Stunde.",
+        "30 Minuten. Nachhaltiger Fokus.",
+        "Eine halbe Stunde. Stetig."
+      ],
+      "milestone_60": [
+        "Eine Stunde. Erledigt.",
+        "60 Minuten. Echte Arbeit.",
+        "Eine Stunde Konzentration.",
+        "60 Zoll. Massiv.",
+        "Eine Stunde. Das zählte.",
+        "Eine Stunde. Nachhaltiger Einsatz.",
+        "60 Minuten intensive Arbeit.",
+        "Stunde geschafft."
+      ]
     },
     "psychotype": {
       "achiever": {
-        "milestone_7": {
-          "0": "7 Minuten in den Büchern 💪",
-          "1": "Hinter dem schwierigen Teil. Bauen Sie weiter."
-        },
-        "milestone_15": {
-          "0": "15 Minuten echter Fortschritt. ✨",
-          "1": "Eine Viertelstunde nach unten. Solide."
-        },
-        "milestone_30": {
-          "0": "Eine halbe Stunde. Das ist eine echte Sitzung. 🌿",
-          "1": "30 Minuten fertig. Schwung."
-        },
-        "milestone_60": {
-          "0": "Eine Stunde. Echte Tiefenarbeit. 🌟",
-          "1": "60 Minuten. Das war echt."
-        }
+        "milestone_7": [
+          "7 Minuten in den Büchern 💪",
+          "Hinter dem schwierigen Teil. Bauen Sie weiter."
+        ],
+        "milestone_15": [
+          "15 Minuten echter Fortschritt. ✨",
+          "Eine Viertelstunde nach unten. Solide."
+        ],
+        "milestone_30": [
+          "Eine halbe Stunde. Das ist eine echte Sitzung. 🌿",
+          "30 Minuten fertig. Schwung."
+        ],
+        "milestone_60": [
+          "Eine Stunde. Echte Tiefenarbeit. 🌟",
+          "60 Minuten. Das war echt."
+        ]
       },
       "explorer": {
-        "milestone_7": {
-          "0": "7 Minuten – Aufwärmen 🔍",
-          "1": "Sich darauf einlassen. Neugier geladen."
-        },
-        "milestone_15": {
-          "0": "15 Minuten, in denen ich diesem Thread folge. ✨",
-          "1": "Immer noch auf Entdeckungsreise. Gut."
-        },
-        "milestone_30": {
-          "0": "Eine halbe Stunde tief. 🌿",
-          "1": "30 Minuten Erkundung."
-        },
-        "milestone_60": {
-          "0": "Eine Stunde. Wohin hat es dich geführt? 🌟",
-          "1": "60 Minuten. Was hast du gefunden?"
-        }
+        "milestone_7": [
+          "7 Minuten – Aufwärmen 🔍",
+          "Sich darauf einlassen. Neugier geladen."
+        ],
+        "milestone_15": [
+          "15 Minuten, in denen ich diesem Thread folge. ✨",
+          "Immer noch auf Entdeckungsreise. Gut."
+        ],
+        "milestone_30": [
+          "Eine halbe Stunde tief. 🌿",
+          "30 Minuten Erkundung."
+        ],
+        "milestone_60": [
+          "Eine Stunde. Wohin hat es dich geführt? 🌟",
+          "60 Minuten. Was hast du gefunden?"
+        ]
       },
       "connector": {
-        "milestone_7": {
-          "0": "7 Minuten. Stetig. 🌱",
-          "1": "Immer noch hier bei dir."
-        },
-        "milestone_15": {
-          "0": "15 Minuten konzentriertes Arbeiten. ✨",
-          "1": "Viertelstunde. Das zählt."
-        },
-        "milestone_30": {
-          "0": "Eine halbe Stunde. Wir stecken da zusammen drin. 🌿",
-          "1": "30 Minuten nach dem Erscheinen."
-        },
-        "milestone_60": {
-          "0": "Eine Stunde. 🌟",
-          "1": "60 Minuten. Echte gemeinsame Arbeit."
-        }
+        "milestone_7": [
+          "7 Minuten. Stetig. 🌱",
+          "Immer noch hier bei dir."
+        ],
+        "milestone_15": [
+          "15 Minuten konzentriertes Arbeiten. ✨",
+          "Viertelstunde. Das zählt."
+        ],
+        "milestone_30": [
+          "Eine halbe Stunde. Wir stecken da zusammen drin. 🌿",
+          "30 Minuten nach dem Erscheinen."
+        ],
+        "milestone_60": [
+          "Eine Stunde. 🌟",
+          "60 Minuten. Echte gemeinsame Arbeit."
+        ]
       },
       "planner": {
-        "milestone_7": {
-          "0": "7 Minuten – auf Kurs. 🌱",
-          "1": "Der Plan funktioniert."
-        },
-        "milestone_15": {
-          "0": "15 Minuten. Planmäßig. ✨",
-          "1": "Eine Viertelstunde später. Stetig."
-        },
-        "milestone_30": {
-          "0": "Eine halbe Stunde. Genau richtig. 🌿",
-          "1": "30 Minuten wie geplant."
-        },
-        "milestone_60": {
-          "0": "Eine Stunde. Plan geliefert. 🌟",
-          "1": "60 Minuten geschafft."
-        }
+        "milestone_7": [
+          "7 Minuten – auf Kurs. 🌱",
+          "Der Plan funktioniert."
+        ],
+        "milestone_15": [
+          "15 Minuten. Planmäßig. ✨",
+          "Eine Viertelstunde später. Stetig."
+        ],
+        "milestone_30": [
+          "Eine halbe Stunde. Genau richtig. 🌿",
+          "30 Minuten wie geplant."
+        ],
+        "milestone_60": [
+          "Eine Stunde. Plan geliefert. 🌟",
+          "60 Minuten geschafft."
+        ]
       }
     },
     "fallback": "Immer noch hier bei dir."
@@ -718,7 +722,13 @@
     "hardWork": "Du hast hart gearbeitet. Kümmere dich zuerst um dich selbst.",
     "easyDoesIt": "Easy macht es heute. Kleine Schritte zählen immer noch.",
     "nothingHereYet": "Hier ist noch nichts",
-    "goalReachedToast": "Tagesziel erreicht! {{min}} Min. konzentriert heute"
+    "goalReachedToast": "Tagesziel erreicht! {{min}} Min. konzentriert heute",
+    "briefTimeOften": "Tag der Zeitblindheit? Stellen Sie einen sichtbaren Timer ein, bevor Sie beginnen.",
+    "briefTimeSometimes": "Schauen Sie auf die Uhr, bevor Sie eintauchen – Überraschungen sind heute schwieriger zu bewältigen.",
+    "briefEmotionHigh": "Hochreaktivitätsmodus: Schützen Sie Ihre ersten 30 Minuten vor Unterbrechungen.",
+    "briefEmotionModerate": "Fangen Sie heute langsam an. Emotionen beeinflussen die Konzentration stärker als gewöhnlich.",
+    "briefMedMorning": "Morgenfenster – gute Zeit für schwierigere Aufgaben.",
+    "briefDefault": "Wählen Sie eine Aufgabe aus, bei der Sie es bereuen würden, wenn Sie sie nicht begonnen haben. Nur einer."
   },
   "progress": {
     "title": "Dein Fortschritt 🌱",
@@ -752,6 +762,9 @@
     "shareThisWeek": "Diese Woche teilen",
     "sessionLog": "Sitzungsprotokoll",
     "weeklyInsight": "✨Wöchentlicher Einblick",
+    "insightPeakFocus": "🧠 Hauptfokus: 14–16 Uhr",
+    "insightShortSessions": "💡 Versuchen Sie es an 15-minütigen Sitzungen an Tagen mit wenig Stress",
+    "insightOneStep": "🎯 Du erledigst Aufgaben Schritt für Schritt",
     "achieverLabel": "Leistungsträger",
     "achieverDesc": "Du tauchst tief ein und beendest, was du begonnen hast",
     "explorerLabel": "Forscher",
@@ -1103,5 +1116,84 @@
     "meetingFifteen": "\"{{title}}\" beginnt in 15 Minuten",
     "viewTasks": "Aufgaben ansehen",
     "startFocus": "Fokus starten"
+  },
+  "achievements": {
+    "first_seed": "Erster Samen",
+    "five_min_hero": "5-Minuten-Held",
+    "flow_rider": "Flow Rider",
+    "comeback_kid": "Comeback-Kind",
+    "deep_diver": "Tieftaucher",
+    "quiet_mind": "Ruhiger Geist",
+    "task_sniper": "Aufgabe Scharfschütze",
+    "sonic_anchor": "Sonic Anchor",
+    "week_warrior": "Wochenkrieger",
+    "brain_trust": "Brain Trust",
+    "micro_master": "Mikromeister",
+    "gentle_start": "Sanfter Start",
+    "recover_rise": "Erholen und aufstehen",
+    "pool_shifter": "Pool-Shifter",
+    "night_owl": "Nachteule",
+    "morning_mind": "Morgengeist",
+    "voice_input": "Spracheingabe",
+    "full_cycle": "Vollständiger Zyklus",
+    "first_seed_desc": "Erledige deine erste Aufgabe",
+    "five_min_hero_desc": "Beginnen Sie eine Aufgabe mit der 5-Minuten-Regel",
+    "flow_rider_desc": "Absolvieren Sie eine 52-minütige Fokussitzung",
+    "comeback_kid_desc": "Kehren Sie nach mehr als 3 Tagen zurück und erledigen Sie eine Aufgabe",
+    "deep_diver_desc": "Absolvieren Sie 5 Fokussitzungen",
+    "quiet_mind_desc": "Verwenden Sie Audio für 3 Fokussitzungen",
+    "task_sniper_desc": "Erledige 10 Aufgaben",
+    "sonic_anchor_desc": "Stellen Sie einen Fokus-Ankerton ein",
+    "week_warrior_desc": "5 von 7 Tagen aktiv",
+    "brain_trust_desc": "Verwenden Sie die KI-Aufgabenzerlegung 10 Mal",
+    "micro_master_desc": "Erledige 50 Mikroaufgaben",
+    "gentle_start_desc": "Erledige eine Aufgabe mit niedriger Energie (1-2)",
+    "recover_rise_desc": "Kommen Sie nach einer Pause zurück und konzentrieren Sie sich",
+    "pool_shifter_desc": "Verschieben Sie eine Aufgabe von „Irgendwann“ nach „Jetzt“.",
+    "night_owl_desc": "Erledige eine Aufgabe nach 21:00 Uhr",
+    "morning_mind_desc": "Erledige eine Aufgabe vor 9 Uhr",
+    "voice_input_desc": "Fügen Sie eine Aufgabe per Spracheingabe hinzu",
+    "full_cycle_desc": "Schließe alle 4 Fokusphasen in einer Sitzung ab"
+  },
+  "levels": {
+    "seedling": "Sämling",
+    "sprout": "Sprießen",
+    "grower": "Erzeuger",
+    "bloomer": "Bloomer",
+    "flourisher": "Flourisher",
+    "cultivator": "Grubber",
+    "nurturer": "Pfleger",
+    "luminary": "Leuchte",
+    "pathfinder": "Pfadfinder",
+    "sage": "Salbei"
+  },
+  "difficulty": {
+    "easy": "Einfach",
+    "medium": "Medium",
+    "hard": "Hart"
+  },
+  "taskType": {
+    "task": "Aufgabe",
+    "idea": "Idee",
+    "reminder": "Erinnerung",
+    "meeting": "Treffen"
+  },
+  "category": {
+    "work": "Arbeiten",
+    "personal": "Persönlich",
+    "health": "Gesundheit",
+    "learning": "Lernen",
+    "finance": "Finanzen"
+  },
+  "appMode": {
+    "minimalSubtitle": "Eine Aufgabe nach der anderen. Was ist am wichtigsten?",
+    "habitSubtitle": "Bauen Sie Ihre Routine Schritt für Schritt auf.",
+    "systemSubtitle": "Alles sichtbar. Sie haben die Kontrolle."
+  },
+  "seasonalMode": {
+    "launch": "Start",
+    "maintain": "Pflegen",
+    "recover": "Genesen",
+    "sandbox": "Sandkasten"
   }
 }
