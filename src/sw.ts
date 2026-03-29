@@ -77,8 +77,8 @@ self.addEventListener('push', (event) => {
   event.waitUntil(
     self.registration.showNotification(title, {
       body,
-      icon:  '/icons/icon-192.png',
-      badge: '/icons/icon-192.png',
+      icon:  '/icon-192.png',
+      badge: '/icon-192.png',
       tag:   data?.tag ?? 'mindshift-reminder',
       data:  { url: data?.url ?? '/' },
     })
@@ -88,7 +88,10 @@ self.addEventListener('push', (event) => {
 // ── Notification click — open the app at the right URL ──────────────────────
 self.addEventListener('notificationclick', (event) => {
   event.notification.close()
-  const url = (event.notification.data as { url?: string })?.url ?? '/'
+  const raw = (event.notification.data as { url?: string })?.url ?? '/'
+  // Validate URL is same-origin or relative (prevent open redirect via push payload)
+  const isSafe = raw.startsWith('/') || raw.startsWith(self.location.origin)
+  const url = isSafe ? raw : '/'
   event.waitUntil(
     (self.clients as Clients).openWindow(url)
   )

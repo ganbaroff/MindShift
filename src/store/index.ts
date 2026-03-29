@@ -847,9 +847,14 @@ export const useStore = create<AppStore>()(
           if (!Array.isArray(state.nowPool)) state.nowPool = []
           if (!Array.isArray(state.nextPool)) state.nextPool = []
           if (!Array.isArray(state.somedayPool)) state.somedayPool = []
-          const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+          const now = Date.now()
+          const cutoff = new Date(now - 30 * 24 * 60 * 60 * 1000).toISOString()
+          // Guard: skip pruning if system clock appears wrong (cutoff in future = clock jumped forward)
+          const shouldPrune = new Date(cutoff).getTime() < now
           const prune = (tasks: Task[]) =>
-            tasks.filter(t => !(t.status === 'completed' && t.completedAt && t.completedAt < cutoff))
+            shouldPrune
+              ? tasks.filter(t => !(t.status === 'completed' && t.completedAt && t.completedAt < cutoff))
+              : tasks
           state.nowPool = prune(state.nowPool)
           state.nextPool = prune(state.nextPool)
           state.somedayPool = prune(state.somedayPool)

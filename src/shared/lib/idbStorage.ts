@@ -47,13 +47,17 @@ export const idbStorage: StateStorage = {
   },
 
   setItem: async (name: string, value: string): Promise<void> => {
-    await set(name, value)
-    // Backup critical data to localStorage as fallback against IDB wipe
-    // during Service Worker updates. localStorage survives SW lifecycle.
+    // Write localStorage backup first — fast synchronous write survives IDB failures
     try { localStorage.setItem(`${name}_backup`, value) } catch { /* quota exceeded — non-fatal */ }
     // Ensure primary localStorage key is cleaned up (migration artifact)
     if (localStorage.getItem(name) !== null) {
       localStorage.removeItem(name)
+    }
+    // Write to IDB — if quota exceeded or unavailable, backup above is still intact
+    try {
+      await set(name, value)
+    } catch {
+      // IDB write failed (quota, private mode, storage error) — backup already written above
     }
   },
 

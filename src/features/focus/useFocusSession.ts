@@ -264,7 +264,7 @@ export function useFocusSession() {
   // ── Save session to DB ──────────────────────────────────────────────────────
   const saveSession = useCallback(async (elapsedMs: number, phaseReached: SessionPhase) => {
     if (sessionSavedRef.current || !activeSession || !userId) return
-    sessionSavedRef.current = true
+    // NOTE: set flag AFTER successful insert so network errors allow retry
     try {
       const row: FocusSessionInsert = {
         task_id:       activeSession.taskId,
@@ -281,7 +281,11 @@ export function useFocusSession() {
         .insert(row as never)
         .select('id')
         .single()
+      // Only mark saved after confirmed DB insert — allows retry on network error
+      sessionSavedRef.current = true
       savedSessionIdRef.current = (saved as { id?: string } | null)?.id ?? null
+      // Clear pending session from localStorage now that it's saved
+      localStorage.removeItem('ms_pending_session')
       updateLastSession()
 
       // Sync focus session as time block to Google Calendar (fire-and-forget)
@@ -412,6 +416,27 @@ export function useFocusSession() {
     document.addEventListener('visibilitychange', handleVisibility)
     return () => document.removeEventListener('visibilitychange', handleVisibility)
   }, [screen, handleSessionEnd, setPhase])
+
+  // ── beforeunload — persist in-progress session to localStorage ───────────────
+  // If the tab is closed mid-session, Supabase insert never runs.
+  // We save a snapshot so the next app load can detect and recover it.
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (screen === 'session' && activeSession && startTimeRef.current > 0 && !sessionSavedRef.current) {
+        const elapsedMs = Date.now() - startTimeRef.current - pausedMsRef.current
+        try {
+          localStorage.setItem('ms_pending_session', JSON.stringify({
+            taskId: activeSession.taskId,
+            startedAt: activeSession.startedAt,
+            elapsedMs,
+            phase: sessionPhase,
+          }))
+        } catch { /* localStorage unavailable — silent */ }
+      }
+    }
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+  }, [screen, activeSession, sessionPhase])
 
   // ── Interval runner ──────────────────────────────────────────────────────────
   const startInterval = useCallback(() => {

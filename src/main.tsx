@@ -22,6 +22,16 @@ const initSentry = () => {
       return event
     },
   })
+  // Wire auth state to Sentry user context for error correlation
+  import('@/shared/lib/supabase').then(({ supabase }) => {
+    supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user?.id) {
+        Sentry.setUser({ id: session.user.id })
+      } else {
+        Sentry.setUser(null)
+      }
+    })
+  }).catch(() => { /* non-critical */ })
 }
 
 if (typeof requestIdleCallback !== 'undefined') {
