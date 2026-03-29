@@ -9,7 +9,7 @@ import { useSessionHistory } from '@/shared/hooks/useSessionHistory';
 import { nativeShare, canShare } from '@/shared/lib/native';
 import { deriveFromSessions } from '@/shared/lib/psychotype';
 import { DISCOVERIES } from '@/shared/lib/mochiDiscoveries';
-import { isVolauraConfigured, fetchCharacterState, type CharacterState } from '@/shared/lib/volaura-bridge';
+import { isVolauraConfigured, fetchCharacterState, sendPsychotype, type CharacterState } from '@/shared/lib/volaura-bridge';
 import { supabase } from '@/shared/lib/supabase';
 import { AchievementGrid } from './AchievementGrid';
 import { BurnoutAlert } from '@/features/home/BurnoutAlert';
@@ -72,6 +72,13 @@ export default function ProgressPage() {
     setPsychotype(derivedPsychotype)
     setPsychotypeLastDerived(new Date().toISOString().slice(0, 10))
     resetGridToDefaults()
+    // VOLAURA: broadcast psychotype change — best-effort
+    if (isVolauraConfigured()) {
+      void supabase.auth.getSession().then(({ data }) => {
+        const token = data.session?.access_token
+        if (token) void sendPsychotype(token, derivedPsychotype)
+      })
+    }
   }
 
   const handleShareWeek = async () => {
