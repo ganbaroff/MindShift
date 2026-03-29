@@ -24,6 +24,7 @@ const STEP_KEYS = [
 function WelcomeWalkthroughInner() {
   const seenHints = useStore(s => s.seenHints)
   const markHintSeen = useStore(s => s.markHintSeen)
+  const firstFocusTutorialCompleted = useStore(s => s.firstFocusTutorialCompleted)
   const { shouldAnimate, t: transition } = useMotion()
   const { t } = useTranslation()
   const [step, setStep] = useState(0)
@@ -42,6 +43,8 @@ function WelcomeWalkthroughInner() {
     markHintSeen('welcome_walkthrough')
   }, [markHintSeen])
 
+  // Tutorial takes priority over walkthrough — don't show both at once
+  if (!firstFocusTutorialCompleted) return null
   if (alreadySeen) return null
 
   const current = STEP_KEYS[step]
