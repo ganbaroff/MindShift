@@ -45,6 +45,12 @@
     "title": "Görevleriniz",
     "tasksInPlay": "{{count}} görevler devrede",
     "search": "Görevleri ara...",
+    "poolGuide": {
+      "title": "Görevler nasıl çalışır",
+      "now": "şu anda yaptığınız 3'e kadar görev. Az seçenek = az felç.",
+      "next": "sırada. Hazır olunca buraya taşı.",
+      "someday": "park edilmiş fikirler. Baskı yok, son tarih yok."
+    },
     "now": "ŞİMDİ",
     "next": "SONRAKİ",
     "someday": "BİR GÜN",

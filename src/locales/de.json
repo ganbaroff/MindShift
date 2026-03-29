@@ -45,6 +45,12 @@
     "title": "Ihre Aufgaben",
     "tasksInPlay": "{{count}} Aufgaben im Spiel",
     "search": "Suchaufgaben...",
+    "poolGuide": {
+      "title": "So funktionieren Aufgaben",
+      "now": "bis zu 3 Aufgaben, die du jetzt erledigst. Weniger Auswahl = weniger Blockade.",
+      "next": "in der Warteschlange. Verschiebe sie hierher wenn du bereit bist.",
+      "someday": "geparkte Ideen. Kein Druck, keine Frist."
+    },
     "now": "JETZT",
     "next": "NÄCHSTE",
     "someday": "EINES TAGES",

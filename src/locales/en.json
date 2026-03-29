@@ -45,6 +45,12 @@
     "title": "Your Tasks",
     "tasksInPlay": "{{count}} tasks in play",
     "search": "Search tasks...",
+    "poolGuide": {
+      "title": "How tasks work here",
+      "now": "up to 3 tasks you do right now. Less choice = less paralysis.",
+      "next": "queued up. Move here when ready.",
+      "someday": "parked ideas. No pressure, no deadline."
+    },
     "now": "NOW",
     "next": "NEXT",
     "someday": "SOMEDAY",
