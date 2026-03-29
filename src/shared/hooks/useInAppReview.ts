@@ -16,15 +16,15 @@ const REVIEW_COOLDOWN_MS = 90 * 24 * 60 * 60 * 1000 // 90 days
 const MIN_SESSIONS = 3
 
 export function useInAppReview() {
-  const completedTotal = useStore(s => s.completedTotal)
+  const completedFocusSessions = useStore(s => s.completedFocusSessions)
   const energyLevel = useStore(s => s.energyLevel)
   const burnoutScore = useStore(s => s.burnoutScore)
   const seenHints = useStore(s => s.seenHints)
   const markHintSeen = useStore(s => s.markHintSeen)
 
   useEffect(() => {
-    // Gate: enough sessions
-    if (completedTotal < MIN_SESSIONS) return
+    // Gate: enough completed focus sessions (not task completions)
+    if (completedFocusSessions < MIN_SESSIONS) return
 
     // Gate: good mental state
     if (energyLevel < 3 || burnoutScore > 60) return
@@ -49,5 +49,5 @@ export function useInAppReview() {
       }
     }
     // Web: no action — review only makes sense in native app
-  }, [completedTotal, energyLevel, burnoutScore, seenHints, markHintSeen])
+  }, [completedFocusSessions, energyLevel, burnoutScore, seenHints, markHintSeen])
 }
