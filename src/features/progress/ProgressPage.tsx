@@ -328,6 +328,7 @@ export default function ProgressPage() {
                 </div>
                 <button
                   onClick={handleAcceptEvolution}
+                  aria-label={t('progress.update')}
                   className="text-[11px] font-semibold px-3 py-1.5 rounded-xl shrink-0 transition-all duration-150"
                   style={{
                     background: 'rgba(245,158,11,0.15)',
@@ -436,6 +437,7 @@ export default function ProgressPage() {
             transition={shouldAnimate ? { delay: 0.18 } : undefined}
             whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
             onClick={() => void handleShareWeek()}
+            aria-label={t('progress.shareThisWeek')}
             className="w-full py-3 rounded-2xl text-sm font-medium flex items-center justify-center gap-2 transition-all duration-200"
             style={{
               background: 'rgba(123,114,255,0.10)',
