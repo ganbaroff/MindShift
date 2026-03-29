@@ -175,7 +175,7 @@ export const NatureBuffer = memo(function NatureBuffer({
                     onClick={() => onSetEnergyLevel(level)}
                     className="flex-1 flex flex-col items-center gap-0.5 py-2 rounded-xl text-xs transition-all duration-150 min-h-[52px]"
                     style={{ background: 'var(--color-surface-raised)', border: '1px solid rgba(255,255,255,0.06)' }}
-                    aria-label={`Post-session energy: ${label}`}
+                    aria-label={t('focus.postSessionEnergyLabel', { label })}
                   >
                     <span className="text-lg leading-none">{ENERGY_EMOJI[i]}</span>
                     <span className="text-[9px]" style={{ color: 'var(--color-text-muted)' }}>{label}</span>
@@ -197,7 +197,7 @@ export const NatureBuffer = memo(function NatureBuffer({
             border: '1px solid rgba(255,255,255,0.06)',
             color: 'var(--color-text-muted)',
           }}
-          aria-label="Skip nature buffer"
+          aria-label={t('focus.skipNatureBuffer')}
         >
           {t('focus.imReady')}
         </button>
@@ -318,7 +318,7 @@ export const RecoveryLock = memo(function RecoveryLock({
             border: '1px solid rgba(255,255,255,0.06)',
             color: 'var(--color-text-muted)',
           }}
-          aria-label="Bypass recovery suggestion"
+          aria-label={t('focus.bypassRecovery')}
         >
           {t('focus.keepGoingBypass')}
         </button>

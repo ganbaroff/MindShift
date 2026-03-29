@@ -355,8 +355,9 @@ function SortableTaskCard({ task, index, onDone, onPark, onRemove, onMove, curre
               ))}
               <button
                 onClick={() => setShowMoveOptions(false)}
-                className="text-[10px] px-1 rounded"
+                className="text-[10px] px-1 rounded focus-visible:ring-2 focus-visible:ring-ms-primary/50 focus-visible:outline-none"
                 style={{ color: 'var(--color-text-muted)' }}
+                aria-label="Close move options"
               >
                 ✕
               </button>

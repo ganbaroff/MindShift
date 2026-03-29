@@ -203,7 +203,7 @@ export function MochiChat({ open, onClose }: MochiChatProps) {
       const crisisMsg: ChatMessage = {
         id: generateId(),
         role: 'mochi',
-        text: `I hear you. You matter.\n\n${resources.primary}\n${resources.international}\n\nI'm just an app, but real people are ready to help right now.`,
+        text: `${t('mochi.crisisHear')}\n\n${resources.primary}\n${resources.international}\n\n${t('mochi.crisisAppNote')}`,
         mascotState: 'encouraging',
         isCrisis: true,
       }
@@ -315,7 +315,7 @@ export function MochiChat({ open, onClose }: MochiChatProps) {
                   onClick={onClose}
                   className="p-1.5 rounded-lg focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
                   style={{ color: 'var(--color-text-muted)' }}
-                  aria-label="Close chat"
+                  aria-label={t('mochi.closeChat')}
                 >
                   <X size={18} />
                 </button>
@@ -410,7 +410,7 @@ export function MochiChat({ open, onClose }: MochiChatProps) {
                     value={input}
                     onChange={e => setInput(e.target.value.slice(0, MAX_INPUT_LENGTH))}
                     onKeyDown={handleKeyDown}
-                    placeholder={atLimit ? 'Limit reached' : 'Ask Mochi anything...'}
+                    placeholder={atLimit ? t('mochi.inputLimitReached') : t('mochi.inputPlaceholder')}
                     disabled={atLimit || loading}
                     className="flex-1 px-3 py-2 rounded-xl text-sm outline-none focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
                     style={{
@@ -418,14 +418,14 @@ export function MochiChat({ open, onClose }: MochiChatProps) {
                       color: 'var(--color-text-primary)',
                       border: 'none',
                     }}
-                    aria-label="Message to Mochi"
+                    aria-label={t('mochi.inputAriaLabel')}
                   />
                   <button
                     onClick={handleSend}
                     disabled={!input.trim() || atLimit || loading}
                     className="p-2 rounded-xl shrink-0 focus-visible:ring-2 focus-visible:ring-[#7B72FF] disabled:opacity-30"
                     style={{ background: 'var(--color-teal)', color: 'var(--color-bg)' }}
-                    aria-label="Send message"
+                    aria-label={t('mochi.sendAriaLabel')}
                   >
                     {loading ? <Loader2 size={18} className="motion-reduce:animate-none animate-spin" /> : <Send size={18} />}
                   </button>
