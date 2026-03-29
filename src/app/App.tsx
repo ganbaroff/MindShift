@@ -210,8 +210,10 @@ export default function App() {
   }, [onboardingCompleted])
 
   // Monthly reflection — first 5 days of each new month, once per month
+  // Gate: skip for brand-new users who haven't completed enough tasks yet
   useEffect(() => {
     if (!onboardingCompleted) return
+    if (completedTotal < 3) return
     const now = new Date()
     const currentDay = now.getDate()
     const currentMonth = now.toISOString().slice(0, 7) // 'YYYY-MM'
@@ -220,11 +222,13 @@ export default function App() {
     const t = setTimeout(() => setShowMonthly(true), 2000)
     return () => clearTimeout(t)
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onboardingCompleted])
+  }, [onboardingCompleted, completedTotal])
 
   // Weekly planning ritual — Sunday 18pm+ or Monday before noon, once per ISO week
+  // Gate: skip for brand-new users who haven't completed enough tasks yet
   useEffect(() => {
     if (!onboardingCompleted) return
+    if (completedTotal < 3) return
     const now = new Date()
     const day = now.getDay()   // 0=Sun, 1=Mon
     const hour = now.getHours()

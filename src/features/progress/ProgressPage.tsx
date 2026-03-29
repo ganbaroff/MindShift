@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -9,6 +9,8 @@ import { useSessionHistory } from '@/shared/hooks/useSessionHistory';
 import { nativeShare, canShare } from '@/shared/lib/native';
 import { deriveFromSessions } from '@/shared/lib/psychotype';
 import { DISCOVERIES } from '@/shared/lib/mochiDiscoveries';
+import { isVolauraConfigured, fetchCharacterState, type CharacterState } from '@/shared/lib/volaura-bridge';
+import { supabase } from '@/shared/lib/supabase';
 import { AchievementGrid } from './AchievementGrid';
 import { BurnoutAlert } from '@/features/home/BurnoutAlert';
 import { PageTransition } from '@/shared/ui/PageTransition';
@@ -34,6 +36,21 @@ export default function ProgressPage() {
 
   const xpSafe = xpTotal ?? 0;
   const shareSupported = canShare();
+
+  // VOLAURA AURA badge integration (Phase 1 — best-effort)
+  const [auraState, setAuraState] = useState<CharacterState | null>(null)
+  useEffect(() => {
+    if (!isVolauraConfigured()) return
+    let cancelled = false
+    const load = async () => {
+      const { data } = await supabase.auth.getSession()
+      if (!data.session?.access_token || cancelled) return
+      const state = await fetchCharacterState(data.session.access_token)
+      if (!cancelled) setAuraState(state)
+    }
+    void load()
+    return () => { cancelled = true }
+  }, [])
 
   // O-7: Derive psychotype from usage patterns — max once per 7 days
   const derivationCooldown = (() => {
@@ -358,6 +375,49 @@ export default function ProgressPage() {
                 )
               })}
             </div>
+          </motion.div>
+        )}
+
+        {/* VOLAURA AURA Badge — shows when integration is active */}
+        {auraState && auraState.verified_skills.length > 0 && (
+          <motion.div
+            initial={shouldAnimate ? { opacity: 0, y: 12 } : false}
+            animate={shouldAnimate ? { opacity: 1, y: 0 } : false}
+            transition={shouldAnimate ? { delay: 0.15 } : undefined}
+            className="rounded-2xl p-4"
+            style={{ backgroundColor: 'var(--color-surface-card)', border: '1px solid rgba(78,205,196,0.15)' }}
+          >
+            <p className="text-[11px] uppercase tracking-widest mb-3" style={{ color: 'var(--color-teal)' }}>
+              VOLAURA AURA
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {auraState.verified_skills.map(skill => {
+                const tierEmoji = skill.badge_tier === 'platinum' ? '💎' :
+                  skill.badge_tier === 'gold' ? '🥇' :
+                  skill.badge_tier === 'silver' ? '🥈' :
+                  skill.badge_tier === 'bronze' ? '🥉' : ''
+                return (
+                  <div
+                    key={skill.skill_slug}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[13px]"
+                    style={{
+                      backgroundColor: 'rgba(78,205,196,0.08)',
+                      border: '1px solid rgba(78,205,196,0.15)',
+                      color: 'var(--color-text-primary)',
+                    }}
+                  >
+                    <span>{tierEmoji}</span>
+                    <span className="capitalize">{skill.skill_slug.replace(/_/g, ' ')}</span>
+                    <span style={{ color: 'var(--color-teal)' }}>{Math.round(skill.aura_score)}</span>
+                  </div>
+                )
+              })}
+            </div>
+            {auraState.crystal_balance > 0 && (
+              <p className="mt-2 text-[12px]" style={{ color: 'var(--color-gold)' }}>
+                💎 {auraState.crystal_balance} crystals
+              </p>
+            )}
           </motion.div>
         )}
 
