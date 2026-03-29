@@ -389,7 +389,7 @@ export function MochiChat({ open, onClose }: MochiChatProps) {
                 <div className="px-4 py-1 text-center">
                   <p className="text-[10px]" style={{ color: 'var(--color-text-muted)' }}>
                     {atLimit
-                      ? 'Chat limit reached for this session'
+                      ? 'That\'s the limit for now — Mochi needs a rest too'
                       : `${messageCount}/${MAX_MESSAGES} messages`}
                   </p>
                 </div>

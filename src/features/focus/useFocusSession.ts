@@ -201,7 +201,7 @@ export function useFocusSession() {
     if (isFlexPauseActive) return
     if (elapsedSeconds >= SESSION_SOFT_STOP_MINUTES * 60) {
       softStopFiredRef.current = true
-      toast("You've been going for 90 minutes — wrap up when ready 🌿", { duration: 8_000 })
+      toast(i18n.t('focus.softStopToast'), { duration: 8_000 })
     }
   }, [elapsedSeconds, screen, flexiblePauseUntil])
 
