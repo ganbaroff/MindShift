@@ -1,52 +1,48 @@
-import { useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { useEffect, useState } from 'react';
+import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import i18n from '@/i18n';
 import { useMotion } from '@/shared/hooks/useMotion';
-import { useTranslation } from 'react-i18next';
 import EnergyPicker from '@/components/EnergyPicker';
 import { useStore } from '@/store';
-import type { EnergyLevel, AudioPreset } from '@/types';
+import type { EnergyLevel } from '@/types';
 import type { UITone } from '@/shared/lib/uiTone';
 import { getCrisisResourcesByCountry, countryFromLocale } from '@/shared/lib/crisisHotlines';
-import { supabase } from '@/shared/lib/supabase';
-import { useAudioEngine } from '@/shared/hooks/useAudioEngine';
 import { PageTransition } from '@/shared/ui/PageTransition';
+import { Section, Chip, Toggle } from './SettingsPrimitives';
+import { AudioSection } from './AudioSection';
+import { IntegrationsSection } from './IntegrationsSection';
+import { AccountSection } from './AccountSection';
 
 const modeKeys = ['minimal', 'habit', 'system'] as const;
 const timerKeys = ['countdown', 'countup', 'surprise'] as const;
 const phaseKeys = ['launch', 'maintain', 'recover', 'sandbox'] as const;
-const audioPresetKeys: { key: AudioPreset; emoji: string; labelKey: string; descKey: string }[] = [
-  { key: 'brown', emoji: '🌊', labelKey: 'settings.soundBrown',  descKey: 'settings.soundBrownDesc' },
-  { key: 'pink',  emoji: '🌧️', labelKey: 'settings.soundPink',   descKey: 'settings.soundPinkDesc' },
-  { key: 'nature',emoji: '🌿', labelKey: 'settings.soundNature', descKey: 'settings.soundNatureDesc' },
-  { key: 'lofi',  emoji: '🎵', labelKey: 'settings.soundLofi',  descKey: 'settings.soundLofiDesc' },
-  { key: 'gamma', emoji: '⚡', labelKey: 'settings.soundGamma',  descKey: 'settings.soundGammaDesc' },
-  { key: 'gamma60', emoji: '🧠', labelKey: 'settings.soundGamma60', descKey: 'settings.soundGamma60Desc' },
-];
 
 const modeChipKeys = [
   { emoji: '🎯', labelKey: 'settings.modeMinimal', descKey: 'settings.modeMinimalDesc' },
-  { emoji: '🌱', labelKey: 'settings.modeHabit', descKey: 'settings.modeHabitDesc' },
+  { emoji: '🌱', labelKey: 'settings.modeHabit',   descKey: 'settings.modeHabitDesc' },
   { emoji: '🗂️', labelKey: 'settings.modeSystem', descKey: 'settings.modeSystemDesc' },
 ];
 
 const timerChipKeys = [
-  { emoji: '⏱', labelKey: 'settings.timerCountdown', descKey: 'settings.timerCountdownDesc' },
-  { emoji: '⬆️', labelKey: 'settings.timerCountUp', descKey: 'settings.timerCountUpDesc' },
-  { emoji: '🎲', labelKey: 'settings.timerSurprise', descKey: 'settings.timerSurpriseDesc' },
+  { emoji: '⏱',  labelKey: 'settings.timerCountdown', descKey: 'settings.timerCountdownDesc' },
+  { emoji: '⬆️', labelKey: 'settings.timerCountUp',   descKey: 'settings.timerCountUpDesc' },
+  { emoji: '🎲', labelKey: 'settings.timerSurprise',  descKey: 'settings.timerSurpriseDesc' },
 ];
 
 const phaseCardKeys = [
-  { emoji: '🚀', labelKey: 'settings.phaseLaunch', descKey: 'settings.phaseLaunchDesc' },
+  { emoji: '🚀', labelKey: 'settings.phaseLaunch',   descKey: 'settings.phaseLaunchDesc' },
   { emoji: '🌱', labelKey: 'settings.phaseMaintain', descKey: 'settings.phaseMaintainDesc' },
   { emoji: '🛋️', labelKey: 'settings.phaseRecover', descKey: 'settings.phaseRecoverDesc' },
-  { emoji: '🧪', labelKey: 'settings.phaseSandbox', descKey: 'settings.phaseSandboxDesc' },
+  { emoji: '🧪', labelKey: 'settings.phaseSandbox',  descKey: 'settings.phaseSandboxDesc' },
 ];
 
 export default function SettingsPage() {
   const { shouldAnimate } = useMotion();
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+
   const {
     appMode, setAppMode,
     timerStyle, setTimerStyle,
@@ -56,152 +52,49 @@ export default function SettingsPage() {
     reducedStimulation, setReducedStimulation,
     subscriptionTier,
     email,
-    userId,
-    signOut,
-    focusAnchor, setFocusAnchor,
-    audioVolume, setVolume: setStoreVolume,
     medicationEnabled, setMedicationEnabled,
     medicationTime, setMedicationTime,
     dailyFocusGoalMin, setDailyFocusGoalMin,
     uiTone, setUITone,
     hapticsEnabled, setHapticsEnabled,
-    telegramLinkCode, telegramLinked, generateTelegramCode, setTelegramLinked,
-    calendarSyncEnabled, setCalendarSyncEnabled,
-    calendarFocusBlocks, setCalendarFocusBlocks,
     userLocale, setUserLocale,
     userTheme, setUserTheme,
     userCountry,
   } = useStore();
 
-  const { play, stop, isPlaying, setVolume: setEngineVolume } = useAudioEngine();
-  const [previewPreset, setPreviewPreset] = useState<AudioPreset | null>(null);
-
-  const handlePresetPreview = (preset: AudioPreset) => {
-    if (previewPreset === preset && isPlaying) {
-      stop();
-      setPreviewPreset(null);
-    } else {
-      void play(preset);
-      setPreviewPreset(preset);
-    }
-  };
-
-  const handleSetFocusAnchor = (preset: AudioPreset) => {
-    setFocusAnchor(focusAnchor === preset ? null : preset);
-  };
-
-  const mode = modeKeys.indexOf(appMode);
+  const mode  = modeKeys.indexOf(appMode);
   const timer = timerKeys.indexOf(timerStyle);
   const phase = phaseKeys.indexOf(seasonalMode);
-  const navigate = useNavigate();
   const restMode = flexiblePauseUntil ? new Date(flexiblePauseUntil) > new Date() : false;
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    localStorage.removeItem('ms_guest_id');
-    localStorage.setItem('ms_signed_out', '1');
-    signOut();
-    navigate('/auth');
+  const [notifPermission, setNotifPermission] = useState<NotificationPermission>('default');
+  useEffect(() => {
+    if ('Notification' in window) setNotifPermission(Notification.permission);
+  }, []);
+  const requestNotifications = async () => {
+    if (!('Notification' in window)) return;
+    const result = await Notification.requestPermission();
+    setNotifPermission(result);
   };
 
-  const isGuest = !userId || userId.startsWith('guest_')
-
-  // ── Delete account ───────────────────────────────────────────────────────────
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-  const [deleteLoading, setDeleteLoading] = useState(false)
-
-  const handleDeleteAccount = async () => {
-    if (isGuest) {
-      // Guest users — just clear local data
-      localStorage.clear()
-      signOut()
-      navigate('/auth')
-      return
-    }
-    setDeleteLoading(true)
-    try {
-      const { error } = await supabase.functions.invoke('gdpr-delete', {
-        body: { confirmEmail: email },
-      })
-      if (error) throw error
-      await supabase.auth.signOut()
-      localStorage.clear()
-      signOut()
-      toast.success(i18n.t('settings.accountDeleted'))
-      navigate('/auth')
-    } catch {
-      toast.error(i18n.t('settings.deleteError'))
-    } finally {
-      setDeleteLoading(false)
-      setShowDeleteConfirm(false)
-    }
-  }
-
-  // ── Export data ──────────────────────────────────────────────────────────────
-  const [exportLoading, setExportLoading] = useState(false)
-
-  const handleExport = async () => {
-    if (isGuest) {
-      toast(i18n.t('settings.exportSignedIn'))
-      return
-    }
-    setExportLoading(true)
-    try {
-      const { data, error } = await supabase.functions.invoke('gdpr-export')
-      if (error) throw error
-      if (!data || typeof data !== 'object') {
-        toast.error(i18n.t('settings.exportFailed'))
-        return
-      }
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `mindshift-export-${new Date().toISOString().slice(0, 10)}.json`
-      a.click()
-      URL.revokeObjectURL(url)
-      toast.success(i18n.t('settings.dataExported'))
-    } catch {
-      toast.error(i18n.t('settings.exportError'))
-    } finally {
-      setExportLoading(false)
-    }
-  }
-
-  // Notification permission state
-  const [notifPermission, setNotifPermission] = useState<NotificationPermission>('default')
-  useEffect(() => {
-    if ('Notification' in window) setNotifPermission(Notification.permission)
-  }, [])
-  const requestNotifications = async () => {
-    if (!('Notification' in window)) return
-    const result = await Notification.requestPermission()
-    setNotifPermission(result)
-  }
-
-  // Telegram link code — copy to clipboard
-  const [codeCopied, setCodeCopied] = useState(false)
-  const handleCopyCode = useCallback(() => {
-    if (!telegramLinkCode) return
-    void navigator.clipboard.writeText(`/link ${telegramLinkCode}`)
-    setCodeCopied(true)
-    setTimeout(() => setCodeCopied(false), 2000)
-  }, [telegramLinkCode])
-
-  const { t } = useTranslation();
-  // crisisResources now handled inline via getCrisisResourcesByCountry
-
   const planLabel =
-    subscriptionTier === 'pro' ? 'MindShift Pro' :
+    subscriptionTier === 'pro'       ? 'MindShift Pro' :
     subscriptionTier === 'pro_trial' ? 'MindShift Pro Trial' :
     'MindShift Free';
 
   return (
     <PageTransition>
     <div className="min-h-screen px-5 pb-36 pt-10" style={{ backgroundColor: 'var(--color-bg)' }}>
-      <motion.div initial={shouldAnimate ? { opacity: 0, y: -8 } : false} animate={shouldAnimate ? { opacity: 1, y: 0 } : false}>
-        <h1 className="text-[24px] font-bold" style={{ color: 'var(--color-text-primary)' }}>{t('settings.title')}</h1>
-        <p className="text-[13px] mt-0.5" style={{ color: 'var(--color-text-muted)' }}>{email ?? t('settings.notSignedIn')}</p>
+      <motion.div
+        initial={shouldAnimate ? { opacity: 0, y: -8 } : false}
+        animate={shouldAnimate ? { opacity: 1, y: 0 } : false}
+      >
+        <h1 className="text-[24px] font-bold" style={{ color: 'var(--color-text-primary)' }}>
+          {t('settings.title')}
+        </h1>
+        <p className="text-[13px] mt-0.5" style={{ color: 'var(--color-text-muted)' }}>
+          {email ?? t('settings.notSignedIn')}
+        </p>
       </motion.div>
 
       <div className="space-y-3 mt-5">
@@ -214,22 +107,19 @@ export default function SettingsPage() {
         <Section label={t('settings.language')}>
           <div className="flex flex-wrap gap-2">
             {[
-              { code: null, label: t('common.auto') },
-              { code: 'en', label: 'English' },
-              { code: 'ru', label: 'Русский' },
-              { code: 'az', label: 'Azərbaycanca' },
-              { code: 'tr', label: 'Türkçe' },
-              { code: 'de', label: 'Deutsch' },
-              { code: 'es', label: 'Español' },
+              { code: null,  label: t('common.auto') },
+              { code: 'en',  label: 'English' },
+              { code: 'ru',  label: 'Русский' },
+              { code: 'az',  label: 'Azərbaycanca' },
+              { code: 'tr',  label: 'Türkçe' },
+              { code: 'de',  label: 'Deutsch' },
+              { code: 'es',  label: 'Español' },
             ].map(({ code, label }) => (
               <button
                 key={code ?? 'auto'}
                 onClick={() => {
-                  setUserLocale(code)
-                  // Switch i18n language immediately
-                  const resolvedLang = code ?? navigator.language.split('-')[0]
-                  i18n.changeLanguage(resolvedLang)
-                  toast(`Language: ${label}`)
+                  setUserLocale(code);
+                  i18n.changeLanguage(code ?? navigator.language.split('-')[0]);
                 }}
                 className="px-3 py-1.5 rounded-xl text-[13px] font-medium focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
                 style={{
@@ -247,14 +137,14 @@ export default function SettingsPage() {
         {/* Theme */}
         <Section label={t('settings.theme')}>
           <div className="flex gap-2">
-            {[
-              { key: 'dark' as const, label: t('settings.darkTheme') },
-              { key: 'light' as const, label: t('settings.lightTheme') },
+            {([
+              { key: 'dark'   as const, label: t('settings.darkTheme') },
+              { key: 'light'  as const, label: t('settings.lightTheme') },
               { key: 'system' as const, label: t('settings.systemTheme') },
-            ].map(({ key, label }) => (
+            ]).map(({ key, label }) => (
               <button
                 key={key}
-                onClick={() => { setUserTheme(key); toast(`Theme: ${label}`) }}
+                onClick={() => setUserTheme(key)}
                 className="flex-1 px-3 py-2 rounded-xl text-[13px] font-medium focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
                 style={{
                   background: userTheme === key ? 'var(--color-primary-alpha)' : 'var(--color-surface-raised)',
@@ -275,7 +165,9 @@ export default function SettingsPage() {
               <Chip key={i} selected={mode === i} onClick={() => setAppMode(modeKeys[i])} emoji={c.emoji} label={t(c.labelKey)} />
             ))}
           </div>
-          <p className="text-[11px] mt-1.5" style={{ color: 'var(--color-text-muted)' }}>{t(modeChipKeys[mode]?.descKey ?? '')}</p>
+          <p className="text-[11px] mt-1.5" style={{ color: 'var(--color-text-muted)' }}>
+            {t(modeChipKeys[mode]?.descKey ?? '')}
+          </p>
         </Section>
 
         {/* Timer */}
@@ -285,83 +177,13 @@ export default function SettingsPage() {
               <Chip key={i} selected={timer === i} onClick={() => setTimerStyle(timerKeys[i])} emoji={c.emoji} label={t(c.labelKey)} />
             ))}
           </div>
-          <p className="text-[11px] mt-1.5" style={{ color: 'var(--color-text-muted)' }}>{t(timerChipKeys[timer]?.descKey ?? '')}</p>
+          <p className="text-[11px] mt-1.5" style={{ color: 'var(--color-text-muted)' }}>
+            {t(timerChipKeys[timer]?.descKey ?? '')}
+          </p>
         </Section>
 
-        {/* Sound */}
-        <Section label={t('settings.sound')}>
-          <p className="text-[11px] mb-2" style={{ color: 'var(--color-text-muted)' }}>
-            {t('settings.soundPreviewHint')}
-          </p>
-          <div className="space-y-1.5">
-            {audioPresetKeys.map((p) => {
-              const isAnchor = focusAnchor === p.key;
-              const isPreviewing = previewPreset === p.key && isPlaying;
-              const label = t(p.labelKey);
-              return (
-                <div key={p.key} className="flex items-center gap-2">
-                  <motion.button
-                    whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
-                    onClick={() => handlePresetPreview(p.key)}
-                    className="flex-1 flex items-center gap-2 h-10 rounded-xl px-3 text-left"
-                    style={{
-                      backgroundColor: isPreviewing ? 'rgba(123,114,255,0.15)' : 'var(--color-surface-raised)',
-                      borderWidth: isPreviewing ? 1.5 : 1,
-                      borderStyle: 'solid',
-                      borderColor: isPreviewing ? 'var(--color-primary)' : 'var(--color-border-subtle)',
-                    }}
-                    aria-label={`${isPreviewing ? 'Stop' : 'Preview'} ${label} noise`}
-                    aria-pressed={isPreviewing}
-                  >
-                    <span className="text-[16px]">{p.emoji}</span>
-                    <div className="flex-1">
-                      <p className="text-[13px] font-medium leading-none" style={{ color: isPreviewing ? 'var(--color-primary)' : 'var(--color-text-primary)' }}>{label}</p>
-                      <p className="text-[10px] mt-0.5" style={{ color: 'var(--color-text-muted)' }}>{t(p.descKey)}</p>
-                    </div>
-                    {isPreviewing && <span className="text-[10px]" style={{ color: 'var(--color-primary)' }}>▶ {t('settings.soundPlaying')}</span>}
-                  </motion.button>
-                  <motion.button
-                    whileTap={shouldAnimate ? { scale: 0.9 } : undefined}
-                    onClick={() => handleSetFocusAnchor(p.key)}
-                    className="w-9 h-10 rounded-xl flex items-center justify-center text-[16px]"
-                    style={{
-                      backgroundColor: isAnchor ? 'rgba(78,205,196,0.15)' : 'var(--color-surface-raised)',
-                      borderWidth: isAnchor ? 1.5 : 1,
-                      borderStyle: 'solid',
-                      borderColor: isAnchor ? 'var(--color-teal)' : 'var(--color-border-subtle)',
-                    }}
-                    aria-label={isAnchor ? `Remove ${label} as focus anchor` : `Set ${label} as focus anchor`}
-                    aria-pressed={isAnchor}
-                  >
-                    🔒
-                  </motion.button>
-                </div>
-              );
-            })}
-          </div>
-          {/* Volume slider */}
-          <div className="mt-3">
-            <div className="flex items-center justify-between mb-1">
-              <p className="text-[11px] uppercase tracking-widest" style={{ color: 'var(--color-text-muted)' }}>{t('settings.volume')}</p>
-              <p className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>{Math.round(audioVolume * 100)}%</p>
-            </div>
-            <input
-              type="range"
-              min={0}
-              max={1}
-              step={0.01}
-              value={audioVolume}
-              onChange={(e) => {
-                const v = parseFloat(e.target.value);
-                setStoreVolume(v);
-                setEngineVolume(v);
-              }}
-              className="w-full h-1.5 rounded-full appearance-none cursor-pointer"
-              style={{ accentColor: '#7B72FF' }}
-              aria-label="Audio volume"
-            />
-          </div>
-        </Section>
+        {/* Sound (extracted) */}
+        <AudioSection />
 
         {/* Energy */}
         <Section label={t('settings.energy')}>
@@ -389,14 +211,16 @@ export default function SettingsPage() {
                 }}
               >
                 <span className="text-[18px]">{c.emoji}</span>
-                <p className="text-[13px] font-semibold mt-0.5" style={{ color: phase === i ? 'var(--color-primary)' : 'var(--color-text-primary)' }}>{t(c.labelKey)}</p>
+                <p className="text-[13px] font-semibold mt-0.5" style={{ color: phase === i ? 'var(--color-primary)' : 'var(--color-text-primary)' }}>
+                  {t(c.labelKey)}
+                </p>
                 <p className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>{t(c.descKey)}</p>
               </motion.button>
             ))}
           </div>
         </Section>
 
-        {/* Toggles */}
+        {/* Rest Mode */}
         <Section label={t('settings.restMode')}>
           <Toggle
             checked={restMode}
@@ -405,6 +229,7 @@ export default function SettingsPage() {
           />
         </Section>
 
+        {/* Accessibility */}
         <Section label={t('settings.accessibility')}>
           <div className="space-y-3">
             <Toggle checked={reducedStimulation} onChange={setReducedStimulation} label={t('settings.reducedStimulation')} />
@@ -433,152 +258,10 @@ export default function SettingsPage() {
           )}
         </Section>
 
-        {/* Telegram integration */}
-        <Section label={t('settings.telegram')}>
-          {telegramLinked ? (
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <span className="text-[16px]">✅</span>
-                <p className="text-[14px] font-medium" style={{ color: 'var(--color-teal)' }}>{t('settings.telegramConnected')}</p>
-              </div>
-              <p className="text-[12px]" style={{ color: 'var(--color-text-muted)' }}>
-                {t('settings.telegramSendTo')}{' '}
-                <a href="https://t.me/MindShiftBot" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-teal)' }}>
-                  @MindShiftBot
-                </a>
-              </p>
-              <motion.button
-                whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
-                onClick={() => setTelegramLinked(false)}
-                className="w-full h-9 rounded-xl text-[13px] font-medium"
-                style={{ backgroundColor: 'rgba(139,139,167,0.12)', color: 'var(--color-text-muted)' }}
-              >
-                {t('settings.telegramDisconnect')}
-              </motion.button>
-            </div>
-          ) : telegramLinkCode ? (
-            <div className="space-y-2">
-              <p className="text-[12px]" style={{ color: 'var(--color-text-muted)' }}>
-                {t('settings.telegramSendThis')}{' '}
-                <a href="https://t.me/MindShiftBot" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-teal)' }}>
-                  @MindShiftBot
-                </a>
-              </p>
-              <div className="flex items-center gap-2">
-                <div
-                  className="flex-1 h-10 rounded-xl flex items-center px-3 font-mono text-[15px] tracking-widest"
-                  style={{ backgroundColor: 'var(--color-surface-raised)', color: 'var(--color-text-primary)', border: '1px solid rgba(78,205,196,0.2)' }}
-                >
-                  /link {telegramLinkCode}
-                </div>
-                <motion.button
-                  whileTap={shouldAnimate ? { scale: 0.93 } : undefined}
-                  onClick={handleCopyCode}
-                  className="h-10 px-3 rounded-xl text-[13px] font-medium"
-                  style={{
-                    backgroundColor: codeCopied ? 'rgba(78,205,196,0.2)' : 'rgba(78,205,196,0.12)',
-                    color: 'var(--color-teal)',
-                  }}
-                  aria-label="Copy link code"
-                >
-                  {codeCopied ? t('settings.telegramCodeCopied') : t('settings.telegramCodeCopy')}
-                </motion.button>
-              </div>
-              <p className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>
-                {t('settings.telegramCodeExpires')}
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              <p className="text-[12px] leading-relaxed" style={{ color: 'var(--color-text-muted)' }}>
-                {t('settings.telegramDesc')}
-              </p>
-              <motion.button
-                whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
-                onClick={generateTelegramCode}
-                className="w-full h-10 rounded-xl text-[14px] font-medium"
-                style={{ backgroundColor: 'rgba(78,205,196,0.12)', color: 'var(--color-teal)' }}
-                aria-label="Connect Telegram"
-              >
-                {t('settings.connectTelegram')}
-              </motion.button>
-              <p className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>
-                {t('settings.telegramHowTo')}
-              </p>
-            </div>
-          )}
-        </Section>
+        {/* Integrations (Telegram + Calendar — extracted) */}
+        <IntegrationsSection />
 
-        {/* Google Calendar integration */}
-        <Section label={t('settings.googleCalendar')}>
-          {isGuest ? (
-            <p className="text-[12px]" style={{ color: 'var(--color-text-muted)' }}>
-              {t('settings.signInForCalendar')}
-            </p>
-          ) : (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-[14px] font-medium" style={{ color: 'var(--color-text-primary)' }}>{t('settings.syncToCalendar')}</p>
-                  <p className="text-[12px] mt-0.5" style={{ color: 'var(--color-text-muted)' }}>
-                    {t('settings.calendarDesc')}
-                  </p>
-                </div>
-                <button
-                  onClick={async () => {
-                    if (!calendarSyncEnabled) {
-                      // Flag so App.tsx onAuthStateChange knows this was calendar auth
-                      localStorage.setItem('ms_calendar_pending', '1')
-                      const { error } = await supabase.auth.signInWithOAuth({
-                        provider: 'google',
-                        options: {
-                          redirectTo: `${window.location.origin}/settings`,
-                          queryParams: { prompt: 'consent', access_type: 'offline' },
-                          scopes: 'https://www.googleapis.com/auth/calendar.events',
-                        },
-                      })
-                      if (error) {
-                        toast.error('Could not connect Google Calendar')
-                      }
-                      // After redirect + return, onAuthStateChange will store tokens and enable sync
-                    } else {
-                      setCalendarSyncEnabled(false)
-                      toast('Calendar sync disabled', { icon: '📅' })
-                    }
-                  }}
-                  className="w-11 h-6 rounded-full relative transition-colors duration-200"
-                  style={{ background: calendarSyncEnabled ? 'var(--color-teal)' : 'var(--color-surface-raised)' }}
-                  aria-pressed={calendarSyncEnabled}
-                  aria-label="Toggle Google Calendar sync"
-                >
-                  <motion.div
-                    animate={shouldAnimate ? { x: calendarSyncEnabled ? 20 : 2 } : { x: calendarSyncEnabled ? 20 : 2 }}
-                    transition={shouldAnimate ? { type: 'spring', damping: 20, stiffness: 300 } : { duration: 0 }}
-                    className="absolute top-1 w-4 h-4 rounded-full bg-white"
-                  />
-                </button>
-              </div>
-              {calendarSyncEnabled && (
-                <motion.div
-                  initial={shouldAnimate ? { opacity: 0, height: 0 } : false}
-                  animate={shouldAnimate ? { opacity: 1, height: 'auto' } : false}
-                  className="overflow-hidden space-y-2"
-                >
-                  <Toggle
-                    checked={calendarFocusBlocks}
-                    onChange={setCalendarFocusBlocks}
-                    label={t('settings.focusBlocks')}
-                  />
-                  <p className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>
-                    {t('settings.focusBlocksDesc')}
-                  </p>
-                </motion.div>
-              )}
-            </div>
-          )}
-        </Section>
-
-        {/* Medication peak window — B-12: show optimal focus window around med timing */}
+        {/* Medication */}
         <Section label={t('settings.medication')}>
           <div className="space-y-3">
             <div className="flex items-center justify-between">
@@ -611,9 +294,9 @@ export default function SettingsPage() {
                 <p className="text-[12px] mb-2" style={{ color: 'var(--color-text-muted)' }}>{t('settings.medWhenTake')}</p>
                 <div className="flex gap-2">
                   {([
-                    { key: 'morning', labelKey: 'settings.medMorning', subKey: 'settings.medMorningSub', emoji: '🌅' },
+                    { key: 'morning',   labelKey: 'settings.medMorning',   subKey: 'settings.medMorningSub',   emoji: '🌅' },
                     { key: 'afternoon', labelKey: 'settings.medAfternoon', subKey: 'settings.medAfternoonSub', emoji: '☀️' },
-                    { key: 'evening', labelKey: 'settings.medEvening', subKey: 'settings.medEveningSub', emoji: '🌆' },
+                    { key: 'evening',   labelKey: 'settings.medEvening',   subKey: 'settings.medEveningSub',   emoji: '🌆' },
                   ] as const).map(({ key, labelKey, subKey, emoji }) => {
                     const sel = medicationTime === key;
                     return (
@@ -639,8 +322,7 @@ export default function SettingsPage() {
           </div>
         </Section>
 
-        {/* Setup revisit — O-11: re-run onboarding to update preferences */}
-        {/* Daily focus goal — P-1 */}
+        {/* Daily Goal */}
         <Section label={t('settings.dailyGoal')}>
           <p className="text-[12px] mb-2" style={{ color: 'var(--color-text-muted)' }}>
             {t('settings.targetMinutes')}
@@ -664,14 +346,14 @@ export default function SettingsPage() {
           </div>
         </Section>
 
-        {/* Interface Style — age-adaptive UI tone override */}
+        {/* Interface Style */}
         <Section label={t('settings.interfaceStyle')}>
           <div className="grid grid-cols-2 gap-1.5">
             {([
-              { tone: 'neutral' as UITone, labelKey: 'settings.toneAuto', descKey: 'settings.toneAutoDesc' },
-              { tone: 'gen_z' as UITone, labelKey: 'settings.toneDynamic', descKey: 'settings.toneDynamicDesc' },
+              { tone: 'neutral'    as UITone, labelKey: 'settings.toneAuto',     descKey: 'settings.toneAutoDesc' },
+              { tone: 'gen_z'      as UITone, labelKey: 'settings.toneDynamic',  descKey: 'settings.toneDynamicDesc' },
               { tone: 'millennial' as UITone, labelKey: 'settings.toneBalanced', descKey: 'settings.toneBalancedDesc' },
-              { tone: 'gen_x' as UITone, labelKey: 'settings.toneClear', descKey: 'settings.toneClearDesc' },
+              { tone: 'gen_x'      as UITone, labelKey: 'settings.toneClear',    descKey: 'settings.toneClearDesc' },
             ]).map(({ tone, labelKey, descKey }) => {
               const sel = uiTone === tone;
               return (
@@ -690,15 +372,14 @@ export default function SettingsPage() {
                   <p className="text-[13px] font-semibold" style={{ color: sel ? 'var(--color-primary)' : 'var(--color-text-primary)' }}>
                     {t(labelKey)}
                   </p>
-                  <p className="text-[10px] mt-0.5" style={{ color: 'var(--color-text-muted)' }}>
-                    {t(descKey)}
-                  </p>
+                  <p className="text-[10px] mt-0.5" style={{ color: 'var(--color-text-muted)' }}>{t(descKey)}</p>
                 </motion.button>
               );
             })}
           </div>
         </Section>
 
+        {/* Preferences */}
         <Section label={t('settings.preferences')}>
           <button
             onClick={() => navigate('/onboarding')}
@@ -710,7 +391,7 @@ export default function SettingsPage() {
           </button>
         </Section>
 
-        {/* Mental Health Resources — localized by country */}
+        {/* Mental Health Resources */}
         <Section label={t('settings.mentalHealth')}>
           <div className="space-y-2">
             <p className="text-[13px] leading-relaxed" style={{ color: 'var(--color-text-primary)' }}>
@@ -718,16 +399,11 @@ export default function SettingsPage() {
             </p>
             <div
               className="rounded-xl p-3 space-y-2"
-              style={{
-                backgroundColor: 'rgba(78,205,196,0.06)',
-                border: '1px solid rgba(78,205,196,0.15)',
-              }}
+              style={{ backgroundColor: 'rgba(78,205,196,0.06)', border: '1px solid rgba(78,205,196,0.15)' }}
             >
               {getCrisisResourcesByCountry(userCountry ?? countryFromLocale(navigator.language)).map((r, i) => (
                 <div key={i}>
-                  <p className="text-[13px] font-medium" style={{ color: 'var(--color-teal)' }}>
-                    {r.name}
-                  </p>
+                  <p className="text-[13px] font-medium" style={{ color: 'var(--color-teal)' }}>{r.name}</p>
                   <p className="text-[12px]" style={{ color: 'var(--color-text-muted)' }}>
                     {r.type === 'web' ? (
                       <a href={`https://${r.number}`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-primary)' }}>
@@ -741,128 +417,10 @@ export default function SettingsPage() {
           </div>
         </Section>
 
-        {/* Feedback */}
-        <Section label={t('settings.feedback')}>
-          <a
-            href="mailto:ganbarov.y@gmail.com?subject=MindShift%20Feedback&body=Hi%20Yusif%2C%0A%0A"
-            className="flex items-center gap-3 w-full h-10 rounded-xl px-3 text-[14px] font-medium focus-visible:ring-2 focus-visible:ring-ms-primary/50 focus-visible:outline-none"
-            style={{ backgroundColor: 'rgba(123,114,255,0.1)', color: 'var(--color-primary)' }}
-          >
-            <span>📬</span>
-            <span>{t('settings.sendFeedback')}</span>
-          </a>
-        </Section>
-
-        {/* Data */}
-        <Section label={t('settings.yourData')}>
-          <motion.button
-            whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
-            onClick={handleExport}
-            disabled={exportLoading}
-            className="w-full h-10 rounded-xl text-[14px] font-medium disabled:opacity-50"
-            style={{ backgroundColor: 'rgba(78,205,196,0.12)', color: 'var(--color-teal)' }}
-          >
-            {exportLoading ? t('settings.exporting') : `📦 ${t('settings.exportJson')}`}
-          </motion.button>
-          <button
-            onClick={() => setShowDeleteConfirm(true)}
-            className="text-[13px] font-medium w-full text-center mt-2"
-            style={{ color: '#F59E0B' }}
-          >
-            {t('settings.deleteAccount')}
-          </button>
-        </Section>
-
-        {/* Delete confirmation */}
-        <AnimatePresence>
-          {showDeleteConfirm && (
-            <motion.div
-              initial={shouldAnimate ? { opacity: 0, height: 0 } : false}
-              animate={shouldAnimate ? { opacity: 1, height: 'auto' } : false}
-              exit={shouldAnimate ? { opacity: 0, height: 0 } : undefined}
-              className="rounded-2xl p-4 space-y-3"
-              style={{ backgroundColor: 'var(--color-surface-card)', border: '1px solid rgba(245,158,11,0.3)' }}
-            >
-              <p className="text-[13px]" style={{ color: 'var(--color-text-primary)' }}>
-                {t('settings.deleteConfirm')}
-              </p>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setShowDeleteConfirm(false)}
-                  className="flex-1 h-9 rounded-xl text-[13px] font-medium"
-                  style={{ backgroundColor: 'rgba(139,139,167,0.15)', color: 'var(--color-text-muted)' }}
-                >
-                  {t('common.cancel')}
-                </button>
-                <button
-                  onClick={handleDeleteAccount}
-                  disabled={deleteLoading}
-                  className="flex-1 h-9 rounded-xl text-[13px] font-medium disabled:opacity-50"
-                  style={{ backgroundColor: 'rgba(245,158,11,0.15)', color: '#F59E0B' }}
-                >
-                  {deleteLoading ? t('settings.deleting') : t('settings.yesDelete')}
-                </button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        <button onClick={handleSignOut} className="text-[13px] font-medium w-full text-center py-2" style={{ color: '#E8976B' }}>{t('settings.signOut')}</button>
-
-        <div className="text-center space-y-1 pt-2 pb-6">
-          <p className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>
-            <button onClick={() => navigate('/privacy')} className="underline underline-offset-2 focus-visible:ring-2 focus-visible:ring-[#7B72FF] rounded" style={{ color: 'var(--color-text-muted)' }}>{t('settings.privacy')}</button>
-            {' · '}
-            <button onClick={() => navigate('/terms')} className="underline underline-offset-2 focus-visible:ring-2 focus-visible:ring-[#7B72FF] rounded" style={{ color: 'var(--color-text-muted)' }}>{t('settings.terms')}</button>
-            {' · '}
-            <button onClick={() => navigate('/cookie-policy')} className="underline underline-offset-2 focus-visible:ring-2 focus-visible:ring-[#7B72FF] rounded" style={{ color: 'var(--color-text-muted)' }}>{t('settings.cookies')}</button>
-          </p>
-          <p className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>MindShift v1.0.0</p>
-        </div>
+        {/* Account (Feedback + Data + Sign out — extracted) */}
+        <AccountSection />
       </div>
     </div>
     </PageTransition>
-  );
-}
-
-function Section({ label, children }: { label: string; children: React.ReactNode }) {
-  const { shouldAnimate } = useMotion();
-  return (
-    <motion.div initial={shouldAnimate ? { opacity: 0, y: 12 } : false} animate={shouldAnimate ? { opacity: 1, y: 0 } : false} className="rounded-2xl p-3" style={{ backgroundColor: 'var(--color-surface-card)' }}>
-      <p className="text-[11px] uppercase tracking-widest mb-2" style={{ color: 'var(--color-text-muted)' }}>{label}</p>
-      {children}
-    </motion.div>
-  );
-}
-
-function Chip({ selected, onClick, emoji, label }: { selected: boolean; onClick: () => void; emoji: string; label: string }) {
-  const { shouldAnimate } = useMotion();
-  return (
-    <motion.button
-      whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
-      onClick={onClick}
-      className="flex-1 h-9 rounded-full flex items-center justify-center gap-1 text-[13px] font-medium"
-      style={{
-        backgroundColor: selected ? 'rgba(123,114,255,0.15)' : 'var(--color-surface-raised)',
-        borderWidth: selected ? 1.5 : 1,
-        borderStyle: 'solid',
-        borderColor: selected ? 'var(--color-primary)' : 'var(--color-border-subtle)',
-        color: selected ? 'var(--color-primary)' : 'var(--color-text-muted)',
-      }}
-    >
-      {emoji} {label}
-    </motion.button>
-  );
-}
-
-function Toggle({ checked, onChange, label }: { checked: boolean; onChange: (v: boolean) => void; label: string }) {
-  const { shouldAnimate } = useMotion();
-  return (
-    <button onClick={() => onChange(!checked)} className="flex items-center justify-between w-full">
-      <span className="text-[14px]" style={{ color: 'var(--color-text-primary)' }}>{label}</span>
-      <div className="w-11 h-6 rounded-full p-0.5 transition-colors" style={{ backgroundColor: checked ? 'var(--color-primary)' : 'var(--color-surface-raised)' }}>
-        <motion.div animate={{ x: checked ? 20 : 0 }} transition={shouldAnimate ? undefined : { duration: 0 }} className="w-5 h-5 rounded-full" style={{ backgroundColor: '#FFFFFF' }} />
-      </div>
-    </button>
   );
 }
