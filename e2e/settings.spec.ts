@@ -138,11 +138,12 @@ test.describe('Settings screen', () => {
 
   test('Reminders section shows enable button when permission not granted', async ({ authedPage: page }) => {
     // In test environment Notification.permission defaults to 'default'
-    // The section should show the "Enable reminders" button (not the granted state)
+    // On iOS non-standalone (iPhone 14 UA), shows "Add to Home Screen first" banner instead
     await expect(
       page.getByRole('button', { name: /Enable reminders/i })
         .or(page.getByText(/Reminders enabled/))
         .or(page.getByText(/Blocked by browser/))
+        .or(page.getByText(/Add to Home Screen first/))
     ).toBeVisible()
   })
 
