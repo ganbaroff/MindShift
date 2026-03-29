@@ -11,6 +11,7 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { getCorsHeaders } from '../_shared/cors.ts'
+import { checkDbRateLimit } from '../_shared/rateLimit.ts'
 
 Deno.serve(async (req: Request) => {
   const cors = getCorsHeaders(req)
@@ -36,6 +37,36 @@ Deno.serve(async (req: Request) => {
     }
 
     const userId = user.id
+
+    // ── Rate limit — 3 exports/day (free), unlimited (pro) ───────────────────
+    const { data: userRow } = await supabase
+      .from('users')
+      .select('subscription_tier')
+      .eq('id', userId)
+      .single()
+
+    const isPro = userRow?.subscription_tier === 'pro' ||
+      userRow?.subscription_tier === 'pro_trial'
+
+    const rl = await checkDbRateLimit(supabase, userId, isPro, {
+      fnName:    'gdpr-export',
+      limitFree: 3,
+      windowMs:  24 * 60 * 60 * 1000, // 3 exports per day
+    })
+
+    if (!rl.allowed) {
+      return new Response(
+        JSON.stringify({ error: 'Rate limit exceeded. You can export your data up to 3 times per day.' }),
+        {
+          status: 429,
+          headers: {
+            ...cors,
+            'Content-Type': 'application/json',
+            'Retry-After': String(rl.retryAfterSeconds ?? 3600),
+          },
+        }
+      )
+    }
 
     // ── Collect all user data in parallel ─────────────────────────────────────
     const [
