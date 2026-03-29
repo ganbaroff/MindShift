@@ -33,8 +33,10 @@ export const hapticTap = () => haptic(10)
 /** Task completed — satisfying double pulse */
 export const hapticDone = () => haptic([15, 50, 25])
 
-/** Achievement unlocked — celebration burst */
-export const hapticWow = () => haptic([30, 30, 30, 30, 80])
+/** Achievement unlocked — celebration burst
+ * Gaps widened to 60-70ms: LRA actuator needs ≥50ms to decay between pulses.
+ * Sub-50ms gaps fuse into a single jarring buzz (unpleasant for ADHD). */
+export const hapticWow = () => haptic([25, 60, 25, 70, 80])
 
 // ── Attention ─────────────────────────────────────────────────────────────────
 
@@ -44,11 +46,14 @@ export const hapticWarning = () => haptic([20, 40, 20, 40, 20])
 /** Phase transition — focus phase change (struggle→release→flow) */
 export const hapticPhase = () => haptic([8, 60, 8])
 
-/** Session start — grounding pulse before focus */
-export const hapticStart = () => haptic([40, 80, 20])
+/** Session start — grounding pulse before focus.
+ * Reduced initial burst 40→30ms: prevents startle reflex on LRA.
+ * Longer silence (80→100ms) increases anticipation/grounding feel. */
+export const hapticStart = () => haptic([30, 100, 20])
 
-/** Session end — release signal */
-export const hapticEnd = () => haptic([20, 30, 20, 30, 60])
+/** Session end — release signal.
+ * Gaps widened to 60ms: 30ms was below LRA decay threshold. */
+export const hapticEnd = () => haptic([18, 60, 18, 60, 60])
 
 // ── Breathwork sync ───────────────────────────────────────────────────────────
 
@@ -61,8 +66,15 @@ export const hapticBreathe = () => haptic(15)
 
 // ── Snoooze / park ────────────────────────────────────────────────────────────
 
-/** Task parked to NEXT — gentle "sliding" feel */
-export const hapticPark = () => haptic([10, 30, 10])
+/** Task parked to NEXT — gentle "sliding" feel.
+ * Gap 30→50ms: minimum for distinct pulse perception on LRA. */
+export const hapticPark = () => haptic([8, 50, 8])
 
-/** Task added to pool */
-export const hapticAdd = () => haptic([8, 20, 15])
+/** Task added to pool.
+ * Gap 20→50ms: was below LRA decay threshold, pulses were fusing. */
+export const hapticAdd = () => haptic([8, 50, 12])
+
+/** Failed action / soft error — intentionally lighter than warning.
+ * NEVER use OS error/reject haptic for ADHD users: those patterns are
+ * designed to be aversive and trigger shame pathways. This is informational. */
+export const hapticError = () => haptic([10, 20, 10])
