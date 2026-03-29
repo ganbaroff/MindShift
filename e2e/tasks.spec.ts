@@ -17,9 +17,10 @@ test.describe('Task creation', () => {
 
     // NOW and NEXT pool headers with counters
     // Wait for store hydration (async idbStorage) before checking counter values
-    await expect(page.getByText('NOW', { exact: true })).toBeVisible()
+    // Use nth(1) to pick the header span, not the guide paragraph span
+    await expect(page.getByText('NOW', { exact: true }).nth(1)).toBeVisible()
     await expect(page.getByText('0/3')).toBeVisible({ timeout: 8000 })
-    await expect(page.getByText('NEXT', { exact: true })).toBeVisible()
+    await expect(page.getByText('NEXT', { exact: true }).nth(1)).toBeVisible()
     await expect(page.getByText('0/6')).toBeVisible()
   })
 
@@ -27,16 +28,16 @@ test.describe('Task creation', () => {
     await page.goto('/tasks')
 
     // Click the Add task FAB
-    await page.getByRole('button', { name: /add task/i }).click()
+    await page.getByRole('button', { name: /add task/i }).last().click()
 
     // Modal should open with "Add a task" heading and placeholder
-    await expect(page.getByText('Add a task')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Add a task' })).toBeVisible()
     await expect(page.getByPlaceholder("What's on your mind?")).toBeVisible()
   })
 
   test('add task modal has difficulty and duration selectors', async ({ authedPage: page }) => {
     await page.goto('/tasks')
-    await page.getByRole('button', { name: /add task/i }).click()
+    await page.getByRole('button', { name: /add task/i }).last().click()
 
     // Difficulty label and buttons (dots + label text, no emoji circles)
     await expect(page.getByText('Difficulty')).toBeVisible()
@@ -55,7 +56,7 @@ test.describe('Task creation', () => {
 
   test('submit button says "Add to Now" by default', async ({ authedPage: page }) => {
     await page.goto('/tasks')
-    await page.getByRole('button', { name: /add task/i }).click()
+    await page.getByRole('button', { name: /add task/i }).last().click()
 
     // Submit button is present with "Add to NOW →" text
     await expect(page.getByRole('button', { name: /Add task to NOW/i })).toBeVisible()
@@ -66,7 +67,7 @@ test.describe('Task creation', () => {
 
   test('typing a title and submitting adds the task', async ({ authedPage: page }) => {
     await page.goto('/tasks')
-    await page.getByRole('button', { name: /add task/i }).click()
+    await page.getByRole('button', { name: /add task/i }).last().click()
 
     await page.getByPlaceholder("What's on your mind?").fill('Test task')
 
@@ -77,7 +78,7 @@ test.describe('Task creation', () => {
 
   test('adding a task shows it in NOW pool', async ({ authedPage: page }) => {
     await page.goto('/tasks')
-    await page.getByRole('button', { name: /add task/i }).click()
+    await page.getByRole('button', { name: /add task/i }).last().click()
 
     // Fill task title
     await page.getByPlaceholder("What's on your mind?").fill('Buy groceries')
@@ -97,7 +98,7 @@ test.describe('Task creation', () => {
 
   test('closing modal resets form', async ({ authedPage: page }) => {
     await page.goto('/tasks')
-    await page.getByRole('button', { name: /add task/i }).click()
+    await page.getByRole('button', { name: /add task/i }).last().click()
 
     // Fill title
     await page.getByPlaceholder("What's on your mind?").fill('Temp task')
@@ -106,10 +107,10 @@ test.describe('Task creation', () => {
     await page.getByRole('button', { name: 'Close modal' }).click()
 
     // Wait for the sheet to finish its exit animation before re-opening
-    await expect(page.getByText('Add a task')).not.toBeVisible({ timeout: 4000 })
+    await expect(page.getByRole('heading', { name: 'Add a task' })).not.toBeVisible({ timeout: 4000 })
 
     // Re-open — title should be empty
-    await page.getByRole('button', { name: /add task/i }).click()
+    await page.getByRole('button', { name: /add task/i }).last().click()
     await expect(page.getByPlaceholder("What's on your mind?")).toHaveValue('')
   })
 })
@@ -118,8 +119,8 @@ test.describe('Task pools', () => {
   test('SOMEDAY pool is collapsed by default', async ({ authedPage: page }) => {
     await page.goto('/tasks')
 
-    // Someday section header should be visible
-    await expect(page.getByText('SOMEDAY')).toBeVisible()
+    // Someday section header should be visible (nth(1) avoids guide paragraph span)
+    await expect(page.getByText('SOMEDAY').nth(1)).toBeVisible()
 
     // The chevron should not be rotated (collapsed state)
     // Verify collapsed by checking no someday task content area is visible
@@ -165,14 +166,14 @@ test.describe('Task pools', () => {
 
 test.describe('Task from HomeScreen', () => {
   test('HomeScreen has Add task FAB', async ({ authedPage: page }) => {
-    await page.goto('/')
+    await page.goto('/home')
 
     const fab = page.getByRole('button', { name: /add task/i })
     await expect(fab).toBeVisible()
   })
 
   test('empty state prompt shows when no tasks', async ({ authedPage: page }) => {
-    await page.goto('/')
+    await page.goto('/home')
 
     // Empty state card: "What's on your mind?"
     await expect(page.getByText("What's on your mind?")).toBeVisible()
@@ -185,14 +186,14 @@ test.describe('Task from HomeScreen', () => {
         { id: 'e2e-check-1', title: 'Existing task', pool: 'now', difficulty: 1, estimatedMinutes: 5, status: 'active', snoozeCount: 0, completedAt: null, dueDate: null, subtasks: [], position: 0, createdAt: new Date().toISOString(), userId: 'e2e-test-user-00000000-0000-0000-0000-000000000001' },
       ],
     })
-    await page.goto('/')
+    await page.goto('/home')
 
     // Empty state should NOT be visible when NOW pool has a task
     await expect(page.getByText(/Tap to add your first task/)).not.toBeVisible()
   })
 
   test('NOW pool counter visible on HomeScreen', async ({ authedPage: page }) => {
-    await page.goto('/')
+    await page.goto('/home')
 
     // NOW pool header with counter (appMode minimal + seasonalMode maintain → nowMax=3)
     await expect(page.getByText('NOW', { exact: true })).toBeVisible()
@@ -203,13 +204,13 @@ test.describe('Task from HomeScreen', () => {
 test.describe('Due date picker', () => {
   test.beforeEach(async ({ authedPage: page }) => {
     await page.goto('/tasks')
-    await page.getByRole('button', { name: /add task/i }).click()
+    await page.getByRole('button', { name: /add task/i }).last().click()
   })
 
   test('due date section is visible in modal', async ({ authedPage: page }) => {
     await expect(page.getByText('Due date')).toBeVisible()
-    await expect(page.getByRole('button', { name: /Today/i })).toBeVisible()
-    await expect(page.getByRole('button', { name: /Tomorrow/i })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Due date: Today' })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Due date: Tomorrow' })).toBeVisible()
   })
 
   test('clicking Today shows upcoming hint', async ({ authedPage: page }) => {
@@ -247,23 +248,23 @@ test.describe('Empty states', () => {
 
   test('NOW pool shows no tasks when empty', async ({ authedPage: page }) => {
     await page.goto('/tasks')
-    // NOW pool header is visible with 0 count
-    await expect(page.getByText('NOW', { exact: true })).toBeVisible()
+    // NOW pool header is visible with 0 count (nth(1) avoids guide paragraph span)
+    await expect(page.getByText('NOW', { exact: true }).nth(1)).toBeVisible()
     await expect(page.getByText('0/3')).toBeVisible()
   })
 
   test('home shows empty state prompt when no tasks', async ({ authedPage: page }) => {
-    await page.goto('/')
+    await page.goto('/home')
     await expect(page.getByText("What's on your mind?")).toBeVisible()
     await expect(page.getByText(/Tap to add your first task/)).toBeVisible()
   })
 
   test('empty state prompt is a button that opens add task modal', async ({ authedPage: page }) => {
-    await page.goto('/')
+    await page.goto('/home')
     // The empty state card is a button
     await page.getByText(/Tap to add your first task/).click()
     // Modal should open
-    await expect(page.getByText('Add a task')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Add a task' })).toBeVisible()
   })
 })
 
@@ -281,7 +282,7 @@ test.describe('Pool overflow', () => {
     await page.goto('/tasks')
 
     // Open add task modal
-    await page.getByRole('button', { name: /add task/i }).click()
+    await page.getByRole('button', { name: /add task/i }).last().click()
 
     // Overflow notice should be visible
     await expect(page.getByText(/NOW is full/i)).toBeVisible()
