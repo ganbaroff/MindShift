@@ -22,6 +22,13 @@ function SessionFrictionNudge({ onDismiss }: { onDismiss: () => void }) {
     const id = setTimeout(onDismiss, 5000)
     return () => clearTimeout(id)
   }, [onDismiss])
+
+  // WCAG 2.1.1: keyboard users can dismiss with Escape
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onDismiss() }
+    window.addEventListener('keydown', handleKey)
+    return () => window.removeEventListener('keydown', handleKey)
+  }, [onDismiss])
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}

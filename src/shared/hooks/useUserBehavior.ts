@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { useStore } from '@/store'
 import type { FocusSessionRow } from '@/types/database'
+import type { Task } from '@/types'
 
 export interface UserBehaviorProfile {
   /** Average session duration in minutes */
@@ -23,18 +24,18 @@ export interface UserBehaviorProfile {
   completedToday: number
 }
 
-/**
- * Aggregates user behavior patterns from focus sessions and store data
- * into a profile suitable for AI edge-function context (e.g. Mochi).
- *
- * @param sessions - FocusSessionRow[] from useSessionHistory
- */
-export function useUserBehavior(sessions: FocusSessionRow[]): UserBehaviorProfile {
-  const nowPool = useStore((s) => s.nowPool)
-  const nextPool = useStore((s) => s.nextPool)
-  const somedayPool = useStore((s) => s.somedayPool)
+// ── Pure computation (exported for unit tests) ────────────────────────────────
 
-  return useMemo(() => {
+interface PoolsArg { nowPool: Task[]; nextPool: Task[]; somedayPool: Task[] }
+
+/**
+ * Pure computation — extracts behavior profile from session history and task pools.
+ * Called by the hook; exported for direct unit testing.
+ */
+export function computeUserBehaviorProfile(
+  sessions: FocusSessionRow[],
+  { nowPool, nextPool, somedayPool }: PoolsArg,
+): UserBehaviorProfile {
     const totalSessions = sessions.length
 
     // ── Average session duration ──────────────────────────────────────
@@ -154,5 +155,23 @@ export function useUserBehavior(sessions: FocusSessionRow[]): UserBehaviorProfil
       totalSessions,
       completedToday,
     }
-  }, [sessions, nowPool, nextPool, somedayPool])
+}
+
+// ── Hook (thin wrapper around pure computation) ───────────────────────────────
+
+/**
+ * Aggregates user behavior patterns from focus sessions and store data
+ * into a profile suitable for AI edge-function context (e.g. Mochi).
+ *
+ * @param sessions - FocusSessionRow[] from useSessionHistory
+ */
+export function useUserBehavior(sessions: FocusSessionRow[]): UserBehaviorProfile {
+  const nowPool = useStore((s) => s.nowPool)
+  const nextPool = useStore((s) => s.nextPool)
+  const somedayPool = useStore((s) => s.somedayPool)
+
+  return useMemo(
+    () => computeUserBehaviorProfile(sessions, { nowPool, nextPool, somedayPool }),
+    [sessions, nowPool, nextPool, somedayPool],
+  )
 }

@@ -728,7 +728,13 @@
     "briefEmotionHigh": "Modo de alta reactividad: protege tus primeros 30 min de interrupciones.",
     "briefEmotionModerate": "Empieza despacio hoy. Las emociones afectan la concentración más de lo habitual.",
     "briefMedMorning": "Ventana de la mañana: buen momento para tareas más difíciles.",
-    "briefDefault": "Elija una tarea que lamentaría no haber comenzado. Sólo uno."
+    "briefDefault": "Elija una tarea que lamentaría no haber comenzado. Sólo uno.",
+    "greeting": {
+      "morning": "Buenos días ☀️",
+      "afternoon": "Buenas tardes 🌤️",
+      "evening": "Buenas tardes 🌙",
+      "night": "Buenas noches 🌃"
+    }
   },
   "progress": {
     "title": "Tu progreso 🌱",

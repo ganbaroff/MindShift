@@ -621,28 +621,76 @@
     },
     "psychotype": {
       "achiever": {
-        "milestone_7": ["7 minutes in the books 💪", "Past the hard part. Keep building."],
-        "milestone_15": ["15 minutes of real progress. ✨", "Quarter hour down. Solid."],
-        "milestone_30": ["Half an hour. That's a real session. 🌿", "30 minutes done. Momentum."],
-        "milestone_60": ["One hour. Genuine deep work. 🌟", "60 minutes. That was real."]
+        "milestone_7": [
+          "7 minutes in the books 💪",
+          "Past the hard part. Keep building."
+        ],
+        "milestone_15": [
+          "15 minutes of real progress. ✨",
+          "Quarter hour down. Solid."
+        ],
+        "milestone_30": [
+          "Half an hour. That's a real session. 🌿",
+          "30 minutes done. Momentum."
+        ],
+        "milestone_60": [
+          "One hour. Genuine deep work. 🌟",
+          "60 minutes. That was real."
+        ]
       },
       "explorer": {
-        "milestone_7": ["7 minutes in — warming up 🔍", "Getting into it. Curiosity loading."],
-        "milestone_15": ["15 minutes of following that thread. ✨", "Still exploring. Good."],
-        "milestone_30": ["Half an hour deep. 🌿", "30 minutes of exploration."],
-        "milestone_60": ["An hour. Where did it take you? 🌟", "60 minutes. What did you find?"]
+        "milestone_7": [
+          "7 minutes in — warming up 🔍",
+          "Getting into it. Curiosity loading."
+        ],
+        "milestone_15": [
+          "15 minutes of following that thread. ✨",
+          "Still exploring. Good."
+        ],
+        "milestone_30": [
+          "Half an hour deep. 🌿",
+          "30 minutes of exploration."
+        ],
+        "milestone_60": [
+          "An hour. Where did it take you? 🌟",
+          "60 minutes. What did you find?"
+        ]
       },
       "connector": {
-        "milestone_7": ["7 minutes. Steady. 🌱", "Still here with you."],
-        "milestone_15": ["15 minutes of focused work. ✨", "Quarter hour. That counts."],
-        "milestone_30": ["Half an hour. We're in this together. 🌿", "30 minutes of showing up."],
-        "milestone_60": ["One hour. 🌟", "60 minutes. Real work, together."]
+        "milestone_7": [
+          "7 minutes. Steady. 🌱",
+          "Still here with you."
+        ],
+        "milestone_15": [
+          "15 minutes of focused work. ✨",
+          "Quarter hour. That counts."
+        ],
+        "milestone_30": [
+          "Half an hour. We're in this together. 🌿",
+          "30 minutes of showing up."
+        ],
+        "milestone_60": [
+          "One hour. 🌟",
+          "60 minutes. Real work, together."
+        ]
       },
       "planner": {
-        "milestone_7": ["7 minutes — on track. 🌱", "The plan is working."],
-        "milestone_15": ["15 minutes. On schedule. ✨", "Quarter hour in. Steady."],
-        "milestone_30": ["Half an hour. Right on pace. 🌿", "30 minutes as planned."],
-        "milestone_60": ["One hour. Plan delivered. 🌟", "60 minutes done."]
+        "milestone_7": [
+          "7 minutes — on track. 🌱",
+          "The plan is working."
+        ],
+        "milestone_15": [
+          "15 minutes. On schedule. ✨",
+          "Quarter hour in. Steady."
+        ],
+        "milestone_30": [
+          "Half an hour. Right on pace. 🌿",
+          "30 minutes as planned."
+        ],
+        "milestone_60": [
+          "One hour. Plan delivered. 🌟",
+          "60 minutes done."
+        ]
       }
     },
     "fallback": "Still here with you."
@@ -680,7 +728,13 @@
     "briefEmotionHigh": "High-reactivity mode: protect your first 30 min from interruptions.",
     "briefEmotionModerate": "Start slow today. Emotions affect focus more than usual.",
     "briefMedMorning": "Morning window — good time for harder tasks.",
-    "briefDefault": "Pick one task you'd regret not starting. Just one."
+    "briefDefault": "Pick one task you'd regret not starting. Just one.",
+    "greeting": {
+      "morning": "Good morning ☀️",
+      "afternoon": "Good afternoon 🌤️",
+      "evening": "Good evening 🌙",
+      "night": "Good night 🌃"
+    }
   },
   "progress": {
     "title": "Your Progress 🌱",
@@ -1136,13 +1190,6 @@
     "health": "Health",
     "learning": "Learning",
     "finance": "Finance"
-  },
-  "energy": {
-    "drained": "Drained",
-    "low": "Low",
-    "okay": "Okay",
-    "good": "Good",
-    "wired": "Wired"
   },
   "appMode": {
     "minimalSubtitle": "One task at a time. What matters most?",

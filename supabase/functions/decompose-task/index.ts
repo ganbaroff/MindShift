@@ -117,7 +117,7 @@ Deno.serve(async (req: Request) => {
     // Research #2: locale must be injected into prompt directly — never translate after.
     // "Generating text in English and passing through a secondary translation API is an
     //  architectural anti-pattern — strips cultural nuance, compounds hallucination errors."
-    const targetLocale = (locale ?? 'en').slice(0, 10)
+    const targetLocale = /^[a-z]{2}(?:-[A-Z]{2,4})?$/.test(locale ?? "") ? (locale ?? "en") : "en"
     const spicinessLevel = Math.min(5, Math.max(1, Math.floor(spiciness ?? 3)))
     const stepCount = spicinessLevel <= 2 ? '5-7' : spicinessLevel <= 3 ? '3-5' : '2-3'
     const granularity = spicinessLevel >= 4

@@ -107,7 +107,8 @@ Deno.serve(async (req: Request) => {
     }
 
     const rawSessions = Array.isArray(raw.sessions) ? (raw.sessions as SessionInput[]).slice(0, 500) : []
-    const targetLocale = typeof raw.locale === 'string' ? raw.locale.slice(0, 10) : 'en'
+    const VALID_LOCALE = /^[a-z]{2}(?:-[A-Z]{2,4})?$/
+    const targetLocale = (typeof raw.locale === 'string' && VALID_LOCALE.test(raw.locale)) ? raw.locale : 'en'
     const seasonalMode = typeof raw.seasonalMode === 'string' ? raw.seasonalMode.slice(0, 20) : null
 
     // ── Compute stats from sessions ───────────────────────────────────────────

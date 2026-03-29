@@ -728,7 +728,13 @@
     "briefEmotionHigh": "Hochreaktivitätsmodus: Schützen Sie Ihre ersten 30 Minuten vor Unterbrechungen.",
     "briefEmotionModerate": "Fangen Sie heute langsam an. Emotionen beeinflussen die Konzentration stärker als gewöhnlich.",
     "briefMedMorning": "Morgenfenster – gute Zeit für schwierigere Aufgaben.",
-    "briefDefault": "Wählen Sie eine Aufgabe aus, bei der Sie es bereuen würden, wenn Sie sie nicht begonnen haben. Nur einer."
+    "briefDefault": "Wählen Sie eine Aufgabe aus, bei der Sie es bereuen würden, wenn Sie sie nicht begonnen haben. Nur einer.",
+    "greeting": {
+      "morning": "Guten Morgen ☀️",
+      "afternoon": "Guten Tag 🌤️",
+      "evening": "Guten Abend 🌙",
+      "night": "Gute Nacht 🌃"
+    }
   },
   "progress": {
     "title": "Dein Fortschritt 🌱",

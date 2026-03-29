@@ -728,7 +728,13 @@
     "briefEmotionHigh": "Yüksek reaktivite modu: İlk 30 dakikanızı kesintilerden koruyun.",
     "briefEmotionModerate": "Bugün yavaş başlayın. Duygular odaklanmayı normalden daha fazla etkiler.",
     "briefMedMorning": "Sabah penceresi – daha zor görevler için iyi bir zaman.",
-    "briefDefault": "Başlamadığınıza pişman olacağınız bir görev seçin. Sadece bir tane."
+    "briefDefault": "Başlamadığınıza pişman olacağınız bir görev seçin. Sadece bir tane.",
+    "greeting": {
+      "morning": "Günaydın ☀️",
+      "afternoon": "İyi günler 🌤️",
+      "evening": "İyi akşamlar 🌙",
+      "night": "İyi geceler 🌃"
+    }
   },
   "progress": {
     "title": "İlerlemeniz 🌱",
