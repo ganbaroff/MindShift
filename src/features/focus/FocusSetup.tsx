@@ -9,17 +9,29 @@
  * All business logic remains in useFocusSession.ts — this is pure UI.
  */
 
-import { useState, useMemo } from 'react'
-import { AnimatePresence } from 'motion/react'
+import { useState, useMemo, useCallback } from 'react'
+import { AnimatePresence, motion } from 'motion/react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { BreathworkRitual } from './BreathworkRitual'
 import { FocusRoomSheet } from './FocusRoomSheet'
 import { clearBookmark } from './useFocusSession'
 import { useStore } from '@/store'
+import { useAudioEngine } from '@/shared/hooks/useAudioEngine'
+import { useMotion } from '@/shared/hooks/useMotion'
 import type { Task, AudioPreset } from '@/types'
 import type { FocusRoomState } from '@/shared/hooks/useFocusRoom'
 import { FeatureHint } from '@/shared/ui/FeatureHint'
+
+// ── Sound preset metadata ─────────────────────────────────────────────────────
+const SOUND_PRESETS: { key: AudioPreset; emoji: string; labelKey: string }[] = [
+  { key: 'brown',   emoji: '🌊', labelKey: 'settings.soundBrown' },
+  { key: 'pink',    emoji: '🌧️', labelKey: 'settings.soundPink' },
+  { key: 'nature',  emoji: '🌿', labelKey: 'settings.soundNature' },
+  { key: 'lofi',    emoji: '🎵', labelKey: 'settings.soundLofi' },
+  { key: 'gamma',   emoji: '⚡',  labelKey: 'settings.soundGamma' },
+  { key: 'gamma60', emoji: '🧠', labelKey: 'settings.soundGamma60' },
+]
 
 // ── Medication peak window helper (B-12) ──────────────────────────────────────
 const MED_PEAK_HOURS: Record<string, [number, number]> = {
@@ -77,10 +89,29 @@ export function FocusSetup({
 }: FocusSetupProps) {
   const [showBreathwork, setShowBreathwork] = useState(false)
   const [showRoomSheet, setShowRoomSheet] = useState(false)
+  const [soundPickerOpen, setSoundPickerOpen] = useState(false)
+  const [previewingKey, setPreviewingKey] = useState<AudioPreset | null>(null)
   const { t } = useTranslation()
+  const { shouldAnimate } = useMotion()
+  const { play, stop, isPlaying } = useAudioEngine()
 
   // Store values for setup-specific UI
-  const { medicationEnabled, medicationTime, timeBlindness, emotionalReactivity, weeklyIntention, weeklyStats, completedTotal } = useStore()
+  const { medicationEnabled, medicationTime, timeBlindness, emotionalReactivity, weeklyIntention, weeklyStats, completedTotal, setFocusAnchor, audioVolume } = useStore()
+
+  // ── Sound picker handlers ────────────────────────────────────────────────────
+  const handleSoundPick = useCallback((key: AudioPreset | null) => {
+    setFocusAnchor(key)
+    if (key) {
+      if (isPlaying) stop()
+      play(key)
+      setPreviewingKey(key)
+      setTimeout(() => { stop(); setPreviewingKey(null) }, 2000)
+    } else {
+      if (isPlaying) stop()
+      setPreviewingKey(null)
+    }
+    setSoundPickerOpen(false)
+  }, [setFocusAnchor, play, stop, isPlaying])
 
   // ── Medication peak window (B-12) ──────────────────────────────────────────
   const medPeakLabel = useMemo(
@@ -341,7 +372,7 @@ export function FocusSetup({
               max="180"
               value={customDuration}
               onChange={e => setCustomDuration(e.target.value)}
-              placeholder="Minutes..."
+              placeholder={t('focus.minutesPlaceholder')}
               autoFocus
               className="flex-1 px-4 py-2.5 rounded-xl text-sm focus:outline-none"
               style={{ background: 'var(--color-card)', border: '1.5px solid var(--color-primary)', color: 'var(--color-text)' }}
@@ -352,21 +383,93 @@ export function FocusSetup({
       </div>
       )} {/* end timerStyle !== 'surprise' */}
 
-      {/* Sound anchor indicator */}
-      {focusAnchor && (
-        <div
-          className="mx-5 mb-6 p-3 rounded-xl flex items-center gap-3"
+      {/* Sound picker */}
+      <div className="mx-5 mb-4">
+        <button
+          onClick={() => setSoundPickerOpen(v => !v)}
+          className="w-full flex items-center justify-between px-4 py-3 rounded-xl focus-visible:ring-2 focus-visible:ring-ms-primary/50 focus-visible:outline-none"
           style={{ background: 'var(--color-card)', border: '1px solid var(--color-border-subtle)' }}
+          aria-expanded={soundPickerOpen}
+          aria-label={t('focus.soundPicker')}
         >
-          <span>🎯</span>
-          <div>
-            <p className="text-xs font-medium" style={{ color: 'var(--color-text)' }}>{t('focus.soundAnchorReady')}</p>
-            <p className="text-xs" style={{ color: 'var(--color-muted)' }}>
-              {t('focus.soundAnchorDesc', { preset: focusAnchor })}
-            </p>
+          <div className="flex items-center gap-2">
+            <span className="text-base">
+              {focusAnchor
+                ? (SOUND_PRESETS.find(p => p.key === focusAnchor)?.emoji ?? '🔊')
+                : '🔇'}
+            </span>
+            <span className="text-sm font-medium" style={{ color: 'var(--color-text)' }}>
+              {focusAnchor
+                ? t(SOUND_PRESETS.find(p => p.key === focusAnchor)?.labelKey ?? 'focus.soundNone')
+                : t('focus.soundNone')}
+            </span>
+            {previewingKey && (
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: 'rgba(78,205,196,0.15)', color: 'var(--color-teal)' }}>
+                ♪
+              </span>
+            )}
           </div>
-        </div>
-      )}
+          <motion.span
+            animate={shouldAnimate ? { rotate: soundPickerOpen ? 180 : 0 } : { rotate: soundPickerOpen ? 180 : 0 }}
+            transition={shouldAnimate ? { duration: 0.2 } : { duration: 0 }}
+            className="text-xs"
+            style={{ color: 'var(--color-muted)' }}
+          >
+            ▾
+          </motion.span>
+        </button>
+        <AnimatePresence>
+          {soundPickerOpen && (
+            <motion.div
+              initial={shouldAnimate ? { opacity: 0, height: 0 } : false}
+              animate={shouldAnimate ? { opacity: 1, height: 'auto' } : false}
+              exit={shouldAnimate ? { opacity: 0, height: 0 } : undefined}
+              className="overflow-hidden"
+            >
+              <div className="pt-2 grid grid-cols-3 gap-2">
+                {SOUND_PRESETS.map(preset => (
+                  <button
+                    key={preset.key}
+                    onClick={() => handleSoundPick(preset.key)}
+                    className="flex flex-col items-center gap-1 py-2.5 rounded-xl text-center focus-visible:ring-2 focus-visible:ring-ms-primary/50 focus-visible:outline-none"
+                    style={{
+                      background: focusAnchor === preset.key ? 'rgba(78,205,196,0.15)' : 'var(--color-card)',
+                      border: focusAnchor === preset.key ? '1px solid rgba(78,205,196,0.4)' : '1px solid var(--color-border-subtle)',
+                    }}
+                    aria-pressed={focusAnchor === preset.key}
+                    aria-label={t(preset.labelKey)}
+                  >
+                    <span className="text-lg">{preset.emoji}</span>
+                    <span className="text-[11px] font-medium" style={{ color: focusAnchor === preset.key ? 'var(--color-teal)' : 'var(--color-muted)' }}>
+                      {t(preset.labelKey)}
+                    </span>
+                  </button>
+                ))}
+                <button
+                  onClick={() => handleSoundPick(null)}
+                  className="flex flex-col items-center gap-1 py-2.5 rounded-xl text-center focus-visible:ring-2 focus-visible:ring-ms-primary/50 focus-visible:outline-none"
+                  style={{
+                    background: !focusAnchor ? 'rgba(139,139,167,0.15)' : 'var(--color-card)',
+                    border: !focusAnchor ? '1px solid rgba(139,139,167,0.4)' : '1px solid var(--color-border-subtle)',
+                  }}
+                  aria-pressed={!focusAnchor}
+                  aria-label={t('focus.soundNone')}
+                >
+                  <span className="text-lg">🔇</span>
+                  <span className="text-[11px] font-medium" style={{ color: !focusAnchor ? 'var(--color-text-muted)' : 'var(--color-muted)' }}>
+                    {t('focus.soundNone')}
+                  </span>
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        {focusAnchor && audioVolume === 0 && (
+          <p className="mt-1.5 text-[11px] text-center" style={{ color: 'var(--color-muted)' }}>
+            {t('focus.soundMutedHint')}
+          </p>
+        )}
+      </div>
 
       {/* Medication peak window badge — B-12 */}
       {medPeakLabel && (
@@ -390,7 +493,7 @@ export function FocusSetup({
               Room {room.code} · {room.peers.length + 1} focusing
             </p>
             {room.peers.length === 0 && (
-              <p className="text-[10px]" style={{ color: '#5A5B72' }}>Waiting for partner to join…</p>
+              <p className="text-[10px]" style={{ color: '#5A5B72' }}>{t('focus.waitingForPartner')}</p>
             )}
           </div>
           <button
@@ -438,7 +541,7 @@ export function FocusSetup({
         <FeatureHint
           id="hint_focus_rooms"
           icon="🤝"
-          text="Focus with a friend — create a room and share the code. You'll see each other's progress."
+          text={t('focus.focusRoomsHint')}
           delay={3000}
         />
         {/* Focus with someone — S-3/S-4 */}
