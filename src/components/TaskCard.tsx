@@ -267,7 +267,7 @@ function TaskCardInner({ task, index = 0, onDone, onPark, onRemove }: TaskCardPr
             {task.estimatedMinutes}m
           </span>
         )}
-        {task.taskType !== 'task' && (
+        {task.taskType !== 'task' && TASK_TYPE_CONFIG[task.taskType] && (
           <span className="text-[13px]" title={TASK_TYPE_CONFIG[task.taskType].label}>
             {TASK_TYPE_CONFIG[task.taskType].emoji}
           </span>
@@ -320,7 +320,7 @@ function TaskCardInner({ task, index = 0, onDone, onPark, onRemove }: TaskCardPr
       )}
 
       {/* Category badge */}
-      {task.category && (
+      {task.category && CATEGORY_CONFIG[task.category] && (
         <span
           className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full font-medium mb-2"
           style={{ backgroundColor: 'rgba(123,114,255,0.12)', color: 'var(--color-primary)' }}
