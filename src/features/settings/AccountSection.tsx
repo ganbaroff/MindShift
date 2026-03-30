@@ -27,6 +27,8 @@ export function AccountSection() {
   const [exportLoading, setExportLoading] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleteLoading, setDeleteLoading] = useState(false)
+  const [deleteConfirmText, setDeleteConfirmText] = useState('')
+  const DELETE_WORD = 'DELETE'
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
@@ -65,6 +67,7 @@ export function AccountSection() {
   }
 
   const handleDeleteAccount = async () => {
+    if (!isGuest && deleteConfirmText !== DELETE_WORD) return
     if (isGuest) {
       localStorage.clear()
       signOut()
@@ -87,6 +90,7 @@ export function AccountSection() {
     } finally {
       setDeleteLoading(false)
       setShowDeleteConfirm(false)
+      setDeleteConfirmText('')
     }
   }
 
@@ -116,7 +120,7 @@ export function AccountSection() {
           {exportLoading ? t('settings.exporting') : `📦 ${t('settings.exportJson')}`}
         </motion.button>
         <button
-          onClick={() => setShowDeleteConfirm(true)}
+          onClick={() => { setShowDeleteConfirm(true); setDeleteConfirmText('') }}
           className="text-[13px] font-medium w-full text-center mt-2"
           style={{ color: '#F59E0B' }}
         >
@@ -137,6 +141,23 @@ export function AccountSection() {
             <p className="text-[13px]" style={{ color: 'var(--color-text-primary)' }}>
               {t('settings.deleteConfirm')}
             </p>
+            {!isGuest && (
+              <div className="space-y-1">
+                <p className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>
+                  {t('settings.deleteTypePrompt')}
+                </p>
+                <input
+                  type="text"
+                  value={deleteConfirmText}
+                  onChange={e => setDeleteConfirmText(e.target.value)}
+                  placeholder={DELETE_WORD}
+                  autoCapitalize="characters"
+                  className="w-full h-9 rounded-xl px-3 text-[13px] font-mono tracking-widest text-center"
+                  style={{ backgroundColor: 'var(--color-surface-raised)', color: 'var(--color-text-primary)', border: '1px solid rgba(245,158,11,0.3)' }}
+                  aria-label={t('settings.deleteTypePrompt')}
+                />
+              </div>
+            )}
             <div className="flex gap-2">
               <button
                 onClick={() => setShowDeleteConfirm(false)}
@@ -147,7 +168,7 @@ export function AccountSection() {
               </button>
               <button
                 onClick={handleDeleteAccount}
-                disabled={deleteLoading}
+                disabled={deleteLoading || (!isGuest && deleteConfirmText !== DELETE_WORD)}
                 className="flex-1 h-9 rounded-xl text-[13px] font-medium disabled:opacity-50"
                 style={{ backgroundColor: 'rgba(245,158,11,0.15)', color: '#F59E0B' }}
               >

@@ -1,6 +1,7 @@
 import { memo, useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useMotion } from '@/shared/hooks/useMotion'
+import i18n from '@/i18n'
 import type { SessionPhase } from '@/types'
 
 // ── Arc geometry ───────────────────────────────────────────────────────────────
@@ -77,10 +78,10 @@ function ArcTimerInner({
 
   // Screen reader: announce phase transitions (only fires when phase text changes)
   const phaseLabel =
-    phase === 'struggle' ? 'Focus phase: getting started' :
-    phase === 'release'  ? 'Focus phase: momentum building' :
-    phase === 'flow'     ? 'Focus phase: deep flow' :
-    phase === 'recovery' ? 'Focus phase: recovery' : ''
+    phase === 'struggle' ? i18n.t('focus.arcPhaseGettingStarted') :
+    phase === 'release'  ? i18n.t('focus.arcPhaseMomentum') :
+    phase === 'flow'     ? i18n.t('focus.arcPhaseDeepFlow') :
+    phase === 'recovery' ? i18n.t('focus.arcPhaseRecovery') : ''
 
   return (
     <motion.button
@@ -91,9 +92,8 @@ function ArcTimerInner({
       className="relative flex items-center justify-center focus:outline-none"
       style={{ cursor: effectiveDisable ? 'default' : 'pointer' }}
       aria-label={
-        isSurprise ? 'Focus timer — digits hidden in flow phase' :
-        effectiveDisable ? 'Focus timer — digits hidden in flow phase' :
-        effectiveShowDigits ? 'Focus timer — tap to hide digits' : 'Focus timer — tap to show digits'
+        isSurprise || effectiveDisable ? i18n.t('focus.arcTimerSurprise') :
+        effectiveShowDigits ? i18n.t('focus.arcTimerHideDigits') : i18n.t('focus.arcTimerShowDigits')
       }
     >
       {/* Announce phase transitions to screen readers — content only changes on phase transition, not per-second */}

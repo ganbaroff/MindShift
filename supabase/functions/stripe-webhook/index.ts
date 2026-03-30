@@ -50,17 +50,35 @@ Deno.serve(async (req: Request) => {
   const event = JSON.parse(body) as { type: string; data: { object: Record<string, unknown> } }
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
+  // Idempotency: store processed event ID to skip duplicate webhook deliveries
+  const eventId = (event as { id?: string }).id
+  if (eventId) {
+    const { data: existing } = await supabase
+      .from('processed_stripe_events')
+      .select('id')
+      .eq('event_id', eventId)
+      .maybeSingle()
+    if (existing) {
+      return new Response(JSON.stringify({ received: true, duplicate: true }), {
+        status: 200, headers: { 'Content-Type': 'application/json' },
+      })
+    }
+    await supabase.from('processed_stripe_events').insert({ event_id: eventId }).catch(() => {/* ignore if table missing */})
+  }
+
   try {
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object
       const userId = session['client_reference_id'] as string
       const subscriptionId = session['subscription'] as string
       if (userId) {
+        // Only set subscription_started_at on first activation (idempotent re-delivery safety)
+        const { data: existing } = await supabase.from('profiles').select('subscription_started_at').eq('id', userId).maybeSingle()
         await supabase.from('profiles').upsert({
           id: userId,
           subscription_tier: 'pro',
           stripe_subscription_id: subscriptionId,
-          subscription_started_at: new Date().toISOString(),
+          subscription_started_at: existing?.subscription_started_at ?? new Date().toISOString(),
         })
       }
     }

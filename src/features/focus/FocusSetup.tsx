@@ -13,6 +13,7 @@ import { useState, useMemo, useCallback } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import i18n from '@/i18n'
 import { BreathworkRitual } from './BreathworkRitual'
 import { FocusRoomSheet } from './FocusRoomSheet'
 import { clearBookmark } from './useFocusSession'
@@ -46,7 +47,7 @@ function getMedPeakLabel(medicationTime: string | null): string | null {
   const h = new Date().getHours()
   if (h >= start && h <= end) {
     const fmt = (n: number) => `${n > 12 ? n - 12 : n}${n >= 12 ? 'pm' : 'am'}`
-    return `⚡ Med peak window: ${fmt(start)}–${fmt(end)}`
+    return i18n.t('focus.medPeakWindow', { start: fmt(start), end: fmt(end) })
   }
   return null
 }
@@ -511,7 +512,7 @@ export function FocusSetup({
             className="text-[10px] px-2 py-1 rounded-lg"
             style={{ background: 'rgba(78,205,196,0.12)', color: 'var(--color-teal)' }}
           >
-            View
+            {t('focus.viewRoom')}
           </button>
         </div>
       )}

@@ -77,16 +77,16 @@ function pushNotify(title: string, options?: NotificationOptions): void {
     if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
       navigator.serviceWorker.ready.then((reg) => {
         reg.showNotification(title, {
-          icon: '/icons/icon-192.png',
-          badge: '/icons/icon-96.png',
+          icon: '/icon-192.png',
+          badge: '/icon-96.png',
           ...options,
         })
       }).catch(() => {
         // Fallback to window.Notification
-        new Notification(title, { icon: '/icons/icon-192.png', ...options })
+        new Notification(title, { icon: '/icon-192.png', ...options })
       })
     } else {
-      new Notification(title, { icon: '/icons/icon-192.png', ...options })
+      new Notification(title, { icon: '/icon-192.png', ...options })
     }
   } catch { /* non-critical */ }
 }

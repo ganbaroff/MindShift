@@ -67,9 +67,17 @@ export default function PrivacyPage() {
             </div>
             <div className="p-3 rounded-lg" style={{ background: 'var(--color-surface-raised)' }}>
               <p className="font-medium mb-1" style={{ color: 'var(--color-text-primary)' }}>App content</p>
-              <p>Task titles, focus session durations, energy check-in values (1–5 scale), and
-                 onboarding preferences (app mode, cognitive style). This is the core data the
-                 app needs to function.</p>
+              <p>Task titles, focus session durations, and onboarding preferences (app mode, cognitive style).
+                 This is the core data the app needs to function.</p>
+            </div>
+            <div className="p-3 rounded-lg" style={{ background: 'var(--color-surface-raised)' }}>
+              <p className="font-medium mb-1" style={{ color: 'var(--color-text-primary)' }}>Wellness indicators (not medical data)</p>
+              <p>Self-reported energy levels (1–5 scale), attention patterns (e.g. time-blindness, emotional
+                 reactivity), and recovery signals such as burnout indicators. These are <strong style={{ color: 'var(--color-text-primary)' }}>productivity
+                 preferences you report</strong>, not medical records. MindShift is not a medical device, and
+                 this data is not classified as special category health data under GDPR Article 9. It is used
+                 solely to personalise the app experience and is never shared with health insurers,
+                 employers, or advertisers.</p>
             </div>
             <div className="p-3 rounded-lg" style={{ background: 'var(--color-surface-raised)' }}>
               <p className="font-medium mb-1" style={{ color: 'var(--color-text-primary)' }}>Usage data</p>
@@ -91,8 +99,8 @@ export default function PrivacyPage() {
           </div>
           <p>
             We do <strong style={{ color: 'var(--color-text-primary)' }}>not</strong> collect: location data,
-            device identifiers, contacts, payment card details (processed directly by our
-            payment provider), or any special category data (health, biometric, etc.).
+            device identifiers, contacts, payment card details (processed directly by our payment provider),
+            or any GDPR Article 9 special category data (biometric, genetic, racial, political, religious, etc.).
           </p>
         </Section>
 
@@ -110,22 +118,25 @@ export default function PrivacyPage() {
           </p>
         </Section>
 
-        <Section title="4. AI Processing (Anthropic Claude)">
+        <Section title="4. AI Processing (Gemini + Mochi)">
           <p>
-            When you use AI features (task decomposition, recovery messages, weekly insights),
-            your <strong style={{ color: 'var(--color-text-primary)' }}>task titles and minimal context</strong> are
-            sent via our secure backend (Supabase Edge Functions) to Anthropic's API.
+            MindShift uses AI in two ways: <strong style={{ color: 'var(--color-text-primary)' }}>Mochi</strong> (our in-app
+            companion) and background AI features (task decomposition, recovery messages, weekly insights).
+            Both are powered by Google Gemini via our secure backend (Supabase Edge Functions).
           </p>
           <p>
-            We do <strong style={{ color: 'var(--color-text-primary)' }}>not</strong> send your email address, energy
-            levels, or any other personal identifiers to Anthropic. The data sent is limited to
-            what is strictly necessary to generate the AI response.
+            When AI features are triggered, we send <strong style={{ color: 'var(--color-text-primary)' }}>task titles,
+            focus session context, and your selected preferences</strong> (psychotype, app mode, language)
+            to Google's Gemini API. We do <strong style={{ color: 'var(--color-text-primary)' }}>not</strong> send your
+            email address or payment information to Gemini. Your language preference is included so
+            Mochi responds in your language.
           </p>
           <p>
-            Anthropic processes this data subject to their{' '}
-            <a href="https://www.anthropic.com/legal/privacy" target="_blank" rel="noopener noreferrer"
+            AI features are rate-limited (10 Mochi responses/day on the free plan). AI responses are
+            generated in real time and are not permanently stored by us. Google processes this data
+            subject to their{' '}
+            <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer"
                style={{ color: 'var(--color-primary)' }}>Privacy Policy</a>.
-            API responses are ephemeral — we do not store the raw AI outputs long-term.
           </p>
         </Section>
 
@@ -149,6 +160,20 @@ export default function PrivacyPage() {
               <p className="font-medium" style={{ color: 'var(--color-text-primary)' }}>Vercel Inc.</p>
               <p>Hosting and content delivery of the web application. Vercel serves static assets only
                  and does not process your personal data beyond standard web server logs.</p>
+            </div>
+            <div className="p-3 rounded-lg" style={{ background: 'var(--color-surface-raised)' }}>
+              <p className="font-medium" style={{ color: 'var(--color-text-primary)' }}>Google LLC (Gemini API)</p>
+              <p>AI inference powering Mochi and background AI features. Limited task and session context
+                 only; no email or payment data. Google does not use API data to train public models under
+                 their API terms.</p>
+            </div>
+            <div className="p-3 rounded-lg" style={{ background: 'var(--color-surface-raised)' }}>
+              <p className="font-medium" style={{ color: 'var(--color-text-primary)' }}>Volaura (optional integration)</p>
+              <p>If you choose to connect the Volaura Life Simulator, your focus session statistics and
+                 XP progress are shared with Volaura to power character progression. This integration is
+                 <strong style={{ color: 'var(--color-text-primary)' }}> opt-in</strong> — no data is shared with
+                 Volaura unless you explicitly connect your account. You can disconnect at any time from
+                 Settings → Integrations.</p>
             </div>
           </div>
           <p>
