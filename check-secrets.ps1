@@ -1,5 +1,5 @@
 $accessToken = '***REMOVED***'
-$projectRef = 'cinctbslvejqicxanvnr'
+$projectRef = 'awfoqycoltvhamtrsvxk'
 
 $headers = @{
     'Authorization' = "Bearer $accessToken"

@@ -18,7 +18,7 @@ export const TEST_USER = {
 }
 
 // Supabase project ref — extracted from VITE_SUPABASE_URL
-const SUPABASE_REF = 'cinctbslvejqicxanvnr'
+const SUPABASE_REF = 'awfoqycoltvhamtrsvxk'
 
 // ── Zustand store seed ─────────────────────────────────────────────────────────
 
