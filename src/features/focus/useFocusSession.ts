@@ -1,14 +1,14 @@
 /**
- * useFocusSession — Block 2a refactor
+ * useFocusSession — orchestrates focus session state
  *
- * Extracts ALL timer/session logic out of FocusScreen.tsx into a testable hook.
- * FocusScreen becomes a thin orchestrator that renders UI based on this hook's state.
+ * Thin coordinator: delegates to four sub-hooks.
+ *   useSessionTimer      ← interval mechanics, timing refs
+ *   useSessionPhase      ← phase transitions + soft/hard-stop side-effects
+ *   useSessionPersistence← DB writes (save, energy_after, autopsy, pending recovery)
+ *   useParkThought       ← stray-thought capture during session
+ *   useSessionEnd        ← post-session screens, recovery/buffer timers, XP/achievements
  *
- * Responsibility boundary:
- *   useFocusSession  ← state, effects, event handlers, DB persistence
- *   FocusScreen      ← layout, screen routing, sub-component composition
- *   SessionControls  ← audio/stop/park UI (active session only)
- *   PostSessionFlow  ← nature-buffer + recovery-lock screens
+ * FocusScreen is a thin orchestrator that renders UI from this hook's state.
  */
 
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
@@ -16,39 +16,24 @@ import { useSearchParams } from 'react-router-dom'
 import { useStore } from '@/store'
 import { useAudioEngine } from '@/shared/hooks/useAudioEngine'
 import { useMotion } from '@/shared/hooks/useMotion'
-import { supabase } from '@/shared/lib/supabase'
-import { logError } from '@/shared/lib/logger'
-import { sendFocusSession, sendVitals, isVolauraConfigured } from '@/shared/lib/volaura-bridge'
-import {
-  notifyFocusEnd, notifyAchievement, requestNotificationPermission,
-  pushFocusComplete, pushRecoveryEnd,
-} from '@/shared/lib/notify'
-import { hapticDone, hapticStart } from '@/shared/lib/haptic'
-import { getToneCopy } from '@/shared/lib/uiTone'
-import { ACHIEVEMENT_DEFINITIONS } from '@/types'
-import {
-  TIMER_PRESETS,
-  MAX_SESSION_MINUTES,
-  RECOVERY_LOCK_MINUTES,
-  NATURE_BUFFER_SECONDS,
-} from '@/shared/lib/constants'
+import { hapticStart } from '@/shared/lib/haptic'
+import { requestNotificationPermission } from '@/shared/lib/notify'
+import { TIMER_PRESETS } from '@/shared/lib/constants'
 import i18n from '@/i18n'
 import { ARC_SIZE } from './ArcTimer'
 import { useSessionPhase } from './useSessionPhase'
 import { useSessionTimer } from './useSessionTimer'
+import { useSessionPersistence } from './useSessionPersistence'
+import { useParkThought } from './useParkThought'
+import { useSessionEnd } from './useSessionEnd'
+import type { ScreenState } from './useSessionEnd'
 import type { SessionPhase, AudioPreset, Task, EnergyLevel } from '@/types'
-import type { FocusSessionInsert } from '@/types/database'
+
+// Re-export ScreenState and getPhase so existing callers don't need to change imports
+export type { ScreenState } from './useSessionEnd'
+export { getPhase } from './useSessionPhase'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
-
-export type ScreenState =
-  | 'setup'
-  | 'session'
-  | 'interrupt-confirm'
-  | 'bookmark-capture'
-  | 'recovery-lock'
-  | 'nature-buffer'
-  | 'hard-stop'
 
 export interface InterruptBookmark {
   text: string
@@ -81,9 +66,6 @@ function saveBookmark(bookmark: InterruptBookmark): void {
 export function clearBookmark(): void {
   try { localStorage.removeItem(BOOKMARK_KEY) } catch { /* silent */ }
 }
-
-// Re-export getPhase from useSessionPhase so existing callers keep working
-export { getPhase } from './useSessionPhase'
 
 export function getSmartDuration(energy: EnergyLevel): number {
   if (energy <= 2) return 5
@@ -119,7 +101,7 @@ export function useFocusSession() {
 
   // ── Smart defaults ──────────────────────────────────────────────────────────
   const smartDuration = useMemo(() => getSmartDuration(energyLevel), [energyLevel])
-  const isQuickStart = searchParams.get('quick') === '1'
+  const isQuickStart  = searchParams.get('quick') === '1'
 
   // ── Setup state ─────────────────────────────────────────────────────────────
   const [selectedTask, setSelectedTask]         = useState<Task | null>(null)
@@ -128,22 +110,18 @@ export function useFocusSession() {
   const [showCustom, setShowCustom]             = useState(false)
 
   // ── Runtime state ───────────────────────────────────────────────────────────
-  const [screen, setScreen]               = useState<ScreenState>('setup')
-  const [recoverySeconds, setRecovery]    = useState(RECOVERY_LOCK_MINUTES * 60)
-  const [bufferSeconds, setBufferSeconds] = useState(NATURE_BUFFER_SECONDS)
+  const [screen, setScreen]             = useState<ScreenState>('setup')
   const [postEnergyLogged, setPostEnergyLogged] = useState(false)
 
-  // ── Refs ─────────────────────────────────────────────────────────────────────
-  const recoveryIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  const bufferIntervalRef   = useRef<ReturnType<typeof setInterval> | null>(null)
-  const quickStartedRef     = useRef(false)
-  const energyBeforeRef     = useRef<EnergyLevel | null>(null) // captured at session start for VOLAURA event
+  // ── Misc refs ────────────────────────────────────────────────────────────────
+  const quickStartedRef = useRef(false)
+  const energyBeforeRef = useRef<EnergyLevel | null>(null)
 
   // ── Timer sub-hook ───────────────────────────────────────────────────────────
   const timer = useSessionTimer({
     screen, sessionPhase, activeSession,
     setPhase: (p) => setPhase(p),
-    onTimerEnd: () => handleSessionEnd(true),
+    onTimerEnd: () => sessionEnd.handleSessionEnd(true),
   })
   const {
     remainingSeconds, elapsedSeconds, showDigits, setShowDigits,
@@ -162,235 +140,49 @@ export function useFocusSession() {
     adaptToPhase,
   })
 
+  // ── Persistence sub-hook ────────────────────────────────────────────────────
+  const { saveSession, handlePostEnergy: _handlePostEnergy, handleAutopsyPick } = useSessionPersistence({
+    activeSession, userId, activePreset, energyLevel,
+    updateLastSession, setEnergyLevel,
+    savedSessionIdRef, sessionSavedRef,
+  })
+
+  // ── Park-thought sub-hook ───────────────────────────────────────────────────
+  const park = useParkThought({ addTask, userId })
+
+  // ── Session-end sub-hook ────────────────────────────────────────────────────
+  const sessionEnd = useSessionEnd({
+    sessionPhase, activePreset, isPlaying, energyBeforeRef,
+    intervalRef, startTimeRef, pausedMsRef, durationSecRef,
+    saveSession, stopAudio, setPreset, endSession,
+    hasAchievement, unlockAchievement, play, setScreen,
+  })
+
   // ── Interrupt bookmark ──────────────────────────────────────────────────────
-  const [bookmarkText, setBookmarkText] = useState('')
-  const [savedBookmark] = useState<InterruptBookmark | null>(() => loadBookmark())
+  const [bookmarkText, setBookmarkText]         = useState('')
+  const [savedBookmark]                         = useState<InterruptBookmark | null>(() => loadBookmark())
 
-  // ── Park thought ─────────────────────────────────────────────────────────────
-  const [parkOpen, setParkOpen] = useState(false)
-  const [parkText, setParkText] = useState('')
-  const parkedCountRef = useRef(0)
-
-  // Only 'task' type can have focus sessions — meetings/reminders/ideas are excluded
+  // Only 'task' type entries can have focus sessions
   const allTasks = [...nowPool, ...nextPool].filter(t => t.status === 'active' && t.taskType === 'task')
 
   // ── Cleanup on unmount ──────────────────────────────────────────────────────
   useEffect(() => () => {
-    if (intervalRef.current)         clearInterval(intervalRef.current)
-    if (recoveryIntervalRef.current) clearInterval(recoveryIntervalRef.current)
-    if (bufferIntervalRef.current)   clearInterval(bufferIntervalRef.current)
+    if (intervalRef.current)                           clearInterval(intervalRef.current)
+    if (sessionEnd.recoveryIntervalRef.current)        clearInterval(sessionEnd.recoveryIntervalRef.current)
+    if (sessionEnd.bufferIntervalRef.current)          clearInterval(sessionEnd.bufferIntervalRef.current)
   }, [])
 
-  // ── Reset session ref on user change ─────────────────────────────────────
-  // Prevents energy_after update from targeting a previous user's session row
+  // ── Reset session ref when user changes ────────────────────────────────────
   useEffect(() => {
     savedSessionIdRef.current = null
     sessionSavedRef.current = false
   }, [userId])
 
-  // ── Recover pending session saved by beforeunload handler ─────────────────
-  // If the tab was closed mid-session, save the partial session on next load.
-  useEffect(() => {
-    if (!userId || userId.startsWith('guest_')) return
-    const pending = localStorage.getItem('ms_pending_session')
-    if (!pending) return
-    try {
-      const p = JSON.parse(pending) as { taskId: string; startedAt: string; elapsedMs: number; phase: string }
-      localStorage.removeItem('ms_pending_session')
-      const elapsedMin = Math.round(p.elapsedMs / 60_000)
-      if (elapsedMin >= 1) {
-        void supabase.from('focus_sessions').insert({
-          user_id: userId,
-          started_at: p.startedAt,
-          duration_ms: p.elapsedMs,
-          phase_reached: p.phase,
-          energy_before: null,
-          energy_after: null,
-          audio_preset: null,
-        } as never).then(({ error }: { error: unknown }) => {
-          if (error) logError('useFocusSession.pendingRecovery', error)
-        })
-      }
-    } catch { /* malformed JSON — discard */ }
-  }, [userId])
-
-  // ── Park thought handler ────────────────────────────────────────────────────
-  const handleParkThought = useCallback(async () => {
-    const text = parkText.trim()
-    if (!text) return
-    const task: Task = {
-      id: crypto.randomUUID(),
-      title: text,
-      pool: 'someday',
-      status: 'active',
-      difficulty: 1,
-      estimatedMinutes: 15,
-      createdAt: new Date().toISOString(),
-      completedAt: null,
-      snoozeCount: 0,
-      parentTaskId: null,
-      position: 0,
-      dueDate: null,
-      dueTime: null,
-      taskType: 'task',
-      reminderSentAt: null,
-      repeat: 'none',
-    }
-    addTask(task)
-    if (userId) {
-      try {
-        await supabase.from('tasks').insert({
-          id: task.id, user_id: userId, title: task.title,
-          pool: task.pool, status: task.status, difficulty: task.difficulty,
-          estimated_minutes: task.estimatedMinutes, parent_task_id: null, position: 0,
-        } as never)
-      } catch (err) {
-        logError('FocusScreen.parkThought.insert', err, { taskId: task.id })
-      }
-    }
-    parkedCountRef.current += 1
-    setParkText('')
-    setParkOpen(false)
-  }, [parkText, addTask, userId])
-
-  // ── Save session to DB ──────────────────────────────────────────────────────
-  const saveSession = useCallback(async (elapsedMs: number, phaseReached: SessionPhase) => {
-    if (sessionSavedRef.current || !activeSession || !userId) return
-    // NOTE: set flag AFTER successful insert so network errors allow retry
-    try {
-      const row: FocusSessionInsert = {
-        task_id:       activeSession.taskId,
-        user_id:       userId,
-        started_at:    activeSession.startedAt,
-        audio_preset:  activePreset,
-        duration_ms:   elapsedMs,
-        phase_reached: phaseReached === 'idle' ? null : phaseReached,
-        // Capture current energy level as pre-session baseline (H-5 fix)
-        energy_before: energyLevel ?? null,
-      }
-      const { data: saved } = await supabase
-        .from('focus_sessions')
-        .insert(row as never)
-        .select('id')
-        .single()
-      // Only mark saved after confirmed DB insert — allows retry on network error
-      sessionSavedRef.current = true
-      savedSessionIdRef.current = (saved as { id?: string } | null)?.id ?? null
-      // Clear pending session from localStorage now that it's saved
-      localStorage.removeItem('ms_pending_session')
-      updateLastSession()
-
-      // Sync focus session as time block to Google Calendar (fire-and-forget)
-      import('@/shared/hooks/useCalendarSync').then(({ syncFocusSession }) => {
-        const taskTitle = activeSession.taskId
-          ? [...useStore.getState().nowPool, ...useStore.getState().nextPool]
-              .find(t => t.id === activeSession.taskId)?.title ?? null
-          : null
-        void syncFocusSession(activeSession.startedAt, elapsedMs, taskTitle)
-      })
-    } catch (err) {
-      logError('FocusScreen.handleSessionEnd.insert', err)
-    }
-  }, [activeSession, activePreset, updateLastSession, userId])
-
-  // ── Nature buffer ────────────────────────────────────────────────────────────
-  const startNatureBuffer = useCallback(() => {
-    setBufferSeconds(NATURE_BUFFER_SECONDS)
-    setScreen('nature-buffer')
-    play('nature')
-    setPreset('nature')
-
-    bufferIntervalRef.current = setInterval(() => {
-      setBufferSeconds(s => {
-        if (s <= 1) {
-          clearInterval(bufferIntervalRef.current!)
-          stopAudio()
-          setPreset(null)
-          setScreen('setup')
-          return 0
-        }
-        return s - 1
-      })
-    }, 1000)
-  }, [play, stopAudio, setPreset])
-
-  // ── Session end ──────────────────────────────────────────────────────────────
-  const handleSessionEnd = useCallback((wasCompleted: boolean) => {
-    if (intervalRef.current) clearInterval(intervalRef.current)
-
-    const elapsedMs = Date.now() - startTimeRef.current - pausedMsRef.current
-    const elapsedMin = Math.floor(elapsedMs / 60_000)
-    void saveSession(elapsedMs, sessionPhase)
-
-    if (elapsedMin >= 1) { notifyFocusEnd(elapsedMin); hapticDone() }
-    if (elapsedMin >= 1) pushFocusComplete(elapsedMin)
-
-    if (wasCompleted) {
-      const storeState = useStore.getState()
-      const toneCopy = getToneCopy(storeState.uiTone)
-      const tryUnlock = (key: string) => {
-        if (!hasAchievement(key)) {
-          unlockAchievement(key)
-          const def = ACHIEVEMENT_DEFINITIONS.find(a => a.key === key)
-          if (def) notifyAchievement(toneCopy.badgeUnlocked(def.name), def.emoji, def.description)
-        }
-      }
-      if (durationSecRef.current >= 52 * 60) tryUnlock('flow_rider')
-      if (sessionPhase === 'flow') tryUnlock('full_cycle')
-      if (durationSecRef.current <= 5 * 60)  tryUnlock('five_min_hero')
-
-      // quiet_mind — complete a session with audio playing
-      if (isPlaying || activePreset !== null) tryUnlock('quiet_mind')
-
-      // BUG 1 fix: award XP based on session duration (was never called)
-      const sessionXP =
-        elapsedMin < 10  ? 5 :
-        elapsedMin <= 25 ? 15 :
-        elapsedMin <= 45 ? 25 : 40
-      storeState.addXP(sessionXP)
-      storeState.incrementFocusSessions()
-
-      // VOLAURA: fire XP event — best-effort, never blocks UX
-      if (isVolauraConfigured() && storeState.userId && !storeState.userId.startsWith('guest_')) {
-        void supabase.auth.getSession().then(({ data }) => {
-          const token = data.session?.access_token
-          if (token) void sendFocusSession(token, {
-            durationMinutes: elapsedMin,
-            phase: sessionPhase,
-            energyBefore: energyBeforeRef.current ?? 3,
-            energyAfter: energyBeforeRef.current ?? 3, // approximate; vital_logged event sends the real post-session energy separately
-            psychotype: storeState.psychotype ?? null,
-          })
-        })
-      }
-    }
-
-    stopAudio()
-    setPreset(null)
-    endSession()
-
-    const wasFull = wasCompleted && durationSecRef.current >= MAX_SESSION_MINUTES * 60
-    if (wasFull) {
-      setRecovery(RECOVERY_LOCK_MINUTES * 60)
-      setScreen('recovery-lock')
-      recoveryIntervalRef.current = setInterval(() => {
-        setRecovery(s => {
-          if (s <= 1) {
-            clearInterval(recoveryIntervalRef.current!)
-            pushRecoveryEnd()
-            setScreen('setup')
-            return 0
-          }
-          return s - 1
-        })
-      }, 1000)
-    } else if (wasCompleted) {
-      startNatureBuffer()
-    } else {
-      setScreen('setup')
-    }
-  }, [sessionPhase, saveSession, stopAudio, setPreset, endSession,
-      hasAchievement, unlockAchievement, startNatureBuffer])
+  // ── handlePostEnergy wrapper: also flips postEnergyLogged ──────────────────
+  const handlePostEnergy = useCallback((level: EnergyLevel) => {
+    _handlePostEnergy(level)
+    setPostEnergyLogged(true)
+  }, [_handlePostEnergy])
 
   // ── Start ────────────────────────────────────────────────────────────────────
   const handleStart = useCallback((overrideDuration?: number) => {
@@ -398,21 +190,19 @@ export function useFocusSession() {
       ?? (showCustom ? (parseInt(customDuration) || 25) : selectedDuration)
     const durationSec = duration * 60
 
-    durationSecRef.current = durationSec
-    startTimeRef.current   = Date.now()
-    pausedMsRef.current    = 0
-    sessionSavedRef.current  = false
-    softStopFiredRef.current = false
-    energyBeforeRef.current  = energyLevel
+    durationSecRef.current    = durationSec
+    startTimeRef.current      = Date.now()
+    pausedMsRef.current       = 0
+    sessionSavedRef.current   = false
+    softStopFiredRef.current  = false
+    energyBeforeRef.current   = energyLevel
     setPostEnergyLogged(false)
 
     void requestNotificationPermission()
-    hapticStart() // grounding pulse before focus begins
-    resetPhaseTracking() // reset phase tracking so first tick doesn't fire hapticPhase
+    hapticStart()
+    resetPhaseTracking()
     startSession(selectedTask?.id ?? null, duration, focusAnchor ?? null)
 
-    // Audio calls wrapped in try/catch — AudioContext can throw on iOS Safari
-    // if the context is in a bad state. Session must start regardless.
     try { playAnchor() } catch { /* audio unavailable — session continues silently */ }
     if (focusAnchor) { try { play(focusAnchor) } catch { /* silent */ } }
 
@@ -462,18 +252,10 @@ export function useFocusSession() {
         timestamp: new Date().toISOString(),
       })
     }
-    handleSessionEnd(false)
-  }, [bookmarkText, selectedTask, handleSessionEnd])
+    sessionEnd.handleSessionEnd(false)
+  }, [bookmarkText, selectedTask, sessionEnd])
 
-  const handleBookmarkSkip = useCallback(() => handleSessionEnd(false), [handleSessionEnd])
-
-  // ── Skip nature buffer ──────────────────────────────────────────────────────
-  const handleSkipBuffer = useCallback(() => {
-    if (bufferIntervalRef.current) clearInterval(bufferIntervalRef.current)
-    stopAudio()
-    setPreset(null)
-    setScreen('setup')
-  }, [stopAudio, setPreset])
+  const handleBookmarkSkip = useCallback(() => sessionEnd.handleSessionEnd(false), [sessionEnd])
 
   // ── Audio toggle ─────────────────────────────────────────────────────────────
   const handleAudioToggle = useCallback(() => {
@@ -486,61 +268,22 @@ export function useFocusSession() {
     }
   }, [isPlaying, focusAnchor, activePreset, play, stopAudio, setPreset])
 
-  // ── Bypass recovery lock ────────────────────────────────────────────────────
-  const handleBypassRecovery = useCallback(() => {
-    if (recoveryIntervalRef.current) clearInterval(recoveryIntervalRef.current)
-    setScreen('setup')
-  }, [])
-
   // ── Bypass hard-stop (hyperfocus) ───────────────────────────────────────────
   const handleBypassHardStop = useCallback(() => {
     setScreen('session')
     startInterval()
   }, [startInterval])
 
-  // ── Energy delta ─────────────────────────────────────────────────────────────
-  const handlePostEnergy = useCallback((level: EnergyLevel) => {
-    setEnergyLevel(level)
-    setPostEnergyLogged(true)
-    // Persist post-session energy to the focus_sessions row that was just created
-    // Guard: only update if we have a saved session ID and the user is still logged in
-    if (savedSessionIdRef.current && userId && !userId.startsWith('guest_')) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      void (supabase.from('focus_sessions') as any)
-        .update({ energy_after: level })
-        .eq('id', savedSessionIdRef.current)
-        .then(({ error }: { error: unknown }) => { if (error) logError('useFocusSession.energy_after.update', error) })
-
-      // VOLAURA: send vitals event — best-effort
-      if (isVolauraConfigured()) {
-        void supabase.auth.getSession().then(({ data }) => {
-          const token = data.session?.access_token
-          if (token) void sendVitals(token, level, useStore.getState().burnoutScore)
-        })
-      }
-    }
-  }, [setEnergyLevel, userId])
-
-  // ── Autopsy pick persistence (B-6) ──────────────────────────────────────────
-  const handleAutopsyPick = useCallback((pick: string) => {
-    if (!savedSessionIdRef.current || !userId || userId.startsWith('guest_')) return
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    void (supabase.from('focus_sessions') as any)
-      .update({ phase_reached: pick })
-      .eq('id', savedSessionIdRef.current)
-      .then(({ error }: { error: unknown }) => { if (error) logError('useFocusSession.autopsy.update', error) })
-  }, [userId])
-
   // ── Derived ──────────────────────────────────────────────────────────────────
-  const progress  = durationSecRef.current > 0 ? 1 - remainingSeconds / durationSecRef.current : 0
-  const isFlow    = sessionPhase === 'flow'
+  const progress   = durationSecRef.current > 0 ? 1 - remainingSeconds / durationSecRef.current : 0
+  const isFlow     = sessionPhase === 'flow'
   const elapsedMin = Math.floor(elapsedSeconds / 60)
-  const timerSize = getTimerSize(sessionPhase)
+  const timerSize  = getTimerSize(sessionPhase)
 
   const energyLabel = useMemo(() => {
-    if (energyLevel <= 2) return { text: i18n.t('focus.lowEnergy'), color: '#4ECDC4' }
+    if (energyLevel <= 2) return { text: i18n.t('focus.lowEnergy'),    color: '#4ECDC4' }
     if (energyLevel === 3) return { text: i18n.t('focus.steadyEnergy'), color: '#7B72FF' }
-    return { text: i18n.t('focus.highEnergy'), color: '#F59E0B' }
+    return                        { text: i18n.t('focus.highEnergy'),   color: '#F59E0B' }
   }, [energyLevel])
 
   return {
@@ -555,23 +298,26 @@ export function useFocusSession() {
     // Runtime
     elapsedSeconds, remainingSeconds,
     showDigits, setShowDigits,
-    recoverySeconds, bufferSeconds,
+    recoverySeconds: sessionEnd.recoverySeconds,
+    bufferSeconds:   sessionEnd.bufferSeconds,
     postEnergyLogged,
     bookmarkText, setBookmarkText,
     // Park thought
-    parkOpen, setParkOpen,
-    parkText, setParkText,
-    parkedThoughtsCount: parkedCountRef.current,
+    parkOpen: park.parkOpen, setParkOpen: park.setParkOpen,
+    parkText: park.parkText, setParkText: park.setParkText,
+    parkedThoughtsCount: park.parkedCount,
     // Derived
     progress, isFlow, elapsedMin, timerSize, energyLabel,
-    // Timer style from store (for ArcTimer prop)
-    timerStyle,
-    sessionPhase,
+    timerStyle, sessionPhase,
     // Handlers
     handleStart, handleStop, handleResume, handleConfirmStop,
-    handleBookmarkSave, handleBookmarkSkip, handleSkipBuffer,
-    handleAudioToggle, handleParkThought,
-    handleSessionEnd, handleBypassRecovery, handleBypassHardStop,
+    handleBookmarkSave, handleBookmarkSkip,
+    handleSkipBuffer:      sessionEnd.handleSkipBuffer,
+    handleBypassRecovery:  sessionEnd.handleBypassRecovery,
+    handleBypassHardStop,
+    handleAudioToggle,
+    handleParkThought:     park.handleParkThought,
+    handleSessionEnd:      sessionEnd.handleSessionEnd,
     handlePostEnergy,
     handleAutopsyPick,
     startInterval, intervalRef,
