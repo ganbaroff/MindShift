@@ -216,10 +216,10 @@ Respond ONLY with the 3 insights, one per line. No headers, no JSON, no extra te
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT_MS)
 
-    const geminiResp = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
+    const geminiResp = await fetch(GEMINI_URL, {
       method: 'POST',
       signal: controller.signal,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: {

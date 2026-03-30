@@ -44,6 +44,24 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 // ── Constants ────────────────────────────────────────────────────────────────────
 
+// In-memory rate limit for /link attempts: max 5 per chatId per 10 minutes.
+// Resets on cold start — sufficient to prevent brute-force within a single invocation lifecycle.
+const LINK_ATTEMPTS = new Map<number, { count: number; windowStart: number }>()
+const LINK_RATE_LIMIT = 5
+const LINK_RATE_WINDOW_MS = 10 * 60 * 1000 // 10 minutes
+
+function checkLinkRateLimit(chatId: number): boolean {
+  const now = Date.now()
+  const entry = LINK_ATTEMPTS.get(chatId)
+  if (!entry || now - entry.windowStart > LINK_RATE_WINDOW_MS) {
+    LINK_ATTEMPTS.set(chatId, { count: 1, windowStart: now })
+    return true
+  }
+  if (entry.count >= LINK_RATE_LIMIT) return false
+  entry.count++
+  return true
+}
+
 const GEMINI_MODEL = 'gemini-2.5-flash'
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`
 const API_TIMEOUT_MS = 8_000
@@ -191,6 +209,15 @@ Or just send me any message — I'll figure out if it's a task, idea, reminder, 
         const msg = lang === 'ru'
           ? 'Укажи код: <code>/link ТВОЙ_КОД</code>\n\nКод можно получить в приложении MindShift → Настройки → Telegram.'
           : 'Please provide your code: <code>/link YOUR_CODE</code>\n\nGet your code from MindShift app → Settings → Telegram.'
+        await sendTelegramMessage(chatId, msg)
+        return new Response('ok', { status: 200 })
+      }
+
+      // ── Rate limit /link attempts (max 5 per 10 min) ─────────────────────────
+      if (!checkLinkRateLimit(chatId)) {
+        const msg = lang === 'ru'
+          ? 'Слишком много попыток. Подожди немного и попробуй снова.'
+          : 'Too many attempts. Please wait a moment and try again.'
         await sendTelegramMessage(chatId, msg)
         return new Response('ok', { status: 200 })
       }
@@ -538,10 +565,10 @@ Respond with ONLY the JSON object.`
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT_MS)
 
-    const resp = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
+    const resp = await fetch(GEMINI_URL, {
       method: 'POST',
       signal: controller.signal,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: { maxOutputTokens: 256, temperature: 0.3 },

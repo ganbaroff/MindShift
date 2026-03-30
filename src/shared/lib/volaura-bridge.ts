@@ -38,8 +38,7 @@ interface CharacterEvent {
 
 // ── Cache ─────────────────────────────────────────────────────────────────────
 
-let cachedState: CharacterState | null = null
-let cacheTs = 0
+const stateCache = new Map<string, { data: CharacterState; ts: number }>()
 const CACHE_TTL = 5 * 60 * 1000 // 5 minutes
 
 // ── API helpers ───────────────────────────────────────────────────────────────
@@ -80,12 +79,10 @@ async function volauraFetch<T>(
 export async function fetchCharacterState(
   token: string
 ): Promise<CharacterState | null> {
-  if (Date.now() - cacheTs < CACHE_TTL && cachedState) return cachedState
+  const cached = stateCache.get(token)
+  if (cached && Date.now() - cached.ts < CACHE_TTL) return cached.data
   const data = await volauraFetch<CharacterState>('/api/character/state', token)
-  if (data) {
-    cachedState = data
-    cacheTs = Date.now()
-  }
+  if (data) stateCache.set(token, { data, ts: Date.now() })
   return data
 }
 

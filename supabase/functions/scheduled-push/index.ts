@@ -48,14 +48,27 @@ async function createVapidJwt(audience: string): Promise<string> {
   const payloadB64 = base64UrlEncode(new TextEncoder().encode(JSON.stringify(payload)))
   const unsigned = `${headerB64}.${payloadB64}`
 
-  // Import VAPID private key as ECDSA P-256
-  const rawKey = base64UrlDecode(VAPID_PRIVATE_KEY)
+  // Import VAPID private key as ECDSA P-256.
+  // The public key is a base64url-encoded uncompressed EC point:
+  //   0x04 || x (32 bytes) || y (32 bytes) = 65 bytes = 88 base64url chars.
+  // Slicing the raw string (43/45 chars) is wrong — decode first, then
+  // re-encode the x and y coordinate slices independently.
+  const pubKeyBytes = Uint8Array.from(
+    atob(VAPID_PUBLIC_KEY.replace(/-/g, '+').replace(/_/g, '/')),
+    c => c.charCodeAt(0),
+  )
+  function toBase64Url(bytes: Uint8Array): string {
+    return btoa(String.fromCharCode(...bytes))
+      .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '')
+  }
+  // pubKeyBytes[0] === 0x04 (uncompressed point marker) — skip it.
+  // bytes 1-32 → x coordinate, bytes 33-64 → y coordinate.
   const jwk = {
     kty: 'EC',
     crv: 'P-256',
     d: VAPID_PRIVATE_KEY,
-    x: VAPID_PUBLIC_KEY.substring(0, 43), // first 32 bytes base64url
-    y: VAPID_PUBLIC_KEY.substring(43),     // last 32 bytes base64url
+    x: toBase64Url(pubKeyBytes.slice(1, 33)),
+    y: toBase64Url(pubKeyBytes.slice(33, 65)),
   }
 
   const key = await crypto.subtle.importKey(

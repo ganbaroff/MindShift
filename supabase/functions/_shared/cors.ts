@@ -10,9 +10,17 @@ const ALLOWED_ORIGINS = [
   'http://localhost:4173',  // Vite preview
 ]
 
-/** Check if origin matches a Vercel preview deployment for this project. */
+const ALLOWED_PREVIEW_ORIGINS = new Set([
+  'https://mind-shift-git-main-yusifg27-3093s-projects.vercel.app',
+  'https://mind-shift-gilt.vercel.app',
+  'https://mind-shift-yusifg27-3093s-projects.vercel.app',
+])
+
+/** Check if origin matches a known Vercel deployment for this project. */
 function isVercelPreview(origin: string): boolean {
-  return /^https:\/\/mind-shift-[a-z0-9-]+\.vercel\.app$/.test(origin)
+  if (ALLOWED_PREVIEW_ORIGINS.has(origin)) return true
+  // Allow PR preview deployments — but only exact hash-based URLs (not arbitrary subdomains)
+  return /^https:\/\/mind-shift-[a-z0-9]{12,}-yusifg27-3093s-projects\.vercel\.app$/.test(origin)
 }
 
 export function getCorsHeaders(req: Request): Record<string, string> {
