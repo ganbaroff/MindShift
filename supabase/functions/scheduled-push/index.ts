@@ -10,7 +10,7 @@
  * Requires env vars:
  * - VAPID_PUBLIC_KEY
  * - VAPID_PRIVATE_KEY
- * - VAPID_SUBJECT (mailto:ganbarov.y@gmail.com)
+ * - VAPID_SUBJECT (e.g. mailto:admin@mindshift.app)
  */
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
@@ -19,7 +19,7 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 const VAPID_PUBLIC_KEY = Deno.env.get('VAPID_PUBLIC_KEY')!
 const VAPID_PRIVATE_KEY = Deno.env.get('VAPID_PRIVATE_KEY')!
-const VAPID_SUBJECT = Deno.env.get('VAPID_SUBJECT') ?? 'mailto:ganbarov.y@gmail.com'
+const VAPID_SUBJECT = Deno.env.get('VAPID_SUBJECT') ?? 'mailto:noreply@mindshift.app'
 
 // ── VAPID JWT signing (Deno-native, no npm deps) ──────────────────────────────
 

@@ -2,7 +2,7 @@
   "name": "MindShift — Focus made kind",
   "short_name": "MindShift",
   "description": "ADHD-aware productivity app. Non-punitive task management, focus sessions, and burnout prevention.",
-  "start_url": "/",
+  "start_url": "/?source=pwa",
   "scope": "/",
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui"],
