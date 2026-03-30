@@ -1,10 +1,10 @@
 import { useState, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ChevronDown, Search, X } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useMotion } from '@/shared/hooks/useMotion';
-import { todayISO } from '@/shared/lib/dateUtils';
+import { todayISO, nextMondayISO } from '@/shared/lib/dateUtils';
 import {
   DndContext,
   closestCenter,
@@ -17,10 +17,8 @@ import {
 import {
   SortableContext,
   verticalListSortingStrategy,
-  useSortable,
   arrayMove,
 } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 import TaskCard from '@/components/TaskCard';
 import Fab from '@/components/Fab';
 import AddTaskModal from '@/components/AddTaskModal';
@@ -30,6 +28,8 @@ import { DIFFICULTY_MAP } from '@/types';
 import type { Task } from '@/types';
 import { getNowPoolMax } from '@/shared/lib/constants';
 import { PageTransition } from '@/shared/ui/PageTransition';
+import { SortableTaskCard } from './SortableTaskCard';
+import { CollapsibleSection } from './CollapsibleSection';
 
 export default function TasksPage() {
   const navigate = useNavigate();
@@ -44,7 +44,7 @@ export default function TasksPage() {
     return !localStorage.getItem('ms_pools_explained')
   });
 
-  const { nowPool, nextPool, somedayPool, completeTask, snoozeTask, removeTask, reorderPool, moveTask, appMode, seasonalMode } = useStore();
+  const { nowPool, nextPool, somedayPool, completeTask, snoozeTask, removeTask, reorderPool, moveTask, setTaskDueDate, appMode, seasonalMode } = useStore();
 
   // dnd-kit sensors — pointer for desktop, touch for mobile
   const sensors = useSensors(
@@ -163,12 +163,11 @@ export default function TasksPage() {
         {/* Auto-reschedule banner — gentle, non-shaming */}
         <AnimatePresence>
           {pastDateTasks.length > 0 && (
-            <motion.button
+            <motion.div
               initial={shouldAnimate ? { opacity: 0, y: -8 } : false}
               animate={shouldAnimate ? { opacity: 1, y: 0 } : false}
               exit={shouldAnimate ? { opacity: 0, y: -8 } : undefined}
-              onClick={() => navigate('/calendar')}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-left"
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl"
               style={{
                 background: 'rgba(245,158,11,0.07)',
                 border: '1px solid rgba(245,158,11,0.20)',
@@ -183,8 +182,28 @@ export default function TasksPage() {
                   {t('tasks.noPressure')}
                 </p>
               </div>
-              <span className="text-xs" style={{ color: 'var(--color-gold)' }}>{t('tasks.reschedule')}</span>
-            </motion.button>
+              <div className="flex flex-col items-end gap-1 shrink-0">
+                <button
+                  onClick={() => {
+                    const monday = nextMondayISO()
+                    pastDateTasks.forEach(task => setTaskDueDate(task.id, monday, null))
+                  }}
+                  className="text-[11px] font-medium px-2 py-1 rounded-lg focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
+                  style={{ background: 'rgba(245,158,11,0.15)', color: 'var(--color-gold)' }}
+                  aria-label="Move overdue tasks to next Monday"
+                >
+                  → Mon
+                </button>
+                <button
+                  onClick={() => navigate('/calendar')}
+                  className="text-[10px] focus-visible:ring-2 focus-visible:ring-[#7B72FF] rounded"
+                  style={{ color: 'var(--color-text-muted)' }}
+                  aria-label="Open calendar to reschedule"
+                >
+                  {t('tasks.reschedule')}
+                </button>
+              </div>
+            </motion.div>
           )}
         </AnimatePresence>
 
@@ -305,95 +324,3 @@ export default function TasksPage() {
   );
 }
 
-// ── Sortable wrapper for TaskCard with pool move options ─────────────────────
-function SortableTaskCard({ task, index, onDone, onPark, onRemove, onMove, currentPool }: {
-  task: Task; index: number; onDone: (id: string) => void; onPark: (id: string) => void; onRemove?: (id: string) => void
-  onMove?: (id: string, pool: Task['pool']) => void; currentPool?: Task['pool']
-}) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: task.id })
-  const [showMoveOptions, setShowMoveOptions] = useState(false)
-  const { t } = useTranslation()
-
-  const poolOptions = [
-    { pool: 'now' as const,     label: t('tasks.now'),     emoji: '🎯' },
-    { pool: 'next' as const,    label: t('tasks.next'),    emoji: '📋' },
-    { pool: 'someday' as const, label: t('tasks.someday'), emoji: '💭' },
-  ].filter(p => p.pool !== currentPool)
-
-  return (
-    <div
-      ref={setNodeRef}
-      style={{
-        transform: CSS.Transform.toString(transform),
-        transition,
-        opacity: isDragging ? 0.5 : 1,
-        zIndex: isDragging ? 999 : 'auto',
-      }}
-    >
-      <div {...attributes} {...listeners} className="touch-none">
-        <TaskCard task={task} index={index} onDone={onDone} onPark={onPark} onRemove={onRemove} />
-      </div>
-      {/* Move options row */}
-      {onMove && (
-        <AnimatePresence>
-          {showMoveOptions ? (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="overflow-hidden flex gap-1.5 px-2 pb-1.5"
-            >
-              {poolOptions.map(({ pool, label, emoji }) => (
-                <button
-                  key={pool}
-                  onClick={() => { onMove(task.id, pool); setShowMoveOptions(false) }}
-                  className="text-[10px] px-2 py-0.5 rounded-lg focus-visible:ring-1 focus-visible:ring-[#7B72FF]"
-                  style={{ background: 'rgba(123,114,255,0.08)', color: 'var(--color-text-muted)' }}
-                >
-                  {emoji} {label}
-                </button>
-              ))}
-              <button
-                onClick={() => setShowMoveOptions(false)}
-                className="text-[10px] px-1 rounded focus-visible:ring-2 focus-visible:ring-ms-primary/50 focus-visible:outline-none"
-                style={{ color: 'var(--color-text-muted)' }}
-                aria-label="Close move options"
-              >
-                ✕
-              </button>
-            </motion.div>
-          ) : (
-            <button
-              onClick={() => setShowMoveOptions(true)}
-              className="text-[10px] px-2 py-0.5 focus-visible:ring-1 focus-visible:ring-[#7B72FF] rounded"
-              style={{ color: '#3A3B52' }}
-            >
-              {t('tasks.move')}
-            </button>
-          )}
-        </AnimatePresence>
-      )}
-    </div>
-  )
-}
-
-function CollapsibleSection({ label, count, open, onToggle, children, labelColor, shouldAnimate = true }: {
-  label: string; count: number; open: boolean; onToggle: () => void; children: React.ReactNode; labelColor?: string; shouldAnimate?: boolean;
-}) {
-  return (
-    <div>
-      <motion.button whileTap={shouldAnimate ? { scale: 0.97 } : undefined} onClick={onToggle} aria-expanded={open} aria-label={`${open ? 'Collapse' : 'Expand'} ${label} section`} className="flex items-center gap-2 w-full py-1 focus-visible:ring-2 focus-visible:ring-ms-primary/50 focus-visible:outline-none rounded">
-        <span className="text-[11px] uppercase tracking-widest font-semibold" style={{ color: labelColor || 'var(--color-text-muted)' }}>{label}</span>
-        <span className="text-[11px] px-1.5 py-0.5 rounded-full" style={{ backgroundColor: 'var(--color-surface-raised)', color: 'var(--color-text-muted)' }}>{count}</span>
-        <ChevronDown size={14} className={`ml-auto transition-transform ${open ? 'rotate-180' : ''}`} style={{ color: 'var(--color-text-muted)' }} />
-      </motion.button>
-      <AnimatePresence>
-        {open && (
-          <motion.div initial={shouldAnimate ? { height: 0, opacity: 0 } : false} animate={shouldAnimate ? { height: 'auto', opacity: 1 } : false} exit={shouldAnimate ? { height: 0, opacity: 0 } : undefined} className="overflow-hidden">
-            {children}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
