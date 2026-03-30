@@ -23,22 +23,19 @@ import {
   notifyFocusEnd, notifyAchievement, requestNotificationPermission,
   pushFocusComplete, pushRecoveryEnd,
 } from '@/shared/lib/notify'
-import { hapticDone, hapticPhase, hapticStart } from '@/shared/lib/haptic'
+import { hapticDone, hapticStart } from '@/shared/lib/haptic'
 import { getToneCopy } from '@/shared/lib/uiTone'
 import { ACHIEVEMENT_DEFINITIONS } from '@/types'
 import {
   TIMER_PRESETS,
-  PHASE_STRUGGLE_MINUTES,
-  PHASE_FLOW_MINUTES,
   MAX_SESSION_MINUTES,
   RECOVERY_LOCK_MINUTES,
   NATURE_BUFFER_SECONDS,
-  SESSION_SOFT_STOP_MINUTES,
-  SESSION_HARD_STOP_MINUTES,
 } from '@/shared/lib/constants'
-import { toast } from 'sonner'
 import i18n from '@/i18n'
 import { ARC_SIZE } from './ArcTimer'
+import { useSessionPhase } from './useSessionPhase'
+import { useSessionTimer } from './useSessionTimer'
 import type { SessionPhase, AudioPreset, Task, EnergyLevel } from '@/types'
 import type { FocusSessionInsert } from '@/types/database'
 
@@ -85,11 +82,8 @@ export function clearBookmark(): void {
   try { localStorage.removeItem(BOOKMARK_KEY) } catch { /* silent */ }
 }
 
-export function getPhase(elapsedMinutes: number): SessionPhase {
-  if (elapsedMinutes < PHASE_STRUGGLE_MINUTES) return 'struggle'
-  if (elapsedMinutes < PHASE_FLOW_MINUTES) return 'release'
-  return 'flow'
-}
+// Re-export getPhase from useSessionPhase so existing callers keep working
+export { getPhase } from './useSessionPhase'
 
 export function getSmartDuration(energy: EnergyLevel): number {
   if (energy <= 2) return 5
@@ -115,7 +109,7 @@ export function useFocusSession() {
     startSession, endSession, setPhase, updateLastSession,
     hasAchievement, unlockAchievement,
     focusAnchor, activePreset, setPreset, audioVolume, setVolume: setStoreVolume,
-    timerStyle, flexiblePauseUntil, setEnergyLevel,
+    timerStyle, setEnergyLevel,
     addTask, userId,
   } = useStore()
 
@@ -135,27 +129,38 @@ export function useFocusSession() {
 
   // ── Runtime state ───────────────────────────────────────────────────────────
   const [screen, setScreen]               = useState<ScreenState>('setup')
-  const [remainingSeconds, setRemaining]  = useState(0)
-  const [elapsedSeconds, setElapsed]      = useState(0)
-  const [showDigits, setShowDigits]       = useState(false)
   const [recoverySeconds, setRecovery]    = useState(RECOVERY_LOCK_MINUTES * 60)
   const [bufferSeconds, setBufferSeconds] = useState(NATURE_BUFFER_SECONDS)
   const [postEnergyLogged, setPostEnergyLogged] = useState(false)
 
   // ── Refs ─────────────────────────────────────────────────────────────────────
-  const startTimeRef        = useRef(0)
-  const pausedMsRef         = useRef(0)
-  const pauseStartRef       = useRef(0)
-  const durationSecRef      = useRef(0)
-  const intervalRef         = useRef<ReturnType<typeof setInterval> | null>(null)
   const recoveryIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const bufferIntervalRef   = useRef<ReturnType<typeof setInterval> | null>(null)
-  const sessionSavedRef     = useRef(false)
   const quickStartedRef     = useRef(false)
-  const softStopFiredRef    = useRef(false)
-  const savedSessionIdRef   = useRef<string | null>(null)  // captures DB row id for energy_after UPDATE
-  const lastPhaseRef        = useRef<SessionPhase>('idle')  // tracks phase for haptic on transition
   const energyBeforeRef     = useRef<EnergyLevel | null>(null) // captured at session start for VOLAURA event
+
+  // ── Timer sub-hook ───────────────────────────────────────────────────────────
+  const timer = useSessionTimer({
+    screen, sessionPhase, activeSession,
+    setPhase: (p) => setPhase(p),
+    onTimerEnd: () => handleSessionEnd(true),
+  })
+  const {
+    remainingSeconds, elapsedSeconds, showDigits, setShowDigits,
+    setRemainingSeconds, setElapsedSeconds,
+    startTimeRef, pausedMsRef, durationSecRef,
+    intervalRef, softStopFiredRef, savedSessionIdRef, sessionSavedRef,
+    startInterval, handleStop: timerStop, handleResume: timerResume,
+    resetPhaseTracking,
+  } = timer
+
+  // ── Phase sub-hook ───────────────────────────────────────────────────────────
+  useSessionPhase({
+    screen, sessionPhase, elapsedSeconds,
+    softStopFiredRef, intervalRef,
+    stopAudio, setPreset, setScreen,
+    adaptToPhase,
+  })
 
   // ── Interrupt bookmark ──────────────────────────────────────────────────────
   const [bookmarkText, setBookmarkText] = useState('')
@@ -208,45 +213,6 @@ export function useFocusSession() {
       }
     } catch { /* malformed JSON — discard */ }
   }, [userId])
-
-  // ── Phase-adaptive audio volume ────────────────────────────────────────────
-  // Research #1: sound adapts to cognitive phase — full masking in struggle,
-  // quiet ambient in flow to avoid disrupting hyperfocus state.
-  useEffect(() => {
-    if (screen !== 'session') return
-    if (sessionPhase === 'struggle' || sessionPhase === 'release' || sessionPhase === 'flow') {
-      adaptToPhase(sessionPhase)
-    }
-  }, [sessionPhase, screen, adaptToPhase])
-
-  // ── Soft-stop toast at 90 min ──────────────────────────────────────────────
-  useEffect(() => {
-    if (screen !== 'session') return
-    if (softStopFiredRef.current) return
-    // BUG-D2: guard against firing simultaneously with hard-stop effect when
-    // app returns from background after 120+ min (both effects see screen==='session'
-    // in the same render cycle before setScreen('hard-stop') takes effect)
-    if (elapsedSeconds >= SESSION_HARD_STOP_MINUTES * 60) return
-    const isFlexPauseActive = !!flexiblePauseUntil && new Date(flexiblePauseUntil) > new Date()
-    if (isFlexPauseActive) return
-    if (elapsedSeconds >= SESSION_SOFT_STOP_MINUTES * 60) {
-      softStopFiredRef.current = true
-      toast(i18n.t('focus.softStopToast'), { duration: 8_000 })
-    }
-  }, [elapsedSeconds, screen, flexiblePauseUntil])
-
-  // ── Hard-stop half-sheet at 120 min ───────────────────────────────────────
-  useEffect(() => {
-    if (screen !== 'session') return
-    const isFlexPauseActive = !!flexiblePauseUntil && new Date(flexiblePauseUntil) > new Date()
-    if (isFlexPauseActive) return
-    if (elapsedSeconds >= SESSION_HARD_STOP_MINUTES * 60) {
-      if (intervalRef.current) clearInterval(intervalRef.current)
-      stopAudio()    // BUG-D1: audio was continuing to play on hard-stop screen
-      setPreset(null)
-      setScreen('hard-stop')
-    }
-  }, [elapsedSeconds, screen, flexiblePauseUntil, stopAudio, setPreset])
 
   // ── Park thought handler ────────────────────────────────────────────────────
   const handleParkThought = useCallback(async () => {
@@ -426,69 +392,6 @@ export function useFocusSession() {
   }, [sessionPhase, saveSession, stopAudio, setPreset, endSession,
       hasAchievement, unlockAchievement, startNatureBuffer])
 
-  // ── Visibility change — correct timer on background return ─────────────────
-  useEffect(() => {
-    const handleVisibility = () => {
-      if (document.visibilityState === 'visible' && screen === 'session' && startTimeRef.current > 0) {
-        const netElapsedMs = Date.now() - startTimeRef.current - pausedMsRef.current
-        const elapsed = Math.floor(netElapsedMs / 1000)
-        const remaining = Math.max(0, durationSecRef.current - elapsed)
-        setElapsed(elapsed)
-        setRemaining(remaining)
-        setPhase(getPhase(elapsed / 60))
-        if (remaining <= 0) handleSessionEnd(true)
-      }
-    }
-    document.addEventListener('visibilitychange', handleVisibility)
-    return () => document.removeEventListener('visibilitychange', handleVisibility)
-  }, [screen, handleSessionEnd, setPhase])
-
-  // ── beforeunload — persist in-progress session to localStorage ───────────────
-  // If the tab is closed mid-session, Supabase insert never runs.
-  // We save a snapshot so the next app load can detect and recover it.
-  useEffect(() => {
-    const handleBeforeUnload = () => {
-      if (screen === 'session' && activeSession && startTimeRef.current > 0 && !sessionSavedRef.current) {
-        const elapsedMs = Date.now() - startTimeRef.current - pausedMsRef.current
-        try {
-          localStorage.setItem('ms_pending_session', JSON.stringify({
-            taskId: activeSession.taskId,
-            startedAt: activeSession.startedAt,
-            elapsedMs,
-            phase: sessionPhase,
-          }))
-        } catch { /* localStorage unavailable — silent */ }
-      }
-    }
-    window.addEventListener('beforeunload', handleBeforeUnload)
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
-  }, [screen, activeSession, sessionPhase])
-
-  // ── Interval runner ──────────────────────────────────────────────────────────
-  const startInterval = useCallback(() => {
-    // BUG-D3: clear any orphaned interval before creating a new one —
-    // rapid taps on "bypass hard-stop" could stack multiple intervals
-    if (intervalRef.current) clearInterval(intervalRef.current)
-    const durationSec = durationSecRef.current
-    intervalRef.current = setInterval(() => {
-      const netElapsedMs = Date.now() - startTimeRef.current - pausedMsRef.current
-      const elapsed      = Math.floor(netElapsedMs / 1000)
-      const remaining    = Math.max(0, durationSec - elapsed)
-
-      setElapsed(elapsed)
-      setRemaining(remaining)
-
-      const newPhase = getPhase(elapsed / 60)
-      if (newPhase !== lastPhaseRef.current) {
-        lastPhaseRef.current = newPhase
-        hapticPhase() // tactile feedback on phase transition
-      }
-      setPhase(newPhase)
-
-      if (remaining <= 0) handleSessionEnd(true)
-    }, 250)
-  }, [setPhase, handleSessionEnd])
-
   // ── Start ────────────────────────────────────────────────────────────────────
   const handleStart = useCallback((overrideDuration?: number) => {
     const duration = overrideDuration
@@ -505,7 +408,7 @@ export function useFocusSession() {
 
     void requestNotificationPermission()
     hapticStart() // grounding pulse before focus begins
-    lastPhaseRef.current = 'struggle' // reset phase tracking
+    resetPhaseTracking() // reset phase tracking so first tick doesn't fire hapticPhase
     startSession(selectedTask?.id ?? null, duration, focusAnchor ?? null)
 
     // Audio calls wrapped in try/catch — AudioContext can throw on iOS Safari
@@ -513,14 +416,14 @@ export function useFocusSession() {
     try { playAnchor() } catch { /* audio unavailable — session continues silently */ }
     if (focusAnchor) { try { play(focusAnchor) } catch { /* silent */ } }
 
-    setRemaining(durationSec)
-    setElapsed(0)
+    setRemainingSeconds(durationSec)
+    setElapsedSeconds(0)
     setPhase('struggle')
     setShowDigits(false)
     setScreen('session')
     startInterval()
   }, [showCustom, customDuration, selectedDuration, selectedTask, focusAnchor,
-      play, playAnchor, startSession, setPhase, startInterval])
+      play, playAnchor, startSession, setPhase, startInterval, resetPhaseTracking])
 
   // ── Quick-start auto detection ──────────────────────────────────────────────
   useEffect(() => {
@@ -532,17 +435,15 @@ export function useFocusSession() {
 
   // ── Stop → interrupt confirm ────────────────────────────────────────────────
   const handleStop = useCallback(() => {
-    if (intervalRef.current) clearInterval(intervalRef.current)
-    pauseStartRef.current = Date.now()
+    timerStop()
     setScreen('interrupt-confirm')
-  }, [])
+  }, [timerStop])
 
   // ── Resume ──────────────────────────────────────────────────────────────────
   const handleResume = useCallback(() => {
-    pausedMsRef.current += Date.now() - pauseStartRef.current
+    timerResume()
     setScreen('session')
-    startInterval()
-  }, [startInterval])
+  }, [timerResume])
 
   // ── Confirm end → bookmark capture ─────────────────────────────────────────
   const handleConfirmStop = useCallback(() => {
