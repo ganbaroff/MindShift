@@ -13,45 +13,11 @@ import { useTranslation } from 'react-i18next';
 import { useUITone } from '@/shared/hooks/useUITone';
 import { BurnoutGauge } from './BurnoutGauge';
 import { BurnoutNudgeCard } from './BurnoutNudgeCard';
+import { DailyBriefCard } from './DailyBriefCard';
+import { StreakBadge } from './StreakBadge';
 import { PageTransition } from '@/shared/ui/PageTransition';
+import { getMochiMessage } from './mochiMessages';
 import { toast } from 'sonner';
-
-// ── Mochi energy reaction messages ────────────────────────────────────────────
-// Research #3: state-aware apps adapt to user's real-time neurological capacity.
-// Mochi reacts when energy changes to acknowledge the shift, never judge.
-
-const MOCHI_ENERGY_MESSAGES: Record<number, { text: string; emoji: string }[]> = {
-  1: [
-    { text: "One tiny thing today is enough.", emoji: '🌙' },
-    { text: "Drained days happen. Take it slow.", emoji: '🛋️' },
-    { text: "Low fuel? Park the big stuff.", emoji: '💤' },
-  ],
-  2: [
-    { text: "Gentle energy — pick something easy.", emoji: '🌱' },
-    { text: "Small moves count.", emoji: '🌿' },
-    { text: "Not your sharpest day? Easy tasks still count.", emoji: '🍃' },
-  ],
-  3: [
-    { text: "Steady energy. Good for focused work.", emoji: '🎯' },
-    { text: "Okay energy is still energy.", emoji: '🙂' },
-    { text: "Middle-ground day. Consistent work fits here.", emoji: '⚖️' },
-  ],
-  4: [
-    { text: "Good energy. This is your window.", emoji: '✨' },
-    { text: "Good day for something that matters.", emoji: '🚀' },
-    { text: "Solid energy. Pick something real.", emoji: '🌊' },
-  ],
-  5: [
-    { text: "High energy. Good time for deep work.", emoji: '⚡' },
-    { text: "Peak energy. Try your hardest task.", emoji: '🔥' },
-    { text: "Full tank. Pick something big.", emoji: '💪' },
-  ],
-};
-
-function getMochiMessage(energy: EnergyLevel) {
-  const pool = MOCHI_ENERGY_MESSAGES[energy] ?? MOCHI_ENERGY_MESSAGES[3];
-  return pool[Math.floor(Math.random() * pool.length)];
-}
 
 export default function HomePage() {
   const {
@@ -76,23 +42,18 @@ export default function HomePage() {
   const [briefDismissed, setBriefDismissed] = useState(false);
   const prevEnergy = useRef<EnergyLevel>(energyLevel);
 
-  // Only 'task' type items in NOW — meetings/reminders/ideas don't appear here
   const nowTasks = useMemo(() => nowPool.filter(t => t.status === 'active' && t.taskType === 'task'), [nowPool]);
   const nextTasks = useMemo(() => nextPool.filter(t => t.status === 'active'), [nextPool]);
 
-  // "Last refreshed" timestamp — gives a sense of data freshness
   const [lastRefreshed] = useState(() => new Date());
   const nowMax = getNowPoolMax(appMode, seasonalMode);
   const { showNextOnHome, homeSubtitle } = APP_MODE_CONFIG[appMode];
-
   const focusMinutes = weeklyStats?.totalFocusMinutes ?? null;
 
-  // ── Low-energy mode — Research #3: dynamic contextual adaptation ─────────────
-  // When energy ≤ 2 OR burnout > 60: simplify the view to reduce cognitive load.
+  // Low-energy mode — Research #3: dynamic contextual adaptation
   const isLowEnergy = energyLevel <= 2 || burnoutScore > 60;
 
-  // ── Mochi energy reactions ────────────────────────────────────────────────────
-  // Show speech bubble when energy level changes. Auto-dismiss after 5s.
+  // Mochi energy reaction — acknowledge shift, never judge
   const handleEnergySelect = (i: number) => {
     const newLevel = (i + 1) as EnergyLevel;
     setEnergyLevel(newLevel);
@@ -102,24 +63,19 @@ export default function HomePage() {
     }
   };
 
-  // Auto-dismiss Mochi message after 5s
   useEffect(() => {
     if (!mochiMsg) return;
     const timer = setTimeout(() => setMochiMsg(null), 5000);
     return () => clearTimeout(timer);
   }, [mochiMsg]);
 
-  // ── Invisible streak ─────────────────────────────────────────────────────────
-  // Research #3: show only when growing — celebrate consistency, never shame gaps.
+  // Invisible streak — show only when growing
   const showStreak = currentStreak >= 2;
 
-  // hour declared early — used by greeting AND daily brief
   const hour = new Date().getHours();
   const { t } = useTranslation();
 
-  // ── Daily brief (Sprint T) ────────────────────────────────────────────────────
-  // A personalised tip based on the user's ADHD profile, shown once per session.
-  // Visible in the morning (before 12) or afternoon; dismissed by user.
+  // Daily brief — personalised ADHD tip (Sprint T)
   const briefTip = useMemo(() => {
     if (timeBlindness === 'often') return { emoji: '⏰', text: t('home.briefTimeOften') }
     if (timeBlindness === 'sometimes') return { emoji: '⏰', text: t('home.briefTimeSometimes') }
@@ -131,15 +87,13 @@ export default function HomePage() {
   const topNowTask = nowTasks[0] ?? null
   const showBrief = !briefDismissed && hour < 17 && !isLowEnergy
 
-  // ── Daily focus goal progress (P-1) ──────────────────────────────────────────
-  // dailyMinutes[0]=Mon…[6]=Sun; today's index from JS getDay (0=Sun)
+  // Daily focus goal progress (P-1)
   const todayDayIdx = (new Date().getDay() + 6) % 7
   const todayMin = weeklyStats?.dailyMinutes?.[todayDayIdx] ?? 0
   const goalProgress = dailyFocusGoalMin > 0 ? Math.min(1, todayMin / dailyFocusGoalMin) : 0
   const goalReached = todayMin >= dailyFocusGoalMin && dailyFocusGoalMin > 0
   const todayISO = new Date().toISOString().split('T')[0]
 
-  // One-time celebration per day when goal is first crossed
   useEffect(() => {
     if (goalReached && goalCelebratedDate !== todayISO) {
       setGoalCelebratedDate(todayISO)
@@ -147,7 +101,6 @@ export default function HomePage() {
     }
   }, [goalReached, goalCelebratedDate, todayISO, dailyFocusGoalMin, setGoalCelebratedDate])
 
-  // ── Bento grid cards (memoized) ──────────────────────────────────────────────
   const bentoCards = useMemo(() => [
     {
       content: (
@@ -178,7 +131,6 @@ export default function HomePage() {
     },
   ], [completedTotal, focusMinutes, xpTotal, energyLevel, burnoutScore]);
 
-  // Time-based greeting — keys live in en.json home.greeting.*
   const greeting =
     hour < 5  ? t('home.greeting.night') :
     hour < 12 ? t('home.greeting.morning') :
@@ -188,7 +140,6 @@ export default function HomePage() {
   return (
     <PageTransition>
     <div className="min-h-screen px-5 pb-36 pt-10" style={{ backgroundColor: 'var(--color-bg)' }}>
-      {/* Last synced indicator */}
       <p className="text-[10px] mb-1" style={{ color: '#5A5B72' }}>
         Updated {lastRefreshed.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
       </p>
@@ -231,75 +182,24 @@ export default function HomePage() {
       </motion.div>
 
       <div className="space-y-5">
-        {/* Invisible streak — only show when growing, never shame */}
+        {/* Invisible streak — only show when growing */}
         <AnimatePresence>
-          {showStreak && (
-            <motion.div
-              initial={shouldAnimate ? { opacity: 0, height: 0 } : false}
-              animate={shouldAnimate ? { opacity: 1, height: 'auto' } : false}
-              exit={shouldAnimate ? { opacity: 0, height: 0 } : undefined}
-              className="overflow-hidden"
-            >
-              <div
-                className="rounded-2xl px-4 py-2.5 flex items-center gap-3"
-                style={{ backgroundColor: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.15)' }}
-              >
-                <span className="text-[20px]">🔥</span>
-                <div>
-                  <p className="text-[13px] font-semibold" style={{ color: 'var(--color-gold)' }}>
-                    {copy.streakGoing(currentStreak)}
-                  </p>
-                  {longestStreak > currentStreak && (
-                    <p className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>{t('home.best', { count: longestStreak })}</p>
-                  )}
-                </div>
-              </div>
-            </motion.div>
-          )}
+          {showStreak && <StreakBadge currentStreak={currentStreak} longestStreak={longestStreak} />}
         </AnimatePresence>
 
-        {/* Daily Brief (Sprint T) — personalised ADHD tip + top task */}
+        {/* Daily Brief — personalised ADHD tip (Sprint T) */}
         <AnimatePresence>
           {showBrief && (
-            <motion.div
-              initial={shouldAnimate ? { opacity: 0, y: 8 } : false}
-              animate={shouldAnimate ? { opacity: 1, y: 0 } : false}
-              exit={shouldAnimate ? { opacity: 0, height: 0 } : undefined}
-              className="rounded-2xl p-3"
-              style={{ backgroundColor: 'var(--color-surface-card)', border: '1px solid rgba(123,114,255,0.12)' }}
-            >
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex items-start gap-2.5 flex-1 min-w-0">
-                  <span className="text-[18px] shrink-0">{briefTip.emoji}</span>
-                  <p className="text-[13px] leading-relaxed" style={{ color: 'var(--color-text-primary)' }}>
-                    {briefTip.text}
-                  </p>
-                </div>
-                <button
-                  onClick={() => setBriefDismissed(true)}
-                  className="text-[11px] shrink-0 mt-0.5"
-                  style={{ color: 'var(--color-text-muted)' }}
-                  aria-label="Dismiss daily brief"
-                >
-                  ✕
-                </button>
-              </div>
-              {topNowTask && (
-                <div
-                  className="mt-2 pt-2 flex items-center gap-2"
-                  style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}
-                >
-                  <span className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>{t('home.startWith')}</span>
-                  <span className="text-[12px] font-medium truncate" style={{ color: 'var(--color-primary)' }}>
-                    {topNowTask.title}
-                  </span>
-                </div>
-              )}
-            </motion.div>
+            <DailyBriefCard
+              emoji={briefTip.emoji}
+              text={briefTip.text}
+              topTask={topNowTask}
+              onDismiss={() => setBriefDismissed(true)}
+            />
           )}
         </AnimatePresence>
 
-        {/* Daily focus goal progress (P-1) — only show when we have session data */}
+        {/* Daily focus goal progress */}
         {weeklyStats && (
           <motion.div
             initial={shouldAnimate ? { opacity: 0, y: 8 } : false}
@@ -345,10 +245,9 @@ export default function HomePage() {
           )}
         </AnimatePresence>
 
-        {/* Burnout nudge — proactive, non-shaming, 48h cooldown */}
         <BurnoutNudgeCard score={burnoutScore} />
 
-        {/* Empty State — prompt to add first task */}
+        {/* Empty state */}
         {nowTasks.length === 0 && nextTasks.length === 0 && (
           <motion.button
             initial={shouldAnimate ? { opacity: 0, y: 12 } : false}
@@ -371,10 +270,7 @@ export default function HomePage() {
         {/* Energy Check-in */}
         <motion.div initial={shouldAnimate ? { opacity: 0, y: 12 } : false} animate={shouldAnimate ? { opacity: 1, y: 0 } : false} transition={shouldAnimate ? { delay: 0.1 } : undefined}>
           <p className="text-[15px] font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>{t('home.howsEnergy')}</p>
-          <EnergyPicker
-            selected={energyLevel - 1}
-            onSelect={handleEnergySelect}
-          />
+          <EnergyPicker selected={energyLevel - 1} onSelect={handleEnergySelect} />
         </motion.div>
 
         {/* NOW Pool — low energy shows only 1 task */}
@@ -389,7 +285,6 @@ export default function HomePage() {
             )}
           </div>
           <div className="space-y-2">
-            {/* Low energy: show only 1 task. Normal: show up to 2. */}
             {nowTasks.slice(0, isLowEnergy ? 1 : 2).map((t, i) => (
               <TaskCard
                 key={t.id}
@@ -424,7 +319,7 @@ export default function HomePage() {
           </motion.div>
         )}
 
-        {/* Bento Grid — simplified in low-energy mode */}
+        {/* Bento Grid — hidden in low-energy mode */}
         {!isLowEnergy && (
           <div className="grid grid-cols-2 gap-2">
             {bentoCards.map((card, i) => (
@@ -443,7 +338,7 @@ export default function HomePage() {
           </div>
         )}
 
-        {/* Low-energy gentle card — replaces dense bento grid */}
+        {/* Low-energy gentle card */}
         {isLowEnergy && (
           <motion.div
             initial={shouldAnimate ? { opacity: 0, y: 12 } : false}
@@ -458,9 +353,7 @@ export default function HomePage() {
                   ⚡ {(xpTotal ?? 0).toLocaleString()} XP · {completedTotal ?? 0} done
                 </p>
                 <p className="text-[12px]" style={{ color: 'var(--color-text-muted)' }}>
-                  {burnoutScore > 60
-                    ? t('home.hardWork')
-                    : t('home.easyDoesIt')}
+                  {burnoutScore > 60 ? t('home.hardWork') : t('home.easyDoesIt')}
                 </p>
               </div>
             </div>
