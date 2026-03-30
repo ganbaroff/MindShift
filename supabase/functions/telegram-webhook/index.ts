@@ -41,26 +41,11 @@
 // ─────────────────────────────────────────────────────────────────────────────────
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { checkDbRateLimit } from '../_shared/rateLimit.ts'
 
 // ── Constants ────────────────────────────────────────────────────────────────────
 
-// In-memory rate limit for /link attempts: max 5 per chatId per 10 minutes.
-// Resets on cold start — sufficient to prevent brute-force within a single invocation lifecycle.
-const LINK_ATTEMPTS = new Map<number, { count: number; windowStart: number }>()
-const LINK_RATE_LIMIT = 5
 const LINK_RATE_WINDOW_MS = 10 * 60 * 1000 // 10 minutes
-
-function checkLinkRateLimit(chatId: number): boolean {
-  const now = Date.now()
-  const entry = LINK_ATTEMPTS.get(chatId)
-  if (!entry || now - entry.windowStart > LINK_RATE_WINDOW_MS) {
-    LINK_ATTEMPTS.set(chatId, { count: 1, windowStart: now })
-    return true
-  }
-  if (entry.count >= LINK_RATE_LIMIT) return false
-  entry.count++
-  return true
-}
 
 const GEMINI_MODEL = 'gemini-2.5-flash'
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`
@@ -213,8 +198,13 @@ Or just send me any message — I'll figure out if it's a task, idea, reminder, 
         return new Response('ok', { status: 200 })
       }
 
-      // ── Rate limit /link attempts (max 5 per 10 min) ─────────────────────────
-      if (!checkLinkRateLimit(chatId)) {
+      // ── Rate limit /link attempts (max 5 per 10 min, DB-backed — survives cold starts) ──
+      const { allowed: linkAllowed } = await checkDbRateLimit(supabase, `tg-${chatId}`, false, {
+        fnName: 'telegram-link',
+        limitFree: 5,
+        windowMs: LINK_RATE_WINDOW_MS,
+      })
+      if (!linkAllowed) {
         const msg = lang === 'ru'
           ? 'Слишком много попыток. Подожди немного и попробуй снова.'
           : 'Too many attempts. Please wait a moment and try again.'

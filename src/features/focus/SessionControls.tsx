@@ -13,6 +13,7 @@ import { memo } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { Volume2, VolumeX } from 'lucide-react'
 import { toast } from 'sonner'
+import i18n from '@/i18n'
 import { useMotion } from '@/shared/hooks/useMotion'
 
 interface Props {
@@ -134,7 +135,7 @@ export const SessionControls = memo(function SessionControls({
                   onClick={() => {
                     if (parkText.trim()) {
                       onParkSave()
-                      toast('Thought saved to Someday 💭')
+                      toast(i18n.t('focus.thoughtSaved'))
                     }
                   }}
                   disabled={!parkText.trim()}
