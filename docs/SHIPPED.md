@@ -4,6 +4,32 @@
 **Updated:** After every sprint commit.
 **Rule:** If it's not here — it may still be in CLAUDE.md sprint history. This file focuses on high-level feature areas.
 
+## BATCH-2026-03-30-M — Play Store Assets
+
+| Item | Location | Notes |
+|------|----------|-------|
+| Play Store screenshots (8) | `public/screenshots/playstore/` | 780×1688 (390×844 @2×), dark mode, seeded demo state |
+| Screenshot capture script | `scripts/capture-screenshots.ts` | `npx tsx scripts/capture-screenshots.ts` |
+| icon-192-maskable.png | `public/icon-192-maskable.png` | Generated from icon-512-maskable; was missing |
+| manifest.json screenshots[] | `public/manifest.json` | 8 narrow + 1 wide entry |
+| DifficultyDots crash fix | `src/components/TaskCard.tsx:22` | `DIFFICULTY_MAP[difficulty] ?? DIFFICULTY_MAP[1]` |
+
+## BATCH-2026-03-30-L — useAudioEngine Decomposition
+
+| Item | Location | Notes |
+|------|----------|-------|
+| useAudioEngine (thin orchestrator) | `src/shared/hooks/useAudioEngine.ts` | 523L → 202L |
+| audioGain.ts | `src/shared/lib/audioGain.ts` | Log volume mapping + FADE curves |
+| audioWorklet.ts | `src/shared/lib/audioWorklet.ts` | Singleton worklet loader |
+| audioBuffers.ts | `src/shared/lib/audioBuffers.ts` | Pink/nature/lofi/brown/gamma buffers |
+| sonicAnchor.ts | `src/shared/lib/sonicAnchor.ts` | Cmaj9 Pavlovian focus cue |
+
+## BATCH-2026-03-30-K — E2E Onboarding Sync
+
+| Item | Location | Notes |
+|------|----------|-------|
+| Onboarding E2E (5-step) | `e2e/onboarding.spec.ts` | Was 3-step; synced to timeBlindness + emotionalReactivity steps |
+
 ---
 
 ## Sprint CG+ (2026-03-29) — Google Calendar Sync + Telegram + MochiChat + TodayPage
