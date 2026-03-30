@@ -1,14 +1,11 @@
 /**
- * OnboardingPage — 3-step setup wizard.
+ * OnboardingPage — 5-step setup wizard.
  *
  * Step 0: Intent (appMode)
- * Step 1: Current energy
- * Step 2: Ready screen — "Let's start"
- *
- * Deferred to contextual moments (not during cold onboarding):
- *   - Timer style (first session setup screen)
- *   - Time blindness / Emotional reactivity (Settings → Re-run wizard)
- *   - Notification permission (after first session completion)
+ * Step 1: Time blindness — how user experiences time
+ * Step 2: Emotional reactivity — response to setbacks
+ * Step 3: Current energy
+ * Step 4: Ready screen — "Let's start"
  *
  * O-11 Revisit mode: when onboardingCompleted is already true (user came from
  * Settings → "Re-run setup wizard"), show a gentle banner, skip re-seeding
@@ -24,102 +21,146 @@ import { useStore } from '@/store';
 import type { EnergyLevel, AppMode } from '@/types';
 
 // ── Maps ──────────────────────────────────────────────────────────────────────
-const modeMap = ['minimal', 'habit', 'system'] as const;
+const modeMap = ['minimal', 'habit', 'system'] as const
+const tbMap   = ['often', 'sometimes', 'rarely'] as const
+const erMap   = ['high', 'moderate', 'steady'] as const
 
-const TOTAL_STEPS = 3;
+const TOTAL_STEPS = 5
 
-function useSteps() {
-  const { t } = useTranslation();
+// ── Steps definition ──────────────────────────────────────────────────────────
+interface Step {
+  title: string
+  subtitle?: string
+  options: { emoji: string; label: string; desc: string }[]
+}
+
+function useSteps(): Step[] {
+  const { t } = useTranslation()
   return useMemo(() => [
-    // 0 — Intent
+    // 0 — Intent (appMode)
     {
       title: t('onboarding.whatBrings'),
       options: [
-        { emoji: '🎯', label: t('onboarding.oneThingLabel'), desc: t('onboarding.oneThingDesc') },
+        { emoji: '🎯', label: t('onboarding.oneThingLabel'),    desc: t('onboarding.oneThingDesc') },
         { emoji: '🌱', label: t('onboarding.buildHabitsLabel'), desc: t('onboarding.buildHabitsDesc') },
         { emoji: '🗂️', label: t('onboarding.fullPictureLabel'), desc: t('onboarding.fullPictureDesc') },
       ],
     },
-    // 1 — Energy (rendered separately)
+    // 1 — Time blindness
+    {
+      title: t('onboarding.timeExperience'),
+      subtitle: t('onboarding.timeSubtitle'),
+      options: [
+        { emoji: '⏰', label: t('onboarding.timeVanishesLabel'), desc: t('onboarding.timeVanishesDesc') },
+        { emoji: '🕰️', label: t('onboarding.timeSlipsLabel'),   desc: t('onboarding.timeSlipsDesc') },
+        { emoji: '🧭', label: t('onboarding.timeNaturalLabel'), desc: t('onboarding.timeNaturalDesc') },
+      ],
+    },
+    // 2 — Emotional reactivity
+    {
+      title: t('onboarding.plansChange'),
+      subtitle: t('onboarding.plansSubtitle'),
+      options: [
+        { emoji: '🌊', label: t('onboarding.throwsOffLabel'),    desc: t('onboarding.throwsOffDesc') },
+        { emoji: '💫', label: t('onboarding.recoverLabel'),      desc: t('onboarding.recoverDesc') },
+        { emoji: '🌿', label: t('onboarding.rarelyPhasesLabel'), desc: t('onboarding.rarelyPhasesDesc') },
+      ],
+    },
+    // 3 — Energy (rendered separately, no options)
     { title: t('onboarding.howsBrain'), options: [] },
-    // 2 — Ready screen (rendered separately)
+    // 4 — Ready (rendered separately, no options)
     { title: t('onboarding.readyTitle'), options: [] },
-  ], [t]);
+  ], [t])
 }
 
-// ── Helper to pre-fill from store (revisit mode) ──────────────────────────────
+// ── Revisit pre-fill helpers ──────────────────────────────────────────────────
 function modeToIdx(m: AppMode | string | undefined): number | null {
   const i = modeMap.indexOf(m as typeof modeMap[number])
+  return i >= 0 ? i : null
+}
+function tbToIdx(v: typeof tbMap[number] | null | undefined): number | null {
+  if (!v) return null
+  const i = tbMap.indexOf(v)
+  return i >= 0 ? i : null
+}
+function erToIdx(v: typeof erMap[number] | null | undefined): number | null {
+  if (!v) return null
+  const i = erMap.indexOf(v)
   return i >= 0 ? i : null
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function OnboardingPage() {
-  const navigate = useNavigate();
-  const { shouldAnimate } = useMotion();
-  const { t } = useTranslation();
-  const steps = useSteps();
+  const navigate = useNavigate()
+  const { shouldAnimate } = useMotion()
+  const { t } = useTranslation()
+  const steps = useSteps()
   const {
     setAppMode, setEnergyLevel, setOnboardingCompleted,
-    appMode, onboardingCompleted,
-  } = useStore();
+    setTimeBlindness, setEmotionalReactivity,
+    appMode, timeBlindness, emotionalReactivity, onboardingCompleted,
+  } = useStore()
 
   // O-11: revisit mode — user came from Settings "Re-run setup wizard"
-  const isRevisit = onboardingCompleted;
+  const isRevisit = onboardingCompleted
 
-  // Pre-fill from store if revisiting
+  // Pre-fill from store if revisiting (snapshot at mount)
   const initialSelections = useMemo<(number | null)[]>(() => {
-    if (!isRevisit) return [null, null, null];
+    if (!isRevisit) return [null, null, null, null, null]
     return [
       modeToIdx(appMode),
+      tbToIdx(timeBlindness),
+      erToIdx(emotionalReactivity),
       null, // energy is always fresh
       null, // ready screen has no selection
     ]
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []) // intentionally once — revisit pre-fill uses snapshot at mount
 
-  const [step,       setStep]       = useState(0);
-  const [selections, setSelections] = useState<(number | null)[]>(initialSelections);
-  const [energy,     setEnergy]     = useState(2);
+  const [step,       setStep]       = useState(0)
+  const [selections, setSelections] = useState<(number | null)[]>(initialSelections)
+  const [energy,     setEnergy]     = useState(2)
 
-  const current = steps[step];
-  const isEnergyStep = step === 1;
-  const isReadyStep  = step === 2;
+  const current      = steps[step]
+  const isEnergyStep = step === 3
+  const isReadyStep  = step === 4
 
   const canContinue =
     isEnergyStep ? true :
     isReadyStep  ? true :
-    selections[step] !== null;
+    selections[step] !== null
 
   const finish = () => {
-    if (selections[0] !== null) setAppMode(modeMap[selections[0]]);
-    setEnergyLevel((energy + 1) as EnergyLevel);
+    if (selections[0] !== null) setAppMode(modeMap[selections[0]])
+    if (selections[1] !== null) setTimeBlindness(tbMap[selections[1]])
+    if (selections[2] !== null) setEmotionalReactivity(erMap[selections[2]])
+    setEnergyLevel((energy + 1) as EnergyLevel)
 
     if (!isRevisit) {
-      setOnboardingCompleted();
-      navigate('/');
+      setOnboardingCompleted()
+      navigate('/')
     } else {
-      navigate(-1);
+      navigate(-1)
     }
-  };
+  }
 
   const handleNext = () => {
-    if (step < TOTAL_STEPS - 1) setStep(step + 1);
-    else finish();
-  };
+    if (step < TOTAL_STEPS - 1) setStep(step + 1)
+    else finish()
+  }
 
   const select = (i: number, isPointerClick: boolean) => {
-    const s = [...selections];
-    s[step] = i;
-    setSelections(s);
+    const s = [...selections]
+    s[step] = i
+    setSelections(s)
     // Auto-advance on single-select steps after brief delay (except energy/ready)
     if (!isEnergyStep && !isReadyStep && isPointerClick) {
       setTimeout(() => {
-        if (step < TOTAL_STEPS - 1) setStep(step + 1);
-        else finish();
-      }, 160);
+        if (step < TOTAL_STEPS - 1) setStep(step + 1)
+        else finish()
+      }, 160)
     }
-  };
+  }
 
   // Quick Start — skip setup, use smart defaults, get into app immediately
   const handleQuickStart = () => {
@@ -191,15 +232,18 @@ export default function OnboardingPage() {
           className="flex-1"
         >
           <h1 className="text-[24px] font-bold mb-1" style={{ color: 'var(--color-text-primary)' }}>{current.title}</h1>
+          {current.subtitle && (
+            <p className="text-[13px] mb-1" style={{ color: 'var(--color-text-muted)' }}>{current.subtitle}</p>
+          )}
 
-          {/* Step 1: Energy picker */}
+          {/* Step 3: Energy picker */}
           {isEnergyStep && (
             <div className="mt-6">
               <EnergyPicker selected={energy} onSelect={setEnergy} size={56} />
             </div>
           )}
 
-          {/* Step 2: Ready screen */}
+          {/* Step 4: Ready screen */}
           {isReadyStep && (
             <div className="mt-6 flex flex-col items-center text-center">
               <div className="text-[64px] mb-6">🌱</div>
@@ -209,7 +253,7 @@ export default function OnboardingPage() {
             </div>
           )}
 
-          {/* Step 0: Option cards (auto-advance on tap) */}
+          {/* Steps 0-2: Option cards (auto-advance on tap) */}
           {!isEnergyStep && !isReadyStep && (
             <div className="space-y-2 mt-5">
               {current.options?.map((opt, i) => (
@@ -273,5 +317,5 @@ export default function OnboardingPage() {
         ))}
       </div>
     </div>
-  );
+  )
 }

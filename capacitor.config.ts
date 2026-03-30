@@ -62,6 +62,10 @@ const config: CapacitorConfig = {
     PushNotifications: {
       presentationOptions: ['badge', 'sound', 'alert'],
     },
+
+    // Haptics — used throughout the app for ADHD-safe tactile feedback
+    // Requires VIBRATE permission on Android (auto-added by @capacitor/haptics)
+    Haptics: {},
   },
 
   ios: {
@@ -80,6 +84,15 @@ const config: CapacitorConfig = {
     captureInput: true,
     webContentsDebuggingEnabled: false,    // Set true only for dev builds
     backgroundColor: '#0F1117',
+    // Minimum WebView version for security + ES2020 support
+    minWebViewVersion: 60,
+    // Permissions declared here for Play Store Data Safety Form reference:
+    //   android.permission.INTERNET          — web app networking (auto-granted)
+    //   android.permission.VIBRATE           — haptic feedback (@capacitor/haptics)
+    //   android.permission.POST_NOTIFICATIONS — push notifications (Android 13+)
+    //   android.permission.RECEIVE_BOOT_COMPLETED — reschedule local notifications
+    //   android.permission.WAKE_LOCK         — notification delivery reliability
+    //   android.permission.SCHEDULE_EXACT_ALARM — precise task reminders
   },
 }
 
