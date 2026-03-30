@@ -10,7 +10,7 @@ import { useState, useMemo, useCallback } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Play, ChevronRight } from 'lucide-react'
+import { Play } from 'lucide-react'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { useUITone } from '@/shared/hooks/useUITone'
 import { useStore } from '@/store'
@@ -18,48 +18,17 @@ import { todayISO, tomorrowISO } from '@/shared/lib/dateUtils'
 import { ENERGY_EMOJI } from '@/shared/lib/constants'
 import { PageTransition } from '@/shared/ui/PageTransition'
 import { QuickCapture } from '@/shared/ui/QuickCapture'
-import type { Task, EnergyLevel } from '@/types'
+import type { Task } from '@/types'
 import type { ParsedTask } from '@/shared/lib/quickParse'
 import AddTaskModal from '@/components/AddTaskModal'
-import TaskCard from '@/components/TaskCard'
 import { WelcomeWalkthrough } from '@/shared/ui/WelcomeWalkthrough'
 import { TransitionNudge } from '@/shared/ui/TransitionNudge'
 import { DiscoveryCard } from '@/shared/ui/DiscoveryCard'
 import { getDiscoveryById } from '@/shared/lib/mochiDiscoveries'
 import { FeatureHint } from '@/shared/ui/FeatureHint'
-
-// ── Time blocks ───────────────────────────────────────────────────────────────
-
-type TimeBlock = 'morning' | 'afternoon' | 'evening'
-
-function getTimeBlock(): TimeBlock {
-  const h = new Date().getHours()
-  if (h < 12) return 'morning'
-  if (h < 18) return 'afternoon'
-  return 'evening'
-}
-
-const GREETING_KEYS: Record<TimeBlock, string> = {
-  morning: 'today.morning',
-  afternoon: 'today.afternoon',
-  evening: 'today.evening',
-}
-
-const GREETING_EMOJI: Record<TimeBlock, string> = {
-  morning: '☀️',
-  afternoon: '🌤️',
-  evening: '🌙',
-}
-
-// ── Energy advice ─────────────────────────────────────────────────────────────
-
-function getEnergyAdvice(level: EnergyLevel, taskCount: number, copy: { lowEnergyNudge: string; highEnergyNudge: string }): string | null {
-  if (level <= 2) return copy.lowEnergyNudge
-  if (level >= 4 && taskCount > 0) return copy.highEnergyNudge
-  return null
-}
-
-// ── Component ─────────────────────────────────────────────────────────────────
+import { getTimeBlock, GREETING_KEYS, GREETING_EMOJI, getEnergyAdvice } from './todayUtils'
+import { TodayMorningPlan } from './TodayMorningPlan'
+import { TodayEveningRecap } from './TodayEveningRecap'
 
 export default function TodayPage() {
   const navigate = useNavigate()
@@ -86,11 +55,9 @@ export default function TodayPage() {
   const todayStr = useMemo(todayISO, [])
   const tomorrowStr = useMemo(tomorrowISO, [])
   const isLowEnergy = energyLevel <= 2 || burnoutScore > 60
-
-  // ENERGY_EMOJI is 0-indexed (0-4), energyLevel is 1-5
   const energyEmoji = ENERGY_EMOJI[energyLevel - 1] ?? '🙂'
 
-  // ── Derived data ──────────────────────────────────────────────────────────
+  // ── Derived data ────────────────────────────────────────────────────────────
 
   const allTasks = useMemo(
     () => [...nowPool, ...nextPool, ...somedayPool],
@@ -109,21 +76,15 @@ export default function TodayPage() {
     [allTasks, todayStr],
   )
 
-  const activeTasks = useMemo(
-    () => nowPool.filter(tk => tk.status === 'active'),
-    [nowPool],
-  )
-
+  const activeTasks = useMemo(() => nowPool.filter(tk => tk.status === 'active'), [nowPool])
   const completedToday = useMemo(
     () => allTasks.filter(tk => tk.status === 'completed' && tk.completedAt?.startsWith(todayStr)),
     [allTasks, todayStr],
   )
-
   const tomorrowTasks = useMemo(
     () => allTasks.filter(tk => tk.status === 'active' && tk.dueDate === tomorrowStr),
     [allTasks, tomorrowStr],
   )
-
   const todayFocusMin = useMemo(() => {
     if (!weeklyStats?.dailyMinutes) return 0
     const dayIdx = (new Date().getDay() + 6) % 7
@@ -133,7 +94,7 @@ export default function TodayPage() {
   const firstTask = activeTasks[0] ?? todayTasks[0] ?? null
   const energyAdvice = getEnergyAdvice(energyLevel, todayTasks.length, copy)
 
-  // ── Handlers ──────────────────────────────────────────────────────────────
+  // ── Handlers ────────────────────────────────────────────────────────────────
 
   const handleQuickSubmit = useCallback((parsed: ParsedTask) => {
     if (!parsed.title) return
@@ -158,10 +119,6 @@ export default function TodayPage() {
     addTask(task)
   }, [addTask])
 
-  const handleQuickExpand = useCallback((_parsed: ParsedTask) => {
-    setShowAddTask(true)
-  }, [])
-
   const handleCompleteTask = useCallback((taskId: string) => {
     const prevCount = mochiDiscoveries.length
     completeTask(taskId)
@@ -174,16 +131,34 @@ export default function TodayPage() {
     }, 50)
   }, [completeTask, mochiDiscoveries.length])
 
-  const handleStartFocus = useCallback(() => {
-    navigate('/focus')
-  }, [navigate])
+  const handleAddSample = useCallback(() => {
+    const sample: Task = {
+      id: crypto.randomUUID(),
+      title: t('today.sampleTask'),
+      pool: 'now',
+      status: 'active',
+      difficulty: 1,
+      estimatedMinutes: 5,
+      completedAt: null,
+      createdAt: new Date().toISOString(),
+      snoozeCount: 0,
+      parentTaskId: null,
+      position: 0,
+      dueDate: todayStr,
+      dueTime: null,
+      taskType: 'task',
+      reminderSentAt: null,
+      repeat: 'none',
+    }
+    addTask(sample)
+  }, [addTask, todayStr, t])
 
-  // ── Render ────────────────────────────────────────────────────────────────
+  // ── Render ──────────────────────────────────────────────────────────────────
 
   return (
     <PageTransition>
       <div className="px-4 pt-6 pb-4 space-y-4">
-        {/* ── Header ─────────────────────────────────────────────────────── */}
+        {/* Header */}
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-[22px] font-bold" style={{ color: 'var(--color-text-primary)' }}>
@@ -206,25 +181,17 @@ export default function TodayPage() {
           </div>
         </div>
 
-        {/* ── Welcome walkthrough (first time only) ────────────────────── */}
         <WelcomeWalkthrough />
 
-        {/* ── Quick Capture ──────────────────────────────────────────────── */}
         <QuickCapture
           onSubmit={handleQuickSubmit}
-          onExpand={handleQuickExpand}
+          onExpand={() => setShowAddTask(true)}
           placeholder={t('quickCapture.placeholder')}
         />
 
-        {/* ── First-time hints ───────────────────────────────────────────── */}
-        <FeatureHint
-          id="hint_quick_capture"
-          icon="💡"
-          text={t('quickCapture.hint')}
-          delay={2000}
-        />
+        <FeatureHint id="hint_quick_capture" icon="💡" text={t('quickCapture.hint')} delay={2000} />
 
-        {/* ── Energy advice ──────────────────────────────────────────────── */}
+        {/* Energy advice */}
         <AnimatePresence>
           {energyAdvice && (
             <motion.div
@@ -234,9 +201,7 @@ export default function TodayPage() {
               transition={transition()}
               className="px-3 py-2 rounded-xl"
               style={{
-                background: isLowEnergy
-                  ? 'rgba(245,158,11,0.08)'
-                  : 'rgba(78,205,196,0.08)',
+                background: isLowEnergy ? 'rgba(245,158,11,0.08)' : 'rgba(78,205,196,0.08)',
                 border: `1px solid ${isLowEnergy ? 'rgba(245,158,11,0.15)' : 'rgba(78,205,196,0.15)'}`,
               }}
             >
@@ -247,204 +212,39 @@ export default function TodayPage() {
           )}
         </AnimatePresence>
 
-        {/* ── Morning/Afternoon: Today's plan ────────────────────────────── */}
+        {/* Morning / Afternoon plan */}
         {timeBlock !== 'evening' && (
-          <div className="space-y-3">
-            {/* Summary strip */}
-            <div
-              className="flex items-center justify-between px-3 py-2.5 rounded-xl"
-              style={{ background: 'var(--color-surface-card)' }}
-            >
-              <div className="flex items-center gap-3">
-                <StatPill label={t('today.tasks')} value={todayTasks.length} color="var(--color-teal)" />
-                <StatPill label={t('today.focus')} value={`${todayFocusMin}m`} color="var(--color-primary)" />
-                {completedToday.length > 0 && (
-                  <StatPill label={t('today.done')} value={completedToday.length} color="var(--color-gold)" />
-                )}
-              </div>
-              {dailyFocusGoalMin > 0 && (
-                <div className="flex items-center gap-1.5">
-                  <div className="w-16 h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--color-surface-raised)' }}>
-                    <motion.div
-                      className="h-full rounded-full"
-                      style={{ background: todayFocusMin >= dailyFocusGoalMin ? 'var(--color-teal)' : 'var(--color-primary)' }}
-                      initial={false}
-                      animate={{ width: `${Math.min(100, (todayFocusMin / dailyFocusGoalMin) * 100)}%` }}
-                      transition={shouldAnimate ? { type: 'spring', damping: 20 } : { duration: 0 }}
-                    />
-                  </div>
-                  <span className="text-[10px]" style={{ color: 'var(--color-text-muted)' }}>
-                    {todayFocusMin}/{dailyFocusGoalMin}m
-                  </span>
-                </div>
-              )}
-            </div>
-
-            {/* Today's tasks */}
-            {todayTasks.length > 0 ? (
-              <div className="space-y-1.5">
-                <h2 className="text-[13px] font-semibold px-1" style={{ color: 'var(--color-text-muted)' }}>
-                  {t('today.todayLabel')}
-                </h2>
-                {(isLowEnergy ? todayTasks.slice(0, 2) : todayTasks).map(task => (
-                  <TaskCard
-                    key={task.id}
-                    task={task}
-                    onDone={handleCompleteTask}
-                    onPark={snoozeTask}
-                  />
-                ))}
-                {isLowEnergy && todayTasks.length > 2 && (
-                  <p className="text-[11px] px-1" style={{ color: 'var(--color-text-muted)' }}>
-                    {t('today.moreFirst', { count: todayTasks.length - 2 })}
-                  </p>
-                )}
-              </div>
-            ) : activeTasks.length === 0 ? (
-              <div
-                className="text-center py-6 rounded-2xl space-y-3"
-                style={{ background: 'rgba(78,205,196,0.05)' }}
-              >
-                <p className="text-[28px] mb-1">🌿</p>
-                <p className="text-[14px] font-medium" style={{ color: 'var(--color-text-primary)' }}>
-                  {t('today.clearDay')}
-                </p>
-                <p className="text-[12px]" style={{ color: 'var(--color-text-muted)' }}>
-                  {t('today.addOrSample')}
-                </p>
-                {completedTotal === 0 && (
-                  <button
-                    onClick={() => {
-                      const sample: Task = {
-                        id: crypto.randomUUID(),
-                        title: t('today.sampleTask'),
-                        pool: 'now',
-                        status: 'active',
-                        difficulty: 1,
-                        estimatedMinutes: 5,
-                        completedAt: null,
-                        createdAt: new Date().toISOString(),
-                        snoozeCount: 0,
-                        parentTaskId: null,
-                        position: 0,
-                        dueDate: todayStr,
-                        dueTime: null,
-                        taskType: 'task',
-                        reminderSentAt: null,
-                        repeat: 'none',
-                      }
-                      addTask(sample)
-                    }}
-                    className="mx-auto px-4 py-2 rounded-xl text-[13px] font-medium focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
-                    style={{
-                      background: 'rgba(123,114,255,0.12)',
-                      color: 'var(--color-primary)',
-                      border: '1px solid rgba(123,114,255,0.2)',
-                    }}
-                  >
-                    {t('today.addSample')}
-                  </button>
-                )}
-              </div>
-            ) : null}
-
-            {/* NOW pool tasks (not date-specific) */}
-            {activeTasks.length > 0 && todayTasks.length === 0 && (
-              <div className="space-y-1.5">
-                <h2 className="text-[13px] font-semibold px-1" style={{ color: 'var(--color-text-muted)' }}>
-                  {t('today.nowPool')}
-                </h2>
-                {activeTasks.slice(0, isLowEnergy ? 1 : density === 'compact' ? 2 : 3).map(task => (
-                  <TaskCard
-                    key={task.id}
-                    task={task}
-                    onDone={handleCompleteTask}
-                    onPark={snoozeTask}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
+          <TodayMorningPlan
+            todayTasks={todayTasks}
+            activeTasks={activeTasks}
+            completedToday={completedToday}
+            todayFocusMin={todayFocusMin}
+            dailyFocusGoalMin={dailyFocusGoalMin}
+            isLowEnergy={isLowEnergy}
+            density={density}
+            completedTotal={completedTotal}
+            onComplete={handleCompleteTask}
+            onPark={snoozeTask}
+            onAddSample={handleAddSample}
+            onShowAddTask={() => setShowAddTask(true)}
+          />
         )}
 
-        {/* ── Evening: Day recap ──────────────────────────────────────────── */}
+        {/* Evening recap */}
         {timeBlock === 'evening' && (
-          <div className="space-y-3">
-            <div
-              className="rounded-2xl p-4 space-y-3"
-              style={{
-                background: 'linear-gradient(135deg, rgba(123,114,255,0.08), rgba(78,205,196,0.05))',
-                border: '1px solid rgba(123,114,255,0.12)',
-              }}
-            >
-              <h2 className="text-[15px] font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-                {t('today.wrapUp')}
-              </h2>
-              <div className="flex gap-4">
-                <RecapStat emoji="✅" value={completedToday.length} label={t('today.done')} />
-                <RecapStat emoji="⏱" value={`${todayFocusMin}m`} label={t('today.focused')} />
-                {density !== 'compact' && (
-                  <RecapStat emoji="📊" value={completedTotal} label={t('today.total')} />
-                )}
-              </div>
-              {completedToday.length === 0 && todayFocusMin === 0 && (
-                <p className="text-[12px]" style={{ color: 'var(--color-text-muted)' }}>
-                  {t('today.quietDay')}
-                </p>
-              )}
-              {completedToday.length > 0 && (
-                <p className="text-[12px]" style={{ color: 'var(--color-teal)' }}>
-                  {copy.mochiGreat}
-                </p>
-              )}
-            </div>
-
-            {/* Tomorrow preview */}
-            {tomorrowTasks.length > 0 && (
-              <div className="space-y-1.5">
-                <h2 className="text-[13px] font-semibold px-1" style={{ color: 'var(--color-text-muted)' }}>
-                  {t('today.tomorrow')}
-                </h2>
-                {tomorrowTasks.slice(0, 3).map(task => (
-                  <TaskCard
-                    key={task.id}
-                    task={task}
-                    onDone={handleCompleteTask}
-                    onPark={snoozeTask}
-                  />
-                ))}
-                {tomorrowTasks.length > 3 && (
-                  <button
-                    onClick={() => navigate('/tasks')}
-                    className="text-[12px] flex items-center gap-1 px-1 focus-visible:ring-2 focus-visible:ring-[#7B72FF] rounded"
-                    style={{ color: 'var(--color-primary)' }}
-                  >
-                    {t('today.more', { count: tomorrowTasks.length - 3 })} <ChevronRight size={12} />
-                  </button>
-                )}
-              </div>
-            )}
-
-            {/* Remaining active tasks */}
-            {activeTasks.length > 0 && (
-              <div className="space-y-1.5">
-                <h2 className="text-[13px] font-semibold px-1" style={{ color: 'var(--color-text-muted)' }}>
-                  {t('today.stillInNow')}
-                </h2>
-                {activeTasks.slice(0, 2).map(task => (
-                  <TaskCard
-                    key={task.id}
-                    task={task}
-                    onDone={handleCompleteTask}
-                    onPark={snoozeTask}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
+          <TodayEveningRecap
+            completedToday={completedToday}
+            tomorrowTasks={tomorrowTasks}
+            activeTasks={activeTasks}
+            todayFocusMin={todayFocusMin}
+            completedTotal={completedTotal}
+            density={density}
+            onComplete={handleCompleteTask}
+            onPark={snoozeTask}
+          />
         )}
 
-        {/* ── Discovery + Transition nudge ─────────────────────────────── */}
+        {/* Discovery + Transition nudge */}
         <AnimatePresence>
           {lastDiscoveryId && (() => {
             const d = getDiscoveryById(lastDiscoveryId)
@@ -455,20 +255,17 @@ export default function TodayPage() {
           {justCompleted && (
             <TransitionNudge
               nextTask={firstTask}
-              onFocus={handleStartFocus}
+              onFocus={() => navigate('/focus')}
               onDismiss={() => setJustCompleted(false)}
             />
           )}
         </AnimatePresence>
 
-        {/* ── Focus CTA ──────────────────────────────────────────────────── */}
+        {/* Focus CTA */}
         <motion.button
-          onClick={handleStartFocus}
+          onClick={() => navigate('/focus')}
           className="w-full py-3.5 rounded-2xl flex items-center justify-center gap-2 font-semibold text-[15px] focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
-          style={{
-            background: 'linear-gradient(135deg, var(--color-primary), var(--color-teal))',
-            color: '#FFFFFF',
-          }}
+          style={{ background: 'linear-gradient(135deg, var(--color-primary), var(--color-teal))', color: '#FFFFFF' }}
           whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
           aria-label={firstTask ? t('today.focusOn', { title: firstTask.title }) : t('today.startFocus')}
         >
@@ -479,7 +276,6 @@ export default function TodayPage() {
           }
         </motion.button>
 
-        {/* Progress link — not in nav */}
         <button
           onClick={() => navigate('/progress')}
           className="w-full py-2 rounded-xl text-[12px] font-medium text-center focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
@@ -489,38 +285,11 @@ export default function TodayPage() {
         </button>
       </div>
 
-      {/* Add Task modal */}
       <AnimatePresence>
         {showAddTask && (
-          <AddTaskModal
-            open={showAddTask}
-            onClose={() => setShowAddTask(false)}
-          />
+          <AddTaskModal open={showAddTask} onClose={() => setShowAddTask(false)} />
         )}
       </AnimatePresence>
-
-      {/* No floating FAB — QuickCapture handles task addition on Today */}
     </PageTransition>
-  )
-}
-
-// ── Sub-components ──────────────────────────────────────────────────────────
-
-function StatPill({ label, value, color }: { label: string; value: string | number; color: string }) {
-  return (
-    <div className="flex items-center gap-1">
-      <span className="text-[15px] font-bold" style={{ color }}>{value}</span>
-      <span className="text-[10px]" style={{ color: 'var(--color-text-muted)' }}>{label}</span>
-    </div>
-  )
-}
-
-function RecapStat({ emoji, value, label }: { emoji: string; value: string | number; label: string }) {
-  return (
-    <div className="text-center">
-      <p className="text-[14px]">{emoji}</p>
-      <p className="text-[18px] font-bold" style={{ color: 'var(--color-text-primary)' }}>{value}</p>
-      <p className="text-[10px]" style={{ color: 'var(--color-text-muted)' }}>{label}</p>
-    </div>
   )
 }
