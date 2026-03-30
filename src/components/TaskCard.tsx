@@ -19,7 +19,7 @@ interface TaskCardProps {
 }
 
 function DifficultyDots({ difficulty }: { difficulty: 1 | 2 | 3 }) {
-  const config = DIFFICULTY_MAP[difficulty];
+  const config = DIFFICULTY_MAP[difficulty] ?? DIFFICULTY_MAP[1];
   return (
     <div className="flex gap-0.5 items-center">
       {Array.from({ length: difficulty }).map((_, i) => (
