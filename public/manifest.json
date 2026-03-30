@@ -72,11 +72,67 @@
 
   "screenshots": [
     {
+      "src": "/screenshots/playstore/01-today.png",
+      "sizes": "780x1688",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Today — your NOW pool at a glance"
+    },
+    {
+      "src": "/screenshots/playstore/02-tasks.png",
+      "sizes": "780x1688",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Tasks — NOW, NEXT, and SOMEDAY pools"
+    },
+    {
+      "src": "/screenshots/playstore/03-focus.png",
+      "sizes": "780x1688",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Focus — distraction-free timer with Mochi"
+    },
+    {
+      "src": "/screenshots/playstore/04-progress.png",
+      "sizes": "780x1688",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Progress — streaks, XP, and focus health"
+    },
+    {
+      "src": "/screenshots/playstore/05-onboarding.png",
+      "sizes": "780x1688",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Onboarding — personalise your ADHD profile"
+    },
+    {
+      "src": "/screenshots/playstore/06-settings.png",
+      "sizes": "780x1688",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Settings — sounds, reminders, and preferences"
+    },
+    {
+      "src": "/screenshots/playstore/07-history.png",
+      "sizes": "780x1688",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "History — your session log"
+    },
+    {
+      "src": "/screenshots/playstore/08-home.png",
+      "sizes": "780x1688",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Home — bento dashboard"
+    },
+    {
       "src": "/og-image.png",
       "sizes": "1200x630",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "MindShift home screen"
+      "label": "MindShift — Focus made kind"
     }
   ],
 
