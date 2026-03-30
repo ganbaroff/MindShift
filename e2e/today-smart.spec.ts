@@ -224,13 +224,34 @@ test.describe('TodayPage — task list', () => {
 
 test.describe('TodayPage — low-energy mode', () => {
   test('low energy (≤2) shows energy advice copy', async ({ page }) => {
+    // Freeze time to 9 AM so the morning greeting is rendered (not evening "Your day")
+    await page.addInitScript(() => {
+      const OrigDate = Date
+      // @ts-ignore
+      class FakeDate extends OrigDate {
+        // @ts-ignore
+        constructor(...args: unknown[]) {
+          if (args.length === 0) {
+            // @ts-ignore
+            super(2026, 2, 30, 9, 0, 0)
+          } else {
+            // @ts-ignore
+            super(...args)
+          }
+        }
+        getHours() { return 9 }
+        static now() { return new OrigDate(2026, 2, 30, 9, 0, 0).getTime() }
+      }
+      // @ts-ignore
+      window.Date = FakeDate
+    })
     await mockSupabase(page)
     await seedStore(page, { energyLevel: 1 })
     await page.goto('/today')
 
     // Low energy = energyLevel <= 2: energyAdvice shows copy.lowEnergyNudge
-    // Page still loads and renders greeting
-    await expect(page.getByText(/good/i).first()).toBeVisible({ timeout: 5000 })
+    // Morning greeting is "Good morning" (t('today.morning'))
+    await expect(page.getByText(/good morning/i)).toBeVisible({ timeout: 5000 })
   })
 
   test('normal energy (≥3) with NOW pool tasks shows them', async ({ page }) => {
