@@ -2,7 +2,7 @@
 
 > **Owner:** Yusif Ganbarov
 > **Project:** MindShift — ADHD-aware productivity PWA
-> **Updated:** 2026-03-31
+> **Updated:** 2026-03-31 (v6.1 — agent files added, FILE REGISTRY cleared)
 > **Status:** ACTIVE — all Claude Code agents follow this protocol without exception
 
 ---
@@ -11,16 +11,16 @@
 
 These are the real roles for a production PWA. Each maps to a Claude agent specialization.
 
-| Role | Real-world title | Claude Agent | Responsibility |
-|------|-----------------|--------------|----------------|
-| **ARCH** | Lead Engineer / Architect | `general-purpose` | Store integrity, decomposition, types, migrations |
-| **SEC** | Security Engineer | `Explore` | Auth, edge functions, GDPR, secrets, RLS |
-| **PERF** | Performance Engineer | `Explore` | Bundle, React memo, hooks, audio, Web Vitals |
-| **UX** | UX + Accessibility Engineer | `Explore` | ADHD safety, copy, a11y, motion, color |
-| **TEST** | QA Engineer | `e2e-runner` | Playwright E2E, unit tests, coverage gaps |
-| **INFRA** | Platform / DevOps Engineer | `Explore` | CI/CD, Vercel, Supabase migrations, PWA, SW |
-| **LIVEOPS** | Live Ops / SRE | `Explore` | Production health, Sentry errors, Vercel logs, user-facing incidents |
-| **GROWTH** | Growth Engineer | `Explore` | Analytics, funnel gaps, retention metrics, A/B hooks |
+| Role | Real-world title | Claude Agent | Agent file | Responsibility |
+|------|-----------------|--------------|------------|----------------|
+| **ARCH** | Lead Engineer / Architect | `general-purpose` | — | Store integrity, decomposition, types, migrations |
+| **SEC** | Security Engineer | `sec` | `.claude/agents/sec.md` | Auth, edge functions, GDPR, secrets, RLS |
+| **PERF** | Performance Engineer | `bundle-analyzer` | `.claude/agents/bundle-analyzer.md` | Bundle, React memo, hooks, audio, Web Vitals |
+| **UX** | UX + Accessibility Engineer | `a11y-scanner` + `guardrail-auditor` | `.claude/agents/a11y-scanner.md` | ADHD safety, copy, a11y, motion, color |
+| **TEST** | QA Engineer | `e2e-runner` | `.claude/agents/e2e-runner.md` | Playwright E2E, unit tests, coverage gaps |
+| **INFRA** | Platform / DevOps Engineer | `infra` | `.claude/agents/infra.md` | CI/CD, Vercel, Supabase migrations, PWA, SW |
+| **LIVEOPS** | Live Ops / SRE | `liveops` | `.claude/agents/liveops.md` | Production health, Sentry errors, Vercel logs, user-facing incidents |
+| **GROWTH** | Growth Engineer | `growth` | `.claude/agents/growth.md` | Analytics, funnel gaps, retention metrics, A/B hooks |
 
 ### LIVEOPS — the "app is alive" role
 
@@ -321,13 +321,14 @@ From `.claude/rules/guardrails.md`:
 ## FILE REGISTRY (key files only — full list in CLAUDE.md)
 
 ### Over guardrail (>400 lines) — needs decomposition
-- `src/features/auth/AuthScreen.tsx` — 540 lines ⚠️
-- `src/features/mochi/MochiChat.tsx` — 491 lines ⚠️
-- `src/features/focus/FocusScreen.tsx` — 465 lines ⚠️
-- `src/features/tasks/TasksPage.tsx` — 418 lines ⚠️
-- `src/features/focus/MonthlyReflection.tsx` — 412 lines ⚠️
+_None — all resolved as of 2026-03-31_ ✅
 
-### Already decomposed (previously in this list — resolved)
+### Decomposed (resolved)
+- `src/features/auth/AuthScreen.tsx` — 252 lines ✅ (AuthEmailStep + AuthCheckStep extracted)
+- `src/features/mochi/MochiChat.tsx` — 366 lines ✅ (mochiChatHelpers + MochiMessageBubble extracted)
+- `src/features/focus/FocusScreen.tsx` — 288 lines ✅ (FocusInterruptConfirm + FocusBookmarkCapture + FocusHardStop + useAmbientOrbit extracted)
+- `src/features/tasks/TasksPage.tsx` — 326 lines ✅ (SortableTaskCard + CollapsibleSection extracted)
+- `src/features/focus/MonthlyReflection.tsx` — 260 lines ✅ (MonthlyWrappedStep + MonthlyIntentionStep extracted)
 - `src/store/index.ts` — 163 lines ✅ (slices in `src/store/slices/`)
 - `src/features/settings/SettingsPage.tsx` — 48 lines ✅
 - `src/features/focus/useFocusSession.ts` — 335 lines ✅
