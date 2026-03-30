@@ -482,8 +482,23 @@ NEXT: {BATCH-ID-next} | Priority: {item1}, {item2} | Blocked by: {blocker or 'no
 ## CURRENT NEXT (as of 2026-03-30)
 
 ```
-NEXT: BATCH-2026-03-30-G | Audit phase 2 — stress tests + deeper code scan
-Priority: store/index.ts decompose (LARGE), useFocusSession decompose (MEDIUM),
-          SettingsPage decompose (MEDIUM), stress test suite (MEDIUM)
-Blocked by: none (Yusif approval needed before store decompose)
+COMPLETED: BATCH-2026-03-30-G
+- store/index.ts: 949 → 163 lines (6 slice files: user/task/session/audio/progress/preferences)
+- useFocusSession.ts: 627 → 588 lines (+useSessionTimer.ts 159L +useSessionPhase.ts 83L)
+- SettingsPage.tsx: 868 → 48 lines (5 new sections: Plan/Appearance/Behavior/Notifications/Wellbeing)
+- e2e/stress.spec.ts: 13 stress tests (500 tasks, offline sync, pending session, low energy, etc.)
+- public/.well-known/assetlinks.json + apple-app-site-association created
+- Security batch (I): Gemini key→header, CORS fix, VAPID JWK, race conditions, DB migration 012
+
+NEXT: BATCH-2026-03-30-H | Production config + Play Store prep
+Priority:
+  1. Apply migration 012 in Supabase Dashboard (repeat/category/gamma) — MANUAL by Yusif
+  2. Add STRIPE_SECRET_KEY + STRIPE_PRO_PRICE_ID + STRIPE_WEBHOOK_SECRET to Supabase env — MANUAL by Yusif
+  3. Enable pg_cron in Supabase Dashboard → run migrations 010+011 — MANUAL by Yusif
+  4. Generate release keystore → replace SHA256 placeholder in assetlinks.json — MANUAL by Yusif
+  5. bubblewrap init → AAB build for Play Store — MANUAL by Yusif
+  6. Feature graphic 1024×500 + 8 phone screenshots — DESIGN by Yusif
+  7. Fix useFocusSession.ts to < 400 lines (still 588 — needs deeper extraction)
+  8. Add getCalendarAuthUrl() null-check in IntegrationsSection
+Blocked by: Stripe keys, Supabase manual steps (items 1-4 above)
 ```
