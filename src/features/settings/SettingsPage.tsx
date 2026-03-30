@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 import i18n from '@/i18n';
 import { useMotion } from '@/shared/hooks/useMotion';
 import EnergyPicker from '@/components/EnergyPicker';
@@ -9,6 +10,7 @@ import { useStore } from '@/store';
 import type { EnergyLevel } from '@/types';
 import type { UITone } from '@/shared/lib/uiTone';
 import { getCrisisResourcesByCountry, countryFromLocale } from '@/shared/lib/crisisHotlines';
+import { supabase } from '@/shared/lib/supabase';
 import { PageTransition } from '@/shared/ui/PageTransition';
 import { Section, Chip, Toggle } from './SettingsPrimitives';
 import { AudioSection } from './AudioSection';
@@ -67,6 +69,22 @@ export default function SettingsPage() {
   const phase = phaseKeys.indexOf(seasonalMode);
   const restMode = flexiblePauseUntil ? new Date(flexiblePauseUntil) > new Date() : false;
 
+  const [upgrading, setUpgrading] = useState(false);
+  const handleUpgrade = async () => {
+    setUpgrading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: { plan: 'pro_monthly' },
+      });
+      if (error || !data?.url) throw error ?? new Error('No checkout URL');
+      window.location.href = data.url;
+    } catch {
+      toast.error(t('settings.upgradeError'));
+    } finally {
+      setUpgrading(false);
+    }
+  };
+
   const [notifPermission, setNotifPermission] = useState<NotificationPermission>('default');
   useEffect(() => {
     if ('Notification' in window) setNotifPermission(Notification.permission);
@@ -106,8 +124,32 @@ export default function SettingsPage() {
 
       <div className="space-y-3 mt-5">
         {/* Plan */}
-        <div className="rounded-2xl p-3" style={{ backgroundColor: 'var(--color-surface-card)' }}>
+        <div className="rounded-2xl p-3 flex items-center justify-between" style={{ backgroundColor: 'var(--color-surface-card)' }}>
           <p className="text-[15px]" style={{ color: 'var(--color-text-primary)' }}>🌱 {planLabel}</p>
+          {(subscriptionTier === 'pro' || subscriptionTier === 'pro_trial') ? (
+            <span
+              className="px-2.5 py-1 rounded-full text-[12px] font-semibold"
+              style={{ background: 'rgba(78,205,196,0.15)', color: 'var(--color-teal)', border: '1px solid rgba(78,205,196,0.3)' }}
+            >
+              {t('settings.proBadge')}
+            </span>
+          ) : (
+            <motion.button
+              whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
+              onClick={handleUpgrade}
+              disabled={upgrading}
+              aria-label={t('settings.upgradeCTA')}
+              className="px-3 py-1.5 rounded-xl text-[13px] font-medium focus-visible:ring-2 focus-visible:ring-[#4ECDC4]"
+              style={{
+                background: 'rgba(78,205,196,0.12)',
+                color: 'var(--color-teal)',
+                border: '1px solid rgba(78,205,196,0.25)',
+                opacity: upgrading ? 0.6 : 1,
+              }}
+            >
+              {upgrading ? t('settings.upgrading') : t('settings.upgradeCTA')}
+            </motion.button>
+          )}
         </div>
 
         {/* Language */}

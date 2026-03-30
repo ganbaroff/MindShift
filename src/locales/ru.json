@@ -273,7 +273,11 @@
     "toneBalanced": "Сбалансированный",
     "toneBalancedDesc": "Коучинговый тон, больше метрик",
     "toneClear": "Чёткий",
-    "toneClearDesc": "Прямолинейный, цифры в первую очередь"
+    "toneClearDesc": "Прямолинейный, цифры в первую очередь",
+    "upgradeError": "Не удалось открыть оплату. Попробуйте ещё раз.",
+    "upgradeCTA": "Перейти на Pro",
+    "proBadge": "Pro",
+    "upgrading": "Открываем оплату..."
   },
   "onboarding": {
     "skipSetup": "Пропустить настройку →",

@@ -183,6 +183,32 @@ export function useFocusSession() {
     sessionSavedRef.current = false
   }, [userId])
 
+  // ── Recover pending session saved by beforeunload handler ─────────────────
+  // If the tab was closed mid-session, save the partial session on next load.
+  useEffect(() => {
+    if (!userId || userId.startsWith('guest_')) return
+    const pending = localStorage.getItem('ms_pending_session')
+    if (!pending) return
+    try {
+      const p = JSON.parse(pending) as { taskId: string; startedAt: string; elapsedMs: number; phase: string }
+      localStorage.removeItem('ms_pending_session')
+      const elapsedMin = Math.round(p.elapsedMs / 60_000)
+      if (elapsedMin >= 1) {
+        void supabase.from('focus_sessions').insert({
+          user_id: userId,
+          started_at: p.startedAt,
+          duration_ms: p.elapsedMs,
+          phase_reached: p.phase,
+          energy_before: null,
+          energy_after: null,
+          audio_preset: null,
+        } as never).then(({ error }: { error: unknown }) => {
+          if (error) logError('useFocusSession.pendingRecovery', error)
+        })
+      }
+    } catch { /* malformed JSON — discard */ }
+  }, [userId])
+
   // ── Phase-adaptive audio volume ────────────────────────────────────────────
   // Research #1: sound adapts to cognitive phase — full masking in struggle,
   // quiet ambient in flow to avoid disrupting hyperfocus state.

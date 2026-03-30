@@ -273,7 +273,11 @@
     "toneBalanced": "Balanced",
     "toneBalancedDesc": "Coaching tone, more metrics",
     "toneClear": "Clear",
-    "toneClearDesc": "Straightforward, numbers-first"
+    "toneClearDesc": "Straightforward, numbers-first",
+    "upgradeError": "Couldn't open checkout. Try again.",
+    "upgradeCTA": "Upgrade to Pro",
+    "proBadge": "Pro",
+    "upgrading": "Opening checkout..."
   },
   "onboarding": {
     "skipSetup": "Skip setup — jump in →",

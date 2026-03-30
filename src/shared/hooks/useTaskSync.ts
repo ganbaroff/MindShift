@@ -86,14 +86,16 @@ function taskToInsertRow(task: Task, userId: string): Omit<TaskRow, 'id' | 'crea
 
 // ── Push local tasks to Supabase (first-device scenario) ─────────────────────
 
-function pushLocalTasksToSupabase(tasks: Task[], userId: string): void {
+async function pushLocalTasksToSupabase(tasks: Task[], userId: string): Promise<void> {
   const rows = tasks.map(t => taskToInsertRow(t, userId))
-  supabase
-    .from('tasks')
-    .upsert(rows as never, { onConflict: 'id' })
-    .then(({ error }) => {
-      if (error) logError('useTaskSync.pushLocal', error)
-    })
+  try {
+    const { error } = await supabase
+      .from('tasks')
+      .upsert(rows as never, { onConflict: 'id' })
+    if (error) logError('useTaskSync.pushLocal', error)
+  } catch (err) {
+    logError('useTaskSync.pushLocal', err)
+  }
 }
 
 // ── Hook ──────────────────────────────────────────────────────────────────────
@@ -104,36 +106,37 @@ export function useTaskSync(): void {
   useEffect(() => {
     if (!userId || userId.startsWith('guest_')) return
 
-    supabase
-      .from('tasks')
-      .select('*')
-      .eq('user_id', userId)
-      .neq('status', 'archived')
-      .then(({ data, error }) => {
-        if (error) {
-          logError('useTaskSync.fetch', error)
-          toast('Could not sync tasks — working offline 📶', { duration: 4000 })
-          return
-        }
+    void (async () => {
+      const { data, error } = await supabase
+        .from('tasks')
+        .select('*')
+        .eq('user_id', userId)
+        .neq('status', 'archived')
 
-        const serverTasks: Task[] = (data ?? []).map(rowToTask)
-        const localTasks = [...nowPool, ...nextPool, ...somedayPool]
+      if (error) {
+        logError('useTaskSync.fetch', error)
+        toast('Could not sync tasks — working offline 📶', { duration: 4000 })
+        return
+      }
 
-        if (serverTasks.length === 0) {
-          // First-device scenario: push local tasks to server
-          if (localTasks.length > 0) {
-            pushLocalTasksToSupabase(localTasks, userId)
-          }
-        } else {
-          // Merge: keep server tasks + any local tasks not yet on server (by id)
-          const serverIds = new Set(serverTasks.map(t => t.id))
-          const localOnly = localTasks.filter(t => !serverIds.has(t.id))
-          if (localOnly.length > 0) {
-            pushLocalTasksToSupabase(localOnly, userId)
-          }
-          setTasks([...serverTasks, ...localOnly])
+      const serverTasks: Task[] = (data ?? []).map(rowToTask)
+      const localTasks = [...nowPool, ...nextPool, ...somedayPool]
+
+      if (serverTasks.length === 0) {
+        // First-device scenario: push local tasks to server
+        if (localTasks.length > 0) {
+          await pushLocalTasksToSupabase(localTasks, userId)
         }
-      })
+      } else {
+        // Merge: keep server tasks + any local tasks not yet on server (by id)
+        const serverIds = new Set(serverTasks.map(t => t.id))
+        const localOnly = localTasks.filter(t => !serverIds.has(t.id))
+        if (localOnly.length > 0) {
+          await pushLocalTasksToSupabase(localOnly, userId)
+        }
+        setTasks([...serverTasks, ...localOnly])
+      }
+    })()
   }, [userId]) // eslint-disable-line react-hooks/exhaustive-deps
   // Intentionally omitting pool/setTasks from deps — we only re-sync on login
 }
@@ -146,12 +149,14 @@ export function useTaskSync(): void {
  */
 export function syncTaskUpsert(task: Task, userId: string): void {
   const row = taskToInsertRow(task, userId)
-  supabase
-    .from('tasks')
-    .upsert(row as never, { onConflict: 'id' })
-    .then(({ error }) => {
-      if (error) logError('syncTaskUpsert', error)
-    })
+  void Promise.resolve(
+    supabase
+      .from('tasks')
+      .upsert(row as never, { onConflict: 'id' })
+      .then(({ error }) => {
+        if (error) logError('syncTaskUpsert', error)
+      })
+  ).catch((err: unknown) => logError('syncTaskUpsert', err))
 }
 
 /**
@@ -159,12 +164,14 @@ export function syncTaskUpsert(task: Task, userId: string): void {
  * (e.g. completedAt, dueDate) without sending the whole record.
  */
 export function syncTaskUpdate(taskId: string, updates: Partial<TaskRow>, userId: string): void {
-  supabase
-    .from('tasks')
-    .update(updates as never)
-    .eq('id', taskId)
-    .eq('user_id', userId)
-    .then(({ error }) => {
-      if (error) logError('syncTaskUpdate', error)
-    })
+  void Promise.resolve(
+    supabase
+      .from('tasks')
+      .update(updates as never)
+      .eq('id', taskId)
+      .eq('user_id', userId)
+      .then(({ error }) => {
+        if (error) logError('syncTaskUpdate', error)
+      })
+  ).catch((err: unknown) => logError('syncTaskUpdate', err))
 }
