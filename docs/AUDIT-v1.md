@@ -211,7 +211,7 @@ All screen state transitions are guarded. Recovery from crash handled (activeSes
 ### E-P0: Edge functions deployment unverified
 **Requires Yusif action**
 - CLAUDE.md: "edge functions: ❓ unconfirmed"
-- Run: `supabase functions list --project-id cinctbslvejqicxanvnr`
+- Run: `supabase functions list --project-id awfoqycoltvhamtrsvxk`
 - Expected: mochi-respond, decompose-task, recovery-message, classify-voice-input, gdpr-export, gdpr-delete, weekly-insight, scheduled-push all listed
 
 ### E-P0: No incident response plan

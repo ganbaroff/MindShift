@@ -1,5 +1,5 @@
 $accessToken = 'sbp_463784e58f49e7aff39ec2570ca66e50d365d0c1'
-$projectRef = 'cinctbslvejqicxanvnr'
+$projectRef = 'awfoqycoltvhamtrsvxk'
 
 $headers = @{
     'Authorization' = "Bearer $accessToken"

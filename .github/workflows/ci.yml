@@ -13,7 +13,7 @@ jobs:
 
     env:
       # Supabase public keys — safe to embed (anon key is client-facing by design)
-      VITE_SUPABASE_URL: https://cinctbslvejqicxanvnr.supabase.co
+      VITE_SUPABASE_URL: https://awfoqycoltvhamtrsvxk.supabase.co
       VITE_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpbmN0YnNsdmVqcWljeGFudm5yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMjkzNTYsImV4cCI6MjA4ODYwNTM1Nn0.QWSu9zWLk4VgUYp-I2QBd1MbAXforqY1vMtgcAiv2FQ
       # Sentry DSN for CI — set VITE_SENTRY_DSN in repo Secrets to enable
       VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}

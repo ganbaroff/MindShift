@@ -14,7 +14,7 @@ import * as path from 'path'
 const BASE_URL   = 'http://localhost:5173'
 const OUT_DIR    = path.join(process.cwd(), 'public', 'screenshots', 'playstore')
 const VIEWPORT   = { width: 390, height: 844 }
-const SUPABASE_REF = 'cinctbslvejqicxanvnr'
+const SUPABASE_REF = 'awfoqycoltvhamtrsvxk'
 
 // ── Demo session ──────────────────────────────────────────────────────────────
 const now = Math.floor(Date.now() / 1000)
