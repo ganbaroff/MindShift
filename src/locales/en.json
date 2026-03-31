@@ -840,7 +840,9 @@
     "phaseFlow": "Flow 🌊",
     "phaseRelease": "Release 🌱",
     "phaseStruggle": "Struggle 💪",
-    "phaseRecovery": "Recovery 🌿"
+    "phaseRecovery": "Recovery 🌿",
+    "filterAll": "All",
+    "noFilterResults": "No sessions with that phase yet"
   },
   "calendar": {
     "upcoming": "Upcoming",

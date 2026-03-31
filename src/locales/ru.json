@@ -840,7 +840,9 @@
     "phaseFlow": "Поток 🌊",
     "phaseRelease": "Релиз 🌱",
     "phaseStruggle": "Борьба 💪",
-    "phaseRecovery": "Восстановление 🌿"
+    "phaseRecovery": "Восстановление 🌿",
+    "filterAll": "Все",
+    "noFilterResults": "Нет сессий с этой фазой"
   },
   "calendar": {
     "upcoming": "Расписание",

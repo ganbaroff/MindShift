@@ -8,7 +8,7 @@
  * No data = encouraging empty state, not shaming.
  */
 
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { motion } from 'motion/react'
 import { useTranslation } from 'react-i18next'
 import { useMotion } from '@/shared/hooks/useMotion'
@@ -56,18 +56,34 @@ export default function HistoryPage() {
 
   const isGuest = !userId || userId.startsWith('guest_')
 
-  // Group sessions by calendar date (descending)
+  const [phaseFilter, setPhaseFilter] = useState<string>('all')
+
+  const PHASE_CHIPS = [
+    { key: 'all',      labelKey: 'history.filterAll' },
+    { key: 'flow',     labelKey: 'history.phaseFlow' },
+    { key: 'release',  labelKey: 'history.phaseRelease' },
+    { key: 'struggle', labelKey: 'history.phaseStruggle' },
+  ]
+
+  // Filter + group sessions by calendar date (descending)
+  const filteredSessions = useMemo(() =>
+    phaseFilter === 'all'
+      ? sessions
+      : sessions.filter(s => (s.phase_reached ?? 'struggle') === phaseFilter),
+    [sessions, phaseFilter],
+  )
+
   const grouped = useMemo(() => {
-    const map = new Map<string, typeof sessions>()
-    for (const s of sessions) {
+    const map = new Map<string, typeof filteredSessions>()
+    for (const s of filteredSessions) {
       const day = s.started_at.slice(0, 10)
       if (!map.has(day)) map.set(day, [])
       map.get(day)!.push(s)
     }
     return Array.from(map.entries()).sort((a, b) => b[0].localeCompare(a[0]))
-  }, [sessions])
+  }, [filteredSessions])
 
-  // Total stats
+  // Total stats (always over all sessions, not filtered — context stays clear)
   const totalMin = useMemo(() =>
     sessions.reduce((sum, s) => sum + Math.round((s.duration_ms ?? 0) / 60000), 0),
     [sessions]
@@ -132,6 +148,34 @@ export default function HistoryPage() {
               </div>
             ))}
           </motion.div>
+
+          {/* Phase filter chips */}
+          <div className="flex gap-2 mb-5 flex-wrap">
+            {PHASE_CHIPS.map(chip => (
+              <button
+                key={chip.key}
+                onClick={() => setPhaseFilter(chip.key)}
+                aria-pressed={phaseFilter === chip.key}
+                className="px-3 py-1 rounded-xl text-[12px] font-medium focus-visible:ring-2 focus-visible:ring-[#7B72FF] transition-colors"
+                style={{
+                  background: phaseFilter === chip.key ? 'rgba(78,205,196,0.15)' : 'var(--color-surface-card)',
+                  border: `1px solid ${phaseFilter === chip.key ? 'var(--color-teal)' : 'rgba(255,255,255,0.06)'}`,
+                  color: phaseFilter === chip.key ? 'var(--color-teal)' : 'var(--color-text-muted)',
+                }}
+              >
+                {t(chip.labelKey)}
+              </button>
+            ))}
+          </div>
+
+          {/* Empty filtered state */}
+          {grouped.length === 0 && (
+            <div className="text-center py-8">
+              <p className="text-[14px]" style={{ color: 'var(--color-text-muted)' }}>
+                {t('history.noFilterResults')}
+              </p>
+            </div>
+          )}
 
           {/* Timeline */}
           <div className="space-y-5">
