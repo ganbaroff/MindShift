@@ -73,8 +73,8 @@ Deno.serve(async (req: Request) => {
       const subscriptionId = session['subscription'] as string
       if (userId) {
         // Only set subscription_started_at on first activation (idempotent re-delivery safety)
-        const { data: existing } = await supabase.from('profiles').select('subscription_started_at').eq('id', userId).maybeSingle()
-        await supabase.from('profiles').upsert({
+        const { data: existing } = await supabase.from('users').select('subscription_started_at').eq('id', userId).maybeSingle()
+        await supabase.from('users').upsert({
           id: userId,
           subscription_tier: 'pro',
           stripe_subscription_id: subscriptionId,
@@ -87,7 +87,7 @@ Deno.serve(async (req: Request) => {
       const sub = event.data.object
       const userId = (sub['metadata'] as Record<string, string>)?.['user_id']
       if (userId) {
-        await supabase.from('profiles').update({
+        await supabase.from('users').update({
           subscription_tier: 'free',
           stripe_subscription_id: null,
         }).eq('id', userId)
@@ -99,7 +99,7 @@ Deno.serve(async (req: Request) => {
       const userId = (sub['metadata'] as Record<string, string>)?.['user_id']
       const status = sub['status'] as string
       if (userId) {
-        await supabase.from('profiles').update({
+        await supabase.from('users').update({
           subscription_tier: status === 'active' ? 'pro' : status === 'trialing' ? 'pro_trial' : 'free',
         }).eq('id', userId)
       }

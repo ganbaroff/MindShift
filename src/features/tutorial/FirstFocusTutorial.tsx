@@ -31,12 +31,13 @@ export function FirstFocusTutorial() {
   const { shouldAnimate, t: transition } = useMotion()
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const { setFirstFocusTutorialCompleted, addTask, markHintSeen } = useStore()
+  const { setFirstFocusTutorialCompleted, addTask, removeTask, markHintSeen } = useStore()
 
   const [step, setStep] = useState<Step>('intro')
   const [elapsed, setElapsed] = useState(0)
   const [timerRunning, setTimerRunning] = useState(false)
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const sampleTaskIdRef = useRef<string | null>(null)
 
   // Current phase based on elapsed time
   const phase = elapsed < PHASE_THRESHOLDS.release
@@ -62,23 +63,33 @@ export function FirstFocusTutorial() {
   }, [timerRunning])
 
   const handleComplete = useCallback(() => {
+    if (sampleTaskIdRef.current) {
+      removeTask(sampleTaskIdRef.current)
+      sampleTaskIdRef.current = null
+    }
     setFirstFocusTutorialCompleted()
     markHintSeen('first_focus_tutorial')
     markHintSeen('welcome_walkthrough')
     navigate('/focus')
-  }, [setFirstFocusTutorialCompleted, markHintSeen, navigate])
+  }, [setFirstFocusTutorialCompleted, markHintSeen, navigate, removeTask])
 
   const handleSkip = useCallback(() => {
     if (intervalRef.current) clearInterval(intervalRef.current)
+    if (sampleTaskIdRef.current) {
+      removeTask(sampleTaskIdRef.current)
+      sampleTaskIdRef.current = null
+    }
     setFirstFocusTutorialCompleted()
     markHintSeen('first_focus_tutorial')
     markHintSeen('welcome_walkthrough')
-  }, [setFirstFocusTutorialCompleted, markHintSeen])
+  }, [setFirstFocusTutorialCompleted, markHintSeen, removeTask])
 
   const handleStartTimer = useCallback(() => {
-    // Create sample task in NOW pool
+    // Create sample task in NOW pool — tracked for cleanup on complete/skip
+    const taskId = `tutorial_${Date.now()}`
+    sampleTaskIdRef.current = taskId
     addTask({
-      id: `tutorial_${Date.now()}`,
+      id: taskId,
       title: t('tutorial.sampleTaskTitle'),
       pool: 'now',
       status: 'active',
