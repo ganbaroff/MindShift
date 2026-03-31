@@ -16,6 +16,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
+import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { useStore } from '@/store'
@@ -29,6 +30,7 @@ const PHASE_THRESHOLDS = { release: 30, flow: 60 } // simplified phases for tuto
 export function FirstFocusTutorial() {
   const { shouldAnimate, t: transition } = useMotion()
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const { setFirstFocusTutorialCompleted, addTask, markHintSeen } = useStore()
 
   const [step, setStep] = useState<Step>('intro')
@@ -63,12 +65,15 @@ export function FirstFocusTutorial() {
     setFirstFocusTutorialCompleted()
     markHintSeen('first_focus_tutorial')
     markHintSeen('welcome_walkthrough')
-  }, [setFirstFocusTutorialCompleted, markHintSeen])
+    navigate('/focus')
+  }, [setFirstFocusTutorialCompleted, markHintSeen, navigate])
 
   const handleSkip = useCallback(() => {
     if (intervalRef.current) clearInterval(intervalRef.current)
-    handleComplete()
-  }, [handleComplete])
+    setFirstFocusTutorialCompleted()
+    markHintSeen('first_focus_tutorial')
+    markHintSeen('welcome_walkthrough')
+  }, [setFirstFocusTutorialCompleted, markHintSeen])
 
   const handleStartTimer = useCallback(() => {
     // Create sample task in NOW pool

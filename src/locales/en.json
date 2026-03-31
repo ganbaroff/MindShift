@@ -23,7 +23,8 @@
     "quietDay": "Quiet day — that's okay too. Rest counts.",
     "focusOn": "Focus on: {{title}}",
     "startFocus": "Start a focus session",
-    "viewProgress": "View progress →"
+    "viewProgress": "View progress →",
+    "moveFromNext": "{{count}} task waiting in Next — pick one →"
   },
   "quickCapture": {
     "placeholder": "Add a task, reminder, or meeting...",
