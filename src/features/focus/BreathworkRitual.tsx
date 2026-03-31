@@ -14,11 +14,12 @@
  * Skip button always visible — never gate the user.
  */
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useTranslation } from 'react-i18next'
 import { hapticBreathe } from '@/shared/lib/haptic'
 import { useMotion } from '@/shared/hooks/useMotion'
+import { playInhaleCue, playExhaleCue } from '@/shared/lib/breathCue'
 
 interface BreathworkRitualProps {
   onComplete: () => void
@@ -37,6 +38,20 @@ export function BreathworkRitual({ onComplete, onSkip }: BreathworkRitualProps) 
   const [cycle, setCycle]       = useState(0)          // 0-indexed
   const [phase, setPhase]       = useState<BreathPhase>('inhale')
   const [done, setDone]         = useState(false)
+  const audioCtxRef             = useRef<AudioContext | null>(null)
+
+  // Create AudioContext on first user interaction (component mount = user tapped Start)
+  useEffect(() => {
+    try {
+      audioCtxRef.current = new AudioContext()
+    } catch {
+      // Web Audio not available (e.g. in E2E tests) — silent fallback
+    }
+    return () => {
+      audioCtxRef.current?.close().catch(() => {})
+      audioCtxRef.current = null
+    }
+  }, [])
 
   useEffect(() => {
     // If reduced motion is on, skip straight to complete after a beat
@@ -58,12 +73,19 @@ export function BreathworkRitual({ onComplete, onSkip }: BreathworkRitualProps) 
       // Inhale phase
       setPhase('inhale')
       hapticBreathe()
+      if (audioCtxRef.current) {
+        if (audioCtxRef.current.state === 'suspended') {
+          void audioCtxRef.current.resume()
+        }
+        playInhaleCue(audioCtxRef.current)
+      }
 
       phaseTimer = setTimeout(() => {
         if (cancelled) return
         // Exhale phase
         setPhase('exhale')
         hapticBreathe()
+        if (audioCtxRef.current) playExhaleCue(audioCtxRef.current)
 
         cycleTimer = setTimeout(() => {
           if (cancelled) return
