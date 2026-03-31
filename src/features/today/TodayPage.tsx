@@ -6,7 +6,7 @@
  * Reduces decision fatigue — the #1 enemy for ADHD brains.
  */
 
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -37,7 +37,7 @@ export default function TodayPage() {
   const { copy, density } = useUITone()
   const {
     nowPool, nextPool, somedayPool,
-    energyLevel,
+    energyLevel, setEnergyLevel,
     burnoutScore,
     weeklyStats,
     completedTotal,
@@ -50,6 +50,19 @@ export default function TodayPage() {
   const [showAddTask, setShowAddTask] = useState(false)
   const [justCompleted, setJustCompleted] = useState(false)
   const [lastDiscoveryId, setLastDiscoveryId] = useState<string | null>(null)
+  const [showEnergyPicker, setShowEnergyPicker] = useState(false)
+  const energyPickerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!showEnergyPicker) return
+    const handler = (e: MouseEvent) => {
+      if (energyPickerRef.current && !energyPickerRef.current.contains(e.target as Node)) {
+        setShowEnergyPicker(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [showEnergyPicker])
 
   const timeBlock = useMemo(getTimeBlock, [])
   const todayStr = useMemo(todayISO, [])
@@ -76,7 +89,12 @@ export default function TodayPage() {
     [allTasks, todayStr],
   )
 
-  const activeTasks = useMemo(() => nowPool.filter(tk => tk.status === 'active'), [nowPool])
+  // activeTasks: NOW pool tasks for today's view — exclude future-dated tasks so tomorrow's
+  // tasks don't bleed into today's "NOW pool" section (they stay in the date-specific filter)
+  const activeTasks = useMemo(
+    () => nowPool.filter(tk => tk.status === 'active' && (!tk.dueDate || tk.dueDate <= todayStr)),
+    [nowPool, todayStr],
+  )
   const completedToday = useMemo(
     () => allTasks.filter(tk => tk.status === 'completed' && tk.completedAt?.startsWith(todayStr)),
     [allTasks, todayStr],
@@ -170,14 +188,47 @@ export default function TodayPage() {
               </p>
             )}
           </div>
-          <div
-            className="flex items-center gap-1 px-2.5 py-1 rounded-xl"
-            style={{ background: 'rgba(78,205,196,0.1)' }}
-          >
-            <span className="text-[14px]">{energyEmoji}</span>
-            <span className="text-[11px] font-medium" style={{ color: 'var(--color-teal)' }}>
-              {energyLevel}/5
-            </span>
+          <div ref={energyPickerRef} className="relative">
+            <button
+              onClick={() => setShowEnergyPicker(v => !v)}
+              className="flex items-center gap-1 px-2.5 py-1 rounded-xl focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
+              style={{ background: 'rgba(78,205,196,0.1)' }}
+              aria-label={`Energy level ${energyLevel} of 5 — tap to update`}
+              aria-expanded={showEnergyPicker}
+            >
+              <span className="text-[14px]">{energyEmoji}</span>
+              <span className="text-[11px] font-medium" style={{ color: 'var(--color-teal)' }}>
+                {energyLevel}/5
+              </span>
+            </button>
+            <AnimatePresence>
+              {showEnergyPicker && (
+                <motion.div
+                  initial={shouldAnimate ? { opacity: 0, scale: 0.9, y: -4 } : false}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={shouldAnimate ? { opacity: 0, scale: 0.9, y: -4 } : {}}
+                  transition={transition()}
+                  className="absolute right-0 top-full mt-1.5 z-20 flex gap-1 p-2 rounded-2xl shadow-lg"
+                  style={{ background: 'var(--color-surface-card)', border: '1px solid rgba(78,205,196,0.2)' }}
+                >
+                  {ENERGY_EMOJI.map((emoji, i) => (
+                    <button
+                      key={i}
+                      onClick={() => { setEnergyLevel((i + 1) as import('@/types').EnergyLevel); setShowEnergyPicker(false) }}
+                      className="flex flex-col items-center gap-0.5 px-2 py-1 rounded-xl focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
+                      style={{
+                        background: energyLevel === i + 1 ? 'rgba(78,205,196,0.15)' : 'transparent',
+                      }}
+                      aria-label={`Set energy to ${i + 1}`}
+                      aria-pressed={energyLevel === i + 1}
+                    >
+                      <span className="text-[18px]">{emoji}</span>
+                      <span className="text-[9px]" style={{ color: 'var(--color-text-muted)' }}>{i + 1}</span>
+                    </button>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
 
@@ -223,6 +274,7 @@ export default function TodayPage() {
             isLowEnergy={isLowEnergy}
             density={density}
             completedTotal={completedTotal}
+            nextTasksCount={nextPool.filter(t => t.status === 'active').length}
             onComplete={handleCompleteTask}
             onPark={snoozeTask}
             onAddSample={handleAddSample}

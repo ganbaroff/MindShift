@@ -25,7 +25,7 @@ export const createAudioSlice: StateCreator<
   AudioSlice
 > = (set, get) => ({
   activePreset: null,
-  audioVolume: 0.55,
+  audioVolume: 0.65,
   audioPlaying: false,
   focusAnchor: null,
   transitionBufferActive: false,

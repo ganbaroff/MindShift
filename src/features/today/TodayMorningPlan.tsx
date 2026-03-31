@@ -1,5 +1,6 @@
 import { motion } from 'motion/react'
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
 import { useMotion } from '@/shared/hooks/useMotion'
 import TaskCard from '@/components/TaskCard'
 import type { Task } from '@/types'
@@ -23,6 +24,7 @@ interface TodayMorningPlanProps {
   isLowEnergy: boolean
   density: string
   completedTotal: number
+  nextTasksCount?: number
   onComplete: (id: string) => void
   onPark: (id: string) => void
   onAddSample: () => void
@@ -31,11 +33,12 @@ interface TodayMorningPlanProps {
 
 export function TodayMorningPlan({
   todayTasks, activeTasks, completedToday, todayFocusMin, dailyFocusGoalMin,
-  isLowEnergy, density, completedTotal,
+  isLowEnergy, density, completedTotal, nextTasksCount = 0,
   onComplete, onPark, onAddSample,
 }: TodayMorningPlanProps) {
   const { t } = useTranslation()
   const { shouldAnimate } = useMotion()
+  const navigate = useNavigate()
 
   return (
     <div className="space-y-3">
@@ -96,7 +99,20 @@ export function TodayMorningPlan({
           <p className="text-[12px]" style={{ color: 'var(--color-text-muted)' }}>
             {t('today.addOrSample')}
           </p>
-          {completedTotal === 0 && (
+          {nextTasksCount > 0 ? (
+            <button
+              onClick={() => navigate('/tasks')}
+              className="mx-auto px-4 py-2 rounded-xl text-[13px] font-medium focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
+              style={{
+                background: 'rgba(78,205,196,0.10)',
+                color: 'var(--color-teal)',
+                border: '1px solid rgba(78,205,196,0.2)',
+              }}
+              aria-label={t('today.moveFromNext', { count: nextTasksCount })}
+            >
+              {t('today.moveFromNext', { count: nextTasksCount })}
+            </button>
+          ) : completedTotal === 0 ? (
             <button
               onClick={onAddSample}
               className="mx-auto px-4 py-2 rounded-xl text-[13px] font-medium focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
@@ -108,7 +124,7 @@ export function TodayMorningPlan({
             >
               {t('today.addSample')}
             </button>
-          )}
+          ) : null}
         </div>
       ) : null}
 
