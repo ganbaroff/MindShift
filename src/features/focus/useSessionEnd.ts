@@ -9,10 +9,11 @@
  * - recoverySeconds / bufferSeconds countdown state
  */
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import type { MutableRefObject } from 'react'
 import { supabase } from '@/shared/lib/supabase'
 import { sendFocusSession, isVolauraConfigured } from '@/shared/lib/volaura-bridge'
+import { logEvent } from '@/shared/lib/logger'
 import { useStore } from '@/store'
 import { notifyFocusEnd, notifyAchievement, pushFocusComplete, pushRecoveryEnd } from '@/shared/lib/notify'
 import { hapticDone } from '@/shared/lib/haptic'
@@ -61,6 +62,14 @@ export function useSessionEnd({
   const recoveryIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const bufferIntervalRef   = useRef<ReturnType<typeof setInterval> | null>(null)
 
+  // Cleanup intervals on unmount — prevents timer accumulation if FocusScreen unmounts mid-countdown
+  useEffect(() => {
+    return () => {
+      if (bufferIntervalRef.current)   clearInterval(bufferIntervalRef.current)
+      if (recoveryIntervalRef.current) clearInterval(recoveryIntervalRef.current)
+    }
+  }, [])
+
   const startNatureBuffer = useCallback(() => {
     setBufferSeconds(NATURE_BUFFER_SECONDS)
     setScreen('nature-buffer')
@@ -90,6 +99,8 @@ export function useSessionEnd({
 
     if (elapsedMin >= 1) { notifyFocusEnd(elapsedMin); hapticDone() }
     if (elapsedMin >= 1) pushFocusComplete(elapsedMin)
+
+    logEvent('session_ended', { completed: wasCompleted ? 1 : 0, duration_min: elapsedMin, phase: sessionPhase })
 
     if (wasCompleted) {
       const storeState = useStore.getState()

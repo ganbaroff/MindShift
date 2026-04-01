@@ -18,6 +18,7 @@ import { useTranslation } from 'react-i18next';
 import { useMotion } from '@/shared/hooks/useMotion';
 import EnergyPicker from '@/components/EnergyPicker';
 import { useStore } from '@/store';
+import { logEvent } from '@/shared/lib/logger';
 import type { EnergyLevel, AppMode } from '@/types';
 
 // ── Maps ──────────────────────────────────────────────────────────────────────
@@ -138,6 +139,7 @@ export default function OnboardingPage() {
 
     if (!isRevisit) {
       setOnboardingCompleted()
+      logEvent('onboarding_completed', { mode: modeMap[selections[0] ?? 0] })
       navigate('/')
     } else {
       navigate(-1)
@@ -155,6 +157,7 @@ export default function OnboardingPage() {
     setSelections(s)
     // Auto-advance on single-select steps after brief delay (except energy/ready)
     if (!isEnergyStep && !isReadyStep && isPointerClick) {
+      logEvent('onboarding_step', { step })
       setTimeout(() => {
         if (step < TOTAL_STEPS - 1) setStep(step + 1)
         else finish()
