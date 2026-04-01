@@ -18,11 +18,12 @@ interface MonthlyIntentionStepProps {
   intention: string
   onIntentionChange: (val: string) => void
   motionTransition: MotionAPI['t']
+  shouldAnimate: boolean
   onNext: () => void
 }
 
 export function MonthlyIntentionStep({
-  monthName, intention, onIntentionChange, motionTransition, onNext,
+  monthName, intention, onIntentionChange, motionTransition, shouldAnimate, onNext,
 }: MonthlyIntentionStepProps) {
   const { t } = useTranslation()
 
@@ -32,7 +33,7 @@ export function MonthlyIntentionStep({
       initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -16 }}
-      transition={{ ...motionTransition(), duration: 0.35 }}
+      transition={{ ...motionTransition(), ...(shouldAnimate && { duration: 0.35 }) }}
       className="flex flex-col gap-5"
     >
       <div className="text-center">
