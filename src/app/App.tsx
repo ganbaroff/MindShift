@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useRef } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from 'sonner'
 import { useStore } from '@/store'
@@ -168,20 +168,26 @@ export default function App() {
 
   useEffect(() => { reminders.restore() }, [])
 
+  // Scalar summaries — limits burnout re-computation to actual data changes, not array identity churn
+  const poolSnoozedCount = useMemo(
+    () => [...nowPool, ...nextPool, ...somedayPool].reduce((acc, t) => acc + t.snoozeCount, 0),
+    [nowPool, nextPool, somedayPool]
+  )
+  const poolActiveCount = useMemo(
+    () => [...nowPool, ...nextPool, ...somedayPool].filter(t => t.status === 'active').length,
+    [nowPool, nextPool, somedayPool]
+  )
+
   useEffect(() => {
-    const allTasks = [...nowPool, ...nextPool, ...somedayPool]
-    const activeTasks = allTasks.filter(t => t.status === 'active')
-    const snoozedCount = allTasks.reduce((acc, t) => acc + t.snoozeCount, 0)
     const avgCompletedPerDay = completedTotal / 7
-    const recentAvgEnergy = energyLevel
     const behaviors = deriveBehaviors({
-      snoozedCount,
-      activeCount: Math.max(activeTasks.length, 1),
-      recentCompletedPerDay: avgCompletedPerDay * (recentAvgEnergy / 3),
+      snoozedCount: poolSnoozedCount,
+      activeCount: Math.max(poolActiveCount, 1),
+      recentCompletedPerDay: avgCompletedPerDay * (energyLevel / 3),
       avgCompletedPerDay,
-      recentSessionMinutes: 20 * (recentAvgEnergy / 3),
+      recentSessionMinutes: 20 * (energyLevel / 3),
       avgSessionMinutes: 20,
-      recentAvgEnergy,
+      recentAvgEnergy: energyLevel,
     })
     const rawScore = computeBurnoutScore(behaviors)
     // High emotional reactivity = feel burnout sooner (1.2x multiplier, capped at 100)
@@ -189,7 +195,7 @@ export default function App() {
       ? Math.min(100, Math.round(rawScore * 1.2))
       : rawScore
     setBurnoutScore(adjustedScore)
-  }, [completedTotal, energyLevel, nowPool, nextPool, somedayPool, setBurnoutScore, emotionalReactivity])
+  }, [completedTotal, energyLevel, poolSnoozedCount, poolActiveCount, setBurnoutScore, emotionalReactivity])
 
   // VOLAURA: broadcast streak update whenever streak changes (once per streak value per session)
   const lastSentStreakRef = useRef(0)

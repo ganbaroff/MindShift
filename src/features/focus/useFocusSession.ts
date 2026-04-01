@@ -19,6 +19,8 @@ import { useMotion } from '@/shared/hooks/useMotion'
 import { hapticStart } from '@/shared/lib/haptic'
 import { requestNotificationPermission } from '@/shared/lib/notify'
 import { TIMER_PRESETS } from '@/shared/lib/constants'
+import { supabase } from '@/shared/lib/supabase'
+import { sendFocusSession } from '@/shared/lib/volaura-bridge'
 import i18n from '@/i18n'
 import { ARC_SIZE } from './ArcTimer'
 import { useSessionPhase } from './useSessionPhase'
@@ -157,6 +159,7 @@ export function useFocusSession() {
     saveSession, stopAudio, setPreset, endSession,
     hasAchievement, unlockAchievement, play, setScreen,
   })
+  const { pendingSessionRef } = sessionEnd
 
   // ── Interrupt bookmark ──────────────────────────────────────────────────────
   const [bookmarkText, setBookmarkText]         = useState('')
@@ -182,7 +185,16 @@ export function useFocusSession() {
   const handlePostEnergy = useCallback((level: EnergyLevel) => {
     _handlePostEnergy(level)
     setPostEnergyLogged(true)
-  }, [_handlePostEnergy])
+    // Deferred VOLAURA session event — now we have the real post-session energy_after
+    const pending = pendingSessionRef.current
+    if (pending) {
+      pendingSessionRef.current = null
+      void supabase.auth.getSession().then(({ data }) => {
+        const token = data.session?.access_token
+        if (token) void sendFocusSession(token, { ...pending, energyAfter: level })
+      })
+    }
+  }, [_handlePostEnergy, pendingSessionRef])
 
   // ── Start ────────────────────────────────────────────────────────────────────
   const handleStart = useCallback((overrideDuration?: number) => {
