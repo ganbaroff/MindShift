@@ -147,6 +147,8 @@ export default function OnboardingPage() {
   }
 
   const handleNext = () => {
+    // Track Continue button on energy (3) and ready (4) steps — auto-advance steps are tracked in select()
+    if (isEnergyStep || isReadyStep) logEvent('onboarding_step', { step })
     if (step < TOTAL_STEPS - 1) setStep(step + 1)
     else finish()
   }
@@ -167,6 +169,7 @@ export default function OnboardingPage() {
 
   // Quick Start — skip setup, use smart defaults, get into app immediately
   const handleQuickStart = () => {
+    logEvent('onboarding_quick_start')
     setAppMode('minimal')
     setEnergyLevel(3 as EnergyLevel)
     setOnboardingCompleted()

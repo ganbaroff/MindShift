@@ -19,6 +19,7 @@ import { useMotion } from '@/shared/hooks/useMotion'
 import { hapticStart } from '@/shared/lib/haptic'
 import { requestNotificationPermission } from '@/shared/lib/notify'
 import { TIMER_PRESETS } from '@/shared/lib/constants'
+import { logEvent } from '@/shared/lib/logger'
 import { supabase } from '@/shared/lib/supabase'
 import { sendFocusSession } from '@/shared/lib/volaura-bridge'
 import i18n from '@/i18n'
@@ -210,6 +211,7 @@ export function useFocusSession() {
     energyBeforeRef.current   = energyLevel
     setPostEnergyLogged(false)
 
+    logEvent('session_started', { duration_min: duration, has_task: selectedTask ? 1 : 0 })
     void requestNotificationPermission()
     hapticStart()
     resetPhaseTracking()
