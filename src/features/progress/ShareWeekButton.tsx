@@ -17,7 +17,7 @@ export function ShareWeekButton() {
     await nativeShare({
       title: 'My MindShift week 🌱',
       text: `This week I focused for ${mins} minutes and completed ${completedTotal} tasks with MindShift — ADHD-aware productivity. 💙`,
-      url: 'https://mindshift.app',
+      url: 'https://mindshift-umber.vercel.app',
     })
   }
 

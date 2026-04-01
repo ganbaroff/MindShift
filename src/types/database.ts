@@ -109,6 +109,8 @@ export interface TaskRow {
   reminder_sent_at: string | null
   note: string | null
   google_event_id: string | null
+  repeat: 'none' | 'daily' | 'weekly'
+  category: string | null
 }
 export type TaskInsert = Omit<TaskRow, 'id' | 'created_at' | 'completed_at' | 'snooze_count'>
 
