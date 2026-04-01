@@ -36,6 +36,16 @@ export function getWeekStart(): Date {
   return monday
 }
 
+/** Next Monday as YYYY-MM-DD (local). Advances past current day even if today is Monday. */
+export function nextMondayISO(): string {
+  const now = new Date()
+  const day = now.getDay() // 0=Sun, 1=Mon … 6=Sat
+  const daysUntilMonday = day === 1 ? 7 : (8 - day) % 7 || 7
+  const next = new Date(now)
+  next.setDate(now.getDate() + daysUntilMonday)
+  return toISODate(next)
+}
+
 /**
  * ISO week key for a date.
  * Sunday maps to next week (to match the weekly planning trigger logic).

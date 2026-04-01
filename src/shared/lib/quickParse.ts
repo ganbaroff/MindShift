@@ -166,6 +166,38 @@ function extractTime(text: string): { time: string | null; cleaned: string } {
     return { time: '12:00', cleaned: text.replace(/(?:^|\s)в\s+полдень(?:\s|$)/i, ' ').trim() }
   }
 
+  // "in 30 minutes", "in 2 hours", "in an hour" — relative from now
+  const inMinutes = text.match(/\bin\s+(\d+)\s*(?:min(?:utes?)?|мин(?:уты?|ут)?)\b/i)
+  if (inMinutes) {
+    const mins = parseInt(inMinutes[1], 10)
+    if (mins > 0 && mins <= 480) {
+      const target = new Date(Date.now() + mins * 60_000)
+      const time = `${target.getHours().toString().padStart(2, '0')}:${target.getMinutes().toString().padStart(2, '0')}`
+      return { time, cleaned: stripMatch(text, inMinutes[0]) }
+    }
+  }
+  const inHours = text.match(/\bin\s+(?:an?\s+hour|(\d+)\s*(?:hours?|ч(?:аса?|асов)?))\b/i)
+  if (inHours) {
+    const hrs = inHours[1] ? parseInt(inHours[1], 10) : 1
+    if (hrs > 0 && hrs <= 24) {
+      const target = new Date(Date.now() + hrs * 3_600_000)
+      const time = `${target.getHours().toString().padStart(2, '0')}:${target.getMinutes().toString().padStart(2, '0')}`
+      return { time, cleaned: stripMatch(text, inHours[0]) }
+    }
+  }
+
+  // "at 3" / "at 9" without am/pm — smart PM defaulting (1–6 → PM, 7–11 → AM, 12+ → as-is)
+  const enBareHour = text.match(/\bat\s+(\d{1,2})\b(?!\s*:\d{2})(?!\s*(?:am|pm))/i)
+  if (enBareHour) {
+    let h = parseInt(enBareHour[1], 10)
+    if (h >= 1 && h <= 6) h += 12  // 1–6 → afternoon (13–18)
+    // 7–11 stay as AM, 12–23 stay as-is
+    if (h >= 0 && h <= 23) {
+      const time = `${h.toString().padStart(2, '0')}:00`
+      return { time, cleaned: stripMatch(text, enBareHour[0]) }
+    }
+  }
+
   return { time: null, cleaned: text }
 }
 

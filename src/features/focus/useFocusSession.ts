@@ -203,8 +203,9 @@ export function useFocusSession() {
     resetPhaseTracking()
     startSession(selectedTask?.id ?? null, duration, focusAnchor ?? null)
 
-    try { playAnchor() } catch { /* audio unavailable — session continues silently */ }
-    if (focusAnchor) { try { play(focusAnchor) } catch { /* silent */ } }
+    try { playAnchor() } catch { /* sonic anchor unavailable */ }
+    // Auto-start ambient audio: use focusAnchor if set, else activePreset, else brown noise
+    try { play(focusAnchor ?? activePreset ?? 'brown') } catch { /* audio unavailable — session continues silently */ }
 
     setRemainingSeconds(durationSec)
     setElapsedSeconds(0)
@@ -212,7 +213,7 @@ export function useFocusSession() {
     setShowDigits(false)
     setScreen('session')
     startInterval()
-  }, [showCustom, customDuration, selectedDuration, selectedTask, focusAnchor,
+  }, [showCustom, customDuration, selectedDuration, selectedTask, focusAnchor, activePreset,
       play, playAnchor, startSession, setPhase, startInterval, resetPhaseTracking])
 
   // ── Quick-start auto detection ──────────────────────────────────────────────

@@ -287,7 +287,7 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
               <div>
                 {!showNote ? (
                   <button type="button" onClick={() => setShowNote(true)}
-                    className="text-xs flex items-center gap-1 -mt-1 focus-visible:ring-2 focus-visible:ring-[#7B72FF] rounded" style={{ color: '#5A5B72' }} aria-expanded={showNote}>
+                    className="text-xs flex items-center gap-1 -mt-1 focus-visible:ring-2 focus-visible:ring-[#7B72FF] rounded" style={{ color: 'var(--color-text-muted)' }} aria-expanded={showNote}>
                     {t('addTask.addContext')}
                   </button>
                 ) : (

@@ -47,3 +47,5 @@ supabase/.temp/
 
 # Visual audit (screenshots + capture scripts — not for git)
 docs/visual-audit/
+
+.vercel

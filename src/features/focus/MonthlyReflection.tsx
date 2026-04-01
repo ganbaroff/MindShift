@@ -8,9 +8,10 @@
  * and reduce the accumulated anxiety of unmeasured progress. Celebratory
  * language (not metrics) prevents shame spirals.
  *
- * Step 1: Gentle celebration of the past month (lifetime completions + streak).
- * Step 2: Set ONE word/intention for the new month (stored in note, not DB yet).
- * Step 3: "New month, fresh start 🌱" — closing, auto-dismiss 3s.
+ * Step 0: Wrapped     — lifetime stats grid + share (MonthlyWrappedStep)
+ * Step 1: Recap       — new month welcome + gentle stats
+ * Step 2: Intention   — one-word input + chips (MonthlyIntentionStep)
+ * Step 3: Close       — auto-dismiss 3s
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
@@ -20,6 +21,8 @@ import { useMotion } from '@/shared/hooks/useMotion'
 import { useStore } from '@/store'
 import { currentMonthISO } from '@/shared/lib/dateUtils'
 import { ShareCard } from '@/shared/ui/ShareCard'
+import { MonthlyWrappedStep } from './MonthlyWrappedStep'
+import { MonthlyIntentionStep } from './MonthlyIntentionStep'
 
 interface Props {
   onDismiss: () => void
@@ -32,11 +35,6 @@ const MONTH_NAMES = [
   'July','August','September','October','November','December',
 ]
 
-const INTENTION_SUGGESTIONS = [
-  'Flow 🌊', 'Steady 🌱', 'Bold 🔥', 'Rest 🌙',
-  'Create ✨', 'Finish 🎯', 'Connect 💙', 'Explore 🗺️',
-]
-
 const CLOSING_KEYS = [
   'monthly.closingFresh',
   'monthly.closingSmall',
@@ -46,7 +44,7 @@ const CLOSING_KEYS = [
 
 export function MonthlyReflection({ onDismiss }: Props) {
   const { completedTotal, currentStreak, longestStreak, xpTotal, achievements, setMonthlyReflectionShownMonth } = useStore()
-  const { t: transition, shouldAnimate } = useMotion()
+  const { t: motionTransition, shouldAnimate } = useMotion()
   const { t } = useTranslation()
   const [step, setStep] = useState<Step>('wrapped')
   const [intention, setIntention] = useState('')
@@ -70,7 +68,6 @@ export function MonthlyReflection({ onDismiss }: Props) {
     onDismiss()
   }, [currentMonth, setMonthlyReflectionShownMonth, onDismiss])
 
-  // Auto-dismiss from closing step after 3s
   useEffect(() => {
     if (step !== 'close') return
     const timer = setTimeout(handleDismiss, 3000)
@@ -84,19 +81,14 @@ export function MonthlyReflection({ onDismiss }: Props) {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         className="fixed inset-0 z-50 flex flex-col justify-center px-6"
-        style={{
-          background: 'linear-gradient(180deg, #0F1117 0%, #1A1B30 50%, #141228 100%)',
-        }}
+        style={{ background: 'linear-gradient(180deg, #0F1117 0%, #1A1B30 50%, #141228 100%)' }}
       >
-        {/* Gentle glow */}
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 0.10, scale: 1 }}
           transition={{ duration: 1.5, ease: 'easeOut' }}
           className="absolute inset-0 pointer-events-none"
-          style={{
-            background: 'radial-gradient(ellipse 65% 45% at 50% 30%, #4ECDC4, #7B72FF30, transparent)',
-          }}
+          style={{ background: 'radial-gradient(ellipse 65% 45% at 50% 30%, #4ECDC4, #7B72FF30, transparent)' }}
         />
 
         <div className="relative max-w-sm mx-auto w-full flex flex-col gap-8">
@@ -120,91 +112,19 @@ export function MonthlyReflection({ onDismiss }: Props) {
           </div>
 
           <AnimatePresence mode="wait">
-            {/* ── Step 0: Wrapped ────────────────────────────────────────── */}
             {step === 'wrapped' && (
-              <motion.div
-                key="wrapped"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, y: -16 }}
-                transition={{ ...transition('expressive'), duration: 0.4 }}
-                className="flex flex-col gap-6"
-              >
-                <div className="text-center">
-                  <p className="text-4xl mb-3">✨</p>
-                  <h2 className="text-xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-                    {t('monthly.yourWrapped', { month: prevMonthName })}
-                  </h2>
-                  <p className="text-sm mt-2" style={{ color: 'var(--color-text-muted)' }}>
-                    {t('monthly.whatYouBuilt')}
-                  </p>
-                </div>
-
-                {/* Stats grid */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div
-                    className="flex flex-col items-center p-3 rounded-2xl"
-                    style={{ background: 'var(--color-surface-card)', border: '1px solid rgba(123,114,255,0.12)' }}
-                  >
-                    <span className="text-2xl font-bold" style={{ color: 'var(--color-primary)' }}>{xpTotal}</span>
-                    <span className="text-[11px] mt-0.5 text-center" style={{ color: 'var(--color-text-muted)' }}>{t('monthly.totalXp')}</span>
-                  </div>
-                  <div
-                    className="flex flex-col items-center p-3 rounded-2xl"
-                    style={{ background: 'var(--color-surface-card)', border: '1px solid rgba(78,205,196,0.12)' }}
-                  >
-                    <span className="text-2xl font-bold" style={{ color: 'var(--color-teal)' }}>{completedTotal}</span>
-                    <span className="text-[11px] mt-0.5 text-center" style={{ color: 'var(--color-text-muted)' }}>{t('monthly.tasksDone')}</span>
-                  </div>
-                  <div
-                    className="flex flex-col items-center p-3 rounded-2xl"
-                    style={{ background: 'var(--color-surface-card)', border: '1px solid rgba(78,205,196,0.12)' }}
-                  >
-                    <span className="text-2xl font-bold" style={{ color: 'var(--color-teal)' }}>{Math.max(currentStreak, longestStreak)}</span>
-                    <span className="text-[11px] mt-0.5 text-center" style={{ color: 'var(--color-text-muted)' }}>{t('monthly.bestStreak')} 🔥</span>
-                  </div>
-                  <div
-                    className="flex flex-col items-center p-3 rounded-2xl"
-                    style={{ background: 'var(--color-surface-card)', border: '1px solid rgba(123,114,255,0.12)' }}
-                  >
-                    <span className="text-2xl font-bold" style={{ color: 'var(--color-primary)' }}>{unlockedBadges.length}</span>
-                    <span className="text-[11px] mt-0.5 text-center" style={{ color: 'var(--color-text-muted)' }}>{t('monthly.badgesEarned')}</span>
-                  </div>
-                </div>
-
-                {/* Top badge highlight */}
-                {topBadge && (
-                  <div
-                    className="flex items-center gap-3 px-4 py-3 rounded-2xl"
-                    style={{ background: 'rgba(123,114,255,0.08)', border: '1px solid rgba(123,114,255,0.15)' }}
-                  >
-                    <span className="text-2xl">{topBadge.emoji}</span>
-                    <div>
-                      <p className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>{topBadge.name}</p>
-                      <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>{t('monthly.latestBadge')}</p>
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex flex-col gap-3">
-                  <button
-                    onClick={() => setShowShareCard(true)}
-                    className="w-full py-4 rounded-2xl font-semibold text-base"
-                    style={{ background: 'var(--color-primary)', color: '#FFFFFF' }}
-                    aria-label="Share monthly wrapped"
-                  >
-                    {t('monthly.shareWrapped')} ✨
-                  </button>
-                  <button
-                    onClick={() => setStep('recap')}
-                    className="w-full py-3 text-sm"
-                    style={{ color: 'var(--color-text-muted)' }}
-                    aria-label="Continue to recap"
-                  >
-                    {t('monthly.continue')}
-                  </button>
-                </div>
-              </motion.div>
+              <MonthlyWrappedStep
+                prevMonthName={prevMonthName}
+                xpTotal={xpTotal}
+                completedTotal={completedTotal}
+                currentStreak={currentStreak}
+                longestStreak={longestStreak}
+                unlockedBadges={unlockedBadges}
+                topBadge={topBadge}
+                motionTransition={motionTransition}
+                onShare={() => setShowShareCard(true)}
+                onContinue={() => setStep('recap')}
+              />
             )}
 
             {/* ── Step 1: Recap ──────────────────────────────────────────── */}
@@ -214,7 +134,7 @@ export function MonthlyReflection({ onDismiss }: Props) {
                 initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -16 }}
-                transition={{ ...transition(), duration: 0.35 }}
+                transition={{ ...motionTransition(), duration: 0.35 }}
                 className="flex flex-col gap-6"
               >
                 <div className="text-center">
@@ -227,7 +147,6 @@ export function MonthlyReflection({ onDismiss }: Props) {
                   </p>
                 </div>
 
-                {/* Gentle stats — celebratory, not punishing */}
                 <div className="grid grid-cols-2 gap-3">
                   <div
                     className="flex flex-col items-center p-3 rounded-2xl"
@@ -245,7 +164,7 @@ export function MonthlyReflection({ onDismiss }: Props) {
                   </div>
                 </div>
 
-                <p className="text-sm text-center italic" style={{ color: '#5A5B72' }}>
+                <p className="text-sm text-center italic" style={{ color: 'var(--color-text-muted)' }}>
                   {t('monthly.prevMonthQuote', { month: prevMonthName })}
                 </p>
 
@@ -270,85 +189,14 @@ export function MonthlyReflection({ onDismiss }: Props) {
               </motion.div>
             )}
 
-            {/* ── Step 2: Intention ──────────────────────────────────────── */}
             {step === 'intention' && (
-              <motion.div
-                key="intention"
-                initial={{ opacity: 0, y: 24 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -16 }}
-                transition={{ ...transition(), duration: 0.35 }}
-                className="flex flex-col gap-5"
-              >
-                <div className="text-center">
-                  <p className="text-4xl mb-3">🌅</p>
-                  <h2 className="text-xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-                    {t('monthly.oneWord', { month: monthName })}
-                  </h2>
-                  <p className="text-sm mt-2" style={{ color: 'var(--color-text-muted)' }}>
-                    {t('monthly.whatFeel')}
-                  </p>
-                </div>
-
-                <input
-                  value={intention}
-                  onChange={e => setIntention(e.target.value.slice(0, 30))}
-                  onKeyDown={e => { if (e.key === 'Enter') setStep('close') }}
-                  placeholder={t('monthly.intentionPlaceholder')}
-                  autoFocus
-                  className="w-full rounded-2xl px-4 py-3 text-base text-center outline-none transition-all duration-200"
-                  style={{
-                    background: 'var(--color-surface-card)',
-                    border: '1px solid rgba(255,255,255,0.06)',
-                    color: 'var(--color-text-primary)',
-                    caretColor: '#4ECDC4',
-                  }}
-                  onFocus={e => { e.currentTarget.style.borderColor = '#4ECDC4' }}
-                  onBlur={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)' }}
-                />
-
-                {/* Quick-pick chips */}
-                <div className="flex flex-wrap gap-2 justify-center">
-                  {INTENTION_SUGGESTIONS.map(s => (
-                    <button
-                      key={s}
-                      type="button"
-                      onClick={() => setIntention(s.split(' ')[0])}
-                      aria-label={`Set intention: ${s.split(' ')[0]}`}
-                      className="text-xs px-3 py-1.5 rounded-xl transition-all duration-150"
-                      style={{
-                        background: intention.startsWith(s.split(' ')[0]) ? 'rgba(78,205,196,0.15)' : 'var(--color-surface-card)',
-                        border: `1px solid ${intention.startsWith(s.split(' ')[0]) ? 'var(--color-teal)' : 'var(--color-border-subtle)'}`,
-                        color: intention.startsWith(s.split(' ')[0]) ? 'var(--color-teal)' : 'var(--color-text-muted)',
-                      }}
-                    >
-                      {s}
-                    </button>
-                  ))}
-                </div>
-
-                <div className="flex flex-col gap-3">
-                  <button
-                    onClick={() => setStep('close')}
-                    className="w-full py-4 rounded-2xl font-semibold text-base transition-all duration-200"
-                    style={{
-                      background: intention.trim() ? 'var(--color-teal)' : 'var(--color-surface-raised)',
-                      color: intention.trim() ? 'var(--color-bg)' : 'var(--color-text-muted)',
-                    }}
-                    aria-label="Set monthly intention"
-                  >
-                    {intention.trim() ? `${t('monthly.intentionSet', { month: monthName, intention: intention.trim() })} 🌱` : t('monthly.setIntentionBtn')}
-                  </button>
-                  <button
-                    onClick={() => setStep('close')}
-                    className="w-full py-3 text-sm"
-                    style={{ color: 'var(--color-text-muted)' }}
-                    aria-label="Skip monthly reflection"
-                  >
-                    Skip
-                  </button>
-                </div>
-              </motion.div>
+              <MonthlyIntentionStep
+                monthName={monthName}
+                intention={intention}
+                onIntentionChange={setIntention}
+                motionTransition={motionTransition}
+                onNext={() => setStep('close')}
+              />
             )}
 
             {/* ── Step 3: Close ──────────────────────────────────────────── */}
@@ -358,7 +206,7 @@ export function MonthlyReflection({ onDismiss }: Props) {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ ...transition('expressive'), duration: 0.5 }}
+                transition={{ ...motionTransition('expressive'), duration: 0.5 }}
                 className="flex flex-col items-center gap-6 text-center"
               >
                 <motion.p
@@ -381,7 +229,7 @@ export function MonthlyReflection({ onDismiss }: Props) {
                 <p className="text-xl font-medium leading-relaxed" style={{ color: 'var(--color-text-primary)' }}>
                   {t(closingKey)}
                 </p>
-                <p className="text-xs" style={{ color: '#5A5B72' }}>{t('monthly.closingMoment')}</p>
+                <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>{t('monthly.closingMoment')}</p>
               </motion.div>
             )}
           </AnimatePresence>

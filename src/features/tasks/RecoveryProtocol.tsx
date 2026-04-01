@@ -264,7 +264,7 @@ export function RecoveryProtocol({ onDismiss }: Props) {
             transition={{ ...transition(), delay: 0.35 }}
             className="flex flex-col gap-2"
           >
-            <p className="text-xs text-center" style={{ color: '#5A5B72' }}>
+            <p className="text-xs text-center" style={{ color: 'var(--color-text-muted)' }}>
               🌶️ {t('recovery.overwhelmQuestion')}
             </p>
             <div className="flex justify-center gap-2">
@@ -288,7 +288,7 @@ export function RecoveryProtocol({ onDismiss }: Props) {
                   aria-label={`Overwhelm level: ${t(labelKey)}`}
                 >
                   <span className="text-base leading-none">{emoji}</span>
-                  <span className="text-[10px]" style={{ color: spiciness === value ? '#C8C0FF' : '#5A5B72' }}>{t(labelKey)}</span>
+                  <span className="text-[10px]" style={{ color: spiciness === value ? '#C8C0FF' : 'var(--color-text-muted)' }}>{t(labelKey)}</span>
                 </button>
               ))}
             </div>
@@ -338,7 +338,7 @@ export function RecoveryProtocol({ onDismiss }: Props) {
 
             {/* Micro-win suggestion chips — Research #7: lower blank-slate barrier */}
             <div className="flex flex-wrap gap-2 mt-1">
-              <p className="w-full text-xs mb-0.5" style={{ color: '#5A5B72' }}>
+              <p className="w-full text-xs mb-0.5" style={{ color: 'var(--color-text-muted)' }}>
                 {t('recovery.orPickEasy')}
               </p>
               {MICRO_WIN_KEYS.map((key, i) => {

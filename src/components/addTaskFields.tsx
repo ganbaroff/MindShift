@@ -139,7 +139,7 @@ export function CategoryPicker({ category, showCategory, onToggle, onSelect, sho
           type="button"
           onClick={onToggle}
           className="text-xs flex items-center gap-1"
-          style={{ color: '#5A5B72' }}
+          style={{ color: 'var(--color-text-muted)' }}
           aria-expanded={false}
         >
           {t('addTaskFields.addCategory')}

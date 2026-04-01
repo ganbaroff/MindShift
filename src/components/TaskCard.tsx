@@ -314,7 +314,7 @@ function TaskCardInner({ task, index = 0, onDone, onPark, onRemove }: TaskCardPr
 
       {/* Note preview — shown when task has context */}
       {task.note && (
-        <p className="text-[11px] mb-2 line-clamp-1" style={{ color: '#5A5B72' }}>
+        <p className="text-[11px] mb-2 line-clamp-1" style={{ color: 'var(--color-text-muted)' }}>
           📝 {task.note}
         </p>
       )}

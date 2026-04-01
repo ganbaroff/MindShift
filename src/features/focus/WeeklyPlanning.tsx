@@ -141,7 +141,7 @@ export const WeeklyPlanning = memo(function WeeklyPlanning({ onDismiss }: Weekly
             <button
               onClick={handleSkip}
               className="mt-3 w-full py-2 text-xs"
-              style={{ color: '#5A5B72' }}
+              style={{ color: 'var(--color-text-muted)' }}
               aria-label="Skip weekly planning"
             >
               {t('weekly.skipForNow')}
@@ -192,7 +192,7 @@ export const WeeklyPlanning = memo(function WeeklyPlanning({ onDismiss }: Weekly
             <button
               onClick={handleSkip}
               className="mt-4 w-full py-2 text-xs text-center"
-              style={{ color: '#5A5B72' }}
+              style={{ color: 'var(--color-text-muted)' }}
               aria-label="Skip weekly planning"
             >
               {t('weekly.skipDecide')}

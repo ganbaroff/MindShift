@@ -122,6 +122,13 @@ export function useSessionEnd({
         elapsedMin <= 25 ? 15 :
         elapsedMin <= 45 ? 25 : 40
       storeState.addXP(sessionXP)
+
+      // Aha moment — first ever focus session completed
+      if (storeState.completedFocusSessions === 0) {
+        tryUnlock('first_focus')
+        logEvent('first_session_completed', { duration_min: elapsedMin })
+      }
+
       storeState.incrementFocusSessions()
 
       if (isVolauraConfigured() && storeState.userId && !storeState.userId.startsWith('guest_')) {
