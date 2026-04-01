@@ -111,7 +111,7 @@ export function MonthlyReflection({ onDismiss }: Props) {
             ))}
           </div>
 
-          <AnimatePresence mode="wait">
+          <AnimatePresence>
             {step === 'wrapped' && (
               <MonthlyWrappedStep
                 prevMonthName={prevMonthName}
@@ -134,7 +134,7 @@ export function MonthlyReflection({ onDismiss }: Props) {
                 initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -16 }}
-                transition={{ ...motionTransition(), duration: 0.35 }}
+                transition={{ ...motionTransition(), ...(shouldAnimate && { duration: 0.35 }) }}
                 className="flex flex-col gap-6"
               >
                 <div className="text-center">
@@ -195,6 +195,7 @@ export function MonthlyReflection({ onDismiss }: Props) {
                 intention={intention}
                 onIntentionChange={setIntention}
                 motionTransition={motionTransition}
+                shouldAnimate={shouldAnimate}
                 onNext={() => setStep('close')}
               />
             )}
@@ -206,7 +207,7 @@ export function MonthlyReflection({ onDismiss }: Props) {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ ...motionTransition('expressive'), duration: 0.5 }}
+                transition={{ ...motionTransition('expressive'), ...(shouldAnimate && { duration: 0.5 }) }}
                 className="flex flex-col items-center gap-6 text-center"
               >
                 <motion.p

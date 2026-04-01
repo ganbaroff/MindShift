@@ -108,6 +108,7 @@ export function useSessionEnd({
     if (elapsedMin >= 1) pushFocusComplete(elapsedMin)
 
     logEvent('session_ended', { completed: wasCompleted ? 1 : 0, duration_min: elapsedMin, phase: sessionPhase })
+    if (wasCompleted) logEvent('session_completed', { duration_min: elapsedMin, phase: sessionPhase })
 
     if (wasCompleted) {
       const storeState = useStore.getState()

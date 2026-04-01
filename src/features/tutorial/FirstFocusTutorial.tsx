@@ -85,7 +85,8 @@ export function FirstFocusTutorial() {
     setFirstFocusTutorialCompleted()
     markHintSeen('first_focus_tutorial')
     markHintSeen('welcome_walkthrough')
-  }, [setFirstFocusTutorialCompleted, markHintSeen, removeTask, step])
+    navigate('/focus')
+  }, [setFirstFocusTutorialCompleted, markHintSeen, removeTask, step, navigate])
 
   const handleStartTimer = useCallback(() => {
     // Create sample task in NOW pool — tracked for cleanup on complete/skip
