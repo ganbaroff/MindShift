@@ -13,7 +13,7 @@ import { checkDbRateLimit } from '../_shared/rateLimit.ts'
 
 const GEMINI_MODEL = Deno.env.get('GEMINI_MODEL') ?? 'gemini-2.0-flash'
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`
-const API_TIMEOUT_MS = 15_000 // 15s — fail fast, don't hang the user
+const API_TIMEOUT_MS = 8_000 // 8s — per security rules (CLAUDE.md)
 const MAX_TITLE_LEN = 500
 const MAX_DESC_LEN = 1000
 
