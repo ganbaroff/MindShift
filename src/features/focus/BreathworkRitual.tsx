@@ -208,7 +208,7 @@ export function BreathworkRitual({ onComplete, onSkip }: BreathworkRitualProps) 
       <motion.button
         whileTap={{ scale: 0.97 }}
         onClick={handleSkip}
-        className="mt-10 text-[13px] px-6 py-2 rounded-full"
+        className="mt-10 text-[13px] px-6 py-2 rounded-full focus-visible:ring-2 focus-visible:ring-[#7B72FF] focus-visible:outline-none"
         style={{ color: 'var(--color-text-muted)', backgroundColor: 'rgba(255,255,255,0.05)' }}
         aria-label="Skip breathing ritual"
       >

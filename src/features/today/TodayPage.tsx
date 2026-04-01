@@ -191,7 +191,7 @@ export default function TodayPage() {
           <div ref={energyPickerRef} className="relative">
             <button
               onClick={() => setShowEnergyPicker(v => !v)}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-xl focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
+              className="flex items-center gap-1 px-2.5 py-1 min-h-[44px] rounded-xl focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
               style={{ background: 'rgba(78,205,196,0.1)' }}
               aria-label={`Energy level ${energyLevel} of 5 — tap to update`}
               aria-expanded={showEnergyPicker}
@@ -330,7 +330,7 @@ export default function TodayPage() {
 
         <button
           onClick={() => navigate('/progress')}
-          className="w-full py-2 rounded-xl text-[12px] font-medium text-center focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
+          className="w-full py-3 rounded-xl text-[12px] font-medium text-center focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
           style={{ color: 'var(--color-text-muted)' }}
         >
           {t('today.viewProgress')}

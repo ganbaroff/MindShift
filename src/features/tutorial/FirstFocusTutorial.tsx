@@ -20,6 +20,7 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { useStore } from '@/store'
+import { logEvent } from '@/shared/lib/logger'
 import { Mascot } from '@/shared/ui/Mascot'
 
 type Step = 'intro' | 'timer' | 'celebrate' | 'next'
@@ -67,6 +68,7 @@ export function FirstFocusTutorial() {
       removeTask(sampleTaskIdRef.current)
       sampleTaskIdRef.current = null
     }
+    logEvent('tutorial_completed')
     setFirstFocusTutorialCompleted()
     markHintSeen('first_focus_tutorial')
     markHintSeen('welcome_walkthrough')
@@ -79,10 +81,11 @@ export function FirstFocusTutorial() {
       removeTask(sampleTaskIdRef.current)
       sampleTaskIdRef.current = null
     }
+    logEvent('tutorial_skipped', { step })
     setFirstFocusTutorialCompleted()
     markHintSeen('first_focus_tutorial')
     markHintSeen('welcome_walkthrough')
-  }, [setFirstFocusTutorialCompleted, markHintSeen, removeTask])
+  }, [setFirstFocusTutorialCompleted, markHintSeen, removeTask, step])
 
   const handleStartTimer = useCallback(() => {
     // Create sample task in NOW pool — tracked for cleanup on complete/skip
