@@ -111,8 +111,12 @@
       Replace data-domain with your actual domain (or VITE_PLAUSIBLE_DOMAIN env var via server).
       Safe to remove entirely for analytics-free setups.
     -->
-    <script defer data-domain="mindshift-umber.vercel.app" src="https://plausible.io/js/script.js"></script>
-    <!-- TODO: when custom domain mindshift.app is added to Vercel, update data-domain here + Plausible site settings -->
+    <!-- Privacy-friendly analytics by Plausible -->
+    <script async src="https://plausible.io/js/pa-TyByCOn6PKKwDFUsU5lmg.js"></script>
+    <script>
+      window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+      plausible.init()
+    </script>
   </head>
   <body>
     <div id="root"></div>
