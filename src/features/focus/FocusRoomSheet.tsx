@@ -145,7 +145,7 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
             >
               {t('focusRoom.joinRoom')}
             </motion.button>
-            <button onClick={() => setMode('pick')} className="w-full py-1.5 text-[12px]" style={{ color: '#5A5B72' }}>
+            <button onClick={() => setMode('pick')} className="w-full py-1.5 text-[12px]" style={{ color: 'var(--color-text-muted)' }}>
               {t('focusRoom.back')}
             </button>
           </div>
@@ -188,7 +188,7 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
 
             {/* Peers */}
             {room.peers.length === 0 ? (
-              <p className="text-[12px] text-center py-2" style={{ color: '#5A5B72' }}>
+              <p className="text-[12px] text-center py-2" style={{ color: 'var(--color-text-muted)' }}>
                 {t('focusRoom.waitingForSomeone')} 🌱
               </p>
             ) : (
@@ -225,7 +225,7 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
             <button
               onClick={() => { room.leave(); setMode('pick') }}
               className="w-full py-1.5 text-[12px] text-center"
-              style={{ color: '#5A5B72' }}
+              style={{ color: 'var(--color-text-muted)' }}
             >
               {t('focusRoom.leaveRoom')}
             </button>

@@ -255,7 +255,7 @@ export default function FocusScreen() {
               ))}
             </div>
             {encouragement && room.peers.length > 0 && (
-              <p className="text-[10px] mt-0.5" style={{ color: '#5A5B72' }}>{encouragement}</p>
+              <p className="text-[10px] mt-0.5" style={{ color: 'var(--color-text-muted)' }}>{encouragement}</p>
             )}
           </motion.div>
         </AnimatePresence>

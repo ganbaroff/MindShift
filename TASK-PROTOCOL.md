@@ -300,16 +300,17 @@ From `.claude/rules/guardrails.md`:
 - [x] `src/store/index.ts` — ✅ 163 lines (decomposed in prior sprint)
 
 ### P1 — User-facing gaps
-- [ ] Audio: BreathworkRitual has zero audio (visual only)
-- [ ] Audio: volume default too quiet at 0.55 (maps to gain ~0.009)
+- [x] Audio: BreathworkRitual — ✅ soft rising/falling sine tones added (BATCH-2026-03-31-D)
+- [x] Audio: volume default too quiet — ✅ raised 0.55 → 0.65 (BATCH-2026-03-31-C)
 - [ ] Google Calendar: inbound sync missing (one-way only)
-- [ ] Push notifications: pg_cron needs enabling in Supabase Dashboard
+- [ ] Push notifications: pg_cron needs enabling in Supabase Dashboard (manual: Supabase Dashboard)
 
 ### P2 — Quality
 - [ ] QuickCapture: "today" / "tomorrow" without time shows no dueTime (expected)
-- [ ] TodayPage: no "add task for today" shortcut when pool is empty but tasks exist in NEXT
-- [ ] HistoryPage: no search/filter (large history unnavigable)
-- [ ] Onboarding: no progress indicator on steps
+- [x] TodayPage: next-tasks nudge when NOW empty + NEXT has tasks ✅ (BATCH-2026-03-31-C)
+- [x] Tutorial: "Start for Real" → navigates to /focus for momentum ✅ (BATCH-2026-03-31-C)
+- [x] HistoryPage: phase filter chips (All/Flow/Release/Struggle) ✅ (BATCH-2026-03-31-D)
+- [x] Onboarding: progress indicator already implemented (segments + "Step X of Y") ✅
 
 ### P3 — Polish
 - [ ] Play Store: 8 screenshots need manual capture (`scripts/capture-screenshots.ts`)

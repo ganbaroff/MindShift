@@ -155,6 +155,7 @@ export const WIDGET_DEFAULTS_GENERIC: WidgetConfig[] = [
 ]
 
 export const ACHIEVEMENT_DEFINITIONS: Omit<Achievement, 'unlockedAt'>[] = [
+  { key: 'first_focus',   name: 'First Focus',    emoji: '🌟', description: 'Complete your first focus session' },
   { key: 'first_seed',    name: 'First Seed',     emoji: '🌱', description: 'Complete your first task' },
   { key: 'five_min_hero', name: '5-Minute Hero',  emoji: '⚡', description: 'Start a task using the 5-minute rule' },
   { key: 'flow_rider',    name: 'Flow Rider',     emoji: '🌊', description: 'Complete a 52-minute focus session' },

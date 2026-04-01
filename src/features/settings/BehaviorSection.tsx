@@ -174,7 +174,7 @@ export function BehaviorSection() {
                     >
                       <span className="text-base">{emoji}</span>
                       <span className="font-medium">{t(labelKey)}</span>
-                      <span style={{ color: '#5A5B72', fontSize: 10 }}>{t(subKey)}</span>
+                      <span style={{ color: 'var(--color-text-muted)', fontSize: 10 }}>{t(subKey)}</span>
                     </button>
                   )
                 })}

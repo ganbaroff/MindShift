@@ -214,7 +214,7 @@ export default function HistoryPage() {
                           <p className="text-[15px] font-bold" style={{ color: 'var(--color-text-primary)' }}>
                             {formatDuration(s.duration_ms)}
                           </p>
-                          <p className="text-[9px] mt-0.5" style={{ color: '#5A5B72' }}>
+                          <p className="text-[9px] mt-0.5" style={{ color: 'var(--color-text-muted)' }}>
                             {new Date(s.started_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </p>
                         </div>
@@ -225,7 +225,7 @@ export default function HistoryPage() {
                             {PHASE_LABEL_KEYS[phase] ? t(PHASE_LABEL_KEYS[phase]) : phase}
                           </p>
                           {s.audio_preset && (
-                            <p className="text-[10px] mt-0.5 capitalize" style={{ color: '#5A5B72' }}>
+                            <p className="text-[10px] mt-0.5 capitalize" style={{ color: 'var(--color-text-muted)' }}>
                               🎧 {s.audio_preset}
                             </p>
                           )}

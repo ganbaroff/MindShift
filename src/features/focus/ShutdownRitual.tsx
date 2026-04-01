@@ -191,7 +191,7 @@ export function ShutdownRitual({ onDismiss }: Props) {
                       </div>
                     ))}
                     {todayWins.length > 4 && (
-                      <p className="text-xs text-center" style={{ color: '#5A5B72' }}>
+                      <p className="text-xs text-center" style={{ color: 'var(--color-text-muted)' }}>
                         {t('shutdown.moreWins', { count: todayWins.length - 4 })} 🌟
                       </p>
                     )}
@@ -308,7 +308,7 @@ export function ShutdownRitual({ onDismiss }: Props) {
                 <p className="text-xl font-medium leading-relaxed" style={{ color: 'var(--color-text-primary)' }}>
                   {t(goodnightKey)}
                 </p>
-                <p className="text-xs" style={{ color: '#5A5B72' }}>
+                <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
                   {t('shutdown.closingInMoment')}
                 </p>
               </motion.div>

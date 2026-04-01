@@ -122,13 +122,13 @@ export function ShareCard({ emoji, title, subtitle, stat, onClose }: ShareCardPr
               {/* XP tier */}
               <div className="relative z-10 flex items-center gap-2">
                 <span className="text-xs" style={{ color: 'var(--color-primary)' }}>🌱 {tierName}</span>
-                <span className="text-xs" style={{ color: '#5A5B72' }}>·</span>
-                <span className="text-xs" style={{ color: '#5A5B72' }}>{xpTotal} XP</span>
+                <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>·</span>
+                <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>{xpTotal} XP</span>
               </div>
 
               {/* Brand */}
               <div className="absolute bottom-6 left-0 right-0 text-center">
-                <p className="text-[10px] font-medium tracking-wider" style={{ color: '#5A5B72' }}>
+                <p className="text-[10px] font-medium tracking-wider" style={{ color: 'var(--color-text-muted)' }}>
                   MINDSHIFT — FOCUS MADE KIND
                 </p>
               </div>

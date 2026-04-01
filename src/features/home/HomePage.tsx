@@ -140,7 +140,7 @@ export default function HomePage() {
   return (
     <PageTransition>
     <div className="min-h-screen px-5 pb-36 pt-10" style={{ backgroundColor: 'var(--color-bg)' }}>
-      <p className="text-[10px] mb-1" style={{ color: '#5A5B72' }}>
+      <p className="text-[10px] mb-1" style={{ color: 'var(--color-text-muted)' }}>
         Updated {lastRefreshed.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
       </p>
 

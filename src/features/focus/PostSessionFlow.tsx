@@ -132,7 +132,7 @@ export const NatureBuffer = memo(function NatureBuffer({
               <p className="text-xs font-medium mb-1 text-center" style={{ color: 'var(--color-primary)' }}>
                 {t('focus.autopsyTitle', { min: sessionMinutes })}
               </p>
-              <p className="text-[11px] mb-3 text-center" style={{ color: '#5A5B72' }}>
+              <p className="text-[11px] mb-3 text-center" style={{ color: 'var(--color-text-muted)' }}>
                 {t('focus.autopsySubtitle')}
               </p>
               <div className="flex gap-2">
