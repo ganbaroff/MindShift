@@ -106,6 +106,7 @@ async function sendPush(
   sub: PushSubscription,
   title: string,
   body: string,
+  adminClient: ReturnType<typeof createClient>,
   url: string = '/'
 ): Promise<boolean> {
   try {
@@ -126,9 +127,8 @@ async function sendPush(
     })
 
     if (response.status === 410 || response.status === 404) {
-      // Subscription expired — clean up
-      const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY)
-      await supabase.from('push_subscriptions').delete().eq('id', sub.id)
+      // Subscription expired — clean up using the shared client (no new connection)
+      await adminClient.from('push_subscriptions').delete().eq('id', sub.id)
       return false
     }
 
@@ -197,7 +197,7 @@ Deno.serve(async (req) => {
     const body = `Heads up: "${task.title}" is coming up`
 
     for (const sub of subs) {
-      const ok = await sendPush(sub, title, body, '/today')
+      const ok = await sendPush(sub, title, body, supabase, '/today')
       if (ok) sent++
     }
   }
