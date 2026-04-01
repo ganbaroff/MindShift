@@ -35,7 +35,7 @@ jobs:
         env:
           # Use the stable branch alias — always points to latest production build.
           # Playwright config skips the dev-server webServer when this is set.
-          PLAYWRIGHT_BASE_URL: https://mind-shift-git-main-yusifg27-3093s-projects.vercel.app
+          PLAYWRIGHT_BASE_URL: https://mindshift-umber.vercel.app
         run: npx playwright test --project=chromium --project=mobile
 
       - name: Upload Playwright report
@@ -51,5 +51,5 @@ jobs:
         run: |
           echo "## E2E Production Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Tested against: https://mind-shift-git-main-yusifg27-3093s-projects.vercel.app" >> $GITHUB_STEP_SUMMARY
+          echo "Tested against: https://mindshift-umber.vercel.app" >> $GITHUB_STEP_SUMMARY
           echo "Triggered by deployment: ${{ github.event.deployment_status.target_url }}" >> $GITHUB_STEP_SUMMARY
