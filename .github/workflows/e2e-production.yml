@@ -28,7 +28,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install Playwright (Chromium only)
+      - name: Install Playwright (Chromium + mobile)
         run: npx playwright install chromium --with-deps
 
       - name: Run E2E against production
@@ -36,7 +36,7 @@ jobs:
           # Use the stable branch alias — always points to latest production build.
           # Playwright config skips the dev-server webServer when this is set.
           PLAYWRIGHT_BASE_URL: https://mind-shift-git-main-yusifg27-3093s-projects.vercel.app
-        run: npx playwright test --project=chromium
+        run: npx playwright test --project=chromium --project=mobile
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4

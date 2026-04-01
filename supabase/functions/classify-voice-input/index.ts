@@ -13,7 +13,7 @@ import { checkDbRateLimit } from '../_shared/rateLimit.ts'
 
 const GEMINI_MODEL = Deno.env.get('GEMINI_MODEL') ?? 'gemini-2.0-flash'
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`
-const API_TIMEOUT_MS = 12_000
+const API_TIMEOUT_MS = 8_000 // 8s — per security rules (CLAUDE.md)
 
 Deno.serve(async (req: Request) => {
   const cors = getCorsHeaders(req)

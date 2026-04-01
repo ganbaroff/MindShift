@@ -60,9 +60,15 @@ export function logInfo(context: string, data: ErrorMeta = {}): void {
  */
 export function logEvent(name: string, props?: Record<string, string | number>): void {
   try {
+    // Plausible (primary — loaded via script tag when configured)
     type PlausibleFn = (event: string, options?: { props?: Record<string, string | number> }) => void
-    const w = window as Window & { plausible?: PlausibleFn }
-    w.plausible?.(name, { props })
+    const w = window as Window & { plausible?: PlausibleFn; va?: { track: (name: string, props?: Record<string, string | number>) => void } }
+    if (w.plausible) {
+      w.plausible(name, { props })
+    } else if (w.va) {
+      // Vercel Analytics fallback (injected via @vercel/analytics in main.tsx)
+      w.va.track(name, props)
+    }
   } catch {
     // Analytics failures never bubble to the user
   }
