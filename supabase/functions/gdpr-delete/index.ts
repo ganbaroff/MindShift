@@ -71,6 +71,9 @@ Deno.serve(async (req: Request) => {
       'edge_rate_limits',
       'subscriptions',
       'tasks',
+      'push_subscriptions',
+      'google_tokens',
+      'telegram_links',
     ]
 
     const clearedTables: string[] = []

@@ -219,16 +219,20 @@ export default function App() {
     <BrowserRouter>
       <Toaster
         theme="dark"
-        position="top-center"
+        position="bottom-center"
+        visibleToasts={1}
         toastOptions={{
           style: {
             background: 'var(--color-surface-card)',
-            border: '1px solid rgba(255,255,255,0.06)',
+            border: '1px solid rgba(123,114,255,0.18)',
             color: 'var(--color-text-primary)',
             fontSize: '14px',
+            borderRadius: '16px',
+            boxShadow: '0 4px 24px rgba(0,0,0,0.35)',
           },
+          duration: 3000,
         }}
-        offset={16}
+        offset="calc(72px + env(safe-area-inset-bottom, 0px))"
       />
       <ErrorBoundary>
         <Suspense fallback={<LoadingScreen />}>

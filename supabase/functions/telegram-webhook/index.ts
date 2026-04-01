@@ -122,11 +122,13 @@ Deno.serve(async (req: Request) => {
 
   // ── Validate Telegram secret token ──────────────────────────────────────────
   const webhookSecret = Deno.env.get('TELEGRAM_WEBHOOK_SECRET')
-  if (webhookSecret) {
-    const headerSecret = req.headers.get('x-telegram-bot-api-secret-token')
-    if (headerSecret !== webhookSecret) {
-      return new Response('Forbidden', { status: 403 })
-    }
+  if (!webhookSecret) {
+    console.error('[telegram-webhook] TELEGRAM_WEBHOOK_SECRET env var not set — refusing to process')
+    return new Response('Misconfigured: TELEGRAM_WEBHOOK_SECRET not set', { status: 500 })
+  }
+  const headerSecret = req.headers.get('x-telegram-bot-api-secret-token')
+  if (headerSecret !== webhookSecret) {
+    return new Response('Forbidden', { status: 403 })
   }
 
   try {

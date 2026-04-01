@@ -69,6 +69,7 @@ export default defineConfig({
           // polluting the main bundle for users who never visit HomeScreen.
           // BentoGrid is lazy-loaded, so this chunk defers until HomeScreen renders.
           'vendor-dnd':      ['@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities'],
+          'vendor-sentry':   ['@sentry/react'],
         },
       },
     },
