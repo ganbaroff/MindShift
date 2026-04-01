@@ -11,8 +11,7 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react'
 import type { MutableRefObject } from 'react'
-import { supabase } from '@/shared/lib/supabase'
-import { sendFocusSession, isVolauraConfigured } from '@/shared/lib/volaura-bridge'
+import { isVolauraConfigured } from '@/shared/lib/volaura-bridge'
 import { logEvent } from '@/shared/lib/logger'
 import { useStore } from '@/store'
 import { notifyFocusEnd, notifyAchievement, pushFocusComplete, pushRecoveryEnd } from '@/shared/lib/notify'
@@ -61,6 +60,14 @@ export function useSessionEnd({
   const [bufferSeconds, setBufferSeconds] = useState(NATURE_BUFFER_SECONDS)
   const recoveryIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const bufferIntervalRef   = useRef<ReturnType<typeof setInterval> | null>(null)
+  // Pending VOLAURA session data — populated at session end, consumed in handlePostEnergy
+  // with the real post-session energy_after (not the stale energyBefore value)
+  const pendingSessionRef   = useRef<{
+    durationMinutes: number
+    phase: string
+    energyBefore: number
+    psychotype: string | null
+  } | null>(null)
 
   // Cleanup intervals on unmount — prevents timer accumulation if FocusScreen unmounts mid-countdown
   useEffect(() => {
@@ -132,16 +139,14 @@ export function useSessionEnd({
       storeState.incrementFocusSessions()
 
       if (isVolauraConfigured() && storeState.userId && !storeState.userId.startsWith('guest_')) {
-        void supabase.auth.getSession().then(({ data }) => {
-          const token = data.session?.access_token
-          if (token) void sendFocusSession(token, {
-            durationMinutes: elapsedMin,
-            phase: sessionPhase,
-            energyBefore: energyBeforeRef.current ?? 3,
-            energyAfter:  energyBeforeRef.current ?? 3,
-            psychotype: storeState.psychotype ?? null,
-          })
-        })
+        // Store session data — sendFocusSession fires in handlePostEnergy once
+        // the user picks their post-session energy (energy_after becomes accurate)
+        pendingSessionRef.current = {
+          durationMinutes: elapsedMin,
+          phase: sessionPhase,
+          energyBefore: energyBeforeRef.current ?? 3,
+          psychotype: storeState.psychotype ?? null,
+        }
       }
     }
 
@@ -189,6 +194,6 @@ export function useSessionEnd({
   return {
     recoverySeconds, bufferSeconds,
     handleSessionEnd, handleSkipBuffer, handleBypassRecovery,
-    recoveryIntervalRef, bufferIntervalRef,
+    recoveryIntervalRef, bufferIntervalRef, pendingSessionRef,
   }
 }
