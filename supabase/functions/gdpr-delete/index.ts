@@ -15,6 +15,7 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { getCorsHeaders } from '../_shared/cors.ts'
+import { checkDbRateLimit } from '../_shared/rateLimit.ts'
 
 Deno.serve(async (req: Request) => {
   const cors = getCorsHeaders(req)
@@ -36,6 +37,19 @@ Deno.serve(async (req: Request) => {
       return new Response(
         JSON.stringify({ error: 'Unauthorized' }),
         { status: 401, headers: { ...cors, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // ── Rate limit: 3 attempts per hour — prevents scripted deletion probing ──
+    const { allowed, retryAfterSeconds } = await checkDbRateLimit(supabase, user.id, false, {
+      fnName:    'gdpr-delete',
+      limitFree: 3,
+      windowMs:  3_600_000,
+    })
+    if (!allowed) {
+      return new Response(
+        JSON.stringify({ error: 'Too many deletion attempts. Try again later.' }),
+        { status: 429, headers: { ...cors, 'Content-Type': 'application/json', 'Retry-After': String(retryAfterSeconds ?? 3600) } }
       )
     }
 
