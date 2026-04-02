@@ -1,9 +1,28 @@
-# TASK-PROTOCOL v6.0 — MindShift Team Operating Standard
+# TASK-PROTOCOL v6.2 — MindShift Team Operating Standard
 
 > **Owner:** Yusif Ganbarov
 > **Project:** MindShift — ADHD-aware productivity PWA
-> **Updated:** 2026-03-31 (v6.1 — agent files added, FILE REGISTRY cleared)
+> **Updated:** 2026-04-02 (v6.2 — autonomy rule + NVIDIA resource added)
 > **Status:** ACTIVE — all Claude Code agents follow this protocol without exception
+
+---
+
+## PRIME DIRECTIVE — AUTONOMY FIRST
+
+**Never escalate to Yusif unless the team is genuinely blocked after real attempts.**
+
+The owner operates at strategy level. The team resolves everything at execution level.
+
+| Situation | Action |
+|-----------|--------|
+| Missing file path | `glob` + `grep` before asking |
+| Unknown architecture decision | Run ARCH + SEC agents, debate internally |
+| Missing env var | Check `.env`, `.env.example`, memory, Vercel docs |
+| Build error | `build-error-resolver` agent — minimum 3 fix attempts |
+| Unclear requirement | Infer from CLAUDE.md + existing code patterns |
+| Need Yusif | Only for: production credentials that exist nowhere, explicit business decisions (pricing, launch date, partnerships), Supabase Dashboard manual actions requiring his login |
+
+**Escalation threshold: 3 genuine attempts minimum before any "I need your input" message.**
 
 ---
 
@@ -277,7 +296,7 @@ From `.claude/rules/guardrails.md`:
 | Routing | React Router v6 | `src/app/App.tsx` |
 | Animation | motion/react (NOT framer-motion) | — |
 | Backend | Supabase (project: `awfoqycoltvhamtrsvxk`) | `src/shared/lib/supabase.ts` |
-| Edge Functions | Deno + Gemini 2.5 Flash | `supabase/functions/` |
+| Edge Functions | Deno + Gemini 2.5 Flash (primary) / NVIDIA NIM (available) | `supabase/functions/` |
 | Auth | Supabase Auth (magic link + Google OAuth) | `src/features/auth/AuthScreen.tsx` |
 | Hosting | Vercel (prod: `mindshift-umber.vercel.app`) | `vercel.json` |
 | E2E Tests | Playwright (chromium + iPhone 14) | `playwright.config.ts` |
@@ -288,10 +307,23 @@ From `.claude/rules/guardrails.md`:
 | Audio | Web Audio API (synthesized, no files) | `src/shared/hooks/useAudioEngine.ts` |
 | PWA | Workbox injectManifest | `public/manifest.json`, `src/sw.ts` |
 | Native | Capacitor (scaffold ready, not built) | `capacitor.config.ts` |
+| AI (alt) | NVIDIA NIM — OpenAI-compatible, 70B+ models | `NVIDIA_API_KEY` in `.env` |
+
+### NVIDIA NIM — available models (use when Gemini is insufficient)
+
+| Model | Best for | Speed |
+|-------|---------|-------|
+| `meta/llama-3.3-70b-instruct` | Drop-in Gemini Flash replacement | Fast |
+| `deepseek-ai/deepseek-r1` | Complex reasoning, task decomposition | Medium |
+| `nvidia/llama-3.1-nemotron-ultra-253b-v1` | Synthesis, deep analysis | Slow |
+| `mistralai/mistral-large-2-instruct` | Multilingual (AZ/RU/TR) | Fast |
+
+**Endpoint:** `https://integrate.api.nvidia.com/v1` (OpenAI-compatible)
+**Key env var:** `NVIDIA_API_KEY`
 
 ---
 
-## BACKLOG PRIORITIES (as of 2026-03-31)
+## BACKLOG PRIORITIES (as of 2026-04-02)
 
 ### P0 — Blockers
 - [x] Google OAuth — ✅ Supabase enabled + Google Cloud redirect URI set (2026-03-31)
