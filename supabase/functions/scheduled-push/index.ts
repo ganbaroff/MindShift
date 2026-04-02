@@ -113,17 +113,17 @@ async function sendPush(
     const audience = new URL(sub.endpoint).origin
     const jwt = await createVapidJwt(audience)
 
-    const payload = JSON.stringify({ title, body, url, tag: 'mindshift-reminder' })
+    // Payloadless push — encryption (RFC 8291 ECDH) is non-trivial in Deno without
+    // Node crypto. SW fallback shows "Time to check in 🌊" for any empty push.
+    // TODO Sprint CG: implement full aes128gcm payload encryption for custom titles.
+    void title; void body; void url // suppress unused-var warnings until encryption lands
 
     const response = await fetch(sub.endpoint, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/octet-stream',
-        'Content-Encoding': 'aes128gcm',
         'Authorization': `vapid t=${jwt}, k=${VAPID_PUBLIC_KEY}`,
         'TTL': '86400',
       },
-      body: new TextEncoder().encode(payload),
     })
 
     if (response.status === 410 || response.status === 404) {

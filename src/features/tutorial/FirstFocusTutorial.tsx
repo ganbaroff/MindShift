@@ -93,7 +93,7 @@ export function FirstFocusTutorial() {
     setFirstFocusTutorialCompleted()
     markHintSeen('first_focus_tutorial')
     markHintSeen('welcome_walkthrough')
-    navigate('/today')
+    navigate('/focus')
   }, [setFirstFocusTutorialCompleted, markHintSeen, removeTask, step, navigate])
 
   const handleStartTimer = useCallback(() => {
