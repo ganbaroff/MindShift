@@ -79,7 +79,7 @@ export function FirstFocusTutorial() {
     setFirstFocusTutorialCompleted()
     markHintSeen('first_focus_tutorial')
     markHintSeen('welcome_walkthrough')
-    navigate('/focus')
+    navigate('/focus?from=tutorial')
   }, [setFirstFocusTutorialCompleted, markHintSeen, navigate, removeTask])
 
   const handleSkip = useCallback(() => {

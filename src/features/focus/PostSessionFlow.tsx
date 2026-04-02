@@ -11,6 +11,7 @@
  */
 
 import { memo, useState } from 'react'
+import { useStore } from '@/store'
 import { motion, AnimatePresence } from 'motion/react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -82,6 +83,7 @@ export const NatureBuffer = memo(function NatureBuffer({
 }: NatureBufferProps) {
   const { shouldAnimate, t: transition } = useMotion()
   const { t } = useTranslation()
+  const completedFocusSessions = useStore(s => s.completedFocusSessions)
   const [autopsyPick, setAutopsyPick] = useState<string | null>(null)
   // High emotional reactivity + short struggle session: hide autopsy (could feel judgmental)
   const isShortStruggle = sessionMinutes < 10 && sessionPhase === 'struggle'
@@ -188,6 +190,24 @@ export const NatureBuffer = memo(function NatureBuffer({
 
         {/* Parked thoughts nudge — reminds user about thoughts captured during session */}
         {parkedThoughtsCount > 0 && <ParkedThoughtsNudge count={parkedThoughtsCount} />}
+
+        {/* Day-1 retention nudge — shown only after first ever completed session */}
+        {completedFocusSessions === 1 && (
+          <motion.div
+            initial={shouldAnimate ? { opacity: 0, y: 8 } : {}}
+            animate={{ opacity: 1, y: 0 }}
+            transition={transition()}
+            className="w-full max-w-xs mb-4 p-3 rounded-2xl text-center"
+            style={{ background: 'rgba(78,205,196,0.08)', border: '1px solid rgba(78,205,196,0.2)' }}
+          >
+            <p className="text-[14px] font-semibold mb-1" style={{ color: 'var(--color-teal)' }}>
+              {t('focus.firstSessionTitle')}
+            </p>
+            <p className="text-[12px]" style={{ color: 'var(--color-text-muted)' }}>
+              {t('focus.firstSessionBody')}
+            </p>
+          </motion.div>
+        )}
 
         <button
           onClick={onSkip}
