@@ -186,6 +186,7 @@ export function useFocusSession() {
   const handlePostEnergy = useCallback((level: EnergyLevel) => {
     _handlePostEnergy(level)
     setPostEnergyLogged(true)
+    logEvent('energy_logged', { level })
     // Deferred VOLAURA session event — now we have the real post-session energy_after
     const pending = pendingSessionRef.current
     if (pending) {

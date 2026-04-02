@@ -5,6 +5,7 @@ import { ACHIEVEMENT_DEFINITIONS } from '@/types'
 import { getToneCopy } from '@/shared/lib/uiTone'
 import { notifyAchievement } from '@/shared/lib/notify'
 import { getRandomDiscovery } from '@/shared/lib/mochiDiscoveries'
+import { logEvent } from '@/shared/lib/logger'
 
 export interface TaskSlice {
   nowPool: Task[]
@@ -53,8 +54,10 @@ export const createTaskSlice: StateCreator<
   }),
 
   completeTask: (taskId) => {
-    // Snapshot pre-set state for achievement checks (set() is sync in Zustand)
+    // Snapshot pre-set state for achievement checks and analytics
     const energyBefore = get().energyLevel
+    const taskSnapshot = [...get().nowPool, ...get().nextPool, ...get().somedayPool]
+      .find(t => t.id === taskId && t.status === 'active')
     let didComplete = false
     set((s) => {
     const now = new Date().toISOString()
@@ -143,6 +146,12 @@ export const createTaskSlice: StateCreator<
 
     // BUG 1 fix: award XP on task completion (was never called)
     s2.addXP(10)
+
+    // Analytics — task completion funnel signal
+    logEvent('task_completed', {
+      pool: taskSnapshot?.pool ?? 'unknown',
+      difficulty: taskSnapshot?.difficulty ?? 0,
+    })
 
     // Mochi discovery — variable reinforcement (Research #5)
     s2.addMochiDiscovery(getRandomDiscovery().id)

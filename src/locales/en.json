@@ -664,6 +664,14 @@
     },
     "psychotype": {
       "achiever": {
+        "phase_release": [
+          "Getting into it. Progress happening.",
+          "Past the friction point."
+        ],
+        "phase_flow": [
+          "Flow state. This is the good part.",
+          "Full focus. Nothing wasted."
+        ],
         "milestone_7": [
           "7 minutes in the books 💪",
           "Past the hard part. Keep building."
@@ -682,6 +690,14 @@
         ]
       },
       "explorer": {
+        "phase_release": [
+          "The focus is opening up. Follow it.",
+          "Something clicking now."
+        ],
+        "phase_flow": [
+          "Deep exploration mode. Don't stop.",
+          "This is when the best finds happen."
+        ],
         "milestone_7": [
           "7 minutes in — warming up 🔍",
           "Getting into it. Curiosity loading."
@@ -700,6 +716,14 @@
         ]
       },
       "connector": {
+        "phase_release": [
+          "The work is settling. Still here.",
+          "In it now."
+        ],
+        "phase_flow": [
+          "In the zone. Feel it.",
+          "Flow. We got here."
+        ],
         "milestone_7": [
           "7 minutes. Steady. 🌱",
           "Still here with you."
@@ -718,6 +742,14 @@
         ]
       },
       "planner": {
+        "phase_release": [
+          "Phase two. On track.",
+          "Deeper now, as planned."
+        ],
+        "phase_flow": [
+          "Optimal execution. Stay in it.",
+          "Full flow. Exactly what you planned for."
+        ],
         "milestone_7": [
           "7 minutes — on track. 🌱",
           "The plan is working."
