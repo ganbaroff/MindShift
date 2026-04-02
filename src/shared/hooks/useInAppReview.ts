@@ -10,7 +10,9 @@
  */
 
 import { useEffect } from 'react'
+import { toast } from 'sonner'
 import { useStore } from '@/store'
+import { canShare, nativeShare } from '@/shared/lib/native'
 
 const REVIEW_COOLDOWN_MS = 90 * 24 * 60 * 60 * 1000 // 90 days
 const MIN_SESSIONS = 3
@@ -36,18 +38,31 @@ export function useInAppReview() {
       if (Date.now() - timestamp < REVIEW_COOLDOWN_MS) return
     }
 
-    // Try native In-App Review (Capacitor)
-    // Only mark cooldown if we actually show something — web is a silent no-op,
-    // so don't burn the 90-day cooldown slot there.
+    // Always stamp the cooldown — even on web — so if the user later installs
+    // the native app, the review prompt doesn't fire immediately on first launch.
+    markHintSeen(`review_asked:${Date.now()}`)
+
     const win = window as unknown as Record<string, unknown>
     if (win.Capacitor && typeof win.Capacitor === 'object') {
+      // Native: trigger the OS in-app review dialog
       const plugins = (win.Capacitor as Record<string, unknown>).Plugins as Record<string, unknown> | undefined
       if (plugins?.InAppReview) {
         const review = plugins.InAppReview as { requestReview: () => Promise<void> }
-        markHintSeen(`review_asked:${Date.now()}`)
         void review.requestReview().catch(() => { /* silently fail */ })
       }
+    } else if (canShare()) {
+      // Web fallback: gentle share nudge via toast
+      toast('Enjoying MindShift? Share it 🌱', {
+        duration: 8000,
+        action: {
+          label: 'Share',
+          onClick: () => void nativeShare({
+            title: 'MindShift',
+            text: 'A focus app built for ADHD brains — no pressure, no shame.',
+            url: 'https://mindshift.app',
+          }),
+        },
+      })
     }
-    // Web: no action, no cooldown written — review only makes sense in native app
   }, [completedFocusSessions, energyLevel, burnoutScore, seenHints, markHintSeen])
 }
