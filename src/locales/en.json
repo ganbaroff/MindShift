@@ -294,7 +294,8 @@
     "upgradeError": "Couldn't open checkout. Try again.",
     "upgradeCTA": "Upgrade to Pro",
     "proBadge": "Pro",
-    "upgrading": "Opening checkout..."
+    "upgrading": "Opening checkout...",
+    "upgradeSuccess": "Welcome to Pro 🌱 Unlimited Mochi + all features unlocked."
   },
   "onboarding": {
     "skipSetup": "Skip setup — jump in →",

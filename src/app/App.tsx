@@ -111,6 +111,23 @@ export default function App() {
       if (session?.user) {
         localStorage.removeItem('ms_signed_out')
         setUser(session.user.id, session.user.email ?? '')
+
+        // Sync subscription tier from DB so store reflects real state on any device
+        void supabase
+          .from('users')
+          .select('subscription_tier, trial_ends_at')
+          .eq('id', session.user.id)
+          .single()
+          .then(({ data }) => {
+            const row = data as { subscription_tier?: string; trial_ends_at?: string | null } | null
+            if (row?.subscription_tier) {
+              useStore.getState().setSubscription(
+                row.subscription_tier as 'free' | 'pro_trial' | 'pro',
+                row.trial_ends_at ?? null
+              )
+            }
+          })
+
         // Guard: don't reset lastSessionAt when the recovery protocol should show.
         // RecoveryProtocol uses lastSessionAt to compute daysAbsent — calling
         // updateLastSession() here would zero out the 72h gap before the overlay renders.
