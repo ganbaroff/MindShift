@@ -36,18 +36,18 @@ export function useInAppReview() {
       if (Date.now() - timestamp < REVIEW_COOLDOWN_MS) return
     }
 
-    // Mark as asked (using seenHints as generic "shown once" tracker)
-    markHintSeen(`review_asked:${Date.now()}`)
-
     // Try native In-App Review (Capacitor)
+    // Only mark cooldown if we actually show something — web is a silent no-op,
+    // so don't burn the 90-day cooldown slot there.
     const win = window as unknown as Record<string, unknown>
     if (win.Capacitor && typeof win.Capacitor === 'object') {
       const plugins = (win.Capacitor as Record<string, unknown>).Plugins as Record<string, unknown> | undefined
       if (plugins?.InAppReview) {
         const review = plugins.InAppReview as { requestReview: () => Promise<void> }
+        markHintSeen(`review_asked:${Date.now()}`)
         void review.requestReview().catch(() => { /* silently fail */ })
       }
     }
-    // Web: no action — review only makes sense in native app
+    // Web: no action, no cooldown written — review only makes sense in native app
   }, [completedFocusSessions, energyLevel, burnoutScore, seenHints, markHintSeen])
 }
