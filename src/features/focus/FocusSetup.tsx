@@ -14,6 +14,7 @@
 import { useState, useEffect, lazy, Suspense } from 'react'
 import { AnimatePresence } from 'motion/react'
 import { useTranslation } from 'react-i18next'
+import { useSearchParams } from 'react-router-dom'
 import { logEvent } from '@/shared/lib/logger'
 
 const LazyBreathworkRitual = lazy(() =>
@@ -67,10 +68,15 @@ export function FocusSetup({
   const [showBreathwork, setShowBreathwork] = useState(false)
   const [showRoomSheet, setShowRoomSheet] = useState(false)
   const { t } = useTranslation()
+  const [searchParams] = useSearchParams()
 
-  // Analytics: setup-to-start conversion rate denominator
+  // Analytics: setup-to-start conversion rate denominator + source attribution
   useEffect(() => {
-    logEvent('focus_setup_viewed', { has_tasks: allTasks.filter(t => t.status === 'active').length > 0 ? 1 : 0 })
+    const source = searchParams.get('from') ?? 'direct'
+    logEvent('focus_setup_viewed', {
+      has_tasks: allTasks.filter(t => t.status === 'active').length > 0 ? 1 : 0,
+      source,
+    })
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 

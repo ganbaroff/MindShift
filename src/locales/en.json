@@ -151,6 +151,8 @@
     "tapToSeeSomeday": "Tap to see them in Someday",
     "imReady": "I'm ready",
     "skipNatureBuffer": "Skip nature buffer",
+    "firstSessionTitle": "You showed up. 🌱",
+    "firstSessionBody": "Come back tomorrow — your streak grows one day at a time.",
     "bypassRecovery": "Bypass recovery suggestion",
     "postSessionEnergyLabel": "Post-session energy: {{label}}",
     "recoveryTitle": "90 minutes of deep focus 🌊",

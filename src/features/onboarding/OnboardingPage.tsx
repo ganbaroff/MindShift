@@ -133,6 +133,14 @@ export default function OnboardingPage() {
     logEvent('onboarding_step_viewed', { step })
   }, [step])
 
+  // Analytics: detect mid-flow drop-off (tab close, back button, app kill)
+  useEffect(() => {
+    if (isRevisit) return
+    const handler = () => logEvent('onboarding_abandoned', { last_step: step })
+    window.addEventListener('beforeunload', handler)
+    return () => window.removeEventListener('beforeunload', handler)
+  }, [step, isRevisit])
+
   const current      = steps[step]
   const isEnergyStep = step === 3
   const isReadyStep  = step === 4
