@@ -145,11 +145,11 @@ export function FocusSetup({
           </div>
         )}
 
-        {/* Start button + skip + rooms discovery */}
+        {/* Start button + breathwork opt-in + rooms discovery */}
         <div className="px-5 space-y-2">
           <button
-            onClick={() => setShowBreathwork(true)}
-            aria-label="Start focus session with breathing ritual"
+            onClick={() => handleStart()}
+            aria-label="Start focus session"
             className="w-full py-4 rounded-2xl font-bold text-base transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[#7B72FF] focus-visible:outline-none"
             style={{
               background: 'linear-gradient(135deg, #7B72FF, #8B7FF7)',
@@ -160,12 +160,12 @@ export function FocusSetup({
             {t('focus.startFocus')}
           </button>
           <button
-            onClick={() => handleStart()}
-            aria-label="Skip breathing ritual and start focus session"
+            onClick={() => setShowBreathwork(true)}
+            aria-label="Start focus session with breathing ritual"
             className="w-full py-2 text-[12px] focus-visible:ring-2 focus-visible:ring-[#7B72FF] focus-visible:outline-none"
             style={{ color: 'var(--color-text-muted)' }}
           >
-            {t('focus.skipRitual')}
+            {t('focus.breatheFirst')}
           </button>
 
           {/* Focus Rooms discovery hint */}

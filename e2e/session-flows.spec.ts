@@ -146,11 +146,11 @@ test.describe('NatureBuffer post-session screen', () => {
     // Select 5-minute preset
     await page.getByRole('button', { name: /^5 minutes/ }).click()
 
-    // Start (BreathworkRitual is z-50 — skip it)
-    await page.getByRole('button', { name: 'Start focus session with breathing ritual', exact: true }).click()
-    await page.getByRole('button', { name: 'Skip breathing ritual', exact: true }).click()
+    // Start session directly (primary button — no breathwork overlay)
+    await page.getByRole('button', { name: 'Start focus session', exact: true }).click()
 
-    // End session deliberately
+    // Wait for active session state then end deliberately
+    await expect(page.getByRole('button', { name: /end session/i }).first()).toBeVisible({ timeout: 5000 })
     await page.getByRole('button', { name: /end session|stop/i }).click()
 
     // Interrupt confirm — confirm end
@@ -172,7 +172,7 @@ test.describe('NatureBuffer post-session screen', () => {
     ).toBeVisible({ timeout: 8000 })
   })
 
-  test('NatureBuffer skip button is visible during buffer screen', async ({ authedPage: page }) => {
+  test('setup screen returns after interrupted session (bookmark capture skipped)', async ({ authedPage: page }) => {
     await seedStore(page, {
       nowPool: [makeTask('nature-skip-001')],
       timerStyle: 'countdown',
@@ -180,10 +180,10 @@ test.describe('NatureBuffer post-session screen', () => {
     await page.goto('/focus')
 
     await page.getByRole('button', { name: /^5 minutes/ }).click()
-    await page.getByRole('button', { name: 'Start focus session with breathing ritual', exact: true }).click()
-    await page.getByRole('button', { name: 'Skip breathing ritual', exact: true }).click()
+    await page.getByRole('button', { name: 'Start focus session', exact: true }).click()
 
-    // Session is running — end it
+    // Session is running — wait for active state then end
+    await expect(page.getByRole('button', { name: 'End session', exact: true })).toBeVisible({ timeout: 5000 })
     await page.getByRole('button', { name: 'End session', exact: true }).click()
 
     // Interrupt confirm screen
@@ -195,9 +195,9 @@ test.describe('NatureBuffer post-session screen', () => {
       await skipBookmark.click()
     }
 
-    // NatureBuffer shown — a "Skip" button must be present
+    // Back on setup screen — primary start button is visible
     await expect(
-      page.getByRole('button', { name: /skip/i }).first()
+      page.getByRole('button', { name: 'Start focus session', exact: true })
     ).toBeVisible({ timeout: 8000 })
   })
 })

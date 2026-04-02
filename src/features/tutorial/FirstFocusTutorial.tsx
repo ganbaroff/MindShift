@@ -79,7 +79,7 @@ export function FirstFocusTutorial() {
     setFirstFocusTutorialCompleted()
     markHintSeen('first_focus_tutorial')
     markHintSeen('welcome_walkthrough')
-    navigate('/today')
+    navigate('/focus')
   }, [setFirstFocusTutorialCompleted, markHintSeen, navigate, removeTask])
 
   const handleSkip = useCallback(() => {
@@ -89,6 +89,7 @@ export function FirstFocusTutorial() {
       sampleTaskIdRef.current = null
     }
     logEvent('tutorial_skipped', { step })
+    logEvent('tutorial_funnel_exit', { exit_step: step, reached_timer: elapsed > 0 ? 1 : 0 })
     setFirstFocusTutorialCompleted()
     markHintSeen('first_focus_tutorial')
     markHintSeen('welcome_walkthrough')
@@ -144,7 +145,7 @@ export function FirstFocusTutorial() {
         {/* Skip button — always visible */}
         <button
           onClick={handleSkip}
-          className="absolute top-6 right-6 text-[13px] font-medium px-3 py-1.5 rounded-xl focus-visible:ring-2"
+          className="absolute top-6 right-6 text-[13px] font-medium px-3 py-1.5 rounded-xl focus-visible:ring-2 focus-visible:ring-[#7B72FF] focus-visible:outline-none"
           style={{ color: 'var(--color-text-muted)', background: 'var(--color-surface-raised)' }}
           aria-label={t('tutorial.skip')}
         >

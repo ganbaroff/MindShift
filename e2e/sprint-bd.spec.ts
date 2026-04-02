@@ -77,10 +77,10 @@ test.describe('FocusSetup — task picker', () => {
     await expect(page.getByText('Start Focus')).toBeVisible()
   })
 
-  test('shows Skip ritual & jump in option', async ({ authedPage: page }) => {
+  test('shows Breathe first option (breathwork opt-in)', async ({ authedPage: page }) => {
     await page.goto('/focus')
     await expect(page.getByText('Focus Session')).toBeVisible({ timeout: 8000 })
-    await expect(page.getByText(/Skip ritual & jump in/)).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Start focus session with breathing ritual', exact: true })).toBeVisible()
   })
 })
 
@@ -408,8 +408,8 @@ test.describe('BreathworkRitual', () => {
     // Wait for setup screen to be fully loaded
     await expect(page.getByText('Focus Session')).toBeVisible({ timeout: 8000 })
 
-    // Click Start Focus (button has aria-label "Start focus session with breathing ritual")
-    await page.getByRole('button', { name: /^Start focus session with/i }).click()
+    // Click the secondary "Breathe first" button to opt into breathwork ritual
+    await page.getByRole('button', { name: 'Start focus session with breathing ritual', exact: true }).click()
 
     // Breathwork shows: either "Breathe in..." or "Breathe out..."
     await expect(page.getByText(/Breathe in|Breathe out/)).toBeVisible({ timeout: 5000 })
