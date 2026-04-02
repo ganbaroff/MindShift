@@ -311,8 +311,8 @@ export default function OnboardingPage() {
         </motion.div>
       </AnimatePresence>
 
-      {/* Continue button — shown on energy + ready steps */}
-      {(isEnergyStep || isReadyStep) && (
+      {/* Continue button — shown on energy + ready steps, and on option-card steps once selection made (keyboard users) */}
+      {(isEnergyStep || isReadyStep || canContinue) && (
         <div className="py-6">
           <motion.button
             whileTap={shouldAnimate ? { scale: 0.97 } : undefined}

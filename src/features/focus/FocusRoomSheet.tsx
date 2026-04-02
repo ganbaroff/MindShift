@@ -101,6 +101,9 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
         animate={shouldAnimate ? { y: 0 } : false}
         exit={shouldAnimate ? { y: '100%' } : undefined}
         transition={shouldAnimate ? { type: 'spring', damping: 28, stiffness: 300 } : { duration: 0 }}
+        role="dialog"
+        aria-labelledby="focus-room-title"
+        aria-modal="true"
         className="fixed bottom-0 left-0 right-0 z-50 rounded-t-3xl p-5 safe-bottom outline-none"
         style={{ background: 'var(--color-surface-card)', maxHeight: '80vh', overflowY: 'auto' }}
       >
@@ -111,7 +114,7 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
         <div className="w-10 h-1 rounded-full mx-auto mb-4" style={{ background: 'rgba(255,255,255,0.12)' }} />
 
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-[17px] font-bold" style={{ color: 'var(--color-text-primary)' }}>
+          <h2 id="focus-room-title" className="text-[17px] font-bold" style={{ color: 'var(--color-text-primary)' }}>
             {t('focusRoom.title')} 🤝
           </h2>
           <button

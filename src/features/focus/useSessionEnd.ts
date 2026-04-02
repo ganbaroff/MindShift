@@ -109,7 +109,7 @@ export function useSessionEnd({
 
     logEvent('session_ended', { completed: wasCompleted ? 1 : 0, duration_min: elapsedMin, phase: sessionPhase })
     if (wasCompleted) {
-      logEvent('session_completed', { duration_min: elapsedMin, phase: sessionPhase })
+      logEvent('session_completed', { duration_min: elapsedMin, phase: sessionPhase, energy_before: useStore.getState().energyLevel })
       const lastActive = useStore.getState().lastActiveDate
       if (lastActive) {
         const gapDays = (Date.now() - new Date(lastActive).getTime()) / 86_400_000
