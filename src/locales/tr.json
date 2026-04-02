@@ -24,7 +24,8 @@
     "focusOn": "Odaklan: {{title}}",
     "startFocus": "Odaklanma oturumu başlatın",
     "viewProgress": "İlerlemeyi görüntüle →",
-    "moveFromNext": "{{count}} görev Sonraki'de bekliyor — birini seç →"
+    "moveFromNext": "{{count}} görev Sonraki'de bekliyor — birini seç →",
+    "focusGoalProgress": "Bugün {{goal}} dakikadan {{current}} dakika odaklandı"
   },
   "quickCapture": {
     "placeholder": "Görev, hatırlatıcı veya toplantı ekleyin...",
@@ -40,7 +41,8 @@
     "step3Body": "Bugün tek bir görev yeterli. İlk girişinizi eklemek için yukarıdaki girişe dokunun.",
     "skip": "Atlamak",
     "next": "Sonraki",
-    "gotIt": "Anladım"
+    "gotIt": "Anladım",
+    "stepOf": "{{total}} adımdan {{current}}. adım"
   },
   "tasks": {
     "title": "Görevleriniz",

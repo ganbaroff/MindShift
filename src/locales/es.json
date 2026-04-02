@@ -24,7 +24,8 @@
     "focusOn": "Centrarse en: {{title}}",
     "startFocus": "Iniciar una sesión de enfoque",
     "viewProgress": "Ver progreso →",
-    "moveFromNext": "{{count}} tarea en espera en Siguiente - elige una →"
+    "moveFromNext": "{{count}} tarea en espera en Siguiente - elige una →",
+    "focusGoalProgress": "{{current}} de {{goal}} minutos enfocados hoy"
   },
   "quickCapture": {
     "placeholder": "Agregue una tarea, recordatorio o reunión...",
@@ -40,7 +41,8 @@
     "step3Body": "Una tarea hoy es suficiente. Toque la entrada de arriba para agregar la primera.",
     "skip": "Saltar",
     "next": "Próximo",
-    "gotIt": "Entiendo"
+    "gotIt": "Entiendo",
+    "stepOf": "Paso {{current}} de {{total}}"
   },
   "tasks": {
     "title": "Tus tareas",

@@ -56,7 +56,15 @@ export function TodayMorningPlan({
         </div>
         {dailyFocusGoalMin > 0 && (
           <div className="flex items-center gap-1.5">
-            <div className="w-16 h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--color-surface-raised)' }}>
+            <div
+              className="w-16 h-1.5 rounded-full overflow-hidden"
+              style={{ background: 'var(--color-surface-raised)' }}
+              role="progressbar"
+              aria-valuenow={todayFocusMin}
+              aria-valuemin={0}
+              aria-valuemax={dailyFocusGoalMin}
+              aria-label={t('today.focusGoalProgress', { current: todayFocusMin, goal: dailyFocusGoalMin })}
+            >
               <motion.div
                 className="h-full rounded-full"
                 style={{ background: todayFocusMin >= dailyFocusGoalMin ? 'var(--color-teal)' : 'var(--color-primary)' }}

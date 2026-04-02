@@ -24,7 +24,8 @@
     "focusOn": "Фокус: {{title}}",
     "startFocus": "Начать фокус-сессию",
     "viewProgress": "Посмотреть прогресс →",
-    "moveFromNext": "{{count}} задача ждёт в Next — выбери одну →"
+    "moveFromNext": "{{count}} задача ждёт в Next — выбери одну →",
+    "focusGoalProgress": "{{current}} из {{goal}} минут фокуса сегодня"
   },
   "quickCapture": {
     "placeholder": "Задача, напоминание или встреча...",
@@ -40,7 +41,8 @@
     "step3Body": "Одна задача на сегодня — этого достаточно. Нажми на поле ввода выше.",
     "skip": "Пропустить",
     "next": "Далее",
-    "gotIt": "Понятно"
+    "gotIt": "Понятно",
+    "stepOf": "Шаг {{current}} из {{total}}"
   },
   "tasks": {
     "title": "Ваши задачи",

@@ -24,7 +24,8 @@
     "focusOn": "Focus on: {{title}}",
     "startFocus": "Start a focus session",
     "viewProgress": "View progress →",
-    "moveFromNext": "{{count}} task waiting in Next — pick one →"
+    "moveFromNext": "{{count}} task waiting in Next — pick one →",
+    "focusGoalProgress": "{{current}} of {{goal}} minutes focused today"
   },
   "quickCapture": {
     "placeholder": "Add a task, reminder, or meeting...",
@@ -40,7 +41,8 @@
     "step3Body": "One task today is enough. Tap the input above to add your first one.",
     "skip": "Skip",
     "next": "Next",
-    "gotIt": "Got it"
+    "gotIt": "Got it",
+    "stepOf": "Step {{current}} of {{total}}"
   },
   "tasks": {
     "title": "Your Tasks",
