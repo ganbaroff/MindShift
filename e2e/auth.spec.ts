@@ -119,18 +119,18 @@ test.describe('Auth screen', () => {
     // Sent state — copy: "Magic link on its way ✨"
     await expect(page.getByText('Magic link on its way ✨')).toBeVisible()
     await expect(page.getByText('user@example.com')).toBeVisible()
-    await expect(page.getByText(/wrong email/i)).toBeVisible()
+    await expect(page.getByText(/not your email/i)).toBeVisible()
   })
 
-  test('"wrong email? go back" returns to email input', async ({ page }) => {
+  test('"not your email? go back" returns to email input', async ({ page }) => {
     // Submit first
     await expandEmailInput(page)
     await page.getByPlaceholder('Enter your email').fill('user@example.com')
     await clickConsentCheckbox(page)
     await page.getByRole('button', { name: /send magic link/i }).click()
 
-    // Go back — copy: "Wrong email? Go back"
-    await page.getByText(/wrong email/i).click()
+    // Go back — copy: "Not your email? Go back"
+    await page.getByText(/not your email/i).click()
 
     // Should be back on email step — heading visible
     await expect(page.getByText("Welcome. Let's get started.")).toBeVisible()

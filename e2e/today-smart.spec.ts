@@ -44,28 +44,7 @@ function makeTask(overrides: Record<string, unknown> = {}) {
 
 test.describe('TodayPage — time-based greeting', () => {
   test('shows morning greeting during morning hours', async ({ page }) => {
-    // Freeze time to 9 AM — t('today.morning') = "Good morning"
-    await page.addInitScript('window.__fakeHour = 9')
-    await page.addInitScript(() => {
-      const OrigDate = Date
-      // @ts-ignore
-      class FakeDate extends OrigDate {
-        // @ts-ignore
-        constructor(...args: unknown[]) {
-          if (args.length === 0) {
-            // @ts-ignore
-            super(2026, 2, 30, 9, 0, 0)
-          } else {
-            // @ts-ignore
-            super(...args)
-          }
-        }
-        getHours() { return 9 }
-        static now() { return new OrigDate(2026, 2, 30, 9, 0, 0).getTime() }
-      }
-      // @ts-ignore
-      window.Date = FakeDate
-    })
+    await page.clock.setFixedTime(new Date('2026-03-30T09:00:00'))
     await mockSupabase(page)
     await seedStore(page)
     await page.goto('/today')
@@ -74,27 +53,7 @@ test.describe('TodayPage — time-based greeting', () => {
   })
 
   test('shows afternoon greeting during afternoon hours', async ({ page }) => {
-    // t('today.afternoon') = "Good afternoon"
-    await page.addInitScript(() => {
-      const OrigDate = Date
-      // @ts-ignore
-      class FakeDate extends OrigDate {
-        // @ts-ignore
-        constructor(...args: unknown[]) {
-          if (args.length === 0) {
-            // @ts-ignore
-            super(2026, 2, 30, 14, 0, 0)
-          } else {
-            // @ts-ignore
-            super(...args)
-          }
-        }
-        getHours() { return 14 }
-        static now() { return new OrigDate(2026, 2, 30, 14, 0, 0).getTime() }
-      }
-      // @ts-ignore
-      window.Date = FakeDate
-    })
+    await page.clock.setFixedTime(new Date('2026-03-30T14:00:00'))
     await mockSupabase(page)
     await seedStore(page)
     await page.goto('/today')
@@ -103,29 +62,7 @@ test.describe('TodayPage — time-based greeting', () => {
   })
 
   test('shows evening heading during evening hours', async ({ page }) => {
-    // t('today.evening') = "Your day" (NOT "good evening")
-    // The evening block renders t('today.wrapUp') = "Today's wrap-up" as h2
-    // and the greeting h1 shows "🌙 Your day"
-    await page.addInitScript(() => {
-      const OrigDate = Date
-      // @ts-ignore
-      class FakeDate extends OrigDate {
-        // @ts-ignore
-        constructor(...args: unknown[]) {
-          if (args.length === 0) {
-            // @ts-ignore
-            super(2026, 2, 30, 18, 0, 0)
-          } else {
-            // @ts-ignore
-            super(...args)
-          }
-        }
-        getHours() { return 18 }
-        static now() { return new OrigDate(2026, 2, 30, 18, 0, 0).getTime() }
-      }
-      // @ts-ignore
-      window.Date = FakeDate
-    })
+    await page.clock.setFixedTime(new Date('2026-03-30T18:00:00'))
     await mockSupabase(page)
     await seedStore(page)
     await page.goto('/today')
@@ -154,27 +91,7 @@ test.describe('TodayPage — quick capture', () => {
 
 test.describe('TodayPage — task list', () => {
   test('NOW pool tasks appear in "In your NOW pool" section (morning)', async ({ page }) => {
-    // Force morning so the morning/afternoon block renders
-    await page.addInitScript(() => {
-      const OrigDate = Date
-      // @ts-ignore
-      class FakeDate extends OrigDate {
-        // @ts-ignore
-        constructor(...args: unknown[]) {
-          if (args.length === 0) {
-            // @ts-ignore
-            super(2026, 2, 30, 9, 0, 0)
-          } else {
-            // @ts-ignore
-            super(...args)
-          }
-        }
-        getHours() { return 9 }
-        static now() { return new OrigDate(2026, 2, 30, 9, 0, 0).getTime() }
-      }
-      // @ts-ignore
-      window.Date = FakeDate
-    })
+    await page.clock.setFixedTime(new Date('2026-03-30T09:00:00'))
     await mockSupabase(page)
     await seedStore(page, {
       energyLevel: 3,
@@ -224,27 +141,7 @@ test.describe('TodayPage — task list', () => {
 
 test.describe('TodayPage — low-energy mode', () => {
   test('low energy (≤2) shows energy advice copy', async ({ page }) => {
-    // Freeze time to 9 AM so the morning greeting is rendered (not evening "Your day")
-    await page.addInitScript(() => {
-      const OrigDate = Date
-      // @ts-ignore
-      class FakeDate extends OrigDate {
-        // @ts-ignore
-        constructor(...args: unknown[]) {
-          if (args.length === 0) {
-            // @ts-ignore
-            super(2026, 2, 30, 9, 0, 0)
-          } else {
-            // @ts-ignore
-            super(...args)
-          }
-        }
-        getHours() { return 9 }
-        static now() { return new OrigDate(2026, 2, 30, 9, 0, 0).getTime() }
-      }
-      // @ts-ignore
-      window.Date = FakeDate
-    })
+    await page.clock.setFixedTime(new Date('2026-03-30T09:00:00'))
     await mockSupabase(page)
     await seedStore(page, { energyLevel: 1 })
     await page.goto('/today')
@@ -255,27 +152,7 @@ test.describe('TodayPage — low-energy mode', () => {
   })
 
   test('normal energy (≥3) with NOW pool tasks shows them', async ({ page }) => {
-    // Force morning so tasks render
-    await page.addInitScript(() => {
-      const OrigDate = Date
-      // @ts-ignore
-      class FakeDate extends OrigDate {
-        // @ts-ignore
-        constructor(...args: unknown[]) {
-          if (args.length === 0) {
-            // @ts-ignore
-            super(2026, 2, 30, 9, 0, 0)
-          } else {
-            // @ts-ignore
-            super(...args)
-          }
-        }
-        getHours() { return 9 }
-        static now() { return new OrigDate(2026, 2, 30, 9, 0, 0).getTime() }
-      }
-      // @ts-ignore
-      window.Date = FakeDate
-    })
+    await page.clock.setFixedTime(new Date('2026-03-30T09:00:00'))
     await mockSupabase(page)
     await seedStore(page, {
       energyLevel: 3,
@@ -291,26 +168,7 @@ test.describe('TodayPage — low-energy mode', () => {
 
 test.describe('TodayPage — evening view', () => {
   test('evening shows wrap-up heading', async ({ page }) => {
-    await page.addInitScript(() => {
-      const OrigDate = Date
-      // @ts-ignore
-      class FakeDate extends OrigDate {
-        // @ts-ignore
-        constructor(...args: unknown[]) {
-          if (args.length === 0) {
-            // @ts-ignore
-            super(2026, 2, 30, 20, 0, 0)
-          } else {
-            // @ts-ignore
-            super(...args)
-          }
-        }
-        getHours() { return 20 }
-        static now() { return new OrigDate(2026, 2, 30, 20, 0, 0).getTime() }
-      }
-      // @ts-ignore
-      window.Date = FakeDate
-    })
+    await page.clock.setFixedTime(new Date('2026-03-30T20:00:00'))
     await mockSupabase(page)
     await seedStore(page)
     await page.goto('/today')
@@ -324,27 +182,7 @@ test.describe('TodayPage — evening view', () => {
 
 test.describe('TodayPage — empty state', () => {
   test('shows clear day message when no tasks', async ({ page }) => {
-    // Force morning so the empty state block renders
-    await page.addInitScript(() => {
-      const OrigDate = Date
-      // @ts-ignore
-      class FakeDate extends OrigDate {
-        // @ts-ignore
-        constructor(...args: unknown[]) {
-          if (args.length === 0) {
-            // @ts-ignore
-            super(2026, 2, 30, 9, 0, 0)
-          } else {
-            // @ts-ignore
-            super(...args)
-          }
-        }
-        getHours() { return 9 }
-        static now() { return new OrigDate(2026, 2, 30, 9, 0, 0).getTime() }
-      }
-      // @ts-ignore
-      window.Date = FakeDate
-    })
+    await page.clock.setFixedTime(new Date('2026-03-30T09:00:00'))
     await mockSupabase(page)
     await seedStore(page, { nowPool: [], nextPool: [], somedayPool: [] })
     await page.goto('/today')
