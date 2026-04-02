@@ -108,7 +108,7 @@ export default function HomePage() {
       content: (
         <>
           <span className="text-[20px] font-bold" style={{ color: 'var(--color-text-primary)' }}>{completedTotal ?? 0}</span>
-          <span className="text-[11px] ml-1" style={{ color: 'var(--color-text-muted)' }}>done</span>
+          <span className="text-[11px] ml-1" style={{ color: 'var(--color-text-muted)' }}>{t('home.doneSub')}</span>
           {focusMinutes !== null && (
             <>
               <span className="text-[11px] mx-1" style={{ color: 'var(--color-text-muted)' }}>·</span>
@@ -121,17 +121,18 @@ export default function HomePage() {
     },
     {
       content: <span className="text-[28px]">{ENERGY_EMOJI[energyLevel - 1]}</span>,
-      sub: 'Tap to update',
+      sub: t('home.tapToUpdate'),
     },
     {
       content: <span className="text-[20px] font-bold" style={{ color: 'var(--color-text-primary)' }}>✅ {completedTotal}</span>,
-      sub: 'tasks completed',
+      sub: t('home.tasksCompleted'),
     },
     {
       content: <BurnoutGauge score={isNaN(burnoutScore) ? 0 : (burnoutScore ?? 0)} />,
-      sub: 'Burnout gauge',
+      sub: t('home.burnoutGauge'),
     },
-  ], [completedTotal, focusMinutes, xpTotal, energyLevel, burnoutScore]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  ], [completedTotal, focusMinutes, xpTotal, energyLevel, burnoutScore, t]);
 
   const greeting =
     hour < 5  ? t('home.greeting.night') :

@@ -343,6 +343,7 @@ function TaskCardInner({ task, index = 0, onDone, onPark, onRemove }: TaskCardPr
           } : undefined}
           transition={shouldAnimate ? { duration: 0.35, ease: 'easeOut' } : { duration: 0 }}
           onClick={() => handleDone(task.id)}
+          aria-label={justCompleted ? t('taskCard.doneComplete') : `${t('taskCard.done')}: ${task.title}`}
           className="flex-1 h-9 rounded-xl text-[13px] font-medium focus-visible:ring-2 focus-visible:ring-[#4ECDC4] focus-visible:outline-none"
           style={{
             backgroundColor: justCompleted ? 'rgba(78,205,196,0.2)' : 'rgba(78,205,196,0.12)',
@@ -355,6 +356,7 @@ function TaskCardInner({ task, index = 0, onDone, onPark, onRemove }: TaskCardPr
         <motion.button
           whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
           onClick={() => onPark?.(task.id)}
+          aria-label={`${t('taskCard.parkIt')}: ${task.title}`}
           className="flex-1 h-9 rounded-xl text-[13px] font-medium focus-visible:ring-2 focus-visible:ring-ms-primary focus-visible:outline-none"
           style={{ backgroundColor: 'var(--color-surface-raised)', color: 'var(--color-text-muted)' }}
         >
@@ -385,6 +387,7 @@ const TaskCard = memo(TaskCardInner, (prev, next) =>
   prev.task.status === next.task.status &&
   prev.task.title === next.task.title &&
   prev.task.note === next.task.note &&
+  prev.task.pool === next.task.pool &&
   prev.task.dueDate === next.task.dueDate &&
   prev.task.difficulty === next.task.difficulty &&
   prev.task.estimatedMinutes === next.task.estimatedMinutes &&
