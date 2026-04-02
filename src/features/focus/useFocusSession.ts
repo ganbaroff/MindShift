@@ -95,7 +95,7 @@ export function useFocusSession() {
     hasAchievement, unlockAchievement,
     focusAnchor, activePreset, setPreset, audioVolume, setVolume: setStoreVolume,
     timerStyle, setEnergyLevel,
-    addTask, userId,
+    addTask, userId, completedFocusSessions,
   } = useStore()
 
   const { shouldAnimate, t } = useMotion()
@@ -213,6 +213,7 @@ export function useFocusSession() {
     setPostEnergyLogged(false)
 
     logEvent('session_started', { duration_min: duration, has_task: selectedTask ? 1 : 0 })
+    if (completedFocusSessions === 0) logEvent('first_session_started', { duration_min: duration })
     void requestNotificationPermission()
     hapticStart()
     resetPhaseTracking()

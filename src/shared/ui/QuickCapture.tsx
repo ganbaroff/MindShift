@@ -113,7 +113,14 @@ function QuickCaptureInner({ onSubmit, onExpand, placeholder }: QuickCaptureProp
   const handleSubmit = useCallback(() => {
     if (!text.trim()) return
     const result = parsed ?? parseQuickInput(text)
-    if (!result.title) return
+    // When user types only a date keyword (e.g. "today", "tomorrow"), quickParse
+    // strips it from the title leaving an empty string. Fall back to a generic
+    // title derived from the due date so the submit is never a silent no-op.
+    if (!result.title) {
+      if (!result.dueDate) return
+      const isTomorrow = result.dueDate !== todayISO()
+      result.title = isTomorrow ? 'Task for tomorrow' : 'Task for today'
+    }
     onSubmit(result)
     setText('')
     setParsed(null)

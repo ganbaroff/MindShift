@@ -957,7 +957,9 @@
     "leaveRoom": "dejar espacio",
     "connectionError": "No se pudo conectar con la habitación",
     "checkInternet": "Verifique su conexión a Internet e inténtelo nuevamente.",
-    "tryAgain": "Intentar otra vez"
+    "tryAgain": "Intentar otra vez",
+    "partnerSteppedAway": "Tu pareja se alejó, sigue adelante.",
+    "yourPhase": "Tu fase de concentración"
   },
   "breathwork": {
     "breatheIn": "Aspirar...",

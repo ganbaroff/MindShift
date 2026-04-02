@@ -957,7 +957,9 @@
     "leaveRoom": "Raum verlassen",
     "connectionError": "Es konnte keine Verbindung zum Raum hergestellt werden",
     "checkInternet": "Überprüfen Sie Ihre Internetverbindung und versuchen Sie es erneut.",
-    "tryAgain": "Versuchen Sie es erneut"
+    "tryAgain": "Versuchen Sie es erneut",
+    "partnerSteppedAway": "Ihr Partner hat sich zurückgezogen – machen Sie weiter",
+    "yourPhase": "Ihre Fokusphase"
   },
   "breathwork": {
     "breatheIn": "Einatmen...",
