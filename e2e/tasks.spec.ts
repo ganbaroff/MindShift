@@ -183,7 +183,7 @@ test.describe('Task from HomeScreen', () => {
   test('empty state prompt hidden when tasks exist', async ({ authedPage: page }) => {
     await seedStore(page, {
       nowPool: [
-        { id: 'e2e-check-1', title: 'Existing task', pool: 'now', difficulty: 1, estimatedMinutes: 5, status: 'active', snoozeCount: 0, completedAt: null, dueDate: null, subtasks: [], position: 0, createdAt: new Date().toISOString(), userId: 'e2e-test-user-00000000-0000-0000-0000-000000000001' },
+        { id: 'e2e-check-1', title: 'Existing task', pool: 'now', difficulty: 1, estimatedMinutes: 5, status: 'active', taskType: 'task', snoozeCount: 0, completedAt: null, dueDate: null, dueTime: null, parentTaskId: null, reminderSentAt: null, repeat: 'none', position: 0, createdAt: new Date().toISOString(), userId: 'e2e-test-user-00000000-0000-0000-0000-000000000001' },
       ],
     })
     await page.goto('/home')
