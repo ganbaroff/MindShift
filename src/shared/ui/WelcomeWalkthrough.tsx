@@ -97,14 +97,14 @@ function WelcomeWalkthroughInner() {
         <div className="flex gap-2">
           <button
             onClick={handleSkip}
-            className="text-[12px] px-2 py-1 rounded-lg focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
+            className="text-[12px] px-2 py-1 rounded-lg focus-visible:ring-2 focus-visible:ring-[#7B72FF] focus-visible:outline-none"
             style={{ color: 'var(--color-text-muted)' }}
           >
             {t('welcome.skip')}
           </button>
           <button
             onClick={handleNext}
-            className="text-[12px] px-3 py-1 rounded-lg font-medium focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
+            className="text-[12px] px-3 py-1 rounded-lg font-medium focus-visible:ring-2 focus-visible:ring-[#7B72FF] focus-visible:outline-none"
             style={{
               background: 'rgba(123,114,255,0.15)',
               color: 'var(--color-primary)',
