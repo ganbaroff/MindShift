@@ -86,6 +86,7 @@
     "custom": "Costumbre",
     "startFocus": "Iniciar enfoque →",
     "skipRitual": "Salta el ritual y lánzate",
+    "breatheFirst": "Respira primero",
     "focusWithSomeone": "🤝 Concéntrate en alguien",
     "focusRoomHint": "Concéntrate con un amigo: crea una sala y comparte el código. Veréis el progreso de cada uno.",
     "breathe": "Hora de respirar 🌿",
@@ -150,6 +151,8 @@
     "tapToSeeSomeday": "Toca para verlos en Algún día",
     "imReady": "estoy listo",
     "skipNatureBuffer": "Saltar zona de influencia natural",
+    "firstSessionTitle": "Apareciste. 🌱",
+    "firstSessionBody": "Vuelve mañana: tu racha crece día a día.",
     "bypassRecovery": "Omitir sugerencia de recuperación",
     "postSessionEnergyLabel": "Energía post-sesión: {{label}}",
     "recoveryTitle": "90 minutos de concentración profunda 🌊",
@@ -291,7 +294,8 @@
     "upgradeError": "No se pudo abrir la caja. Intentar otra vez.",
     "upgradeCTA": "Actualízate a Pro",
     "proBadge": "Pro",
-    "upgrading": "Abriendo caja..."
+    "upgrading": "Abriendo caja...",
+    "upgradeSuccess": "Bienvenido a Pro 🌱 Unlimited Mochi + todas las funciones desbloqueadas."
   },
   "onboarding": {
     "skipSetup": "Saltar configuración - saltar →",
@@ -792,6 +796,11 @@
     "moreRest": "+{{count}} más: descansa primero, ellos esperarán",
     "upNext": "A continuación · {{count}} tareas en cola",
     "seeAll": "Ver todos →",
+    "seeAllTasks": "Ver todas las tareas en cola",
+    "doneSub": "hecho",
+    "tapToUpdate": "Toca para actualizar",
+    "tasksCompleted": "tareas completadas",
+    "burnoutGauge": "indicador de desgaste",
     "goalReached": "¡Objetivo alcanzado!",
     "todaysFocus": "El enfoque de hoy",
     "startWith": "Empezar con →",
@@ -902,7 +911,9 @@
     "remove": "¿Eliminar?",
     "undo": "Deshacer",
     "save": "Ahorrar",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "titlePlaceholder": "Título de la tarea",
+    "notePlaceholder": "Nota (opcional)"
   },
   "addTask": {
     "title": "Agregar una tarea",
@@ -961,7 +972,8 @@
     "checkInternet": "Verifique su conexión a Internet e inténtelo nuevamente.",
     "tryAgain": "Intentar otra vez",
     "partnerSteppedAway": "Tu pareja se alejó, sigue adelante.",
-    "yourPhase": "Tu fase de concentración"
+    "yourPhase": "Tu fase de concentración",
+    "activeRoomLabel": "Sala {{code}} · {{count}} enfocando"
   },
   "breathwork": {
     "breatheIn": "Aspirar...",
@@ -1064,7 +1076,12 @@
     "letsGo": "Vamos →",
     "skipShowTasks": "Saltar — mostrar mis tareas",
     "archivedTasks": "{{count}} tarea anterior trasladada a Algún día. Puedes revisarlos en cualquier momento.",
-    "archivedTasksPlural": "{{count}} tareas antiguas trasladadas a Algún día. Puedes revisarlos en cualquier momento."
+    "archivedTasksPlural": "{{count}} tareas antiguas trasladadas a Algún día. Puedes revisarlos en cualquier momento.",
+    "daysAway": "{{count}} días desde tu última sesión",
+    "weeksAway": "Faltan {{count}} semanas: sin prisas",
+    "longAway": "Cuando estés listo, todo esperó",
+    "skipMedium": "Solo mira a tu alrededor primero",
+    "skipLong": "Volveré más tarde"
   },
   "contextRestore": {
     "whereWereWe": "¿Dónde estábamos?",
@@ -1098,6 +1115,10 @@
     "okay": "Bueno",
     "good": "Bien",
     "wired": "cableado"
+  },
+  "review": {
+    "sharePrompt": "¿Disfrutas de MindShift? Compártelo 🌱",
+    "shareAction": "Compartir"
   },
   "common": {
     "done": "✓ Hecho",

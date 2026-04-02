@@ -86,6 +86,7 @@
     "custom": "Xüsusi",
     "startFocus": "Diqqəti başladın →",
     "skipRitual": "Ritualı atlayın və daxil olun",
+    "breatheFirst": "Əvvəlcə nəfəs alın",
     "focusWithSomeone": "🤝 Diqqətinizi kiməsə yönəldin",
     "focusRoomHint": "Dostunuza diqqət yetirin — otaq yaradın və kodu paylaşın. Bir-birinizin tərəqqisini görəcəksiniz.",
     "breathe": "Nəfəs alma vaxtıdır 🌿",
@@ -150,6 +151,8 @@
     "tapToSeeSomeday": "Bir gün onları görmək üçün toxunun",
     "imReady": "mən hazıram",
     "skipNatureBuffer": "Təbiət tamponunu atlayın",
+    "firstSessionTitle": "Sən ortaya çıxdın. 🌱",
+    "firstSessionBody": "Sabah geri qayıdın - ardıcıllığınız hər dəfə artır.",
     "bypassRecovery": "Bərpa təklifini keçin",
     "postSessionEnergyLabel": "Sessiyadan sonrakı enerji: {{label}}",
     "recoveryTitle": "90 dəqiqə dərin fokus 🌊",
@@ -291,7 +294,8 @@
     "upgradeError": "Kassanı açmaq mümkün olmadı. Yenidən cəhd edin.",
     "upgradeCTA": "Pro-a yüksəldin",
     "proBadge": "Pro",
-    "upgrading": "Kassa açılır..."
+    "upgrading": "Kassa açılır...",
+    "upgradeSuccess": "Pro 🌱 Limitsiz Mochi + bütün funksiyalar kiliddən çıxarıldı."
   },
   "onboarding": {
     "skipSetup": "Quraşdırmanı keçin — daxil olun →",
@@ -792,6 +796,11 @@
     "moreRest": "+{{count}} daha çox — əvvəlcə dincəl, gözləyəcəklər",
     "upNext": "Növbəti · {{count}} tapşırıq növbəyə alınıb",
     "seeAll": "Hamısına bax →",
+    "seeAllTasks": "Bütün növbəli tapşırıqlara baxın",
+    "doneSub": "edildi",
+    "tapToUpdate": "Yeniləmək üçün toxunun",
+    "tasksCompleted": "tapşırıqlar tamamlandı",
+    "burnoutGauge": "Tükənmişlik göstəricisi",
     "goalReached": "Məqsəd əldə edildi!",
     "todaysFocus": "Bu günün diqqəti",
     "startWith": "→ ilə başlayın",
@@ -902,7 +911,9 @@
     "remove": "Silinsin?",
     "undo": "Geri al",
     "save": "Saxla",
-    "cancel": "Ləğv et"
+    "cancel": "Ləğv et",
+    "titlePlaceholder": "Tapşırıq başlığı",
+    "notePlaceholder": "Qeyd (isteğe bağlı)"
   },
   "addTask": {
     "title": "Tapşırıq əlavə edin",
@@ -961,7 +972,8 @@
     "checkInternet": "İnternet bağlantınızı yoxlayın və yenidən cəhd edin.",
     "tryAgain": "Yenidən cəhd edin",
     "partnerSteppedAway": "Tərəfdaşınız uzaqlaşdı - davam edin",
-    "yourPhase": "Sizin diqqət fazanız"
+    "yourPhase": "Sizin diqqət fazanız",
+    "activeRoomLabel": "Otaq {{code}} · {{count}} fokuslanma"
   },
   "breathwork": {
     "breatheIn": "Nəfəs al...",
@@ -1064,7 +1076,12 @@
     "letsGo": "gedək →",
     "skipShowTasks": "Keç - tapşırıqlarımı göstər",
     "archivedTasks": "{{count}} köhnə tapşırıq Someday-a köçürüldü. İstənilən vaxt onları nəzərdən keçirə bilərsiniz.",
-    "archivedTasksPlural": "{{count}} köhnə tapşırıqlar Someday-a köçürüldü. İstənilən vaxt onları nəzərdən keçirə bilərsiniz."
+    "archivedTasksPlural": "{{count}} köhnə tapşırıqlar Someday-a köçürüldü. İstənilən vaxt onları nəzərdən keçirə bilərsiniz.",
+    "daysAway": "Son sessiyanızdan {{count}} gün",
+    "weeksAway": "{{count}} həftə qalıb - tələsməyin",
+    "longAway": "Nə vaxt hazırsan - hər şey gözlədi",
+    "skipMedium": "Sadəcə əvvəlcə ətrafa baxın",
+    "skipLong": "Mən sonra qayıdacağam"
   },
   "contextRestore": {
     "whereWereWe": "Biz harada idik?",
@@ -1098,6 +1115,10 @@
     "okay": "tamam",
     "good": "Yaxşı",
     "wired": "Simli"
+  },
+  "review": {
+    "sharePrompt": "MindShift-dən zövq alırsınız? Paylaşın 🌱",
+    "shareAction": "Paylaşın"
   },
   "common": {
     "done": "✓ Tamamlandı",

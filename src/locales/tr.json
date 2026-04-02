@@ -86,6 +86,7 @@
     "custom": "Gelenek",
     "startFocus": "Odaklanmayı Başlat →",
     "skipRitual": "Ritüeli atla ve içeri gir",
+    "breatheFirst": "Önce nefes al",
     "focusWithSomeone": "🤝 Birine odaklan",
     "focusRoomHint": "Bir arkadaşınızla odaklanın; bir oda oluşturun ve kodu paylaşın. Birbirinizin ilerleyişini göreceksiniz.",
     "breathe": "Nefes alma zamanı 🌿",
@@ -150,6 +151,8 @@
     "tapToSeeSomeday": "Onları Bir Gün'de görmek için dokunun",
     "imReady": "Ben hazırım",
     "skipNatureBuffer": "Doğa arabelleğini atla",
+    "firstSessionTitle": "Sen ortaya çıktın. 🌱",
+    "firstSessionBody": "Yarın tekrar gelin; seriniz gün be gün büyüyor.",
     "bypassRecovery": "Kurtarma önerisini atla",
     "postSessionEnergyLabel": "Seans sonrası enerji: {{label}}",
     "recoveryTitle": "90 dakikalık derin odaklanma 🌊",
@@ -291,7 +294,8 @@
     "upgradeError": "Ödeme açılamadı. Tekrar deneyin.",
     "upgradeCTA": "Pro'ya yükseltin",
     "proBadge": "Profesyonel",
-    "upgrading": "Ödeme işlemi açılıyor..."
+    "upgrading": "Ödeme işlemi açılıyor...",
+    "upgradeSuccess": "Pro'ya hoş geldiniz 🌱 Sınırsız Mochi + tüm özelliklerin kilidi açıldı."
   },
   "onboarding": {
     "skipSetup": "Kurulumu atlayın — hemen başlayın →",
@@ -792,6 +796,11 @@
     "moreRest": "+{{count}} daha fazla — önce dinlenin, onlar bekleyecek",
     "upNext": "Sıradaki · {{count}} görev sıraya alındı",
     "seeAll": "Tümünü gör →",
+    "seeAllTasks": "Tüm sıraya alınmış görevleri görün",
+    "doneSub": "Tamamlandı",
+    "tapToUpdate": "Güncellemek için dokunun",
+    "tasksCompleted": "tamamlanan görevler",
+    "burnoutGauge": "Tükenmişlik göstergesi",
     "goalReached": "Hedefe ulaşıldı!",
     "todaysFocus": "Bugünün odak noktası",
     "startWith": "→ ile başlayın",
@@ -902,7 +911,9 @@
     "remove": "Kaldırmak?",
     "undo": "Geri al",
     "save": "Kaydetmek",
-    "cancel": "İptal etmek"
+    "cancel": "İptal etmek",
+    "titlePlaceholder": "Görev başlığı",
+    "notePlaceholder": "Not (isteğe bağlı)"
   },
   "addTask": {
     "title": "Görev ekle",
@@ -961,7 +972,8 @@
     "checkInternet": "İnternet bağlantınızı kontrol edip tekrar deneyin.",
     "tryAgain": "Tekrar deneyin",
     "partnerSteppedAway": "Partneriniz uzaklaştı – devam edin",
-    "yourPhase": "Odaklanma aşamanız"
+    "yourPhase": "Odaklanma aşamanız",
+    "activeRoomLabel": "Oda {{code}} · {{count}} odaklanma"
   },
   "breathwork": {
     "breatheIn": "Nefes alın...",
@@ -1064,7 +1076,12 @@
     "letsGo": "Hadi gidelim →",
     "skipShowTasks": "Atla — görevlerimi göster",
     "archivedTasks": "{{count}} eski görev Birgün'e taşındı. Bunları istediğiniz zaman inceleyebilirsiniz.",
-    "archivedTasksPlural": "{{count}} eski görevler Birgün'e taşındı. Bunları istediğiniz zaman inceleyebilirsiniz."
+    "archivedTasksPlural": "{{count}} eski görevler Birgün'e taşındı. Bunları istediğiniz zaman inceleyebilirsiniz.",
+    "daysAway": "Son oturumunuzdan bu yana {{count}} gün",
+    "weeksAway": "{{count}} hafta kaldı — aceleye gerek yok",
+    "longAway": "Ne zaman hazır olursan - her şey bekledi",
+    "skipMedium": "Önce etrafına bak",
+    "skipLong": "Ben daha sonra gelirim"
   },
   "contextRestore": {
     "whereWereWe": "Neredeydik?",
@@ -1098,6 +1115,10 @@
     "okay": "Tamam",
     "good": "İyi",
     "wired": "kablolu"
+  },
+  "review": {
+    "sharePrompt": "MindShift'ten memnun musunuz? Paylaş 🌱",
+    "shareAction": "Paylaşmak"
   },
   "common": {
     "done": "✓ Bitti",

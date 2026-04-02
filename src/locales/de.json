@@ -86,6 +86,7 @@
     "custom": "Brauch",
     "startFocus": "Fokus starten →",
     "skipRitual": "Überspringen Sie das Ritual und springen Sie ein",
+    "breatheFirst": "Atme zuerst",
     "focusWithSomeone": "🤝 Konzentriere dich auf jemanden",
     "focusRoomHint": "Konzentrieren Sie sich mit einem Freund – erstellen Sie einen Raum und teilen Sie den Code. Sie werden die Fortschritte des anderen sehen.",
     "breathe": "Zeit zum Durchatmen 🌿",
@@ -150,6 +151,8 @@
     "tapToSeeSomeday": "Tippen Sie hier, um sie in „Someday“ zu sehen",
     "imReady": "Ich bin bereit",
     "skipNatureBuffer": "Naturpuffer überspringen",
+    "firstSessionTitle": "Du bist aufgetaucht. 🌱",
+    "firstSessionBody": "Kommen Sie morgen wieder – Ihr Streak wächst von Tag zu Tag.",
     "bypassRecovery": "Vorschlag zur Bypass-Wiederherstellung",
     "postSessionEnergyLabel": "Energie nach der Sitzung: {{label}}",
     "recoveryTitle": "90 Minuten tiefe Konzentration 🌊",
@@ -291,7 +294,8 @@
     "upgradeError": "Der Checkout konnte nicht geöffnet werden. Versuchen Sie es erneut.",
     "upgradeCTA": "Upgrade auf Pro",
     "proBadge": "Profi",
-    "upgrading": "Kasse wird geöffnet..."
+    "upgrading": "Kasse wird geöffnet...",
+    "upgradeSuccess": "Willkommen bei Pro 🌱 Unbegrenztes Mochi + alle Funktionen freigeschaltet."
   },
   "onboarding": {
     "skipSetup": "Einrichtung überspringen – einsteigen →",
@@ -792,6 +796,11 @@
     "moreRest": "+{{count}} mehr – ruhen Sie sich zuerst aus, sie werden warten",
     "upNext": "Als nächstes stehen {{count}} Aufgaben in der Warteschlange",
     "seeAll": "Alle anzeigen →",
+    "seeAllTasks": "Alle Aufgaben in der Warteschlange anzeigen",
+    "doneSub": "Erledigt",
+    "tapToUpdate": "Zum Aktualisieren tippen",
+    "tasksCompleted": "Aufgaben erledigt",
+    "burnoutGauge": "Burnout-Messgerät",
     "goalReached": "Ziel erreicht!",
     "todaysFocus": "Der heutige Schwerpunkt",
     "startWith": "Beginnen Sie mit →",
@@ -902,7 +911,9 @@
     "remove": "Entfernen?",
     "undo": "Rückgängig machen",
     "save": "Speichern",
-    "cancel": "Stornieren"
+    "cancel": "Stornieren",
+    "titlePlaceholder": "Aufgabentitel",
+    "notePlaceholder": "Hinweis (optional)"
   },
   "addTask": {
     "title": "Fügen Sie eine Aufgabe hinzu",
@@ -961,7 +972,8 @@
     "checkInternet": "Überprüfen Sie Ihre Internetverbindung und versuchen Sie es erneut.",
     "tryAgain": "Versuchen Sie es erneut",
     "partnerSteppedAway": "Ihr Partner hat sich zurückgezogen – machen Sie weiter",
-    "yourPhase": "Ihre Fokusphase"
+    "yourPhase": "Ihre Fokusphase",
+    "activeRoomLabel": "Raum {{code}} · {{count}} Fokussierung"
   },
   "breathwork": {
     "breatheIn": "Einatmen...",
@@ -1064,7 +1076,12 @@
     "letsGo": "Lass uns gehen →",
     "skipShowTasks": "Überspringen – Meine Aufgaben anzeigen",
     "archivedTasks": "{{count}} alte Aufgabe wurde nach Someday verschoben. Sie können sie jederzeit überprüfen.",
-    "archivedTasksPlural": "{{count}} alte Aufgaben wurden nach Someday verschoben. Sie können sie jederzeit überprüfen."
+    "archivedTasksPlural": "{{count}} alte Aufgaben wurden nach Someday verschoben. Sie können sie jederzeit überprüfen.",
+    "daysAway": "{{count}} Tage seit Ihrer letzten Sitzung",
+    "weeksAway": "{{count}} Wochen entfernt – keine Eile",
+    "longAway": "Wann immer Sie bereit sind – alles wartet",
+    "skipMedium": "Schauen Sie sich einfach erst einmal um",
+    "skipLong": "Ich komme später wieder"
   },
   "contextRestore": {
     "whereWereWe": "Wo waren wir?",
@@ -1098,6 +1115,10 @@
     "okay": "Okay",
     "good": "Gut",
     "wired": "Verdrahtet"
+  },
+  "review": {
+    "sharePrompt": "Genießen Sie MindShift? Teile es 🌱",
+    "shareAction": "Aktie"
   },
   "common": {
     "done": "✓ Fertig",
