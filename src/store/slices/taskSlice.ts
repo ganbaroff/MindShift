@@ -48,6 +48,8 @@ export const createTaskSlice: StateCreator<
       return task.pool // 'task' type uses caller-assigned pool
     })()
     const assigned = { ...task, pool: effectivePool }
+    const allTasks = [...s.nowPool, ...s.nextPool, ...s.somedayPool]
+    logEvent('task_added', { pool: effectivePool, is_first: allTasks.length === 0 ? 1 : 0 })
     if (effectivePool === 'now')  return { nowPool: [...s.nowPool, assigned] }
     if (effectivePool === 'next') return { nextPool: [...s.nextPool, assigned] }
     return { somedayPool: [...s.somedayPool, assigned] }

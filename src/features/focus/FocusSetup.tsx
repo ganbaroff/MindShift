@@ -11,11 +11,14 @@
  * All business logic lives in useFocusSession.ts — this is pure UI composition.
  */
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import { AnimatePresence } from 'motion/react'
 import { useTranslation } from 'react-i18next'
 import { logEvent } from '@/shared/lib/logger'
-import { BreathworkRitual } from './BreathworkRitual'
+
+const LazyBreathworkRitual = lazy(() =>
+  import('./BreathworkRitual').then(m => ({ default: m.BreathworkRitual }))
+)
 import { FocusRoomSheet } from './FocusRoomSheet'
 import { FocusSetupHeader } from './FocusSetupHeader'
 import { FocusTaskPicker } from './FocusTaskPicker'
@@ -186,14 +189,16 @@ export function FocusSetup({
         </div>
       </div>
 
-      {/* Breathwork ritual overlay */}
+      {/* Breathwork ritual overlay — lazy loaded, only when user opts in */}
       <AnimatePresence>
         {showBreathwork && (
           <div className="fixed inset-0 z-50">
-            <BreathworkRitual
-              onComplete={() => { setShowBreathwork(false); handleStart() }}
-              onSkip={() => { setShowBreathwork(false); handleStart() }}
-            />
+            <Suspense fallback={null}>
+              <LazyBreathworkRitual
+                onComplete={() => { setShowBreathwork(false); handleStart() }}
+                onSkip={() => { setShowBreathwork(false); handleStart() }}
+              />
+            </Suspense>
           </div>
         )}
       </AnimatePresence>
