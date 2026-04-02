@@ -17,7 +17,7 @@ export interface AuthCheckStepProps {
 }
 
 export function AuthCheckStep({ email, onBack, onResend }: AuthCheckStepProps) {
-  const { t: transition } = useMotion()
+  const { shouldAnimate, t: transition } = useMotion()
   const { t } = useTranslation()
   const [resent, setResent] = useState(false)
 
@@ -31,15 +31,15 @@ export function AuthCheckStep({ email, onBack, onResend }: AuthCheckStepProps) {
     <motion.div
       key="check-step"
       className="flex flex-col items-center text-center"
-      initial={{ opacity: 0, y: 16 }}
+      initial={shouldAnimate ? { opacity: 0, y: 16 } : {}}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -12 }}
+      exit={shouldAnimate ? { opacity: 0, y: -12 } : {}}
       transition={transition()}
     >
       <motion.div
         className="w-20 h-20 rounded-full flex items-center justify-center mb-5"
         style={{ background: 'rgba(78,205,196,0.12)', border: '1.5px solid rgba(78,205,196,0.35)' }}
-        initial={{ scale: 0.5, opacity: 0 }}
+        initial={shouldAnimate ? { scale: 0.5, opacity: 0 } : {}}
         animate={{ scale: 1, opacity: 1 }}
         transition={transition('expressive')}
       >
