@@ -23,7 +23,7 @@ import { checkDbRateLimit } from '../_shared/rateLimit.ts'
 
 const GEMINI_MODEL = 'gemini-2.5-flash'
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`
-const API_TIMEOUT_MS = 15_000 // 15s timeout
+const API_TIMEOUT_MS = 8_000 // 8s — Supabase platform limit is 10s, leave 2s buffer
 
 const PRESET_NAMES: Record<string, string> = {
   brown:  'brown noise (Deep Focus)',

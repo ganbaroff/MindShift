@@ -62,7 +62,9 @@ export const SessionControls = memo(function SessionControls({
             {/* Audio toggle */}
             <button
               onClick={onAudioToggle}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm transition-all duration-200"
+              aria-pressed={isPlaying}
+              aria-label={isPlaying ? 'Sound on — tap to mute' : 'Sound off — tap to enable'}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[#4ECDC4] focus-visible:outline-none"
               style={{
                 background: isPlaying ? 'rgba(78,205,196,0.12)' : 'var(--color-surface-card)',
                 border: `1.5px solid ${isPlaying ? 'var(--color-teal)' : 'rgba(255,255,255,0.06)'}`,
@@ -94,7 +96,7 @@ export const SessionControls = memo(function SessionControls({
             {/* End session */}
             <button
               onClick={onStop}
-              className="px-6 py-2.5 rounded-xl text-sm font-medium transition-all duration-200"
+              className="px-6 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[#4ECDC4] focus-visible:outline-none"
               style={{
                 background: 'transparent',
                 border: '1px solid rgba(255,255,255,0.06)',
@@ -157,7 +159,9 @@ export const SessionControls = memo(function SessionControls({
         </AnimatePresence>
         <button
           onClick={onParkToggle}
-          className="w-11 h-11 rounded-full flex items-center justify-center text-lg shadow-lg"
+          aria-pressed={parkOpen}
+          aria-expanded={parkOpen}
+          className="w-11 h-11 rounded-full flex items-center justify-center text-lg shadow-lg focus-visible:ring-2 focus-visible:ring-[#4ECDC4] focus-visible:outline-none"
           style={{
             background: parkOpen ? 'var(--color-primary)' : 'var(--color-surface-card)',
             border: `1.5px solid ${parkOpen ? 'var(--color-primary)' : 'rgba(255,255,255,0.06)'}`,
