@@ -26,6 +26,7 @@ import { TransitionNudge } from '@/shared/ui/TransitionNudge'
 import { DiscoveryCard } from '@/shared/ui/DiscoveryCard'
 import { getDiscoveryById } from '@/shared/lib/mochiDiscoveries'
 import { FeatureHint } from '@/shared/ui/FeatureHint'
+import { logEvent } from '@/shared/lib/logger'
 import { getTimeBlock, GREETING_KEYS, GREETING_EMOJI, getEnergyAdvice } from './todayUtils'
 import { TodayMorningPlan } from './TodayMorningPlan'
 import { TodayEveningRecap } from './TodayEveningRecap'
@@ -52,6 +53,11 @@ export default function TodayPage() {
   const [lastDiscoveryId, setLastDiscoveryId] = useState<string | null>(null)
   const [showEnergyPicker, setShowEnergyPicker] = useState(false)
   const energyPickerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    logEvent('today_page_viewed', { time_block: timeBlock, energy: energyLevel })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   useEffect(() => {
     if (!showEnergyPicker) return
@@ -138,6 +144,7 @@ export default function TodayPage() {
   }, [addTask])
 
   const handleCompleteTask = useCallback((taskId: string) => {
+    logEvent('task_completed_today', { from: 'today_page' })
     const prevCount = mochiDiscoveries.length
     completeTask(taskId)
     setJustCompleted(true)
@@ -315,7 +322,7 @@ export default function TodayPage() {
 
         {/* Focus CTA */}
         <motion.button
-          onClick={() => navigate('/focus')}
+          onClick={() => { logEvent('focus_cta_tapped', { has_task: firstTask ? 1 : 0 }); navigate('/focus') }}
           className="w-full py-3.5 rounded-2xl flex items-center justify-center gap-2 font-semibold text-[15px] focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
           style={{ background: 'linear-gradient(135deg, var(--color-primary), var(--color-teal))', color: '#FFFFFF' }}
           whileTap={shouldAnimate ? { scale: 0.97 } : undefined}

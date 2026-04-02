@@ -115,7 +115,7 @@ export function FocusSetup({
             <span className="text-base">🤝</span>
             <div className="flex-1 min-w-0">
               <p className="text-[12px] font-semibold" style={{ color: 'var(--color-teal)' }}>
-                Room {room.code} · {room.peers.length + 1} focusing
+                {t('focusRoom.activeRoomLabel', { code: room.code, count: room.peers.length + 1 })}
               </p>
               {room.peers.length === 0 && (
                 <p className="text-[10px]" style={{ color: 'var(--color-text-muted)' }}>

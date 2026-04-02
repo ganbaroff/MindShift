@@ -141,6 +141,7 @@ export const useStore = create<import('./types').AppStore>()(
           goalCelebratedDate: s.goalCelebratedDate,
           weeklyPlanShownWeek: s.weeklyPlanShownWeek,
           weeklyIntention: s.weeklyIntention,
+          poolsExplained: s.poolsExplained,
           firstFocusTutorialCompleted: s.firstFocusTutorialCompleted,
           uiTone: s.uiTone,
           telegramLinkCode: s.telegramLinkCode,

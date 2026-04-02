@@ -195,7 +195,7 @@ function TaskCardInner({ task, index = 0, onDone, onPark, onRemove }: TaskCardPr
             value={editTitle}
             onChange={e => setEditTitle(e.target.value)}
             onKeyDown={handleEditKeyDown}
-            placeholder="Task title"
+            placeholder={t('taskCard.titlePlaceholder')}
             className="w-full bg-ms-raised rounded-lg px-3 h-9 text-[14px] text-ms-text placeholder:text-ms-muted border border-transparent focus:border-ms-primary outline-none"
             aria-label="Edit task title"
           />
@@ -203,7 +203,7 @@ function TaskCardInner({ task, index = 0, onDone, onPark, onRemove }: TaskCardPr
             value={editNote}
             onChange={e => setEditNote(e.target.value)}
             onKeyDown={handleEditKeyDown}
-            placeholder="Note (optional)"
+            placeholder={t('taskCard.notePlaceholder')}
             rows={2}
             className="w-full bg-ms-raised rounded-lg px-3 py-2 text-[12px] text-ms-text placeholder:text-ms-muted border border-transparent focus:border-ms-primary outline-none resize-none"
             aria-label="Edit task note"

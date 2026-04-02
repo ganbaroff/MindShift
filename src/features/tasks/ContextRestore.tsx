@@ -15,10 +15,12 @@
  * pulling this component into the main bundle.
  */
 
+import { useEffect } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useTranslation } from 'react-i18next'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { useStore } from '@/store'
+import { logEvent } from '@/shared/lib/logger'
 
 // Re-export utils so existing call-sites (tests, etc.) don't break
 export { writeLastActive, shouldShowContextRestore } from './contextRestoreUtils'
@@ -36,6 +38,11 @@ export function ContextRestore({ onDismiss }: Props) {
 
   // Show up to 2 active NOW tasks — cognitive load limit
   const activeTasks = nowPool.filter(task => task.status === 'active').slice(0, 2)
+
+  useEffect(() => {
+    logEvent('context_restore_shown', { active_tasks: activeTasks.length })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return (
     <AnimatePresence>

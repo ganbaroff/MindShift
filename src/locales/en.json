@@ -907,7 +907,9 @@
     "remove": "Remove?",
     "undo": "Undo",
     "save": "Save",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "titlePlaceholder": "Task title",
+    "notePlaceholder": "Note (optional)"
   },
   "addTask": {
     "title": "Add a task",
@@ -966,7 +968,8 @@
     "checkInternet": "Check your internet connection and try again.",
     "tryAgain": "Try again",
     "partnerSteppedAway": "Your partner stepped away — keep going",
-    "yourPhase": "Your focus phase"
+    "yourPhase": "Your focus phase",
+    "activeRoomLabel": "Room {{code}} · {{count}} focusing"
   },
   "breathwork": {
     "breatheIn": "Breathe in...",

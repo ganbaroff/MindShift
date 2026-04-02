@@ -7,7 +7,7 @@ import { supabase } from '@/shared/lib/supabase'
 import Avatar from '@/features/progress/Avatar'
 import type { Task } from '@/types'
 import { RECOVERY_THRESHOLD_HOURS } from '@/shared/lib/constants'
-import { logError } from '@/shared/lib/logger'
+import { logError, logEvent } from '@/shared/lib/logger'
 import { pushWelcomeBack, notifyAchievement } from '@/shared/lib/notify'
 import { useUITone } from '@/shared/hooks/useUITone'
 import { getToneCopy } from '@/shared/lib/uiTone'
@@ -60,6 +60,11 @@ export function RecoveryProtocol({ onDismiss }: Props) {
 
   // Archive overdue tasks + fetch AI welcome + fire welcome-back push on mount
   useEffect(() => {
+    logEvent('recovery_shown', {
+      days_absent: lastSessionAt
+        ? Math.floor((Date.now() - new Date(lastSessionAt).getTime()) / (1000 * 60 * 60 * 24))
+        : Math.ceil(RECOVERY_THRESHOLD_HOURS / 24),
+    })
     // Native push — visible when app was backgrounded (silent, no shame)
     // Extract first name from email or use generic greeting
     const userName = email ? email.split('@')[0].split('.')[0] : undefined
@@ -198,6 +203,7 @@ export function RecoveryProtocol({ onDismiss }: Props) {
   }
 
   const handleSkip = () => {
+    logEvent('recovery_dismissed', { action: 'skip' })
     onDismiss()
   }
 

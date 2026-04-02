@@ -26,7 +26,7 @@ import { EmptyState } from '@/shared/ui/EmptyState';
 import { useStore } from '@/store';
 import { DIFFICULTY_MAP } from '@/types';
 import type { Task } from '@/types';
-import { getNowPoolMax } from '@/shared/lib/constants';
+import { getNowPoolMax, NEXT_POOL_MAX } from '@/shared/lib/constants';
 import { PageTransition } from '@/shared/ui/PageTransition';
 import { SortableTaskCard } from './SortableTaskCard';
 import { CollapsibleSection } from './CollapsibleSection';
@@ -40,11 +40,8 @@ export default function TasksPage() {
   const [showSomeday, setShowSomeday] = useState(false);
   const [showDone, setShowDone] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [showPoolGuide, setShowPoolGuide] = useState(() => {
-    return !localStorage.getItem('ms_pools_explained')
-  });
 
-  const { nowPool, nextPool, somedayPool, completeTask, snoozeTask, removeTask, reorderPool, moveTask, setTaskDueDate, appMode, seasonalMode } = useStore();
+  const { nowPool, nextPool, somedayPool, completeTask, snoozeTask, removeTask, reorderPool, moveTask, setTaskDueDate, appMode, seasonalMode, poolsExplained, setPoolsExplained } = useStore();
 
   // dnd-kit sensors — pointer for desktop, touch for mobile
   const sensors = useSensors(
@@ -125,7 +122,7 @@ export default function TasksPage() {
 
       {/* Pool explanation for first-time users */}
       <AnimatePresence>
-        {showPoolGuide && (
+        {!poolsExplained && (
           <motion.div
             initial={shouldAnimate ? { opacity: 0, height: 0 } : false}
             animate={shouldAnimate ? { opacity: 1, height: 'auto' } : false}
@@ -138,10 +135,7 @@ export default function TasksPage() {
                 {t('tasks.poolGuide.title', { defaultValue: 'How tasks work here' })}
               </p>
               <button
-                onClick={() => {
-                  localStorage.setItem('ms_pools_explained', '1')
-                  setShowPoolGuide(false)
-                }}
+                onClick={() => { setPoolsExplained() }}
                 className="text-[11px] px-2 py-0.5 rounded-lg"
                 style={{ color: 'var(--color-text-muted)', backgroundColor: 'rgba(255,255,255,0.05)' }}
                 aria-label="Dismiss"
@@ -254,7 +248,7 @@ export default function TasksPage() {
         <div>
           <div className="flex items-center gap-2 mb-2">
             <span className="text-[11px] uppercase tracking-widest font-semibold" style={{ color: 'var(--color-text-muted)' }}>{t('tasks.next')}</span>
-            <span className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>{nextTasks.length}/6</span>
+            <span className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>{nextTasks.length}/{NEXT_POOL_MAX}</span>
             {/* Two-Thirds guardrail — B-9: gentle nudge when queue is getting full */}
             {nextTasks.length >= 4 && (
               <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: 'rgba(245,158,11,0.10)', color: 'var(--color-gold)' }}>

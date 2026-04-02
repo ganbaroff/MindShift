@@ -89,6 +89,8 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
         exit={shouldAnimate ? { opacity: 0 } : undefined}
         className="fixed inset-0 bg-black/60 z-40"
         onClick={onClose}
+        aria-label={t('common.close')}
+        role="button"
       />
 
       {/* Sheet */}
