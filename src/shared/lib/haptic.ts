@@ -14,11 +14,15 @@
  * All functions fail silently — haptics are enhancement, never critical path.
  */
 
-import { useStore } from '@/store'
+// Avoid circular dependency (store → taskSlice → notify → haptic → store) by
+// letting the store register itself here rather than importing it directly.
+type HapticsGetter = () => boolean
+let _hapticsEnabled: HapticsGetter = () => true
+export function _registerHapticsGetter(fn: HapticsGetter) { _hapticsEnabled = fn }
 
 export function haptic(pattern: number | number[] = 150): void {
   try {
-    if (!useStore.getState().hapticsEnabled) return
+    if (!_hapticsEnabled()) return
     if ('vibrate' in navigator) {
       navigator.vibrate(pattern)
     }
