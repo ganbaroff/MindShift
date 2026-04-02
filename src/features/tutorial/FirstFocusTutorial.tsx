@@ -41,7 +41,10 @@ export function FirstFocusTutorial() {
   const sampleTaskIdRef = useRef<string | null>(null)
 
   // Analytics: denominator for tutorial completion/skip rate
-  useEffect(() => { logEvent('tutorial_started') }, [])
+  useEffect(() => {
+    logEvent('tutorial_started')
+    logEvent('tutorial_step_viewed', { step: 'intro' })
+  }, [])
 
   // Current phase based on elapsed time
   const phase = elapsed < PHASE_THRESHOLDS.release
@@ -245,7 +248,11 @@ export function FirstFocusTutorial() {
 
               {/* Skip remaining */}
               <button
-                onClick={() => { setTimerRunning(false); setStep('celebrate') }}
+                onClick={() => {
+                  logEvent('tutorial_timer_skipped', { elapsed })
+                  setTimerRunning(false)
+                  setStep('celebrate')
+                }}
                 className="text-[12px]"
                 style={{ color: 'var(--color-text-subtle)' }}
               >

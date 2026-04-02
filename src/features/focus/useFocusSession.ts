@@ -277,9 +277,11 @@ export function useFocusSession() {
   // ── Audio toggle ─────────────────────────────────────────────────────────────
   const handleAudioToggle = useCallback(() => {
     if (isPlaying) {
+      logEvent('audio_toggled', { preset: activePreset ?? 'brown', action: 'off' })
       stopAudio()
     } else {
       const preset: AudioPreset = (focusAnchor ?? activePreset ?? 'brown')
+      logEvent('audio_toggled', { preset, action: 'on' })
       play(preset)
       setPreset(preset)
     }

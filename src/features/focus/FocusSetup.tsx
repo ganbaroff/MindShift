@@ -11,9 +11,10 @@
  * All business logic lives in useFocusSession.ts — this is pure UI composition.
  */
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { AnimatePresence } from 'motion/react'
 import { useTranslation } from 'react-i18next'
+import { logEvent } from '@/shared/lib/logger'
 import { BreathworkRitual } from './BreathworkRitual'
 import { FocusRoomSheet } from './FocusRoomSheet'
 import { FocusSetupHeader } from './FocusSetupHeader'
@@ -63,6 +64,12 @@ export function FocusSetup({
   const [showBreathwork, setShowBreathwork] = useState(false)
   const [showRoomSheet, setShowRoomSheet] = useState(false)
   const { t } = useTranslation()
+
+  // Analytics: setup-to-start conversion rate denominator
+  useEffect(() => {
+    logEvent('focus_setup_viewed', { has_tasks: allTasks.filter(t => t.status === 'active').length > 0 ? 1 : 0 })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return (
     <>
