@@ -1075,7 +1075,12 @@
     "letsGo": "Let's go →",
     "skipShowTasks": "Skip — show my tasks",
     "archivedTasks": "{{count}} old task moved to Someday. You can review them anytime.",
-    "archivedTasksPlural": "{{count}} old tasks moved to Someday. You can review them anytime."
+    "archivedTasksPlural": "{{count}} old tasks moved to Someday. You can review them anytime.",
+    "daysAway": "{{count}} days since your last session",
+    "weeksAway": "{{count}} weeks away — no rush",
+    "longAway": "Whenever you're ready — everything waited",
+    "skipMedium": "Just look around first",
+    "skipLong": "I'll come back later"
   },
   "contextRestore": {
     "whereWereWe": "Where were we?",
