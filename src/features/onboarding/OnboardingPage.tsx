@@ -181,6 +181,7 @@ export default function OnboardingPage() {
   // Quick Start — skip setup, use smart defaults, get into app immediately
   const handleQuickStart = () => {
     logEvent('onboarding_quick_start')
+    logEvent('onboarding_completed', { mode: 'minimal', quick_start: 1 })
     setAppMode('minimal')
     setEnergyLevel(3 as EnergyLevel)
     setOnboardingCompleted()
