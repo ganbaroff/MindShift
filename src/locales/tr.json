@@ -23,7 +23,8 @@
     "quietDay": "Sessiz bir gün - bu da sorun değil. Dinlenme önemlidir.",
     "focusOn": "Odaklan: {{title}}",
     "startFocus": "Odaklanma oturumu başlatın",
-    "viewProgress": "İlerlemeyi görüntüle →"
+    "viewProgress": "İlerlemeyi görüntüle →",
+    "moveFromNext": "{{count}} görev Sonraki'de bekliyor — birini seç →"
   },
   "quickCapture": {
     "placeholder": "Görev, hatırlatıcı veya toplantı ekleyin...",
@@ -111,6 +112,16 @@
     "soundAnchorDesc": "{{preset}} gürültü otomatik olarak oynatılacak",
     "soundPicker": "Odaklanma sesi",
     "soundNone": "Ses yok",
+    "thoughtSaved": "Düşünce Bir Gün panosuna kaydedildi 💭",
+    "viewRoom": "Görüş",
+    "medPeakWindow": "⚡ Ortalama zirve penceresi: {{start}}–{{end}}",
+    "arcPhaseGettingStarted": "Odaklanma aşaması: Başlarken",
+    "arcPhaseMomentum": "Odaklanma aşaması: momentum oluşturma",
+    "arcPhaseDeepFlow": "Odaklanma aşaması: derin akış",
+    "arcPhaseRecovery": "Odaklanma aşaması: kurtarma",
+    "arcTimerSurprise": "Odaklanma zamanlayıcısı — akış aşamasında gizlenen rakamlar",
+    "arcTimerHideDigits": "Odaklanma zamanlayıcısı — rakamları gizlemek için dokunun",
+    "arcTimerShowDigits": "Odaklanma zamanlayıcısı — rakamları göstermek için dokunun",
     "soundMutedHint": "Ses seviyesi 0'da — Ayarlar → Ses bölümünde ayarlayın",
     "minutesPlaceholder": "Dakikalar...",
     "waitingForPartner": "İş ortağının katılması bekleniyor…",
@@ -257,6 +268,7 @@
     "dataExported": "Dışa aktarılan veriler",
     "deleteAccount": "Hesabı sil",
     "deleteConfirm": "Bu, hesabınızı ve tüm verilerinizi kalıcı olarak silecektir. Bu geri alınamaz.",
+    "deleteTypePrompt": "Onaylamak için DELETE yazın",
     "deleting": "Siliniyor...",
     "yesDelete": "Evet sil",
     "accountDeleted": "Hesap silindi",
@@ -273,7 +285,11 @@
     "toneBalanced": "Dengeli",
     "toneBalancedDesc": "Koçluk tonu, daha fazla ölçüm",
     "toneClear": "Temizlemek",
-    "toneClearDesc": "Basit, sayılar öncelikli"
+    "toneClearDesc": "Basit, sayılar öncelikli",
+    "upgradeError": "Ödeme açılamadı. Tekrar deneyin.",
+    "upgradeCTA": "Pro'ya yükseltin",
+    "proBadge": "Profesyonel",
+    "upgrading": "Ödeme işlemi açılıyor..."
   },
   "onboarding": {
     "skipSetup": "Kurulumu atlayın — hemen başlayın →",
@@ -648,6 +664,14 @@
     },
     "psychotype": {
       "achiever": {
+        "phase_release": [
+          "İçeri girmek. İlerleme yaşanıyor.",
+          "Sürtünme noktasını geçtik."
+        ],
+        "phase_flow": [
+          "Akış durumu. Bu iyi kısmı.",
+          "Tam odaklanma. Hiçbir şey boşa gitmedi."
+        ],
         "milestone_7": [
           "Kitaplarda 7 dakika 💪",
           "Zor kısmı geçtim. İnşa etmeye devam edin."
@@ -666,6 +690,14 @@
         ]
       },
       "explorer": {
+        "phase_release": [
+          "Odak açılıyor. Takip et.",
+          "Şimdi bir şeyler tıklıyor."
+        ],
+        "phase_flow": [
+          "Derin keşif modu. Durma.",
+          "Bu, en iyi bulguların gerçekleştiği zamandır."
+        ],
         "milestone_7": [
           "7 dakika içinde — ısınıyoruz 🔍",
           "İçeri girmek. Merak yükleniyor."
@@ -684,6 +716,14 @@
         ]
       },
       "connector": {
+        "phase_release": [
+          "İş düzeliyor. Hala buradayım.",
+          "Şimdi içinde."
+        ],
+        "phase_flow": [
+          "Bölgede. Hisset.",
+          "Akış. Buraya geldik."
+        ],
         "milestone_7": [
           "7 dakika. Sabit durmak. 🌱",
           "Hala burada seninle."
@@ -702,6 +742,14 @@
         ]
       },
       "planner": {
+        "phase_release": [
+          "İkinci aşama. Yolda.",
+          "Planlandığı gibi şimdi daha derine."
+        ],
+        "phase_flow": [
+          "Optimum yürütme. İçinde kal.",
+          "Tam akış. Tam olarak planladığın şey."
+        ],
         "milestone_7": [
           "7 dakika - yolda. 🌱",
           "Plan işe yarıyor."
@@ -824,7 +872,9 @@
     "phaseFlow": "Akış 🌊",
     "phaseRelease": "Yayınla 🌱",
     "phaseStruggle": "Mücadele 💪",
-    "phaseRecovery": "İyileşme 🌿"
+    "phaseRecovery": "İyileşme 🌿",
+    "filterAll": "Tüm",
+    "noFilterResults": "Henüz bu aşamada oturum yok"
   },
   "calendar": {
     "upcoming": "Yaklaşan",

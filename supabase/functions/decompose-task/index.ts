@@ -5,13 +5,13 @@
 //
 // Auth: JWT required — user must be signed in
 // Rate limit: 20 calls/hour per user (free), unlimited (pro) — DB-backed
-// AI: Google Gemini 2.5 Flash
+// AI: Google Gemini 2.5 Flash (default)
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { getCorsHeaders } from '../_shared/cors.ts'
 import { checkDbRateLimit } from '../_shared/rateLimit.ts'
 
-const GEMINI_MODEL = Deno.env.get('GEMINI_MODEL') ?? 'gemini-2.0-flash'
+const GEMINI_MODEL = Deno.env.get('GEMINI_MODEL') ?? 'gemini-2.5-flash'
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`
 const API_TIMEOUT_MS = 8_000 // 8s — per security rules (CLAUDE.md)
 const MAX_TITLE_LEN = 500
