@@ -227,7 +227,7 @@ export function FirstFocusTutorial() {
                     className="h-full rounded-full"
                     style={{ background: phase === 'struggle' ? 'var(--color-primary)' : 'var(--color-teal)' }}
                     animate={{ width: `${progress * 100}%` }}
-                    transition={{ duration: 0.5 }}
+                    transition={shouldAnimate ? { duration: 0.5 } : { duration: 0 }}
                   />
                 </div>
               </div>
@@ -253,7 +253,7 @@ export function FirstFocusTutorial() {
                   setTimerRunning(false)
                   setStep('celebrate')
                 }}
-                className="text-[12px]"
+                className="text-[12px] focus-visible:ring-2 focus-visible:ring-[#7B72FF] rounded-lg px-2 py-1"
                 style={{ color: 'var(--color-text-subtle)' }}
               >
                 {t('tutorial.skipTimer')}
@@ -300,7 +300,7 @@ export function FirstFocusTutorial() {
 
               <button
                 onClick={() => { logEvent('tutorial_step_viewed', { step: 'next' }); setStep('next') }}
-                className="w-full py-3 rounded-2xl text-[14px] font-semibold"
+                className="w-full py-3 rounded-2xl text-[14px] font-semibold focus-visible:ring-2 focus-visible:ring-[#4ECDC4]"
                 style={{ background: 'var(--color-teal)', color: '#FFFFFF' }}
               >
                 {t('tutorial.continueButton')}
@@ -342,7 +342,7 @@ export function FirstFocusTutorial() {
 
               <button
                 onClick={handleComplete}
-                className="w-full py-3.5 rounded-2xl text-[15px] font-semibold"
+                className="w-full py-3.5 rounded-2xl text-[15px] font-semibold focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
                 style={{ background: 'var(--color-primary)', color: '#FFFFFF' }}
               >
                 {t('tutorial.startForReal')}

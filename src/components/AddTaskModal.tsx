@@ -222,7 +222,7 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
                 {voiceState === 'listening' && (
                   <motion.p initial={shouldAnimate ? { opacity: 0, y: -4 } : {}} animate={{ opacity: 1, y: 0 }}
                     exit={shouldAnimate ? { opacity: 0 } : undefined} className="text-xs flex items-center gap-1.5 -mt-3" style={{ color: 'var(--color-primary)' }}>
-                    <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse motion-reduce:opacity-80" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse motion-reduce:animate-none" />
                     {t('addTask.listening')}
                   </motion.p>
                 )}
