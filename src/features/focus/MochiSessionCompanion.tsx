@@ -317,7 +317,7 @@ function MochiSessionCompanionInner({ elapsedSeconds, sessionPhase, behaviorProf
 
       {/* Mochi — small ambient presence in flow, normal in other phases */}
       <motion.div
-        animate={{ opacity: isFlow ? 0.35 : 1, scale: isFlow ? 0.75 : 1 }}
+        animate={shouldAnimate ? { opacity: isFlow ? 0.35 : 1, scale: isFlow ? 0.75 : 1 } : { opacity: isFlow ? 0.35 : 1 }}
         transition={t()}
         aria-hidden="true"
       >

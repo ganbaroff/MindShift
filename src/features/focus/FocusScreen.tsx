@@ -177,7 +177,7 @@ export default function FocusScreen() {
             key={sessionPhase}
             initial={shouldAnimate ? { opacity: 0, y: -8 } : {}}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
+            exit={shouldAnimate ? { opacity: 0, y: -8 } : {}}
             transition={motionT()}
             className="text-sm mb-6 text-center"
             style={{ color: 'var(--color-muted)' }}

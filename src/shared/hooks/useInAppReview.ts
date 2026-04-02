@@ -10,6 +10,7 @@
  */
 
 import { useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { useStore } from '@/store'
 import { canShare, nativeShare } from '@/shared/lib/native'
@@ -23,6 +24,7 @@ export function useInAppReview() {
   const burnoutScore = useStore(s => s.burnoutScore)
   const seenHints = useStore(s => s.seenHints)
   const markHintSeen = useStore(s => s.markHintSeen)
+  const { t } = useTranslation()
 
   useEffect(() => {
     // Gate: enough completed focus sessions (not task completions)
@@ -52,10 +54,10 @@ export function useInAppReview() {
       }
     } else if (canShare()) {
       // Web fallback: gentle share nudge via toast
-      toast('Enjoying MindShift? Share it 🌱', {
+      toast(t('review.sharePrompt'), {
         duration: 8000,
         action: {
-          label: 'Share',
+          label: t('review.shareAction'),
           onClick: () => void nativeShare({
             title: 'MindShift',
             text: 'A focus app built for ADHD brains — no pressure, no shame.',
@@ -64,5 +66,5 @@ export function useInAppReview() {
         },
       })
     }
-  }, [completedFocusSessions, energyLevel, burnoutScore, seenHints, markHintSeen])
+  }, [completedFocusSessions, energyLevel, burnoutScore, seenHints, markHintSeen, t])
 }

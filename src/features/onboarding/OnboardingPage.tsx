@@ -168,9 +168,10 @@ export default function OnboardingPage() {
     const s = [...selections]
     s[step] = i
     setSelections(s)
+    // Track selection for all input methods (pointer + keyboard/a11y)
+    if (!isEnergyStep && !isReadyStep) logEvent('onboarding_step', { step })
     // Auto-advance on single-select steps after brief delay (except energy/ready)
     if (!isEnergyStep && !isReadyStep && isPointerClick) {
-      logEvent('onboarding_step', { step })
       setTimeout(() => {
         if (step < TOTAL_STEPS - 1) setStep(step + 1)
         else finish()

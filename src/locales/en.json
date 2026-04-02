@@ -361,7 +361,7 @@
     "weSentLink": "We sent a link to",
     "tapLink": "Tap the link in the email to sign in instantly.",
     "noPasswordEver": "No password needed — ever.",
-    "wrongEmail": "Wrong email? Go back",
+    "wrongEmail": "Not your email? Go back",
     "linkSent": "We sent a sign-in link to {{email}}",
     "dataPrivate": "Your data stays private. Always.",
     "continueWithout": "Continue without account →",
@@ -1106,6 +1106,10 @@
     "okay": "Okay",
     "good": "Good",
     "wired": "Wired"
+  },
+  "review": {
+    "sharePrompt": "Enjoying MindShift? Share it 🌱",
+    "shareAction": "Share"
   },
   "common": {
     "done": "✓ Done",
