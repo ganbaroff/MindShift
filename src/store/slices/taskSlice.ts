@@ -155,6 +155,21 @@ export const createTaskSlice: StateCreator<
       difficulty: taskSnapshot?.difficulty ?? 0,
     })
 
+    // VOLAURA ecosystem — send skill credit (best-effort, fire-and-forget)
+    const userId = get().userId
+    if (userId && !userId.startsWith('guest_')) {
+      const difficulty = taskSnapshot?.difficulty ?? 1
+      void import('@/shared/lib/supabase').then(({ supabase }) =>
+        supabase.auth.getSession().then(({ data }) => {
+          const token = data.session?.access_token
+          if (!token) return
+          void import('@/shared/lib/volaura-bridge').then(({ sendTaskDone, isVolauraConfigured }) => {
+            if (isVolauraConfigured()) void sendTaskDone(token, difficulty)
+          })
+        })
+      )
+    }
+
     // Mochi discovery — variable reinforcement (Research #5)
     s2.addMochiDiscovery(getRandomDiscovery().id)
   },

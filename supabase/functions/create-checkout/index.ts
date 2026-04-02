@@ -15,7 +15,7 @@ import { getCorsHeaders } from '../_shared/cors.ts'
 
 const STRIPE_SECRET_KEY = Deno.env.get('STRIPE_SECRET_KEY')
 const STRIPE_PRO_PRICE_ID = Deno.env.get('STRIPE_PRO_PRICE_ID') ?? ''
-const APP_URL = Deno.env.get('APP_URL') ?? 'https://mind-shift-git-main-yusifg27-3093s-projects.vercel.app'
+const APP_URL = Deno.env.get('APP_URL') ?? 'https://mindshift-umber.vercel.app'
 
 Deno.serve(async (req: Request) => {
   const cors = getCorsHeaders(req)

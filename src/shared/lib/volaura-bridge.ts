@@ -189,5 +189,23 @@ export function sendPsychotype(
   })
 }
 
+/** Send task completion event (skill credit) */
+export function sendTaskDone(
+  token: string,
+  difficulty: number
+): Promise<boolean> {
+  return sendCharacterEvent(token, {
+    event_type: 'xp_earned',
+    payload: {
+      _schema_version: 1,
+      xp: difficulty * 10,
+      skill_credit: 1,
+      task_difficulty: difficulty,
+      source: 'task_completion',
+    },
+    source_product: 'mindshift',
+  })
+}
+
 /** Check if VOLAURA integration is configured */
 export { isConfigured as isVolauraConfigured }
