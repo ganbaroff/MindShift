@@ -233,7 +233,7 @@ export default function OnboardingPage() {
         </div>
         <div className="flex items-center justify-between">
           {step > 0
-            ? <button onClick={() => setStep(step - 1)} className="text-[13px]" style={{ color: 'var(--color-text-muted)' }}>{t('onboarding.back')}</button>
+            ? <button onClick={() => setStep(step - 1)} className="text-[13px] focus-visible:ring-2 focus-visible:ring-[#7B72FF] focus-visible:outline-none rounded" style={{ color: 'var(--color-text-muted)' }}>{t('onboarding.back')}</button>
             : <div />
           }
           <span className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>{t('onboarding.step', { current: step + 1, total: TOTAL_STEPS })}</span>
@@ -280,7 +280,8 @@ export default function OnboardingPage() {
                   key={i}
                   whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
                   onClick={(e) => select(i, e.detail > 0)}
-                  className="w-full text-left p-3.5 rounded-2xl"
+                  aria-pressed={selections[step] === i}
+                  className="w-full text-left p-3.5 rounded-2xl focus-visible:ring-2 focus-visible:ring-[#7B72FF] focus-visible:outline-none"
                   style={{
                     backgroundColor: selections[step] === i ? 'rgba(123,114,255,0.15)' : 'var(--color-surface-raised)',
                     borderWidth: selections[step] === i ? 1.5 : 1,
@@ -309,7 +310,7 @@ export default function OnboardingPage() {
             whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
             onClick={handleNext}
             disabled={!canContinue}
-            className="w-full h-[48px] rounded-xl gradient-primary font-semibold text-[15px] shadow-primary disabled:opacity-40"
+            className="w-full h-[48px] rounded-xl gradient-primary font-semibold text-[15px] shadow-primary disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-[#7B72FF] focus-visible:outline-none"
             style={{ color: '#fff' }}
           >
             {isReadyStep ? t('onboarding.letsStart') : t('onboarding.continue')}

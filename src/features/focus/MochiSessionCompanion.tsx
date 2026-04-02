@@ -81,37 +81,26 @@ interface MochiAIContext {
   upcomingDeadlines?: { title: string; taskType: string; dueDate: string }[] | null
 }
 
-async function fetchMochiAISingle(
-  trigger: string,
-  context: MochiAIContext,
-  locale: string,
-): Promise<MochiAIResponse | null> {
-  const { data, error } = await supabase.functions.invoke('mochi-respond', {
-    body: { trigger, context, locale },
-  })
-  if (error) throw error
-  const resp = data as MochiAIResponse | null
-  if (resp?.message) return resp
-  return null
-}
-
 async function fetchMochiAI(
   trigger: string,
   context: MochiAIContext,
   locale: string,
 ): Promise<MochiAIResponse | null> {
   try {
-    return await fetchMochiAISingle(trigger, context, locale)
+    const invokePromise = supabase.functions.invoke('mochi-respond', {
+      body: { trigger, context, locale },
+    })
+    const timeoutPromise = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('mochi-timeout')), 8_000)
+    )
+    const { data, error } = await Promise.race([invokePromise, timeoutPromise])
+    if (error) throw error
+    const resp = data as MochiAIResponse | null
+    if (resp?.message) return resp
+    return null
   } catch (err) {
     logError('MochiAI.fetch', err)
-    // Single retry after 5 seconds — if it also fails, keep hardcoded fallback
-    try {
-      await new Promise(resolve => setTimeout(resolve, 5_000))
-      return await fetchMochiAISingle(trigger, context, locale)
-    } catch (retryErr) {
-      logError('MochiAI.retry', retryErr)
-      return null
-    }
+    return null
   }
 }
 

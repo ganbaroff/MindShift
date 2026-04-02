@@ -254,10 +254,11 @@ export default function HomePage() {
         {nowTasks.length === 0 && nextTasks.length === 0 && (
           <motion.button
             initial={shouldAnimate ? { opacity: 0, y: 12 } : false}
-            animate={shouldAnimate ? { opacity: 1, y: 0 } : false}
+            animate={{ opacity: 1, y: 0 }}
             whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
             onClick={() => setShowAddTask(true)}
-            className="w-full rounded-2xl p-5 border text-left"
+            aria-label={t('home.whatsOnMind')}
+            className="w-full rounded-2xl p-5 border text-left focus-visible:ring-2 focus-visible:ring-[#7B72FF] focus-visible:outline-none"
             style={{ backgroundColor: 'var(--color-surface-card)', borderColor: 'rgba(123,114,255,0.25)', boxShadow: '0 0 20px rgba(123,114,255,0.08)' }}
           >
             <div className="flex items-center gap-3">
@@ -271,7 +272,7 @@ export default function HomePage() {
         )}
 
         {/* Energy Check-in */}
-        <motion.div initial={shouldAnimate ? { opacity: 0, y: 12 } : false} animate={shouldAnimate ? { opacity: 1, y: 0 } : false} transition={shouldAnimate ? { delay: 0.1 } : undefined}>
+        <motion.div initial={shouldAnimate ? { opacity: 0, y: 12 } : false} animate={{ opacity: 1, y: 0 }} transition={shouldAnimate ? { delay: 0.1 } : undefined}>
           <p className="text-[15px] font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>{t('home.howsEnergy')}</p>
           <EnergyPicker selected={energyLevel - 1} onSelect={handleEnergySelect} />
         </motion.div>
