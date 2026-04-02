@@ -88,6 +88,9 @@ export const useStore = create<import('./types').AppStore>()(
             )
           state.nowPool = bump(state.nowPool)
           state.nextPool = bump(state.nextPool)
+
+          // Auto-set installDate on first launch — ISO timestamp, never reset
+          if (!state.installDate) state.installDate = new Date().toISOString()
         },
         partialize: (s) => ({
           userId: s.userId,
@@ -129,6 +132,7 @@ export const useStore = create<import('./types').AppStore>()(
           emotionalReactivity: s.emotionalReactivity,
           seasonalMode: s.seasonalMode,
           flexiblePauseUntil: s.flexiblePauseUntil,
+          installDate: s.installDate,
           // sleepQuality + burnoutScore are NOT persisted (session-only)
           // Locale & streaks
           locale: s.locale,

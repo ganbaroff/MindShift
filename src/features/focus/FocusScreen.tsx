@@ -34,11 +34,12 @@ import { nativeStatusBarHide, nativeStatusBarShow } from '@/shared/lib/native'
 import { useSessionHistory } from '@/shared/hooks/useSessionHistory'
 import { useUserBehavior } from '@/shared/hooks/useUserBehavior'
 import { useStore } from '@/store'
+import { isVolauraConfigured } from '@/shared/lib/volaura-bridge'
 
 export default function FocusScreen() {
   const session = useFocusSession()
   const { t } = useTranslation()
-  const { emotionalReactivity } = useStore()
+  const { emotionalReactivity, userId } = useStore()
   const orbitCount = useAmbientOrbit(session.screen === 'session')
   const room = useFocusRoom()
 
@@ -103,6 +104,10 @@ export default function FocusScreen() {
   } = session
 
   if (screen === 'nature-buffer') {
+    const crystalEarned =
+      isVolauraConfigured() && userId && !userId.startsWith('guest_')
+        ? Math.floor(elapsedMin * 5)
+        : undefined
     return (
       <NatureBuffer
         bufferSeconds={bufferSeconds}
@@ -114,6 +119,7 @@ export default function FocusScreen() {
         sessionPhase={sessionPhase}
         parkedThoughtsCount={parkedThoughtsCount}
         onAutopsyPick={handleAutopsyPick}
+        crystalEarned={crystalEarned}
       />
     )
   }

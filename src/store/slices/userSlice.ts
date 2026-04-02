@@ -60,6 +60,8 @@ export interface UserSlice {
   setSeasonalMode: (m: 'launch' | 'maintain' | 'recover' | 'sandbox') => void
   setBurnoutScore: (score: number) => void
   setFlexiblePauseUntil: (until: string | null) => void
+  /** ISO timestamp of first app launch — persisted, never reset on signOut (device-level) */
+  installDate: string | null
 }
 
 export const createUserSlice: StateCreator<
@@ -91,6 +93,7 @@ export const createUserSlice: StateCreator<
   seasonalMode: 'launch' as const,
   burnoutScore: 0,
   flexiblePauseUntil: null,
+  installDate: null,
 
   setUser: (userId, email) => set({ userId, email }),
   setEnergyLevel: (level) => set({ energyLevel: level }),

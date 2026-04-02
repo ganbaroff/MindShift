@@ -72,6 +72,8 @@ interface NatureBufferProps {
   onAutopsyPick?: (pick: string) => void
   /** Number of thoughts parked during this session */
   parkedThoughtsCount?: number
+  /** VOLAURA crystals earned this session — shown as feedback chip when set */
+  crystalEarned?: number
 }
 
 const ENERGY_LABEL_KEYS = ['energy.drained', 'energy.low', 'energy.okay', 'energy.good', 'energy.wired'] as const
@@ -79,7 +81,7 @@ const ENERGY_OPTION_LEVELS: EnergyLevel[] = [1, 2, 3, 4, 5]
 
 export const NatureBuffer = memo(function NatureBuffer({
   bufferSeconds, postEnergyLogged, onSetEnergyLevel, onSkip, sessionMinutes = 0,
-  emotionalReactivity, sessionPhase, parkedThoughtsCount = 0, onAutopsyPick,
+  emotionalReactivity, sessionPhase, parkedThoughtsCount = 0, onAutopsyPick, crystalEarned,
 }: NatureBufferProps) {
   const { shouldAnimate, t: transition } = useMotion()
   const { t } = useTranslation()
@@ -120,6 +122,21 @@ export const NatureBuffer = memo(function NatureBuffer({
           </p>
           <p className="text-xs mt-1" style={{ color: 'var(--color-text-muted)' }}>{t('focus.untilNext')}</p>
         </div>
+
+        {/* VOLAURA crystal feedback — shown when crystals were earned */}
+        {crystalEarned != null && crystalEarned > 0 && (
+          <motion.div
+            initial={shouldAnimate ? { opacity: 0, scale: 0.85 } : {}}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={shouldAnimate ? { ...transition(), delay: 0.3 } : { duration: 0 }}
+            className="flex items-center gap-1.5 px-4 py-1.5 rounded-full mb-4"
+            style={{ background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.25)' }}
+          >
+            <span className="text-base leading-none">💎</span>
+            <span className="text-sm font-semibold" style={{ color: '#F59E0B' }}>+{crystalEarned}</span>
+            <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>{t('focus.crystalsEarned')}</span>
+          </motion.div>
+        )}
 
         {/* Hyperfocus Autopsy — B-6: shown when session ≥ 45 min */}
         {showAutopsy && (
