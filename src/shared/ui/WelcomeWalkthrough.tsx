@@ -52,7 +52,7 @@ function WelcomeWalkthroughInner() {
   return (
     <motion.div
       initial={shouldAnimate ? { opacity: 0, y: 12 } : false}
-      animate={{ opacity: 1, y: 0 }}
+      animate={shouldAnimate ? { opacity: 1, y: 0 } : false}
       transition={transition()}
       className="rounded-2xl overflow-hidden"
       style={{
@@ -64,7 +64,7 @@ function WelcomeWalkthroughInner() {
         <motion.div
           key={step}
           initial={shouldAnimate ? { opacity: 0, x: 20 } : false}
-          animate={{ opacity: 1, x: 0 }}
+          animate={shouldAnimate ? { opacity: 1, x: 0 } : false}
           exit={shouldAnimate ? { opacity: 0, x: -20 } : {}}
           transition={transition()}
           className="p-4"
@@ -97,14 +97,14 @@ function WelcomeWalkthroughInner() {
         <div className="flex gap-2">
           <button
             onClick={handleSkip}
-            className="text-[12px] px-2 py-1 rounded-lg focus-visible:ring-1 focus-visible:ring-[#7B72FF]"
+            className="text-[12px] px-2 py-1 rounded-lg focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
             style={{ color: 'var(--color-text-muted)' }}
           >
             {t('welcome.skip')}
           </button>
           <button
             onClick={handleNext}
-            className="text-[12px] px-3 py-1 rounded-lg font-medium focus-visible:ring-1 focus-visible:ring-[#7B72FF]"
+            className="text-[12px] px-3 py-1 rounded-lg font-medium focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
             style={{
               background: 'rgba(123,114,255,0.15)',
               color: 'var(--color-primary)',

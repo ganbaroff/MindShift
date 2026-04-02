@@ -792,6 +792,7 @@
     "moreRest": "+{{count}} more — rest first, they'll wait",
     "upNext": "Up next · {{count}} tasks queued",
     "seeAll": "See all →",
+    "seeAllTasks": "See all queued tasks",
     "goalReached": "Goal reached!",
     "todaysFocus": "Today's focus",
     "startWith": "Start with →",

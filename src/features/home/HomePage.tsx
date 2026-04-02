@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { useMotion } from '@/shared/hooks/useMotion';
 import TaskCard from '@/components/TaskCard';
@@ -35,6 +36,7 @@ export default function HomePage() {
     completeTask, snoozeTask,
   } = useStore();
 
+  const navigate = useNavigate();
   const { copy } = useUITone();
   const { shouldAnimate } = useMotion();
   const [showAddTask, setShowAddTask] = useState(false);
@@ -221,7 +223,7 @@ export default function HomePage() {
                 initial={shouldAnimate ? { width: 0 } : false}
                 animate={{ width: `${goalProgress * 100}%` }}
                 transition={shouldAnimate ? { duration: 0.8, ease: 'easeOut' } : { duration: 0 }}
-                style={{ background: goalReached ? 'var(--color-teal)' : 'linear-gradient(90deg, var(--color-primary), #9B8EFF)' }}
+                style={{ background: goalReached ? 'var(--color-teal)' : 'linear-gradient(90deg, var(--color-primary), var(--color-primary-light, #9B8EFF))' }}
               />
             </div>
           </motion.div>
@@ -315,7 +317,14 @@ export default function HomePage() {
             {nextTasks.slice(0, 2).map(t => (
               <p key={t.id} className="text-[13px] truncate" style={{ color: 'var(--color-text-muted)' }}>{t.title}</p>
             ))}
-            <button className="text-[13px] font-medium mt-1" style={{ color: 'var(--color-primary)' }}>{t('home.seeAll')}</button>
+            <button
+              onClick={() => navigate('/tasks')}
+              className="text-[13px] font-medium mt-1 focus-visible:ring-2 focus-visible:ring-[#7B72FF] rounded"
+              style={{ color: 'var(--color-primary)' }}
+              aria-label={t('home.seeAllTasks')}
+            >
+              {t('home.seeAll')}
+            </button>
           </motion.div>
         )}
 
