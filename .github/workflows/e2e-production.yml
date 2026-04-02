@@ -11,8 +11,8 @@ jobs:
     # Only run when Vercel production deployment succeeds
     if: >
       github.event.deployment_status.state == 'success' &&
-      (github.event.deployment.environment == 'Production' ||
-       github.event.deployment.environment == 'production')
+      startsWith(github.event.deployment.environment, 'Production') &&
+      contains(github.event.deployment.environment, 'mindshift')
 
     runs-on: ubuntu-latest
     timeout-minutes: 10

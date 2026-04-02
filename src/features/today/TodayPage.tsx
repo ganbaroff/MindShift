@@ -56,6 +56,13 @@ export default function TodayPage() {
 
   useEffect(() => {
     logEvent('today_page_viewed', { time_block: timeBlock, energy: energyLevel })
+    // Re-engagement signal — fires when user returns after a gap >= 1 day
+    // Feeds Day-3 / Day-7 retention cohort analysis
+    const lastActive = useStore.getState().lastActiveDate
+    if (lastActive) {
+      const gapDays = Math.floor((Date.now() - new Date(lastActive).getTime()) / 86_400_000)
+      if (gapDays >= 1) logEvent('user_returned', { gap_days: gapDays, day_of_week: new Date().getDay() })
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 

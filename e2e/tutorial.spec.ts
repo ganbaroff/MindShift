@@ -150,8 +150,8 @@ test.describe('FirstFocusTutorial', () => {
     // Complete tutorial
     await page.getByRole('button', { name: /start for real/i }).click()
 
-    // Navigated to /today — tutorial overlay gone
-    await expect(page).toHaveURL(/\/today/, { timeout: 5000 })
+    // Navigated to /focus — tutorial overlay gone
+    await expect(page).toHaveURL(/\/focus/, { timeout: 5000 })
     await expect(page.getByText('You\'re ready')).not.toBeVisible({ timeout: 3000 })
   })
 })

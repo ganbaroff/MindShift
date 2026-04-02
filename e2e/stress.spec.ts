@@ -136,9 +136,8 @@ test.describe('Stress: beforeunload pending session', () => {
 
     await page.goto('/focus')
 
-    // Start the session (goes through BreathworkRitual skip)
-    await page.getByRole('button', { name: /^Start focus session with/i }).click()
-    await page.getByRole('button', { name: 'Skip breathing ritual', exact: true }).click()
+    // Start the session (primary button goes directly — no breathwork overlay)
+    await page.getByRole('button', { name: 'Start focus session', exact: true }).click()
 
     // Wait for the active session screen (ArcTimer present)
     await expect(page.getByRole('button', { name: /Focus timer/i })).toBeVisible({ timeout: 5000 })

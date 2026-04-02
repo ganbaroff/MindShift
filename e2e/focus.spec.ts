@@ -16,10 +16,9 @@
  */
 import { test, expect, seedStore } from './helpers'
 
-/** Helper: start a focus session by skipping the breathwork ritual */
+/** Helper: start a focus session (primary button goes directly — no breathwork overlay) */
 async function startSession(page: import('@playwright/test').Page) {
-  // BreathworkRitual is a z-50 overlay — click its exact "Skip breathing ritual" button (not the setup "skip")
-  await page.getByRole('button', { name: 'Skip breathing ritual', exact: true }).click()
+  await page.getByRole('button', { name: 'Start focus session', exact: true }).click()
 }
 
 test.describe('Focus setup screen', () => {
@@ -46,8 +45,10 @@ test.describe('Focus setup screen', () => {
     // Custom duration button (✎ pencil) — aria-label is "Custom duration"
     await expect(page.getByRole('button', { name: 'Custom duration' })).toBeVisible()
 
-    // Start button
-    await expect(page.getByRole('button', { name: /^Start focus session with/i })).toBeVisible()
+    // Start button (primary — direct start, no breathwork)
+    await expect(page.getByRole('button', { name: 'Start focus session', exact: true })).toBeVisible()
+    // Secondary — breathwork opt-in
+    await expect(page.getByRole('button', { name: 'Start focus session with breathing ritual', exact: true })).toBeVisible()
   })
 
   test('shows "No tasks yet" empty state when pool is empty', async ({ authedPage: page }) => {
@@ -125,7 +126,6 @@ test.describe('Focus setup screen', () => {
 test.describe('Focus session', () => {
   test('starting a session shows the active timer view', async ({ authedPage: page }) => {
     await page.goto('/focus')
-    await page.getByRole('button', { name: /^Start focus session with/i }).click()
     await startSession(page)
 
     // ArcTimer is present — check for the ArcTimer button's aria-label
@@ -134,7 +134,6 @@ test.describe('Focus session', () => {
 
   test('active session shows struggle phase label', async ({ authedPage: page }) => {
     await page.goto('/focus')
-    await page.getByRole('button', { name: /^Start focus session with/i }).click()
     await startSession(page)
 
     // PHASE_LABELS.struggle = "Getting into it... 💪"
@@ -143,7 +142,6 @@ test.describe('Focus session', () => {
 
   test('active session shows audio and end session controls', async ({ authedPage: page }) => {
     await page.goto('/focus')
-    await page.getByRole('button', { name: /^Start focus session with/i }).click()
     await startSession(page)
 
     // Wait for active session — ArcTimer appears
@@ -163,7 +161,6 @@ test.describe('Focus session', () => {
 
   test('tapping end session shows interrupt confirm screen', async ({ authedPage: page }) => {
     await page.goto('/focus')
-    await page.getByRole('button', { name: /^Start focus session with/i }).click()
     await startSession(page)
 
     // Wait for session active
@@ -198,7 +195,6 @@ test.describe('Focus session', () => {
     await page.goto('/focus')
     await expect(page.getByText('Write quarterly report')).toBeVisible({ timeout: 8000 })
     await page.getByText('Write quarterly report').click()
-    await page.getByRole('button', { name: /^Start focus session with/i }).click()
     await startSession(page)
 
     // Wait for session to start

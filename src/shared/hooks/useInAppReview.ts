@@ -14,6 +14,7 @@ import i18n from '@/i18n'
 import { toast } from 'sonner'
 import { useStore } from '@/store'
 import { canShare, nativeShare } from '@/shared/lib/native'
+import { logEvent } from '@/shared/lib/logger'
 
 const REVIEW_COOLDOWN_MS = 90 * 24 * 60 * 60 * 1000 // 90 days
 const MIN_SESSIONS = 3
@@ -48,10 +49,12 @@ export function useInAppReview() {
       // Native: trigger the OS in-app review dialog
       const plugins = (win.Capacitor as Record<string, unknown>).Plugins as Record<string, unknown> | undefined
       if (plugins?.InAppReview) {
+        logEvent('in_app_review_triggered', { platform: 'native' })
         const review = plugins.InAppReview as { requestReview: () => Promise<void> }
         void review.requestReview().catch(() => { /* silently fail */ })
       }
     } else if (canShare()) {
+      logEvent('in_app_review_triggered', { platform: 'web_share' })
       // Web fallback: gentle share nudge via toast.
       // Read t() from the i18n singleton at call time — no React hook needed.
       const t = i18n.t.bind(i18n)
