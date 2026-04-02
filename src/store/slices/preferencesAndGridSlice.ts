@@ -55,6 +55,9 @@ interface PreferencesSlice {
   // Weekly intention — user's chosen focus area for the week (shown in FocusScreen)
   weeklyIntention: string | null
   setWeeklyIntention: (intention: string | null) => void
+  // Pool guide — dismissable one-time explainer in TasksPage
+  poolsExplained: boolean
+  setPoolsExplained: () => void
   // First-focus tutorial — shown once after onboarding
   firstFocusTutorialCompleted: boolean
   setFirstFocusTutorialCompleted: () => void
@@ -184,6 +187,8 @@ export const createPreferencesAndGridSlice: StateCreator<
   setWeeklyPlanShownWeek: (week) => set({ weeklyPlanShownWeek: week }),
   weeklyIntention: null,
   setWeeklyIntention: (intention) => set({ weeklyIntention: intention }),
+  poolsExplained: false,
+  setPoolsExplained: () => set({ poolsExplained: true }),
   firstFocusTutorialCompleted: false,
   setFirstFocusTutorialCompleted: () => set({ firstFocusTutorialCompleted: true }),
 

@@ -12,7 +12,7 @@ import { CookieBanner } from '@/shared/ui/CookieBanner'
 import { useOfflineSync } from '@/shared/hooks/useOfflineSync'
 import { useTaskSync } from '@/shared/hooks/useTaskSync'
 import { useSessionHistory } from '@/shared/hooks/useSessionHistory'
-import { logError } from '@/shared/lib/logger'
+import { logError, logEvent } from '@/shared/lib/logger'
 import { sendStreakUpdate, isVolauraConfigured } from '@/shared/lib/volaura-bridge'
 import { reminders } from '@/shared/lib/reminders'
 import { computeBurnoutScore, deriveBehaviors } from '@/shared/lib/burnout'
@@ -119,6 +119,12 @@ export default function App() {
         const isLongAbsence = s.lastSessionAt && !s.recoveryShown &&
           (Date.now() - new Date(s.lastSessionAt).getTime()) / 3_600_000 >= RECOVERY_THRESHOLD_HOURS
         if (!isLongAbsence) updateLastSession()
+
+        // Analytics: track return after 2+ day gap (below recovery threshold)
+        if (s.lastSessionAt && !isLongAbsence) {
+          const gapDays = (Date.now() - new Date(s.lastSessionAt).getTime()) / 86_400_000
+          if (gapDays >= 2) logEvent('return_after_gap', { gap_days: Math.floor(gapDays) })
+        }
 
         // ── Google Calendar: store provider tokens on OAuth callback ──────────
         // Only store tokens + enable sync when returning from calendar-scope auth

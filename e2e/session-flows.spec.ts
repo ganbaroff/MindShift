@@ -44,7 +44,7 @@ test.describe('Park it (snooze NOW → NEXT)', () => {
 
     await expect(page.getByText('Test task for E2E')).toBeVisible({ timeout: 8000 })
     // Park button rendered in TaskCard action row (exact label from en.json taskCard.park)
-    await expect(page.getByRole('button', { name: /Park it/ })).toBeVisible()
+    await expect(page.locator('button[aria-label*="Park it →"]')).toBeVisible()
   })
 
   test('clicking "Park it →" moves task from NOW to NEXT', async ({ authedPage: page }) => {
@@ -56,7 +56,7 @@ test.describe('Park it (snooze NOW → NEXT)', () => {
 
     await expect(page.getByText('1/3')).toBeVisible({ timeout: 8000 })
 
-    await page.getByRole('button', { name: /Park it/ }).click()
+    await page.locator('button[aria-label*="Park it →"]').click()
 
     // NOW pool empties, NEXT pool gains 1
     await expect(page.getByText('0/3')).toBeVisible({ timeout: 5000 })
@@ -71,7 +71,7 @@ test.describe('Park it (snooze NOW → NEXT)', () => {
     await page.goto('/tasks')
 
     await expect(page.getByText('Test task for E2E')).toBeVisible({ timeout: 8000 })
-    await page.getByRole('button', { name: /Park it/ }).click()
+    await page.locator('button[aria-label*="Park it →"]').click()
 
     // Task should move out of the NOW section
     await expect(page.getByText('0/3')).toBeVisible({ timeout: 5000 })
@@ -88,7 +88,7 @@ test.describe('Task completion undo', () => {
     await expect(page.getByText('Test task for E2E')).toBeVisible({ timeout: 8000 })
 
     // Done button (from en.json taskCard.done = "✓ Done")
-    const doneBtn = page.getByRole('button', { name: /✓ Done/ })
+    const doneBtn = page.getByRole('button', { name: '✓ Done: Test task for E2E', exact: true })
     await expect(doneBtn).toBeVisible()
     await doneBtn.click()
 
@@ -105,7 +105,7 @@ test.describe('Task completion undo', () => {
     await expect(page.getByText('1/3')).toBeVisible()
 
     // Complete
-    await page.getByRole('button', { name: /✓ Done/ }).click()
+    await page.getByRole('button', { name: '✓ Done: Test task for E2E', exact: true }).click()
 
     // Undo immediately
     const undoBtn = page.getByRole('button', { name: 'Undo', exact: true })
@@ -122,7 +122,7 @@ test.describe('Task completion undo', () => {
     await page.goto('/tasks')
 
     await expect(page.getByText('Test task for E2E')).toBeVisible({ timeout: 8000 })
-    await page.getByRole('button', { name: /✓ Done/ }).click()
+    await page.getByRole('button', { name: '✓ Done: Test task for E2E', exact: true }).click()
 
     // Toast visible
     await expect(page.getByRole('button', { name: 'Undo', exact: true })).toBeVisible({ timeout: 3000 })
