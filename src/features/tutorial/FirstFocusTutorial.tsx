@@ -177,7 +177,7 @@ export function FirstFocusTutorial() {
                 </p>
                 <button
                   onClick={handleStartTimer}
-                  className="w-full py-3.5 rounded-2xl text-[15px] font-semibold transition-all"
+                  className="w-full py-3.5 rounded-2xl text-[15px] font-semibold transition-all focus-visible:ring-2 focus-visible:ring-[#7B72FF] focus-visible:outline-none"
                   style={{ background: 'var(--color-primary)', color: '#FFFFFF' }}
                 >
                   {t('tutorial.startButton')}

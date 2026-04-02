@@ -6,6 +6,7 @@ import { useEffect, useRef, useCallback } from 'react'
 import { useStore } from '@/store'
 import { supabase } from '@/shared/lib/supabase'
 import { toast } from 'sonner'
+import { logError } from '@/shared/lib/logger'
 import type { Task } from '@/types'
 
 /** Task types that should sync to Google Calendar */
@@ -38,7 +39,7 @@ async function callGcalSync(
     })
 
     if (error) {
-      console.warn('[calendarSync] edge function error:', error)
+      logError('useCalendarSync.edgeFn', error)
       return null
     }
 
@@ -54,7 +55,7 @@ async function callGcalSync(
 
     return data?.googleEventId ?? null
   } catch (err) {
-    console.warn('[calendarSync] unexpected error:', err)
+    logError('useCalendarSync.syncTask', err)
     return null
   }
 }
@@ -76,7 +77,7 @@ export async function syncFocusSession(
       },
     })
   } catch (err) {
-    console.warn('[calendarSync] focus session sync failed:', err)
+    logError('useCalendarSync.sessionSync', err)
   }
 }
 

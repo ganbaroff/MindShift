@@ -12,6 +12,7 @@ import { pushWelcomeBack, notifyAchievement } from '@/shared/lib/notify'
 import { useUITone } from '@/shared/hooks/useUITone'
 import { getToneCopy } from '@/shared/lib/uiTone'
 import { ACHIEVEMENT_DEFINITIONS } from '@/types'
+import { SpicinessPicker } from './SpicinessPicker'
 
 // ── Fallback messages (Research #7: identity-reinforcing, shame-free) ────────
 // Rules: no quantifying absence, no streaks, forward-looking, persona-voiced.
@@ -273,31 +274,7 @@ export function RecoveryProtocol({ onDismiss }: Props) {
             <p className="text-xs text-center" style={{ color: 'var(--color-text-muted)' }}>
               🌶️ {t('recovery.overwhelmQuestion')}
             </p>
-            <div className="flex justify-center gap-2">
-              {([
-                { value: 1 as const, labelKey: 'recovery.overwhelmVery', emoji: '😵' },
-                { value: 2 as const, labelKey: 'recovery.overwhelmALot', emoji: '😰' },
-                { value: 3 as const, labelKey: 'recovery.overwhelmSome', emoji: '😐' },
-                { value: 4 as const, labelKey: 'recovery.overwhelmABit', emoji: '🙂' },
-                { value: 5 as const, labelKey: 'recovery.overwhelmBarely', emoji: '😎' },
-              ]).map(({ value, labelKey, emoji }) => (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() => setSpiciness(value)}
-                  className="flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl transition-all duration-150"
-                  style={{
-                    background: spiciness === value ? 'rgba(123,114,255,0.18)' : 'var(--color-surface-card)',
-                    border: `1px solid ${spiciness === value ? 'var(--color-primary)' : 'rgba(255,255,255,0.06)'}`,
-                  }}
-                  aria-pressed={spiciness === value}
-                  aria-label={`Overwhelm level: ${t(labelKey)}`}
-                >
-                  <span className="text-base leading-none">{emoji}</span>
-                  <span className="text-[10px]" style={{ color: spiciness === value ? '#C8C0FF' : 'var(--color-text-muted)' }}>{t(labelKey)}</span>
-                </button>
-              ))}
-            </div>
+            <SpicinessPicker value={spiciness} onChange={setSpiciness} />
           </motion.div>
 
           {/* Task input */}

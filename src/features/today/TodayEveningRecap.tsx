@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronRight } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -26,7 +27,7 @@ interface TodayEveningRecapProps {
   onPark: (id: string) => void
 }
 
-export function TodayEveningRecap({
+export const TodayEveningRecap = memo(function TodayEveningRecap({
   completedToday, tomorrowTasks, activeTasks, todayFocusMin,
   completedTotal, density, onComplete, onPark,
 }: TodayEveningRecapProps) {
@@ -99,4 +100,4 @@ export function TodayEveningRecap({
       )}
     </div>
   )
-}
+})

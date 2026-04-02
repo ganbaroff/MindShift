@@ -2,6 +2,7 @@ import { lazy, Suspense, useState, useEffect, useRef, useCallback } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'motion/react'
 import { useTranslation } from 'react-i18next'
+import { ErrorBoundary } from '@/shared/ui/ErrorBoundary'
 import { BottomNav } from './BottomNav'
 import { useStore } from '@/store'
 import { useMotion } from '@/shared/hooks/useMotion'
@@ -186,11 +187,13 @@ export function AppShell() {
         </motion.button>
       )}
 
-      {/* Mochi chat overlay — lazy loaded */}
+      {/* Mochi chat overlay — lazy loaded, isolated so crashes don't collapse the shell */}
       {mochiChatOpen && (
-        <Suspense fallback={null}>
-          <LazyMochiChat open={mochiChatOpen} onClose={handleMochiClose} />
-        </Suspense>
+        <ErrorBoundary fallback={null}>
+          <Suspense fallback={null}>
+            <LazyMochiChat open={mochiChatOpen} onClose={handleMochiClose} />
+          </Suspense>
+        </ErrorBoundary>
       )}
 
       {/* Hide bottom nav + install nudge during deep focus phases */}

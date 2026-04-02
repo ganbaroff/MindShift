@@ -65,9 +65,9 @@ export default defineConfig({
           'vendor-supabase': ['@supabase/supabase-js'],
           'vendor-query':    ['@tanstack/react-query'],
           'vendor-ui':       ['zustand', 'sonner', 'lucide-react'],
-          // dnd-kit only used in BentoGrid (HomeScreen) — split to prevent
-          // polluting the main bundle for users who never visit HomeScreen.
-          // BentoGrid is lazy-loaded, so this chunk defers until HomeScreen renders.
+          'vendor-i18n':     ['i18next', 'react-i18next'],
+          // dnd-kit only used in TasksPage (SortableTaskCard) — split to prevent
+          // polluting the main bundle for users who never visit /tasks.
           'vendor-dnd':      ['@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities'],
           'vendor-sentry':   ['@sentry/react'],
         },

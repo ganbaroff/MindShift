@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { motion } from 'motion/react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
@@ -31,7 +32,7 @@ interface TodayMorningPlanProps {
   onShowAddTask?: () => void
 }
 
-export function TodayMorningPlan({
+export const TodayMorningPlan = memo(function TodayMorningPlan({
   todayTasks, activeTasks, completedToday, todayFocusMin, dailyFocusGoalMin,
   isLowEnergy, density, completedTotal, nextTasksCount = 0,
   onComplete, onPark, onAddSample,
@@ -149,4 +150,4 @@ export function TodayMorningPlan({
       )}
     </div>
   )
-}
+})

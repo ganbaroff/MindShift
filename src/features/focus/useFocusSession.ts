@@ -213,6 +213,7 @@ export function useFocusSession() {
     setPostEnergyLogged(false)
 
     logEvent('session_started', { duration_min: duration, has_task: selectedTask ? 1 : 0 })
+    logEvent('session_audio_state', { has_anchor: focusAnchor ? 1 : 0, preset: focusAnchor ?? 'none' })
     if (completedFocusSessions === 0) logEvent('first_session_started', { duration_min: duration })
     void requestNotificationPermission()
     hapticStart()
