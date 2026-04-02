@@ -2,9 +2,10 @@
  * PlanSection — subscription plan banner + upgrade CTA
  */
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'motion/react'
 import { useTranslation } from 'react-i18next'
+import { useSearchParams, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { useStore } from '@/store'
@@ -13,7 +14,29 @@ import { supabase } from '@/shared/lib/supabase'
 export function PlanSection() {
   const { t } = useTranslation()
   const { shouldAnimate } = useMotion()
-  const { subscriptionTier } = useStore()
+  const { subscriptionTier, setSubscription } = useStore()
+  const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
+
+  // ── Stripe return leg — sync tier from DB when redirected back after checkout ──
+  useEffect(() => {
+    if (searchParams.get('upgrade') !== 'success') return
+    // Clear the param immediately so page refresh doesn't re-trigger
+    navigate('/settings', { replace: true })
+    void supabase
+      .from('users')
+      .select('subscription_tier, trial_ends_at')
+      .limit(1)
+      .single()
+      .then(({ data }) => {
+        const row = data as { subscription_tier?: string; trial_ends_at?: string | null } | null
+        // Webhook may not have processed yet — default to 'pro' optimistically
+        const tier = ((row?.subscription_tier) ?? 'pro') as 'free' | 'pro_trial' | 'pro'
+        setSubscription(tier, row?.trial_ends_at ?? null)
+        toast.success(t('settings.upgradeSuccess'), { duration: 6000 })
+      })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const [upgrading, setUpgrading] = useState(false)
   const handleUpgrade = async () => {
