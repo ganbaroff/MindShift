@@ -23,7 +23,8 @@
     "quietDay": "Día tranquilo, eso también está bien. El descanso cuenta.",
     "focusOn": "Centrarse en: {{title}}",
     "startFocus": "Iniciar una sesión de enfoque",
-    "viewProgress": "Ver progreso →"
+    "viewProgress": "Ver progreso →",
+    "moveFromNext": "{{count}} tarea en espera en Siguiente - elige una →"
   },
   "quickCapture": {
     "placeholder": "Agregue una tarea, recordatorio o reunión...",
@@ -111,6 +112,16 @@
     "soundAnchorDesc": "El ruido {{preset}} se reproducirá automáticamente",
     "soundPicker": "Sonido de enfoque",
     "soundNone": "Sin sonido",
+    "thoughtSaved": "Pensamiento guardado para Algún día 💭",
+    "viewRoom": "Vista",
+    "medPeakWindow": "⚡ Ventana de pico medio: {{start}}–{{end}}",
+    "arcPhaseGettingStarted": "Fase de enfoque: cómo empezar",
+    "arcPhaseMomentum": "Fase de enfoque: creación de impulso",
+    "arcPhaseDeepFlow": "Fase de enfoque: flujo profundo",
+    "arcPhaseRecovery": "Fase de enfoque: recuperación",
+    "arcTimerSurprise": "Temporizador de enfoque: dígitos ocultos en la fase de flujo",
+    "arcTimerHideDigits": "Temporizador de enfoque: toque para ocultar dígitos",
+    "arcTimerShowDigits": "Temporizador de enfoque: toque para mostrar los dígitos",
     "soundMutedHint": "El volumen está en 0: ajústelo en Configuración → Sonido",
     "minutesPlaceholder": "Minutos...",
     "waitingForPartner": "Esperando que el socio se una...",
@@ -257,6 +268,7 @@
     "dataExported": "Datos exportados",
     "deleteAccount": "Eliminar cuenta",
     "deleteConfirm": "Esto eliminará permanentemente su cuenta y todos sus datos. Esto no se puede deshacer.",
+    "deleteTypePrompt": "Escribe BORRAR para confirmar",
     "deleting": "Eliminando...",
     "yesDelete": "Si, borrar",
     "accountDeleted": "Cuenta eliminada",
@@ -273,7 +285,11 @@
     "toneBalanced": "Equilibrado",
     "toneBalancedDesc": "Tono de coaching, más métricas",
     "toneClear": "Claro",
-    "toneClearDesc": "Sencillo, los números primero"
+    "toneClearDesc": "Sencillo, los números primero",
+    "upgradeError": "No se pudo abrir la caja. Intentar otra vez.",
+    "upgradeCTA": "Actualízate a Pro",
+    "proBadge": "Pro",
+    "upgrading": "Abriendo caja..."
   },
   "onboarding": {
     "skipSetup": "Saltar configuración - saltar →",
@@ -648,6 +664,14 @@
     },
     "psychotype": {
       "achiever": {
+        "phase_release": [
+          "Entrando en ello. Progreso sucediendo.",
+          "Más allá del punto de fricción."
+        ],
+        "phase_flow": [
+          "Estado de flujo. Ésta es la parte buena.",
+          "Enfoque completo. Nada desperdiciado."
+        ],
         "milestone_7": [
           "7 minutos en los libros 💪",
           "Pasada la parte difícil. Sigue construyendo."
@@ -666,6 +690,14 @@
         ]
       },
       "explorer": {
+        "phase_release": [
+          "El foco se está abriendo. Síguelo.",
+          "Algo hace clic ahora."
+        ],
+        "phase_flow": [
+          "Modo de exploración profunda. No pares.",
+          "Aquí es cuando ocurren los mejores hallazgos."
+        ],
         "milestone_7": [
           "7 minutos en - calentando 🔍",
           "Entrando en ello. Carga de curiosidad."
@@ -684,6 +716,14 @@
         ]
       },
       "connector": {
+        "phase_release": [
+          "El trabajo se está asentando. Todavía aquí.",
+          "En eso ahora."
+        ],
+        "phase_flow": [
+          "En la zona. Siéntelo.",
+          "Fluir. Llegamos aquí."
+        ],
         "milestone_7": [
           "7 minutos. Estable. 🌱",
           "Todavía aquí contigo."
@@ -702,6 +742,14 @@
         ]
       },
       "planner": {
+        "phase_release": [
+          "Fase dos. En camino.",
+          "Más profundo ahora, como estaba previsto."
+        ],
+        "phase_flow": [
+          "Ejecución óptima. Quédate en ello.",
+          "Flujo total. Exactamente lo que planeaste."
+        ],
         "milestone_7": [
           "7 minutos – en el camino correcto. 🌱",
           "El plan está funcionando."
@@ -824,7 +872,9 @@
     "phaseFlow": "Fluir 🌊",
     "phaseRelease": "Lanzamiento 🌱",
     "phaseStruggle": "Lucha 💪",
-    "phaseRecovery": "Recuperación 🌿"
+    "phaseRecovery": "Recuperación 🌿",
+    "filterAll": "Todo",
+    "noFilterResults": "Aún no hay sesiones con esa fase."
   },
   "calendar": {
     "upcoming": "Próximo",

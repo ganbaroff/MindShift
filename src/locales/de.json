@@ -23,7 +23,8 @@
     "quietDay": "Ruhiger Tag – das ist auch in Ordnung. Ruhe zählt.",
     "focusOn": "Konzentrieren Sie sich auf: {{title}}",
     "startFocus": "Starten Sie eine Fokussitzung",
-    "viewProgress": "Fortschritt anzeigen →"
+    "viewProgress": "Fortschritt anzeigen →",
+    "moveFromNext": "{{count}} Aufgabe wartet in „Weiter“ – wählen Sie eine aus →"
   },
   "quickCapture": {
     "placeholder": "Fügen Sie eine Aufgabe, Erinnerung oder Besprechung hinzu...",
@@ -111,6 +112,16 @@
     "soundAnchorDesc": "{{preset}}-Rauschen wird automatisch abgespielt",
     "soundPicker": "Fokusgeräusch",
     "soundNone": "Kein Ton",
+    "thoughtSaved": "Der Gedanke wurde für Someday gespeichert 💭",
+    "viewRoom": "Sicht",
+    "medPeakWindow": "⚡ Mittleres Spitzenfenster: {{start}}–{{end}}",
+    "arcPhaseGettingStarted": "Fokusphase: Erste Schritte",
+    "arcPhaseMomentum": "Fokusphase: Impulsaufbau",
+    "arcPhaseDeepFlow": "Fokusphase: tiefer Fluss",
+    "arcPhaseRecovery": "Fokusphase: Erholung",
+    "arcTimerSurprise": "Fokus-Timer – Ziffern in der Flussphase ausgeblendet",
+    "arcTimerHideDigits": "Fokus-Timer: Tippen Sie, um Ziffern auszublenden",
+    "arcTimerShowDigits": "Fokus-Timer: Tippen Sie, um Ziffern anzuzeigen",
     "soundMutedHint": "Die Lautstärke ist auf 0 – passen Sie sie unter Einstellungen → Ton an",
     "minutesPlaceholder": "Minuten...",
     "waitingForPartner": "Warten auf den Beitritt des Partners…",
@@ -257,6 +268,7 @@
     "dataExported": "Daten exportiert",
     "deleteAccount": "Konto löschen",
     "deleteConfirm": "Dadurch werden Ihr Konto und alle Daten dauerhaft gelöscht. Dies kann nicht rückgängig gemacht werden.",
+    "deleteTypePrompt": "Geben Sie zur Bestätigung DELETE ein",
     "deleting": "Löschen...",
     "yesDelete": "Ja, löschen",
     "accountDeleted": "Konto gelöscht",
@@ -273,7 +285,11 @@
     "toneBalanced": "Ausgewogen",
     "toneBalancedDesc": "Coaching-Ton, mehr Kennzahlen",
     "toneClear": "Klar",
-    "toneClearDesc": "Unkompliziert, Zahlen zuerst"
+    "toneClearDesc": "Unkompliziert, Zahlen zuerst",
+    "upgradeError": "Der Checkout konnte nicht geöffnet werden. Versuchen Sie es erneut.",
+    "upgradeCTA": "Upgrade auf Pro",
+    "proBadge": "Profi",
+    "upgrading": "Kasse wird geöffnet..."
   },
   "onboarding": {
     "skipSetup": "Einrichtung überspringen – einsteigen →",
@@ -648,6 +664,14 @@
     },
     "psychotype": {
       "achiever": {
+        "phase_release": [
+          "Sich darauf einlassen. Fortschritte passieren.",
+          "Hinter dem Reibungspunkt."
+        ],
+        "phase_flow": [
+          "Fließzustand. Das ist das Gute daran.",
+          "Volle Konzentration. Nichts verschwendet."
+        ],
         "milestone_7": [
           "7 Minuten in den Büchern 💪",
           "Hinter dem schwierigen Teil. Bauen Sie weiter."
@@ -666,6 +690,14 @@
         ]
       },
       "explorer": {
+        "phase_release": [
+          "Der Fokus liegt auf der Öffnung. Folgen Sie ihm.",
+          "Da klickt jetzt etwas."
+        ],
+        "phase_flow": [
+          "Tiefenerkundungsmodus. Hör nicht auf.",
+          "Dann passieren die besten Funde."
+        ],
         "milestone_7": [
           "7 Minuten – Aufwärmen 🔍",
           "Sich darauf einlassen. Neugier geladen."
@@ -684,6 +716,14 @@
         ]
       },
       "connector": {
+        "phase_release": [
+          "Die Arbeit geht zu Ende. Immer noch hier.",
+          "Jetzt drin."
+        ],
+        "phase_flow": [
+          "In der Zone. Fühle es.",
+          "Fließen. Wir sind hier angekommen."
+        ],
         "milestone_7": [
           "7 Minuten. Stetig. 🌱",
           "Immer noch hier bei dir."
@@ -702,6 +742,14 @@
         ]
       },
       "planner": {
+        "phase_release": [
+          "Phase zwei. Auf dem richtigen Weg.",
+          "Jetzt tiefer, wie geplant."
+        ],
+        "phase_flow": [
+          "Optimale Ausführung. Bleib drin.",
+          "Voller Fluss. Genau das, was Sie geplant haben."
+        ],
         "milestone_7": [
           "7 Minuten – auf Kurs. 🌱",
           "Der Plan funktioniert."
@@ -824,7 +872,9 @@
     "phaseFlow": "Fließen 🌊",
     "phaseRelease": "Veröffentlichung 🌱",
     "phaseStruggle": "Kampf 💪",
-    "phaseRecovery": "Erholung 🌿"
+    "phaseRecovery": "Erholung 🌿",
+    "filterAll": "Alle",
+    "noFilterResults": "Noch keine Sitzungen mit dieser Phase"
   },
   "calendar": {
     "upcoming": "Demnächst",

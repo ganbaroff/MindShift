@@ -40,6 +40,9 @@ export function FirstFocusTutorial() {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const sampleTaskIdRef = useRef<string | null>(null)
 
+  // Analytics: denominator for tutorial completion/skip rate
+  useEffect(() => { logEvent('tutorial_started') }, [])
+
   // Current phase based on elapsed time
   const phase = elapsed < PHASE_THRESHOLDS.release
     ? 'struggle'
@@ -72,7 +75,7 @@ export function FirstFocusTutorial() {
     setFirstFocusTutorialCompleted()
     markHintSeen('first_focus_tutorial')
     markHintSeen('welcome_walkthrough')
-    navigate('/focus')
+    navigate('/today')
   }, [setFirstFocusTutorialCompleted, markHintSeen, navigate, removeTask])
 
   const handleSkip = useCallback(() => {
@@ -85,7 +88,7 @@ export function FirstFocusTutorial() {
     setFirstFocusTutorialCompleted()
     markHintSeen('first_focus_tutorial')
     markHintSeen('welcome_walkthrough')
-    navigate('/focus')
+    navigate('/today')
   }, [setFirstFocusTutorialCompleted, markHintSeen, removeTask, step, navigate])
 
   const handleStartTimer = useCallback(() => {

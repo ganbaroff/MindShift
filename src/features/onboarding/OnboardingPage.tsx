@@ -11,7 +11,7 @@
  * Settings → "Re-run setup wizard"), show a gentle banner, skip re-seeding
  * sample tasks, navigate back on finish instead of to '/'.
  */
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -121,6 +121,17 @@ export default function OnboardingPage() {
   const [step,       setStep]       = useState(0)
   const [selections, setSelections] = useState<(number | null)[]>(initialSelections)
   const [energy,     setEnergy]     = useState(2)
+
+  // Analytics: fire once on mount for new users (denominator for funnel)
+  useEffect(() => {
+    if (!isRevisit) logEvent('onboarding_started')
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Analytics: track each step viewed (detects step-level drop-off)
+  useEffect(() => {
+    logEvent('onboarding_step_viewed', { step })
+  }, [step])
 
   const current      = steps[step]
   const isEnergyStep = step === 3

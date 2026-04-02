@@ -75,6 +75,8 @@ Deno.serve(async (req: Request) => {
       incompleteCount?: unknown
       locale?: string
       emotionalReactivity?: unknown
+      psychotype?: unknown
+      timeBlindness?: unknown
     }
 
     const days   = Math.min(365, Math.max(0, Math.floor(Number(body.daysAbsent  ?? 0))))
@@ -86,12 +88,34 @@ Deno.serve(async (req: Request) => {
     const emotionalReactivity = VALID_ER.includes(body.emotionalReactivity as string)
       ? (body.emotionalReactivity as string)
       : null
+    const VALID_PSYCHOTYPE = ['achiever', 'explorer', 'connector', 'planner']
+    const psychotype = VALID_PSYCHOTYPE.includes(body.psychotype as string)
+      ? (body.psychotype as string)
+      : null
+    const VALID_TB = ['often', 'sometimes', 'rarely']
+    const timeBlindness = VALID_TB.includes(body.timeBlindness as string)
+      ? (body.timeBlindness as string)
+      : null
 
     // ── Gemini call ──────────────────────────────────────────────────────────
     const erGuidance = emotionalReactivity === 'high'
       ? '\n- The user has HIGH emotional reactivity. Be EXTRA gentle and validating. Use phrases like "no explanation needed" and "you are here now, and that is what matters". Avoid anything that could feel like judgment or pressure. Never imply they should have come back sooner.'
       : emotionalReactivity === 'steady'
       ? '\n- The user handles emotions well. Be warm but direct. You can be more matter-of-fact: "Welcome back. Pick up where you left off?"'
+      : ''
+
+    const psychotypeGuidance = psychotype === 'achiever'
+      ? '\n- The user is an achiever. They are goal-driven. Acknowledge they have things to accomplish and one step forward is enough.'
+      : psychotype === 'explorer'
+      ? '\n- The user is an explorer. They are curious and thrive on discovery. Frame the return as a new starting point, not a continuation.'
+      : psychotype === 'connector'
+      ? '\n- The user is a connector. They are motivated by people and meaning. Remind them their goals still matter and someone (even Mochi) is glad they are back.'
+      : psychotype === 'planner'
+      ? '\n- The user is a planner. They like structure. Suggest a small, concrete first action — something definite to latch onto.'
+      : ''
+
+    const tbGuidance = timeBlindness === 'often'
+      ? '\n- The user often loses track of time. Keep the message short and suggest starting with just 5 minutes — frame it as a tiny action, not a session.'
       : ''
 
     const prompt = `You are a compassionate ADHD productivity coach writing a welcome-back message. Your only job is to generate a warm, shame-free welcome-back message.
@@ -106,7 +130,7 @@ Write exactly 2 sentences. Rules:
 - Do NOT mention the number of incomplete tasks or the number of days
 - Focus on the present moment and what's possible right now
 - Use gentle, grounded language — not toxic positivity
-- Second sentence can suggest one small first step${erGuidance}
+- Second sentence can suggest one small first step${erGuidance}${psychotypeGuidance}${tbGuidance}
 - IMPORTANT: Respond in the language with BCP-47 code "${targetLocale}". If unsure, use English.
 
 Respond ONLY with the 2-sentence message. No quotes, no JSON, no labels.`

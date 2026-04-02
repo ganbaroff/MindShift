@@ -23,7 +23,8 @@
     "quietDay": "Sakit gün - bu da yaxşıdır. İstirahət sayılır.",
     "focusOn": "Fokuslayın: {{title}}",
     "startFocus": "Fokus sessiyasına başlayın",
-    "viewProgress": "Tərəqqiyə baxın →"
+    "viewProgress": "Tərəqqiyə baxın →",
+    "moveFromNext": "{{count}} tapşırığı Növbəti bölmədə gözləyir — birini seçin →"
   },
   "quickCapture": {
     "placeholder": "Tapşırıq, xatırlatma və ya görüş əlavə edin...",
@@ -284,7 +285,11 @@
     "toneBalanced": "Balanslı",
     "toneBalancedDesc": "Məşq tonu, daha çox ölçülər",
     "toneClear": "Təmiz",
-    "toneClearDesc": "Düzdür, nömrələr - birinci"
+    "toneClearDesc": "Düzdür, nömrələr - birinci",
+    "upgradeError": "Kassanı açmaq mümkün olmadı. Yenidən cəhd edin.",
+    "upgradeCTA": "Pro-a yüksəldin",
+    "proBadge": "Pro",
+    "upgrading": "Kassa açılır..."
   },
   "onboarding": {
     "skipSetup": "Quraşdırmanı keçin — daxil olun →",
@@ -659,6 +664,14 @@
     },
     "psychotype": {
       "achiever": {
+        "phase_release": [
+          "İçəri girmək. Tərəqqi baş verir.",
+          "Sürtünmə nöqtəsini keçmişdir."
+        ],
+        "phase_flow": [
+          "Axın vəziyyəti. Bu yaxşı hissəsidir.",
+          "Tam diqqət. Heç nə boşa getmir."
+        ],
         "milestone_7": [
           "Kitablarda 7 dəqiqə 💪",
           "Çətin hissəni keçdi. Tikintiyə davam edin."
@@ -677,6 +690,14 @@
         ]
       },
       "explorer": {
+        "phase_release": [
+          "Diqqət açılır. Onu izləyin.",
+          "İndi nəsə kliklənir."
+        ],
+        "phase_flow": [
+          "Dərin kəşfiyyat rejimi. dayanma.",
+          "Ən yaxşı tapıntılar bu zaman baş verir."
+        ],
         "milestone_7": [
           "7 dəqiqə ərzində - isinmə 🔍",
           "İçəri girmək. Maraq yüklənir."
@@ -695,6 +716,14 @@
         ]
       },
       "connector": {
+        "phase_release": [
+          "İş həll olunur. Hələ burada.",
+          "İndi içində."
+        ],
+        "phase_flow": [
+          "zonada. Hiss et.",
+          "Axın. Bura gəldik."
+        ],
         "milestone_7": [
           "7 dəqiqə. Sabit. 🌱",
           "Hələ burada səninlə."
@@ -713,6 +742,14 @@
         ]
       },
       "planner": {
+        "phase_release": [
+          "İkinci mərhələ. Yolda.",
+          "Planlaşdırıldığı kimi indi daha dərin."
+        ],
+        "phase_flow": [
+          "Optimal icra. İçində qalın.",
+          "Tam axın. Tam olaraq planlaşdırdığınız şey."
+        ],
         "milestone_7": [
           "7 dəqiqə - yolda. 🌱",
           "Plan işləyir."
@@ -835,7 +872,9 @@
     "phaseFlow": "Axın 🌊",
     "phaseRelease": "Buraxın 🌱",
     "phaseStruggle": "Mübarizə 💪",
-    "phaseRecovery": "Bərpa 🌿"
+    "phaseRecovery": "Bərpa 🌿",
+    "filterAll": "Hamısı",
+    "noFilterResults": "Bu mərhələ ilə hələ heç bir sessiya yoxdur"
   },
   "calendar": {
     "upcoming": "Qarşıdan gələn",

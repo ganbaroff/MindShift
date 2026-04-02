@@ -43,7 +43,7 @@ interface Props {
 }
 
 export function RecoveryProtocol({ onDismiss }: Props) {
-  const { archiveAllOverdue, addTask, nowPool, userId, lastSessionAt, xpTotal, email, hasAchievement, unlockAchievement, uiTone, emotionalReactivity } = useStore()
+  const { archiveAllOverdue, addTask, nowPool, userId, lastSessionAt, xpTotal, email, hasAchievement, unlockAchievement, uiTone, emotionalReactivity, psychotype, timeBlindness } = useStore()
   const { t: transition } = useMotion()
   const { t } = useTranslation()
   const { copy } = useUITone()
@@ -76,7 +76,7 @@ export function RecoveryProtocol({ onDismiss }: Props) {
     // Fetch personalized recovery message (non-blocking)
     setLoadingAi(true)
     supabase.functions.invoke('recovery-message', {
-      body: { daysAbsent, incompleteCount: ids.length, locale, emotionalReactivity },
+      body: { daysAbsent, incompleteCount: ids.length, locale, emotionalReactivity, psychotype, timeBlindness },
     }).then(({ data }) => {
       if (data?.message) setWelcomeMsg(data.message as string)
     }).catch(() => { /* fallback already set */ }).finally(() => {
