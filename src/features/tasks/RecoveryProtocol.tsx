@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useTranslation } from 'react-i18next'
 import { useMotion } from '@/shared/hooks/useMotion'
@@ -59,13 +59,18 @@ export function RecoveryProtocol({ onDismiss }: Props) {
   // Hoisted to component scope so handleSubmit can inject into decompose-task
   const locale = navigator.language?.split('-')[0] ?? 'en'
 
+  // S-5 Ghosting Grace: absence duration drives UI tone + CTA copy
+  const daysAbsent = useMemo(() =>
+    lastSessionAt
+      ? Math.floor((Date.now() - new Date(lastSessionAt).getTime()) / (1000 * 60 * 60 * 24))
+      : Math.ceil(RECOVERY_THRESHOLD_HOURS / 24)
+  , [lastSessionAt])
+  // short = 3-7d (normal break), medium = 7-30d (been a while), long = 30d+ (fresh start tone)
+  const durationTier = daysAbsent >= 30 ? 'long' : daysAbsent >= 7 ? 'medium' : 'short'
+
   // Archive overdue tasks + fetch AI welcome + fire welcome-back push on mount
   useEffect(() => {
-    logEvent('recovery_shown', {
-      days_absent: lastSessionAt
-        ? Math.floor((Date.now() - new Date(lastSessionAt).getTime()) / (1000 * 60 * 60 * 24))
-        : Math.ceil(RECOVERY_THRESHOLD_HOURS / 24),
-    })
+    logEvent('recovery_shown', { days_absent: daysAbsent, duration_tier: durationTier })
     // Native push — visible when app was backgrounded (silent, no shame)
     // Extract first name from email or use generic greeting
     const userName = email ? email.split('@')[0].split('.')[0] : undefined
@@ -73,11 +78,6 @@ export function RecoveryProtocol({ onDismiss }: Props) {
 
     const ids = archiveAllOverdue()
     setArchivedCount(ids.length)
-
-    // Calculate days absent
-    const daysAbsent = lastSessionAt
-      ? Math.floor((Date.now() - new Date(lastSessionAt).getTime()) / (1000 * 60 * 60 * 24))
-      : Math.ceil(RECOVERY_THRESHOLD_HOURS / 24)
 
     // Fetch personalized recovery message (non-blocking)
     setLoadingAi(true)
@@ -204,7 +204,7 @@ export function RecoveryProtocol({ onDismiss }: Props) {
   }
 
   const handleSkip = () => {
-    logEvent('recovery_dismissed', { action: 'skip' })
+    logEvent('recovery_dismissed', { action: 'skip', duration_tier: durationTier })
     onDismiss()
   }
 
@@ -257,6 +257,16 @@ export function RecoveryProtocol({ onDismiss }: Props) {
                 {welcomeMsg}
               </p>
             )}
+            {/* S-5 Ghosting Grace: duration badge — normalises absence as a valid pause */}
+            <p className="text-[11px] text-center" style={{ color: 'var(--color-text-muted)', opacity: 0.65 }}>
+              {daysAbsent < 7
+                ? t('recovery.daysAway', { count: daysAbsent })
+                : daysAbsent < 30
+                  ? t('recovery.weeksAway', { count: Math.floor(daysAbsent / 7) })
+                  : t('recovery.longAway')
+              }
+            </p>
+
             {archivedCount > 0 && (
               <p className="text-sm text-center" style={{ color: 'var(--color-text-muted)' }}>
                 🗃️ {t(archivedCount !== 1 ? 'recovery.archivedTasksPlural' : 'recovery.archivedTasks', { count: archivedCount })}
@@ -370,7 +380,9 @@ export function RecoveryProtocol({ onDismiss }: Props) {
               className="w-full py-3 text-sm transition-all duration-200"
               style={{ color: 'var(--color-text-muted)' }}
             >
-              {t('recovery.skipShowTasks')}
+              {durationTier === 'long' ? t('recovery.skipLong')
+                : durationTier === 'medium' ? t('recovery.skipMedium')
+                : t('recovery.skipShowTasks')}
             </button>
           </motion.div>
         </div>
