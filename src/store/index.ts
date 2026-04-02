@@ -8,6 +8,7 @@ import { createSessionSlice } from './slices/sessionSlice'
 import { createAudioSlice } from './slices/audioSlice'
 import { createProgressSlice } from './slices/progressSlice'
 import { createPreferencesAndGridSlice } from './slices/preferencesAndGridSlice'
+import { _registerHapticsGetter } from '@/shared/lib/haptic'
 export type { AppStore } from './types'
 
 // ── Store ─────────────────────────────────────────────────────────────────────
@@ -151,6 +152,10 @@ export const useStore = create<import('./types').AppStore>()(
     )
   )
 )
+
+// Break circular dep: store → taskSlice → notify → haptic → store
+// haptic.ts uses this getter instead of importing useStore directly.
+_registerHapticsGetter(() => useStore.getState().hapticsEnabled)
 
 // ── Selectors ─────────────────────────────────────────────────────────────────
 export const selectActiveTasks = (s: import('./types').AppStore) =>
