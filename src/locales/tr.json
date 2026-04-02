@@ -957,7 +957,9 @@
     "leaveRoom": "Odadan ayrıl",
     "connectionError": "Odaya bağlanılamadı",
     "checkInternet": "İnternet bağlantınızı kontrol edip tekrar deneyin.",
-    "tryAgain": "Tekrar deneyin"
+    "tryAgain": "Tekrar deneyin",
+    "partnerSteppedAway": "Partneriniz uzaklaştı – devam edin",
+    "yourPhase": "Odaklanma aşamanız"
   },
   "breathwork": {
     "breatheIn": "Nefes alın...",

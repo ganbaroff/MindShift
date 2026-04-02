@@ -57,6 +57,7 @@ export function FirstFocusTutorial() {
       setElapsed(prev => {
         if (prev >= TUTORIAL_DURATION) {
           setTimerRunning(false)
+          logEvent('tutorial_step_viewed', { step: 'celebrate' })
           setStep('celebrate')
           return TUTORIAL_DURATION
         }
@@ -113,6 +114,7 @@ export function FirstFocusTutorial() {
       reminderSentAt: null,
       repeat: 'none',
     })
+    logEvent('tutorial_step_viewed', { step: 'timer' })
     setStep('timer')
     setTimerRunning(true)
   }, [addTask, t])
@@ -290,7 +292,7 @@ export function FirstFocusTutorial() {
               </div>
 
               <button
-                onClick={() => setStep('next')}
+                onClick={() => { logEvent('tutorial_step_viewed', { step: 'next' }); setStep('next') }}
                 className="w-full py-3 rounded-2xl text-[14px] font-semibold"
                 style={{ background: 'var(--color-teal)', color: '#FFFFFF' }}
               >

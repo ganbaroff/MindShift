@@ -8,7 +8,7 @@
  * S-3: 1:1 partner / S-4: up to 4-person room / S-11: anonymous encouragement
  */
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion } from 'motion/react'
 import { useTranslation } from 'react-i18next'
 import { useMotion } from '@/shared/hooks/useMotion'
@@ -28,6 +28,21 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
   const [mode, setMode] = useState<'pick' | 'join'>('pick')
   const [codeInput, setCodeInput] = useState('')
   const [copied, setCopied] = useState(false)
+  const sheetRef = useRef<HTMLDivElement>(null)
+
+  // Focus sheet on open — WCAG 2.4.3
+  useEffect(() => {
+    sheetRef.current?.focus()
+  }, [])
+
+  // Escape key to close — WCAG 2.1.1
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', handleKey)
+    return () => document.removeEventListener('keydown', handleKey)
+  }, [onClose])
 
   const handleCreate = () => {
     room.create()
@@ -52,12 +67,18 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
     onReady()
   }
 
-  // ── Phase dot helper ───────────────────────────────────────────────────────
+  // ── Phase dot helper — CSS custom properties (guardrail: no hardcoded colors)
   const phaseColor = (phase: string) => {
-    if (phase === 'flow')    return '#4ECDC4'
-    if (phase === 'release') return '#F59E0B'
-    return '#7B72FF'   // struggle / idle
+    if (phase === 'flow')    return 'var(--color-teal)'
+    if (phase === 'release') return 'var(--color-gold)'
+    return 'var(--color-primary)'   // struggle / idle
   }
+
+  // Live region status for screen readers — WCAG 3.2.2
+  const liveStatus =
+    room.status === 'connecting' ? t('focusRoom.joining') :
+    room.status === 'connected'  ? t('focusRoom.inTheRoom', { count: room.peers.length + 1 }) :
+    ''
 
   return (
     <>
@@ -72,13 +93,18 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
 
       {/* Sheet */}
       <motion.div
+        ref={sheetRef}
+        tabIndex={-1}
         initial={shouldAnimate ? { y: '100%' } : false}
         animate={shouldAnimate ? { y: 0 } : false}
         exit={shouldAnimate ? { y: '100%' } : undefined}
         transition={shouldAnimate ? { type: 'spring', damping: 28, stiffness: 300 } : { duration: 0 }}
-        className="fixed bottom-0 left-0 right-0 z-50 rounded-t-3xl p-5 safe-bottom"
+        className="fixed bottom-0 left-0 right-0 z-50 rounded-t-3xl p-5 safe-bottom outline-none"
         style={{ background: 'var(--color-surface-card)', maxHeight: '80vh', overflowY: 'auto' }}
       >
+        {/* Visually-hidden live region — status announcements for screen readers */}
+        <div aria-live="polite" aria-atomic="true" className="sr-only">{liveStatus}</div>
+
         {/* Handle */}
         <div className="w-10 h-1 rounded-full mx-auto mb-4" style={{ background: 'rgba(255,255,255,0.12)' }} />
 
@@ -86,7 +112,12 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
           <h2 className="text-[17px] font-bold" style={{ color: 'var(--color-text-primary)' }}>
             {t('focusRoom.title')} 🤝
           </h2>
-          <button onClick={onClose} className="p-1.5 rounded-lg" style={{ color: 'var(--color-text-muted)' }}>
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-lg focus-visible:ring-2 focus-visible:ring-[#7B72FF] focus-visible:ring-offset-1"
+            style={{ color: 'var(--color-text-muted)' }}
+            aria-label={t('common.close')}
+          >
             <X size={18} />
           </button>
         </div>
@@ -101,7 +132,7 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
             <motion.button
               whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
               onClick={handleCreate}
-              className="w-full py-3.5 rounded-2xl font-semibold text-[14px]"
+              className="w-full py-3.5 rounded-2xl font-semibold text-[14px] focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
               style={{ background: 'linear-gradient(135deg, #7B72FF, #8B7FF7)', color: '#fff' }}
             >
               {t('focusRoom.createRoom')} ✦
@@ -110,7 +141,7 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
             <motion.button
               whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
               onClick={() => setMode('join')}
-              className="w-full py-3 rounded-2xl font-medium text-[14px]"
+              className="w-full py-3 rounded-2xl font-medium text-[14px] focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
               style={{ background: 'var(--color-surface-raised)', border: '1px solid rgba(255,255,255,0.06)', color: 'var(--color-text-primary)' }}
             >
               {t('focusRoom.joinWithCode')}
@@ -127,7 +158,7 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
               onChange={e => setCodeInput(e.target.value.toUpperCase().slice(0, 6))}
               placeholder={t('focusRoom.codePlaceholder')}
               maxLength={6}
-              className="w-full rounded-xl px-4 h-12 text-center text-[20px] font-mono font-bold outline-none"
+              className="w-full rounded-xl px-4 h-12 text-center text-[20px] font-mono font-bold outline-none focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
               style={{
                 background: 'var(--color-surface-raised)',
                 border: '1.5px solid rgba(123,114,255,0.35)',
@@ -140,12 +171,16 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
               whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
               onClick={handleJoin}
               disabled={codeInput.trim().length < 4}
-              className="w-full py-3.5 rounded-2xl font-semibold text-[14px] disabled:opacity-40"
+              className="w-full py-3.5 rounded-2xl font-semibold text-[14px] disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
               style={{ background: 'linear-gradient(135deg, #7B72FF, #8B7FF7)', color: '#fff' }}
             >
               {t('focusRoom.joinRoom')}
             </motion.button>
-            <button onClick={() => setMode('pick')} className="w-full py-1.5 text-[12px]" style={{ color: 'var(--color-text-muted)' }}>
+            <button
+              onClick={() => setMode('pick')}
+              className="w-full py-1.5 text-[12px] focus-visible:ring-2 focus-visible:ring-[#7B72FF] rounded-lg"
+              style={{ color: 'var(--color-text-muted)' }}
+            >
               {t('focusRoom.back')}
             </button>
           </div>
@@ -154,7 +189,7 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
         {/* ── Connecting ───────────────────────────────────────────────────── */}
         {room.status === 'connecting' && (
           <div className="flex flex-col items-center py-8 gap-3">
-            <div className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin motion-reduce:animate-none motion-reduce:opacity-60" style={{ borderColor: 'var(--color-primary)', borderTopColor: 'transparent' }} />
+            <div className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin motion-reduce:animate-none" style={{ borderColor: 'var(--color-primary)', borderTopColor: 'transparent' }} />
             <p className="text-[13px]" style={{ color: 'var(--color-text-muted)' }}>{t('focusRoom.joining')}</p>
           </div>
         )}
@@ -175,7 +210,7 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
               </div>
               <button
                 onClick={() => void handleCopy()}
-                className="px-3 py-1.5 rounded-xl text-[12px] font-medium transition-all"
+                className="px-3 py-1.5 rounded-xl text-[12px] font-medium transition-all focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
                 style={{
                   background: copied ? 'rgba(78,205,196,0.15)' : 'rgba(123,114,255,0.12)',
                   border: `1px solid ${copied ? 'var(--color-teal)' : 'rgba(123,114,255,0.25)'}`,
@@ -200,13 +235,13 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
                 <div className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{ background: 'var(--color-surface-raised)' }}>
                   <span className="text-[16px]">🧠</span>
                   <span className="text-[13px] flex-1" style={{ color: 'var(--color-text-primary)' }}>{t('focusRoom.you')}</span>
-                  <div className="w-2 h-2 rounded-full" style={{ background: 'var(--color-teal)' }} />
+                  <div className="w-2 h-2 rounded-full" style={{ background: 'var(--color-teal)' }} aria-label={t('focusRoom.yourPhase')} />
                 </div>
                 {room.peers.map(peer => (
                   <div key={peer.userId} className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{ background: 'var(--color-surface-raised)' }}>
                     <span className="text-[16px]">{peer.emoji}</span>
                     <span className="text-[13px] flex-1" style={{ color: 'var(--color-text-primary)' }}>{t('focusRoom.partner')}</span>
-                    <div className="w-2 h-2 rounded-full" style={{ background: phaseColor(peer.phase) }} />
+                    <div className="w-2 h-2 rounded-full" style={{ background: phaseColor(peer.phase) }} aria-label={peer.phase} />
                     <span className="text-[10px] capitalize" style={{ color: 'var(--color-text-muted)' }}>{peer.phase}</span>
                   </div>
                 ))}
@@ -216,7 +251,7 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
             <motion.button
               whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
               onClick={handleStart}
-              className="w-full py-3.5 rounded-2xl font-semibold text-[14px]"
+              className="w-full py-3.5 rounded-2xl font-semibold text-[14px] focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
               style={{ background: 'linear-gradient(135deg, #7B72FF, #4ECDC4)', color: '#fff' }}
             >
               {t('focusRoom.startSession')}
@@ -224,7 +259,7 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
 
             <button
               onClick={() => { room.leave(); setMode('pick') }}
-              className="w-full py-1.5 text-[12px] text-center"
+              className="w-full py-1.5 text-[12px] text-center focus-visible:ring-2 focus-visible:ring-[#7B72FF] rounded-lg"
               style={{ color: 'var(--color-text-muted)' }}
             >
               {t('focusRoom.leaveRoom')}
@@ -239,7 +274,7 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
             <p className="text-[12px]" style={{ color: 'var(--color-text-muted)' }}>{t('focusRoom.checkInternet')}</p>
             <button
               onClick={() => { room.leave(); setMode('pick') }}
-              className="px-4 py-2 rounded-xl text-[13px]"
+              className="px-4 py-2 rounded-xl text-[13px] focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
               style={{ background: 'rgba(123,114,255,0.12)', border: '1px solid rgba(123,114,255,0.25)', color: 'var(--color-primary)' }}
             >
               {t('focusRoom.tryAgain')}

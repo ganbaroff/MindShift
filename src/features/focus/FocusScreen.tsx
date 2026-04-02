@@ -62,9 +62,9 @@ export default function FocusScreen() {
 
   // Anonymous encouragement — rotate every 5 min during session
   const encouragement = useMemo(() => {
-    if (room.status !== 'connected' || room.peers.length === 0) return null
+    if (room.status !== 'connected' || (room.peers.length === 0 && !room.peerGrace)) return null
     return ROOM_ENCOURAGEMENTS[Math.floor(Date.now() / 300_000) % ROOM_ENCOURAGEMENTS.length]
-  }, [room.status, room.peers.length])
+  }, [room.status, room.peers.length, room.peerGrace])
 
   // Immersive status bar — hide during active session, restore otherwise
   useEffect(() => {
@@ -241,19 +241,30 @@ export default function FocusScreen() {
             transition={shouldAnimate ? { delay: 2, duration: 1 } : { duration: 0 }}
             className="absolute bottom-40 left-0 right-0 flex flex-col items-center gap-1 pointer-events-none"
           >
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full"
-              style={{ backgroundColor: 'rgba(78,205,196,0.08)', border: '1px solid rgba(78,205,196,0.15)' }}
-            >
-              <span className="text-[11px]" style={{ color: '#4ECDC4' }}>{t('focus.inRoom', { count: room.peers.length + 1 })}</span>
-              {room.peers.map(p => (
-                <div key={p.userId} className="flex items-center gap-1">
-                  <span className="text-[11px]">{p.emoji}</span>
-                  <div className="w-1.5 h-1.5 rounded-full"
-                    style={{ background: p.phase === 'flow' ? '#4ECDC4' : p.phase === 'release' ? '#F59E0B' : '#7B72FF' }}
-                  />
-                </div>
-              ))}
-            </div>
+            {/* S-5: Ghosting Grace — warm message when partner steps away */}
+            {room.peerGrace && room.peers.length === 0 ? (
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full"
+                style={{ backgroundColor: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.15)' }}
+              >
+                <span className="text-[11px]" style={{ color: 'var(--color-gold)' }}>
+                  {t('focusRoom.partnerSteppedAway')}
+                </span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full"
+                style={{ backgroundColor: 'rgba(78,205,196,0.08)', border: '1px solid rgba(78,205,196,0.15)' }}
+              >
+                <span className="text-[11px]" style={{ color: 'var(--color-teal)' }}>{t('focus.inRoom', { count: room.peers.length + 1 })}</span>
+                {room.peers.map(p => (
+                  <div key={p.userId} className="flex items-center gap-1">
+                    <span className="text-[11px]">{p.emoji}</span>
+                    <div className="w-1.5 h-1.5 rounded-full"
+                      style={{ background: p.phase === 'flow' ? 'var(--color-teal)' : p.phase === 'release' ? 'var(--color-gold)' : 'var(--color-primary)' }}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
             {encouragement && room.peers.length > 0 && (
               <p className="text-[10px] mt-0.5" style={{ color: 'var(--color-text-muted)' }}>{encouragement}</p>
             )}

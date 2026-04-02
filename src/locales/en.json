@@ -957,7 +957,9 @@
     "leaveRoom": "Leave room",
     "connectionError": "Couldn't connect to room",
     "checkInternet": "Check your internet connection and try again.",
-    "tryAgain": "Try again"
+    "tryAgain": "Try again",
+    "partnerSteppedAway": "Your partner stepped away — keep going",
+    "yourPhase": "Your focus phase"
   },
   "breathwork": {
     "breatheIn": "Breathe in...",

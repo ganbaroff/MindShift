@@ -19,7 +19,7 @@
  *   room.peers             → array of { phase, emoji, userId }
  */
 
-import { useRef, useState, useCallback } from 'react'
+import { useRef, useState, useCallback, useEffect } from 'react'
 import { supabase } from '@/shared/lib/supabase'
 import type { SessionPhase } from '@/types'
 import type { RealtimeChannel } from '@supabase/supabase-js'
@@ -49,6 +49,8 @@ export interface RoomPeer {
 export interface FocusRoomState {
   code: string | null
   peers: RoomPeer[]
+  /** True for 3 min after a partner disconnects — prevents abrupt solo-drop */
+  peerGrace: boolean
   status: 'idle' | 'connecting' | 'connected' | 'error'
   create: () => void
   join: (code: string) => void
@@ -78,8 +80,11 @@ export function useFocusRoom(): FocusRoomState {
   const [code, setCode] = useState<string | null>(null)
   const [peers, setPeers] = useState<RoomPeer[]>([])
   const [status, setStatus] = useState<FocusRoomState['status']>('idle')
+  const [peerGrace, setPeerGrace] = useState(false)
   const channelRef = useRef<RealtimeChannel | null>(null)
   const phaseRef = useRef<SessionPhase>('struggle')
+  const prevPeersLengthRef = useRef(0)
+  const graceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // ── Subscribe to a channel ─────────────────────────────────────────────────
   const subscribe = useCallback((roomCode: string) => {
@@ -101,6 +106,20 @@ export function useFocusRoom(): FocusRoomState {
             emoji: PEER_EMOJIS[idx % PEER_EMOJIS.length],
             joinedAt: (metas[0] as { phase: SessionPhase; joinedAt: number }).joinedAt ?? Date.now(),
           }))
+
+        // S-5 Ghosting Grace — when partner drops mid-session, show warm message
+        // for 3 minutes instead of instantly silencing the room presence
+        const prevLen = prevPeersLengthRef.current
+        prevPeersLengthRef.current = peerList.length
+        if (peerList.length === 0 && prevLen > 0) {
+          setPeerGrace(true)
+          if (graceTimerRef.current) clearTimeout(graceTimerRef.current)
+          graceTimerRef.current = setTimeout(() => setPeerGrace(false), 3 * 60 * 1000)
+        } else if (peerList.length > 0) {
+          if (graceTimerRef.current) clearTimeout(graceTimerRef.current)
+          setPeerGrace(false)
+        }
+
         setPeers(peerList)
       })
       .subscribe(async (s) => {
@@ -130,6 +149,7 @@ export function useFocusRoom(): FocusRoomState {
   }, [])
 
   const leave = useCallback(() => {
+    if (graceTimerRef.current) clearTimeout(graceTimerRef.current)
     if (channelRef.current) {
       void channelRef.current.untrack()
       void supabase.removeChannel(channelRef.current)
@@ -137,8 +157,13 @@ export function useFocusRoom(): FocusRoomState {
     }
     setCode(null)
     setPeers([])
+    setPeerGrace(false)
+    prevPeersLengthRef.current = 0
     setStatus('idle')
   }, [])
 
-  return { code, peers, status, create, join, broadcast, leave }
+  // Cleanup on unmount — prevent presence leak when component navigates away
+  useEffect(() => () => leave(), [leave])
+
+  return { code, peers, peerGrace, status, create, join, broadcast, leave }
 }
