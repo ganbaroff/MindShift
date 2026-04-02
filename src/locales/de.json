@@ -24,7 +24,8 @@
     "focusOn": "Konzentrieren Sie sich auf: {{title}}",
     "startFocus": "Starten Sie eine Fokussitzung",
     "viewProgress": "Fortschritt anzeigen →",
-    "moveFromNext": "{{count}} Aufgabe wartet in „Weiter“ – wählen Sie eine aus →"
+    "moveFromNext": "{{count}} Aufgabe wartet in „Weiter“ – wählen Sie eine aus →",
+    "focusGoalProgress": "{{current}} von {{goal}} Minuten heute fokussiert"
   },
   "quickCapture": {
     "placeholder": "Fügen Sie eine Aufgabe, Erinnerung oder Besprechung hinzu...",
@@ -40,7 +41,8 @@
     "step3Body": "Eine Aufgabe heute reicht aus. Tippen Sie auf die Eingabe oben, um Ihre erste hinzuzufügen.",
     "skip": "Überspringen",
     "next": "Nächste",
-    "gotIt": "Habe es"
+    "gotIt": "Habe es",
+    "stepOf": "Schritt {{current}} von {{total}}"
   },
   "tasks": {
     "title": "Ihre Aufgaben",

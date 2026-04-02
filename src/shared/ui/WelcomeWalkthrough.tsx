@@ -80,8 +80,8 @@ function WelcomeWalkthroughInner() {
       </AnimatePresence>
 
       <div className="flex items-center justify-between px-4 pb-3">
-        {/* Progress dots */}
-        <div className="flex gap-1.5">
+        {/* Progress dots — aria-hidden; step announced via heading */}
+        <div className="flex gap-1.5" aria-hidden="true">
           {STEP_KEYS.map((_, i) => (
             <div
               key={i}
@@ -92,6 +92,7 @@ function WelcomeWalkthroughInner() {
             />
           ))}
         </div>
+        <span className="sr-only">{t('welcome.stepOf', { current: step + 1, total: STEP_KEYS.length })}</span>
 
         <div className="flex gap-2">
           <button

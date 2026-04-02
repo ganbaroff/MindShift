@@ -24,7 +24,8 @@
     "focusOn": "Fokuslayın: {{title}}",
     "startFocus": "Fokus sessiyasına başlayın",
     "viewProgress": "Tərəqqiyə baxın →",
-    "moveFromNext": "{{count}} tapşırığı Növbəti bölmədə gözləyir — birini seçin →"
+    "moveFromNext": "{{count}} tapşırığı Növbəti bölmədə gözləyir — birini seçin →",
+    "focusGoalProgress": "Bu gün {{goal}} dəqiqədən {{current}} dəqiqə fokuslandınız"
   },
   "quickCapture": {
     "placeholder": "Tapşırıq, xatırlatma və ya görüş əlavə edin...",
@@ -40,7 +41,8 @@
     "step3Body": "Bu gün bir iş kifayətdir. Birincisini əlavə etmək üçün yuxarıdakı daxiletməyə toxunun.",
     "skip": "Keç",
     "next": "Sonrakı",
-    "gotIt": "Anladım"
+    "gotIt": "Anladım",
+    "stepOf": "{{total}}-dən {{current}}-ci addım"
   },
   "tasks": {
     "title": "Tapşırıqlarınız",
