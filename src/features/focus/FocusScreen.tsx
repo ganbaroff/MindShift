@@ -291,7 +291,7 @@ export default function FocusScreen() {
                 style={{
                   backgroundColor: 'rgba(78,205,196,0.08)',
                   border: '1px solid rgba(78,205,196,0.15)',
-                  color: '#4ECDC4',
+                  color: 'var(--color-teal)',
                 }}
               >
                 {orbitCount === 1 ? t('focus.peopleFocusing', { count: orbitCount }) : t('focus.peopleFocusingPlural', { count: orbitCount })}

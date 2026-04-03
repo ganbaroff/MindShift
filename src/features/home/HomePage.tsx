@@ -258,7 +258,7 @@ export default function HomePage() {
             whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
             onClick={() => setShowAddTask(true)}
             aria-label={t('home.whatsOnMind')}
-            className="w-full rounded-2xl p-5 border text-left focus-visible:ring-2 focus-visible:ring-[#7B72FF] focus-visible:outline-none"
+            className="w-full rounded-2xl p-5 border text-left focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none"
             style={{ backgroundColor: 'var(--color-surface-card)', borderColor: 'rgba(123,114,255,0.25)', boxShadow: '0 0 20px rgba(123,114,255,0.08)' }}
           >
             <div className="flex items-center gap-3">
@@ -321,7 +321,7 @@ export default function HomePage() {
             ))}
             <button
               onClick={() => navigate('/tasks')}
-              className="text-[13px] font-medium mt-1 focus-visible:ring-2 focus-visible:ring-[#7B72FF] rounded"
+              className="text-[13px] font-medium mt-1 focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] rounded"
               style={{ color: 'var(--color-primary)' }}
               aria-label={t('home.seeAllTasks')}
             >
