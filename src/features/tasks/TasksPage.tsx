@@ -82,7 +82,7 @@ export default function TasksPage() {
 
   const nowMax = getNowPoolMax(appMode, seasonalMode);
 
-  const isLowEnergy = energyLevel <= 2 || burnoutScore > 60;
+  const isLowEnergy = energyLevel <= 2 || (burnoutScore ?? 0) > 60;
 
   // Past-date task detection — tasks with a past due date still active
   const pastDateTasks = useMemo(() =>
