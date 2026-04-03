@@ -10,6 +10,7 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { getCorsHeaders } from '../_shared/cors.ts'
+import { checkDbRateLimit } from '../_shared/rateLimit.ts'
 
 const GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token'
 const GCAL_BASE = 'https://www.googleapis.com/calendar/v3/calendars'
@@ -39,6 +40,21 @@ Deno.serve(async (req) => {
     if (authError || !user) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401, headers: { ...cors, 'Content-Type': 'application/json' },
+      })
+    }
+
+    // ── Rate limit (200/day free, unlimited pro) ────────────────────────────
+    const { allowed, retryAfterSeconds } = await checkDbRateLimit(
+      supabase, user.id, false, {
+        fnName: 'gcal-sync',
+        limitFree: 200,
+        windowMs: 86_400_000,
+      }
+    )
+    if (!allowed) {
+      return new Response(JSON.stringify({ error: 'Rate limit exceeded' }), {
+        status: 429,
+        headers: { ...cors, 'Content-Type': 'application/json', 'Retry-After': String(retryAfterSeconds) },
       })
     }
 

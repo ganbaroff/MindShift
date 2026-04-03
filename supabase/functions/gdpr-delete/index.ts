@@ -92,6 +92,23 @@ Deno.serve(async (req: Request) => {
 
     const clearedTables: string[] = []
 
+    // Revoke Google OAuth tokens before deletion (best-effort)
+    try {
+      const { data: tokenRow } = await adminClient
+        .from('google_tokens')
+        .select('refresh_token, access_token')
+        .eq('user_id', userId)
+        .single()
+      if (tokenRow?.refresh_token) {
+        await fetch(`https://oauth2.googleapis.com/revoke?token=${tokenRow.refresh_token}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        }).catch(() => {/* best-effort */})
+      }
+    } catch {
+      // No tokens to revoke — continue
+    }
+
     for (const table of tables) {
       const { error } = await adminClient
         .from(table)

@@ -32,7 +32,13 @@ async function verifyStripeSignature(body: string, signature: string, secret: st
   )
   const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(payload))
   const computed = Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('')
-  return computed === v1
+  // Constant-time comparison to prevent timing side-channel attacks
+  const a = new TextEncoder().encode(computed)
+  const b = new TextEncoder().encode(v1)
+  if (a.length !== b.length) return false
+  let diff = 0
+  for (let i = 0; i < a.length; i++) diff |= a[i] ^ b[i]
+  return diff === 0
 }
 
 Deno.serve(async (req: Request) => {

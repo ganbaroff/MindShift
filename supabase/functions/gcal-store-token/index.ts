@@ -6,6 +6,7 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { getCorsHeaders } from '../_shared/cors.ts'
+import { checkDbRateLimit } from '../_shared/rateLimit.ts'
 
 Deno.serve(async (req) => {
   const cors = getCorsHeaders(req)
@@ -31,6 +32,21 @@ Deno.serve(async (req) => {
     if (authError || !user) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401, headers: { ...cors, 'Content-Type': 'application/json' },
+      })
+    }
+
+    // ── Rate limit (10/day — token store is a one-time-per-auth action) ──────
+    const { allowed, retryAfterSeconds } = await checkDbRateLimit(
+      supabase, user.id, false, {
+        fnName: 'gcal-store-token',
+        limitFree: 10,
+        windowMs: 86_400_000,
+      }
+    )
+    if (!allowed) {
+      return new Response(JSON.stringify({ error: 'Rate limit exceeded' }), {
+        status: 429,
+        headers: { ...cors, 'Content-Type': 'application/json', 'Retry-After': String(retryAfterSeconds) },
       })
     }
 
