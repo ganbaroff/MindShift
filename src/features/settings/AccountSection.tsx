@@ -194,7 +194,7 @@ export function AccountSection() {
         <p className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>
           <button
             onClick={() => navigate('/privacy')}
-            className="underline underline-offset-2 focus-visible:ring-2 focus-visible:ring-[#7B72FF] rounded"
+            className="underline underline-offset-2 focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] rounded"
             style={{ color: 'var(--color-text-muted)' }}
           >
             {t('settings.privacy')}
@@ -202,7 +202,7 @@ export function AccountSection() {
           {' · '}
           <button
             onClick={() => navigate('/terms')}
-            className="underline underline-offset-2 focus-visible:ring-2 focus-visible:ring-[#7B72FF] rounded"
+            className="underline underline-offset-2 focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] rounded"
             style={{ color: 'var(--color-text-muted)' }}
           >
             {t('settings.terms')}
@@ -210,7 +210,7 @@ export function AccountSection() {
           {' · '}
           <button
             onClick={() => navigate('/cookie-policy')}
-            className="underline underline-offset-2 focus-visible:ring-2 focus-visible:ring-[#7B72FF] rounded"
+            className="underline underline-offset-2 focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] rounded"
             style={{ color: 'var(--color-text-muted)' }}
           >
             {t('settings.cookies')}

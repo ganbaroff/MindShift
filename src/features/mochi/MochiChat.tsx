@@ -239,7 +239,7 @@ export function MochiChat({ open, onClose }: MochiChatProps) {
                 </div>
                 <button
                   onClick={onClose}
-                  className="p-1.5 rounded-lg focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
+                  className="p-1.5 rounded-lg focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
                   style={{ color: 'var(--color-text-muted)' }}
                   aria-label={t('mochi.closeChat')}
                 >
@@ -264,7 +264,7 @@ export function MochiChat({ open, onClose }: MochiChatProps) {
                     </p>
                     <button
                       onClick={() => { onClose(); window.location.href = '/auth' }}
-                      className="px-4 py-2 rounded-xl text-[13px] font-medium focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
+                      className="px-4 py-2 rounded-xl text-[13px] font-medium focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
                       style={{
                         background: 'linear-gradient(135deg, #7B72FF, #4ECDC4)',
                         color: '#FFFFFF',
@@ -274,7 +274,7 @@ export function MochiChat({ open, onClose }: MochiChatProps) {
                     </button>
                     <button
                       onClick={onClose}
-                      className="text-[12px] focus-visible:ring-1 focus-visible:ring-[#7B72FF] rounded px-2 py-1"
+                      className="text-[12px] focus-visible:ring-1 focus-visible:ring-[var(--color-primary)] rounded px-2 py-1"
                       style={{ color: 'var(--color-text-muted)' }}
                     >
                       {t('mochi.maybeLater')}
@@ -338,7 +338,7 @@ export function MochiChat({ open, onClose }: MochiChatProps) {
                     onKeyDown={handleKeyDown}
                     placeholder={atLimit ? t('mochi.inputLimitReached') : t('mochi.inputPlaceholder')}
                     disabled={atLimit || loading}
-                    className="flex-1 px-3 py-2 rounded-xl text-sm outline-none focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
+                    className="flex-1 px-3 py-2 rounded-xl text-sm outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
                     style={{
                       background: 'var(--color-surface-raised)',
                       color: 'var(--color-text-primary)',
@@ -349,7 +349,7 @@ export function MochiChat({ open, onClose }: MochiChatProps) {
                   <button
                     onClick={handleSend}
                     disabled={!input.trim() || atLimit || loading}
-                    className="p-2 rounded-xl shrink-0 focus-visible:ring-2 focus-visible:ring-[#7B72FF] disabled:opacity-30"
+                    className="p-2 rounded-xl shrink-0 focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] disabled:opacity-30"
                     style={{ background: 'var(--color-teal)', color: 'var(--color-bg)' }}
                     aria-label={t('mochi.sendAriaLabel')}
                   >

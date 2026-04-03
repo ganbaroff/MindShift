@@ -134,7 +134,7 @@ export function FocusSetup({
             </div>
             <button
               onClick={() => setShowRoomSheet(true)}
-              className="text-[10px] px-2 py-1 rounded-lg focus-visible:ring-2 focus-visible:ring-[#7B72FF] focus-visible:outline-none"
+              className="text-[10px] px-2 py-1 rounded-lg focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none"
               style={{ background: 'rgba(78,205,196,0.12)', color: 'var(--color-teal)' }}
             >
               {t('focus.viewRoom')}
@@ -156,7 +156,7 @@ export function FocusSetup({
           <button
             onClick={() => handleStart()}
             aria-label="Start focus session"
-            className="w-full py-4 rounded-2xl font-bold text-base transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[#7B72FF] focus-visible:outline-none"
+            className="w-full py-4 rounded-2xl font-bold text-base transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none"
             style={{
               background: 'linear-gradient(135deg, #7B72FF, #8B7FF7)',
               color: 'white',
@@ -168,7 +168,7 @@ export function FocusSetup({
           <button
             onClick={() => setShowBreathwork(true)}
             aria-label="Start focus session with breathing ritual"
-            className="w-full py-2 text-[12px] focus-visible:ring-2 focus-visible:ring-[#7B72FF] focus-visible:outline-none"
+            className="w-full py-2 text-[12px] focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none"
             style={{ color: 'var(--color-text-muted)' }}
           >
             {t('focus.breatheFirst')}
@@ -186,7 +186,7 @@ export function FocusSetup({
           {room.status === 'idle' && (
             <button
               onClick={() => setShowRoomSheet(true)}
-              className="w-full py-1.5 text-[12px] flex items-center justify-center gap-1.5 focus-visible:ring-2 focus-visible:ring-[#7B72FF] focus-visible:outline-none"
+              className="w-full py-1.5 text-[12px] flex items-center justify-center gap-1.5 focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none"
               style={{ color: 'var(--color-text-muted)' }}
             >
               {t('focus.focusWithSomeone')}

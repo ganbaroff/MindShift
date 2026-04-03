@@ -83,7 +83,7 @@ export default function ProgressPage() {
           {/* Session Log link */}
           <Link
             to="/history"
-            className="flex items-center justify-between px-4 py-3 rounded-2xl transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
+            className="flex items-center justify-between px-4 py-3 rounded-2xl transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
             style={{
               backgroundColor: 'var(--color-surface-card)',
               border: '1px solid rgba(255,255,255,0.05)',

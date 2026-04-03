@@ -111,7 +111,7 @@ export const TodayMorningPlan = memo(function TodayMorningPlan({
           {nextTasksCount > 0 ? (
             <button
               onClick={() => navigate('/tasks')}
-              className="mx-auto px-4 py-2 rounded-xl text-[13px] font-medium focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
+              className="mx-auto px-4 py-2 rounded-xl text-[13px] font-medium focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
               style={{
                 background: 'rgba(78,205,196,0.10)',
                 color: 'var(--color-teal)',
@@ -124,7 +124,7 @@ export const TodayMorningPlan = memo(function TodayMorningPlan({
           ) : completedTotal === 0 ? (
             <button
               onClick={onAddSample}
-              className="mx-auto px-4 py-2 rounded-xl text-[13px] font-medium focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
+              className="mx-auto px-4 py-2 rounded-xl text-[13px] font-medium focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
               style={{
                 background: 'rgba(123,114,255,0.12)',
                 color: 'var(--color-primary)',

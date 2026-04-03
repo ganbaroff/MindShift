@@ -89,7 +89,7 @@ export function FocusSoundPicker({ focusAnchor }: FocusSoundPickerProps) {
       <div className="mx-5 mb-4">
         <button
           onClick={() => setSoundPickerOpen(v => !v)}
-          className="w-full flex items-center justify-between px-4 py-3 rounded-xl focus-visible:ring-2 focus-visible:ring-[#7B72FF] focus-visible:outline-none"
+          className="w-full flex items-center justify-between px-4 py-3 rounded-xl focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none"
           style={{ background: 'var(--color-card)', border: '1px solid var(--color-border-subtle)' }}
           aria-expanded={soundPickerOpen}
           aria-label={t('focus.soundPicker')}
@@ -137,7 +137,7 @@ export function FocusSoundPicker({ focusAnchor }: FocusSoundPickerProps) {
                   <button
                     key={preset.key}
                     onClick={() => handleSoundPick(preset.key)}
-                    className="flex flex-col items-center gap-1 py-2.5 rounded-xl text-center focus-visible:ring-2 focus-visible:ring-[#7B72FF] focus-visible:outline-none"
+                    className="flex flex-col items-center gap-1 py-2.5 rounded-xl text-center focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none"
                     style={{
                       background: focusAnchor === preset.key ? 'rgba(78,205,196,0.15)' : 'var(--color-card)',
                       border: focusAnchor === preset.key
@@ -160,7 +160,7 @@ export function FocusSoundPicker({ focusAnchor }: FocusSoundPickerProps) {
                 {/* None / off option */}
                 <button
                   onClick={() => handleSoundPick(null)}
-                  className="flex flex-col items-center gap-1 py-2.5 rounded-xl text-center focus-visible:ring-2 focus-visible:ring-[#7B72FF] focus-visible:outline-none"
+                  className="flex flex-col items-center gap-1 py-2.5 rounded-xl text-center focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none"
                   style={{
                     background: !focusAnchor ? 'rgba(139,139,167,0.15)' : 'var(--color-card)',
                     border: !focusAnchor

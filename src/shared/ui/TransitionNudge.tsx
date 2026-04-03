@@ -64,7 +64,7 @@ function TransitionNudgeInner({ nextTask, onFocus, onDismiss }: TransitionNudgeP
       )}
       <button
         onClick={onDismiss}
-        className="shrink-0 text-[10px] px-1 focus-visible:ring-1 focus-visible:ring-[#7B72FF] rounded"
+        className="shrink-0 text-[10px] px-1 focus-visible:ring-1 focus-visible:ring-[var(--color-primary)] rounded"
         style={{ color: 'var(--color-text-muted)' }}
         aria-label="Dismiss"
       >

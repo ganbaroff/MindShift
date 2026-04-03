@@ -73,7 +73,7 @@ export function FocusDurationPicker({
               onClick={() => { setSelectedDuration(min); setShowCustom(false) }}
               aria-pressed={isActive}
               aria-label={`${min} minutes${isRecommended ? ' (recommended)' : ''}`}
-              className="flex-1 py-3 rounded-xl font-semibold text-sm transition-all duration-200 relative focus-visible:ring-2 focus-visible:ring-[#7B72FF] focus-visible:outline-none"
+              className="flex-1 py-3 rounded-xl font-semibold text-sm transition-all duration-200 relative focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none"
               style={{
                 background: isActive ? 'var(--color-primary-alpha)' : 'var(--color-card)',
                 border:     `1.5px solid ${isActive ? 'var(--color-primary)' : 'var(--color-border-subtle)'}`,
@@ -97,7 +97,7 @@ export function FocusDurationPicker({
         <button
           onClick={() => setShowCustom(true)}
           aria-label="Custom duration"
-          className="flex-1 py-3 rounded-xl font-semibold text-sm transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[#7B72FF] focus-visible:outline-none"
+          className="flex-1 py-3 rounded-xl font-semibold text-sm transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none"
           style={{
             background: showCustom ? 'var(--color-primary-alpha)' : 'var(--color-card)',
             border:     `1.5px solid ${showCustom ? 'var(--color-primary)' : 'var(--color-border-subtle)'}`,
@@ -129,7 +129,7 @@ export function FocusDurationPicker({
             }}
             placeholder={t('focus.minutesPlaceholder')}
             autoFocus
-            className="flex-1 px-4 py-2.5 rounded-xl text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
+            className="flex-1 px-4 py-2.5 rounded-xl text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
             style={{
               background: 'var(--color-card)',
               border: '1.5px solid var(--color-primary)',

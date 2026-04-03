@@ -161,7 +161,7 @@ export function AppShell() {
       {!isInFocus && (
         <motion.button
           onClick={handleMochiOpen}
-          className="fixed z-30 rounded-full focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
+          className="fixed z-30 rounded-full focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
           style={{
             right: 16,
             bottom: 'calc(176px + env(safe-area-inset-bottom))',

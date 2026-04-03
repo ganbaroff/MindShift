@@ -205,7 +205,7 @@ export default function TodayPage() {
           <div ref={energyPickerRef} className="relative">
             <button
               onClick={() => setShowEnergyPicker(v => !v)}
-              className="flex items-center gap-1 px-2.5 py-1 min-h-[44px] rounded-xl focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
+              className="flex items-center gap-1 px-2.5 py-1 min-h-[44px] rounded-xl focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
               style={{ background: 'rgba(78,205,196,0.1)' }}
               aria-label={`Energy level ${energyLevel} of 5 — tap to update`}
               aria-expanded={showEnergyPicker}
@@ -229,7 +229,7 @@ export default function TodayPage() {
                     <button
                       key={i}
                       onClick={() => { setEnergyLevel((i + 1) as import('@/types').EnergyLevel); setShowEnergyPicker(false) }}
-                      className="flex flex-col items-center gap-0.5 px-2 py-1 rounded-xl focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
+                      className="flex flex-col items-center gap-0.5 px-2 py-1 rounded-xl focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
                       style={{
                         background: energyLevel === i + 1 ? 'rgba(78,205,196,0.15)' : 'transparent',
                       }}
@@ -330,7 +330,7 @@ export default function TodayPage() {
         {/* Focus CTA */}
         <motion.button
           onClick={() => { logEvent('focus_cta_tapped', { has_task: firstTask ? 1 : 0 }); navigate('/focus') }}
-          className="w-full py-3.5 rounded-2xl flex items-center justify-center gap-2 font-semibold text-[15px] focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
+          className="w-full py-3.5 rounded-2xl flex items-center justify-center gap-2 font-semibold text-[15px] focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
           style={{ background: 'linear-gradient(135deg, var(--color-primary), var(--color-teal))', color: '#FFFFFF' }}
           whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
           aria-label={firstTask ? t('today.focusOn', { title: firstTask.title }) : t('today.startFocus')}
@@ -344,7 +344,7 @@ export default function TodayPage() {
 
         <button
           onClick={() => navigate('/progress')}
-          className="w-full py-3 rounded-xl text-[12px] font-medium text-center focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
+          className="w-full py-3 rounded-xl text-[12px] font-medium text-center focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
           style={{ color: 'var(--color-text-muted)' }}
         >
           {t('today.viewProgress')}

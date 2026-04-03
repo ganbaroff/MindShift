@@ -119,7 +119,7 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
           </h2>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg focus-visible:ring-2 focus-visible:ring-[#7B72FF] focus-visible:ring-offset-1"
+            className="p-1.5 rounded-lg focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-1"
             style={{ color: 'var(--color-text-muted)' }}
             aria-label={t('common.close')}
           >
@@ -137,7 +137,7 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
             <motion.button
               whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
               onClick={handleCreate}
-              className="w-full py-3.5 rounded-2xl font-semibold text-[14px] focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
+              className="w-full py-3.5 rounded-2xl font-semibold text-[14px] focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
               style={{ background: 'linear-gradient(135deg, #7B72FF, #8B7FF7)', color: '#fff' }}
             >
               {t('focusRoom.createRoom')} ✦
@@ -146,7 +146,7 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
             <motion.button
               whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
               onClick={() => setMode('join')}
-              className="w-full py-3 rounded-2xl font-medium text-[14px] focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
+              className="w-full py-3 rounded-2xl font-medium text-[14px] focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
               style={{ background: 'var(--color-surface-raised)', border: '1px solid rgba(255,255,255,0.06)', color: 'var(--color-text-primary)' }}
             >
               {t('focusRoom.joinWithCode')}
@@ -163,7 +163,7 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
               onChange={e => setCodeInput(e.target.value.toUpperCase().slice(0, 6))}
               placeholder={t('focusRoom.codePlaceholder')}
               maxLength={6}
-              className="w-full rounded-xl px-4 h-12 text-center text-[20px] font-mono font-bold outline-none focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
+              className="w-full rounded-xl px-4 h-12 text-center text-[20px] font-mono font-bold outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
               style={{
                 background: 'var(--color-surface-raised)',
                 border: '1.5px solid rgba(123,114,255,0.35)',
@@ -176,14 +176,14 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
               whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
               onClick={handleJoin}
               disabled={codeInput.trim().length < 4}
-              className="w-full py-3.5 rounded-2xl font-semibold text-[14px] disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
+              className="w-full py-3.5 rounded-2xl font-semibold text-[14px] disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
               style={{ background: 'linear-gradient(135deg, #7B72FF, #8B7FF7)', color: '#fff' }}
             >
               {t('focusRoom.joinRoom')}
             </motion.button>
             <button
               onClick={() => setMode('pick')}
-              className="w-full py-1.5 text-[12px] focus-visible:ring-2 focus-visible:ring-[#7B72FF] rounded-lg"
+              className="w-full py-1.5 text-[12px] focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] rounded-lg"
               style={{ color: 'var(--color-text-muted)' }}
             >
               {t('focusRoom.back')}
@@ -215,7 +215,7 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
               </div>
               <button
                 onClick={() => void handleCopy()}
-                className="px-3 py-1.5 rounded-xl text-[12px] font-medium transition-all focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
+                className="px-3 py-1.5 rounded-xl text-[12px] font-medium transition-all focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
                 style={{
                   background: copied ? 'rgba(78,205,196,0.15)' : 'rgba(123,114,255,0.12)',
                   border: `1px solid ${copied ? 'var(--color-teal)' : 'rgba(123,114,255,0.25)'}`,
@@ -256,7 +256,7 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
             <motion.button
               whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
               onClick={handleStart}
-              className="w-full py-3.5 rounded-2xl font-semibold text-[14px] focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
+              className="w-full py-3.5 rounded-2xl font-semibold text-[14px] focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
               style={{ background: 'linear-gradient(135deg, #7B72FF, #4ECDC4)', color: '#fff' }}
             >
               {t('focusRoom.startSession')}
@@ -264,7 +264,7 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
 
             <button
               onClick={() => { room.leave(); setMode('pick') }}
-              className="w-full py-1.5 text-[12px] text-center focus-visible:ring-2 focus-visible:ring-[#7B72FF] rounded-lg"
+              className="w-full py-1.5 text-[12px] text-center focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] rounded-lg"
               style={{ color: 'var(--color-text-muted)' }}
             >
               {t('focusRoom.leaveRoom')}
@@ -279,7 +279,7 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
             <p className="text-[12px]" style={{ color: 'var(--color-text-muted)' }}>{t('focusRoom.checkInternet')}</p>
             <button
               onClick={() => { room.leave(); setMode('pick') }}
-              className="px-4 py-2 rounded-xl text-[13px] focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
+              className="px-4 py-2 rounded-xl text-[13px] focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
               style={{ background: 'rgba(123,114,255,0.12)', border: '1px solid rgba(123,114,255,0.25)', color: 'var(--color-primary)' }}
             >
               {t('focusRoom.tryAgain')}
