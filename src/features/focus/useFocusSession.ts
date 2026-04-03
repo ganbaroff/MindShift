@@ -50,6 +50,7 @@ export interface InterruptBookmark {
 export const PHASE_LABELS: Partial<Record<SessionPhase, string>> = {
   struggle: 'Getting into it... 💪',
   release:  'Finding your flow... 🌊',
+  flow:     'Deep flow 🌊',
   recovery: 'Rest time. You did it! 🌟',
 }
 

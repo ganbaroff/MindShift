@@ -126,8 +126,8 @@ export function AppearanceSection() {
       {/* Accessibility */}
       <Section label={t('settings.accessibility')}>
         <div className="space-y-3">
-          <Toggle checked={reducedStimulation} onChange={setReducedStimulation} label={t('settings.reducedStimulation')} />
-          <Toggle checked={hapticsEnabled} onChange={setHapticsEnabled} label={t('settings.hapticFeedback')} />
+          <Toggle checked={reducedStimulation} onChange={setReducedStimulation} label={t('settings.reducedStimulation')} hint={t('settings.reducedStimulationHint', 'Dims animations and desaturates colours — easier on the eyes and senses.')} />
+          <Toggle checked={hapticsEnabled} onChange={setHapticsEnabled} label={t('settings.hapticFeedback')} hint={t('settings.hapticFeedbackHint', 'Gentle vibrations on task completion and phase changes (Android only).')} />
         </div>
       </Section>
 
