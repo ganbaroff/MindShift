@@ -110,7 +110,7 @@ export default function TasksPage() {
         initial={shouldAnimate ? { opacity: 0, y: 4 } : false}
         animate={shouldAnimate ? { opacity: 1, y: 0 } : false}
         className="mt-3 flex items-center gap-2 px-3 rounded-2xl h-10"
-        style={{ backgroundColor: 'var(--color-surface-card)', border: '1px solid rgba(255,255,255,0.06)' }}
+        style={{ backgroundColor: 'var(--color-surface-card)', border: '1px solid var(--color-border-subtle)' }}
       >
         <Search size={14} style={{ color: 'var(--color-text-muted)', flexShrink: 0 }} />
         <input
@@ -144,7 +144,7 @@ export default function TasksPage() {
               <button
                 onClick={() => { setPoolsExplained() }}
                 className="text-[11px] px-2 py-0.5 rounded-lg"
-                style={{ color: 'var(--color-text-muted)', backgroundColor: 'rgba(255,255,255,0.05)' }}
+                style={{ color: 'var(--color-text-muted)', backgroundColor: 'var(--color-border-subtle)' }}
                 aria-label="Dismiss"
               >
                 {t('generic.gotIt', { defaultValue: 'Got it' })}
@@ -189,7 +189,7 @@ export default function TasksPage() {
                     const monday = nextMondayISO()
                     pastDateTasks.forEach(task => setTaskDueDate(task.id, monday, null))
                   }}
-                  className="text-[11px] font-medium px-2 py-1 rounded-lg focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
+                  className="text-[11px] font-medium px-2 py-1 rounded-lg focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
                   style={{ background: 'rgba(245,158,11,0.15)', color: 'var(--color-gold)' }}
                   aria-label="Move overdue tasks to next Monday"
                 >
@@ -197,7 +197,7 @@ export default function TasksPage() {
                 </button>
                 <button
                   onClick={() => navigate('/calendar')}
-                  className="text-[10px] focus-visible:ring-2 focus-visible:ring-[#7B72FF] rounded"
+                  className="text-[10px] focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] rounded"
                   style={{ color: 'var(--color-text-muted)' }}
                   aria-label="Open calendar to reschedule"
                 >
@@ -213,7 +213,7 @@ export default function TasksPage() {
           <div className="flex items-center gap-2 mb-2">
             <span className="text-[11px] uppercase tracking-widest font-semibold" style={{ color: 'var(--color-primary)' }}>{t('tasks.now')}</span>
             <span className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>{nowTasks.length}/{nowMax}</span>
-            {nowTasks.length > 1 && <span className="text-[10px]" style={{ color: '#3A3B52' }}>{t('tasks.holdToReorder')}</span>}
+            {nowTasks.length > 1 && <span className="text-[10px]" style={{ color: 'var(--color-border)' }}>{t('tasks.holdToReorder')}</span>}
           </div>
           {nowTasks.length === 0 ? (
             <EmptyState
@@ -292,7 +292,7 @@ export default function TasksPage() {
         </CollapsibleSection>
 
         {/* Done */}
-        <CollapsibleSection label={`✓ ${t('tasks.doneRecently')}`} count={doneTasks.length} open={showDone} onToggle={() => setShowDone(!showDone)} labelColor="#4ECDC4" shouldAnimate={shouldAnimate}>
+        <CollapsibleSection label={`✓ ${t('tasks.doneRecently')}`} count={doneTasks.length} open={showDone} onToggle={() => setShowDone(!showDone)} labelColor="var(--color-teal)" shouldAnimate={shouldAnimate}>
           <div className="space-y-1 mt-2">
             {doneTasks.map(t => {
               const diffConfig = DIFFICULTY_MAP[t.difficulty ?? 1];
