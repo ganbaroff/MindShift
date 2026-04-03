@@ -28,7 +28,7 @@ export function XpCard() {
       <div className="flex items-center gap-3">
         <div
           className="w-14 h-14 rounded-full flex items-center justify-center text-[24px] shrink-0"
-          style={{ background: 'linear-gradient(135deg, #7B72FF, #4ECDC4)', padding: 2 }}
+          style={{ background: 'linear-gradient(135deg, var(--color-primary), var(--color-teal))', padding: 2 }}
         >
           <div
             className="w-full h-full rounded-full flex items-center justify-center"

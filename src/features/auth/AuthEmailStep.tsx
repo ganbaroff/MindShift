@@ -67,8 +67,8 @@ export function AuthEmailStep({
           <motion.div
             className="w-5 h-5 rounded-md flex items-center justify-center"
             animate={{
-              background: consented ? '#7B72FF' : 'rgba(25,28,48,0.8)',
-              borderColor: consented ? '#7B72FF' : '#3D4060',
+              background: consented ? 'var(--color-primary)' : 'rgba(25,28,48,0.8)',
+              borderColor: consented ? 'var(--color-primary)' : '#3D4060',
               scale: consented ? [1, 1.15, 1] : 1,
             }}
             transition={{ duration: 0.2 }}
