@@ -133,7 +133,7 @@ export const NatureBuffer = memo(function NatureBuffer({
             style={{ background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.25)' }}
           >
             <span className="text-base leading-none">💎</span>
-            <span className="text-sm font-semibold" style={{ color: '#F59E0B' }}>+{crystalEarned}</span>
+            <span className="text-sm font-semibold" style={{ color: 'var(--color-gold)' }}>+{crystalEarned}</span>
             <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>{t('focus.crystalsEarned')}</span>
           </motion.div>
         )}

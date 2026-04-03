@@ -22,7 +22,7 @@ function StorageRow({ name, purpose, duration, type }: {
         <span className="text-xs px-2 py-0.5 rounded" style={{ background: 'var(--color-surface-card)', color: 'var(--color-teal)' }}>{type}</span>
       </div>
       <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>{purpose}</p>
-      <p className="text-xs" style={{ color: '#6B6B8A' }}>Expires: {duration}</p>
+      <p className="text-xs" style={{ color: 'var(--color-text-subtle)' }}>Expires: {duration}</p>
     </div>
   )
 }

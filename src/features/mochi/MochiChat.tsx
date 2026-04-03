@@ -266,7 +266,7 @@ export function MochiChat({ open, onClose }: MochiChatProps) {
                       onClick={() => { onClose(); window.location.href = '/auth' }}
                       className="px-4 py-2 rounded-xl text-[13px] font-medium focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
                       style={{
-                        background: 'linear-gradient(135deg, #7B72FF, #4ECDC4)',
+                        background: 'linear-gradient(135deg, var(--color-primary), var(--color-teal))',
                         color: '#FFFFFF',
                       }}
                     >

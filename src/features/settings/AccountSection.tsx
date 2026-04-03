@@ -123,7 +123,7 @@ export function AccountSection() {
         <button
           onClick={() => { setShowDeleteConfirm(true); setDeleteConfirmText('') }}
           className="text-[13px] font-medium w-full text-center mt-2"
-          style={{ color: '#F59E0B' }}
+          style={{ color: 'var(--color-gold)' }}
         >
           {t('settings.deleteAccount')}
         </button>
@@ -171,7 +171,7 @@ export function AccountSection() {
                 onClick={handleDeleteAccount}
                 disabled={deleteLoading || (!isGuest && deleteConfirmText !== DELETE_WORD)}
                 className="flex-1 h-9 rounded-xl text-[13px] font-medium disabled:opacity-50"
-                style={{ backgroundColor: 'rgba(245,158,11,0.15)', color: '#F59E0B' }}
+                style={{ backgroundColor: 'rgba(245,158,11,0.15)', color: 'var(--color-gold)' }}
               >
                 {deleteLoading ? t('settings.deleting') : t('settings.yesDelete')}
               </button>

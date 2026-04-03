@@ -53,14 +53,14 @@ function FeatureHintInner({ id, text, icon, delay = 1000 }: FeatureHintProps) {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={shouldAnimate ? { opacity: 0, y: -4, scale: 0.95 } : {}}
           transition={t()}
-          className="w-full px-3 py-2 rounded-xl text-left cursor-pointer focus-visible:ring-2 focus-visible:ring-[#4ECDC4]"
+          className="w-full px-3 py-2 rounded-xl text-left cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--color-teal)]"
           style={{
             background: 'rgba(78,205,196,0.08)',
             border: '1px solid rgba(78,205,196,0.15)',
           }}
           aria-label="Dismiss hint"
         >
-          <p className="text-[12px] leading-relaxed" style={{ color: '#4ECDC4' }}>
+          <p className="text-[12px] leading-relaxed" style={{ color: 'var(--color-teal)' }}>
             {icon && <span className="mr-1">{icon}</span>}
             {text}
           </p>

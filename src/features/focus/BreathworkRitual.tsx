@@ -135,8 +135,8 @@ export function BreathworkRitual({ onComplete, onSkip }: BreathworkRitualProps) 
             animate={{
               width:           i <= cycle ? 20 : 6,
               height:          6,
-              backgroundColor: i < cycle  ? '#4ECDC4'
-                             : i === cycle ? '#7B72FF'
+              backgroundColor: i < cycle  ? 'var(--color-teal)'
+                             : i === cycle ? 'var(--color-primary)'
                              : 'rgba(255,255,255,0.12)',
             }}
             transition={{ duration: 0.3 }}
@@ -161,7 +161,7 @@ export function BreathworkRitual({ onComplete, onSkip }: BreathworkRitualProps) 
           className="rounded-full flex items-center justify-center"
           animate={{
             scale: shouldAnimate ? circleScale : 1,
-            backgroundColor: phase === 'inhale' ? '#7B72FF' : '#4ECDC4',
+            backgroundColor: phase === 'inhale' ? 'var(--color-primary)' : 'var(--color-teal)',
           }}
           transition={{ duration: phase === 'inhale' ? INHALE_MS / 1000 : EXHALE_MS / 1000, ease: 'easeInOut' }}
           style={{ width: 120, height: 120 }}

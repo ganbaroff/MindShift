@@ -130,7 +130,7 @@ export const WeeklyPlanning = memo(function WeeklyPlanning({ onDismiss }: Weekly
               onClick={() => setStep(1)}
               className="w-full py-3.5 rounded-2xl font-semibold text-sm"
               style={{
-                background: 'linear-gradient(135deg, #7B72FF, #8B7FF7)',
+                background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-light))',
                 color: '#fff',
                 boxShadow: '0 8px 24px rgba(123,114,255,0.25)',
               }}
@@ -225,7 +225,7 @@ export const WeeklyPlanning = memo(function WeeklyPlanning({ onDismiss }: Weekly
               onClick={handleFinish}
               className="w-full py-3.5 rounded-2xl font-semibold text-sm"
               style={{
-                background: 'linear-gradient(135deg, #7B72FF, #4ECDC4)',
+                background: 'linear-gradient(135deg, var(--color-primary), var(--color-teal))',
                 color: '#fff',
                 boxShadow: '0 8px 24px rgba(123,114,255,0.22)',
               }}

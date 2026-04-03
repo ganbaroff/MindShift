@@ -119,7 +119,7 @@ export function AudioSection() {
             setEngineVolume(v)
           }}
           className="w-full h-1.5 rounded-full appearance-none cursor-pointer"
-          style={{ accentColor: '#7B72FF' }}
+          style={{ accentColor: 'var(--color-primary)' }}
           aria-label="Audio volume"
         />
       </div>

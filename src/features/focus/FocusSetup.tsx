@@ -158,7 +158,7 @@ export function FocusSetup({
             aria-label="Start focus session"
             className="w-full py-4 rounded-2xl font-bold text-base transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none"
             style={{
-              background: 'linear-gradient(135deg, #7B72FF, #8B7FF7)',
+              background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-light))',
               color: 'white',
               boxShadow: '0 8px 32px rgba(123,114,255,0.3)',
             }}

@@ -49,7 +49,7 @@ export function FocusHardStop({ onEndAndRest, onKeepGoing }: FocusHardStopProps)
           onClick={onEndAndRest}
           className="w-full py-3.5 rounded-2xl font-semibold text-sm mb-3 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2 focus-visible:outline-none"
           style={{
-            background: 'linear-gradient(135deg, #7B72FF, #8B7FF7)',
+            background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-light))',
             color: 'white',
             boxShadow: '0 8px 24px rgba(123,114,255,0.28)',
           }}
