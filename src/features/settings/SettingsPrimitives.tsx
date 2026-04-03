@@ -50,16 +50,20 @@ export function Chip({
 }
 
 export function Toggle({
-  checked, onChange, label,
+  checked, onChange, label, hint,
 }: {
   checked: boolean
   onChange: (v: boolean) => void
   label: string
+  hint?: string
 }) {
   const { shouldAnimate } = useMotion()
   return (
-    <button onClick={() => onChange(!checked)} className="flex items-center justify-between w-full">
-      <span className="text-[14px]" style={{ color: 'var(--color-text-primary)' }}>{label}</span>
+    <button onClick={() => onChange(!checked)} className="flex items-center justify-between w-full gap-3">
+      <span className="flex flex-col items-start text-left">
+        <span className="text-[14px]" style={{ color: 'var(--color-text-primary)' }}>{label}</span>
+        {hint && <span className="text-[11px] mt-0.5 leading-snug" style={{ color: 'var(--color-text-muted)' }}>{hint}</span>}
+      </span>
       <div
         className="w-11 h-6 rounded-full p-0.5 transition-colors"
         style={{ backgroundColor: checked ? 'var(--color-primary)' : 'var(--color-surface-raised)' }}

@@ -105,6 +105,7 @@ export function AccountSection() {
         >
           <span>📬</span>
           <span>{t('settings.sendFeedback')}</span>
+          <span className="ml-auto text-[11px]" style={{ color: 'var(--color-text-muted)' }}>ganbarov.y@gmail.com</span>
         </a>
       </Section>
 

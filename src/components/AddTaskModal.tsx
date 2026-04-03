@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from 'motion/react';
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
+import { toast } from 'sonner';
 import { X, Mic, MicOff, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useStore } from '@/store';
@@ -155,6 +156,7 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
     }
     if (newTask.dueDate && 'Notification' in window && Notification.permission === 'granted') {
       reminders.schedule(newTask, 15);
+      toast('Reminder set', { description: '15 min before due date', duration: 2500, icon: '🔔' });
     }
     onClose();
   };
