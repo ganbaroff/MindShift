@@ -77,6 +77,7 @@ Deno.serve(async (req: Request) => {
       { data: energyLogs },
       { data: behavior },
       { data: subscriptions },
+      { data: googleTokens },
     ] = await Promise.all([
       supabase.from('users').select('*').eq('id', userId).single(),
       supabase.from('tasks').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
@@ -85,6 +86,7 @@ Deno.serve(async (req: Request) => {
       supabase.from('energy_logs').select('*').eq('user_id', userId).order('logged_at', { ascending: false }),
       supabase.from('user_behavior').select('*').eq('user_id', userId).order('date', { ascending: false }),
       supabase.from('subscriptions').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
+      supabase.from('google_tokens').select('calendar_id, expires_at, created_at, updated_at').eq('user_id', userId).maybeSingle(),
     ])
 
     // ── Build export package ──────────────────────────────────────────────────
@@ -154,6 +156,12 @@ Deno.serve(async (req: Request) => {
         endsAt: s.ends_at,
         active: s.active,
       })),
+      googleCalendar: googleTokens ? {
+        calendarId: googleTokens.calendar_id,
+        connectedAt: googleTokens.created_at,
+        lastUpdated: googleTokens.updated_at,
+        hasRefreshToken: !!googleTokens.refresh_token,
+      } : null,
     }
 
     return new Response(
