@@ -47,6 +47,7 @@
   "tasks": {
     "title": "Your Tasks",
     "tasksInPlay": "{{count}} tasks in play",
+    "lowEnergyHint": "Low energy — focus on one thing from your NOW list. The rest can wait.",
     "search": "Search tasks...",
     "poolGuide": {
       "title": "How tasks work here",
@@ -245,7 +246,10 @@
     "soundPlaying": "playing",
     "volume": "Volume",
     "reducedStimulation": "Reduced stimulation",
+    "reducedStimulationHint": "Dims animations and desaturates colours — easier on the eyes and senses.",
     "hapticFeedback": "Haptic feedback",
+    "hapticFeedbackHint": "Gentle vibrations on task completion and phase changes (Android only).",
+    "languageSetAuto": "Language set to auto (follows system)",
     "pauseForDay": "Pause for 24h",
     "remindersEnabled": "Reminders enabled",
     "remindersBlocked": "Blocked by browser — enable in browser settings to get due-date nudges.",
