@@ -192,7 +192,7 @@ function QuickCaptureInner({ onSubmit, onExpand, placeholder }: QuickCaptureProp
         {voiceSupported && !showSubmit && (
           <button
             onClick={handleVoiceTap}
-            className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
+            className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
             style={{
               background: listening ? 'rgba(78,205,196,0.2)' : 'transparent',
               border: listening ? '1px solid rgba(78,205,196,0.4)' : '1px solid rgba(123,114,255,0.15)',
@@ -209,7 +209,7 @@ function QuickCaptureInner({ onSubmit, onExpand, placeholder }: QuickCaptureProp
               animate={{ scale: 1 }}
               exit={shouldAnimate ? { scale: 0 } : {}}
               onClick={handleSubmit}
-              className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
+              className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
               style={{ background: 'var(--color-teal)' }}
               aria-label="Add task"
             >
@@ -242,7 +242,7 @@ function QuickCaptureInner({ onSubmit, onExpand, placeholder }: QuickCaptureProp
               {onExpand && (
                 <button
                   onClick={handleExpand}
-                  className="text-[11px] flex items-center gap-0.5 px-1.5 py-0.5 rounded-lg focus-visible:ring-1 focus-visible:ring-[#7B72FF]"
+                  className="text-[11px] flex items-center gap-0.5 px-1.5 py-0.5 rounded-lg focus-visible:ring-1 focus-visible:ring-[var(--color-primary)]"
                   style={{ color: 'var(--color-text-muted)' }}
                 >
                   <ChevronDown size={10} />

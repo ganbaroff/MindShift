@@ -29,7 +29,7 @@ export function ShareWeekButton() {
       whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
       onClick={() => void handleShareWeek()}
       aria-label={t('progress.shareThisWeek')}
-      className="w-full py-3 rounded-2xl text-sm font-medium flex items-center justify-center gap-2 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
+      className="w-full py-3 rounded-2xl text-sm font-medium flex items-center justify-center gap-2 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
       style={{
         background: 'rgba(123,114,255,0.10)',
         border: '1px solid rgba(123,114,255,0.20)',

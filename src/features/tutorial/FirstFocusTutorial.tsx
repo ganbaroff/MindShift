@@ -145,7 +145,7 @@ export function FirstFocusTutorial() {
         {/* Skip button — always visible */}
         <button
           onClick={handleSkip}
-          className="absolute top-6 right-6 text-[13px] font-medium px-3 py-1.5 rounded-xl focus-visible:ring-2 focus-visible:ring-[#7B72FF] focus-visible:outline-none"
+          className="absolute top-6 right-6 text-[13px] font-medium px-3 py-1.5 rounded-xl focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none"
           style={{ color: 'var(--color-text-muted)', background: 'var(--color-surface-raised)' }}
           aria-label={t('tutorial.skip')}
         >
@@ -178,7 +178,7 @@ export function FirstFocusTutorial() {
                 </p>
                 <button
                   onClick={handleStartTimer}
-                  className="w-full py-3.5 rounded-2xl text-[15px] font-semibold transition-all focus-visible:ring-2 focus-visible:ring-[#7B72FF] focus-visible:outline-none"
+                  className="w-full py-3.5 rounded-2xl text-[15px] font-semibold transition-all focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none"
                   style={{ background: 'var(--color-primary)', color: '#FFFFFF' }}
                 >
                   {t('tutorial.startButton')}
@@ -254,7 +254,7 @@ export function FirstFocusTutorial() {
                   setTimerRunning(false)
                   setStep('celebrate')
                 }}
-                className="text-[12px] focus-visible:ring-2 focus-visible:ring-[#7B72FF] rounded-lg px-2 py-1"
+                className="text-[12px] focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] rounded-lg px-2 py-1"
                 style={{ color: 'var(--color-text-subtle)' }}
               >
                 {t('tutorial.skipTimer')}
@@ -343,7 +343,7 @@ export function FirstFocusTutorial() {
 
               <button
                 onClick={handleComplete}
-                className="w-full py-3.5 rounded-2xl text-[15px] font-semibold focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
+                className="w-full py-3.5 rounded-2xl text-[15px] font-semibold focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
                 style={{ background: 'var(--color-primary)', color: '#FFFFFF' }}
               >
                 {t('tutorial.startForReal')}

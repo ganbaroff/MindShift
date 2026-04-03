@@ -63,7 +63,7 @@ export function SortableTaskCard({ task, index, onDone, onPark, onRemove, onMove
                 <button
                   key={pool}
                   onClick={() => { onMove(task.id, pool); setShowMoveOptions(false) }}
-                  className="text-[10px] px-2 py-0.5 rounded-lg focus-visible:ring-1 focus-visible:ring-[#7B72FF]"
+                  className="text-[10px] px-2 py-0.5 rounded-lg focus-visible:ring-1 focus-visible:ring-[var(--color-primary)]"
                   style={{ background: 'rgba(123,114,255,0.08)', color: 'var(--color-text-muted)' }}
                 >
                   {emoji} {label}
@@ -81,7 +81,7 @@ export function SortableTaskCard({ task, index, onDone, onPark, onRemove, onMove
           ) : (
             <button
               onClick={() => setShowMoveOptions(true)}
-              className="text-[10px] px-2 py-0.5 focus-visible:ring-1 focus-visible:ring-[#7B72FF] rounded"
+              className="text-[10px] px-2 py-0.5 focus-visible:ring-1 focus-visible:ring-[var(--color-primary)] rounded"
               style={{ color: '#3A3B52' }}
             >
               {t('tasks.move')}

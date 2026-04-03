@@ -156,7 +156,7 @@ export default function HistoryPage() {
                 key={chip.key}
                 onClick={() => setPhaseFilter(chip.key)}
                 aria-pressed={phaseFilter === chip.key}
-                className="px-3 py-1 rounded-xl text-[12px] font-medium focus-visible:ring-2 focus-visible:ring-[#7B72FF] transition-colors"
+                className="px-3 py-1 rounded-xl text-[12px] font-medium focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] transition-colors"
                 style={{
                   background: phaseFilter === chip.key ? 'rgba(78,205,196,0.15)' : 'var(--color-surface-card)',
                   border: `1px solid ${phaseFilter === chip.key ? 'var(--color-teal)' : 'rgba(255,255,255,0.06)'}`,

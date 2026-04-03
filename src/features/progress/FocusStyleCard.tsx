@@ -111,7 +111,7 @@ export function FocusStyleCard({ sessions }: FocusStyleCardProps) {
           <button
             onClick={handleAcceptEvolution}
             aria-label={t('progress.update')}
-            className="text-[11px] font-semibold px-3 py-1.5 rounded-xl shrink-0 transition-all duration-150 focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
+            className="text-[11px] font-semibold px-3 py-1.5 rounded-xl shrink-0 transition-all duration-150 focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
             style={{
               background: 'rgba(245,158,11,0.15)',
               border: '1px solid rgba(245,158,11,0.30)',

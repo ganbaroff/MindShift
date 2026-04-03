@@ -26,7 +26,7 @@ export function SpicinessPicker({ value, onChange }: SpicinesPickerProps) {
           key={v}
           type="button"
           onClick={() => onChange(v)}
-          className="flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl transition-all duration-150 focus-visible:ring-2 focus-visible:ring-[#7B72FF] focus-visible:outline-none"
+          className="flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl transition-all duration-150 focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none"
           style={{
             background: value === v ? 'rgba(123,114,255,0.18)' : 'var(--color-surface-card)',
             border: `1px solid ${value === v ? 'var(--color-primary)' : 'rgba(255,255,255,0.06)'}`,

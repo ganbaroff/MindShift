@@ -47,7 +47,7 @@ export function AppearanceSection() {
                 i18n.changeLanguage(code ?? navigator.language.split('-')[0])
                 toast.success(label === t('common.auto') ? t('settings.languageSetAuto') : `${label} selected`, { duration: 2000 })
               }}
-              className="px-3 py-1.5 rounded-xl text-[13px] font-medium focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
+              className="px-3 py-1.5 rounded-xl text-[13px] font-medium focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
               style={{
                 background: userLocale === code ? 'rgba(123,114,255,0.15)' : 'var(--color-surface-raised)',
                 color: userLocale === code ? 'var(--color-primary)' : 'var(--color-text-primary)',
@@ -71,7 +71,7 @@ export function AppearanceSection() {
             <button
               key={key}
               onClick={() => setUserTheme(key)}
-              className="flex-1 px-3 py-2 rounded-xl text-[13px] font-medium focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
+              className="flex-1 px-3 py-2 rounded-xl text-[13px] font-medium focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
               style={{
                 background: userTheme === key ? 'var(--color-primary-alpha)' : 'var(--color-surface-raised)',
                 color: userTheme === key ? 'var(--color-primary)' : 'var(--color-text-primary)',

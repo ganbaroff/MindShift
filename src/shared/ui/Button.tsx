@@ -38,7 +38,7 @@ export function Button({
   // Use centralized motion system (Research #2)
   const { t, shouldAnimate } = useMotion()
 
-  const base = 'relative inline-flex items-center justify-center font-medium rounded-xl transition-colors duration-150 select-none disabled:opacity-50 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1E2136] focus-visible:ring-[#7B72FF]/60 outline-none'
+  const base = 'relative inline-flex items-center justify-center font-medium rounded-xl transition-colors duration-150 select-none disabled:opacity-50 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1E2136] focus-visible:ring-[var(--color-primary)]/60 outline-none'
 
   const variants = {
     primary:   'bg-primary text-white hover:opacity-90 shadow-lg shadow-primary/20',

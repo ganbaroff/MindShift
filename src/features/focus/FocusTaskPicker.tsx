@@ -40,7 +40,7 @@ export function FocusTaskPicker({
         </p>
         <Link
           to="/tasks"
-          className="px-5 py-2.5 rounded-xl text-xs font-semibold transition-all focus-visible:ring-2 focus-visible:ring-[#7B72FF] focus-visible:outline-none"
+          className="px-5 py-2.5 rounded-xl text-xs font-semibold transition-all focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none"
           style={{
             background: 'var(--color-primary-alpha)',
             border: '1.5px solid var(--color-primary)',
@@ -64,7 +64,7 @@ export function FocusTaskPicker({
           onClick={() => setSelectedTask(null)}
           aria-pressed={selectedTask === null}
           aria-label="Open focus — no specific task"
-          className="flex items-center gap-3 p-3 rounded-xl text-left transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[#7B72FF] focus-visible:outline-none"
+          className="flex items-center gap-3 p-3 rounded-xl text-left transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none"
           style={{
             background: selectedTask === null ? 'var(--color-primary-alpha)' : 'var(--color-card)',
             border: `1.5px solid ${selectedTask === null ? 'var(--color-primary)' : 'var(--color-border-subtle)'}`,
@@ -88,7 +88,7 @@ export function FocusTaskPicker({
               onClick={() => setSelectedTask(task)}
               aria-pressed={isSelected}
               aria-label={`Focus on: ${task.title}`}
-              className="flex items-center gap-3 p-3 rounded-xl text-left transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[#7B72FF] focus-visible:outline-none"
+              className="flex items-center gap-3 p-3 rounded-xl text-left transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none"
               style={{
                 background: isSelected ? 'var(--color-primary-alpha)' : 'var(--color-card)',
                 border: `1.5px solid ${isSelected ? 'var(--color-primary)' : 'var(--color-border-subtle)'}`,

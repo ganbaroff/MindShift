@@ -78,7 +78,7 @@ export const TodayEveningRecap = memo(function TodayEveningRecap({
           {tomorrowTasks.length > 3 && (
             <button
               onClick={() => navigate('/tasks')}
-              className="text-[12px] flex items-center gap-1 px-1 focus-visible:ring-2 focus-visible:ring-[#7B72FF] rounded"
+              className="text-[12px] flex items-center gap-1 px-1 focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] rounded"
               style={{ color: 'var(--color-primary)' }}
             >
               {t('today.more', { count: tomorrowTasks.length - 3 })} <ChevronRight size={12} />

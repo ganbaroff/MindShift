@@ -77,7 +77,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           <input
             ref={ref}
             id={id}
-            className={`ms-input focus-visible:ring-2 focus-visible:ring-[#7B72FF] focus-visible:ring-offset-1 focus-visible:ring-offset-[#1E2136] ${className}`}
+            className={`ms-input focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-1 focus-visible:ring-offset-[#1E2136] ${className}`}
             style={inputStyle}
             {...rest}
           />

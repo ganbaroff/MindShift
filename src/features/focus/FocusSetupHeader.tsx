@@ -133,7 +133,7 @@ export function FocusSetupHeader({
                   if (task) setSelectedTask(task)
                   clearBookmark()
                 }}
-                className="flex-1 py-2 rounded-xl text-xs font-semibold focus-visible:ring-2 focus-visible:ring-[#7B72FF] focus-visible:outline-none"
+                className="flex-1 py-2 rounded-xl text-xs font-semibold focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none"
                 style={{
                   background: 'var(--color-primary-alpha)',
                   border: '1.5px solid var(--color-primary)',
@@ -145,7 +145,7 @@ export function FocusSetupHeader({
             )}
             <button
               onClick={clearBookmark}
-              className="py-2 px-4 rounded-xl text-xs focus-visible:ring-2 focus-visible:ring-[#7B72FF] focus-visible:outline-none"
+              className="py-2 px-4 rounded-xl text-xs focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none"
               style={{ color: 'var(--color-muted)', border: '1px solid var(--color-border-subtle)' }}
             >
               {t('focus.dismiss')}

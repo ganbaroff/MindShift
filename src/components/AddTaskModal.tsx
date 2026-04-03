@@ -185,7 +185,7 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
             <div className="w-10 h-1 rounded-full bg-ms-muted/30 mx-auto mb-4" />
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-title text-ms-text">{t('addTask.title')}</h2>
-              <button onClick={handleClose} aria-label="Close modal" className="p-3 text-ms-muted focus-visible:ring-2 focus-visible:ring-[#7B72FF] rounded-xl">
+              <button onClick={handleClose} aria-label="Close modal" className="p-3 text-ms-muted focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] rounded-xl">
                 <X size={20} />
               </button>
             </div>
@@ -206,7 +206,7 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
                     onClick={handleVoiceTap}
                     disabled={voiceState === 'classifying'}
                     aria-label={voiceState === 'listening' ? 'Stop recording' : 'Start voice input'}
-                    className="absolute right-1 top-1/2 -translate-y-1/2 w-11 h-11 rounded-lg flex items-center justify-center transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
+                    className="absolute right-1 top-1/2 -translate-y-1/2 w-11 h-11 rounded-lg flex items-center justify-center transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
                     style={{
                       background: voiceState === 'listening' ? 'rgba(123,114,255,0.25)' : 'rgba(255,255,255,0.04)',
                       color: voiceState === 'listening' ? 'var(--color-primary)' : voiceState === 'classifying' ? 'var(--color-teal)' : 'var(--color-text-muted)',
@@ -289,7 +289,7 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
               <div>
                 {!showNote ? (
                   <button type="button" onClick={() => setShowNote(true)}
-                    className="text-xs flex items-center gap-1 -mt-1 focus-visible:ring-2 focus-visible:ring-[#7B72FF] rounded" style={{ color: 'var(--color-text-muted)' }} aria-expanded={showNote}>
+                    className="text-xs flex items-center gap-1 -mt-1 focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] rounded" style={{ color: 'var(--color-text-muted)' }} aria-expanded={showNote}>
                     {t('addTask.addContext')}
                   </button>
                 ) : (

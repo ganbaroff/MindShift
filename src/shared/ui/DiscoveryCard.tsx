@@ -40,7 +40,7 @@ function DiscoveryCardInner({ discovery, onDismiss }: DiscoveryCardProps) {
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={shouldAnimate ? { opacity: 0, scale: 0.9, y: -8 } : {}}
       transition={transition('expressive')}
-      className="w-full px-3 py-2.5 rounded-xl text-left cursor-pointer focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
+      className="w-full px-3 py-2.5 rounded-xl text-left cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
       style={{
         background: style.bg,
         border: `1px solid ${style.border}`,
