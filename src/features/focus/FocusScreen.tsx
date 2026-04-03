@@ -186,7 +186,7 @@ export default function FocusScreen() {
             exit={shouldAnimate ? { opacity: 0, y: -8 } : {}}
             transition={motionT()}
             className="text-sm mb-6 text-center"
-            style={{ color: isFlow ? 'var(--color-teal)' : 'var(--color-muted)', opacity: isFlow ? 0.6 : 1 }}
+            style={{ color: isFlow ? 'var(--color-teal)' : 'var(--color-muted)', fontWeight: isFlow ? 500 : 400 }}
           >
             {PHASE_LABELS[sessionPhase]}
           </motion.p>

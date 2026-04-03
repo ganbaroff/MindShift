@@ -12,6 +12,7 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { getCorsHeaders } from '../_shared/cors.ts'
+import { checkDbRateLimit } from '../_shared/rateLimit.ts'
 
 const STRIPE_SECRET_KEY = Deno.env.get('STRIPE_SECRET_KEY')
 const STRIPE_PRO_PRICE_ID = Deno.env.get('STRIPE_PRO_PRICE_ID') ?? ''
@@ -38,6 +39,15 @@ Deno.serve(async (req: Request) => {
     if (authError || !user) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401, headers: { ...cors, 'Content-Type': 'application/json' },
+      })
+    }
+
+    const { allowed, retryAfterSeconds } = await checkDbRateLimit(
+      supabase, user.id, false, { fnName: 'create-checkout', freeLimit: 5, proLimit: 20 }
+    )
+    if (!allowed) {
+      return new Response(JSON.stringify({ error: 'Rate limit exceeded', retryAfter: retryAfterSeconds }), {
+        status: 429, headers: { ...cors, 'Content-Type': 'application/json', 'Retry-After': String(retryAfterSeconds) },
       })
     }
 
