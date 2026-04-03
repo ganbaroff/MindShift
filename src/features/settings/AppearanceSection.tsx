@@ -5,10 +5,12 @@
 import { motion } from 'motion/react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 import i18n from '@/i18n'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { useStore } from '@/store'
 import type { UITone } from '@/shared/lib/uiTone'
+import { TONE_DESCRIPTIONS } from '@/shared/lib/uiTone'
 import { Section, Toggle } from './SettingsPrimitives'
 
 export function AppearanceSection() {
@@ -43,6 +45,7 @@ export function AppearanceSection() {
               onClick={() => {
                 setUserLocale(code)
                 i18n.changeLanguage(code ?? navigator.language.split('-')[0])
+                toast.success(label === t('common.auto') ? t('settings.languageSetAuto') : `${label} selected`, { duration: 2000 })
               }}
               className="px-3 py-1.5 rounded-xl text-[13px] font-medium focus-visible:ring-2 focus-visible:ring-[#7B72FF]"
               style={{
@@ -95,7 +98,13 @@ export function AppearanceSection() {
               <motion.button
                 key={tone}
                 whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
-                onClick={() => setUITone(tone)}
+                onClick={() => {
+                  setUITone(tone)
+                  toast(TONE_DESCRIPTIONS[tone], {
+                    duration: 2500,
+                    icon: tone === 'gen_z' ? '⚡' : tone === 'millennial' ? '📊' : tone === 'gen_x' ? '📋' : '✨',
+                  })
+                }}
                 className="p-2.5 rounded-xl text-left"
                 style={{
                   backgroundColor: sel ? 'rgba(123,114,255,0.15)' : 'var(--color-surface-raised)',

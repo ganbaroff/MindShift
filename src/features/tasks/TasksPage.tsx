@@ -41,7 +41,7 @@ export default function TasksPage() {
   const [showDone, setShowDone] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const { nowPool, nextPool, somedayPool, completeTask, snoozeTask, removeTask, reorderPool, moveTask, setTaskDueDate, appMode, seasonalMode, poolsExplained, setPoolsExplained } = useStore();
+  const { nowPool, nextPool, somedayPool, completeTask, snoozeTask, removeTask, reorderPool, moveTask, setTaskDueDate, appMode, seasonalMode, poolsExplained, setPoolsExplained, energyLevel, burnoutScore } = useStore();
 
   // dnd-kit sensors — pointer for desktop, touch for mobile
   const sensors = useSensors(
@@ -82,6 +82,8 @@ export default function TasksPage() {
 
   const nowMax = getNowPoolMax(appMode, seasonalMode);
 
+  const isLowEnergy = energyLevel <= 2 || burnoutScore > 60;
+
   // Past-date task detection — tasks with a past due date still active
   const pastDateTasks = useMemo(() =>
     [...nowPool, ...nextPool].filter(
@@ -97,6 +99,11 @@ export default function TasksPage() {
         <h1 className="text-[24px] font-bold" style={{ color: 'var(--color-text-primary)' }}>{t('tasks.title')}</h1>
         <p className="text-[13px] mt-0.5" style={{ color: 'var(--color-text-muted)' }}>{t('tasks.tasksInPlay', { count: nowTasks.length + nextTasks.length })}</p>
       </motion.div>
+      {isLowEnergy && (
+        <div className="mt-3 px-3 py-2 rounded-xl text-[12px]" style={{ background: 'rgba(78,205,196,0.08)', color: 'var(--color-teal)', border: '1px solid rgba(78,205,196,0.15)' }}>
+          {t('tasks.lowEnergyHint', 'Low energy — focus on one thing from your NOW list. The rest can wait.')}
+        </div>
+      )}
 
       {/* Search bar */}
       <motion.div

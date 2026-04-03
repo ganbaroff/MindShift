@@ -96,18 +96,13 @@ export default function App() {
   }, [userTheme])
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      if (!data.session) {
-        // If user explicitly signed out, don't auto-create guest — let them stay on /auth
-        if (localStorage.getItem('ms_signed_out')) return
-        const guestId = localStorage.getItem('ms_guest_id') ?? `guest_${crypto.randomUUID()}`
-        localStorage.setItem('ms_guest_id', guestId)
-        setUser(guestId, '')
-        updateLastSession()
-      }
-    })
+    // authStateResolved prevents a race where getSession() returns null during
+    // token refresh, briefly creating a guest, before onAuthStateChange fires
+    // with the real user. We only create a guest after auth state is confirmed.
+    let authStateResolved = false
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      authStateResolved = true
       if (session?.user) {
         localStorage.removeItem('ms_signed_out')
         setUser(session.user.id, session.user.email ?? '')
@@ -184,9 +179,32 @@ export default function App() {
               })
           }
         } catch { /* localStorage or JSON parse failure */ }
+      } else {
+        // No session — create guest unless user explicitly signed out
+        if (!localStorage.getItem('ms_signed_out')) {
+          const guestId = localStorage.getItem('ms_guest_id') ?? `guest_${crypto.randomUUID()}`
+          localStorage.setItem('ms_guest_id', guestId)
+          setUser(guestId, '')
+          updateLastSession()
+        }
       }
     })
-    return () => subscription.unsubscribe()
+
+    // Fallback: if onAuthStateChange never fires (network issue, Supabase cold start),
+    // create guest after a short delay so the app is usable offline.
+    const fallbackTimer = setTimeout(() => {
+      if (!authStateResolved && !localStorage.getItem('ms_signed_out')) {
+        const guestId = localStorage.getItem('ms_guest_id') ?? `guest_${crypto.randomUUID()}`
+        localStorage.setItem('ms_guest_id', guestId)
+        setUser(guestId, '')
+        updateLastSession()
+      }
+    }, 2000)
+
+    return () => {
+      subscription.unsubscribe()
+      clearTimeout(fallbackTimer)
+    }
   }, [setUser, updateLastSession])
 
   useEffect(() => { reminders.restore() }, [])

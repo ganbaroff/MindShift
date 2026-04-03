@@ -73,7 +73,9 @@ export function detectCrisis(text: string): boolean {
   return ALL_KEYWORDS.some(k => lower.includes(k) || normalized.includes(k))
 }
 
-interface CrisisResources {
+import { countryFromLocale, getCrisisResourcesByCountry } from './crisisHotlines'
+
+export interface CrisisResources {
   /** Primary crisis line for the user's locale */
   primary: string
   /** International fallback line */
@@ -82,20 +84,20 @@ interface CrisisResources {
 
 /**
  * Returns locale-appropriate crisis hotline information.
- * Always includes an international option.
+ * Derives country from locale (e.g. "en-US" → US, "az-AZ" → AZ).
+ * Falls back to international resources if country not found.
  */
 export function getCrisisResources(locale: string): CrisisResources {
-  const lang = locale.slice(0, 2).toLowerCase()
+  const country = countryFromLocale(locale)
+  const resources = getCrisisResourcesByCountry(country)
 
-  if (lang === 'ru') {
-    return {
-      primary: 'Телефон доверия: 8-800-2000-122 (бесплатно, круглосуточно)',
-      international: 'Crisis Text Line: Text HOME to 741741',
-    }
-  }
+  const primary = resources[0]
+    ? `${resources[0].name}: ${resources[0].number}`
+    : 'findahelpline.com — crisis support in 175+ countries'
 
-  return {
-    primary: 'If you\'re in crisis: 988 Suicide & Crisis Lifeline (call or text 988)',
-    international: 'Crisis Text Line: Text HOME to 741741',
-  }
+  const international = resources[1]
+    ? `${resources[1].name}: ${resources[1].number}`
+    : 'Befrienders Worldwide: befrienders.org'
+
+  return { primary, international }
 }
