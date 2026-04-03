@@ -138,7 +138,7 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
               whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
               onClick={handleCreate}
               className="w-full py-3.5 rounded-2xl font-semibold text-[14px] focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
-              style={{ background: 'linear-gradient(135deg, #7B72FF, #8B7FF7)', color: '#fff' }}
+              style={{ background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-light))', color: '#fff' }}
             >
               {t('focusRoom.createRoom')} ✦
             </motion.button>
@@ -177,7 +177,7 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
               onClick={handleJoin}
               disabled={codeInput.trim().length < 4}
               className="w-full py-3.5 rounded-2xl font-semibold text-[14px] disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
-              style={{ background: 'linear-gradient(135deg, #7B72FF, #8B7FF7)', color: '#fff' }}
+              style={{ background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-light))', color: '#fff' }}
             >
               {t('focusRoom.joinRoom')}
             </motion.button>
@@ -257,7 +257,7 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
               whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
               onClick={handleStart}
               className="w-full py-3.5 rounded-2xl font-semibold text-[14px] focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
-              style={{ background: 'linear-gradient(135deg, #7B72FF, #4ECDC4)', color: '#fff' }}
+              style={{ background: 'linear-gradient(135deg, var(--color-primary), var(--color-teal))', color: '#fff' }}
             >
               {t('focusRoom.startSession')}
             </motion.button>

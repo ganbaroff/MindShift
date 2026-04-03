@@ -138,7 +138,7 @@ export default function PreviewScreen() {
             viewBox={`0 0 ${SIZE} ${SIZE}`}
             style={{ transform: 'rotate(-90deg)' }}
           >
-            <circle cx={CX} cy={CY} r={RADIUS} fill="none" stroke="#252840" strokeWidth={STROKE} />
+            <circle cx={CX} cy={CY} r={RADIUS} fill="none" style={{ stroke: "var(--color-elevated)" }} strokeWidth={STROKE} />
             <circle
               cx={CX} cy={CY} r={RADIUS}
               fill="none"
