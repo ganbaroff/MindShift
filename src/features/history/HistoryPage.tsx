@@ -236,7 +236,7 @@ export default function HistoryPage() {
                           <div className="flex items-center gap-1 text-[14px]">
                             {energyBefore && <span title={t('history.energyBefore')}>{energyBefore}</span>}
                             {energyBefore && energyAfter && (
-                              <span style={{ color: '#3A3B52', fontSize: 10 }}>→</span>
+                              <span style={{ color: 'var(--color-border)', fontSize: 10 }}>→</span>
                             )}
                             {energyAfter && <span title={t('history.energyAfter')}>{energyAfter}</span>}
                           </div>

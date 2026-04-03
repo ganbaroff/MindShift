@@ -43,12 +43,12 @@ function MochiLogo() {
         <svg width="32" height="32" viewBox="0 0 44 44" fill="none">
           <path
             d="M8 22C8 14.268 14.268 8 22 8C29.732 8 36 14.268 36 22"
-            stroke="#7B72FF"
+            style={{ stroke: 'var(--color-primary)' }}
             strokeWidth="2.5"
             strokeLinecap="round"
           />
-          <circle cx="22" cy="22" r="7" stroke="#7B72FF" strokeWidth="2" opacity="0.6" />
-          <circle cx="22" cy="22" r="2.5" fill="#7B72FF" />
+          <circle cx="22" cy="22" r="7" style={{ stroke: 'var(--color-primary)' }} strokeWidth="2" opacity="0.6" />
+          <circle cx="22" cy="22" r="2.5" style={{ fill: 'var(--color-primary)' }} />
           <path d="M33 10L33.8 12L36 12L34.2 13.4L35 15.4L33 14L31 15.4L31.8 13.4L30 12L32.2 12Z"
             style={{ fill: 'var(--color-gold)' }} opacity="0.85" />
         </svg>
