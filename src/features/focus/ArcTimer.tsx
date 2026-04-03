@@ -119,7 +119,7 @@ function ArcTimerInner({
         <circle
           cx={CX} cy={CY} r={RADIUS}
           fill="none"
-          stroke="#252840"
+          style={{ stroke: 'var(--color-elevated)' }}
           strokeWidth={STROKE}
         />
 
