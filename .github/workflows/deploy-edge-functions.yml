@@ -38,4 +38,3 @@ jobs:
           supabase functions deploy create-checkout --project-ref ${{ secrets.SUPABASE_PROJECT_ID }}
           supabase functions deploy stripe-webhook --no-verify-jwt --project-ref ${{ secrets.SUPABASE_PROJECT_ID }}
           supabase functions deploy gcal-inbound --project-ref ${{ secrets.SUPABASE_PROJECT_ID }}
-          supabase functions deploy send-magic-link --project-ref ${{ secrets.SUPABASE_PROJECT_ID }}

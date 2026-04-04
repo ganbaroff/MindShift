@@ -117,6 +117,7 @@ export default function TasksPage() {
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
           placeholder={t('tasks.search')}
+          aria-label={t('tasks.search')}
           className="flex-1 bg-transparent text-[13px] outline-none"
           style={{ color: 'var(--color-text-primary)' }}
         />

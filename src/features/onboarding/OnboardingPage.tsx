@@ -158,7 +158,11 @@ export default function OnboardingPage() {
 
     if (!isRevisit) {
       setOnboardingCompleted()
-      logEvent('onboarding_completed', { mode: modeMap[selections[0] ?? 0] })
+      logEvent('onboarding_completed', {
+        mode: modeMap[selections[0] ?? 0],
+        ...(selections[1] != null && { time_blindness: tbMap[selections[1]] }),
+        ...(selections[2] != null && { emotional_reactivity: erMap[selections[2]] }),
+      })
       navigate('/')
     } else {
       navigate(-1)
