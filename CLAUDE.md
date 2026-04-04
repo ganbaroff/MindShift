@@ -22,7 +22,7 @@ Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ latest. Status: **prod
 ## Sprint History
 | Sprint | Commit | What landed |
 |--------|--------|-------------|
-| BATCH-2026-04-04-P "analytics + screenshots" | `pending` | room_created/joined/session_started analytics in useFocusRoom. 8 Play Store screenshots refreshed (Apr 4). supabase/config.toml backlog closed. tsc -b ✅ |
+| BATCH-2026-04-04-P "analytics + screenshots" | `9512424` | room_created/joined/session_started analytics in useFocusRoom. 8 Play Store screenshots refreshed (Apr 4). supabase/config.toml backlog closed. tsc -b ✅ |
 | BATCH-2026-04-04-O "S-9 social cool-down" | `bf34770` | S-9: SocialFeedbackCard.tsx (new) — 👍/😐/👎 reaction card in NatureBuffer after room sessions. wasInRoomRef captured in FocusScreen before room.leave(). social_session_feedback logEvent. 4 i18n keys × 6 locales. PostSessionFlow decomposed to stay ≤400 lines. tsc -b ✅ |
 | BATCH-2026-04-04-N "S-5 Ghosting Grace" | `16db3ec` | S-5: lastRoomCode+lastRoomLeftAt persisted in store + partialize. useFocusRoom.leave() saves room code before clearing. wasRecentlyInRoom derived in useOverlayState (24h window). ContextRestore warm teal re-entry card with room code. ghosting_grace_shown dim on context_restore_shown event. 2 new i18n keys × 6 locales. tsc -b ✅ |
 | BATCH-2026-04-04-M "analytics+a11y" | `8af4bae` | manifest.json og-image removed from screenshots (Play Store). ContextRestore + NatureBuffer button focus rings. nature_buffer_skipped/recovery_lock_bypassed/autopsy_picked/share/progress_page_viewed events. CI bundle gate 400 KB exit 1. screenshots:prod npm script. tsc -b ✅ |
