@@ -80,6 +80,15 @@ export function FocusSetup({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // Tutorial momentum — when arriving from tutorial, pre-select first active task and default to 5 min
+  useEffect(() => {
+    if (searchParams.get('from') !== 'tutorial') return
+    const firstActive = allTasks.find(t => t.status === 'active' && t.pool === 'now')
+    if (firstActive && !selectedTask) setSelectedTask(firstActive)
+    setSelectedDuration(5)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   return (
     <>
       <div className="flex flex-col pb-28" style={{ background: 'var(--color-bg)' }}>

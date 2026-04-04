@@ -30,7 +30,9 @@
   "quickCapture": {
     "placeholder": "Fügen Sie eine Aufgabe, Erinnerung oder Besprechung hinzu...",
     "hint": "Versuchen Sie, „Treffen mit Roma morgen um 15 Uhr“ einzugeben – Typ, Datum und Uhrzeit werden automatisch erkannt",
-    "moreOptions": "Weitere Optionen"
+    "moreOptions": "Weitere Optionen",
+    "taskForToday": "Aufgabe für heute",
+    "taskForTomorrow": "Aufgabe für morgen"
   },
   "welcome": {
     "step1Title": "Ihr ruhiger Raum",
@@ -47,6 +49,7 @@
   "tasks": {
     "title": "Ihre Aufgaben",
     "tasksInPlay": "{{count}} Aufgaben im Spiel",
+    "lowEnergyHint": "Niedrige Energie – Konzentrieren Sie sich auf eine Sache aus Ihrer JETZT-Liste. Der Rest kann warten.",
     "search": "Suchaufgaben...",
     "poolGuide": {
       "title": "So funktionieren Aufgaben",
@@ -197,6 +200,13 @@
     "calendarDesc": "Besprechungen und Erinnerungen mit Datum werden in Google Kalender angezeigt",
     "focusBlocks": "Fügen Sie Fokussitzungen als Zeitblöcke hinzu",
     "focusBlocksDesc": "Fokussitzungen werden in Ihrem Kalender als blaugrüne Blöcke angezeigt",
+    "importFromCalendar": "Aus Google Kalender importieren",
+    "importFromCalendarDesc": "Bringen Sie bevorstehende Ereignisse als Aufgaben ein",
+    "calendarImporting": "Ereignisse werden abgerufen...",
+    "calendarImportEmpty": "Keine neuen Ereignisse in den nächsten 7 Tagen",
+    "calendarImportAdd": "Fügen Sie {{count}} zu Aufgaben hinzu",
+    "calendarImportAdded": "{{count}}-Ereignisse zu Aufgaben hinzugefügt",
+    "calendarImportError": "Kalenderereignisse konnten nicht abgerufen werden",
     "signInForCalendar": "Melden Sie sich bei Google an, um Besprechungen und Erinnerungen zu synchronisieren",
     "mentalHealth": "Psychische Gesundheit",
     "crisisTitle": "Wenn Sie oder jemand, den Sie kennen, Probleme haben",
@@ -245,7 +255,10 @@
     "soundPlaying": "spielen",
     "volume": "Volumen",
     "reducedStimulation": "Reduzierte Stimulation",
+    "reducedStimulationHint": "Dimmt Animationen und entsättigt Farben – schonender für Augen und Sinne.",
     "hapticFeedback": "Haptisches Feedback",
+    "hapticFeedbackHint": "Sanfte Vibrationen bei Aufgabenerfüllung und Phasenwechseln (nur Android).",
+    "languageSetAuto": "Sprache auf „Auto“ eingestellt (folgt dem System)",
     "pauseForDay": "24 Stunden pausieren",
     "remindersEnabled": "Erinnerungen aktiviert",
     "remindersBlocked": "Vom Browser blockiert – aktivieren Sie diese Option in den Browsereinstellungen, um Hinweise zum Fälligkeitsdatum zu erhalten.",

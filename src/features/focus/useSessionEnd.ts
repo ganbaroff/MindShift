@@ -113,7 +113,7 @@ export function useSessionEnd({
       const daysSinceInstall = installDate
         ? Math.floor((Date.now() - new Date(installDate).getTime()) / 86_400_000)
         : undefined
-      logEvent('session_completed', { duration_min: elapsedMin, phase: sessionPhase, energy_before: useStore.getState().energyLevel, ...(daysSinceInstall != null && { days_since_install: daysSinceInstall }) })
+      logEvent('session_completed', { duration_min: elapsedMin, phase: sessionPhase, energy_before: useStore.getState().energyLevel, audio_active: isPlaying ? 1 : 0, ...(daysSinceInstall != null && { days_since_install: daysSinceInstall }) })
       const lastActive = useStore.getState().lastActiveDate
       if (lastActive) {
         const gapDays = (Date.now() - new Date(lastActive).getTime()) / 86_400_000

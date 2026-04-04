@@ -105,7 +105,8 @@ export function AppearanceSection() {
                     icon: tone === 'gen_z' ? '⚡' : tone === 'millennial' ? '📊' : tone === 'gen_x' ? '📋' : '✨',
                   })
                 }}
-                className="p-2.5 rounded-xl text-left"
+                aria-pressed={sel}
+                className="p-2.5 rounded-xl text-left focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none"
                 style={{
                   backgroundColor: sel ? 'rgba(123,114,255,0.15)' : 'var(--color-surface-raised)',
                   borderWidth: sel ? 1.5 : 1,

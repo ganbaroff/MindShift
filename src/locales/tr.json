@@ -30,7 +30,9 @@
   "quickCapture": {
     "placeholder": "Görev, hatırlatıcı veya toplantı ekleyin...",
     "hint": "'Yarın saat 15:00'te Roma'yla toplantı' yazmayı deneyin; bu, türü, tarihi ve saati otomatik olarak algılar",
-    "moreOptions": "Daha fazla seçenek"
+    "moreOptions": "Daha fazla seçenek",
+    "taskForToday": "Bugünkü görev",
+    "taskForTomorrow": "Yarın için görev"
   },
   "welcome": {
     "step1Title": "Sakin alanınız",
@@ -47,6 +49,7 @@
   "tasks": {
     "title": "Görevleriniz",
     "tasksInPlay": "{{count}} görevler devrede",
+    "lowEnergyHint": "Düşük enerji – ŞİMDİ listenizdeki bir şeye odaklanın. Gerisi bekleyebilir.",
     "search": "Görevleri ara...",
     "poolGuide": {
       "title": "Görevler nasıl çalışır",
@@ -197,6 +200,13 @@
     "calendarDesc": "Tarihli toplantılar ve hatırlatıcılar Google Takvim'de görünüyor",
     "focusBlocks": "Odaklanma oturumlarını zaman blokları olarak ekleyin",
     "focusBlocksDesc": "Odaklanma oturumları takviminizde deniz mavisi bloklar olarak gösterilecek",
+    "importFromCalendar": "Google Takvim'den içe aktar",
+    "importFromCalendarDesc": "Yaklaşan etkinlikleri görev olarak getirin",
+    "calendarImporting": "Etkinlikler getiriliyor...",
+    "calendarImportEmpty": "Önümüzdeki 7 gün içinde yeni etkinlik yok",
+    "calendarImportAdd": "Görevlere {{count}} ekle",
+    "calendarImportAdded": "Görevlere {{count}} etkinlikleri eklendi",
+    "calendarImportError": "Takvim etkinlikleri getirilemedi",
     "signInForCalendar": "Toplantıları ve hatırlatıcıları senkronize etmek için Google ile oturum açın",
     "mentalHealth": "Ruh Sağlığı",
     "crisisTitle": "Siz veya tanıdığınız biri mücadele ediyorsa",
@@ -245,7 +255,10 @@
     "soundPlaying": "oynuyor",
     "volume": "Hacim",
     "reducedStimulation": "Azaltılmış stimülasyon",
+    "reducedStimulationHint": "Animasyonları soluklaştırır ve renklerin doygunluğunu azaltır; gözleri ve duyuları yormaz.",
     "hapticFeedback": "Dokunsal geribildirim",
+    "hapticFeedbackHint": "Görev tamamlandığında ve aşama değişikliklerinde hafif titreşimler (yalnızca Android).",
+    "languageSetAuto": "Dil otomatik olarak ayarlandı (sistemi takip eder)",
     "pauseForDay": "24 saat duraklat",
     "remindersEnabled": "Hatırlatıcılar etkinleştirildi",
     "remindersBlocked": "Tarayıcı tarafından engellendi — Son tarih uyarıları almak için tarayıcı ayarlarında etkinleştirin.",

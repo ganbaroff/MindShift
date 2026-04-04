@@ -351,10 +351,10 @@ export const RecoveryLock = memo(function RecoveryLock({
         {/* Continue anyway — hyperfocus support */}
         <button
           onClick={onBypass}
-          className="text-xs px-5 py-2 rounded-xl transition-all duration-200"
+          className="text-xs px-5 py-2 rounded-xl transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none"
           style={{
             background: 'transparent',
-            border: '1px solid rgba(255,255,255,0.06)',
+            border: '1px solid var(--color-border-subtle)',
             color: 'var(--color-text-muted)',
           }}
           aria-label={t('focus.bypassRecovery')}

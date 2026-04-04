@@ -30,7 +30,9 @@
   "quickCapture": {
     "placeholder": "Agregue una tarea, recordatorio o reunión...",
     "hint": "Intente escribir \"reunión con Roma mañana a las 3:00 p. m.\"; detectará automáticamente el tipo, la fecha y la hora.",
-    "moreOptions": "Más opciones"
+    "moreOptions": "Más opciones",
+    "taskForToday": "Tarea para hoy",
+    "taskForTomorrow": "Tarea para mañana"
   },
   "welcome": {
     "step1Title": "Tu espacio tranquilo",
@@ -47,6 +49,7 @@
   "tasks": {
     "title": "Tus tareas",
     "tasksInPlay": "{{count}} tareas en juego",
+    "lowEnergyHint": "Baja energía: concéntrate en una cosa de tu lista AHORA. El resto puede esperar.",
     "search": "Buscar tareas...",
     "poolGuide": {
       "title": "Como funcionan las tareas",
@@ -197,6 +200,13 @@
     "calendarDesc": "Las reuniones y recordatorios con fechas aparecen en Google Calendar",
     "focusBlocks": "Agregue sesiones de enfoque como bloques de tiempo",
     "focusBlocksDesc": "Las sesiones de enfoque se mostrarán como bloques verde azulado en tu calendario.",
+    "importFromCalendar": "Importar desde Google Calendar",
+    "importFromCalendarDesc": "Incorporar los próximos eventos como tareas",
+    "calendarImporting": "Recuperando eventos...",
+    "calendarImportEmpty": "No hay nuevos eventos en los próximos 7 días",
+    "calendarImportAdd": "Agregar {{count}} a las tareas",
+    "calendarImportAdded": "{{count}} eventos agregados a las tareas",
+    "calendarImportError": "No se pudieron recuperar los eventos del calendario",
     "signInForCalendar": "Inicia sesión con Google para sincronizar reuniones y recordatorios",
     "mentalHealth": "Salud mental",
     "crisisTitle": "Si usted o alguien que conoce está luchando",
@@ -245,7 +255,10 @@
     "soundPlaying": "jugando",
     "volume": "Volumen",
     "reducedStimulation": "Estimulación reducida",
+    "reducedStimulationHint": "Atenúa las animaciones y desatura los colores, lo que resulta más agradable para la vista y los sentidos.",
     "hapticFeedback": "Retroalimentación háptica",
+    "hapticFeedbackHint": "Vibraciones suaves al finalizar tareas y cambios de fase (solo Android).",
+    "languageSetAuto": "Idioma configurado en automático (sigue el sistema)",
     "pauseForDay": "Pausa por 24h",
     "remindersEnabled": "Recordatorios habilitados",
     "remindersBlocked": "Bloqueado por el navegador: habilítelo en la configuración del navegador para obtener avisos sobre la fecha de vencimiento.",
