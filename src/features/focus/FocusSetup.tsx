@@ -11,7 +11,7 @@
  * All business logic lives in useFocusSession.ts — this is pure UI composition.
  */
 
-import { useState, useEffect, lazy, Suspense } from 'react'
+import { useState, useEffect, useRef, useCallback, lazy, Suspense } from 'react'
 import { AnimatePresence } from 'motion/react'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router-dom'
@@ -69,14 +69,30 @@ export function FocusSetup({
   const [showRoomSheet, setShowRoomSheet] = useState(false)
   const { t } = useTranslation()
   const [searchParams] = useSearchParams()
+  const startedRef = useRef(false)
+
+  // Wrap handleStart to track whether session was actually started (for abandoned event)
+  const handleStartTracked = useCallback(() => {
+    startedRef.current = true
+    handleStart()
+  }, [handleStart])
 
   // Analytics: setup-to-start conversion rate denominator + source attribution
+  // Cleanup fires focus_setup_abandoned if user leaves without starting
   useEffect(() => {
     const source = searchParams.get('from') ?? 'direct'
-    logEvent('focus_setup_viewed', {
-      has_tasks: allTasks.filter(t => t.status === 'active').length > 0 ? 1 : 0,
-      source,
-    })
+    const hasActiveTasks = allTasks.filter(t => t.status === 'active').length > 0 ? 1 : 0
+    logEvent('focus_setup_viewed', { has_tasks: hasActiveTasks, source })
+    return () => {
+      if (!startedRef.current) {
+        logEvent('focus_setup_abandoned', {
+          has_tasks: hasActiveTasks,
+          source,
+          selected_task: selectedTask ? 1 : 0,
+          selected_duration: selectedDuration,
+        })
+      }
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -163,7 +179,7 @@ export function FocusSetup({
         {/* Start button + breathwork opt-in + rooms discovery */}
         <div className="px-5 space-y-2">
           <button
-            onClick={() => handleStart()}
+            onClick={() => handleStartTracked()}
             aria-label="Start focus session"
             className="w-full py-4 rounded-2xl font-bold text-base transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none"
             style={{
@@ -210,8 +226,8 @@ export function FocusSetup({
           <div className="fixed inset-0 z-50">
             <Suspense fallback={null}>
               <LazyBreathworkRitual
-                onComplete={() => { setShowBreathwork(false); handleStart() }}
-                onSkip={() => { setShowBreathwork(false); handleStart() }}
+                onComplete={() => { setShowBreathwork(false); handleStartTracked() }}
+                onSkip={() => { setShowBreathwork(false); handleStartTracked() }}
               />
             </Suspense>
           </div>
@@ -224,7 +240,7 @@ export function FocusSetup({
           <FocusRoomSheet
             room={room}
             onClose={() => setShowRoomSheet(false)}
-            onReady={() => handleStart()}
+            onReady={() => handleStartTracked()}
           />
         )}
       </AnimatePresence>

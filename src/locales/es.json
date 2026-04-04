@@ -32,7 +32,11 @@
     "hint": "Intente escribir \"reunión con Roma mañana a las 3:00 p. m.\"; detectará automáticamente el tipo, la fecha y la hora.",
     "moreOptions": "Más opciones",
     "taskForToday": "Tarea para hoy",
-    "taskForTomorrow": "Tarea para mañana"
+    "taskForTomorrow": "Tarea para mañana",
+    "typeTask": "Tarea",
+    "typeIdea": "Idea",
+    "typeReminder": "Recordatorio",
+    "typeMeeting": "Reunión"
   },
   "welcome": {
     "step1Title": "Tu espacio tranquilo",

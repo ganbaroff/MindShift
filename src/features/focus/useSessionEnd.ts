@@ -117,7 +117,7 @@ export function useSessionEnd({
       const lastActive = useStore.getState().lastActiveDate
       if (lastActive) {
         const gapDays = (Date.now() - new Date(lastActive).getTime()) / 86_400_000
-        if (gapDays >= 2) logEvent('streak_recovered', { gap_days: Math.floor(gapDays) })
+        if (gapDays >= 2) logEvent('streak_recovered', { gap_days: Math.floor(gapDays), grace_shown: 0 })
       }
     }
 

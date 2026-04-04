@@ -338,6 +338,8 @@ export const RecoveryLock = memo(function RecoveryLock({
         {/* Timer — informational, not a gate */}
         <div
           role="timer"
+          aria-live="polite"
+          aria-atomic="true"
           aria-label={`${t('focus.suggestedRest')}: ${rm} minutes ${rs} seconds remaining`}
           className="px-8 py-3 rounded-2xl mb-6"
           style={{ background: 'var(--color-surface-card)', border: '1px solid rgba(255,255,255,0.06)' }}
