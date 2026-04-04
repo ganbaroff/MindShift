@@ -526,13 +526,19 @@ WHAT'S NEXT:
 - [x] gcal-inbound edge function ✅ BATCH-2026-04-04-H
 - [x] tutorial momentum (from= dim in session_started) ✅ BATCH-2026-04-04-I
 - [x] a11y: aria-pressed on tone picker, aria-live on timer, aria-label on search ✅ BATCH-2026-04-04-I
+- [x] BurnoutGauge + progress bar ARIA (BLOCKS_LAUNCH) ✅ BATCH-2026-04-04-K
+- [x] manifest.json stable alias + deploy-edge-functions CI gate ✅ BATCH-2026-04-04-K
+- [x] Quick Start ADHD defaults (timeBlindness + emotionalReactivity) ✅ BATCH-2026-04-04-K
 
 ### P2 — Quality
 - [ ] S-5 Ghosting Grace — ContextRestore re-entry card (L3)
 - [ ] S-9 Post-social cool-down ritual (L3)
+- [ ] K-9: ContextRestore ghosting_grace_shown logEvent (depends on S-5)
 - [x] ADHD profile dims in onboarding_completed ✅ BATCH-2026-04-04-I
 - [x] QuickCapture i18n complete ✅ BATCH-2026-04-04-I
 - [x] Sentry source maps in CI ✅ BATCH-2026-04-04-I
+- [x] ArcTimer tap hint i18n (6 locales) ✅ BATCH-2026-04-04-K
+- [x] CI bundle size warning threshold ✅ BATCH-2026-04-04-K
 
 ### P3 — Polish
 - [ ] Play Store: 8 screenshots (`npm run screenshots` — needs real device or Playwright viewport)

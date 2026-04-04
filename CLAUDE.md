@@ -22,6 +22,7 @@ Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ latest. Status: **prod
 ## Sprint History
 | Sprint | Commit | What landed |
 |--------|--------|-------------|
+| BATCH-2026-04-04-K "ARIA + CI guardrails" | `aebeef0` | BurnoutGauge role=meter + HomePage progress bar role=progressbar (BLOCKS_LAUNCH cleared). manifest.json → stable alias. deploy-edge-functions workflow_run + CI success gate. Quick Start sets ADHD defaults. ArcTimer tap hint i18n (6 locales). CI bundle size threshold. tsc -b ✅ |
 | BATCH-2026-04-02-N "Analytics closure" | `HEAD` | energy_logged event upgraded with energy_before + energy_delta (cohort retention signal). TASK-PROTOCOL.md + CLAUDE.md backlog synced (6 items closed). tsc -b ✅ |
 | BATCH-2026-04-02-M "VOLAURA crystal chip + installDate" | `476f098` | NatureBuffer shows 💎 +N chip when VOLAURA configured (sessionMinutes × 5). installDate added to store (device-level, never reset). days_since_install in session_started + session_completed events. i18n in 6 locales. tsc -b ✅ |
 | BATCH-2026-04-02-L "A11y P1s + edge fn timeout" | `[prev]` | (1) OnboardingPage keyboard trap fixed — Continue button visible on steps 0-2 when option selected. (2) FocusRoomSheet role=dialog + aria-labelledby. (3) SessionControls audio/end/park focus-visible:ring-2 + aria-pressed. (4) weekly-insight timeout 15s → 8s (Supabase platform limit). (5) session_completed analytics: energy_before added. tsc -b ✅ |
