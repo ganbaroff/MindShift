@@ -9,6 +9,7 @@ import { createAudioSlice } from './slices/audioSlice'
 import { createProgressSlice } from './slices/progressSlice'
 import { createPreferencesAndGridSlice } from './slices/preferencesAndGridSlice'
 import { _registerHapticsGetter } from '@/shared/lib/haptic'
+import { logEvent } from '@/shared/lib/logger'
 export type { AppStore } from './types'
 
 // ── Store ─────────────────────────────────────────────────────────────────────
@@ -90,7 +91,11 @@ export const useStore = create<import('./types').AppStore>()(
           state.nextPool = bump(state.nextPool)
 
           // Auto-set installDate on first launch — ISO timestamp, never reset
-          if (!state.installDate) state.installDate = new Date().toISOString()
+          if (!state.installDate) {
+            state.installDate = new Date().toISOString()
+            // Fire once per device — true install denominator for funnel metrics
+            setTimeout(() => logEvent('app_first_open'), 0)
+          }
         },
         partialize: (s) => ({
           userId: s.userId,

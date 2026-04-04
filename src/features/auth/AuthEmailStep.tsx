@@ -55,6 +55,7 @@ export function AuthEmailStep({
 
       {/* ── 1. Consent — prominent, above all CTAs ── */}
       <motion.label
+        htmlFor="consent-checkbox"
         className="flex items-start gap-3 mb-5 cursor-pointer select-none rounded-xl px-3 py-2.5 -mx-1"
         animate={consentHighlighted ? {
           backgroundColor: ['rgba(78,205,196,0)', 'rgba(78,205,196,0.12)', 'rgba(78,205,196,0)'],
@@ -63,8 +64,17 @@ export function AuthEmailStep({
         transition={{ duration: 0.6 }}
         style={{ border: '1px solid transparent' }}
       >
-        <div className="relative shrink-0 mt-0.5" onClick={() => setConsented(!consented)}>
+        <div className="relative shrink-0 mt-0.5">
+          <input
+            type="checkbox"
+            checked={consented}
+            onChange={() => setConsented(!consented)}
+            className="sr-only peer"
+            aria-required="true"
+            id="consent-checkbox"
+          />
           <motion.div
+            aria-hidden="true"
             className="w-5 h-5 rounded-md flex items-center justify-center"
             animate={{
               background: consented ? 'var(--color-primary)' : 'rgba(25,28,48,0.8)',

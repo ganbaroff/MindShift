@@ -224,7 +224,7 @@ export default function OnboardingPage() {
           style={{ background: 'rgba(123,114,255,0.10)', border: '1px solid rgba(123,114,255,0.20)' }}
         >
           <span className="text-base">✦</span>
-          <p className="text-xs" style={{ color: '#C8C0FF' }}>
+          <p className="text-xs" style={{ color: 'var(--color-primary-light)' }}>
             {t('onboarding.recalibrate')}
           </p>
         </div>

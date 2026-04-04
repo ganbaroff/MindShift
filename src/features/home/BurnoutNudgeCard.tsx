@@ -65,7 +65,7 @@ export const BurnoutNudgeCard = memo(function BurnoutNudgeCard({ score }: Burnou
           <div className="flex items-start gap-2.5 flex-1 min-w-0">
             <span className="text-[18px] shrink-0">🌙</span>
             <div>
-              <p className="text-[13px] font-semibold" style={{ color: '#C8C0FF' }}>
+              <p className="text-[13px] font-semibold" style={{ color: 'var(--color-primary-light)' }}>
                 It has been a quiet few days
               </p>
               <p className="text-[12px] mt-0.5 leading-relaxed" style={{ color: 'var(--color-text-muted)' }}>

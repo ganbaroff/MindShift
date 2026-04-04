@@ -341,11 +341,11 @@ export function RecoveryProtocol({ onDismiss }: Props) {
                     key={key}
                     type="button"
                     onClick={() => setTaskInput(label)}
-                    className="text-xs px-3 py-1.5 rounded-xl transition-all duration-150"
+                    className="text-xs px-3 py-1.5 rounded-xl transition-all duration-150 focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none"
                     style={{
                       background: taskInput === label ? 'rgba(123,114,255,0.18)' : 'var(--color-surface-card)',
                       border: `1px solid ${taskInput === label ? 'var(--color-primary)' : 'rgba(255,255,255,0.06)'}`,
-                      color: taskInput === label ? '#C8C0FF' : 'var(--color-text-muted)',
+                      color: taskInput === label ? 'var(--color-primary-light)' : 'var(--color-text-muted)',
                     }}
                   >
                     {label}
@@ -365,7 +365,7 @@ export function RecoveryProtocol({ onDismiss }: Props) {
             <button
               onClick={() => void handleSubmit()}
               disabled={!taskInput.trim() || isSubmitting}
-              className="w-full py-4 rounded-2xl font-semibold text-base transition-all duration-200"
+              className="w-full py-4 rounded-2xl font-semibold text-base transition-all duration-200 focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:outline-none"
               style={{
                 background: taskInput.trim() ? 'var(--color-primary)' : 'var(--color-surface-raised)',
                 color: taskInput.trim() ? '#FFFFFF' : 'var(--color-text-muted)',
@@ -377,7 +377,7 @@ export function RecoveryProtocol({ onDismiss }: Props) {
 
             <button
               onClick={handleSkip}
-              className="w-full py-3 text-sm transition-all duration-200"
+              className="w-full py-3 text-sm transition-all duration-200 rounded-xl focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none"
               style={{ color: 'var(--color-text-muted)' }}
             >
               {durationTier === 'long' ? t('recovery.skipLong')

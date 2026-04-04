@@ -171,7 +171,7 @@ export const NatureBuffer = memo(function NatureBuffer({
                     style={{
                       background: autopsyPick === key ? 'rgba(123,114,255,0.18)' : 'var(--color-surface-raised)',
                       border: `1px solid ${autopsyPick === key ? 'var(--color-primary)' : 'rgba(255,255,255,0.06)'}`,
-                      color: autopsyPick === key ? '#C8C0FF' : 'var(--color-text-muted)',
+                      color: autopsyPick === key ? 'var(--color-primary-light)' : 'var(--color-text-muted)',
                     }}
                     aria-pressed={autopsyPick === key}
                   >

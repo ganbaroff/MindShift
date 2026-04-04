@@ -5,7 +5,6 @@
  * Uses useStore.getState() / useStore.setState() to drive and inspect state.
  *
  * Why these tests matter:
- * - archiveAllOverdue: core ADHD UX — guilt-free recovery depends on this
  * - snoozeTask: "Not now" path — must move now→next, increment count
  * - completeTask: marks as completed across all pools
  * - isProActive: trial expiry logic — financial/UX boundary
@@ -176,67 +175,8 @@ describe('Store — snoozeTask (now → next)', () => {
   })
 })
 
-describe('Store — archiveAllOverdue (guilt-free recovery)', () => {
-  beforeEach(resetStore)
-
-  it('returns empty array when no active tasks', () => {
-    const ids = useStore.getState().archiveAllOverdue()
-    expect(ids).toHaveLength(0)
-  })
-
-  it('moves all active now-pool tasks to someday', () => {
-    const t1 = makeTask({ pool: 'now' })
-    const t2 = makeTask({ pool: 'now' })
-    useStore.getState().addTask(t1)
-    useStore.getState().addTask(t2)
-    useStore.getState().archiveAllOverdue()
-    const someday = useStore.getState().somedayPool
-    expect(someday.some(t => t.id === t1.id)).toBe(true)
-    expect(someday.some(t => t.id === t2.id)).toBe(true)
-  })
-
-  it('moves active next-pool tasks to someday', () => {
-    const task = makeTask({ pool: 'next' })
-    useStore.getState().addTask(task)
-    useStore.getState().archiveAllOverdue()
-    expect(useStore.getState().nextPool.find(t => t.id === task.id)).toBeUndefined()
-    expect(useStore.getState().somedayPool.some(t => t.id === task.id)).toBe(true)
-  })
-
-  it('returns ids of all archived tasks', () => {
-    const t1 = makeTask({ pool: 'now' })
-    const t2 = makeTask({ pool: 'next' })
-    useStore.getState().addTask(t1)
-    useStore.getState().addTask(t2)
-    const ids = useStore.getState().archiveAllOverdue()
-    expect(ids).toContain(t1.id)
-    expect(ids).toContain(t2.id)
-  })
-
-  it('does NOT archive completed tasks', () => {
-    const active    = makeTask({ pool: 'now', status: 'active' })
-    const completed = makeTask({ pool: 'now', status: 'completed' })
-    useStore.getState().addTask(active)
-    useStore.getState().addTask(completed)
-    const ids = useStore.getState().archiveAllOverdue()
-    expect(ids).toHaveLength(1)
-    expect(ids[0]).toBe(active.id)
-  })
-
-  it('clears nowPool of all active tasks', () => {
-    useStore.getState().addTask(makeTask({ pool: 'now' }))
-    useStore.getState().addTask(makeTask({ pool: 'now' }))
-    useStore.getState().archiveAllOverdue()
-    const active = useStore.getState().nowPool.filter(t => t.status === 'active')
-    expect(active).toHaveLength(0)
-  })
-
-  it('clears nextPool of all active tasks', () => {
-    useStore.getState().addTask(makeTask({ pool: 'next' }))
-    useStore.getState().archiveAllOverdue()
-    expect(useStore.getState().nextPool).toHaveLength(0)
-  })
-})
+// archiveAllOverdue tests removed — method was never implemented in the store.
+// If this feature is needed later, re-add tests + implementation together.
 
 // ── XP slice ──────────────────────────────────────────────────────────────────
 

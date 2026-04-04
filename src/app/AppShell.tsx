@@ -46,10 +46,10 @@ function SessionFrictionNudge({ onDismiss }: { onDismiss: () => void }) {
       }}
     >
       <span className="text-base">⏱️</span>
-      <p className="text-[12px] flex-1 leading-snug" style={{ color: '#C8C0FF' }}>
+      <p className="text-[12px] flex-1 leading-snug" style={{ color: 'var(--color-primary-light)' }}>
         {t('appShell.sessionRunning')}
       </p>
-      <button onClick={onDismiss} className="text-[10px] px-2 py-0.5 rounded-lg shrink-0" style={{ color: 'var(--color-primary)' }}>
+      <button onClick={onDismiss} className="text-[10px] px-2 py-0.5 rounded-lg shrink-0 focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none" style={{ color: 'var(--color-primary)' }}>
         {t('appShell.gotIt')}
       </button>
     </motion.div>

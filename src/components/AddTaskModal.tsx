@@ -176,6 +176,9 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
             onClick={handleClose}
           />
           <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="add-task-title"
             initial={shouldAnimate ? { y: '100%' } : {}}
             animate={{ y: 0 }}
             exit={shouldAnimate ? { y: '100%' } : undefined}
@@ -184,7 +187,7 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
           >
             <div className="w-10 h-1 rounded-full bg-ms-muted/30 mx-auto mb-4" />
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-title text-ms-text">{t('addTask.title')}</h2>
+              <h2 id="add-task-title" className="text-title text-ms-text">{t('addTask.title')}</h2>
               <button onClick={handleClose} aria-label="Close modal" className="p-3 text-ms-muted focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] rounded-xl">
                 <X size={20} />
               </button>

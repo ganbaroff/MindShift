@@ -89,7 +89,7 @@ export function FocusSetupHeader({
           {weeklyIntention && (
             <span
               className="text-[11px] px-2 py-0.5 rounded-full ml-auto"
-              style={{ background: 'rgba(123,114,255,0.10)', color: '#C8C0FF' }}
+              style={{ background: 'rgba(123,114,255,0.10)', color: 'var(--color-primary-light)' }}
             >
               {weeklyIntention}
             </span>

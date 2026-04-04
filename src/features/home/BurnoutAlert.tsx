@@ -1,8 +1,9 @@
-import { memo } from 'react'
+import { memo, useEffect } from 'react'
 import { motion } from 'motion/react'
 import { useTranslation } from 'react-i18next'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { useNavigate } from 'react-router-dom'
+import { logEvent } from '@/shared/lib/logger'
 
 interface BurnoutAlertProps {
   score: number
@@ -17,6 +18,12 @@ export const BurnoutAlert = memo(function BurnoutAlert({ score }: BurnoutAlertPr
   const { t } = useTranslation()
   const navigate = useNavigate()
 
+  useEffect(() => {
+    if (score > 40) {
+      logEvent('burnout_alert_shown', { score, tier: score >= 66 ? 'purple' : 'amber' })
+    }
+  }, [score])
+
   if (score <= 40) return null
 
   const isBurnout = score > 65
@@ -26,7 +33,7 @@ export const BurnoutAlert = memo(function BurnoutAlert({ score }: BurnoutAlertPr
   const borderColor = isBurnout
     ? 'rgba(123,114,255,0.25)'
     : 'rgba(245,158,11,0.15)'
-  const textColor = isBurnout ? '#C8C0FF' : '#F59E0B'
+  const textColor = isBurnout ? 'var(--color-primary-light)' : '#F59E0B'
   const emoji = isBurnout ? '🌙' : '🌿'
   const title = isBurnout
     ? t('burnout.needsBreather')
