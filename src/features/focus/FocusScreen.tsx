@@ -16,7 +16,7 @@
  *   useAmbientOrbit       — S-2 social signal hook
  */
 
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useTranslation } from 'react-i18next'
 import { ArcTimer } from './ArcTimer'
@@ -42,6 +42,8 @@ export default function FocusScreen() {
   const { emotionalReactivity, userId } = useStore()
   const orbitCount = useAmbientOrbit(session.screen === 'session')
   const room = useFocusRoom()
+  // S-9: capture whether user was in a room at the moment the session ended
+  const wasInRoomRef = useRef(false)
 
   const { sessions: historySessions } = useSessionHistory()
   const behaviorProfile = useUserBehavior(historySessions)
@@ -53,9 +55,10 @@ export default function FocusScreen() {
     }
   }, [session.sessionPhase, room.status, room])
 
-  // Leave room when session ends
+  // Leave room when session ends — capture wasInRoom before clearing state
   useEffect(() => {
     if (session.screen !== 'session' && session.screen !== 'setup') {
+      wasInRoomRef.current = room.status === 'connected'
       room.leave()
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -120,6 +123,7 @@ export default function FocusScreen() {
         parkedThoughtsCount={parkedThoughtsCount}
         onAutopsyPick={handleAutopsyPick}
         crystalEarned={crystalEarned}
+        wasInRoom={wasInRoomRef.current}
       />
     )
   }
