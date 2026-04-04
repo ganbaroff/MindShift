@@ -18,11 +18,11 @@ import { todayISO } from '@/shared/lib/dateUtils'
 const voiceSupported = typeof window !== 'undefined' &&
   ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)
 
-const TYPE_CHIPS: Record<TaskType, { emoji: string; label: string }> = {
-  task:     { emoji: '✅', label: 'Task' },
-  idea:     { emoji: '💡', label: 'Idea' },
-  reminder: { emoji: '🔔', label: 'Reminder' },
-  meeting:  { emoji: '🤝', label: 'Meeting' },
+const TYPE_CHIPS: Record<TaskType, { emoji: string }> = {
+  task:     { emoji: '✅' },
+  idea:     { emoji: '💡' },
+  reminder: { emoji: '🔔' },
+  meeting:  { emoji: '🤝' },
 }
 
 interface QuickCaptureProps {
@@ -233,7 +233,7 @@ function QuickCaptureInner({ onSubmit, onExpand, placeholder }: QuickCaptureProp
           >
             <div className="flex flex-wrap items-center gap-1.5 px-3 pb-2.5">
               {parsed && parsed.taskType !== 'task' && (
-                <MemoChip label={`${TYPE_CHIPS[parsed.taskType].emoji} ${TYPE_CHIPS[parsed.taskType].label}`} />
+                <MemoChip label={`${TYPE_CHIPS[parsed.taskType].emoji} ${i18nT(`quickCapture.type${parsed.taskType.charAt(0).toUpperCase()}${parsed.taskType.slice(1)}`)}`} />
               )}
               {parsed?.dueDate && (
                 <MemoChip label={`📅 ${formatDate(parsed.dueDate)}`} onRemove={removeDueDate} />

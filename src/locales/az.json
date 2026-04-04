@@ -32,7 +32,11 @@
     "hint": "\"Sabah saat 15:00-da Roma ilə görüş\" yazmağa cəhd edin - o, növü, tarixi və vaxtı avtomatik aşkar edəcək",
     "moreOptions": "Daha çox seçim",
     "taskForToday": "Bu gün üçün tapşırıq",
-    "taskForTomorrow": "Sabah üçün tapşırıq"
+    "taskForTomorrow": "Sabah üçün tapşırıq",
+    "typeTask": "Tapşırıq",
+    "typeIdea": "İdeya",
+    "typeReminder": "Xatırlatma",
+    "typeMeeting": "Görüş"
   },
   "welcome": {
     "step1Title": "Sakit məkanınız",

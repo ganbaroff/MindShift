@@ -234,11 +234,11 @@ export default function HistoryPage() {
                         {/* Energy delta */}
                         {(energyBefore || energyAfter) && (
                           <div className="flex items-center gap-1 text-[14px]">
-                            {energyBefore && <span title={t('history.energyBefore')}>{energyBefore}</span>}
+                            {energyBefore && <span role="img" aria-label={t('history.energyBefore')}>{energyBefore}</span>}
                             {energyBefore && energyAfter && (
-                              <span style={{ color: 'var(--color-border)', fontSize: 10 }}>→</span>
+                              <span aria-hidden="true" style={{ color: 'var(--color-border)', fontSize: 10 }}>→</span>
                             )}
-                            {energyAfter && <span title={t('history.energyAfter')}>{energyAfter}</span>}
+                            {energyAfter && <span role="img" aria-label={t('history.energyAfter')}>{energyAfter}</span>}
                           </div>
                         )}
                       </div>

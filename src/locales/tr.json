@@ -32,7 +32,11 @@
     "hint": "'Yarın saat 15:00'te Roma'yla toplantı' yazmayı deneyin; bu, türü, tarihi ve saati otomatik olarak algılar",
     "moreOptions": "Daha fazla seçenek",
     "taskForToday": "Bugünkü görev",
-    "taskForTomorrow": "Yarın için görev"
+    "taskForTomorrow": "Yarın için görev",
+    "typeTask": "Görev",
+    "typeIdea": "Fikir",
+    "typeReminder": "Hatırlatma",
+    "typeMeeting": "Toplantı"
   },
   "welcome": {
     "step1Title": "Sakin alanınız",

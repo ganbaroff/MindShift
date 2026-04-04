@@ -32,7 +32,11 @@
     "hint": "Versuchen Sie, „Treffen mit Roma morgen um 15 Uhr“ einzugeben – Typ, Datum und Uhrzeit werden automatisch erkannt",
     "moreOptions": "Weitere Optionen",
     "taskForToday": "Aufgabe für heute",
-    "taskForTomorrow": "Aufgabe für morgen"
+    "taskForTomorrow": "Aufgabe für morgen",
+    "typeTask": "Aufgabe",
+    "typeIdea": "Idee",
+    "typeReminder": "Erinnerung",
+    "typeMeeting": "Treffen"
   },
   "welcome": {
     "step1Title": "Ihr ruhiger Raum",

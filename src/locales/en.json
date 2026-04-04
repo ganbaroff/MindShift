@@ -32,7 +32,11 @@
     "hint": "Try typing 'meeting with Roma tomorrow at 3pm' — it'll auto-detect the type, date, and time",
     "moreOptions": "More options",
     "taskForToday": "Task for today",
-    "taskForTomorrow": "Task for tomorrow"
+    "taskForTomorrow": "Task for tomorrow",
+    "typeTask": "Task",
+    "typeIdea": "Idea",
+    "typeReminder": "Reminder",
+    "typeMeeting": "Meeting"
   },
   "welcome": {
     "step1Title": "Your calm space",
