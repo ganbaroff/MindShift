@@ -22,6 +22,7 @@
 import { useRef, useState, useCallback, useEffect } from 'react'
 import { supabase } from '@/shared/lib/supabase'
 import { useStore } from '@/store'
+import { logEvent } from '@/shared/lib/logger'
 import type { SessionPhase } from '@/types'
 import type { RealtimeChannel } from '@supabase/supabase-js'
 
@@ -128,6 +129,7 @@ export function useFocusRoom(): FocusRoomState {
         if (s === 'SUBSCRIBED') {
           await channel.track({ phase: phaseRef.current, joinedAt: Date.now() })
           setStatus('connected')
+          logEvent('room_session_started', { peers: prevPeersLengthRef.current })
         } else if (s === 'CHANNEL_ERROR' || s === 'TIMED_OUT') {
           setStatus('error')
         }
@@ -138,10 +140,12 @@ export function useFocusRoom(): FocusRoomState {
 
   const create = useCallback(() => {
     const newCode = genCode()
+    logEvent('room_created')
     subscribe(newCode)
   }, [subscribe])
 
   const join = useCallback((c: string) => {
+    logEvent('room_joined')
     subscribe(c.trim().toUpperCase().slice(0, 6))
   }, [subscribe])
 

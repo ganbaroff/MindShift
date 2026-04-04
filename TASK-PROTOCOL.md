@@ -545,9 +545,9 @@ WHAT'S NEXT:
 - [x] CI bundle size warning threshold ✅ BATCH-2026-04-04-K
 
 ### P3 — Polish
-- [ ] Play Store: 8 screenshots (`npm run screenshots` — needs real device or Playwright viewport)
-- [ ] Feature graphic 1024×500 (design work)
-- [ ] supabase/config.toml for reproducible local env
+- [x] Play Store: 8 screenshots ✅ BATCH-2026-04-04-P (re-run Apr 4, all 8 PNGs updated)
+- [ ] Feature graphic 1024×500 (design work — Yusif only)
+- [x] supabase/config.toml for reproducible local env ✅ BATCH-2026-04-04-L
 
 ---
 
