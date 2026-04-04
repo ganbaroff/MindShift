@@ -30,7 +30,9 @@
   "quickCapture": {
     "placeholder": "Add a task, reminder, or meeting...",
     "hint": "Try typing 'meeting with Roma tomorrow at 3pm' — it'll auto-detect the type, date, and time",
-    "moreOptions": "More options"
+    "moreOptions": "More options",
+    "taskForToday": "Task for today",
+    "taskForTomorrow": "Task for tomorrow"
   },
   "welcome": {
     "step1Title": "Your calm space",

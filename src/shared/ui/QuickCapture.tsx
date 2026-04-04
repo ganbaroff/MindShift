@@ -10,6 +10,7 @@ import { useState, useCallback, useRef, useEffect, memo } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { Send, X, ChevronDown, Mic, MicOff } from 'lucide-react'
 import { useMotion } from '@/shared/hooks/useMotion'
+import { useTranslation } from 'react-i18next'
 import { parseQuickInput, type ParsedTask, type TaskType } from '@/shared/lib/quickParse'
 import { todayISO } from '@/shared/lib/dateUtils'
 
@@ -62,6 +63,7 @@ const MemoChip = memo(Chip)
 
 function QuickCaptureInner({ onSubmit, onExpand, placeholder }: QuickCaptureProps) {
   const { shouldAnimate, t } = useMotion()
+  const { t: i18nT } = useTranslation()
   const [text, setText] = useState('')
   const [parsed, setParsed] = useState<ParsedTask | null>(null)
   const [listening, setListening] = useState(false)
@@ -119,7 +121,7 @@ function QuickCaptureInner({ onSubmit, onExpand, placeholder }: QuickCaptureProp
     if (!result.title) {
       if (!result.dueDate) return
       const isTomorrow = result.dueDate !== todayISO()
-      result.title = isTomorrow ? 'Task for tomorrow' : 'Task for today'
+      result.title = isTomorrow ? i18nT('quickCapture.taskForTomorrow') : i18nT('quickCapture.taskForToday')
     }
     onSubmit(result)
     setText('')
@@ -155,7 +157,7 @@ function QuickCaptureInner({ onSubmit, onExpand, placeholder }: QuickCaptureProp
   const showSubmit = text.trim().length > 0
 
   const formatDate = (iso: string): string => {
-    if (iso === todayISO()) return 'Today'
+    if (iso === todayISO()) return i18nT('today.todayLabel', 'Today')
     const d = new Date(iso + 'T12:00:00')
     return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })
   }

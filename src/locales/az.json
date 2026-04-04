@@ -30,7 +30,9 @@
   "quickCapture": {
     "placeholder": "Tapşırıq, xatırlatma və ya görüş əlavə edin...",
     "hint": "\"Sabah saat 15:00-da Roma ilə görüş\" yazmağa cəhd edin - o, növü, tarixi və vaxtı avtomatik aşkar edəcək",
-    "moreOptions": "Daha çox seçim"
+    "moreOptions": "Daha çox seçim",
+    "taskForToday": "Bu gün üçün tapşırıq",
+    "taskForTomorrow": "Sabah üçün tapşırıq"
   },
   "welcome": {
     "step1Title": "Sakit məkanınız",
@@ -47,6 +49,7 @@
   "tasks": {
     "title": "Tapşırıqlarınız",
     "tasksInPlay": "{{count}} tapşırıqlar oyunda",
+    "lowEnergyHint": "Aşağı enerji - NOW siyahınızdan bir şeyə diqqət edin. Qalanları gözləyə bilər.",
     "search": "Tapşırıqları axtarın...",
     "poolGuide": {
       "title": "Tapşırıqlar necə işləyir",
@@ -197,6 +200,13 @@
     "calendarDesc": "Tarixləri olan görüşlər və xatırlatmalar Google Təqvimdə görünür",
     "focusBlocks": "Fokus seanslarını vaxt blokları kimi əlavə edin",
     "focusBlocksDesc": "Fokus seansları təqviminizdə mavi bloklar kimi görünəcək",
+    "importFromCalendar": "Google Təqvimdən idxal edin",
+    "importFromCalendarDesc": "Qarşıdan gələn hadisələri tapşırıqlar kimi daxil edin",
+    "calendarImporting": "Tədbirlər götürülür...",
+    "calendarImportEmpty": "Növbəti 7 gündə yeni tədbir olmayacaq",
+    "calendarImportAdd": "Tapşırıqlara {{count}} əlavə edin",
+    "calendarImportAdded": "{{count}} hadisələr tapşırıqlara əlavə edildi",
+    "calendarImportError": "Təqvim tədbirlərini əldə etmək mümkün olmadı",
     "signInForCalendar": "Görüşləri və xatırlatmaları sinxronlaşdırmaq üçün Google ilə daxil olun",
     "mentalHealth": "Psixi Sağlamlıq",
     "crisisTitle": "Əgər siz və ya tanıdığınız biri mübarizə aparırsa",
@@ -245,7 +255,10 @@
     "soundPlaying": "oynayır",
     "volume": "Həcmi",
     "reducedStimulation": "Azaldılmış stimullaşdırma",
+    "reducedStimulationHint": "Animasiyaları tündləşdirir və rəngləri desaturasiya edir – gözlər və hisslər üçün daha asandır.",
     "hapticFeedback": "Haptik rəy",
+    "hapticFeedbackHint": "Tapşırığın tamamlanmasında və faza dəyişikliklərində yumşaq vibrasiyalar (yalnız Android).",
+    "languageSetAuto": "Dil avtomatik olaraq ayarlandı (sistemi izləyir)",
     "pauseForDay": "24 saat fasilə verin",
     "remindersEnabled": "Xatırlatmalar aktivləşdirildi",
     "remindersBlocked": "Brauzer tərəfindən bloklandı — bitmə tarixləri əldə etmək üçün brauzer parametrlərində aktivləşdirin.",
