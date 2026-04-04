@@ -209,6 +209,26 @@ export default function App() {
 
   useEffect(() => { reminders.restore() }, [])
 
+  // ── Re-engagement signal — fires once per app-open after a ≥1-day gap ──────
+  // Moved from TodayPage so direct-to-/focus and push-notification deep-link
+  // users are counted correctly in Day-3/Day-7 retention cohorts.
+  useEffect(() => {
+    if (!_hasHydrated) return
+    const { lastActiveDate, installDate } = useStore.getState()
+    if (!lastActiveDate) return
+    const gapDays = Math.floor((Date.now() - new Date(lastActiveDate).getTime()) / 86_400_000)
+    if (gapDays < 1) return
+    const daysSinceInstall = installDate
+      ? Math.floor((Date.now() - new Date(installDate).getTime()) / 86_400_000)
+      : undefined
+    logEvent('user_returned', {
+      gap_days: gapDays,
+      day_of_week: new Date().getDay(),
+      entry_route: window.location.pathname,
+      ...(daysSinceInstall != null && { days_since_install: daysSinceInstall }),
+    })
+  }, [_hasHydrated])
+
   // Scalar summaries — limits burnout re-computation to actual data changes, not array identity churn
   const poolSnoozedCount = useMemo(
     () => [...nowPool, ...nextPool, ...somedayPool].reduce((acc, t) => acc + t.snoozeCount, 0),

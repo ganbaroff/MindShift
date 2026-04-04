@@ -192,8 +192,18 @@ export function useFocusSession() {
       level,
       ...(energyBefore != null && { energy_before: energyBefore, energy_delta: level - energyBefore }),
     })
-    // Deferred VOLAURA session event — now we have the real post-session energy_after
+    // Deferred analytics event — fired here so we have the real energy_after (not possible at session end)
     const pending = pendingSessionRef.current
+    if (pending) {
+      logEvent('session_energy_delta', {
+        energy_before: energyBefore ?? 0,
+        energy_after: level,
+        ...(energyBefore != null && { energy_delta: level - energyBefore }),
+        duration_min: pending.durationMinutes,
+        phase: pending.phase,
+      })
+    }
+    // Deferred VOLAURA session event — now we have the real post-session energy_after
     if (pending) {
       pendingSessionRef.current = null
       void supabase.auth.getSession().then(({ data }) => {

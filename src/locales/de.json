@@ -888,6 +888,7 @@
   "history": {
     "title": "Sitzungsprotokoll 📋",
     "subtitle": "Letzte 30 Fokustage",
+    "loading": "Sitzungen werden geladen…",
     "signInTitle": "Melden Sie sich an, um Ihren Verlauf anzuzeigen",
     "signInDesc": "Ihre Sitzungen werden in der Cloud gespeichert, wenn Sie angemeldet sind.",
     "noSessionsTitle": "Noch keine Sitzungen",

@@ -888,6 +888,7 @@
   "history": {
     "title": "Session Log 📋",
     "subtitle": "Last 30 days of focus",
+    "loading": "Loading sessions…",
     "signInTitle": "Sign in to see your history",
     "signInDesc": "Your sessions are saved to the cloud when you're logged in.",
     "noSessionsTitle": "No sessions yet",
