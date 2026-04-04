@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  width: 1024px;
+  height: 500px;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #0D0E1A 0%, #1A1B2E 40%, #0F1117 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+/* Subtle grid pattern */
+body::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(123,114,255,0.08) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(78,205,196,0.06) 0%, transparent 50%);
+}
+
+.container {
+  display: flex;
+  align-items: center;
+  gap: 64px;
+  position: relative;
+  z-index: 1;
+  padding: 0 72px;
+  width: 100%;
+}
+
+.left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(78,205,196,0.12);
+  border: 1px solid rgba(78,205,196,0.25);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 13px;
+  color: #4ECDC4;
+  font-weight: 600;
+  width: fit-content;
+  letter-spacing: 0.3px;
+}
+
+h1 {
+  font-size: 42px;
+  font-weight: 800;
+  color: #E8E8F0;
+  line-height: 1.15;
+  letter-spacing: -0.5px;
+}
+
+h1 span {
+  background: linear-gradient(135deg, #7B72FF 0%, #4ECDC4 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+  font-size: 17px;
+  color: #8B8BA7;
+  line-height: 1.5;
+  max-width: 380px;
+}
+
+.features {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.feature-chip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(123,114,255,0.1);
+  border: 1px solid rgba(123,114,255,0.2);
+  border-radius: 12px;
+  padding: 6px 12px;
+  font-size: 12px;
+  color: #B0ABFF;
+  font-weight: 500;
+}
+
+/* Phone mockup */
+.phone {
+  width: 220px;
+  height: 440px;
+  background: #1E2136;
+  border-radius: 32px;
+  border: 2px solid rgba(255,255,255,0.08);
+  box-shadow:
+    0 20px 60px rgba(0,0,0,0.5),
+    0 0 80px rgba(123,114,255,0.1),
+    inset 0 1px 0 rgba(255,255,255,0.05);
+  overflow: hidden;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.phone-screen {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 32px 16px 16px;
+}
+
+.phone-status {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.phone-greeting {
+  font-size: 11px;
+  color: #8B8BA7;
+}
+
+.phone-xp {
+  font-size: 10px;
+  background: rgba(123,114,255,0.15);
+  border: 1px solid rgba(123,114,255,0.25);
+  border-radius: 8px;
+  padding: 2px 8px;
+  color: #7B72FF;
+  font-weight: 600;
+}
+
+.phone-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #E8E8F0;
+  margin-bottom: 4px;
+}
+
+.phone-sub {
+  font-size: 10px;
+  color: #8B8BA7;
+  margin-bottom: 16px;
+}
+
+.phone-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 14px;
+  padding: 12px;
+  margin-bottom: 8px;
+}
+
+.task-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.task-check {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1.5px solid #4ECDC4;
+  flex-shrink: 0;
+}
+
+.task-check.done {
+  background: #4ECDC4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.task-check.done::after {
+  content: '\2713';
+  color: #0F1117;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.task-text {
+  font-size: 11px;
+  color: #E8E8F0;
+  font-weight: 500;
+}
+
+.task-text.completed {
+  text-decoration: line-through;
+  color: #6B6B8A;
+}
+
+.phone-focus-btn {
+  background: linear-gradient(135deg, #7B72FF 0%, #5B52E8 100%);
+  border-radius: 14px;
+  padding: 10px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: white;
+  margin-top: auto;
+  letter-spacing: 0.3px;
+}
+
+/* Decorative orbs */
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.15;
+}
+.orb-1 { width: 200px; height: 200px; background: #7B72FF; top: -40px; right: 100px; }
+.orb-2 { width: 150px; height: 150px; background: #4ECDC4; bottom: -20px; left: 200px; }
+</style>
+</head>
+<body>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="container">
+    <div class="left">
+      <div class="badge">Built for ADHD brains</div>
+      <h1>Focus without<br>the <span>friction</span></h1>
+      <p class="subtitle">Tasks, timers, and gentle accountability designed around how your brain actually works.</p>
+      <div class="features">
+        <div class="feature-chip">Focus Rooms</div>
+        <div class="feature-chip">Smart Timer</div>
+        <div class="feature-chip">No Shame</div>
+      </div>
+    </div>
+    <div class="phone">
+      <div class="phone-screen">
+        <div class="phone-status">
+          <span class="phone-greeting">Good afternoon</span>
+          <span class="phone-xp">2,450 XP</span>
+        </div>
+        <div class="phone-title">Your calm space</div>
+        <div class="phone-sub">In your NOW pool</div>
+        <div class="phone-card">
+          <div class="task-row">
+            <div class="task-check done"></div>
+            <span class="task-text completed">Review sprint plan</span>
+          </div>
+          <div class="task-row">
+            <div class="task-check"></div>
+            <span class="task-text">Write standup notes</span>
+          </div>
+          <div class="task-row">
+            <div class="task-check"></div>
+            <span class="task-text">Set up dev environment</span>
+          </div>
+        </div>
+        <div class="phone-focus-btn">Start Focus</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
