@@ -68,6 +68,13 @@ export function MonthlyReflection({ onDismiss }: Props) {
     onDismiss()
   }, [currentMonth, setMonthlyReflectionShownMonth, onDismiss])
 
+  // WCAG 2.1.1: Escape key dismisses the overlay
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') handleDismiss() }
+    window.addEventListener('keydown', handleKey)
+    return () => window.removeEventListener('keydown', handleKey)
+  }, [handleDismiss])
+
   useEffect(() => {
     if (step !== 'close') return
     const timer = setTimeout(handleDismiss, 3000)
@@ -171,7 +178,7 @@ export function MonthlyReflection({ onDismiss }: Props) {
                 <div className="flex flex-col gap-3">
                   <button
                     onClick={() => setStep('intention')}
-                    className="w-full py-4 rounded-2xl font-semibold text-base"
+                    className="w-full py-4 rounded-2xl font-semibold text-base focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none"
                     style={{ background: 'var(--color-teal)', color: '#0F1117' }}
                     aria-label="Set monthly intention"
                   >
@@ -179,7 +186,7 @@ export function MonthlyReflection({ onDismiss }: Props) {
                   </button>
                   <button
                     onClick={handleDismiss}
-                    className="w-full py-3 text-sm"
+                    className="w-full py-3 text-sm focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none rounded-lg"
                     style={{ color: 'var(--color-text-muted)' }}
                     aria-label="Skip monthly reflection"
                   >

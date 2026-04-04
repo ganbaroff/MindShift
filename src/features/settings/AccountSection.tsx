@@ -184,7 +184,7 @@ export function AccountSection() {
       <button
         onClick={handleSignOut}
         className="text-[13px] font-medium w-full text-center py-2"
-        style={{ color: '#E8976B' }}
+        style={{ color: 'var(--color-gold)' }}
       >
         {t('settings.signOut')}
       </button>

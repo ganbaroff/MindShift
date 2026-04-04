@@ -12,15 +12,13 @@ import { CookieBanner } from '@/shared/ui/CookieBanner'
 import { useOfflineSync } from '@/shared/hooks/useOfflineSync'
 import { useTaskSync } from '@/shared/hooks/useTaskSync'
 import { useSessionHistory } from '@/shared/hooks/useSessionHistory'
-import { logError, logEvent } from '@/shared/lib/logger'
+import { logEvent } from '@/shared/lib/logger'
 import { sendStreakUpdate, isVolauraConfigured } from '@/shared/lib/volaura-bridge'
 import { reminders } from '@/shared/lib/reminders'
 import { computeBurnoutScore, deriveBehaviors } from '@/shared/lib/burnout'
-import { RECOVERY_THRESHOLD_HOURS } from '@/shared/lib/constants'
 import { useCalendarSync } from '@/shared/hooks/useCalendarSync'
 import { useInAppReview } from '@/shared/hooks/useInAppReview'
-
-const CONSENT_PENDING_KEY = 'ms_consent_pending'
+import { useAuthInit } from './useAuthInit'
 
 // ── Lazy routes — Lovable redesign pages ───────────────────────────────────────
 const PreviewScreen    = lazy(() => import('@/features/preview/PreviewScreen'))
@@ -58,8 +56,10 @@ const LazyFirstFocusTutorial = lazy(() =>
 )
 
 export default function App() {
+  useAuthInit()
+
   const {
-    setUser, updateLastSession,
+    updateLastSession,
     nowPool, nextPool, somedayPool,
     onboardingCompleted, setBurnoutScore, completedTotal, energyLevel,
     emotionalReactivity,
@@ -96,117 +96,7 @@ export default function App() {
     if (meta) meta.setAttribute('content', resolved === 'light' ? '#F5F3EE' : '#0F1117')
   }, [userTheme])
 
-  useEffect(() => {
-    // authStateResolved prevents a race where getSession() returns null during
-    // token refresh, briefly creating a guest, before onAuthStateChange fires
-    // with the real user. We only create a guest after auth state is confirmed.
-    let authStateResolved = false
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      authStateResolved = true
-      if (session?.user) {
-        localStorage.removeItem('ms_signed_out')
-        setUser(session.user.id, session.user.email ?? '')
-
-        // Sync subscription tier from DB so store reflects real state on any device
-        void supabase
-          .from('users')
-          .select('subscription_tier, trial_ends_at')
-          .eq('id', session.user.id)
-          .single()
-          .then(({ data }) => {
-            const row = data as { subscription_tier?: string; trial_ends_at?: string | null } | null
-            if (row?.subscription_tier) {
-              useStore.getState().setSubscription(
-                row.subscription_tier as 'free' | 'pro_trial' | 'pro',
-                row.trial_ends_at ?? null
-              )
-            }
-          })
-
-        // Guard: don't reset lastSessionAt when the recovery protocol should show.
-        // RecoveryProtocol uses lastSessionAt to compute daysAbsent — calling
-        // updateLastSession() here would zero out the 72h gap before the overlay renders.
-        // updateLastSession() is called instead from the RecoveryProtocol onDismiss handler.
-        const s = useStore.getState()
-        const isLongAbsence = s.lastSessionAt && !s.recoveryShown &&
-          (Date.now() - new Date(s.lastSessionAt).getTime()) / 3_600_000 >= RECOVERY_THRESHOLD_HOURS
-        if (!isLongAbsence) updateLastSession()
-
-        // Analytics: track return after 2+ day gap (below recovery threshold)
-        if (s.lastSessionAt && !isLongAbsence) {
-          const gapDays = (Date.now() - new Date(s.lastSessionAt).getTime()) / 86_400_000
-          if (gapDays >= 2) logEvent('return_after_gap', { gap_days: Math.floor(gapDays) })
-        }
-
-        // ── Google Calendar: store provider tokens on OAuth callback ──────────
-        // Only store tokens + enable sync when returning from calendar-scope auth
-        // (Settings toggle sets this flag before redirect)
-        if (session.provider_token && localStorage.getItem('ms_calendar_pending')) {
-          localStorage.removeItem('ms_calendar_pending')
-          try {
-            await supabase.functions.invoke('gcal-store-token', {
-              body: {
-                providerToken: session.provider_token,
-                providerRefreshToken: session.provider_refresh_token ?? null,
-                expiresIn: 3600, // Google tokens last 1 hour
-              },
-            })
-            useStore.getState().setCalendarSyncEnabled(true)
-          } catch (err) {
-            logError('App.gcalTokenStore', err instanceof Error ? err : new Error(String(err)))
-          }
-        }
-
-        try {
-          const raw = localStorage.getItem(CONSENT_PENDING_KEY)
-          if (raw) {
-            const consent = JSON.parse(raw) as {
-              terms_accepted_at: string
-              terms_version:     string
-              age_confirmed:     boolean
-            }
-            supabase
-              .from('users')
-              .update({
-                terms_accepted_at: consent.terms_accepted_at,
-                terms_version:     consent.terms_version,
-                age_confirmed:     consent.age_confirmed,
-              } as never)
-              .eq('id', session.user.id)
-              .then(({ error }) => {
-                if (error) logError('App.consentPersist', new Error(error.message))
-                else localStorage.removeItem(CONSENT_PENDING_KEY)
-              })
-          }
-        } catch { /* localStorage or JSON parse failure */ }
-      } else {
-        // No session — create guest unless user explicitly signed out
-        if (!localStorage.getItem('ms_signed_out')) {
-          const guestId = localStorage.getItem('ms_guest_id') ?? `guest_${crypto.randomUUID()}`
-          localStorage.setItem('ms_guest_id', guestId)
-          setUser(guestId, '')
-          updateLastSession()
-        }
-      }
-    })
-
-    // Fallback: if onAuthStateChange never fires (network issue, Supabase cold start),
-    // create guest after a short delay so the app is usable offline.
-    const fallbackTimer = setTimeout(() => {
-      if (!authStateResolved && !localStorage.getItem('ms_signed_out')) {
-        const guestId = localStorage.getItem('ms_guest_id') ?? `guest_${crypto.randomUUID()}`
-        localStorage.setItem('ms_guest_id', guestId)
-        setUser(guestId, '')
-        updateLastSession()
-      }
-    }, 2000)
-
-    return () => {
-      subscription.unsubscribe()
-      clearTimeout(fallbackTimer)
-    }
-  }, [setUser, updateLastSession])
+  // Auth init (Supabase onAuthStateChange, consent, calendar OAuth) → useAuthInit.ts
 
   useEffect(() => { reminders.restore() }, [])
 

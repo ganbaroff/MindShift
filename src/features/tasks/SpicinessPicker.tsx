@@ -35,7 +35,7 @@ export function SpicinessPicker({ value, onChange }: SpicinesPickerProps) {
           aria-label={`Overwhelm level: ${t(labelKey)}`}
         >
           <span className="text-base leading-none">{emoji}</span>
-          <span className="text-[10px]" style={{ color: value === v ? '#C8C0FF' : 'var(--color-text-muted)' }}>{t(labelKey)}</span>
+          <span className="text-[10px]" style={{ color: value === v ? 'var(--color-primary-light)' : 'var(--color-text-muted)' }}>{t(labelKey)}</span>
         </button>
       ))}
     </div>

@@ -141,15 +141,16 @@ export const SessionControls = memo(function SessionControls({
                     }
                   }}
                   disabled={!parkText.trim()}
-                  className="flex-1 py-1.5 rounded-lg text-xs font-medium"
+                  className="flex-1 py-1.5 rounded-lg text-xs font-medium focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none"
                   style={{ background: parkText.trim() ? 'var(--color-primary)' : 'var(--color-surface-raised)', color: 'white' }}
                 >
                   Save
                 </button>
                 <button
                   onClick={onParkDismiss}
-                  className="py-1.5 px-3 rounded-lg text-xs"
+                  className="py-1.5 px-3 rounded-lg text-xs focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none"
                   style={{ color: 'var(--color-text-muted)' }}
+                  aria-label="Dismiss"
                 >
                   ✕
                 </button>

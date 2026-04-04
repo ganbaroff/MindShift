@@ -36,7 +36,7 @@ export function ShareWeekButton() {
       style={{
         background: 'rgba(123,114,255,0.10)',
         border: '1px solid rgba(123,114,255,0.20)',
-        color: '#C8C0FF',
+        color: 'var(--color-primary-light)',
       }}
     >
       <span>🔗</span>

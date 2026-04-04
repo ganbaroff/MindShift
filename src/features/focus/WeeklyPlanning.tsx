@@ -14,7 +14,7 @@
  * as a subtle chip in FocusScreen setup (Sprint W).
  */
 
-import { memo, useState } from 'react'
+import { memo, useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useTranslation } from 'react-i18next'
 import { useMotion } from '@/shared/hooks/useMotion'
@@ -42,6 +42,13 @@ export const WeeklyPlanning = memo(function WeeklyPlanning({ onDismiss }: Weekly
 
   const [step, setStep] = useState(0)
   const [chosen, setChosen] = useState<IntentionKey | null>(null)
+
+  // WCAG 2.1.1: Escape key dismisses the overlay
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onDismiss() }
+    window.addEventListener('keydown', handleKey)
+    return () => window.removeEventListener('keydown', handleKey)
+  }, [onDismiss])
 
   const handleIntentionPick = (key: IntentionKey) => {
     setChosen(key)
@@ -128,7 +135,7 @@ export const WeeklyPlanning = memo(function WeeklyPlanning({ onDismiss }: Weekly
             <motion.button
               whileTap={{ scale: 0.97 }}
               onClick={() => setStep(1)}
-              className="w-full py-3.5 rounded-2xl font-semibold text-sm"
+              className="w-full py-3.5 rounded-2xl font-semibold text-sm focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none"
               style={{
                 background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-light))',
                 color: '#fff',
@@ -140,7 +147,7 @@ export const WeeklyPlanning = memo(function WeeklyPlanning({ onDismiss }: Weekly
             </motion.button>
             <button
               onClick={handleSkip}
-              className="mt-3 w-full py-2 text-xs"
+              className="mt-3 w-full py-2 text-xs focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none rounded-lg"
               style={{ color: 'var(--color-text-muted)' }}
               aria-label="Skip weekly planning"
             >
@@ -174,7 +181,7 @@ export const WeeklyPlanning = memo(function WeeklyPlanning({ onDismiss }: Weekly
                   onClick={() => handleIntentionPick(key)}
                   aria-pressed={chosen === key}
                   aria-label={`Intention: ${t(labelKey)}`}
-                  className="w-full text-left p-3.5 rounded-2xl flex items-center gap-3"
+                  className="w-full text-left p-3.5 rounded-2xl flex items-center gap-3 focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none"
                   style={{
                     background: chosen === key ? 'rgba(123,114,255,0.15)' : 'var(--color-surface-card)',
                     border: `1px solid ${chosen === key ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
@@ -191,7 +198,7 @@ export const WeeklyPlanning = memo(function WeeklyPlanning({ onDismiss }: Weekly
 
             <button
               onClick={handleSkip}
-              className="mt-4 w-full py-2 text-xs text-center"
+              className="mt-4 w-full py-2 text-xs text-center focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none rounded-lg"
               style={{ color: 'var(--color-text-muted)' }}
               aria-label="Skip weekly planning"
             >
@@ -223,7 +230,7 @@ export const WeeklyPlanning = memo(function WeeklyPlanning({ onDismiss }: Weekly
             <motion.button
               whileTap={{ scale: 0.97 }}
               onClick={handleFinish}
-              className="w-full py-3.5 rounded-2xl font-semibold text-sm"
+              className="w-full py-3.5 rounded-2xl font-semibold text-sm focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none"
               style={{
                 background: 'linear-gradient(135deg, var(--color-primary), var(--color-teal))',
                 color: '#fff',
