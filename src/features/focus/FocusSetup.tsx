@@ -90,6 +90,7 @@ export function FocusSetup({
           source,
           selected_task: selectedTask ? 1 : 0,
           selected_duration: selectedDuration,
+          came_from_tutorial: source === 'tutorial' ? 1 : 0,
         })
       }
     }

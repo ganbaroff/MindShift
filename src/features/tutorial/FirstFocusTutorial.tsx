@@ -71,10 +71,10 @@ export function FirstFocusTutorial() {
   }, [timerRunning])
 
   const handleComplete = useCallback(() => {
-    if (sampleTaskIdRef.current) {
-      removeTask(sampleTaskIdRef.current)
-      sampleTaskIdRef.current = null
-    }
+    // Keep the tutorial task alive — it gives the user a pre-selected task
+    // on FocusSetup (/focus?from=tutorial), preventing ADHD cold-start paralysis.
+    // The task persists until they complete or delete it naturally.
+    sampleTaskIdRef.current = null
     const installDate = useStore.getState().installDate
     const dsi = installDate ? Math.floor((Date.now() - new Date(installDate).getTime()) / 86_400_000) : undefined
     logEvent('tutorial_completed', {
@@ -86,7 +86,7 @@ export function FirstFocusTutorial() {
     markHintSeen('first_focus_tutorial')
     markHintSeen('welcome_walkthrough')
     navigate('/focus?from=tutorial')
-  }, [setFirstFocusTutorialCompleted, markHintSeen, navigate, removeTask])
+  }, [setFirstFocusTutorialCompleted, markHintSeen, navigate])
 
   const handleSkip = useCallback(() => {
     if (intervalRef.current) clearInterval(intervalRef.current)
