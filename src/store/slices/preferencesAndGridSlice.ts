@@ -69,6 +69,9 @@ interface PreferencesSlice {
   telegramLinked: boolean
   generateTelegramCode: () => void
   setTelegramLinked: (linked: boolean) => void
+  // Mochi companion — toggle visibility during focus sessions
+  mochiCompanionEnabled: boolean
+  setMochiCompanionEnabled: (val: boolean) => void
   // Google Calendar integration
   calendarSyncEnabled: boolean
   setCalendarSyncEnabled: (val: boolean) => void
@@ -216,6 +219,10 @@ export const createPreferencesAndGridSlice: StateCreator<
     }
   },
   setTelegramLinked: (linked) => set((s) => ({ telegramLinked: linked, telegramLinkCode: linked ? null : s.telegramLinkCode })),
+
+  // Mochi companion — visible during focus sessions by default
+  mochiCompanionEnabled: true,
+  setMochiCompanionEnabled: (val) => set({ mochiCompanionEnabled: val }),
 
   // Google Calendar integration
   calendarSyncEnabled: false,

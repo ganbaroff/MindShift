@@ -267,6 +267,7 @@
     "reducedStimulationHint": "Dims animations and desaturates colours — easier on the eyes and senses.",
     "hapticFeedback": "Haptic feedback",
     "hapticFeedbackHint": "Gentle vibrations on task completion and phase changes (Android only).",
+    "mochiCompanion": "Show Mochi during sessions",
     "languageSetAuto": "Language set to auto (follows system)",
     "pauseForDay": "Pause for 24h",
     "remindersEnabled": "Reminders enabled",

@@ -17,7 +17,7 @@
     "tomorrow": "Sabah",
     "more": "+{{count}} daha çox",
     "moreFirst": "+{{count}} daha çox — əvvəlcə bunlara diqqət yetirin",
-    "nowPool": "NOW hovuzunuzda",
+    "nowPool": "İNDİ siyahınızda",
     "stillInNow": "Hələ İNDİDİR",
     "wrapUp": "Bugünkü yekun",
     "quietDay": "Sakit gün - bu da yaxşıdır. İstirahət sayılır.",
@@ -53,7 +53,7 @@
   "tasks": {
     "title": "Tapşırıqlarınız",
     "tasksInPlay": "{{count}} tapşırıqlar oyunda",
-    "lowEnergyHint": "Aşağı enerji - NOW siyahınızdan bir şeyə diqqət edin. Qalanları gözləyə bilər.",
+    "lowEnergyHint": "Aşağı enerji - İNDİ siyahınızdan bir şeyə diqqət edin. Qalanları gözləyə bilər.",
     "search": "Tapşırıqları axtarın...",
     "poolGuide": {
       "title": "Tapşırıqlar necə işləyir",
@@ -69,15 +69,15 @@
     "addToStart": "Diqqəti cəmləmək üçün tapşırıq əlavə edin",
     "addTask": "Tapşırıq əlavə edin",
     "holdToReorder": "yenidən sıralamaq üçün saxlayın",
-    "fillingUp": "doldurulması",
+    "fillingUp": "dolur",
     "pastDue": "{{count}} tapşırığın vaxtı keçmişdir",
     "pastDuePlural": "{{count}} tapşırıqlar vaxtı keçmişdir",
     "noPressure": "Təzyiq yoxdur — hazır olduğunuzda yeni tarixlər təyin etmək üçün toxunun",
     "reschedule": "Yenidən planlaşdırın →",
     "move": "Köçürün →",
-    "park": "Park edin →",
+    "park": "Sonraya saxlayın →",
     "energyHint": "Aşağı enerji günü? Asan birindən başlayın - kiçik qələbələrdən impuls yaranır.",
-    "queueHere": "Tapşırıqları burada növbəyə qoyun - NOW yer olduqda onlar hazır olacaq."
+    "queueHere": "Tapşırıqları burada növbəyə qoyun - İNDİ siyahısında yer olduqda onlar hazır olacaq."
   },
   "focus": {
     "title": "Fokus sessiyası",
@@ -89,7 +89,7 @@
     "dismiss": "Rədd et",
     "taskOptional": "TAPŞIQ (İSTEĞE BAĞLI)",
     "openFocus": "Açıq diqqət - xüsusi tapşırıq yoxdur",
-    "duration": "DURATION",
+    "duration": "MÜDDƏT",
     "custom": "Xüsusi",
     "startFocus": "Diqqəti başladın →",
     "skipRitual": "Ritualı atlayın və daxil olun",
@@ -103,7 +103,7 @@
     "focusedFor": "{{min}}m diqqətinizi cəmləmisiniz. Sizin tərəqqiniz yadda saxlanılacaq.",
     "keepGoing": "Davam edin 🌿",
     "endSession": "Sessiyanı bitir",
-    "parkProgress": "Tərəqqinizi park edin",
+    "parkProgress": "İrəliləyişinizi sonraya saxlayın",
     "parkProgressDesc": "Nə üzərində işləyirdin? Növbəti dəfə sizə xatırladacağıq.",
     "parkPlaceholder": "məs. Başlıq tərtibatı tamamlanır...",
     "saveAndExit": "Saxla və Çıx 📌",
@@ -163,7 +163,7 @@
     "thoughtsSavedPlural": "{{count}} fikirlər yadda saxlanıldı",
     "tapToSeeSomeday": "Bir gün onları görmək üçün toxunun",
     "imReady": "mən hazıram",
-    "skipNatureBuffer": "Təbiət tamponunu atlayın",
+    "skipNatureBuffer": "İstirahəti keçin",
     "firstSessionTitle": "Sən ortaya çıxdın. 🌱",
     "firstSessionBody": "Sabah geri qayıdın - ardıcıllığınız hər dəfə artır.",
     "bypassRecovery": "Bərpa təklifini keçin",
@@ -246,7 +246,7 @@
     "phaseMaintainDesc": "İNDİ 3 tapşırıq",
     "phaseRecover": "bərpa edin",
     "phaseRecoverDesc": "İNDİ Maks 2",
-    "phaseSandbox": "Sandbox",
+    "phaseSandbox": "Sərbəst rejim",
     "phaseSandboxDesc": "Limit yoxdur",
     "soundPreviewHint": "Öncədən baxmaq üçün toxunun · Fokus ankeri kimi təyin etmək üçün 🔒 düyməsini basın",
     "soundBrown": "Qəhvəyi",
@@ -267,6 +267,7 @@
     "reducedStimulationHint": "Animasiyaları tündləşdirir və rəngləri desaturasiya edir – gözlər və hisslər üçün daha asandır.",
     "hapticFeedback": "Haptik rəy",
     "hapticFeedbackHint": "Tapşırığın tamamlanmasında və faza dəyişikliklərində yumşaq vibrasiyalar (yalnız Android).",
+    "mochiCompanion": "Sessiyalar zamanı Mochi-ni göstər",
     "languageSetAuto": "Dil avtomatik olaraq ayarlandı (sistemi izləyir)",
     "pauseForDay": "24 saat fasilə verin",
     "remindersEnabled": "Xatırlatmalar aktivləşdirildi",
@@ -352,7 +353,7 @@
     "plansChange": "Planlar gözlənilmədən dəyişdikdə... 🌊",
     "plansSubtitle": "Necə cavab versəniz, çətin günlərdə sizi daha yaxşı dəstəkləyəcəyik.",
     "throwsOffLabel": "Məni tamamilə yıxır",
-    "throwsOffDesc": "Yenidən fokuslanmaq çətindir - RSD güclü zərbə vura bilər",
+    "throwsOffDesc": "Yenidən fokuslanmaq çətindir - duyğusal ağrı güclü ola bilər",
     "recoverLabel": "Mən bunu görürəm, sonra sağalıram",
     "recoverDesc": "Bir az sürtünmə, amma geri sıçrayıram",
     "rarelyPhasesLabel": "Nadir hallarda məni fazalandırır",
@@ -376,7 +377,7 @@
     "getStarted": "Başlayın",
     "letsGetStarted": "Xoş gəldiniz. Başlayaq.",
     "enterEmailDesc": "E-poçtunuzu daxil edin və biz sehrli bir keçid göndərəcəyik.",
-    "noPasswordNoFriction": "Parol yoxdur. Sürtünmə yoxdur.",
+    "noPasswordNoFriction": "Parol yoxdur. Əlavə addım yoxdur.",
     "continueWithGoogle": "Google ilə davam edin",
     "orEmail": "və ya e-poçtla daxil olun",
     "or": "və ya",
@@ -814,7 +815,7 @@
     "tapToAdd": "İlk tapşırığınızı əlavə etmək üçün klikləyin – yalnız biri kifayətdir",
     "howsEnergy": "Hazırda enerjiniz necədir?",
     "lowEnergyDetected": "Aşağı enerji aşkarlandı - yalnız ən vacib olanı göstərir.",
-    "burnoutProtection": "Yanıqdan qorunma rejimi aktivdir.",
+    "burnoutProtection": "Tükənmişlikdən qorunma rejimi aktivdir.",
     "gentleMode": "zərif rejim",
     "moreRest": "+{{count}} daha çox — əvvəlcə dincəl, gözləyəcəklər",
     "upNext": "Növbəti · {{count}} tapşırıq növbəyə alınıb",
@@ -882,7 +883,7 @@
     "insightOneStep": "🎯 Tapşırıqları addım-addım bitirirsiniz",
     "achieverLabel": "Uğurlu",
     "achieverDesc": "Dərinliyə dalıb başladığınız işi bitirirsiniz",
-    "explorerLabel": "Explorer",
+    "explorerLabel": "Kəşfçi",
     "explorerDesc": "Siz müxtəliflikdə inkişaf edirsiniz və marağı izləyirsiniz",
     "connectorLabel": "Bağlayıcı",
     "connectorDesc": "Ardıcıllıq vasitəsilə təcil yaradırsınız",
@@ -930,7 +931,7 @@
   "taskCard": {
     "done": "✓ Tamamlandı",
     "doneComplete": "✓ Tamamlandı!",
-    "parkIt": "Park edin →",
+    "parkIt": "Sonraya saxlayın →",
     "carryOver": "daşınması",
     "remove": "Silinsin?",
     "undo": "Geri al",
@@ -950,10 +951,10 @@
     "notePlaceholder": "İstənilən əlavə təfərrüat, keçidlər və ya kontekst...",
     "whenMeeting": "Bu nə vaxtdır?",
     "whenReminder": "Bu nə vaxtdır?",
-    "nowFullNext": "NOW doludur — NEXT-ə eniş",
+    "nowFullNext": "İNDİ doludur — NÖVBƏTİ-yə əlavə edilir",
     "addingTo": "{{pool}} əlavə edilir",
     "addToPool": "{{pool}} əlavə et →",
-    "queueFull": "Növbəniz dolmaqdadır – əlavə etməzdən əvvəl birini park edə bilərsiniz?",
+    "queueFull": "Növbəniz dolmaqdadır – əlavə etməzdən əvvəl birini sonraya saxlaya bilərsiniz?",
     "crisisMessage": "Sən tək deyilsən. Bu hisslər realdır və kömək mümkündür.",
     "saving": "Yadda saxlanılır..."
   },
@@ -1001,7 +1002,7 @@
   },
   "breathwork": {
     "breatheIn": "Nəfəs al...",
-    "breatheOut": "Breathe out...",
+    "breatheOut": "Nəfəs ver...",
     "readyToFocus": "Diqqət etməyə hazırdır",
     "breathCount": "Nəfəs {{current}}/{{total}}",
     "skip": "Keç →"
@@ -1015,7 +1016,7 @@
     "setTomorrowFocus": "Sabahın diqqətini təyin edin →",
     "skipClose": "Keçin - sadəcə bağlayın",
     "oneThingTomorrow": "Sabah BİR şey nədir?",
-    "waitingInNext": "Siz oyandığınız zaman NEXT-də gözləyəcək.",
+    "waitingInNext": "Siz oyandığınız zaman NÖVBƏTİ-də gözləyəcək.",
     "tomorrowPlaceholder": "Sabah üçün bir şey ...",
     "saving": "Yadda saxlanılır...",
     "saveAndRest": "Saxla və istirahət et",
@@ -1136,11 +1137,11 @@
     "tryFiveMin": "5 dəqiqəlik seans keçirməyə çalışın"
   },
   "energy": {
-    "drained": "Qurudulmuş",
+    "drained": "Taqətsiz",
     "low": "Aşağı",
     "okay": "tamam",
     "good": "Yaxşı",
-    "wired": "Simli"
+    "wired": "Enerjili"
   },
   "review": {
     "sharePrompt": "MindShift-dən zövq alırsınız? Paylaşın 🌱",
@@ -1267,7 +1268,7 @@
     "micro_master": "Mikro Usta",
     "gentle_start": "Zərif Başlanğıc",
     "recover_rise": "Bərpa et və yüksəl",
-    "pool_shifter": "Hovuz dəyişdiricisi",
+    "pool_shifter": "Siyahı dəyişdiricisi",
     "night_owl": "Gecə bayquşu",
     "morning_mind": "Səhər Ağlı",
     "voice_input": "Səs daxiletmə",
@@ -1330,6 +1331,6 @@
     "launch": "Başlayın",
     "maintain": "Saxlamaq",
     "recover": "Bərpa edin",
-    "sandbox": "Sandbox"
+    "sandbox": "Sərbəst rejim"
   }
 }

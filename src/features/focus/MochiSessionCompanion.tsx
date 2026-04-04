@@ -115,7 +115,7 @@ interface ActiveBubble {
 function MochiSessionCompanionInner({ elapsedSeconds, sessionPhase, behaviorProfile }: Props) {
   const { shouldAnimate, t } = useMotion()
   const { t: translate } = useTranslation()
-  const { psychotype, userId, energyLevel, currentStreak, seasonalMode, timeBlindness, emotionalReactivity, locale, uiTone, nowPool } = useStore()
+  const { psychotype, userId, energyLevel, currentStreak, seasonalMode, timeBlindness, emotionalReactivity, locale, uiTone, nowPool, mochiCompanionEnabled } = useStore()
 
   // Compute task context for AI — what the user is working on
   const activeNowTasks = useMemo(() => nowPool.filter((task: Task) => task.status === 'active'), [nowPool])
@@ -161,6 +161,11 @@ function MochiSessionCompanionInner({ elapsedSeconds, sessionPhase, behaviorProf
 
   const isGuest = !userId || userId.startsWith('guest_')
 
+  // Clinical safety: neutral tone for high-reactivity users during struggle (Naргиз recommendation)
+  const effectiveTone = emotionalReactivity === 'high' && sessionPhase === 'struggle'
+    ? 'neutral' as const
+    : uiTone
+
   // Resolve an i18n key that should be a string array; fall back to mochi.fallback
   const getPool = useCallback((key: string): string[] => {
     const result = translate(key, { returnObjects: true })
@@ -171,12 +176,12 @@ function MochiSessionCompanionInner({ elapsedSeconds, sessionPhase, behaviorProf
   // Get fallback message from i18n pools — tone-aware, then psychotype, then neutral
   const getFallbackMessage = useCallback((trigger: BubbleTrigger): ActiveBubble => {
     // 1. Try tone-specific pool (gen_z / millennial / gen_x)
-    const tonePool = uiTone !== 'neutral'
-      ? getPool(`mochi.${uiTone}.${trigger.messagePool}`)
+    const tonePool = effectiveTone !== 'neutral'
+      ? getPool(`mochi.${effectiveTone}.${trigger.messagePool}`)
       : undefined
 
     // 2. Try psychotype overlay (only for neutral tone — tone-specific already personalizes)
-    const psychoPool = uiTone === 'neutral' && psychotype
+    const psychoPool = effectiveTone === 'neutral' && psychotype
       ? getPool(`mochi.psychotype.${psychotype}.${trigger.messagePool}`)
       : undefined
 
@@ -190,7 +195,7 @@ function MochiSessionCompanionInner({ elapsedSeconds, sessionPhase, behaviorProf
       message: getRandomMessage(pool),
       mascotState: trigger.fallbackState,
     }
-  }, [psychotype, uiTone, getPool])
+  }, [psychotype, effectiveTone, getPool])
 
   // ── Trigger logic ───────────────────────────────────────────────────────────
   // Runs at most once per threshold crossing (4 thresholds total) rather than
@@ -262,6 +267,8 @@ function MochiSessionCompanionInner({ elapsedSeconds, sessionPhase, behaviorProf
     if (dismissTimer.current) clearTimeout(dismissTimer.current)
     setActiveBubble(null)
   }
+
+  if (!mochiCompanionEnabled) return null
 
   return (
     <div className="flex flex-col items-center gap-2 mt-6" aria-label="Mochi focus companion">

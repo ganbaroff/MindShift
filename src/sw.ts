@@ -90,7 +90,7 @@ self.addEventListener('notificationclick', (event) => {
   event.notification.close()
   const raw = (event.notification.data as { url?: string })?.url ?? '/'
   // Validate URL is same-origin or relative (prevent open redirect via push payload)
-  const isSafe = raw.startsWith('/') || raw.startsWith(self.location.origin)
+  const isSafe = (raw.startsWith('/') && !raw.startsWith('//')) || raw.startsWith(self.location.origin)
   const url = isSafe ? raw : '/'
   event.waitUntil(
     (self.clients as Clients).openWindow(url)

@@ -60,9 +60,9 @@ export interface FocusRoomState {
   leave: () => void
 }
 
-// ── Generate a random 4-char room code ────────────────────────────────────────
+// ── Generate a random 6-char room code (2.1B combinations vs 1.6M with 4-char) ─
 function genCode(): string {
-  return Math.random().toString(36).slice(2, 6).toUpperCase()
+  return Math.random().toString(36).slice(2, 8).toUpperCase()
 }
 
 // ── Stable local "userId" for this browser tab ────────────────────────────────

@@ -267,6 +267,7 @@
     "reducedStimulationHint": "Atenúa las animaciones y desatura los colores, lo que resulta más agradable para la vista y los sentidos.",
     "hapticFeedback": "Retroalimentación háptica",
     "hapticFeedbackHint": "Vibraciones suaves al finalizar tareas y cambios de fase (solo Android).",
+    "mochiCompanion": "Mostrar Mochi durante sesiones",
     "languageSetAuto": "Idioma configurado en automático (sigue el sistema)",
     "pauseForDay": "Pausa por 24h",
     "remindersEnabled": "Recordatorios habilitados",
