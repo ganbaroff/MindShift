@@ -2,7 +2,7 @@
  * SocialFeedbackCard — S-9 Post-social cool-down ritual
  *
  * Shown in NatureBuffer after sessions where user was in a Focus Room.
- * Single-tap 3-option reaction: 👍 / 😐 / 👎
+ * Single-tap 3-option reaction: 🌊 flow / 🌱 steady / 🌀 scattered (RSD-safe, no negative symbols)
  * No detailed feedback — prevents overthinking and RSD analysis-paralysis.
  */
 
@@ -13,9 +13,9 @@ import { useMotion } from '@/shared/hooks/useMotion'
 import { logEvent } from '@/shared/lib/logger'
 
 const SOCIAL_OPTIONS = [
-  { key: 'good', emoji: '👍' } as const,
-  { key: 'okay', emoji: '😐' } as const,
-  { key: 'hard', emoji: '👎' } as const,
+  { key: 'good', emoji: '🌊' } as const,
+  { key: 'okay', emoji: '🌱' } as const,
+  { key: 'hard', emoji: '🌀' } as const,
 ]
 
 export function SocialFeedbackCard() {

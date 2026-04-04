@@ -98,7 +98,7 @@
     "focusRoomHint": "Concéntrate con un amigo: crea una sala y comparte el código. Veréis el progreso de cada uno.",
     "breathe": "Hora de respirar 🌿",
     "untilNext": "hasta la próxima sesión",
-    "crystalsEarned": "cristales ganados",
+    "crystalsEarned": "cristales recolectados",
     "leaveSession": "¿Dejar la sesión de enfoque?",
     "focusedFor": "Has estado concentrado durante {{min}}m. Tu progreso se guardará.",
     "keepGoing": "Sigue adelante 🌿",
@@ -319,7 +319,7 @@
     "upgradeCTA": "Actualízate a Pro",
     "proBadge": "Pro",
     "upgrading": "Abriendo caja...",
-    "upgradeSuccess": "Bienvenido a Pro 🌱 Unlimited Mochi + todas las funciones desbloqueadas."
+    "upgradeSuccess": "Bienvenido a Pro 🌱 Unlimited Mochi + todas las funciones disponibles."
   },
   "onboarding": {
     "skipSetup": "Saltar configuración - saltar →",
@@ -626,7 +626,7 @@
         "Una hora. No hay atajos, solo apareces tú.",
         "60 minutos de concentración sostenida. Eso es algo. 🌟",
         "Una hora. Tu ritmo te trajo hasta aquí.",
-        "Una hora de trabajo profundo. Real y ganado. 🌟",
+        "Una hora de trabajo profundo. Real y tuyo. 🌟",
         "60 minutos. Esto es lo que parece. 🌟"
       ]
     },
@@ -888,7 +888,8 @@
     "connectorLabel": "Conector",
     "connectorDesc": "Generas impulso a través de la coherencia",
     "plannerLabel": "Planificador",
-    "plannerDesc": "Te concentras mejor con un ritmo predecible"
+    "plannerDesc": "Te concentras mejor con un ritmo predecible",
+    "firstBadgeWaiting": "Tu primera insignia te espera. Sigue adelante."
   },
   "history": {
     "title": "Registro de sesión 📋",
@@ -1034,7 +1035,7 @@
     "totalXp": "experiencia total",
     "tasksDone": "tareas realizadas",
     "bestStreak": "mejor racha",
-    "badgesEarned": "insignias obtenidas",
+    "badgesEarned": "insignias recolectadas",
     "latestBadge": "Última insignia",
     "shareWrapped": "Comparte tu envuelto",
     "continue": "Continuar →",
@@ -1160,7 +1161,7 @@
       "mochiHey": "yo 👋",
       "mochiGreat": "lindo 🔥",
       "mochiComeBack": "oye volviste 💜",
-      "badgeUnlocked": "{{name}} desbloqueado ✨",
+      "badgeUnlocked": "{{name}} ✨",
       "streakBreak": "sin estrés, mañana también funciona 💜",
       "streakGoing": "{{days}} días van 🔥",
       "recoveryWelcome": "regresaste, ese es el punto 💜",
@@ -1175,7 +1176,7 @@
       "mochiHey": "hola 👋",
       "mochiGreat": "bien hecho hoy ✨",
       "mochiComeBack": "bienvenido de nuevo 👋",
-      "badgeUnlocked": "{{name}} desbloqueado 🏆",
+      "badgeUnlocked": "{{name}} 🏆",
       "streakBreak": "racha en pausa: retoma cuando estés listo",
       "streakGoing": "Racha de {{days}} días 💪",
       "recoveryWelcome": "bienvenido de nuevo: continúa donde lo dejaste",
@@ -1205,7 +1206,7 @@
       "mochiHey": "hola 👋",
       "mochiGreat": "bien hecho ✨",
       "mochiComeBack": "bienvenido de nuevo 💙",
-      "badgeUnlocked": "{{name}} - desbloqueado ✨",
+      "badgeUnlocked": "{{name}} ✨",
       "streakBreak": "mañana es un nuevo comienzo",
       "streakGoing": "{{days}} días van 💫",
       "recoveryWelcome": "bienvenido de nuevo 💙",

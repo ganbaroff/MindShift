@@ -98,7 +98,7 @@
     "focusRoomHint": "Konzentrieren Sie sich mit einem Freund – erstellen Sie einen Raum und teilen Sie den Code. Sie werden die Fortschritte des anderen sehen.",
     "breathe": "Zeit zum Durchatmen 🌿",
     "untilNext": "bis zur nächsten Sitzung",
-    "crystalsEarned": "Kristalle verdient",
+    "crystalsEarned": "Kristalle gesammelt",
     "leaveSession": "Fokussitzung verlassen?",
     "focusedFor": "Du warst seit {{min}}m fokussiert. Dein Fortschritt wird gespeichert.",
     "keepGoing": "Mach weiter 🌿",
@@ -319,7 +319,7 @@
     "upgradeCTA": "Upgrade auf Pro",
     "proBadge": "Profi",
     "upgrading": "Kasse wird geöffnet...",
-    "upgradeSuccess": "Willkommen bei Pro 🌱 Unbegrenztes Mochi + alle Funktionen freigeschaltet."
+    "upgradeSuccess": "Willkommen bei Pro 🌱 Unbegrenztes Mochi + alle Funktionen verfügbar."
   },
   "onboarding": {
     "skipSetup": "Einrichtung überspringen – einsteigen →",
@@ -605,7 +605,7 @@
         "15 Minuten tief. Das zählt mehr als Sie denken. ✨",
         "Ihr Gehirn brauchte Zeit, um sich zu beruhigen. Das tat es.",
         "15 Minuten, in denen Sie sich selbst zeigen. ✨",
-        "Viertelstunde später. Du hast dir diesen Schwung verdient.",
+        "Viertelstunde später. Du hast diesen Schwung aufgebaut.",
         "Das ist Fokus. Nicht perfekt, einfach echt. ✨",
         "15 Minuten. Dein Gehirn macht seine Sache."
       ],
@@ -626,7 +626,7 @@
         "Eine Stunde. Keine Verknüpfungen, nur Sie werden angezeigt.",
         "60 Minuten anhaltende Konzentration. Das ist etwas. 🌟",
         "Eine Stunde. Dein Tempo hat dich hierher gebracht.",
-        "Eine Stunde intensiver Arbeit. Echt und verdient. 🌟",
+        "Eine Stunde intensiver Arbeit. Echt und deins. 🌟",
         "60 Minuten. So sieht es aus. 🌟"
       ]
     },
@@ -888,7 +888,8 @@
     "connectorLabel": "Stecker",
     "connectorDesc": "Sie bauen Schwung durch Beständigkeit auf",
     "plannerLabel": "Planer",
-    "plannerDesc": "Mit einem vorhersehbaren Rhythmus können Sie sich am besten konzentrieren"
+    "plannerDesc": "Mit einem vorhersehbaren Rhythmus können Sie sich am besten konzentrieren",
+    "firstBadgeWaiting": "Dein erstes Abzeichen wartet. Mach weiter."
   },
   "history": {
     "title": "Sitzungsprotokoll 📋",
@@ -1034,7 +1035,7 @@
     "totalXp": "Gesamt-XP",
     "tasksDone": "Aufgaben erledigt",
     "bestStreak": "beste Serie",
-    "badgesEarned": "Abzeichen verdient",
+    "badgesEarned": "Abzeichen gesammelt",
     "latestBadge": "Neuestes Abzeichen",
     "shareWrapped": "Teilen Sie Ihre Verpackung",
     "continue": "Weiter →",
@@ -1160,7 +1161,7 @@
       "mochiHey": "Yo 👋",
       "mochiGreat": "schön 🔥",
       "mochiComeBack": "hey, du bist zurückgekommen 💜",
-      "badgeUnlocked": "{{name}} freigeschaltet ✨",
+      "badgeUnlocked": "{{name}} ✨",
       "streakBreak": "Kein Stress, morgen klappt auch 💜",
       "streakGoing": "{{days}} Tage gehen 🔥",
       "recoveryWelcome": "Du bist zurückgekommen – das ist der springende Punkt 💜",
@@ -1175,7 +1176,7 @@
       "mochiHey": "Hallo 👋",
       "mochiGreat": "gut gemacht heute ✨",
       "mochiComeBack": "Willkommen zurück 👋",
-      "badgeUnlocked": "{{name}} freigeschaltet 🏆",
+      "badgeUnlocked": "{{name}} 🏆",
       "streakBreak": "Streak pausiert – weitermachen, wenn Sie bereit sind",
       "streakGoing": "{{days}}-Tagessträhne 💪",
       "recoveryWelcome": "Willkommen zurück – machen Sie dort weiter, wo Sie aufgehört haben",
@@ -1205,7 +1206,7 @@
       "mochiHey": "hey 👋",
       "mochiGreat": "gut gemacht ✨",
       "mochiComeBack": "Willkommen zurück 💙",
-      "badgeUnlocked": "{{name}} – entsperrt ✨",
+      "badgeUnlocked": "{{name}} ✨",
       "streakBreak": "Morgen ist ein Neuanfang",
       "streakGoing": "{{days}} Tage gehen 💫",
       "recoveryWelcome": "Willkommen zurück 💙",

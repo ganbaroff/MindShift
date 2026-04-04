@@ -110,6 +110,10 @@ export default function HomePage() {
     }
   }, [goalReached, goalCelebratedDate, todayISO, dailyFocusGoalMin, setGoalCelebratedDate])
 
+  const TIER_NAMES = ['Seedling','Sprout','Grower','Bloomer','Flourisher','Cultivator','Nurturer','Luminary','Pathfinder','Sage']
+  const xpLevel = Math.min(Math.floor((xpTotal ?? 0) / 1000), TIER_NAMES.length - 1)
+  const tierName = TIER_NAMES[xpLevel]
+
   const bentoCards = useMemo(() => [
     {
       content: (
@@ -124,7 +128,7 @@ export default function HomePage() {
           )}
         </>
       ),
-      sub: `⚡ ${(xpTotal ?? 0).toLocaleString()} XP`,
+      sub: `Level ${xpLevel} · ${tierName}`,
     },
     {
       content: <span className="text-[28px]">{ENERGY_EMOJI[energyLevel - 1]}</span>,
@@ -376,7 +380,7 @@ export default function HomePage() {
               <span className="text-[32px]">{ENERGY_EMOJI[energyLevel - 1]}</span>
               <div>
                 <p className="text-[15px] font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-                  ⚡ {(xpTotal ?? 0).toLocaleString()} XP · {completedTotal ?? 0} done
+                  Level {xpLevel} · {tierName} · {completedTotal ?? 0} done
                 </p>
                 <p className="text-[12px]" style={{ color: 'var(--color-text-muted)' }}>
                   {burnoutScore > 60 ? t('home.hardWork') : t('home.easyDoesIt')}
