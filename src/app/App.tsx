@@ -75,6 +75,7 @@ export default function App() {
     flexPauseActive, flexPauseUntilLabel,
     showContextRestore, showShutdown, showMonthly, showWeeklyPlan,
     dismissContextRestore, dismissShutdown, dismissMonthly, dismissWeeklyPlan,
+    wasRecentlyInRoom, lastRoomCode,
   } = useOverlayState()
 
   useEffect(() => {
@@ -312,7 +313,11 @@ export default function App() {
 
           {!showRecovery && showContextRestore && (
             <Suspense fallback={null}>
-              <LazyContextRestore onDismiss={dismissContextRestore} />
+              <LazyContextRestore
+                onDismiss={dismissContextRestore}
+                wasRecentlyInRoom={wasRecentlyInRoom}
+                lastRoomCode={lastRoomCode}
+              />
             </Suspense>
           )}
 

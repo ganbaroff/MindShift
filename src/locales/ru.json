@@ -1109,7 +1109,9 @@
     "allCaughtUp": "Всё готово — к чему приступим?",
     "diveBack": "Вернуться к делу →",
     "letsGo": "Поехали →",
-    "maybeLater": "Может позже"
+    "maybeLater": "Может позже",
+    "roomReEntry": "Комната фокуса всё ещё сохранена",
+    "roomReEntryBody": "Комната {{code}} здесь — начните сессию, чтобы вернуться."
   },
   "install": {
     "installMindShift": "Установить MindShift",
