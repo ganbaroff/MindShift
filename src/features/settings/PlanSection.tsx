@@ -46,7 +46,11 @@ export function PlanSection() {
         body: { plan: 'pro_monthly' },
       })
       if (error || !data?.url) throw error ?? new Error('No checkout URL')
-      window.location.href = data.url
+      const checkoutUrl = String(data.url)
+      if (!checkoutUrl.startsWith('https://checkout.stripe.com/')) {
+        throw new Error('Invalid checkout URL')
+      }
+      window.location.href = checkoutUrl
     } catch {
       toast.error(t('settings.upgradeError'))
     } finally {

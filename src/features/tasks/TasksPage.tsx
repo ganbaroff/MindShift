@@ -41,7 +41,21 @@ export default function TasksPage() {
   const [showDone, setShowDone] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const { nowPool, nextPool, somedayPool, completeTask, snoozeTask, removeTask, reorderPool, moveTask, setTaskDueDate, appMode, seasonalMode, poolsExplained, setPoolsExplained, energyLevel, burnoutScore } = useStore();
+  const nowPool = useStore(s => s.nowPool)
+  const nextPool = useStore(s => s.nextPool)
+  const somedayPool = useStore(s => s.somedayPool)
+  const completeTask = useStore(s => s.completeTask)
+  const snoozeTask = useStore(s => s.snoozeTask)
+  const removeTask = useStore(s => s.removeTask)
+  const reorderPool = useStore(s => s.reorderPool)
+  const moveTask = useStore(s => s.moveTask)
+  const setTaskDueDate = useStore(s => s.setTaskDueDate)
+  const appMode = useStore(s => s.appMode)
+  const seasonalMode = useStore(s => s.seasonalMode)
+  const poolsExplained = useStore(s => s.poolsExplained)
+  const setPoolsExplained = useStore(s => s.setPoolsExplained)
+  const energyLevel = useStore(s => s.energyLevel)
+  const burnoutScore = useStore(s => s.burnoutScore)
 
   // dnd-kit sensors — pointer for desktop, touch for mobile
   const sensors = useSensors(
