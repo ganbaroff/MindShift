@@ -22,6 +22,7 @@ Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ latest. Status: **prod
 ## Sprint History
 | Sprint | Commit | What landed |
 |--------|--------|-------------|
+| BATCH-2026-04-04-Q "launch readiness" | `f030eb1` | Full 8-agent audit → 15 fixes. A11y: AddTaskModal role=dialog, AuthEmailStep checkbox, focus rings on RecoveryProtocol+WeeklyPlanning+MonthlyReflection+SessionControls+AppShell. Analytics: app_first_open, burnout_alert_shown, return_after_gap removed. Guardrails: App.tsx 449→345 lines (useAuthInit extracted), #E8976B+#C8C0FF tokenized. Tests: 207/207 unit + 201/201 E2E. tsc -b ✅ |
 | BATCH-2026-04-04-P "analytics + screenshots" | `9512424` | room_created/joined/session_started analytics in useFocusRoom. 8 Play Store screenshots refreshed (Apr 4). supabase/config.toml backlog closed. tsc -b ✅ |
 | BATCH-2026-04-04-O "S-9 social cool-down" | `bf34770` | S-9: SocialFeedbackCard.tsx (new) — 👍/😐/👎 reaction card in NatureBuffer after room sessions. wasInRoomRef captured in FocusScreen before room.leave(). social_session_feedback logEvent. 4 i18n keys × 6 locales. PostSessionFlow decomposed to stay ≤400 lines. tsc -b ✅ |
 | BATCH-2026-04-04-N "S-5 Ghosting Grace" | `16db3ec` | S-5: lastRoomCode+lastRoomLeftAt persisted in store + partialize. useFocusRoom.leave() saves room code before clearing. wasRecentlyInRoom derived in useOverlayState (24h window). ContextRestore warm teal re-entry card with room code. ghosting_grace_shown dim on context_restore_shown event. 2 new i18n keys × 6 locales. tsc -b ✅ |
