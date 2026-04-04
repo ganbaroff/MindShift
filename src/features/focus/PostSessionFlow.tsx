@@ -163,7 +163,7 @@ export const NatureBuffer = memo(function NatureBuffer({
                   <button
                     key={key}
                     onClick={() => { setAutopsyPick(key); onAutopsyPick?.(key) }}
-                    className="flex-1 flex flex-col items-center gap-1 py-2 rounded-xl text-xs transition-all duration-150"
+                    className="flex-1 flex flex-col items-center gap-1 py-2 rounded-xl text-xs transition-all duration-150 focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none"
                     style={{
                       background: autopsyPick === key ? 'rgba(123,114,255,0.18)' : 'var(--color-surface-raised)',
                       border: `1px solid ${autopsyPick === key ? 'var(--color-primary)' : 'rgba(255,255,255,0.06)'}`,
@@ -196,7 +196,7 @@ export const NatureBuffer = memo(function NatureBuffer({
                   <button
                     key={level}
                     onClick={() => onSetEnergyLevel(level)}
-                    className="flex-1 flex flex-col items-center gap-0.5 py-2 rounded-xl text-xs transition-all duration-150 min-h-[52px]"
+                    className="flex-1 flex flex-col items-center gap-0.5 py-2 rounded-xl text-xs transition-all duration-150 min-h-[52px] focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none"
                     style={{ background: 'var(--color-surface-raised)', border: '1px solid rgba(255,255,255,0.06)' }}
                     aria-label={t('focus.postSessionEnergyLabel', { label })}
                   >
@@ -232,7 +232,7 @@ export const NatureBuffer = memo(function NatureBuffer({
 
         <button
           onClick={onSkip}
-          className="px-6 py-2.5 rounded-xl text-sm font-medium transition-all duration-200"
+          className="px-6 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[var(--color-text-muted)] focus-visible:outline-none"
           style={{
             background: 'transparent',
             border: '1px solid rgba(255,255,255,0.06)',
@@ -263,7 +263,7 @@ function ParkedThoughtsNudge({ count }: { count: number }) {
       animate={{ opacity: 1, y: 0 }}
       transition={transition()}
       onClick={() => navigate('/tasks')}
-      className="w-full max-w-xs mb-4 p-3 rounded-2xl flex items-center gap-3 text-left"
+      className="w-full max-w-xs mb-4 p-3 rounded-2xl flex items-center gap-3 text-left focus-visible:ring-2 focus-visible:ring-[var(--color-teal)] focus-visible:outline-none"
       style={{
         background: 'rgba(78,205,196,0.08)',
         border: '1px solid rgba(78,205,196,0.2)',

@@ -126,13 +126,6 @@
       "type": "image/png",
       "form_factor": "narrow",
       "label": "Home — bento dashboard"
-    },
-    {
-      "src": "/og-image.png",
-      "sizes": "1200x630",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "MindShift — Focus made kind"
     }
   ],
 

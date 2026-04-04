@@ -22,12 +22,15 @@ import { VolauraCrystalCard } from './VolauraCrystalCard';
 import { VolauraAuraBadges } from './VolauraAuraBadges';
 import { ShareWeekButton } from './ShareWeekButton';
 import { WeeklyInsights } from './WeeklyInsights';
+import { logEvent } from '@/shared/lib/logger';
 
 export default function ProgressPage() {
   const { shouldAnimate } = useMotion();
   const { t } = useTranslation();
   const { achievements, burnoutScore } = useStore();
   const { energyTrend, weeklyInsight, loading, sessions } = useSessionHistory();
+
+  useEffect(() => { logEvent('progress_page_viewed') }, []);
 
   // VOLAURA AURA badge integration (Phase 1 — best-effort)
   const [auraState, setAuraState] = useState<CharacterState | null>(null);

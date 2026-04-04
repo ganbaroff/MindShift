@@ -102,14 +102,14 @@ export function ContextRestore({ onDismiss }: Props) {
           <div className="flex gap-3">
             <button
               onClick={onDismiss}
-              className="flex-1 py-3 rounded-2xl font-semibold text-sm"
+              className="flex-1 py-3 rounded-2xl font-semibold text-sm focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:outline-none"
               style={{ background: 'var(--color-primary)', color: '#FFFFFF' }}
             >
               {activeTasks.length > 0 ? t('contextRestore.diveBack') : t('contextRestore.letsGo')}
             </button>
             <button
               onClick={onDismiss}
-              className="px-4 py-3 rounded-2xl text-sm"
+              className="px-4 py-3 rounded-2xl text-sm focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none"
               style={{ background: 'var(--color-surface-raised)', border: '1px solid rgba(255,255,255,0.06)', color: 'var(--color-text-muted)' }}
             >
               {t('contextRestore.maybeLater')}

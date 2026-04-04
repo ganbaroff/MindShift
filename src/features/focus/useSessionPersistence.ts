@@ -11,7 +11,7 @@
 import { useEffect, useCallback } from 'react'
 import type { MutableRefObject } from 'react'
 import { supabase } from '@/shared/lib/supabase'
-import { logError } from '@/shared/lib/logger'
+import { logError, logEvent } from '@/shared/lib/logger'
 import { sendVitals, isVolauraConfigured } from '@/shared/lib/volaura-bridge'
 import { useStore } from '@/store'
 import type { SessionPhase, AudioPreset, EnergyLevel } from '@/types'
@@ -118,6 +118,7 @@ export function useSessionPersistence({
   }, [setEnergyLevel, userId, savedSessionIdRef])
 
   const handleAutopsyPick = useCallback((pick: string) => {
+    logEvent('hyperfocus_autopsy_picked', { pick, session_id: savedSessionIdRef.current ?? 'unknown' })
     if (!savedSessionIdRef.current || !userId || userId.startsWith('guest_')) return
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     void (supabase.from('focus_sessions') as any)
