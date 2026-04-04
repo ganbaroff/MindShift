@@ -546,7 +546,7 @@ WHAT'S NEXT:
 
 ### P3 — Polish
 - [x] Play Store: 8 screenshots ✅ BATCH-2026-04-04-P (re-run Apr 4, all 8 PNGs updated)
-- [ ] Feature graphic 1024×500 (design work — Yusif only)
+- [x] Feature graphic 1024×500 ✅ BATCH-2026-04-04-R (Playwright HTML→PNG, 2048×1000 @2×)
 - [x] supabase/config.toml for reproducible local env ✅ BATCH-2026-04-04-L
 
 ---
