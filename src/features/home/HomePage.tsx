@@ -218,7 +218,15 @@ export default function HomePage() {
                 {todayMin} / {dailyFocusGoalMin} min
               </span>
             </div>
-            <div className="h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: 'rgba(255,255,255,0.06)' }}>
+            <div
+              className="h-1.5 rounded-full overflow-hidden"
+              style={{ backgroundColor: 'rgba(255,255,255,0.06)' }}
+              role="progressbar"
+              aria-valuenow={Math.round(goalProgress * 100)}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label={t('home.todaysFocus')}
+            >
               <motion.div
                 className="h-full rounded-full"
                 initial={shouldAnimate ? { width: 0 } : false}

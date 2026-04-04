@@ -133,6 +133,7 @@
     "arcTimerSurprise": "Odaklanma zamanlayıcısı — akış aşamasında gizlenen rakamlar",
     "arcTimerHideDigits": "Odaklanma zamanlayıcısı — rakamları gizlemek için dokunun",
     "arcTimerShowDigits": "Odaklanma zamanlayıcısı — rakamları göstermek için dokunun",
+    "arcTapHint": "Rakamları değiştirmek için dokunun veya Boşluk'a basın",
     "soundMutedHint": "Ses seviyesi 0'da — Ayarlar → Ses bölümünde ayarlayın",
     "minutesPlaceholder": "Dakikalar...",
     "waitingForPartner": "İş ortağının katılması bekleniyor…",

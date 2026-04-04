@@ -201,7 +201,7 @@ function ArcTimerInner({
             className="absolute bottom-0 translate-y-full mt-2 text-xs text-center whitespace-nowrap"
             style={{ color: 'var(--color-text-muted)' }}
           >
-            Tap or press Space to toggle digits
+            {i18n.t('focus.arcTapHint')}
           </motion.p>
         )}
       </AnimatePresence>

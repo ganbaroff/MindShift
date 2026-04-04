@@ -70,3 +70,10 @@ jobs:
           du -sh dist/ >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           ls -lhS dist/assets/*.js 2>/dev/null | head -5 >> $GITHUB_STEP_SUMMARY || true
+          # Warn if any single JS chunk exceeds 200 KB (gzipped estimate ~65 KB)
+          LARGE=$(find dist/assets -name "*.js" -size +200k 2>/dev/null || true)
+          if [ -n "$LARGE" ]; then
+            echo "### ⚠️ Large chunks (>200 KB)" >> $GITHUB_STEP_SUMMARY
+            echo "$LARGE" >> $GITHUB_STEP_SUMMARY
+            echo "Consider lazy-loading or splitting these chunks." >> $GITHUB_STEP_SUMMARY
+          fi
