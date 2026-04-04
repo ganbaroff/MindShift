@@ -888,6 +888,7 @@
   "history": {
     "title": "Registro de sesión 📋",
     "subtitle": "Últimos 30 días de concentración",
+    "loading": "Cargando sesiones…",
     "signInTitle": "Inicia sesión para ver tu historial",
     "signInDesc": "Sus sesiones se guardan en la nube cuando inicia sesión.",
     "noSessionsTitle": "Aún no hay sesiones",

@@ -116,8 +116,12 @@ export const NatureBuffer = memo(function NatureBuffer({
         <div
           className="px-8 py-4 rounded-2xl mb-6"
           style={{ background: 'var(--color-surface-card)', border: '1px solid rgba(255,255,255,0.06)' }}
+          role="timer"
+          aria-live="polite"
+          aria-atomic="true"
+          aria-label={`${bm} minutes ${bs} seconds until next session`}
         >
-          <p className="font-mono text-3xl font-bold" style={{ color: 'var(--color-teal)' }}>
+          <p className="font-mono text-3xl font-bold" aria-hidden="true" style={{ color: 'var(--color-teal)' }}>
             {bm}:{bs.toString().padStart(2, '0')}
           </p>
           <p className="text-xs mt-1" style={{ color: 'var(--color-text-muted)' }}>{t('focus.untilNext')}</p>

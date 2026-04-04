@@ -888,6 +888,7 @@
   "history": {
     "title": "Oturum Kaydı 📋",
     "subtitle": "Odaklanmanın son 30 günü",
+    "loading": "Oturumlar yükleniyor…",
     "signInTitle": "Geçmişinizi görmek için oturum açın",
     "signInDesc": "Oturum açtığınızda oturumlarınız buluta kaydedilir.",
     "noSessionsTitle": "Henüz oturum yok",

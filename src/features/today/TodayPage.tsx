@@ -56,19 +56,6 @@ export default function TodayPage() {
 
   useEffect(() => {
     logEvent('today_page_viewed', { time_block: timeBlock, energy: energyLevel })
-    // Re-engagement signal — fires when user returns after a gap >= 1 day
-    // Feeds Day-3 / Day-7 retention cohort analysis
-    const lastActive = useStore.getState().lastActiveDate
-    if (lastActive) {
-      const gapDays = Math.floor((Date.now() - new Date(lastActive).getTime()) / 86_400_000)
-      if (gapDays >= 1) {
-        const installDate = useStore.getState().installDate
-        const daysSinceInstall = installDate
-          ? Math.floor((Date.now() - new Date(installDate).getTime()) / 86_400_000)
-          : undefined
-        logEvent('user_returned', { gap_days: gapDays, day_of_week: new Date().getDay(), ...(daysSinceInstall != null && { days_since_install: daysSinceInstall }) })
-      }
-    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 

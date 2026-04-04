@@ -42,6 +42,8 @@ export function AchievementGrid({ achievements }: AchievementGridProps) {
                   filter: unlocked ? 'none' : 'grayscale(1)',
                 }}
                 aria-label={`${name}: ${desc}`}
+                aria-expanded={isFocused}
+                aria-disabled={!unlocked ? true : undefined}
               >
                 <span className="text-[24px]">{a.emoji}</span>
                 <span className="text-[10px] text-center mt-0.5" style={{ color: 'var(--color-text-muted)' }}>{name}</span>
@@ -52,6 +54,8 @@ export function AchievementGrid({ achievements }: AchievementGridProps) {
                     initial={shouldAnimate ? { opacity: 0, y: 4 } : false}
                     animate={shouldAnimate ? { opacity: 1, y: 0 } : false}
                     exit={shouldAnimate ? { opacity: 0, y: 4 } : undefined}
+                    role="region"
+                    aria-label={name}
                     className="absolute left-0 right-0 top-full mt-1 z-10 rounded-xl px-2.5 py-2"
                     style={{ backgroundColor: 'var(--color-surface-raised)', border: '1px solid rgba(123,114,255,0.20)' }}
                   >

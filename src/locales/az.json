@@ -888,6 +888,7 @@
   "history": {
     "title": "Sessiya Qeydiyyatı 📋",
     "subtitle": "Diqqətin son 30 günü",
+    "loading": "Sessiyalar yüklənir…",
     "signInTitle": "Tarixçənizə baxmaq üçün daxil olun",
     "signInDesc": "Daxil olduğunuz zaman sessiyalarınız buludda saxlanılır.",
     "noSessionsTitle": "Hələ sessiya yoxdur",

@@ -77,7 +77,11 @@ export function FirstFocusTutorial() {
     }
     const installDate = useStore.getState().installDate
     const dsi = installDate ? Math.floor((Date.now() - new Date(installDate).getTime()) / 86_400_000) : undefined
-    logEvent('tutorial_completed', { mode: useStore.getState().appMode, ...(dsi != null && { days_since_install: dsi }) })
+    logEvent('tutorial_completed', {
+      mode: useStore.getState().appMode,
+      timer_completed: elapsed >= TUTORIAL_DURATION ? 1 : 0,
+      ...(dsi != null && { days_since_install: dsi }),
+    })
     setFirstFocusTutorialCompleted()
     markHintSeen('first_focus_tutorial')
     markHintSeen('welcome_walkthrough')
@@ -92,7 +96,13 @@ export function FirstFocusTutorial() {
     }
     const installDate = useStore.getState().installDate
     const dsi = installDate ? Math.floor((Date.now() - new Date(installDate).getTime()) / 86_400_000) : undefined
-    logEvent('tutorial_skipped', { step, mode: useStore.getState().appMode, ...(dsi != null && { days_since_install: dsi }) })
+    logEvent('tutorial_skipped', {
+      step,
+      mode: useStore.getState().appMode,
+      elapsed_sec: elapsed,
+      reached_flow: elapsed >= PHASE_THRESHOLDS.flow ? 1 : 0,
+      ...(dsi != null && { days_since_install: dsi }),
+    })
     logEvent('tutorial_funnel_exit', { exit_step: step, reached_timer: elapsed > 0 ? 1 : 0 })
     setFirstFocusTutorialCompleted()
     markHintSeen('first_focus_tutorial')

@@ -112,8 +112,9 @@ export default function HistoryPage() {
           </p>
         </motion.div>
       ) : loading ? (
-        <div className="mt-12 flex justify-center">
+        <div className="mt-12 flex justify-center" role="status" aria-label={t('history.loading')}>
           <div className="w-6 h-6 rounded-full border-2 border-t-transparent animate-spin motion-reduce:animate-none motion-reduce:opacity-60"
+            aria-hidden="true"
             style={{ borderColor: 'var(--color-primary)', borderTopColor: 'transparent' }} />
         </div>
       ) : sessions.length === 0 ? (

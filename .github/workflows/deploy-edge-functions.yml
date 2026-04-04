@@ -29,17 +29,27 @@ jobs:
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
         run: |
-          supabase functions deploy mochi-respond --project-ref ${{ secrets.SUPABASE_PROJECT_ID }}
-          supabase functions deploy decompose-task --project-ref ${{ secrets.SUPABASE_PROJECT_ID }}
-          supabase functions deploy recovery-message --project-ref ${{ secrets.SUPABASE_PROJECT_ID }}
-          supabase functions deploy weekly-insight --project-ref ${{ secrets.SUPABASE_PROJECT_ID }}
-          supabase functions deploy classify-voice-input --project-ref ${{ secrets.SUPABASE_PROJECT_ID }}
-          supabase functions deploy gdpr-export --project-ref ${{ secrets.SUPABASE_PROJECT_ID }}
-          supabase functions deploy gdpr-delete --project-ref ${{ secrets.SUPABASE_PROJECT_ID }}
-          supabase functions deploy telegram-webhook --no-verify-jwt --project-ref ${{ secrets.SUPABASE_PROJECT_ID }}
-          supabase functions deploy gcal-sync --project-ref ${{ secrets.SUPABASE_PROJECT_ID }}
-          supabase functions deploy gcal-store-token --project-ref ${{ secrets.SUPABASE_PROJECT_ID }}
-          supabase functions deploy scheduled-push --project-ref ${{ secrets.SUPABASE_PROJECT_ID }}
-          supabase functions deploy create-checkout --project-ref ${{ secrets.SUPABASE_PROJECT_ID }}
-          supabase functions deploy stripe-webhook --no-verify-jwt --project-ref ${{ secrets.SUPABASE_PROJECT_ID }}
-          supabase functions deploy gcal-inbound --project-ref ${{ secrets.SUPABASE_PROJECT_ID }}
+          FAILED=""
+          deploy() {
+            local name="$1"; shift
+            supabase functions deploy "$name" "$@" --project-ref ${{ secrets.SUPABASE_PROJECT_ID }} \
+              || FAILED="$FAILED $name"
+          }
+          deploy mochi-respond
+          deploy decompose-task
+          deploy recovery-message
+          deploy weekly-insight
+          deploy classify-voice-input
+          deploy gdpr-export
+          deploy gdpr-delete
+          deploy telegram-webhook --no-verify-jwt
+          deploy gcal-sync
+          deploy gcal-store-token
+          deploy scheduled-push
+          deploy create-checkout
+          deploy stripe-webhook --no-verify-jwt
+          deploy gcal-inbound
+          if [ -n "$FAILED" ]; then
+            echo "::error::Failed to deploy:$FAILED"
+            exit 1
+          fi
