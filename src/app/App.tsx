@@ -58,17 +58,23 @@ const LazyFirstFocusTutorial = lazy(() =>
 export default function App() {
   useAuthInit()
 
-  const {
-    updateLastSession,
-    nowPool, nextPool, somedayPool,
-    onboardingCompleted, setBurnoutScore, completedTotal, energyLevel,
-    emotionalReactivity,
-    setFlexiblePauseUntil,
-    reducedStimulation, userTheme, firstFocusTutorialCompleted,
-    setRecoveryShown,
-    currentStreak, userId,
-    _hasHydrated,
-  } = useStore()
+  const updateLastSession = useStore(s => s.updateLastSession)
+  const nowPool = useStore(s => s.nowPool)
+  const nextPool = useStore(s => s.nextPool)
+  const somedayPool = useStore(s => s.somedayPool)
+  const onboardingCompleted = useStore(s => s.onboardingCompleted)
+  const setBurnoutScore = useStore(s => s.setBurnoutScore)
+  const completedTotal = useStore(s => s.completedTotal)
+  const energyLevel = useStore(s => s.energyLevel)
+  const emotionalReactivity = useStore(s => s.emotionalReactivity)
+  const setFlexiblePauseUntil = useStore(s => s.setFlexiblePauseUntil)
+  const reducedStimulation = useStore(s => s.reducedStimulation)
+  const userTheme = useStore(s => s.userTheme)
+  const firstFocusTutorialCompleted = useStore(s => s.firstFocusTutorialCompleted)
+  const setRecoveryShown = useStore(s => s.setRecoveryShown)
+  const currentStreak = useStore(s => s.currentStreak)
+  const userId = useStore(s => s.userId)
+  const _hasHydrated = useStore(s => s._hasHydrated)
 
   const {
     showRecovery,

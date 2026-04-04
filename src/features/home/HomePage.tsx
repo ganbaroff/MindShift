@@ -21,20 +21,27 @@ import { getMochiMessage } from './mochiMessages';
 import { toast } from 'sonner';
 
 export default function HomePage() {
-  const {
-    nowPool, nextPool,
-    energyLevel, setEnergyLevel,
-    appMode,
-    seasonalMode,
-    completedTotal, xpTotal,
-    burnoutScore,
-    weeklyStats,
-    currentStreak, longestStreak,
-    dailyFocusGoalMin,
-    goalCelebratedDate, setGoalCelebratedDate,
-    timeBlindness, emotionalReactivity, medicationEnabled, medicationTime,
-    completeTask, snoozeTask,
-  } = useStore();
+  const nowPool = useStore(s => s.nowPool)
+  const nextPool = useStore(s => s.nextPool)
+  const energyLevel = useStore(s => s.energyLevel)
+  const setEnergyLevel = useStore(s => s.setEnergyLevel)
+  const appMode = useStore(s => s.appMode)
+  const seasonalMode = useStore(s => s.seasonalMode)
+  const completedTotal = useStore(s => s.completedTotal)
+  const xpTotal = useStore(s => s.xpTotal)
+  const burnoutScore = useStore(s => s.burnoutScore)
+  const weeklyStats = useStore(s => s.weeklyStats)
+  const currentStreak = useStore(s => s.currentStreak)
+  const longestStreak = useStore(s => s.longestStreak)
+  const dailyFocusGoalMin = useStore(s => s.dailyFocusGoalMin)
+  const goalCelebratedDate = useStore(s => s.goalCelebratedDate)
+  const setGoalCelebratedDate = useStore(s => s.setGoalCelebratedDate)
+  const timeBlindness = useStore(s => s.timeBlindness)
+  const emotionalReactivity = useStore(s => s.emotionalReactivity)
+  const medicationEnabled = useStore(s => s.medicationEnabled)
+  const medicationTime = useStore(s => s.medicationTime)
+  const completeTask = useStore(s => s.completeTask)
+  const snoozeTask = useStore(s => s.snoozeTask)
 
   const navigate = useNavigate();
   const { copy } = useUITone();

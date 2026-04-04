@@ -43,7 +43,7 @@ Deno.serve(async (req: Request) => {
     }
 
     const { allowed, retryAfterSeconds } = await checkDbRateLimit(
-      supabase, user.id, false, { fnName: 'create-checkout', freeLimit: 5, proLimit: 20 }
+      supabase, user.id, false, { fnName: 'create-checkout', limitFree: 5, windowMs: 86_400_000 }
     )
     if (!allowed) {
       return new Response(JSON.stringify({ error: 'Rate limit exceeded', retryAfter: retryAfterSeconds }), {

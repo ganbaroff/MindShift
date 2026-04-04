@@ -54,7 +54,7 @@ Deno.serve(async (req: Request) => {
 
     // ── Rate limit (50/day free) ──────────────────────────────────────────────
     const { allowed, retryAfterSeconds } = await checkDbRateLimit(
-      supabase, user.id, false, { fnName: 'gcal-inbound', freeLimit: 50, proLimit: 200 }
+      supabase, user.id, false, { fnName: 'gcal-inbound', limitFree: 50, windowMs: 86_400_000 }
     )
     if (!allowed) {
       return new Response(JSON.stringify({ error: 'Rate limit exceeded', retryAfter: retryAfterSeconds }), {
