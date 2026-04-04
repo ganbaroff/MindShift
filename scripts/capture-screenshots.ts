@@ -11,7 +11,7 @@ import { chromium } from 'playwright'
 import * as fs from 'fs'
 import * as path from 'path'
 
-const BASE_URL   = 'http://localhost:5173'
+const BASE_URL   = process.env.SCREENSHOTS_BASE_URL ?? 'http://localhost:5173'
 const OUT_DIR    = path.join(process.cwd(), 'public', 'screenshots', 'playstore')
 const VIEWPORT   = { width: 390, height: 844 }
 const SUPABASE_REF = 'awfoqycoltvhamtrsvxk'

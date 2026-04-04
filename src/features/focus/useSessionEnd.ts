@@ -192,16 +192,18 @@ export function useSessionEnd({
       hasAchievement, unlockAchievement, startNatureBuffer, setScreen])
 
   const handleSkipBuffer = useCallback(() => {
+    logEvent('nature_buffer_skipped', { buffer_elapsed_sec: NATURE_BUFFER_SECONDS - bufferSeconds })
     if (bufferIntervalRef.current) clearInterval(bufferIntervalRef.current)
     stopAudio()
     setPreset(null)
     setScreen('setup')
-  }, [stopAudio, setPreset, setScreen])
+  }, [bufferSeconds, stopAudio, setPreset, setScreen])
 
   const handleBypassRecovery = useCallback(() => {
+    logEvent('recovery_lock_bypassed', { recovery_elapsed_sec: RECOVERY_LOCK_MINUTES * 60 - recoverySeconds })
     if (recoveryIntervalRef.current) clearInterval(recoveryIntervalRef.current)
     setScreen('setup')
-  }, [setScreen])
+  }, [recoverySeconds, setScreen])
 
   return {
     recoverySeconds, bufferSeconds,

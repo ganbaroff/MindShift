@@ -70,10 +70,13 @@ jobs:
           du -sh dist/ >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           ls -lhS dist/assets/*.js 2>/dev/null | head -5 >> $GITHUB_STEP_SUMMARY || true
-          # Warn if any single JS chunk exceeds 200 KB (gzipped estimate ~65 KB)
-          LARGE=$(find dist/assets -name "*.js" -size +200k 2>/dev/null || true)
+          # Fail if any single JS chunk exceeds 400 KB (current largest intentional chunk: ~306 KB index bundle)
+          # Threshold is 400 KB to allow headroom; adjust if a new vendor chunk legitimately exceeds it.
+          LARGE=$(find dist/assets -name "*.js" -size +400k 2>/dev/null || true)
           if [ -n "$LARGE" ]; then
-            echo "### ⚠️ Large chunks (>200 KB)" >> $GITHUB_STEP_SUMMARY
+            echo "### ❌ Bundle size gate FAILED (>400 KB chunk)" >> $GITHUB_STEP_SUMMARY
             echo "$LARGE" >> $GITHUB_STEP_SUMMARY
-            echo "Consider lazy-loading or splitting these chunks." >> $GITHUB_STEP_SUMMARY
+            echo "Lazy-load or split these chunks before merging." >> $GITHUB_STEP_SUMMARY
+            echo "--- Bundle size gate FAILED ---"
+            exit 1
           fi

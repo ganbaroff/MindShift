@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { useStore } from '@/store'
 import { nativeShare, canShare } from '@/shared/lib/native'
+import { logEvent } from '@/shared/lib/logger'
 
 export function ShareWeekButton() {
   const { shouldAnimate } = useMotion()
@@ -14,11 +15,13 @@ export function ShareWeekButton() {
 
   const handleShareWeek = async () => {
     const mins = weeklyStats?.totalFocusMinutes ?? 0
+    logEvent('weekly_share_tapped', { focus_min: mins, completed_total: completedTotal })
     await nativeShare({
       title: 'My MindShift week 🌱',
       text: `This week I focused for ${mins} minutes and completed ${completedTotal} tasks with MindShift — ADHD-aware productivity. 💙`,
       url: 'https://mindshift-umber.vercel.app',
     })
+    logEvent('weekly_share_completed', { focus_min: mins })
   }
 
   return (
