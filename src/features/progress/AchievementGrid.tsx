@@ -90,7 +90,7 @@ export function AchievementGrid({ achievements }: AchievementGridProps) {
   const { shouldAnimate } = useMotion()
   const { t } = useTranslation()
   const [focusedAchievement, setFocusedAchievement] = useState<string | null>(null)
-  const unlockedCount = achievements.filter(a => a.unlockedAt).length
+  const unlocked = achievements.filter(a => a.unlockedAt)
 
   const handleToggle = (key: string) => {
     setFocusedAchievement(prev => prev === key ? null : key)
@@ -100,20 +100,32 @@ export function AchievementGrid({ achievements }: AchievementGridProps) {
     <div>
       <div className="flex items-center justify-between mb-2">
         <p className="text-[11px] uppercase tracking-widest" style={{ color: 'var(--color-text-muted)' }}>{t('progress.achievements')}</p>
-        <p className="text-[11px]" style={{ color: 'var(--color-primary)' }}>{unlockedCount}/{achievements.length}</p>
+        <p className="text-[11px]" style={{ color: 'var(--color-primary)' }}>{unlocked.length}</p>
       </div>
-      <div className="grid grid-cols-3 gap-2">
-        {achievements.map((a, i) => (
-          <AchievementBadge
-            key={a.key}
-            achievement={a}
-            index={i}
-            isFocused={focusedAchievement === a.key}
-            shouldAnimate={shouldAnimate}
-            onToggle={handleToggle}
-          />
-        ))}
-      </div>
+      {unlocked.length === 0 ? (
+        <div
+          className="rounded-2xl p-5 text-center"
+          style={{ backgroundColor: 'var(--color-surface-card)' }}
+        >
+          <p className="text-[24px] mb-1">🌱</p>
+          <p className="text-[13px]" style={{ color: 'var(--color-text-muted)' }}>
+            {t('progress.firstBadgeWaiting')}
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-3 gap-2">
+          {unlocked.map((a, i) => (
+            <AchievementBadge
+              key={a.key}
+              achievement={a}
+              index={i}
+              isFocused={focusedAchievement === a.key}
+              shouldAnimate={shouldAnimate}
+              onToggle={handleToggle}
+            />
+          ))}
+        </div>
+      )}
     </div>
   )
 }

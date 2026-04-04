@@ -11,16 +11,13 @@ import { hapticDone, hapticWow } from './haptic'
 
 export function notifyXP(amount: number): void {
   hapticDone()
-  toast.success(`+${amount} XP earned!`, { duration: 2500 })
+  toast.success(`+${amount} XP`, { duration: 2500 })
 }
 
-// Variable Ratio bonus notification — fired on lucky phasic burst (~25% chance)
+// XP notification — no multiplier details shown to user (VR math is internal)
 export function notifyXPBonus(amount: number): void {
   hapticWow()
-  toast.success(`⚡ Lucky burst! +${amount} XP`, {
-    duration: 3000,
-    description: 'Bonus dopamine 🎉',
-  })
+  toast.success(`+${amount} XP`, { duration: 3000 })
 }
 
 export function notifyAchievement(

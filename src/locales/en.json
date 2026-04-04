@@ -98,7 +98,7 @@
     "focusRoomHint": "Focus with a friend — create a room and share the code. You'll see each other's progress.",
     "breathe": "Time to breathe 🌿",
     "untilNext": "until next session",
-    "crystalsEarned": "crystals earned",
+    "crystalsEarned": "crystals collected",
     "leaveSession": "Leave focus session?",
     "focusedFor": "You've been focused for {{min}}m. Your progress will be saved.",
     "keepGoing": "Keep going 🌿",
@@ -319,7 +319,7 @@
     "upgradeCTA": "Upgrade to Pro",
     "proBadge": "Pro",
     "upgrading": "Opening checkout...",
-    "upgradeSuccess": "Welcome to Pro 🌱 Unlimited Mochi + all features unlocked."
+    "upgradeSuccess": "Welcome to Pro 🌱 Unlimited Mochi + all features available."
   },
   "onboarding": {
     "skipSetup": "Skip setup — jump in →",
@@ -605,7 +605,7 @@
         "15 minutes deep. This counts more than you think. ✨",
         "Your brain needed time to settle. It did.",
         "15 minutes of showing up for yourself. ✨",
-        "Quarter hour in. You earned this momentum.",
+        "Quarter hour in. You built this momentum.",
         "This is focus. Not perfect, just real. ✨",
         "15 minutes. Your brain is doing its thing."
       ],
@@ -626,7 +626,7 @@
         "An hour. No shortcuts, just you showing up.",
         "60 minutes of sustained focus. That's something. 🌟",
         "One hour. Your pace got you here.",
-        "An hour of deep work. Real and earned. 🌟",
+        "An hour of deep work. Real and yours. 🌟",
         "60 minutes. This is what it looks like. 🌟"
       ]
     },
@@ -888,7 +888,8 @@
     "connectorLabel": "Connector",
     "connectorDesc": "You build momentum through consistency",
     "plannerLabel": "Planner",
-    "plannerDesc": "You focus best with a predictable rhythm"
+    "plannerDesc": "You focus best with a predictable rhythm",
+    "firstBadgeWaiting": "Your first badge is waiting. Keep going."
   },
   "history": {
     "title": "Session Log 📋",
@@ -1034,7 +1035,7 @@
     "totalXp": "total XP",
     "tasksDone": "tasks done",
     "bestStreak": "best streak",
-    "badgesEarned": "badges earned",
+    "badgesEarned": "badges collected",
     "latestBadge": "Latest badge",
     "shareWrapped": "Share your wrapped",
     "continue": "Continue →",
@@ -1160,7 +1161,7 @@
       "mochiHey": "yo 👋",
       "mochiGreat": "nice one 🔥",
       "mochiComeBack": "hey, you came back 💜",
-      "badgeUnlocked": "{{name}} unlocked ✨",
+      "badgeUnlocked": "{{name}} ✨",
       "streakBreak": "no stress, tomorrow works too 💜",
       "streakGoing": "{{days}} days going 🔥",
       "recoveryWelcome": "you came back — that's the whole point 💜",
@@ -1175,7 +1176,7 @@
       "mochiHey": "hey there 👋",
       "mochiGreat": "well done today ✨",
       "mochiComeBack": "welcome back 👋",
-      "badgeUnlocked": "{{name}} unlocked 🏆",
+      "badgeUnlocked": "{{name}} 🏆",
       "streakBreak": "streak paused — pick up when ready",
       "streakGoing": "{{days}}-day streak 💪",
       "recoveryWelcome": "welcome back — pick up where you left off",
@@ -1205,7 +1206,7 @@
       "mochiHey": "hey 👋",
       "mochiGreat": "well done ✨",
       "mochiComeBack": "welcome back 💙",
-      "badgeUnlocked": "{{name}} — unlocked ✨",
+      "badgeUnlocked": "{{name}} ✨",
       "streakBreak": "tomorrow is a fresh start",
       "streakGoing": "{{days}} days going 💫",
       "recoveryWelcome": "welcome back 💙",

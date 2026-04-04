@@ -98,7 +98,7 @@
     "focusRoomHint": "Bir arkadaşınızla odaklanın; bir oda oluşturun ve kodu paylaşın. Birbirinizin ilerleyişini göreceksiniz.",
     "breathe": "Nefes alma zamanı 🌿",
     "untilNext": "bir sonraki oturuma kadar",
-    "crystalsEarned": "kristal kazanıldı",
+    "crystalsEarned": "kristal toplandı",
     "leaveSession": "Odaklanma oturumundan ayrılmak mı istiyorsunuz?",
     "focusedFor": "{{min}}m'ye odaklandınız. İlerlemeniz kaydedilecektir.",
     "keepGoing": "Devam et 🌿",
@@ -319,7 +319,7 @@
     "upgradeCTA": "Pro'ya yükseltin",
     "proBadge": "Profesyonel",
     "upgrading": "Ödeme işlemi açılıyor...",
-    "upgradeSuccess": "Pro'ya hoş geldiniz 🌱 Sınırsız Mochi + tüm özelliklerin kilidi açıldı."
+    "upgradeSuccess": "Pro'ya hoş geldiniz 🌱 Sınırsız Mochi + tüm özellikler kullanılabilir."
   },
   "onboarding": {
     "skipSetup": "Kurulumu atla →",
@@ -605,7 +605,7 @@
         "15 dakika derin. Bu düşündüğünüzden daha önemli. ✨",
         "Beyninin yerleşmek için zamana ihtiyacı vardı. Öyle oldu.",
         "15 dakika kendiniz görünün. ✨",
-        "Çeyrek saat içinde. Bu ivmeyi kazandınız.",
+        "Çeyrek saat içinde. Bu ivmeyi siz oluşturdunuz.",
         "Bu odak noktasıdır. Mükemmel değil, sadece gerçek. ✨",
         "15 dakika. Beyniniz işini yapıyor."
       ],
@@ -626,7 +626,7 @@
         "Bir saat. Kısayol yok, sadece sen ortaya çıkıyorsun.",
         "60 dakika sürekli odaklanma. Bu bir şey. 🌟",
         "Bir saat. Hızınız sizi buraya getirdi.",
-        "Bir saatlik derin çalışma. Gerçek ve kazanılmış. 🌟",
+        "Bir saatlik derin çalışma. Gerçek ve sizin. 🌟",
         "60 dakika. Görünüşe göre bu. 🌟"
       ]
     },
@@ -888,7 +888,8 @@
     "connectorLabel": "Bağlayıcı",
     "connectorDesc": "Tutarlılıkla ivme kazanırsınız",
     "plannerLabel": "Planlayıcı",
-    "plannerDesc": "Tahmin edilebilir bir ritimle en iyi şekilde odaklanırsınız"
+    "plannerDesc": "Tahmin edilebilir bir ritimle en iyi şekilde odaklanırsınız",
+    "firstBadgeWaiting": "İlk rozetiniz sizi bekliyor. Devam edin."
   },
   "history": {
     "title": "Oturum Kaydı 📋",
@@ -1034,7 +1035,7 @@
     "totalXp": "toplam XP",
     "tasksDone": "yapılan görevler",
     "bestStreak": "en iyi seri",
-    "badgesEarned": "kazanılan rozetler",
+    "badgesEarned": "toplanan rozetler",
     "latestBadge": "En son rozet",
     "shareWrapped": "Paketlenmişinizi paylaşın",
     "continue": "Devam →",
@@ -1160,7 +1161,7 @@
       "mochiHey": "sen 👋",
       "mochiGreat": "güzel bir şey 🔥",
       "mochiComeBack": "hey geri döndün 💜",
-      "badgeUnlocked": "{{name}} kilidi açıldı ✨",
+      "badgeUnlocked": "{{name}} ✨",
       "streakBreak": "stres yok, yarın da çalışıyor 💜",
       "streakGoing": "{{days}} gün gidiyor 🔥",
       "recoveryWelcome": "geri döndün — bütün mesele bu 💜",
@@ -1175,7 +1176,7 @@
       "mochiHey": "merhaba 👋",
       "mochiGreat": "bugün iyi iş çıkardın ✨",
       "mochiComeBack": "tekrar hoş geldiniz 👋",
-      "badgeUnlocked": "{{name}} kilidi açıldı 🏆",
+      "badgeUnlocked": "{{name}} 🏆",
       "streakBreak": "seri duraklatıldı — hazır olduğunuzda alın",
       "streakGoing": "{{days}} günlük seri 💪",
       "recoveryWelcome": "tekrar hoş geldiniz — kaldığınız yerden devam edin",
@@ -1205,7 +1206,7 @@
       "mochiHey": "selam 👋",
       "mochiGreat": "aferin ✨",
       "mochiComeBack": "tekrar hoş geldin 💙",
-      "badgeUnlocked": "{{name}} — kilidi açıldı ✨",
+      "badgeUnlocked": "{{name}} ✨",
       "streakBreak": "yarın yeni bir başlangıç",
       "streakGoing": "{{days}} gün gidiyor 💫",
       "recoveryWelcome": "tekrar hoş geldin 💙",

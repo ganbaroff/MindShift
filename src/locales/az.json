@@ -98,7 +98,7 @@
     "focusRoomHint": "Dostunuza diqqət yetirin — otaq yaradın və kodu paylaşın. Bir-birinizin tərəqqisini görəcəksiniz.",
     "breathe": "Nəfəs alma vaxtıdır 🌿",
     "untilNext": "növbəti sessiyaya qədər",
-    "crystalsEarned": "kristal qazanıldı",
+    "crystalsEarned": "kristal toplandı",
     "leaveSession": "Fokus sessiyası tərk edilsin?",
     "focusedFor": "{{min}}m diqqətinizi cəmləmisiniz. Sizin tərəqqiniz yadda saxlanılacaq.",
     "keepGoing": "Davam edin 🌿",
@@ -319,7 +319,7 @@
     "upgradeCTA": "Pro-a yüksəldin",
     "proBadge": "Pro",
     "upgrading": "Kassa açılır...",
-    "upgradeSuccess": "Pro 🌱 Limitsiz Mochi + bütün funksiyalar kiliddən çıxarıldı."
+    "upgradeSuccess": "Pro 🌱 Limitsiz Mochi + bütün funksiyalar mövcuddur."
   },
   "onboarding": {
     "skipSetup": "Quraşdırmanı keçin — daxil olun →",
@@ -605,7 +605,7 @@
         "15 dəqiqə dərin. Bu, düşündüyünüzdən daha çox hesab olunur. ✨",
         "Beyninizin nizamlanması üçün vaxt lazım idi. Bu oldu.",
         "Özünüzü göstərmək üçün 15 dəqiqə. ✨",
-        "Dörddəbir saat. Siz bu sürəti qazandınız.",
+        "Dörddəbir saat. Siz bu sürəti qurdunuz.",
         "Bu diqqət mərkəzindədir. Mükəmməl deyil, sadəcə realdır. ✨",
         "15 dəqiqə. Beyniniz öz işini görür."
       ],
@@ -626,7 +626,7 @@
         "Bir saat. Qısayol yoxdur, sadəcə siz görünürsünüz.",
         "60 dəqiqə davamlı diqqət. Bu bir şeydir. 🌟",
         "Bir saat. Sürətiniz sizi bura çatdırdı.",
-        "Bir saatlıq dərin iş. Real və qazanılmış. 🌟",
+        "Bir saatlıq dərin iş. Real və sizin. 🌟",
         "60 dəqiqə. Göründüyü budur. 🌟"
       ]
     },
@@ -888,7 +888,8 @@
     "connectorLabel": "Bağlayıcı",
     "connectorDesc": "Ardıcıllıq vasitəsilə təcil yaradırsınız",
     "plannerLabel": "Planlayıcı",
-    "plannerDesc": "Siz proqnozlaşdırıla bilən bir ritmlə ən yaxşı şəkildə fokuslanırsınız"
+    "plannerDesc": "Siz proqnozlaşdırıla bilən bir ritmlə ən yaxşı şəkildə fokuslanırsınız",
+    "firstBadgeWaiting": "İlk nişanınız gözləyir. Davam edin."
   },
   "history": {
     "title": "Sessiya Qeydiyyatı 📋",
@@ -1034,7 +1035,7 @@
     "totalXp": "ümumi XP",
     "tasksDone": "görülən vəzifələr",
     "bestStreak": "ən yaxşı zolaq",
-    "badgesEarned": "nişanlar qazandı",
+    "badgesEarned": "nişanlar toplandı",
     "latestBadge": "Ən son nişan",
     "shareWrapped": "Paketinizi paylaşın",
     "continue": "Davam et →",
@@ -1160,7 +1161,7 @@
       "mochiHey": "yo 👋",
       "mochiGreat": "gözəl 🔥",
       "mochiComeBack": "hey, qayıtdın 💜",
-      "badgeUnlocked": "{{name}} kilidi açıldı ✨",
+      "badgeUnlocked": "{{name}} ✨",
       "streakBreak": "stress yox, sabah da işləyir💜",
       "streakGoing": "{{days}} gün qalır 🔥",
       "recoveryWelcome": "geri qayıtdın - bütün məsələ budur 💜",
@@ -1175,7 +1176,7 @@
       "mochiHey": "salam 👋",
       "mochiGreat": "bu gün yaxşı ✨",
       "mochiComeBack": "xoş gəlmisiniz 👋",
-      "badgeUnlocked": "{{name}} kilidi açıldı 🏆",
+      "badgeUnlocked": "{{name}} 🏆",
       "streakBreak": "zolaq dayandırıldı - hazır olduqda götürün",
       "streakGoing": "{{days}}-günlük seriya 💪",
       "recoveryWelcome": "xoş gəlmisiniz - qaldığınız yerdən davam edin",
@@ -1205,7 +1206,7 @@
       "mochiHey": "hey 👋",
       "mochiGreat": "aferin ✨",
       "mochiComeBack": "xoş gəlmisiniz 💙",
-      "badgeUnlocked": "{{name}} — kilidi açıldı ✨",
+      "badgeUnlocked": "{{name}} ✨",
       "streakBreak": "sabah təzə başlanğıcdır",
       "streakGoing": "{{days}} gündür 💫",
       "recoveryWelcome": "xoş gəlmisiniz 💙",

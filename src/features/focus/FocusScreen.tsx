@@ -34,12 +34,11 @@ import { nativeStatusBarHide, nativeStatusBarShow } from '@/shared/lib/native'
 import { useSessionHistory } from '@/shared/hooks/useSessionHistory'
 import { useUserBehavior } from '@/shared/hooks/useUserBehavior'
 import { useStore } from '@/store'
-import { isVolauraConfigured } from '@/shared/lib/volaura-bridge'
 
 export default function FocusScreen() {
   const session = useFocusSession()
   const { t } = useTranslation()
-  const { emotionalReactivity, userId } = useStore()
+  const emotionalReactivity = useStore(s => s.emotionalReactivity)
   const orbitCount = useAmbientOrbit(session.screen === 'session')
   const room = useFocusRoom()
   // S-9: capture whether user was in a room at the moment the session ended
@@ -107,10 +106,8 @@ export default function FocusScreen() {
   } = session
 
   if (screen === 'nature-buffer') {
-    const crystalEarned =
-      isVolauraConfigured() && userId && !userId.startsWith('guest_')
-        ? Math.floor(elapsedMin * 5)
-        : undefined
+    // Research #10: crystal chip removed from post-session — vulnerability window
+    // where impulse control is lowest. Crystals now shown only on ProgressPage.
     return (
       <NatureBuffer
         bufferSeconds={bufferSeconds}
@@ -122,7 +119,6 @@ export default function FocusScreen() {
         sessionPhase={sessionPhase}
         parkedThoughtsCount={parkedThoughtsCount}
         onAutopsyPick={handleAutopsyPick}
-        crystalEarned={crystalEarned}
         wasInRoom={wasInRoomRef.current}
       />
     )
