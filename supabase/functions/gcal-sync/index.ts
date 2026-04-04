@@ -150,7 +150,7 @@ Deno.serve(async (req) => {
       const start = new Date(focusSession.startedAt)
       const end = new Date(start.getTime() + focusSession.durationMs)
       const event = {
-        summary: focusSession.taskTitle ? `Focus: ${focusSession.taskTitle}` : 'Focus session',
+        summary: focusSession.taskTitle ? `Focus: ${String(focusSession.taskTitle).slice(0, 200)}` : 'Focus session',
         start: { dateTime: start.toISOString() },
         end: { dateTime: end.toISOString() },
         colorId: '7', // teal
@@ -238,9 +238,11 @@ Deno.serve(async (req) => {
       eventEnd = { date: nextDay.toISOString().split('T')[0] }
     }
 
+    const safeTitle = String(task.title ?? '').slice(0, 200)
+    const safeNote = task.note ? String(task.note).slice(0, 1000) : ''
     const event = {
-      summary: `${typeEmoji} ${task.title}`,
-      description: task.note ? `${task.note}\n\nCreated by MindShift` : 'Created by MindShift',
+      summary: `${typeEmoji} ${safeTitle}`,
+      description: safeNote ? `${safeNote}\n\nCreated by MindShift` : 'Created by MindShift',
       start: eventStart,
       end: eventEnd,
       colorId: isMeeting ? '9' : '7', // 9=blueberry for meetings, 7=teal for tasks

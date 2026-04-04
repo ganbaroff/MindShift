@@ -15,6 +15,14 @@
 
 import { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
+// ── Circuit breaker: fail-closed after sustained DB outage ───────────────────
+// Prevents unlimited AI calls during prolonged Supabase downtime.
+// Resets after 60s of no errors.
+let consecutiveErrors = 0
+let lastErrorAt = 0
+const CIRCUIT_BREAKER_THRESHOLD = 5
+const CIRCUIT_BREAKER_RESET_MS = 60_000
+
 export interface RateLimitConfig {
   /** Matches the fn_name column in edge_rate_limits, e.g. 'decompose-task' */
   fnName: string
@@ -44,6 +52,17 @@ export async function checkDbRateLimit(
   if (isPro) return { allowed: true }
 
   const now = Date.now()
+
+  // Circuit breaker: if DB has been failing continuously, fail-closed to prevent abuse
+  if (consecutiveErrors >= CIRCUIT_BREAKER_THRESHOLD && now - lastErrorAt < CIRCUIT_BREAKER_RESET_MS) {
+    console.warn(`[rateLimit] Circuit breaker OPEN (${consecutiveErrors} errors) — blocking request`)
+    return { allowed: false, retryAfterSeconds: 60 }
+  }
+  // Reset circuit breaker if enough time has passed since last error
+  if (now - lastErrorAt >= CIRCUIT_BREAKER_RESET_MS) {
+    consecutiveErrors = 0
+  }
+
   // Align window to epoch boundary (e.g. 3 600 000 ms → top of current hour)
   const windowStart = new Date(
     Math.floor(now / config.windowMs) * config.windowMs
@@ -58,10 +77,15 @@ export async function checkDbRateLimit(
     })
 
     if (error) {
-      // Fail open — DB hiccup should never block the user
-      console.warn('[rateLimit] DB error, failing open:', error.message)
+      consecutiveErrors++
+      lastErrorAt = now
+      // Fail open on transient errors (below circuit breaker threshold)
+      console.warn(`[rateLimit] DB error (${consecutiveErrors}/${CIRCUIT_BREAKER_THRESHOLD}), failing open:`, error.message)
       return { allowed: true }
     }
+
+    // DB success — reset circuit breaker
+    consecutiveErrors = 0
 
     if ((count as number) > config.limitFree) {
       return {
@@ -72,8 +96,9 @@ export async function checkDbRateLimit(
 
     return { allowed: true }
   } catch (err) {
-    // Fail open on unexpected errors
-    console.warn('[rateLimit] Unexpected error, failing open:', err)
+    consecutiveErrors++
+    lastErrorAt = now
+    console.warn(`[rateLimit] Unexpected error (${consecutiveErrors}/${CIRCUIT_BREAKER_THRESHOLD}), failing open:`, err)
     return { allowed: true }
   }
 }

@@ -18,6 +18,11 @@
 import { get, set, del } from 'idb-keyval'
 import type { StateStorage } from 'zustand/middleware'
 
+// Debounce writes to prevent serializing 200 KB on every drag-move event
+let writeTimer: ReturnType<typeof setTimeout> | null = null
+let pendingWrite: { name: string; value: string } | null = null
+const WRITE_DEBOUNCE_MS = 300
+
 export const idbStorage: StateStorage = {
   getItem: async (name: string): Promise<string | null> => {
     // Check localStorage FIRST (synchronous, fastest path).
@@ -47,18 +52,30 @@ export const idbStorage: StateStorage = {
   },
 
   setItem: async (name: string, value: string): Promise<void> => {
-    // Write localStorage backup first — fast synchronous write survives IDB failures
-    try { localStorage.setItem(`${name}_backup`, value) } catch { /* quota exceeded — non-fatal */ }
-    // Ensure primary localStorage key is cleaned up (migration artifact)
-    if (localStorage.getItem(name) !== null) {
-      localStorage.removeItem(name)
-    }
-    // Write to IDB — if quota exceeded or unavailable, backup above is still intact
-    try {
-      await set(name, value)
-    } catch {
-      // IDB write failed (quota, private mode, storage error) — backup already written above
-    }
+    // Debounce: batch rapid writes (drag-to-reorder fires on every pointer-move)
+    // The last write always wins — no data loss possible.
+    pendingWrite = { name, value }
+    if (writeTimer) clearTimeout(writeTimer)
+
+    writeTimer = setTimeout(async () => {
+      const w = pendingWrite
+      if (!w) return
+      pendingWrite = null
+      writeTimer = null
+
+      // Write localStorage backup first — fast synchronous write survives IDB failures
+      try { localStorage.setItem(`${w.name}_backup`, w.value) } catch { /* quota exceeded — non-fatal */ }
+      // Ensure primary localStorage key is cleaned up (migration artifact)
+      if (localStorage.getItem(w.name) !== null) {
+        localStorage.removeItem(w.name)
+      }
+      // Write to IDB — if quota exceeded or unavailable, backup above is still intact
+      try {
+        await set(w.name, w.value)
+      } catch {
+        // IDB write failed (quota, private mode, storage error) — backup already written above
+      }
+    }, WRITE_DEBOUNCE_MS)
   },
 
   removeItem: async (name: string): Promise<void> => {
