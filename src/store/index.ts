@@ -152,6 +152,9 @@ export const useStore = create<import('./types').AppStore>()(
           telegramLinked: s.telegramLinked,
           calendarSyncEnabled: s.calendarSyncEnabled,
           calendarFocusBlocks: s.calendarFocusBlocks,
+          // S-5 Ghosting Grace — persisted so ContextRestore can surface room context on return
+          lastRoomCode: s.lastRoomCode,
+          lastRoomLeftAt: s.lastRoomLeftAt,
         }),
       }
     )

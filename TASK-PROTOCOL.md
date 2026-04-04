@@ -531,9 +531,13 @@ WHAT'S NEXT:
 - [x] Quick Start ADHD defaults (timeBlindness + emotionalReactivity) ✅ BATCH-2026-04-04-K
 
 ### P2 — Quality
-- [ ] S-5 Ghosting Grace — ContextRestore re-entry card (L3)
+- [x] S-5 Ghosting Grace — ContextRestore re-entry card (L3) ✅ BATCH-2026-04-04-N
+- [x] K-9: ContextRestore ghosting_grace_shown logEvent ✅ BATCH-2026-04-04-N (ghosting_grace_shown dim on context_restore_shown)
 - [ ] S-9 Post-social cool-down ritual (L3)
-- [ ] K-9: ContextRestore ghosting_grace_shown logEvent (depends on S-5)
+- [x] manifest.json og-image wide removed (Play Store fix) ✅ BATCH-2026-04-04-M
+- [x] NatureBuffer + ContextRestore + AchievementGrid focus rings ✅ BATCH-2026-04-04-M
+- [x] nature_buffer_skipped/recovery_lock_bypassed/autopsy_picked/share/progress_viewed events ✅ BATCH-2026-04-04-M
+- [x] CI bundle gate 400 KB exit 1 ✅ BATCH-2026-04-04-M
 - [x] ADHD profile dims in onboarding_completed ✅ BATCH-2026-04-04-I
 - [x] QuickCapture i18n complete ✅ BATCH-2026-04-04-I
 - [x] Sentry source maps in CI ✅ BATCH-2026-04-04-I

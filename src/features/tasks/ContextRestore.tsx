@@ -29,9 +29,12 @@ export { writeLastActive, shouldShowContextRestore } from './contextRestoreUtils
 
 interface Props {
   onDismiss: () => void
+  /** S-5 Ghosting Grace — true if user was in a Focus Room within the last 24h */
+  wasRecentlyInRoom?: boolean
+  lastRoomCode?: string | null
 }
 
-export function ContextRestore({ onDismiss }: Props) {
+export function ContextRestore({ onDismiss, wasRecentlyInRoom, lastRoomCode }: Props) {
   const nowPool = useStore(s => s.nowPool)
   const { shouldAnimate, t: transition } = useMotion()
   const { t } = useTranslation()
@@ -40,7 +43,10 @@ export function ContextRestore({ onDismiss }: Props) {
   const activeTasks = nowPool.filter(task => task.status === 'active').slice(0, 2)
 
   useEffect(() => {
-    logEvent('context_restore_shown', { active_tasks: activeTasks.length })
+    logEvent('context_restore_shown', {
+      active_tasks: activeTasks.length,
+      ghosting_grace_shown: wasRecentlyInRoom ? 1 : 0,
+    })
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -77,6 +83,27 @@ export function ContextRestore({ onDismiss }: Props) {
                 : t('contextRestore.allCaughtUp')}
             </p>
           </div>
+
+          {/* S-5 Ghosting Grace — warm Focus Room re-entry card */}
+          {wasRecentlyInRoom && lastRoomCode && (
+            <div
+              className="flex items-start gap-3 px-3 py-2.5 rounded-xl mb-4"
+              style={{
+                background: 'rgba(78, 205, 196, 0.08)',
+                border: '1px solid rgba(78, 205, 196, 0.2)',
+              }}
+            >
+              <span className="text-base mt-0.5" aria-hidden="true">🤝</span>
+              <div>
+                <p className="text-sm font-medium leading-snug" style={{ color: 'var(--color-text-primary)' }}>
+                  {t('contextRestore.roomReEntry')}
+                </p>
+                <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-muted)' }}>
+                  {t('contextRestore.roomReEntryBody', { code: lastRoomCode })}
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Task list — externalize working memory */}
           {activeTasks.length > 0 && (

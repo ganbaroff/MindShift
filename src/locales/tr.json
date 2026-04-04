@@ -1109,7 +1109,9 @@
     "allCaughtUp": "Hepiniz hazırsınız; bir sonraki adıma hazır mısınız?",
     "diveBack": "Tekrar dalın →",
     "letsGo": "Hadi gidelim →",
-    "maybeLater": "Belki daha sonra"
+    "maybeLater": "Belki daha sonra",
+    "roomReEntry": "Odak odanız hâlâ kaydedildi",
+    "roomReEntryBody": "{{code}} odası burada — istediğin zaman yeniden katılmak için bir seans başlat."
   },
   "install": {
     "installMindShift": "MindShift'i yükleyin",

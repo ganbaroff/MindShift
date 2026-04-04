@@ -1109,7 +1109,9 @@
     "allCaughtUp": "Sie sind alle auf dem Laufenden – bereit für das, was als nächstes kommt?",
     "diveBack": "Tauchen Sie wieder ein →",
     "letsGo": "Lass uns gehen →",
-    "maybeLater": "Vielleicht später"
+    "maybeLater": "Vielleicht später",
+    "roomReEntry": "Dein Fokusraum ist noch gespeichert",
+    "roomReEntryBody": "Raum {{code}} ist noch da — starte eine Sitzung, um jederzeit wieder beizutreten."
   },
   "install": {
     "installMindShift": "Installieren Sie MindShift",

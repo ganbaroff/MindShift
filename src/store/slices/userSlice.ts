@@ -62,6 +62,12 @@ export interface UserSlice {
   setFlexiblePauseUntil: (until: string | null) => void
   /** ISO timestamp of first app launch — persisted, never reset on signOut (device-level) */
   installDate: string | null
+  /** S-5 Ghosting Grace — last Focus Room code the user was in, cleared after 24h */
+  lastRoomCode: string | null
+  /** S-5 Ghosting Grace — ISO timestamp when the user last left a Focus Room */
+  lastRoomLeftAt: string | null
+  setLastRoomCode: (code: string | null) => void
+  setLastRoomLeftAt: (at: string | null) => void
 }
 
 export const createUserSlice: StateCreator<
@@ -94,6 +100,8 @@ export const createUserSlice: StateCreator<
   burnoutScore: 0,
   flexiblePauseUntil: null,
   installDate: null,
+  lastRoomCode: null,
+  lastRoomLeftAt: null,
 
   setUser: (userId, email) => set({ userId, email }),
   setEnergyLevel: (level) => set({ energyLevel: level }),
@@ -164,6 +172,8 @@ export const createUserSlice: StateCreator<
   }),
   setBurnoutScore: (score) => set({ burnoutScore: score }),
   setFlexiblePauseUntil: (until) => set({ flexiblePauseUntil: until }),
+  setLastRoomCode: (code) => set({ lastRoomCode: code }),
+  setLastRoomLeftAt: (at) => set({ lastRoomLeftAt: at }),
   signOut: () => set({
     // User slice
     userId: null, email: null, xpTotal: 0, psychotypeLastDerived: null,
@@ -199,5 +209,8 @@ export const createUserSlice: StateCreator<
     // Calendar reset
     calendarSyncEnabled: false,
     calendarFocusBlocks: false,
+    // Room reset (S-5)
+    lastRoomCode: null,
+    lastRoomLeftAt: null,
   }),
 })

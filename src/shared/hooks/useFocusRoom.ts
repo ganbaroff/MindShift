@@ -21,6 +21,7 @@
 
 import { useRef, useState, useCallback, useEffect } from 'react'
 import { supabase } from '@/shared/lib/supabase'
+import { useStore } from '@/store'
 import type { SessionPhase } from '@/types'
 import type { RealtimeChannel } from '@supabase/supabase-js'
 
@@ -77,6 +78,7 @@ function getTabId(): string {
 const tabId = getTabId()
 
 export function useFocusRoom(): FocusRoomState {
+  const { setLastRoomCode, setLastRoomLeftAt } = useStore()
   const [code, setCode] = useState<string | null>(null)
   const [peers, setPeers] = useState<RoomPeer[]>([])
   const [status, setStatus] = useState<FocusRoomState['status']>('idle')
@@ -150,6 +152,12 @@ export function useFocusRoom(): FocusRoomState {
 
   const leave = useCallback(() => {
     if (graceTimerRef.current) clearTimeout(graceTimerRef.current)
+    // S-5 Ghosting Grace — persist room code before clearing so ContextRestore can show warm re-entry
+    const currentCode = code
+    if (currentCode) {
+      setLastRoomCode(currentCode)
+      setLastRoomLeftAt(new Date().toISOString())
+    }
     if (channelRef.current) {
       void channelRef.current.untrack()
       void supabase.removeChannel(channelRef.current)
@@ -160,7 +168,7 @@ export function useFocusRoom(): FocusRoomState {
     setPeerGrace(false)
     prevPeersLengthRef.current = 0
     setStatus('idle')
-  }, [])
+  }, [code, setLastRoomCode, setLastRoomLeftAt])
 
   // Cleanup on unmount — prevent presence leak when component navigates away
   useEffect(() => () => leave(), [leave])

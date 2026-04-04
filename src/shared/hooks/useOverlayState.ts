@@ -31,6 +31,9 @@ export interface OverlayState {
   showRecovery: boolean
   flexPauseActive: boolean
   flexPauseUntilLabel: string
+  /** S-5 Ghosting Grace — true if user was in a room within the last 24h */
+  wasRecentlyInRoom: boolean
+  lastRoomCode: string | null
   // Controlled
   showContextRestore: boolean
   showShutdown: boolean
@@ -52,6 +55,7 @@ export function useOverlayState(): OverlayState {
     weeklyPlanShownWeek, setWeeklyPlanShownWeek,
     flexiblePauseUntil,
     nowPool,
+    lastRoomCode, lastRoomLeftAt,
   } = useStore()
 
   const [showContextRestore, setShowContextRestore] = useState(false)
@@ -128,6 +132,12 @@ export function useOverlayState(): OverlayState {
     return new Date(flexiblePauseUntil).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
   }, [flexiblePauseUntil])
 
+  // S-5 Ghosting Grace — true if user was in a room within the last 24h
+  const wasRecentlyInRoom = useMemo(() => {
+    if (!lastRoomCode || !lastRoomLeftAt) return false
+    return Date.now() - new Date(lastRoomLeftAt).getTime() < 86_400_000
+  }, [lastRoomCode, lastRoomLeftAt])
+
   // ── Dismiss handlers ──────────────────────────────────────────────────────────
   const dismissContextRestore = () => setShowContextRestore(false)
 
@@ -150,6 +160,8 @@ export function useOverlayState(): OverlayState {
     showRecovery,
     flexPauseActive,
     flexPauseUntilLabel,
+    wasRecentlyInRoom,
+    lastRoomCode,
     showContextRestore,
     showShutdown,
     showMonthly,

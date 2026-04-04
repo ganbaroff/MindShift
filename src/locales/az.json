@@ -1109,7 +1109,9 @@
     "allCaughtUp": "Siz hamınız məşğulsunuz - növbəti nəyə hazırsınız?",
     "diveBack": "Geri qayıdın →",
     "letsGo": "gedək →",
-    "maybeLater": "Bəlkə sonra"
+    "maybeLater": "Bəlkə sonra",
+    "roomReEntry": "Fokus otağınız hələ saxlanılıb",
+    "roomReEntryBody": "{{code}} otağı burada — istənilən vaxt qoşulmaq üçün bir sesiya başladın."
   },
   "install": {
     "installMindShift": "MindShift-i quraşdırın",
