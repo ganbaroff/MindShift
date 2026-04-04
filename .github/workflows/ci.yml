@@ -52,6 +52,18 @@ jobs:
           path: playwright-report/
           retention-days: 14
 
+      - name: Upload Sentry source maps
+        if: ${{ secrets.SENTRY_AUTH_TOKEN != '' }}
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: yusif-ganbarov
+          SENTRY_PROJECT: mindshift
+        run: |
+          npx @sentry/cli releases new "$GITHUB_SHA"
+          npx @sentry/cli sourcemaps inject dist/
+          npx @sentry/cli sourcemaps upload dist/ --release="$GITHUB_SHA"
+          npx @sentry/cli releases finalize "$GITHUB_SHA"
+
       - name: Bundle size summary
         run: |
           echo "## Bundle Analysis" >> $GITHUB_STEP_SUMMARY

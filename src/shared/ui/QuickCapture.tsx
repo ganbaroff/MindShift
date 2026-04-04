@@ -185,7 +185,7 @@ function QuickCaptureInner({ onSubmit, onExpand, placeholder }: QuickCaptureProp
           value={text}
           onChange={e => setText(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder={placeholder ?? "What's on your mind?"}
+          placeholder={placeholder ?? i18nT('quickCapture.placeholder', "What's on your mind?")}
           className="flex-1 bg-transparent text-[14px] outline-none placeholder:text-[#8B8BA7]"
           style={{ color: 'var(--color-text-primary)' }}
           aria-label="Quick task input"
@@ -248,7 +248,7 @@ function QuickCaptureInner({ onSubmit, onExpand, placeholder }: QuickCaptureProp
                   style={{ color: 'var(--color-text-muted)' }}
                 >
                   <ChevronDown size={10} />
-                  More options
+                  {i18nT('quickCapture.moreOptions', 'More options')}
                 </button>
               )}
             </div>

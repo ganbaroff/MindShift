@@ -163,6 +163,7 @@ function ArcTimerInner({
           >
             <span
               role="timer"
+              aria-live="off"
               aria-label={isCountup ? `${formatTime(displaySeconds)} elapsed` : `${formatTime(displaySeconds)} remaining`}
               className="font-mono font-bold tabular-nums"
               style={{

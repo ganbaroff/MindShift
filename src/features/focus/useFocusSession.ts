@@ -221,7 +221,7 @@ export function useFocusSession() {
     const daysSinceInstall = installDate
       ? Math.floor((Date.now() - new Date(installDate).getTime()) / 86_400_000)
       : undefined
-    logEvent('session_started', { duration_min: duration, has_task: selectedTask ? 1 : 0, ...(daysSinceInstall != null && { days_since_install: daysSinceInstall }) })
+    logEvent('session_started', { duration_min: duration, has_task: selectedTask ? 1 : 0, from: searchParams.get('from') ?? 'direct', ...(daysSinceInstall != null && { days_since_install: daysSinceInstall }) })
     logEvent('session_audio_state', { has_anchor: focusAnchor ? 1 : 0, preset: focusAnchor ?? 'none' })
     if (completedFocusSessions === 0) logEvent('first_session_started', { duration_min: duration })
     void requestNotificationPermission()
