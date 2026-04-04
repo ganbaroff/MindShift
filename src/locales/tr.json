@@ -267,6 +267,7 @@
     "reducedStimulationHint": "Animasyonları soluklaştırır ve renklerin doygunluğunu azaltır; gözleri ve duyuları yormaz.",
     "hapticFeedback": "Dokunsal geribildirim",
     "hapticFeedbackHint": "Görev tamamlandığında ve aşama değişikliklerinde hafif titreşimler (yalnızca Android).",
+    "mochiCompanion": "Oturumlar sırasında Mochi'yi göster",
     "languageSetAuto": "Dil otomatik olarak ayarlandı (sistemi takip eder)",
     "pauseForDay": "24 saat duraklat",
     "remindersEnabled": "Hatırlatıcılar etkinleştirildi",
@@ -321,7 +322,7 @@
     "upgradeSuccess": "Pro'ya hoş geldiniz 🌱 Sınırsız Mochi + tüm özelliklerin kilidi açıldı."
   },
   "onboarding": {
-    "skipSetup": "Kurulumu atlayın — hemen başlayın →",
+    "skipSetup": "Kurulumu atla →",
     "refreshing": "Profiliniz yenileniyor — değişiklikler anında uygulanır",
     "step": "{{current}} / {{total}} Adımı",
     "back": "← Geri",
@@ -1167,7 +1168,7 @@
       "lowEnergyNudge": "Düşük pil modu — tek bir şey yeterli 🌿",
       "highEnergyNudge": "güzel enerji, kullan ⚡",
       "xpLabel": "XP",
-      "streakLabel": "rüzgâr gibi geçmek",
+      "streakLabel": "seri",
       "badgeLabel": "rozetler"
     },
     "millennial": {
@@ -1182,7 +1183,7 @@
       "lowEnergyNudge": "Kolay bir gün — bir şey yeter 🌿",
       "highEnergyNudge": "Bugünün enerjisi güzel ✨",
       "xpLabel": "XP",
-      "streakLabel": "rüzgâr gibi geçmek",
+      "streakLabel": "seri",
       "badgeLabel": "başarılar"
     },
     "genX": {
@@ -1212,7 +1213,7 @@
       "lowEnergyNudge": "Bugün tek bir şey var; bu kadar yeter 🌿",
       "highEnergyNudge": "Bugünün enerjisi güzel ✨",
       "xpLabel": "XP",
-      "streakLabel": "rüzgâr gibi geçmek",
+      "streakLabel": "seri",
       "badgeLabel": "rozetler"
     }
   },

@@ -122,6 +122,12 @@ Deno.serve(async (req: Request) => {
         completedAt: t.completed_at,
         createdAt: t.created_at,
         snoozeCount: t.snooze_count,
+        dueDate: t.due_date,
+        dueTime: t.due_time,
+        note: t.note,
+        taskType: t.task_type,
+        repeat: t.repeat,
+        category: t.category,
       })),
       focusSessions: (focusSessions ?? []).map(s => ({
         id: s.id,
