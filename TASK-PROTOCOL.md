@@ -1,8 +1,8 @@
-# TASK-PROTOCOL v7.0 — MindShift Team Operating Standard
+# TASK-PROTOCOL v8.0 — MindShift Team Operating Standard
 
 > **Owner:** Yusif Ganbarov
 > **Project:** MindShift — ADHD-aware productivity PWA
-> **Updated:** 2026-04-02 (v7.0 — L1-L5 classification, Sprint Gate DSP, Completion Consensus, Session Context Injection, HOTFIX 4-box, Efficiency Gate scope, Concurrent Edit Protocol)
+> **Updated:** 2026-04-04 (v8.0 — Zero-simulation rewrite. Every step has a mandatory artifact. No step can be faked.)
 > **Status:** ACTIVE — all Claude Code agents follow this protocol without exception
 
 ---
@@ -26,43 +26,36 @@ The owner operates at strategy level. The team resolves everything at execution 
 
 ---
 
-## BEFORE EVERY BATCH — Required Reads (30 seconds, non-skippable)
+## THE CORE RULE — NO ARTIFACT, NOT DONE
 
-### Tier 1 — Always read (every session, every batch)
-```
-□ sprint-state: CLAUDE.md Sprint History → WHERE ARE WE
-□ mistakes: TASK-PROTOCOL.md Backlog Priorities → what's open/blocked
-□ guardrails: .claude/rules/guardrails.md → what NEVER to do
-```
+Every step below produces a specific artifact. If the artifact is absent, the step did not happen.
 
-### Tier 2 — Read if relevant (domain match)
-```
-□ Store changes → src/store/index.ts + partialize()
-□ Auth/security → .claude/rules/security.md + AuthGuard.tsx
-□ New dep → vite.config.ts + package.json (PERF sign-off required)
-□ Edge function → supabase/functions/ + rate limit logic
-□ E2E changes → e2e/helpers.ts + playwright.config.ts
-```
+**Artifacts are not summaries. They are structured outputs with grep-verifiable claims.**
 
-### Tier 3 — Reference (as needed)
-```
-□ CLAUDE.md full → Architecture sections, Stack hot cache
-□ ADRs in docs/adr/ → architecture decisions
-□ .claude/rules/testing.md → test patterns
-```
+An agent cannot say "blast radius is small" without showing the grep command and its output.
+An agent cannot say "I read the file" without producing a READ RECEIPT.
+An agent cannot say "approved" without running an independent grep.
 
-**All Tier 1 items empty before batch start = CLASS 3 mistake.**
+**If any artifact is missing → ARCH stops execution, names the missing artifact, and restarts that step.**
 
 ---
 
 ## FLOW DETECTION — Declare BEFORE executing
 
 ```
-CEO says "загрузи протокол и делай"    →  FULL PROTOCOL (5 steps)
+CEO says "загрузи протокол и делай"    →  FULL PROTOCOL (all 6 steps)
 CEO says "что дальше / propose"        →  TEAM PROPOSES (Step 1.5 → 2.0)
 CEO says "срочно / P0"                 →  HOTFIX  (keep security 4-box)
 CEO says "быстро / today"              →  EXPEDITED (1 critique round, keep security)
 ```
+
+**Declared flow must appear as first line of response:**
+```
+FLOW: [FULL PROTOCOL | TEAM PROPOSES | HOTFIX | EXPEDITED]
+LEVEL: [L1 | L2 | L3 | L4 | L5]
+REASON: [1 sentence why this level]
+```
+If this declaration is missing → CLASS 3 mistake. Stop. Restart.
 
 ### HOTFIX path (P0 only)
 ```
@@ -73,325 +66,292 @@ CEO says "быстро / today"              →  EXPEDITED (1 critique round, k
 ```
 All 4 must be ✅ before commit. No exceptions — not even for 1-line fixes.
 
-### EXPEDITED path
-- 1 critique round (not 2)
-- Security 4-box still mandatory
-- BATCH_ID still required
-- Completion Consensus still required (Step 4.0.5)
-
 ---
 
-## PHASE 0.7 — SPRINT GATE (fires BEFORE Team Proposes)
+## PHASE 0.7 — SPRINT GATE
 
-When flow = FULL PROTOCOL, run this check FIRST:
+Run BEFORE Team Proposes. Required output:
 
 ```
 SPRINT GATE:
-  □ Current sprint: [read from CLAUDE.md Sprint History]
-  □ What's in progress: [open P0/P1 items from Backlog]
-  □ Any BLOCKS_LAUNCH items unresolved? → fix those first
-  □ Batch fits current sprint goal? → yes / no (if no, justify)
+  Current sprint: [read from CLAUDE.md Sprint History — exact batch ID]
+  Open P0 items: [list or NONE]
+  Open P1 items: [list or NONE]
+  BLOCKS_LAUNCH unresolved: yes → [item] / no
+  Batch fits sprint goal: yes / no [if no: 1-sentence justification]
 ```
 
-If a BLOCKS_LAUNCH item exists → that item becomes Step 1.5 forced P0. Nothing else ships first.
+**EXIT CONDITION:** This block must exist before any agent reads a file.
+If BLOCKS_LAUNCH = yes → that item becomes forced P0. Nothing else executes first.
+
+---
+
+## TASK LEVEL
+
+| Level | Name | What it means | Agents needed |
+|-------|------|--------------|---------------|
+| **L1** | Trivial | ≤10 lines, 1 file, 0 consumers outside that file. NOT auth/store/external. | None — FASTPATH |
+| **L2** | Simple | 10-50 lines OR internal doc/ADR. 1-2 domains. Blast radius ≤ 3 files. | 1 domain agent |
+| **L3** | Standard | 50-200 lines OR multiple domains OR blast radius 4+ files. | 2 agents + confidence gate |
+| **L4** | Complex | 200+ lines OR DB migration OR edge function change. | 3-4 agents + confidence gate |
+| **L5** | Critical | Production deploy / auth rewrite / irreversible data change. | Full 7-agent + Yusif |
+
+**L1 FASTPATH is BLOCKED for:** auth logic · store partialize() · Supabase schema · edge functions · RLS policies · any value used in more than 1 file
+
+**L1 FASTPATH requires proof:**
+```
+L1 PROOF:
+  grep "[changed value/component]" src/ --include="*.tsx" --include="*.ts" -l
+  RESULT: [exact output — must show only 1 file]
+```
+If grep returns > 1 file → auto-escalate to L2 minimum. No exceptions.
 
 ---
 
 ## THE TEAM
 
-| Role | Real-world title | Claude Agent | Responsibility |
-|------|-----------------|--------------|----------------|
-| **ARCH** | Lead Engineer / Architect | `general-purpose` | Store integrity, decomposition, types, migrations |
-| **SEC** | Security Engineer | `sec` | Auth, edge functions, GDPR, secrets, RLS |
-| **PERF** | Performance Engineer | `bundle-analyzer` | Bundle, React memo, hooks, audio, Web Vitals |
-| **UX** | UX + Accessibility Engineer | `a11y-scanner` + `guardrail-auditor` | ADHD safety, copy, a11y, motion, color |
-| **TEST** | QA Engineer | `e2e-runner` | Playwright E2E, unit tests, coverage gaps |
-| **INFRA** | Platform / DevOps Engineer | `infra` | CI/CD, Vercel, Supabase migrations, PWA, SW |
-| **LIVEOPS** | Live Ops / SRE | `liveops` | Production health, Sentry errors, Vercel logs, user-facing incidents |
-| **GROWTH** | Growth Engineer | `growth` | Analytics, funnel gaps, retention metrics, A/B hooks |
+| Role | Agent | Responsibility |
+|------|-------|----------------|
+| **ARCH** | `general-purpose` | Store integrity, decomposition, types, migrations, blast radius |
+| **SEC** | `sec` | Auth, edge functions, GDPR, secrets, RLS |
+| **PERF** | `bundle-analyzer` | Bundle, React memo, hooks, audio, Web Vitals |
+| **UX** | `a11y-scanner` + `guardrail-auditor` | ADHD safety, copy, a11y, motion, color |
+| **TEST** | `e2e-runner` | Playwright E2E, unit tests, coverage gaps |
+| **INFRA** | `infra` | CI/CD, Vercel, Supabase migrations, PWA, SW |
+| **LIVEOPS** | `liveops` | Production health, Sentry errors, Vercel logs |
+| **GROWTH** | `growth` | Analytics, funnel gaps, retention metrics |
 
 LIVEOPS runs FIRST after any prod deploy or user-reported incident.
 
 ---
 
-## THE FIVE STEPS (non-negotiable order)
-
-```
-0.5  FLOW DETECTION    → classify task type, declare level
-0.7  SPRINT GATE       → verify against current sprint (FULL only)
-1.0  TEAM READS        → parallel reads of all relevant files
-1.5  TEAM PROPOSES     → each agent returns ranked findings
-2.0  DEBATE + LOCK     → triage, priority vote, declare BATCH-ID + named roles
-3.0  EXECUTE           → implement, tsc -b, commit
-4.0  CLOSE             → Completion Consensus → docs → memory → "what's next"
-```
-
----
-
-## STEP 0.5 — FLOW DETECTION
-
-Classify incoming request before anything else:
-
-| Signal | Route |
-|--------|-------|
-| "bug" / crash / error / broken / ошибка | `build-error-resolver` agent |
-| E2E / Playwright / spec failing | `e2e-runner` agent |
-| User complaint about production | **LIVEOPS first**, then route |
-| audit / security / performance / analyze | 4–8 agent swarm |
-| new feature | `Plan` → `general-purpose` |
-| copy / UX text / translation | `humanizer` skill |
-| ≤10 lines, obvious, not auth/store/external | L1 FASTPATH → `Edit` directly |
-| "what's next" / roadmap | GROWTH + UX agents |
-
----
-
-## TASK LEVEL — Declare BEFORE executing
-
-| Level | Name | What it means | Agents needed |
-|-------|------|--------------|---------------|
-| **L1** | Trivial | ≤10 lines, 1 file, obvious, reversible. NOT auth/store/external. | None — FASTPATH |
-| **L2** | Simple | 10-50 lines OR internal doc/ADR. 1-2 domains. | 1 domain agent |
-| **L3** | Standard | 50-200 lines OR multiple domains OR formal output. | 2 agents + confidence gate |
-| **L4** | Complex | 200+ lines OR DB migration OR edge function change. | 3-4 agents + confidence gate |
-| **L5** | Critical | Production deploy / auth rewrite / irreversible data change. | Full 7-agent + Yusif |
-
-**L1 FASTPATH is BLOCKED for:** auth logic · store partialize() · Supabase schema · edge functions · RLS policies
-**Not in table? → Default L3. Never self-assign L1 for unknown type.**
-
-### Before Launching ANY Agent (2 minutes)
-
-```
-□ SESSION CONTEXT filled (decisions today, what's done, Yusif said what)
-□ MINDSHIFT CONTEXT BLOCK pasted (what MindShift is, stack, current sprint)
-□ "What's already decided" filled (prevents re-research)
-□ Output format specified
-```
-**All 4 empty = CLASS 3 mistake. Takes 2 minutes, saves hours.**
-
-### Confidence Gate (MANDATORY before L3+ delivery)
-
-```
-CONFIDENCE GATE:
-  Task type + Level: [e.g., DB migration, L4]
-  ARCH confidence:   [%]
-  Agents verified:   [list]
-  Weak points:       [where knowledge is limited]
-  Ready:             YES (≥85%) / NO
-```
-
-Thresholds:
-- ≥85% after verification → deliver
-- 70-84% → deliver with explicit caveat to Yusif
-- <70% → do NOT deliver until additional verification
-
----
-
-## STEP 1.0 — TEAM READS (always parallel)
+## STEP 1.0 — TEAM READS
 
 Launch all relevant agents simultaneously. Never read sequentially.
 
-### Domain → Files mapping
+**Each agent must produce a READ RECEIPT for every file they read:**
 
-**ARCH reads:**
-- `src/store/index.ts`, `src/store/slices/`
-- `src/app/App.tsx`, `src/app/AppShell.tsx`
-- `src/types/index.ts`, `src/types/database.ts`
+```
+READ RECEIPT
+Agent: [name]
+File: [exact path]
+Lines read: [range or "full"]
+Key facts relevant to current task: [2-3 bullet points — specific, not vague]
+Risks spotted: [yes → describe / no]
+Consumers of this module (if component/hook/util): [list from grep or NONE]
+```
 
-**SEC reads:**
-- `src/shared/lib/supabase.ts`, `src/app/AuthGuard.tsx`
-- `supabase/functions/` (all edge functions)
-- `.env.example`, `src/shared/lib/logger.ts`
-- `supabase/migrations/` (latest 3)
-
-**PERF reads:**
-- `vite.config.ts`, `package.json` (deps + scripts)
-- `src/shared/hooks/useAudioEngine.ts`
-- `src/features/focus/useFocusSession.ts`
-- `src/features/focus/MochiSessionCompanion.tsx`
-
-**UX reads:**
-- `src/features/today/TodayPage.tsx`
-- `src/features/home/HomePage.tsx`
-- `src/features/focus/FocusScreen.tsx`
-- `src/components/TaskCard.tsx`
-- `.claude/rules/guardrails.md`
-
-**TEST reads:**
-- `e2e/helpers.ts`, `playwright.config.ts`
-- `e2e/*.spec.ts` (all specs, filenames only + line counts)
-- `src/store/__tests__/store.test.ts`
-
-**INFRA reads:**
-- `public/manifest.json`, `src/sw.ts`
-- `vercel.json`, `.github/workflows/`
-- `capacitor.config.ts`
-- `supabase/migrations/` (all, for schema state)
-
-**LIVEOPS reads:**
-- Vercel deployment logs (via MCP or CLI)
-- Sentry DSN from `.env` → check recent errors
-- `src/shared/lib/logger.ts` — what gets captured
-- `src/app/AppShell.tsx` — offline bar, error boundaries
-
-**GROWTH reads:**
-- `src/features/onboarding/OnboardingPage.tsx`
-- `src/features/tutorial/FirstFocusTutorial.tsx`
-- `src/features/focus/FocusScreen.tsx` (setup screen)
-- `src/shared/lib/volaura-bridge.ts` — analytics events
-- `src/shared/hooks/useInAppReview.ts`
+**EXIT CONDITION:** Every agent that will propose changes in Step 1.5 must have READ RECEIPTs for the files they're proposing to change. Agent without READ RECEIPT cannot make proposals. No exceptions.
 
 ---
 
 ## STEP 1.5 — TEAM PROPOSES
 
-Each agent returns proposals in this exact format:
+Each agent returns proposals. **Every field is mandatory. No field can be left blank.**
 
 ```
 AGENT: {ID}
 FINDING: {one line — what's wrong or what opportunity exists}
 SEVERITY: P0 | P1 | P2 | P3
 LEVEL: L1 | L2 | L3 | L4 | L5
-FILE: {exact path:line}
-FIX: {exact change in plain English}
+FILE: {exact path:line — verified by Read, not assumed}
+
+BLAST RADIUS ANALYSIS:
+  grep command run: [exact command]
+  grep output: [exact output — paste it]
+  Direct consumers (files that import this): [list from grep]
+  Prop consumers (components that receive this as prop): [list or NONE]
+  Default value reliance (who uses the default): [list or NONE]
+  i18n keys affected: [list or NONE — run grep on key name]
+  Store/partialize impact: [yes → field name / no]
+
+BLAST RADIUS VERDICT: CONTAINED (1 file) | MODERATE (2-3 files) | WIDE (4+ files)
+
+FIX: {exact change in plain English — specific enough that a junior dev could implement it}
 BLOCKS_LAUNCH: yes | no
 ```
 
-**Severity levels:**
-- **P0** = data loss / security breach / crash / auth broken
-- **P1** = user-facing bug / compliance gap / feature not working at all
-- **P2** = degraded UX / tech debt / missing translation / performance issue
-- **P3** = polish / nice-to-have / future optimization
+**EXIT CONDITION:** Every proposal must have BLAST RADIUS ANALYSIS with actual grep output. "No consumers" is only valid if grep returned 0 results and that output is shown.
+
+**Auto-escalation rules based on blast radius:**
+- CONTAINED → level as declared
+- MODERATE → minimum L2
+- WIDE → minimum L3, requires Round-2 Debate
 
 ---
 
 ## STEP 2.0 — DEBATE + BATCH LOCK
 
-### Priority rules (non-negotiable)
-1. P0 always executes first, regardless of effort
-2. L1 items batch together (≤5 per batch)
-3. L4+ items require Yusif awareness before execution
-4. Nothing ships without `tsc -b` passing
-5. LIVEOPS P0 items bypass all other queues
+### Round 1 — Cross-review (mandatory for ALL proposals)
 
-### Veto rules
-- Store `partialize()` change → ARCH must verify no data loss
-- New npm dependency → PERF must check bundle impact first
-- Edge function change → SEC must verify rate limit logic untouched
-- Any red color, shame language, urgency copy → rejected, no vote needed
-- Component >400 lines → decompose first, feature second
+Every proposal is reviewed by a **different** agent. Assignment:
+- ARCH proposals → reviewed by SEC
+- SEC proposals → reviewed by ARCH
+- UX proposals → reviewed by PERF
+- PERF proposals → reviewed by UX
+- GROWTH proposals → reviewed by UX
+- INFRA proposals → reviewed by ARCH
+- TEST proposals → reviewed by INFRA
 
-### Round-2 Debate (when agents disagree)
+**Cross-review format (mandatory fields):**
 
-After initial proposals, if two agents hold conflicting positions:
 ```
-AGENT: [ID]
-POSITION: [1-sentence stance]
-COUNTER: [1-sentence rebuttal to opposing agent's position]
-FINAL: AGREE / MAINTAIN — [if maintaining, cite specific technical reason]
+CROSS-REVIEW
+Reviewer: [agent]
+Reviewing proposal: [agent + finding title]
+
+Independent blast radius check:
+  grep command: [run it yourself — do not trust original agent's grep]
+  grep output: [paste]
+  Matches original claim: yes / no [if no: describe discrepancy]
+
+Checks:
+  □ Store partialize() affected? yes/no
+  □ Auth flow affected? yes/no
+  □ i18n keys exist in all locales? yes/no/n-a
+  □ a11y labels preserved? yes/no/n-a
+  □ No red/shame/urgency in copy? yes/no/n-a
+  □ Component stays ≤400 lines after change? yes/no/n-a
+  □ tsc -b will pass? confident/uncertain [if uncertain: why]
+
+VERDICT: APPROVED | APPROVED WITH NOTES [list notes] | BLOCKED [reason]
 ```
-CTO breaks tie after round 2. No round 3.
+
+**EXIT CONDITION:** Every proposal needs one CROSS-REVIEW with VERDICT. No self-review. No skipped reviews.
+
+### Round 2 — Conflict resolution (when BLOCKED or cross-reviewer found discrepancy)
+
+```
+ROUND-2
+Agent: [ID]
+Position: [1-sentence stance]
+Counter: [1-sentence rebuttal to opposing position]
+Evidence: [grep command + output that supports your position]
+Final: AGREE | MAINTAIN — [if maintaining: cite specific technical evidence]
+```
+
+ARCH breaks tie after Round 2. No Round 3.
 
 ### Concurrent Edit Protocol
 
 When two tasks touch the same file:
 ```
 CONCURRENT EDIT PROTOCOL:
-  1. Task [X] declared primary owner → commits first
-  2. Task [Y] dependent → waits for X commit, then applies changes
-  3. Conflict detected → force sequential re-execution (no parallel merge)
-  Declared at Batch Lock.
+  Primary owner: Task [X] — commits first
+  Dependent: Task [Y] — waits for X commit hash, then applies changes
+  Conflict trigger: [which specific lines overlap]
 ```
 
-### Batch Lock Declares (once, at lock)
+### Batch Lock (required before any execution)
 
 ```
-BATCH-ID:       BATCH-{YYYY-MM-DD}-{LETTER}
-C3_REVIEWER:    [agent responsible for final output review]
-CROSS_QA_AGENT: [agent that verifies tests — cannot be TEST author]
-BATCH_AGENT_COUNT: [N agents running this batch]
+BATCH-ID: BATCH-{YYYY-MM-DD}-{LETTER}
+LEVEL: [highest level among all tasks]
+C3_REVIEWER: [agent for final output review — cannot be author]
+CROSS_QA_AGENT: [cannot be TEST author]
+BATCH_AGENT_COUNT: [N]
+CONCURRENT_EDITS: [list files with multiple owners, or NONE]
+
+TASK LIST:
+  [ID-1]: [description] | owner: [agent] | level: [L?] | blast: [CONTAINED/MODERATE/WIDE]
+  [ID-2]: ...
 ```
+
+**EXIT CONDITION:** Batch Lock block must exist before any file is touched. If it's missing → no execution.
 
 ---
 
 ## STEP 3.0 — EXECUTE
 
-```bash
-# Gate check — run before touching ANYTHING:
-npx tsc -b
+### Step 3.0 — Pre-flight (mandatory before touching ANY file)
 
-# After every individual item:
-npx tsc -b
-
-# Before commit:
-npx tsc -b && npx playwright test --reporter=line
-```
-
-### Step 3.1 — Security Pre-Check (L3+ only)
+For each task in the batch:
 
 ```
-□ Rate limiting on new endpoints?
-□ RLS policies on new tables?
-□ TypeScript validation on inputs?
-□ Auth + ownership checks?
-□ No sensitive data in logs?
-□ Parameterized SQL?
-□ Schema field names verified against actual DB (not assumed)?
-□ All interim TypeScript types verified against source: [mismatches: none / list]
+PRE-FLIGHT — [task ID]
+Files I will edit: [exact list]
+Files in blast radius I will NOT edit (but verified OK): [list]
+tsc -b before state: [run it — 0 errors / N errors — paste output]
+Rollback plan: [git stash / specific revert command]
 ```
 
-Schema verification is BLOCKING for L3+. Cannot proceed if unchecked.
+**EXIT CONDITION:** Pre-flight exists for every task before first edit. tsc -b must be run and result pasted — not assumed.
+
+### Step 3.1 — Security Pre-Check (L3+ mandatory, L2 if touching auth/edge/store)
+
+```
+SECURITY PRE-CHECK
+□ Rate limiting on new endpoints? yes/no/n-a
+□ RLS policies on new tables? yes/no/n-a
+□ TypeScript validation on all new inputs? yes/no/n-a
+□ Auth + ownership checks? yes/no/n-a
+□ No sensitive data in logs? yes/no/n-a
+□ Parameterized SQL? yes/no/n-a
+□ Schema field names verified against actual DB schema file (not assumed)? yes/no/n-a
+□ All interim TypeScript types verified against source? yes/no/n-a [list mismatches or NONE]
+```
+
+All boxes must be filled. "n-a" is valid only with a reason.
 
 ### Step 3.2 — Execute
 
-- Follow the proposal scope. Don't expand.
-- Checkpoint commits at natural breakpoints: `git commit -m "[BATCH-ID] description"`
-- If blocked: announce blocker, continue unblocked parts. Don't wait.
-- If deviating from plan: log reason BEFORE deviating.
+- Follow the proposal scope exactly. Don't expand. Don't "while I'm here" fix adjacent things.
+- After each individual item: run `tsc -b` and paste result.
+- If blocked: announce blocker with exact error, continue unblocked parts. Don't wait silently.
+- If deviating from plan: write MID-BATCH CHANGE block before deviating.
 
-### Step 3.2.5 — Test Execution Gate (L2+ tasks)
-
-Before any task is marked complete:
 ```
-□ Test file exists and is committed
-□ Tests ran: `npx playwright test` or `npx vitest run`  ← must actually run, not just exist
-□ TEST declares: "Tests executed. [N] passing, 0 failing."
+MID-BATCH CHANGE:
+  Stopping: [task ID] — [reason in 1 sentence]
+  New direction: [1 sentence]
+  Partial work status: committed / discarded / will be in next batch
 ```
 
-"Verified" = tests RAN and PASSED. Not: tests exist as code.
+### Step 3.3 — Post-edit verification (mandatory after every file edit)
 
-### Step 3.3 — Peer Review (L2+ tasks)
+```
+POST-EDIT — [file edited]
+tsc -b result: [0 errors / paste errors]
+grep verify — changed value still correct: [grep command + output]
+Blast radius consumers verified: [for each consumer file — did I check it still works?]
+```
 
-Agent who didn't write the code reviews it. Looks for:
-- Store partialize() missing (causes silent data loss on reload)
-- Security gaps (unguarded routes, missing RLS)
-- Missing i18n keys
-- Guardrail violations (red color, shame language, urgency copy)
+### Step 3.4 — Peer Review (L2+ mandatory)
 
-Verdict: **APPROVED** / **APPROVED WITH NOTES** / **BLOCKED**
+Agent who did NOT write the code:
 
-If BLOCKED → fix → re-review. Not restart.
+```
+PEER REVIEW — [reviewer] on [task ID]
+□ Store partialize() — new persisted fields added to it? yes/no/n-a
+□ Security gaps — unguarded routes, missing RLS? none / [describe]
+□ Missing i18n keys — grep for hardcoded strings in changed files? none / [list]
+□ Guardrail violations — red color, shame language, urgency copy? none / [describe]
+□ Blast radius consumers — all affected files still compile? yes/no
+VERDICT: APPROVED | APPROVED WITH NOTES | BLOCKED
+```
 
-### Step 3.4 — Cross-QA Verification (L3+ tasks only)
+### Step 3.5 — Cross-QA (L3+ mandatory)
 
 TEST cannot self-verify. Independent agent spot-checks:
-```
-CROSS-QA SPOT-CHECK (by ARCH or SEC):
-  □ Tests are actually running code (not just mocking everything)
-  □ Tests cover failure case, not just happy path
-  □ Test data is realistic (not just value = true / value = "test")
-  □ Edge cases present for known risk areas (auth, session sync, push)
 
-Cross-checker declares: "Tests verified by [Agent]. Spotted [N] issues."
-Rule: TEST cannot cross-check their own test suite.
+```
+CROSS-QA — [checker, cannot be TEST]
+□ Tests run actual code (not just mocking everything)? yes/no
+□ Tests cover failure case, not just happy path? yes/no
+□ Test data is realistic? yes/no
+□ Edge cases present for known risk areas? yes/no
+Tests verified by: [agent]. Issues found: [N — list or NONE]
 ```
 
 ### Commit format
 
 ```
-{type}: {description} ({BATCH-ID})
+{type}({scope}): {description} ({BATCH-ID})
 
-- item 1: what changed and why
-- item 2: what changed and why
+- item: what changed and why
+- item: what changed and why
+
+tsc -b ✅
 
 Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
 ```
@@ -402,71 +362,55 @@ Types: `fix` · `feat` · `perf` · `refactor` · `test` · `chore` · `docs`
 
 ## STEP 4.0 — CLOSE
 
-### Step 4.0.5 — Completion Consensus (required before batch report)
+### Step 4.0.5 — Completion Consensus
 
 Each primary agent produces:
 
 ```
 AGENT: [Name]
 TASKS COMPLETED: [list task IDs]
-TESTS RAN: [command] → [X passed, 0 failed]
-JOURNEY VERIFIED: [page/flow tested + what was confirmed]
+TESTS RAN: [exact command] → [X passed, 0 failed — paste summary line]
+JOURNEY VERIFIED: [page/flow + what was confirmed in preview or grep]
+BLAST RADIUS CLEARED: [for each MODERATE/WIDE item — consumers verified]
 MEMORY UPDATED: [files updated, or "none required"]
 BLOCKERS: [any unresolved issue, or "none"]
-SIGN-OFF: ✅ READY / ❌ BLOCKED — [reason if blocked]
+SIGN-OFF: ✅ READY | ❌ BLOCKED — [reason if blocked]
 ```
 
-Consensus rules:
-- 2+ READY sign-offs required before batch report (MindShift has smaller team than VOLAURA)
+Rules:
+- 2+ READY sign-offs required before batch report
 - Any ❌ BLOCKED → batch stays open, ARCH investigates
-- If agent cannot produce TESTS RAN line → task is NOT done
+- "Tests ran" line requires actual command + actual result. Not: "tests should pass."
 
 ### Step 4.1 — Batch Report
 
 ```
 BATCH: [ID]
-COMPLETED: [count] tasks — [1-line each]
-DEFERRED: [count] — [why each]
-DISCOVERED: [gaps found during execution]
-USER IMPACT: [what users can now do that they couldn't before]
+COMPLETED: [N] tasks
+  - [task]: [1-line description of what changed + blast radius verdict]
+DEFERRED: [N] — [why each — must be a real reason, not "out of scope"]
+DISCOVERED: [gaps found during execution — add to backlog]
+USER IMPACT: [what users can now do / see / not see that they couldn't before]
 QUESTION: NONE  ← default. CEO question requires proof team couldn't answer it.
 
 WHAT'S NEXT:
   1. [highest priority unblocked task — ready to start immediately]
   2. [highest risk item outstanding]
-  3. [thing Yusif probably hasn't thought about yet]
+  3. [thing Yusif probably hasn't thought about yet — must be non-obvious]
 ```
 
-"What's next" is declared proactively by the team — not after Yusif asks "что дальше".
-
-### Step 4.2 — Memory Update
-
-After every batch:
-1. Run `npx playwright test` — must stay green
-2. If Vercel auto-deploys → LIVEOPS checks production within 10 min
-3. Update CLAUDE.md sprint history if a feature landed
-4. Update `memory/` if new architectural decision made
-
----
-
-## MID-BATCH DIRECTION CHANGE
-
-If scope changes mid-execution (Yusif redirects, blocker discovered, P0 surfaces):
+### Step 4.2 — Memory + Docs Update
 
 ```
-MID-BATCH CHANGE:
-  Stopping: [task ID + reason in 1 sentence]
-  New direction: [1 sentence]
-  Partial work: [committed / discarded / will be in next batch]
+□ npx playwright test — result: [N passing]
+□ CLAUDE.md sprint history updated if feature landed: yes/no
+□ memory/ updated if architectural decision made: yes/no [which file]
+□ TASK-PROTOCOL.md backlog updated: yes/no [which items closed/opened]
 ```
-
-2-sentence rule: if you can't explain the change in 2 sentences, you haven't understood it yet.
 
 ---
 
 ## GUARDRAILS (enforced by all agents — never override)
-
-From `.claude/rules/guardrails.md`:
 
 1. **Never red.** Teal/indigo/gold only. #FF0000, red-*, hue 0-15 = instant reject.
 2. **Never urgency.** "hurry", "running out", "don't miss", "urgent" = instant reject.
@@ -479,35 +423,33 @@ From `.claude/rules/guardrails.md`:
 9. **No new deps without PERF approval.** Bundle size matters.
 10. **Mochi is a companion, not a coach.** Never medical advice. Never diagnose.
 
-### Efficiency Gate SCOPE (violations cause CLASS 3 mistake)
+---
 
-Efficiency Gate = "skip DSP if obvious." Applies ONLY to DSP (design/proposal step).
-**NEVER applies to:** agent context blocks · security pre-check · Tier 1 required reads · Completion Consensus
+## FAILURE MODES
+
+| What happened | CLASS | What should have caught it |
+|--------------|-------|---------------------------|
+| Executed without team proposal | CLASS 3 | Step 2.0 Batch Lock missing |
+| Changed value without blast radius grep | CLASS 3 | Step 1.5 BLAST RADIUS field missing |
+| "Done" without test evidence | CLASS 1 | Step 4.0.5 TESTS RAN line missing |
+| Memory not updated | CLASS 2 | Step 4.2 checklist |
+| Wrong field names assumed (DB schema) | CLASS 4 | Step 3.1 security pre-check |
+| Invented numbers or file paths | CLASS 5 | Step 1.5 FILE field must be grep-verified |
+| Agent launched without context block | CLASS 3 | Step 1.0 READ RECEIPT missing |
+| L1 self-assigned for multi-file change | CLASS 3 | L1 PROOF grep showed >1 file |
+| Cross-review skipped | CLASS 3 | Step 2.0 no CROSS-REVIEW block |
+| Post-edit tsc -b not run | CLASS 3 | Step 3.3 POST-EDIT block missing |
+| Blast radius claimed without grep output | CLASS 3 | Grep output is mandatory — "I believe" = rejected |
 
 ---
 
-## TOP FAILURE MODES
-
-| What happened | CLASS |
-|--------------|-------|
-| Executed without team proposal | CLASS 3 (dominant) |
-| "Done" without test evidence | CLASS 1 |
-| Memory not updated | CLASS 2 |
-| Wrong field names assumed (DB schema) | CLASS 4 |
-| Invented numbers or file paths | CLASS 5 |
-| Agent launched without context block | CLASS 3 |
-| Efficiency Gate applied to non-DSP step | CLASS 3 |
-| L1 self-assigned for auth/store/external task | CLASS 3 |
-
----
-
-## PRODUCTION HEALTH CHECKLIST (LIVEOPS runs this)
+## PRODUCTION HEALTH CHECKLIST (LIVEOPS)
 
 ```
 □ Vercel latest deploy: status = READY?
 □ Sentry: 0 new P0 errors in last 24h?
-□ Supabase: all 13 edge functions deployed and responding?
-□ E2E on prod: 340+ tests passing?
+□ Supabase: all deployed edge functions responding?
+□ E2E on prod: tests passing?
 □ Auth: magic link + Google OAuth working?
 □ Push notifications: scheduled-push edge function running via pg_cron?
 □ IDB storage: no quota errors in Sentry?
@@ -516,7 +458,7 @@ Efficiency Gate = "skip DSP if obvious." Applies ONLY to DSP (design/proposal st
 
 ---
 
-## STRESS TEST CHECKLIST (TEST + PERF run before launch gates)
+## STRESS TEST CHECKLIST (TEST + PERF before launch gates)
 
 ```
 □ 500 tasks in store — TasksPage renders without lag?
@@ -558,7 +500,7 @@ Efficiency Gate = "skip DSP if obvious." Applies ONLY to DSP (design/proposal st
 | Native | Capacitor (scaffold ready, not built) | `capacitor.config.ts` |
 | AI (alt) | NVIDIA NIM — OpenAI-compatible, 70B+ models | `NVIDIA_API_KEY` in `.env` |
 
-### NVIDIA NIM — available models (use when Gemini is insufficient)
+### NVIDIA NIM — available models
 
 | Model | Best for | Speed |
 |-------|---------|-------|
@@ -572,73 +514,48 @@ Efficiency Gate = "skip DSP if obvious." Applies ONLY to DSP (design/proposal st
 
 ---
 
-## BACKLOG PRIORITIES (as of 2026-04-02)
+## BACKLOG PRIORITIES (as of 2026-04-04)
 
 ### P0 — Blockers
-- [x] Google OAuth — ✅ Supabase enabled + Google Cloud redirect URI set (2026-03-31)
-- [x] `useFocusSession.ts` — ✅ 335 lines (decomposed in prior sprint)
-- [x] `SettingsPage.tsx` — ✅ 48 lines (decomposed in prior sprint)
-- [x] `src/store/index.ts` — ✅ 163 lines (decomposed in prior sprint)
-- [x] `AuthGuard.tsx` — ✅ investigated 2026-04-02: intentional guest PWA design; RLS protects all Supabase data. False alarm, closed.
-- [x] `weekly-insight` edge function — ✅ timeout fixed 8s (BATCH-2026-04-02-L)
+- [x] Google OAuth ✅
+- [x] All store slices decomposed ✅
+- [x] send-magic-link removed from CI (no function exists) ✅ BATCH-2026-04-04-I
 
 ### P1 — User-facing gaps
-- [x] Audio: BreathworkRitual — ✅ soft rising/falling sine tones added (BATCH-2026-03-31-D)
-- [x] Audio: volume default too quiet — ✅ raised 0.55 → 0.65 (BATCH-2026-03-31-C)
-- [ ] Google Calendar: inbound sync missing (one-way only)
-- [ ] Push notifications: pg_cron needs enabling in Supabase Dashboard (manual: Supabase Dashboard)
-- [x] CSP: ✅ investigated 2026-04-02: fonts.googleapis.com already in connect-src; OAuth uses page navigation, not fetch. False alarm, closed.
-- [x] OnboardingPage: keyboard trap ✅ fixed (BATCH-2026-04-02-L)
-- [x] FocusRoomSheet: role="dialog" + aria-labelledby ✅ added (BATCH-2026-04-02-L)
-- [x] SessionControls.tsx: focus-visible:ring-2 + aria-pressed ✅ added (BATCH-2026-04-02-L)
+- [ ] Push notifications: pg_cron needs enabling in Supabase Dashboard (manual — Yusif only)
+- [x] gcal-inbound edge function ✅ BATCH-2026-04-04-H
+- [x] tutorial momentum (from= dim in session_started) ✅ BATCH-2026-04-04-I
+- [x] a11y: aria-pressed on tone picker, aria-live on timer, aria-label on search ✅ BATCH-2026-04-04-I
 
 ### P2 — Quality
-- [ ] QuickCapture: "today" / "tomorrow" without time shows no dueTime (expected)
-- [x] TodayPage: next-tasks nudge when NOW empty + NEXT has tasks ✅ (BATCH-2026-03-31-C)
-- [x] Tutorial: "Start for Real" → navigates to /focus for momentum ✅ (BATCH-2026-03-31-C)
-- [x] HistoryPage: phase filter chips (All/Flow/Release/Struggle) ✅ (BATCH-2026-03-31-D)
-- [x] Onboarding: progress indicator already implemented (segments + "Step X of Y") ✅
-- [x] Add `install_date` to store + `days_since_install` to analytics events ✅ (BATCH-2026-04-02-M)
-- [x] Add `energy_after` to `session_completed` logEvent ✅ energy_logged upgraded with energy_before + energy_delta (BATCH-2026-04-02-N)
+- [ ] S-5 Ghosting Grace — ContextRestore re-entry card (L3)
+- [ ] S-9 Post-social cool-down ritual (L3)
+- [x] ADHD profile dims in onboarding_completed ✅ BATCH-2026-04-04-I
+- [x] QuickCapture i18n complete ✅ BATCH-2026-04-04-I
+- [x] Sentry source maps in CI ✅ BATCH-2026-04-04-I
 
 ### P3 — Polish
-- [ ] Play Store: 8 screenshots need manual capture (`scripts/capture-screenshots.ts`)
-- [ ] Feature graphic 1024×500 (needs design)
-- [x] In-App Review API trigger ✅ already wired: import + useInAppReview() in App.tsx:241
+- [ ] Play Store: 8 screenshots (`npm run screenshots` — needs real device or Playwright viewport)
+- [ ] Feature graphic 1024×500 (design work)
+- [ ] supabase/config.toml for reproducible local env
 
 ---
 
-## FILE REGISTRY (key files only — full list in CLAUDE.md)
+## FILE REGISTRY
 
 ### Over guardrail (>400 lines) — needs decomposition
-_None — all resolved as of 2026-03-31_ ✅
+_None — all resolved_ ✅
 
-### Decomposed (resolved)
-- `src/features/auth/AuthScreen.tsx` — 252 lines ✅
-- `src/features/mochi/MochiChat.tsx` — 366 lines ✅
-- `src/features/focus/FocusScreen.tsx` — 288 lines ✅
-- `src/features/tasks/TasksPage.tsx` — 326 lines ✅
-- `src/features/focus/MonthlyReflection.tsx` — 260 lines ✅
-- `src/store/index.ts` — 163 lines ✅
-- `src/features/settings/SettingsPage.tsx` — 48 lines ✅
-- `src/features/focus/useFocusSession.ts` — 335 lines ✅
-- `src/features/focus/FocusSetup.tsx` — 207 lines ✅
-- `src/features/progress/ProgressPage.tsx` — 109 lines ✅
-
-### Core orchestrators
-- `src/app/App.tsx` — Router + overlay priority logic
-- `src/app/AppShell.tsx` — Layout, offline bar, friction nudge
-- `src/features/today/TodayPage.tsx` — Default route, daily view
-- `src/features/focus/FocusScreen.tsx` — Focus orchestrator
-
-### Supabase edge functions (13 deployed)
-- `decompose-task` · `recovery-message` · `weekly-insight`
-- `classify-voice-input` · `mochi-respond` · `gdpr-export` · `gdpr-delete`
-- `scheduled-push` · `gcal-store-token` · `gcal-sync`
-- `telegram-webhook` · `stripe-webhook` · `send-magic-link`
+### Supabase edge functions (deployed)
+`decompose-task` · `recovery-message` · `weekly-insight`
+`classify-voice-input` · `mochi-respond` · `gdpr-export` · `gdpr-delete`
+`scheduled-push` · `gcal-store-token` · `gcal-sync` · `gcal-inbound`
+`telegram-webhook` · `stripe-webhook` · `create-checkout`
 
 ### Infrastructure
 - `supabase/migrations/` — 13 migrations applied
 - `.github/workflows/e2e-production.yml` — runs on Vercel deploy
+- `.github/workflows/ci.yml` — type check + build + tests + Sentry source maps
+- `.github/workflows/deploy-edge-functions.yml` — deploys 14 edge functions on push to main
 - `scripts/capture-screenshots.ts` — Play Store screenshots
 - `scripts/translate.mjs` — auto-translate en.json → other locales
