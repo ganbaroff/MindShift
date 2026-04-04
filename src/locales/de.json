@@ -133,6 +133,7 @@
     "arcTimerSurprise": "Fokus-Timer – Ziffern in der Flussphase ausgeblendet",
     "arcTimerHideDigits": "Fokus-Timer: Tippen Sie, um Ziffern auszublenden",
     "arcTimerShowDigits": "Fokus-Timer: Tippen Sie, um Ziffern anzuzeigen",
+    "arcTapHint": "Tippen oder Leertaste drücken, um Ziffern umzuschalten",
     "soundMutedHint": "Die Lautstärke ist auf 0 – passen Sie sie unter Einstellungen → Ton an",
     "minutesPlaceholder": "Minuten...",
     "waitingForPartner": "Warten auf den Beitritt des Partners…",

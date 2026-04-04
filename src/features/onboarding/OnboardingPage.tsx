@@ -197,6 +197,9 @@ export default function OnboardingPage() {
     logEvent('onboarding_completed', { mode: 'minimal', quick_start: 1 })
     setAppMode('minimal')
     setEnergyLevel(3 as EnergyLevel)
+    // Set neutral ADHD profile defaults so FocusSetupHeader adaptive tips work for quick-start users
+    setTimeBlindness('sometimes')
+    setEmotionalReactivity('moderate')
     setOnboardingCompleted()
     navigate('/')
   }

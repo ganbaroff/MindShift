@@ -1,14 +1,19 @@
 name: Deploy Edge Functions
 
 on:
-  push:
+  workflow_run:
+    workflows: ["CI"]
     branches: [main]
-    paths:
-      - 'supabase/functions/**'
+    types: [completed]
+
+# Only deploy edge functions after CI passes — prevents broken functions from
+# deploying before TypeScript/build failures are caught.
+# Note: workflow_run only fires for the default branch (main) — PRs are unaffected.
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - uses: actions/checkout@v4
 

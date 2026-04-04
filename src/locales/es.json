@@ -133,6 +133,7 @@
     "arcTimerSurprise": "Temporizador de enfoque: dígitos ocultos en la fase de flujo",
     "arcTimerHideDigits": "Temporizador de enfoque: toque para ocultar dígitos",
     "arcTimerShowDigits": "Temporizador de enfoque: toque para mostrar los dígitos",
+    "arcTapHint": "Toque o presione Espacio para alternar los dígitos",
     "soundMutedHint": "El volumen está en 0: ajústelo en Configuración → Sonido",
     "minutesPlaceholder": "Minutos...",
     "waitingForPartner": "Esperando que el socio se una...",
