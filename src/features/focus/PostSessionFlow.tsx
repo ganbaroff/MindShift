@@ -16,6 +16,7 @@ import { motion, AnimatePresence } from 'motion/react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useMotion } from '@/shared/hooks/useMotion'
+import { SocialFeedbackCard } from './SocialFeedbackCard'
 import type { EnergyLevel, SessionPhase } from '@/types'
 import { ENERGY_EMOJI } from '@/shared/lib/constants'
 
@@ -74,6 +75,8 @@ interface NatureBufferProps {
   parkedThoughtsCount?: number
   /** VOLAURA crystals earned this session — shown as feedback chip when set */
   crystalEarned?: number
+  /** S-9 Post-social cool-down — true when user was in a Focus Room during this session */
+  wasInRoom?: boolean
 }
 
 const ENERGY_LABEL_KEYS = ['energy.drained', 'energy.low', 'energy.okay', 'energy.good', 'energy.wired'] as const
@@ -82,6 +85,7 @@ const ENERGY_OPTION_LEVELS: EnergyLevel[] = [1, 2, 3, 4, 5]
 export const NatureBuffer = memo(function NatureBuffer({
   bufferSeconds, postEnergyLogged, onSetEnergyLevel, onSkip, sessionMinutes = 0,
   emotionalReactivity, sessionPhase, parkedThoughtsCount = 0, onAutopsyPick, crystalEarned,
+  wasInRoom,
 }: NatureBufferProps) {
   const { shouldAnimate, t: transition } = useMotion()
   const { t } = useTranslation()
@@ -179,6 +183,9 @@ export const NatureBuffer = memo(function NatureBuffer({
             </motion.div>
           </AnimatePresence>
         )}
+
+        {/* S-9 Post-social cool-down — compact reaction card after room sessions */}
+        {wasInRoom && <SocialFeedbackCard />}
 
         {/* Block 3d: Post-session energy delta check-in */}
         {!postEnergyLogged && (
