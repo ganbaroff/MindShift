@@ -45,7 +45,7 @@ interface Props {
 
 export function RecoveryProtocol({ onDismiss }: Props) {
   const { archiveAllOverdue, addTask, nowPool, userId, lastSessionAt, xpTotal, email, hasAchievement, unlockAchievement, uiTone, emotionalReactivity, psychotype, timeBlindness } = useStore()
-  const { t: transition } = useMotion()
+  const { shouldAnimate, t: transition } = useMotion()
   const { t } = useTranslation()
   const { copy } = useUITone()
   const [taskInput, setTaskInput] = useState('')
@@ -211,9 +211,9 @@ export function RecoveryProtocol({ onDismiss }: Props) {
   return (
     <AnimatePresence>
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
+        initial={shouldAnimate ? { opacity: 0 } : {}}
+        animate={shouldAnimate ? { opacity: 1 } : {}}
+        exit={shouldAnimate ? { opacity: 0 } : {}}
         className="fixed inset-0 z-50 flex flex-col justify-center px-6"
         style={{
           background: 'linear-gradient(180deg, #0F1117 0%, #1A1B30 50%, #1E1A2E 100%)',
@@ -221,9 +221,9 @@ export function RecoveryProtocol({ onDismiss }: Props) {
       >
         {/* Warm glow accent — deep blue → warm purple (feels like a hug) */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 0.18, scale: 1 }}
-          transition={{ duration: 1.2, ease: 'easeOut' }}
+          initial={shouldAnimate ? { opacity: 0, scale: 0.8 } : {}}
+          animate={shouldAnimate ? { opacity: 0.18, scale: 1 } : {}}
+          transition={shouldAnimate ? { duration: 1.2, ease: 'easeOut' } : { duration: 0 }}
           className="absolute inset-0 pointer-events-none"
           style={{
             background: 'radial-gradient(ellipse 70% 45% at 50% 35%, #7B72FF, #4ECDC420, transparent)',
@@ -233,15 +233,15 @@ export function RecoveryProtocol({ onDismiss }: Props) {
         <div className="relative max-w-sm mx-auto w-full flex flex-col gap-8">
           {/* Welcome section — Avatar + empathetic message */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ ...transition(), delay: 0.2 }}
+            initial={shouldAnimate ? { opacity: 0, y: 20 } : {}}
+            animate={shouldAnimate ? { opacity: 1, y: 0 } : {}}
+            transition={shouldAnimate ? { ...transition(), delay: 0.2 } : { duration: 0 }}
             className="flex flex-col items-center gap-4"
           >
             <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ ...transition('expressive'), delay: 0.3 }}
+              initial={shouldAnimate ? { scale: 0.8, opacity: 0 } : {}}
+              animate={shouldAnimate ? { scale: 1, opacity: 1 } : {}}
+              transition={shouldAnimate ? { ...transition('expressive'), delay: 0.3 } : { duration: 0 }}
             >
               <Avatar level={Math.floor(xpTotal / 100) + 1} size={80} />
             </motion.div>
@@ -276,9 +276,9 @@ export function RecoveryProtocol({ onDismiss }: Props) {
 
           {/* Spiciness meter — Research #3 (Goblin Tools): overwhelm scale */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ ...transition(), delay: 0.35 }}
+            initial={shouldAnimate ? { opacity: 0, y: 20 } : {}}
+            animate={shouldAnimate ? { opacity: 1, y: 0 } : {}}
+            transition={shouldAnimate ? { ...transition(), delay: 0.35 } : { duration: 0 }}
             className="flex flex-col gap-2"
           >
             <p className="text-xs text-center" style={{ color: 'var(--color-text-muted)' }}>
@@ -289,9 +289,9 @@ export function RecoveryProtocol({ onDismiss }: Props) {
 
           {/* Task input */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ ...transition(), delay: 0.45 }}
+            initial={shouldAnimate ? { opacity: 0, y: 20 } : {}}
+            animate={shouldAnimate ? { opacity: 1, y: 0 } : {}}
+            transition={shouldAnimate ? { ...transition(), delay: 0.45 } : { duration: 0 }}
             className="flex flex-col gap-3"
           >
             <label
@@ -357,9 +357,9 @@ export function RecoveryProtocol({ onDismiss }: Props) {
 
           {/* Actions */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ ...transition(), delay: 0.55 }}
+            initial={shouldAnimate ? { opacity: 0, y: 20 } : {}}
+            animate={shouldAnimate ? { opacity: 1, y: 0 } : {}}
+            transition={shouldAnimate ? { ...transition(), delay: 0.55 } : { duration: 0 }}
             className="flex flex-col gap-3"
           >
             <button
