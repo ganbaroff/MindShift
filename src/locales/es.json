@@ -839,6 +839,9 @@
     "briefEmotionModerate": "Empieza despacio hoy. Las emociones afectan la concentración más de lo habitual.",
     "briefMedMorning": "Ventana de la mañana: buen momento para tareas más difíciles.",
     "briefDefault": "Elija una tarea que lamentaría no haber comenzado. Sólo uno.",
+    "tinyActionBtn": "¿Cuál es el siguiente paso más pequeño?",
+    "tinyActionLoading": "Pensando…",
+    "tinyActionLabel": "Pequeño paso para: {{task}}",
     "greeting": {
       "morning": "Buenos días ☀️",
       "afternoon": "Buenas tardes 🌤️",

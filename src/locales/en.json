@@ -839,6 +839,9 @@
     "briefEmotionModerate": "Start slow today. Emotions affect focus more than usual.",
     "briefMedMorning": "Morning window — good time for harder tasks.",
     "briefDefault": "Pick one task you'd regret not starting. Just one.",
+    "tinyActionBtn": "What's the tiniest next step?",
+    "tinyActionLoading": "Thinking…",
+    "tinyActionLabel": "Tiny step for: {{task}}",
     "greeting": {
       "morning": "Good morning ☀️",
       "afternoon": "Good afternoon 🌤️",
