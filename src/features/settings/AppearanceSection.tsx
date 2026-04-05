@@ -24,6 +24,7 @@ export function AppearanceSection() {
     uiTone, setUITone,
     reducedStimulation, setReducedStimulation,
     hapticsEnabled, setHapticsEnabled,
+    fontScale, setFontScale,
   } = useStore()
 
   return (
@@ -129,6 +130,48 @@ export function AppearanceSection() {
         <div className="space-y-3">
           <Toggle checked={reducedStimulation} onChange={setReducedStimulation} label={t('settings.reducedStimulation')} hint={t('settings.reducedStimulationHint', 'Dims animations and desaturates colours — easier on the eyes and senses.')} />
           <Toggle checked={hapticsEnabled} onChange={setHapticsEnabled} label={t('settings.hapticFeedback')} hint={t('settings.hapticFeedbackHint', 'Gentle vibrations on task completion and phase changes (Android only).')} />
+          {/* Text size — 30-50% of ADHD users have dyslexia comorbidity */}
+          <div>
+            <p className="text-[13px] font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>
+              {t('settings.textSize')}
+            </p>
+            <div className="flex gap-2">
+              {([
+                { scale: 1    as const, label: t('settings.textSizeNormal'), sample: 'Aa' },
+                { scale: 1.15 as const, label: t('settings.textSizeLarge'),  sample: 'Aa' },
+                { scale: 1.3  as const, label: t('settings.textSizeXL'),     sample: 'Aa' },
+              ]).map(({ scale, label, sample }) => {
+                const sel = fontScale === scale
+                return (
+                  <motion.button
+                    key={scale}
+                    whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
+                    onClick={() => setFontScale(scale)}
+                    aria-pressed={sel}
+                    className="flex-1 flex flex-col items-center gap-0.5 py-2.5 rounded-xl focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none"
+                    style={{
+                      backgroundColor: sel ? 'rgba(78,205,196,0.12)' : 'var(--color-surface-raised)',
+                      border: sel ? '1.5px solid rgba(78,205,196,0.4)' : '1px solid transparent',
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: `${scale * 18}px`,
+                        lineHeight: 1,
+                        fontWeight: 700,
+                        color: sel ? 'var(--color-teal)' : 'var(--color-text-primary)',
+                      }}
+                    >
+                      {sample}
+                    </span>
+                    <span className="text-[11px]" style={{ color: sel ? 'var(--color-teal)' : 'var(--color-text-muted)' }}>
+                      {label}
+                    </span>
+                  </motion.button>
+                )
+              })}
+            </div>
+          </div>
         </div>
       </Section>
 

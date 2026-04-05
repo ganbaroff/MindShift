@@ -70,6 +70,7 @@ export default function App() {
   const setFlexiblePauseUntil = useStore(s => s.setFlexiblePauseUntil)
   const reducedStimulation = useStore(s => s.reducedStimulation)
   const userTheme = useStore(s => s.userTheme)
+  const fontScale = useStore(s => s.fontScale)
   const firstFocusTutorialCompleted = useStore(s => s.firstFocusTutorialCompleted)
   const setRecoveryShown = useStore(s => s.setRecoveryShown)
   const currentStreak = useStore(s => s.currentStreak)
@@ -90,6 +91,11 @@ export default function App() {
       reducedStimulation ? 'calm' : 'normal'
     )
   }, [reducedStimulation])
+
+  // ── Apply font scale to DOM (ADHD+dyslexia accessibility) ─────────────────
+  useEffect(() => {
+    document.documentElement.style.setProperty('--font-scale', String(fontScale))
+  }, [fontScale])
 
   // ── Apply theme to DOM ──────────────────────────────────────────────────────
   useEffect(() => {
