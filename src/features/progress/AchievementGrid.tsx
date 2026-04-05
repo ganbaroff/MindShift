@@ -22,7 +22,7 @@ const AchievementBadge = memo(function AchievementBadge({
   onToggle,
 }: AchievementBadgeProps) {
   const { t } = useTranslation()
-  const unlocked = !!a.unlockedAt
+  // Only unlocked achievements are rendered (locked hidden per Research #10)
   const name = t(`achievements.${a.key}`, a.name)
   const desc = t(`achievements.${a.key}_desc`, a.description)
 
@@ -38,12 +38,9 @@ const AchievementBadge = memo(function AchievementBadge({
         style={{
           backgroundColor: isFocused ? 'rgba(123,114,255,0.12)' : 'var(--color-surface-card)',
           border: `1px solid ${isFocused ? 'rgba(123,114,255,0.30)' : 'transparent'}`,
-          opacity: unlocked ? 1 : 0.38,
-          filter: unlocked ? 'none' : 'grayscale(1)',
         }}
         aria-label={`${name}: ${desc}`}
         aria-expanded={isFocused}
-        aria-disabled={!unlocked ? true : undefined}
       >
         <span className="text-[24px]">{a.emoji}</span>
         <span className="text-[10px] text-center mt-0.5" style={{ color: 'var(--color-text-muted)' }}>{name}</span>
@@ -59,10 +56,10 @@ const AchievementBadge = memo(function AchievementBadge({
             className="absolute left-0 right-0 top-full mt-1 z-10 rounded-xl px-2.5 py-2"
             style={{ backgroundColor: 'var(--color-surface-raised)', border: '1px solid rgba(123,114,255,0.20)' }}
           >
-            <p className="text-[11px] leading-relaxed" style={{ color: unlocked ? 'var(--color-text-primary)' : 'var(--color-text-muted)' }}>
+            <p className="text-[11px] leading-relaxed" style={{ color: 'var(--color-text-primary)' }}>
               {desc}
             </p>
-            {unlocked && a.unlockedAt && (
+            {a.unlockedAt && (
               <p className="text-[10px] mt-0.5" style={{ color: 'var(--color-primary)' }}>
                 {'\u2713'} {new Date(a.unlockedAt).toLocaleDateString()}
               </p>
