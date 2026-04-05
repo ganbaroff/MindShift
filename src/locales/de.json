@@ -839,6 +839,9 @@
     "briefEmotionModerate": "Fangen Sie heute langsam an. Emotionen beeinflussen die Konzentration stärker als gewöhnlich.",
     "briefMedMorning": "Morgenfenster – gute Zeit für schwierigere Aufgaben.",
     "briefDefault": "Wählen Sie eine Aufgabe aus, bei der Sie es bereuen würden, wenn Sie sie nicht begonnen haben. Nur einer.",
+    "tinyActionBtn": "Was ist der kleinste nächste Schritt?",
+    "tinyActionLoading": "Nachdenken…",
+    "tinyActionLabel": "Kleiner Schritt für: {{task}}",
     "greeting": {
       "morning": "Guten Morgen ☀️",
       "afternoon": "Guten Tag 🌤️",

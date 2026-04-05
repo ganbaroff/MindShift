@@ -839,6 +839,9 @@
     "briefEmotionModerate": "Bu gün yavaş başlayın. Duyğular diqqətə həmişəkindən daha çox təsir edir.",
     "briefMedMorning": "Səhər pəncərəsi - daha çətin tapşırıqlar üçün yaxşı vaxt.",
     "briefDefault": "Başlamamağa peşman olacağınız bir işi seçin. Sadəcə bir.",
+    "tinyActionBtn": "Ən kiçik növbəti addım nədir?",
+    "tinyActionLoading": "Düşünürəm…",
+    "tinyActionLabel": "Kiçik addım: {{task}}",
     "greeting": {
       "morning": "Sabahınız xeyir ☀️",
       "afternoon": "Günortanız xeyir 🌤️",

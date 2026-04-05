@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { useMotion } from '@/shared/hooks/useMotion';
@@ -19,6 +19,7 @@ import { StreakBadge } from './StreakBadge';
 import { PageTransition } from '@/shared/ui/PageTransition';
 import { getMochiMessage } from './mochiMessages';
 import { toast } from 'sonner';
+import { supabase } from '@/shared/lib/supabase';
 
 export default function HomePage() {
   const nowPool = useStore(s => s.nowPool)
@@ -49,6 +50,7 @@ export default function HomePage() {
   const [showAddTask, setShowAddTask] = useState(false);
   const [mochiMsg, setMochiMsg] = useState<{ text: string; emoji: string } | null>(null);
   const [briefDismissed, setBriefDismissed] = useState(false);
+  const [tinyActionLoading, setTinyActionLoading] = useState(false);
   const prevEnergy = useRef<EnergyLevel>(energyLevel);
 
   const nowTasks = useMemo(() => nowPool.filter(t => t.status === 'active' && t.taskType === 'task'), [nowPool]);
@@ -72,9 +74,32 @@ export default function HomePage() {
     }
   };
 
+  // Research #3 (burnout prevention): Next Tiny Action
+  // decompose-task with max spiciness (5) = 2-minute micro-step
+  // Bypasses executive function paralysis — pre-decided action
+  const handleTinyAction = useCallback(async () => {
+    if (tinyActionLoading || nowTasks.length === 0) return;
+    const topTask = nowTasks[0];
+    setTinyActionLoading(true);
+    try {
+      const locale = navigator.language?.split('-')[0] ?? 'en';
+      const { data } = await supabase.functions.invoke('decompose-task', {
+        body: { taskTitle: topTask.title, spiciness: 5, locale },
+      });
+      const firstStep = data?.steps?.[0] as string | undefined;
+      if (firstStep) {
+        setMochiMsg({ text: firstStep, emoji: '⚡' });
+      }
+    } catch {
+      // silent fail — ADHD users don't need error noise
+    } finally {
+      setTinyActionLoading(false);
+    }
+  }, [tinyActionLoading, nowTasks]);
+
   useEffect(() => {
     if (!mochiMsg) return;
-    const timer = setTimeout(() => setMochiMsg(null), 5000);
+    const timer = setTimeout(() => setMochiMsg(null), 8000);
     return () => clearTimeout(timer);
   }, [mochiMsg]);
 
@@ -323,6 +348,27 @@ export default function HomePage() {
               </p>
             )}
           </div>
+
+          {/* Next Tiny Action — Research #3: pre-decided micro-step bypasses ADHD paralysis */}
+          {nowTasks.length > 0 && !isLowEnergy && (
+            <motion.button
+              initial={shouldAnimate ? { opacity: 0 } : false}
+              animate={{ opacity: 1 }}
+              whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
+              onClick={handleTinyAction}
+              disabled={tinyActionLoading}
+              aria-label={t('home.tinyActionBtn')}
+              className="mt-2 w-full text-left px-3 py-2.5 rounded-xl border focus-visible:ring-2 focus-visible:ring-[var(--color-teal)] focus-visible:outline-none disabled:opacity-50 transition-opacity"
+              style={{
+                backgroundColor: 'rgba(78,205,196,0.06)',
+                borderColor: 'rgba(78,205,196,0.2)',
+              }}
+            >
+              <span className="text-[13px]" style={{ color: 'var(--color-teal)' }}>
+                {tinyActionLoading ? `⏳ ${t('home.tinyActionLoading')}` : `⚡ ${t('home.tinyActionBtn')}`}
+              </span>
+            </motion.button>
+          )}
         </div>
 
         {/* Up Next Preview — hidden in low-energy mode */}
