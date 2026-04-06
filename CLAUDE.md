@@ -1,23 +1,54 @@
 # MindShift — Claude Working Memory
 
+## Ecosystem Context
+
+MindShift is **one of 5 products** in the VOLAURA ecosystem:
+
+| Product | What | Status |
+|---------|------|--------|
+| **VOLAURA** | AI assessment platform (Python swarm, 44 agents) | Active |
+| **MindShift** | ADHD-aware productivity PWA **(this repo)** | Production v1.0 |
+| **Life Simulator** | 3D agent office (claw3d, Three.js) | In development |
+| **BrandedBy** | AI professional identity builder | Planned |
+| **ZEUS** | Node.js WebSocket gateway (39 agents) | Railway + pm2 |
+
+**The Ecosystem Constitution** (`C:/Projects/VOLAURA/docs/ECOSYSTEM-CONSTITUTION.md`) governs ALL products.
+If code contradicts the Constitution — code changes.
+
+## Foundation Laws (from Constitution v1.7)
+
+Every change to MindShift MUST comply with these laws:
+
+| # | Law | MindShift Status |
+|---|-----|-----------------|
+| 1 | **NEVER RED** — no red hues (0-15, 345-360). RSD trigger. | ✅ Enforced. Palette: teal/indigo/gold. See `.claude/rules/guardrails.md` Rule 1. |
+| 2 | **Energy Adaptation** — UI simplifies at low energy | ✅ Implemented. `isLowEnergy = energyLevel <= 2 \|\| burnoutScore > 60` → 1 NOW task, hide NEXT, gentle banner. |
+| 3 | **Shame-Free Language** — no guilt, no pressure | ✅ Enforced. Invisible streaks (shown ≥2 only), warm amber carry-over, welcoming recovery. See `.claude/rules/guardrails.md` Rule 1+6. |
+| 4 | **Animation Safety** — respect prefers-reduced-motion | ✅ Enforced. `useMotion()` hook gates all animations. See `.claude/rules/guardrails.md` Rule 2. |
+| 5 | **One Primary Action** — max 1 CTA per screen | ✅ Enforced in all screens. |
+
+## Crystal Economy Laws (from Constitution)
+
+See `.claude/rules/crystal-shop-ethics.md` — 8 rules protecting ADHD users from impulse exploitation.
+Key: crystals never expire, no timers in shop, transparent formula (1 min = 5 crystals), 24h refund.
+
 ## Project
+
 **MindShift** — ADHD-aware productivity PWA. Mobile-first, React + TypeScript + Supabase.
 Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ latest. Status: **production-ready v1.0**. Google Play launch pending account verification.
 
 ## Stable Production URL
 **`https://mind-shift-git-main-yusifg27-3093s-projects.vercel.app`**
-- This URL never changes — always the latest `main` branch production build
 - Auto-updates on every `git push origin main` (Vercel GitHub integration)
 - Works from any device / network without auth
-- Custom domain: add via Vercel Dashboard → Project Settings → Domains
 
 ## E2E Testing
 - Framework: `@playwright/test` (already in package.json)
 - Local: `npx playwright test` (starts dev server automatically)
 - Production: `PLAYWRIGHT_BASE_URL=https://mind-shift-git-main-yusifg27-3093s-projects.vercel.app npx playwright test`
-- CI auto-run: `.github/workflows/e2e-production.yml` fires after every successful Vercel deploy via `deployment_status` event
+- CI auto-run: `.github/workflows/e2e-production.yml` fires after every successful Vercel deploy
 - Browsers: Chromium + iPhone 14 (mobile)
-- All Supabase API calls are mocked via `page.route()` — tests run offline
+- All Supabase API calls mocked via `page.route()` — tests run offline
 
 ## Sprint History
 | Sprint | Commit | What landed |
@@ -368,10 +399,32 @@ Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ latest. Status: **prod
 | In-App Review API | ❌ | Trigger after 3rd session, not in low energy |
 | Home screen widget | ❌ | Post-launch (30 days) |
 
-## Preferences (Yusif)
-- Russian comms OK in conversation; commit messages in English
-- ADHD-aware design = non-punitive, calm palette, no red/urgency
-- Always: `tsc -b` before commit (not `tsc --noEmit`)
-- Humanizer skill on all user-facing text
-→ Full details: memory/
+## Working Protocol
+
+### CEO Rules (Yusif)
+- Russian in conversation. English in commits and docs.
+- ADHD-aware design = non-punitive, calm palette, NEVER red.
+- Always: `tsc -b` before commit (not `tsc --noEmit`).
+- Humanizer skill on all user-facing text.
+- Constitution has PRIORITY over all code and docs.
+- Agents are a live team, not bots. Consult before deciding.
+- Do NOT simulate understanding. If unsure — ask.
+
+### Breadcrumb Pattern (prevents context loss)
+1. Before starting work: write `memory/wip-{task}.md` with what/why/expected changes
+2. Do the work (code, edits, commits)
+3. Update breadcrumb with checkpoints as you go
+4. At the end: consolidate into proper documentation
+5. Delete breadcrumb only after final docs are written
+
+If context compresses mid-work — first action = read breadcrumb files.
+
+### Cross-Product Awareness
+MindShift changes can affect other products:
+- Crystal earning (1 min = 5 crystals) → feeds into VOLAURA economy
+- Session events → ZEUS `character_events` → Life Simulator agent state
+- Foundation Law violations here = violations everywhere
+
+Full ecosystem map: `C:/Projects/VOLAURA/packages/swarm/prompt_modules/ecosystem-map.md`
+Full details: `memory/`
 
