@@ -1,6 +1,7 @@
 name: Deploy Edge Functions
 
 on:
+  workflow_dispatch:
   workflow_run:
     workflows: ["CI"]
     branches: [main]
