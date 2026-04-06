@@ -370,12 +370,14 @@ test.describe('Stress: session hard-stop screen', () => {
    * Skip annotation is here for CI environments where fake timers may interfere
    * with Playwright's own networking; remove the skip once confirmed stable.
    */
-  test.skip('hard-stop screen appears after 120-min session (fake timer — verify manually)', async ({ authedPage: page }) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  test.skip('hard-stop screen appears after 120-min session (fake timer — verify manually)', async ({ authedPage: _page }) => {
     // This scenario requires fake system time. Mark as skip with a clear note.
     // Manual verification: start a session, wait 120 min → "Two hours of deep work" appears.
   })
 
-  test.skip('hard-stop screen renders the correct heading and buttons when triggered', async ({ authedPage: page }) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  test.skip('hard-stop screen renders the correct heading and buttons when triggered', async ({ authedPage: _page }) => {
     // SKIP REASON: The hard-stop screen requires elapsedSeconds >= 7200 (120min) while
     // screen === 'session'. Any session duration < 120min triggers onTimerEnd() first
     // (remaining <= 0), transitioning to 'nature-buffer' before the hard-stop check fires.

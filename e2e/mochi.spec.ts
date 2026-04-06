@@ -28,6 +28,7 @@ async function openMochiChat(page: import('@playwright/test').Page) {
 }
 
 // Helper: get the chat input regardless of locale (uses aria-label or role)
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function getChatInput(page: import('@playwright/test').Page) {
   return page.getByRole('textbox', { name: /message|mochi|ask|сообщение|спроси/i })
 }

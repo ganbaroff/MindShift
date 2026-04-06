@@ -213,13 +213,13 @@ function extractType(text: string): { type: TaskType; cleaned: string } {
   }
 
   // Reminder patterns — strip prefix
-  const reminderMatch = text.match(/^(?:remind\s+me\s+(?:to\s+)?|напомни(?:ть)?\s+(?:мне\s+)?|напоминание\s*[:\-]?\s*)/i)
+  const reminderMatch = text.match(/^(?:remind\s+me\s+(?:to\s+)?|напомни(?:ть)?\s+(?:мне\s+)?|напоминание\s*[:-]?\s*)/i)
   if (reminderMatch) {
     return { type: 'reminder', cleaned: text.slice(reminderMatch[0].length).trim() }
   }
 
   // Idea patterns — strip prefix
-  const ideaMatch = text.match(/^(?:idea\s*[:\-]\s*|идея\s*[:\-]\s*)/i)
+  const ideaMatch = text.match(/^(?:idea\s*[:-]\s*|идея\s*[:-]\s*)/i)
   if (ideaMatch) {
     return { type: 'idea', cleaned: text.slice(ideaMatch[0].length).trim() }
   }

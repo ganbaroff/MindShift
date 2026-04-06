@@ -11,7 +11,7 @@
  * - Focus room button
  * - Breathwork ritual
  */
-import { test, expect, seedStore, mockSupabase } from './helpers'
+import { test, expect, seedStore } from './helpers'
 
 // ── Shared task factory ──────────────────────────────────────────────────────
 const makeTask = (overrides: Record<string, unknown> = {}) => ({
