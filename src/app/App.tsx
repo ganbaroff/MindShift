@@ -20,21 +20,39 @@ import { useCalendarSync } from '@/shared/hooks/useCalendarSync'
 import { useInAppReview } from '@/shared/hooks/useInAppReview'
 import { useAuthInit } from './useAuthInit'
 
+// ── Lazy import with auto-reload on stale chunk (PWA cache invalidation) ────
+function lazyWithReload<T extends { default: React.ComponentType<unknown> }>(
+  factory: () => Promise<T>
+): React.LazyExoticComponent<T['default']> {
+  return lazy(() =>
+    factory().catch(() => {
+      // Stale SW cache → chunk hash mismatch → reload once
+      const key = 'mindshift-chunk-reload'
+      if (!sessionStorage.getItem(key)) {
+        sessionStorage.setItem(key, '1')
+        window.location.reload()
+      }
+      // Fallback: return empty component to avoid infinite loop
+      return { default: (() => null) as unknown as T['default'] } as T
+    })
+  )
+}
+
 // ── Lazy routes — Lovable redesign pages ───────────────────────────────────────
-const PreviewScreen    = lazy(() => import('@/features/preview/PreviewScreen'))
-const AuthScreen       = lazy(() => import('@/features/auth/AuthScreen'))
-const OnboardingPage   = lazy(() => import('@/features/onboarding/OnboardingPage'))
-const HomePage         = lazy(() => import('@/features/home/HomePage'))
-const FocusPage        = lazy(() => import('@/features/focus/FocusScreen'))
-const TasksPage        = lazy(() => import('@/features/tasks/TasksPage'))
-const ProgressPage     = lazy(() => import('@/features/progress/ProgressPage'))
-const SettingsPage     = lazy(() => import('@/features/settings/SettingsPage'))
-const DueDateScreen    = lazy(() => import('@/features/calendar/DueDateScreen'))
-const HistoryPage      = lazy(() => import('@/features/history/HistoryPage'))
-const TodayPage        = lazy(() => import('@/features/today/TodayPage'))
-const PrivacyPage      = lazy(() => import('@/features/legal/PrivacyPage'))
-const TermsPage        = lazy(() => import('@/features/legal/TermsPage'))
-const CookiePolicyPage = lazy(() => import('@/features/legal/CookiePolicyPage'))
+const PreviewScreen    = lazyWithReload(() => import('@/features/preview/PreviewScreen'))
+const AuthScreen       = lazyWithReload(() => import('@/features/auth/AuthScreen'))
+const OnboardingPage   = lazyWithReload(() => import('@/features/onboarding/OnboardingPage'))
+const HomePage         = lazyWithReload(() => import('@/features/home/HomePage'))
+const FocusPage        = lazyWithReload(() => import('@/features/focus/FocusScreen'))
+const TasksPage        = lazyWithReload(() => import('@/features/tasks/TasksPage'))
+const ProgressPage     = lazyWithReload(() => import('@/features/progress/ProgressPage'))
+const SettingsPage     = lazyWithReload(() => import('@/features/settings/SettingsPage'))
+const DueDateScreen    = lazyWithReload(() => import('@/features/calendar/DueDateScreen'))
+const HistoryPage      = lazyWithReload(() => import('@/features/history/HistoryPage'))
+const TodayPage        = lazyWithReload(() => import('@/features/today/TodayPage'))
+const PrivacyPage      = lazyWithReload(() => import('@/features/legal/PrivacyPage'))
+const TermsPage        = lazyWithReload(() => import('@/features/legal/TermsPage'))
+const CookiePolicyPage = lazyWithReload(() => import('@/features/legal/CookiePolicyPage'))
 
 const LazyRecoveryProtocol = lazy(() =>
   import('@/features/tasks/RecoveryProtocol').then(m => ({ default: m.RecoveryProtocol }))
