@@ -9,7 +9,7 @@ import type { ReactNode, MouseEventHandler } from 'react'
 
 interface ButtonProps {
   children?: ReactNode
-  variant?: 'primary' | 'secondary' | 'ghost' | 'danger'
+  variant?: 'primary' | 'secondary' | 'ghost' | 'warning'
   size?: 'sm' | 'md' | 'lg'
   loading?: boolean
   disabled?: boolean
@@ -44,7 +44,7 @@ export function Button({
     primary:   'bg-primary text-white hover:opacity-90 shadow-lg shadow-primary/20',
     secondary: 'bg-secondary/15 text-secondary border border-secondary/30 hover:bg-secondary/25',
     ghost:     'bg-transparent text-muted border border-border hover:text-text hover:border-primary/40',
-    danger:    'bg-warning/15 text-warning border border-warning/30 hover:bg-warning/25',
+    warning:   'bg-warning/15 text-warning border border-warning/30 hover:bg-warning/25',
   }
 
   const sizes = {
