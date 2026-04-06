@@ -77,6 +77,9 @@ interface PreferencesSlice {
   setCalendarSyncEnabled: (val: boolean) => void
   calendarFocusBlocks: boolean
   setCalendarFocusBlocks: (val: boolean) => void
+  // Font scale — accessibility for ADHD+dyslexia users (30-50% comorbidity)
+  fontScale: 1 | 1.15 | 1.3
+  setFontScale: (scale: 1 | 1.15 | 1.3) => void
 }
 
 interface GridSlice {
@@ -229,4 +232,8 @@ export const createPreferencesAndGridSlice: StateCreator<
   setCalendarSyncEnabled: (val) => set({ calendarSyncEnabled: val }),
   calendarFocusBlocks: false,
   setCalendarFocusBlocks: (val) => set({ calendarFocusBlocks: val }),
+
+  // Font scale — 1 = normal, 1.15 = large (~15%), 1.3 = extra large (~30%)
+  fontScale: 1,
+  setFontScale: (scale) => set({ fontScale: scale }),
 })

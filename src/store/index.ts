@@ -158,6 +158,7 @@ export const useStore = create<import('./types').AppStore>()(
           mochiCompanionEnabled: s.mochiCompanionEnabled,
           calendarSyncEnabled: s.calendarSyncEnabled,
           calendarFocusBlocks: s.calendarFocusBlocks,
+          fontScale: s.fontScale,
           // S-5 Ghosting Grace — persisted so ContextRestore can surface room context on return
           lastRoomCode: s.lastRoomCode,
           lastRoomLeftAt: s.lastRoomLeftAt,

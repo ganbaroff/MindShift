@@ -28,6 +28,9 @@
 
   /* Typography */
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  /* Font scale — controlled by store.fontScale. 1 = default, 1.15 = large, 1.3 = XL.
+     Applied to html font-size so all rem-based Tailwind classes scale automatically. */
+  --font-scale: 1;
 
   /* Animation */
   --duration-fast:   150ms;
@@ -205,6 +208,12 @@
     padding: 0;
     -webkit-tap-highlight-color: transparent;
     border-color: hsl(var(--border));
+  }
+
+  html {
+    /* Scale entire UI for dyslexia/low-vision users — all rem units inherit this */
+    font-size: calc(16px * var(--font-scale));
+    transition: font-size 0.2s ease;
   }
 
   html, body, #root {
