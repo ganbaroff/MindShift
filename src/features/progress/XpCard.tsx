@@ -41,8 +41,8 @@ export function XpCard() {
           <p className="text-[15px] font-semibold" style={{ color: 'var(--color-text-primary)' }}>
             {t('progress.level', { level, name: levelName })}
           </p>
-          <p className="text-[13px]" style={{ color: 'var(--color-primary)' }}>
-            {xpSafe.toLocaleString()} XP
+          <p className="text-[13px]" style={{ color: 'var(--color-text-muted)' }}>
+            {t('progress.xpProgress', { current: xpInLevel, next: xpToNext })}
           </p>
           <div
             className="w-full h-1.5 rounded-full mt-1.5 overflow-hidden"
@@ -54,7 +54,7 @@ export function XpCard() {
             />
           </div>
           <p className="text-[11px] mt-0.5" style={{ color: 'var(--color-text-muted)' }}>
-            {t('progress.xpToNext', { current: xpInLevel, next: xpToNext, level: level + 1 })}
+            {t('progress.xpToNext', { level: level + 1 })}
           </p>
         </div>
       </div>

@@ -28,6 +28,7 @@ function base64UrlEncode(data: Uint8Array): string {
   return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function base64UrlDecode(str: string): Uint8Array {
   const base64 = str.replace(/-/g, '+').replace(/_/g, '/')
   const padding = '='.repeat((4 - (base64.length % 4)) % 4)

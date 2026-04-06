@@ -252,7 +252,7 @@ function MochiSessionCompanionInner({ elapsedSeconds, sessionPhase, behaviorProf
 
       break  // one at a time
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+   
   }, [elapsedBucket, getFallbackMessage, isGuest, psychotype, sessionPhase, energyLevel, currentStreak, behaviorProfile, timeBlindness, emotionalReactivity, seasonalMode, locale, activeTaskTypes, upcomingDeadlines])
 
   // Cleanup timer on unmount

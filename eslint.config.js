@@ -6,8 +6,8 @@ import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  // Ignore build output and Playwright E2E (not React code)
-  globalIgnores(['dist', 'e2e/**']),
+  // Ignore build output, Playwright E2E (not React code), and Android build artifacts
+  globalIgnores(['dist', 'e2e/**', 'android/**']),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [

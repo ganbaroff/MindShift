@@ -4,6 +4,20 @@
 **Updated:** After every sprint commit.
 **Rule:** If it's not here — it may still be in CLAUDE.md sprint history. This file focuses on high-level feature areas.
 
+## SESSION-2026-04-06 — Font Scale + ZEUS Gateway
+
+| Item | Location | Notes |
+|------|----------|-------|
+| Font size control (3 chips) | `src/features/settings/AppearanceSection.tsx` | Normal/Large/XL = 1/1.15/1.3×. ADHD+dyslexia accommodation. |
+| `--font-scale` CSS var | `src/index.css` | Applied to `html` element — scales all Tailwind rem classes automatically |
+| `fontScale` store field | `src/store/slices/preferencesAndGridSlice.ts` | Type `1 \| 1.15 \| 1.3`, default 1, persisted in partialize() |
+| App.tsx sync effect | `src/app/App.tsx` | `useEffect` sets `--font-scale` CSS var on `document.documentElement` |
+| i18n keys × 6 locales | `src/locales/{en,ru,de,az,es,tr}.json` | `textSize`, `textSizeNormal`, `textSizeLarge`, `textSizeXL` |
+| ZEUS pm2 env fix | `claw3d-fork/ecosystem.config.js` | `node_args: "--env-file .env"` — NVIDIA key now loads reliably |
+| ZEUS static mode gate fix | `claw3d-fork/server/zeus-gateway-adapter.js` | Was `if(anthropic)` blocking NVIDIA+Ollama. Fixed to `if(anthropic\|\|NVIDIA_API_KEY\|\|OLLAMA_URL)` |
+| ZEUS DeepSeek R1 EOL fix | `claw3d-fork/server/zeus-gateway-adapter.js:41` | `deepseek-r1` → `deepseek-r1-distill-llama-8b` |
+| ZEUS-SETUP.md | `claw3d-fork/ZEUS-SETUP.md` | Ops runbook: keys, pm2 commands, agent routing table, troubleshooting |
+
 ## BATCH-2026-03-30-M — Play Store Assets
 
 | Item | Location | Notes |
