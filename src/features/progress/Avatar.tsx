@@ -196,4 +196,5 @@ export default function Avatar({ level, size = 64 }: AvatarProps) {
   )
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export { STAGE_NAMES, stageFromLevel }
