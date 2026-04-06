@@ -63,10 +63,8 @@ enabled = true
 # See: https://supabase.com/docs/guides/auth/social-login/auth-google
 
 # ── Extensions ────────────────────────────────────────────────────────────────
-# pg_cron: required for scheduled-push edge function (every 15 min delivery)
-[[db.extensions]]
-name = "pg_cron"
-schema = "extensions"
+# pg_cron: enabled in production Supabase dashboard (not in config.toml — new CLI format)
+# See: https://supabase.com/dashboard/project/awfoqycoltvhamtrsvxk/database/extensions
 
 # ── Edge function config ───────────────────────────────────────────────────────
 # verify_jwt = false for webhook functions that receive external calls without a user token
