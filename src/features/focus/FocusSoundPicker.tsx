@@ -18,6 +18,7 @@ import { useMotion } from '@/shared/hooks/useMotion'
 import type { AudioPreset } from '@/types'
 
 // ── Sound preset metadata ─────────────────────────────────────────────────────
+// eslint-disable-next-line react-refresh/only-export-components
 export const SOUND_PRESETS: { key: AudioPreset; emoji: string; labelKey: string }[] = [
   { key: 'brown',   emoji: '🌊', labelKey: 'settings.soundBrown' },
   { key: 'pink',    emoji: '🌧️', labelKey: 'settings.soundPink' },

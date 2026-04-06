@@ -32,6 +32,7 @@ export const useStore = create<import('./types').AppStore>()(
         storage: createJSONStorage(() => idbStorage),
         // migrate() ensures Zustand treats versioned state as recoverable
         // rather than discarding it when the version matches.
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         migrate: (persistedState: unknown, _version: number) => {
           const state = persistedState as Record<string, unknown>
           return state as ReturnType<typeof Object>

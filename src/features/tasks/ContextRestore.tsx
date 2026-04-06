@@ -23,6 +23,7 @@ import { useStore } from '@/store'
 import { logEvent } from '@/shared/lib/logger'
 
 // Re-export utils so existing call-sites (tests, etc.) don't break
+// eslint-disable-next-line react-refresh/only-export-components
 export { writeLastActive, shouldShowContextRestore } from './contextRestoreUtils'
 
 // ── Component ─────────────────────────────────────────────────────────────────

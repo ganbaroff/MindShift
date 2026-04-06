@@ -5,6 +5,7 @@ import type { TaskType, TaskCategory } from '@/types';
 
 // ── Field visibility per task type ──────────────────────────────────────────
 
+/* eslint-disable react-refresh/only-export-components */
 export interface FieldVisibility {
   difficulty: boolean;
   duration: boolean;
