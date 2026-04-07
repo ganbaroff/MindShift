@@ -4,6 +4,30 @@
 **Updated:** After every sprint commit.
 **Rule:** If it's not here — it may still be in CLAUDE.md sprint history. This file focuses on high-level feature areas.
 
+## Session 91 (2026-04-07) — Agent Marketplace + Sprint E2 plan
+
+| Item | Location | Notes |
+|------|----------|-------|
+| Plugin Marketplace (private) | `github.com/ganbaroff/volaura-claude-plugins` | 8 production-tested agents + 5 slash commands. Setup: `.claude/settings.json` `extraKnownMarketplaces` + `enabledPlugins`. |
+| 8 agents extracted + verified | telemetry: 99 invocations across 3 sessions | growth (24), code-reviewer (22), a11y-scanner (14), liveops (10), sec (9), e2e-runner (7), infra (6), guardrail-auditor (5) |
+| Dead agents deleted | `.claude/agents/` | bundle-analyzer (CI gate replaces), build-error-resolver (hooks.json tsc replaces) |
+| Sprint E2 Option D planned | `~/.claude/projects/C--Projects-VOLAURA/memory/mindshift-sprint-e2-plan.md` | Mapping table approach. Awaiting VOLAURA-Claude D2 backend. |
+| Honesty hooks (UserPromptSubmit) | `~/.claude/hooks/honesty-prompt-guard.sh` | Forces "## Что проверено" sections on trigger words. Stop hook tried + disabled (architectural). |
+| ESLint Law 1 enforcer | `eslint.config.js` | `no-restricted-syntax` blocks red Tailwind classes + red hex codes at lint time. |
+| 4 background research audits | `memory/synthesis-4-audits.md`, `memory/agent-audit-mindshift-real-usage.md`, `memory/swarm-runtime-audit.md`, `memory/research-shared-agents-monorepo.md` | Found: my agents work (telemetry proof), VOLAURA swarm operational (5 successful runs), Plugin Marketplace = best extraction pattern |
+
+## Session 88 (2026-04-06) — PWA cache fix + edge functions revival
+
+| Item | Location | Notes |
+|------|----------|-------|
+| Settings crash fixed | `src/app/App.tsx` | `lazyWithReload()` wraps 13 lazy routes. SW serving stale chunks → auto-reload once via sessionStorage guard. |
+| Constitution 3 fixes | `src/features/progress/XpCard.tsx`, `src/shared/ui/Confetti.tsx`, `src/shared/ui/Button.tsx` | Removed raw "2,450 XP", reduced confetti 20→12, renamed danger→warning variant |
+| Lint errors fixed | 30 errors blocking CI for 5+ days | unblocked Deploy Edge Functions workflow |
+| Edge functions revived | `supabase/functions/*` | All 14 functions deployed after fixing CI blockers (was broken since April 1) |
+| Cross-repo sync workflows | `.github/workflows/sync-to-zeus.yml` (3 repos) | ZEUS Gateway notified on every push to main (+ GitHub Secrets configured) |
+| MindShift CLAUDE.md rewrite | Top-level CLAUDE.md | Frame: Constitution + Foundation Laws table + ecosystem context + working protocol |
+| 10 MindShift agents \u2192 VOLAURA | `.claude/agents/` (in both repos) | Imported MindShift agents into VOLAURA replacing 39 dead ones |
+
 ## BATCH-2026-03-30-M — Play Store Assets
 
 | Item | Location | Notes |
