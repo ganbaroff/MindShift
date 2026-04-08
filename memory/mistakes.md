@@ -100,3 +100,68 @@ Fix (Sprint Copy Audit): humanizer skill run across all visible text. 25 anti-pa
 What: Early prototypes had red error messages. Research #8 shows red triggers RSD.
 Root cause: Default browser/library styling.
 Fix: All error states use amber/gold. "Never use red" is Rule 1 in guardrails.
+
+---
+
+## CTO Role / Process (Session 91 lessons — 2026-04-08)
+
+### CTO became implementer instead of orchestrator
+What: Session 91 — wrote `safety_gate`, `swarm_coder`, `daemon`, `test_runner`, `gpu-watcher.mjs`, all 3 Figma rebuild iterations BY HAND. Did not delegate to subagents or external models.
+Root cause: Default mode is "code it yourself". Faster in the moment, terrible at scale.
+Fix: Before coding anything > 50 lines, ask "can a subagent or local LLM do this in parallel while I do strategy?"
+→ CTO orchestrates and delegates. Coding alone = junior dev mode. Use Agent tool aggressively.
+
+### Team workflow was isolated polling, not multi-round debate
+What: Spawned subagents independently, synthesized results alone. No cross-critique between agents.
+Root cause: Treating subagents as a consultant pool, not a team.
+Fix: Multi-round pattern → spawn N agents → collect outputs → spawn critic agents to find holes → synthesize. At least 2 rounds for non-trivial decisions.
+→ Anti-pattern: N parallel queries + solo synthesis. Pattern: N → critique → synthesize.
+
+### CEO escalation worst quadrant: neither solved nor consulted team
+What: Figma redesign hit wall. Neither escalated to CEO with options NOR consulted team via agents. Just kept retrying alone.
+Root cause: Two rules conflict — "solve yourself first" vs "don't decide alone". Chose neither.
+Fix: Stuck > 2 attempts = broadcast to team (agents) + draft CEO options. Both, not either.
+
+### mistakes.md not updated each session
+What: File was last touched before Session 91. Multiple new mistakes went unrecorded.
+Root cause: End-of-session housekeeping skipped due to context exhaustion.
+Fix: Updating mistakes.md is a hard checkpoint at session end, BEFORE writing the handoff.
+→ No handoff without mistakes.md update.
+
+---
+
+## Tooling / Inference
+
+### Local Ollama models installed but unused
+What: `gemma4`, `glm-ocr`, `qwen3:8b` installed at localhost:11434. Only gemma4 used. Zero callers for qwen3/glm-ocr.
+Root cause: Installed in burst, never wired into workflow. Default is cloud APIs.
+Fix: For any new agent/script needing LLM, FIRST try gemma4 or qwen3:8b via Ollama. Fall back to cloud only if quality insufficient.
+→ Local-first inference policy. `curl http://localhost:11434/api/tags` before reaching for cloud keys.
+
+---
+
+## Session 91 self-postmortem (2026-04-07/08)
+
+### Avoidance loop on Figma redesign
+What: Burned first half of session on verification/audits/memory instead of opening Figma.
+Root cause: Anxiety about quality + permission-asking habit.
+Fix: When the ask is "build X", FIRST tool call is the build tool. Research happens inside the loop.
+→ First action in a build task = the build tool.
+
+### Headless Figma file trap
+What: Created Figma file via MCP, worked in it for hours. CEO opened drafts → empty. File was a headless sandbox, not in user's account.
+Root cause: Did not verify fileKey after creation.
+Fix: After ANY Figma file creation, verify URL is openable. Have CEO confirm "I see the file" before more than 5 min of work.
+→ Verify file exists in user's account before claiming creation.
+
+### Quality gap: tried to be a designer
+What: CEO wanted "Linear/Vercel/Arc-quality" Figma. I built v1 (flat), v2 (gradients+glow). CEO verdict: "ужасно".
+Root cause: Pride. Tried to deliver instead of escalating capability limits.
+Fix: When ask is "best design in the world": "I'm not at that level. Want wireframe + design tokens + handoff to real designer, or accept lower quality?" → let CEO pick.
+→ Capability honesty > false confidence.
+
+### "сделай всё" misinterpretation
+What: CEO said "сделай всё". Treated as license to expand scope, tackled 10 things.
+Root cause: Ambiguous instruction + preference for breadth over depth.
+Fix: "Сделай всё" = "ship the obvious next thing now". Pick single highest-value action and execute.
+→ Default interpretation: smallest scoped action that ships value.

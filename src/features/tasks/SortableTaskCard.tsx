@@ -7,11 +7,12 @@
  * Extracted from TasksPage.tsx.
  */
 
-import { useState } from 'react'
+import { useState, memo } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useTranslation } from 'react-i18next'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import { useMotion } from '@/shared/hooks/useMotion'
 import TaskCard from '@/components/TaskCard'
 import type { Task } from '@/types'
 
@@ -25,10 +26,11 @@ interface SortableTaskCardProps {
   currentPool?: Task['pool']
 }
 
-export function SortableTaskCard({ task, index, onDone, onPark, onRemove, onMove, currentPool }: SortableTaskCardProps) {
+function SortableTaskCardInner({ task, index, onDone, onPark, onRemove, onMove, currentPool }: SortableTaskCardProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: task.id })
   const [showMoveOptions, setShowMoveOptions] = useState(false)
   const { t } = useTranslation()
+  const { shouldAnimate } = useMotion()
 
   const poolOptions = [
     { pool: 'now' as const,     label: t('tasks.now'),     emoji: '🎯' },
@@ -54,9 +56,9 @@ export function SortableTaskCard({ task, index, onDone, onPark, onRemove, onMove
         <AnimatePresence>
           {showMoveOptions ? (
             <motion.div
-              initial={{ height: 0, opacity: 0 }}
+              initial={shouldAnimate ? { height: 0, opacity: 0 } : {}}
               animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
+              exit={shouldAnimate ? { height: 0, opacity: 0 } : {}}
               className="overflow-hidden flex gap-1.5 px-2 pb-1.5"
             >
               {poolOptions.map(({ pool, label, emoji }) => (
@@ -92,3 +94,11 @@ export function SortableTaskCard({ task, index, onDone, onPark, onRemove, onMove
     </div>
   )
 }
+
+export const SortableTaskCard = memo(SortableTaskCardInner, (prev, next) =>
+  prev.task.id === next.task.id &&
+  prev.task.status === next.task.status &&
+  prev.task.title === next.task.title &&
+  prev.task.difficulty === next.task.difficulty &&
+  prev.currentPool === next.currentPool
+)
