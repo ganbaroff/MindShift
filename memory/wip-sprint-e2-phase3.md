@@ -42,5 +42,29 @@ Fix: new Supabase edge function `volaura-bridge-proxy` that:
 - [x] tsc -b exit 0 ✅
 - [x] Phase 4 complete — volaura-bridge.ts now routes through proxy
 
-## Status: DONE (phases 3+4 shipped)
-Still pending CEO actions before Phase 5 (E2E test) is possible.
+## D.5: E2E Test — WRITTEN (pending deploy to run for real)
+
+File: `e2e/volaura-bridge.spec.ts`
+
+Tests:
+1. `fetch_state` — proxy reachable, returns 200 (ok:false graceful if not configured)
+2. `character_event → character_events row` — verifies full chain: identity mapping created, row in VOLAURA DB
+3. `invalid action → 400`
+4. `unauthenticated → 401`
+
+Runs with `npx playwright test e2e/volaura-bridge.spec.ts`
+Skips gracefully if env vars missing (CI stays green).
+
+Required env vars for full run:
+- `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY` (MindShift)
+- `SUPABASE_SERVICE_KEY_MS` (MindShift service_role — create/delete test users)
+- `VOLAURA_SERVICE_KEY` (VOLAURA shared project service_role — query results)
+
+## Status: D.3+D.4+D.5 SHIPPED. Deploy + secrets = CEO actions.
+
+Blockers before full E2E passes:
+- [ ] `supabase login` then `supabase functions deploy volaura-bridge-proxy --project-ref awfoqycoltvhamtrsvxk`
+- [ ] `supabase secrets set VOLAURA_API_URL=https://volauraapi-production.up.railway.app EXTERNAL_BRIDGE_SECRET=c93a9578a8e9ad8b7ae580e720db156b8600d22f0ee8f99abbad49d24295d1b7 --project-ref awfoqycoltvhamtrsvxk`
+- [ ] On Railway VOLAURA: set `EXTERNAL_BRIDGE_SECRET=c93a9578a8e9ad8b7ae580e720db156b8600d22f0ee8f99abbad49d24295d1b7`
+- [ ] On Railway VOLAURA: set `SUPABASE_JWT_SECRET=<from Supabase dashboard dwdgzfusjsobnixgyzjk → Settings → API → JWT Secret>`
+- [ ] Apply migration: `supabase db push --project-ref dwdgzfusjsobnixgyzjk` (VOLAURA shared project)
