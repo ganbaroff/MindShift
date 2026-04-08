@@ -81,11 +81,17 @@ export default function HomePage() {
     if (tinyActionLoading || nowTasks.length === 0) return;
     const topTask = nowTasks[0];
     setTinyActionLoading(true);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
     try {
       const locale = navigator.language?.split('-')[0] ?? 'en';
-      const { data } = await supabase.functions.invoke('decompose-task', {
+      const invokePromise = supabase.functions.invoke('decompose-task', {
         body: { taskTitle: topTask.title, spiciness: 5, locale },
       });
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        controller.signal.addEventListener('abort', () => reject(new Error('timeout')))
+      );
+      const { data } = await Promise.race([invokePromise, timeoutPromise]);
       const firstStep = data?.steps?.[0] as string | undefined;
       if (firstStep) {
         setMochiMsg({ text: firstStep, emoji: '⚡' });
@@ -93,6 +99,7 @@ export default function HomePage() {
     } catch {
       // silent fail — ADHD users don't need error noise
     } finally {
+      clearTimeout(timeoutId);
       setTinyActionLoading(false);
     }
   }, [tinyActionLoading, nowTasks]);
