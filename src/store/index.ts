@@ -163,6 +163,8 @@ export const useStore = create<import('./types').AppStore>()(
           // S-5 Ghosting Grace — persisted so ContextRestore can surface room context on return
           lastRoomCode: s.lastRoomCode,
           lastRoomLeftAt: s.lastRoomLeftAt,
+          mochiMemory: s.mochiMemory,
+          shopUnlocks: s.shopUnlocks,
         }),
       }
     )
