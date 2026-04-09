@@ -32,7 +32,7 @@ const PROXY_URL  = MS_URL ? `${MS_URL}/functions/v1/volaura-bridge-proxy` : ''
 
 /** Create a throwaway user in MindShift via admin API and return their JWT. */
 async function createTestUser(ctx: Awaited<ReturnType<typeof pwRequest.newContext>>) {
-  const email = `e2e-bridge-${Date.now()}@test.volaura.invalid`
+  const email = `e2e-bridge-${Date.now()}@mindshift-e2e.dev`
   const password = 'E2eTestPass123!'
 
   // Create user via admin endpoint
