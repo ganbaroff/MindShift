@@ -15,7 +15,7 @@ import { isVolauraConfigured } from '@/shared/lib/volaura-bridge'
 import { logEvent } from '@/shared/lib/logger'
 import { useStore } from '@/store'
 import { notifyFocusEnd, notifyAchievement, pushFocusComplete, pushRecoveryEnd } from '@/shared/lib/notify'
-import { nativeRequestReview } from '@/shared/lib/native'
+import { nativeRequestReview, updateWidgetData } from '@/shared/lib/native'
 import { hapticDone } from '@/shared/lib/haptic'
 import { getToneCopy } from '@/shared/lib/uiTone'
 import { ACHIEVEMENT_DEFINITIONS } from '@/types'
@@ -158,6 +158,12 @@ export function useSessionEnd({
       if (storeState.completedFocusSessions === 2 && !isLowEnergy) {
         nativeRequestReview()
       }
+
+      // Sync Android home screen widget with today's focus progress
+      updateWidgetData({
+        nowTaskTitle: storeState.nowPool.find(t => t.status === 'active')?.title ?? '',
+        focusMinutesToday: elapsedMin,
+      })
 
       if (isVolauraConfigured() && storeState.userId && !storeState.userId.startsWith('guest_')) {
         // Store session data — sendFocusSession fires in handlePostEnergy once
