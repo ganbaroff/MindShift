@@ -134,7 +134,12 @@ async function sendCharacterEvent(
 
 // ── Convenience senders ───────────────────────────────────────────────────────
 
-/** Send focus session completion event */
+/** Send focus session completion event
+ *
+ * GDPR FIREWALL (Article 9): energy_before / energy_after are health signals.
+ * They are stored in Supabase (user's own data) but NEVER forwarded to VOLAURA.
+ * Only anonymised productivity signals (duration, phase, xp) cross the boundary.
+ */
 export function sendFocusSession(
   token: string,
   data: {
@@ -152,8 +157,7 @@ export function sendFocusSession(
       xp:              Math.floor(data.durationMinutes * 5),
       focus_minutes:   data.durationMinutes,
       phase:           data.phase,
-      energy_before:   data.energyBefore,
-      energy_after:    data.energyAfter,
+      // energy_before / energy_after intentionally excluded — GDPR Art.9 health data firewall
       psychotype:      data.psychotype ?? undefined,
     },
     source_product: 'mindshift',

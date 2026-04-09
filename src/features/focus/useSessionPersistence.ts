@@ -12,7 +12,7 @@ import { useEffect, useCallback } from 'react'
 import type { MutableRefObject } from 'react'
 import { supabase } from '@/shared/lib/supabase'
 import { logError, logEvent } from '@/shared/lib/logger'
-import { sendVitals, isVolauraConfigured } from '@/shared/lib/volaura-bridge'
+// GDPR firewall: sendVitals import removed — energy/burnout are Art.9 health data, not for VOLAURA
 import { useStore } from '@/store'
 import type { SessionPhase, AudioPreset, EnergyLevel } from '@/types'
 import type { FocusSessionInsert } from '@/types/database'
@@ -108,12 +108,9 @@ export function useSessionPersistence({
         .eq('id', savedSessionIdRef.current)
         .then(({ error }: { error: unknown }) => { if (error) logError('useSessionPersistence.energy_after', error) })
 
-      if (isVolauraConfigured()) {
-        void supabase.auth.getSession().then(({ data }) => {
-          const token = data.session?.access_token
-          if (token) void sendVitals(token, level, useStore.getState().burnoutScore)
-        })
-      }
+      // GDPR Art.9 firewall: energy_level + burnoutScore are mental health signals.
+      // They are stored in Supabase (user's own data) but never forwarded to VOLAURA.
+      // sendVitals() intentionally disabled until explicit user consent flow exists.
     }
   }, [setEnergyLevel, userId, savedSessionIdRef])
 
