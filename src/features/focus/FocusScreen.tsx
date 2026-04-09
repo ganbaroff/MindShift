@@ -125,7 +125,7 @@ export default function FocusScreen() {
   }
 
   if (screen === 'recovery-lock') {
-    return <RecoveryLock recoverySeconds={recoverySeconds} onBypass={handleBypassRecovery} />
+    return <RecoveryLock recoverySeconds={recoverySeconds} onBypass={handleBypassRecovery} sessionMinutes={elapsedMin} sessionPhase={sessionPhase} />
   }
 
   if (screen === 'interrupt-confirm') {

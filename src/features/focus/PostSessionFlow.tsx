@@ -17,6 +17,7 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { SocialFeedbackCard } from './SocialFeedbackCard'
+import { ShareCard } from '@/shared/ui/ShareCard'
 import { nativeShare, canShare } from '@/shared/lib/native'
 import type { EnergyLevel, SessionPhase } from '@/types'
 import { ENERGY_EMOJI } from '@/shared/lib/constants'
@@ -299,13 +300,16 @@ function ParkedThoughtsNudge({ count }: { count: number }) {
 interface RecoveryLockProps {
   recoverySeconds: number
   onBypass: () => void
+  sessionMinutes?: number
+  sessionPhase?: SessionPhase
 }
 
 export const RecoveryLock = memo(function RecoveryLock({
-  recoverySeconds, onBypass,
+  recoverySeconds, onBypass, sessionMinutes = 0, sessionPhase,
 }: RecoveryLockProps) {
   const { shouldAnimate, t: transition } = useMotion()
   const { t } = useTranslation()
+  const [showShareCard, setShowShareCard] = useState(false)
   const rm = Math.floor(recoverySeconds / 60)
   const rs = recoverySeconds % 60
 
@@ -364,6 +368,21 @@ export const RecoveryLock = memo(function RecoveryLock({
           <p className="text-xs mt-1" style={{ color: 'var(--color-text-muted)' }}>{t('focus.suggestedRest')}</p>
         </div>
 
+        {/* Focus Proof — share card (past vulnerability window, ethically safe) */}
+        {sessionMinutes > 0 && (
+          <button
+            onClick={() => setShowShareCard(true)}
+            className="mb-4 text-xs px-4 py-1.5 rounded-xl focus-visible:ring-2 focus-visible:ring-[var(--color-teal)] focus-visible:outline-none"
+            style={{
+              background: 'rgba(78,205,196,0.08)',
+              border: '1px solid rgba(78,205,196,0.2)',
+              color: 'var(--color-teal)',
+            }}
+          >
+            {t('focus.shareFocusProof')}
+          </button>
+        )}
+
         {/* Continue anyway — hyperfocus support */}
         <button
           onClick={onBypass}
@@ -378,6 +397,21 @@ export const RecoveryLock = memo(function RecoveryLock({
           {t('focus.keepGoingBypass')}
         </button>
       </motion.div>
+
+      {/* Focus Proof share card sheet */}
+      {showShareCard && (
+        <ShareCard
+          emoji={sessionPhase === 'flow' ? '🌊' : sessionPhase === 'release' ? '🌿' : '🌱'}
+          title={
+            sessionPhase === 'flow'
+              ? t('focus.proofTitleFlow', { min: sessionMinutes })
+              : t('focus.proofTitleSteady', { min: sessionMinutes })
+          }
+          subtitle={t('focus.proofSubtitle')}
+          stat={`${sessionMinutes} min`}
+          onClose={() => setShowShareCard(false)}
+        />
+      )}
     </div>
   )
 })
