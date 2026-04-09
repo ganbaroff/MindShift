@@ -108,5 +108,8 @@ verify_jwt = true
 [functions.stripe-webhook]
 verify_jwt = false
 
+[functions.dodo-webhook]
+verify_jwt = false
+
 [functions.gcal-inbound]
 verify_jwt = true
