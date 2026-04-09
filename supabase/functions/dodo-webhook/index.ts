@@ -86,22 +86,32 @@ Deno.serve(async (req: Request) => {
     return new Response('Unauthorized', { status: 401 })
   }
 
-  const event = JSON.parse(body) as DodoEvent
+  let event: DodoEvent
+  try {
+    event = JSON.parse(body) as DodoEvent
+  } catch {
+    return new Response(JSON.stringify({ error: 'Invalid JSON body' }), {
+      status: 400, headers: { 'Content-Type': 'application/json' },
+    })
+  }
+
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
   // Idempotency: reuse processed_stripe_events table (stores any payment event IDs)
   if (webhookId) {
-    const { data: existing } = await supabase
-      .from('processed_stripe_events')
-      .select('id')
-      .eq('event_id', webhookId)
-      .maybeSingle()
-    if (existing) {
-      return new Response(JSON.stringify({ received: true, duplicate: true }), {
-        status: 200, headers: { 'Content-Type': 'application/json' },
-      })
-    }
-    await supabase.from('processed_stripe_events').insert({ event_id: webhookId }).catch(() => {/* ignore if table missing */})
+    try {
+      const { data: existing } = await supabase
+        .from('processed_stripe_events')
+        .select('event_id')
+        .eq('event_id', webhookId)
+        .maybeSingle()
+      if (existing) {
+        return new Response(JSON.stringify({ received: true, duplicate: true }), {
+          status: 200, headers: { 'Content-Type': 'application/json' },
+        })
+      }
+      await supabase.from('processed_stripe_events').insert({ event_id: webhookId })
+    } catch {/* ignore if table missing */}
   }
 
   try {
@@ -117,23 +127,20 @@ Deno.serve(async (req: Request) => {
     }
 
     if (event.type === 'subscription.active') {
-      const { data: existing } = await supabase
-        .from('users')
-        .select('subscription_started_at')
-        .eq('id', userId)
-        .maybeSingle()
-      await supabase.from('users').upsert({
-        id: userId,
+      await supabase.from('users').update({
         subscription_tier: 'pro',
-        stripe_subscription_id: subscriptionId ?? null,
-        subscription_started_at: existing?.subscription_started_at ?? new Date().toISOString(),
-      })
+      }).eq('id', userId)
+      // Audit log (non-blocking)
+      supabase.from('subscriptions').insert({
+        user_id: userId,
+        tier: 'pro',
+        active: true,
+      }).then(null, () => {/* ignore */})
     }
 
     if (['subscription.cancelled', 'subscription.expired', 'subscription.on_hold', 'subscription.failed'].includes(event.type)) {
       await supabase.from('users').update({
         subscription_tier: 'free',
-        stripe_subscription_id: null,
       }).eq('id', userId)
     }
 
