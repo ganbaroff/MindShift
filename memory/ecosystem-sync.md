@@ -109,6 +109,18 @@ Source code: C:\Users\user\Downloads\vidvow (React 19 + Hono + Cloudflare Worker
 | `src/shared/lib/volaura-bridge.ts` | API bridge to VOLAURA |
 | `memory/ecosystem-sync.md` | THIS FILE — ecosystem context |
 
+## ECOSYSTEM DEBT CLOSURES (2026-04-09)
+
+Three VOLAURA UNFULFILLED-PROMISES items closed — relevant to MindShift:
+
+| Item | What closed | MindShift impact |
+|------|------------|-----------------|
+| #23 | `packages/swarm/execute_proposal.py` now exists | 62 approved swarm proposals (incl. MindShift bridge proposals) can now be auto-implemented |
+| #26 | AURA scoreMeaning fix (`7fec325` merged) | Low-scorer UX improved — affects VOLAURA badge quality shown in MindShift ProgressPage (Phase 2) |
+| D1 | 16 stale handoff docs archived from VOLAURA docs/ | Cleaner shared docs/ — reduces confusion when MindShift CTO reads VOLAURA context |
+
+---
+
 ## VOLAURA CTO CONTACT
 
 - Same Claude, different session
