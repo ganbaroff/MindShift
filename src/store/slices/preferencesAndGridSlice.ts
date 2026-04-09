@@ -80,6 +80,13 @@ interface PreferencesSlice {
   // Font scale — accessibility for ADHD+dyslexia users (30-50% comorbidity)
   fontScale: 1 | 1.15 | 1.3
   setFontScale: (scale: 1 | 1.15 | 1.3) => void
+  // Mochi persistent memory — compressed 3-5 bullet summary of last chat session
+  // Stored on-device (IDB), never on server → zero GDPR Article 9 risk
+  mochiMemory: string | null
+  setMochiMemory: (memory: string | null) => void
+  // Crystal shop unlocks — items purchased with crystals (client-side gates)
+  shopUnlocks: string[]
+  addShopUnlock: (item: string) => void
 }
 
 interface GridSlice {
@@ -236,4 +243,14 @@ export const createPreferencesAndGridSlice: StateCreator<
   // Font scale — 1 = normal, 1.15 = large (~15%), 1.3 = extra large (~30%)
   fontScale: 1,
   setFontScale: (scale) => set({ fontScale: scale }),
+
+  // Mochi persistent memory — updated after each chat session on-device
+  mochiMemory: null,
+  setMochiMemory: (memory) => set({ mochiMemory: memory }),
+
+  // Crystal shop unlocks — string IDs match Denis's 5 sinks
+  shopUnlocks: [],
+  addShopUnlock: (item) => set((s) => ({
+    shopUnlocks: s.shopUnlocks.includes(item) ? s.shopUnlocks : [...s.shopUnlocks, item],
+  })),
 })

@@ -19,6 +19,7 @@ import { PeakFocusCard } from './PeakFocusCard';
 import { FocusStyleCard } from './FocusStyleCard';
 import { MochiGarden } from './MochiGarden';
 import { VolauraCrystalCard } from './VolauraCrystalCard';
+import { CrystalShopSection } from './CrystalShopSection';
 import { VolauraAuraBadges } from './VolauraAuraBadges';
 import { ShareWeekButton } from './ShareWeekButton';
 import { WeeklyInsights } from './WeeklyInsights';
@@ -77,6 +78,9 @@ export default function ProgressPage() {
 
           {/* VOLAURA Crystal Balance */}
           {auraState && <VolauraCrystalCard auraState={auraState} />}
+
+          {/* Crystal Shop — spend path (Constitution: ≥1 sink required before crystals shown) */}
+          {auraState && <CrystalShopSection crystalBalance={auraState.crystal_balance} />}
 
           {/* VOLAURA AURA Badges */}
           {auraState && <VolauraAuraBadges auraState={auraState} />}

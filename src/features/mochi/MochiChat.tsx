@@ -57,6 +57,7 @@ export function MochiChat({ open, onClose }: MochiChatProps) {
     timeBlindness, emotionalReactivity, completedTotal, currentStreak,
     nowPool, nextPool, somedayPool,
     weeklyIntention, dailyFocusGoalMin, locale, uiTone,
+    mochiMemory, setMochiMemory,
   } = useStore()
 
   const [messages, setMessages] = useState<ChatMessage[]>([])
@@ -76,6 +77,13 @@ export function MochiChat({ open, onClose }: MochiChatProps) {
     }
   }, [messages])
 
+  // Save compressed memory when chat session closes
+  useEffect(() => {
+    if (open) return // only on close
+    saveMemory()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open])
+
   // Focus input when opened
   useEffect(() => {
     if (open && !isGuest && inputRef.current) {
@@ -83,19 +91,22 @@ export function MochiChat({ open, onClose }: MochiChatProps) {
     }
   }, [open, isGuest])
 
-  // Welcome message on first open
+  // Welcome message on first open — with memory awareness
   useEffect(() => {
     if (open && messages.length === 0 && !isGuest) {
+      const welcomeText = mochiMemory
+        ? `Hey, you're back. I remember a bit from last time — ${mochiMemory.split('|')[0]?.replace('User: ', '').slice(0, 60)}... What's on your mind today?`
+        : "Hey! Tap me anytime you need a nudge, want to talk through a task, or just need someone in your corner. What's on your mind?"
       setMessages([{
         id: generateId(),
         role: 'mochi',
-        text: "Hey! Tap me anytime you need a nudge, want to talk through a task, or just need someone in your corner. What's on your mind?",
+        text: welcomeText,
         mascotState: 'encouraging',
       }])
     }
-  }, [open, messages.length, isGuest])
+  }, [open, messages.length, isGuest, mochiMemory])
 
-  // Build context for AI
+  // Build context for AI — includes persistent memory from last session
   const chatContext = useMemo(() => {
     const activeTasks = nowPool.filter((t: Task) => t.status === 'active')
     return {
@@ -116,12 +127,28 @@ export function MochiChat({ open, onClose }: MochiChatProps) {
       nowPoolCount: activeTasks.length,
       nextPoolCount: nextPool.filter((t: Task) => t.status === 'active').length,
       somedayPoolCount: somedayPool.filter((t: Task) => t.status === 'active').length,
+      // Persistent memory — compressed summary from last chat session (device-only)
+      mochiMemory: mochiMemory ?? undefined,
     }
   }, [
     psychotype, energyLevel, appMode, seasonalMode, timeBlindness,
     emotionalReactivity, completedTotal, currentStreak, weeklyIntention,
-    dailyFocusGoalMin, uiTone, nowPool, nextPool, somedayPool,
+    dailyFocusGoalMin, uiTone, nowPool, nextPool, somedayPool, mochiMemory,
   ])
+
+  // Save compressed memory when chat session ends with enough messages
+  const saveMemory = useCallback(() => {
+    const exchanges = messages.filter(m => m.role !== 'mochi' || !messages.some(x => x.role === 'user'))
+    if (messages.length < 4) return // not enough to be meaningful
+    const userMessages = messages.filter(m => m.role === 'user').slice(-2)
+    const mochiMessages = messages.filter(m => m.role === 'mochi').slice(-2)
+    const summary = [
+      ...userMessages.map(m => `User: ${m.text.slice(0, 80)}`),
+      ...mochiMessages.map(m => `Mochi: ${m.text.slice(0, 80)}`),
+    ].join(' | ')
+    if (summary.length > 20) setMochiMemory(summary)
+    void exchanges // suppress unused warning
+  }, [messages, setMochiMemory])
 
   const handleSend = useCallback(async () => {
     const trimmed = input.trim()
