@@ -308,6 +308,7 @@
     "telegramCodeCopy": "Kopie",
     "telegramCodeExpires": "Der Code läuft in 10 Minuten ab",
     "exporting": "Exportieren...",
+    "dataFirewallNote": "Gesundheitsdaten (Energielevel, Burnout-Score) bleiben auf deinem Gerät. Sie werden nur mit deiner ausdrücklichen Zustimmung exportiert.",
     "analyticsToggle": "Anonyme Analyse",
     "analyticsDesc": "Nur aggregierte Nutzungsdaten — keine persönlichen Daten. Hilft, MindShift zu verbessern.",
     "exportJson": "Exportieren (JSON)",
