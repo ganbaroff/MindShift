@@ -47,7 +47,7 @@ export function PlanSection() {
       })
       if (error || !data?.url) throw error ?? new Error('No checkout URL')
       const checkoutUrl = String(data.url)
-      if (!checkoutUrl.startsWith('https://checkout.stripe.com/')) {
+      if (!checkoutUrl.startsWith('https://')) {
         throw new Error('Invalid checkout URL')
       }
       window.location.href = checkoutUrl

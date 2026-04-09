@@ -3,27 +3,28 @@
 // Body: { plan?: 'pro_monthly' | 'pro_yearly' }
 // Returns: { url: string, sessionId: string }
 //
-// Creates a Stripe Checkout Session for the authenticated user.
+// Creates a Dodo Payments Checkout Session for the authenticated user.
 // Redirects to APP_URL/settings?upgrade=success on completion.
 //
 // Auth: JWT required
-// Env required: STRIPE_SECRET_KEY, STRIPE_PRO_PRICE_ID, SUPABASE_URL, SUPABASE_ANON_KEY
-// Env optional: STRIPE_PRO_YEARLY_PRICE_ID, APP_URL
+// Env required: DODO_API_KEY, DODO_PRODUCT_ID, SUPABASE_URL, SUPABASE_ANON_KEY
+// Env optional: DODO_PRODUCT_ID_YEARLY, APP_URL
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { getCorsHeaders } from '../_shared/cors.ts'
 import { checkDbRateLimit } from '../_shared/rateLimit.ts'
 
-const STRIPE_SECRET_KEY = Deno.env.get('STRIPE_SECRET_KEY')
-const STRIPE_PRO_PRICE_ID = Deno.env.get('STRIPE_PRO_PRICE_ID') ?? ''
+const DODO_API_KEY = Deno.env.get('DODO_API_KEY')
+const DODO_PRODUCT_ID = Deno.env.get('DODO_PRODUCT_ID') ?? ''
 const APP_URL = Deno.env.get('APP_URL') ?? 'https://mindshift-umber.vercel.app'
+const DODO_API_BASE = 'https://live.dodopayments.com'
 
 Deno.serve(async (req: Request) => {
   const cors = getCorsHeaders(req)
 
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors })
 
-  if (!STRIPE_SECRET_KEY) {
+  if (!DODO_API_KEY) {
     return new Response(JSON.stringify({ error: 'Payments not configured' }), {
       status: 503, headers: { ...cors, 'Content-Type': 'application/json' },
     })
@@ -52,40 +53,34 @@ Deno.serve(async (req: Request) => {
     }
 
     const { plan = 'pro_monthly' } = await req.json() as { plan?: string }
-    const priceId = plan === 'pro_yearly'
-      ? (Deno.env.get('STRIPE_PRO_YEARLY_PRICE_ID') ?? STRIPE_PRO_PRICE_ID)
-      : STRIPE_PRO_PRICE_ID
+    const productId = plan === 'pro_yearly'
+      ? (Deno.env.get('DODO_PRODUCT_ID_YEARLY') ?? DODO_PRODUCT_ID)
+      : DODO_PRODUCT_ID
 
-    // Create Stripe checkout session
-    const stripeRes = await fetch('https://api.stripe.com/v1/checkout/sessions', {
+    const dodoRes = await fetch(`${DODO_API_BASE}/checkouts`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${STRIPE_SECRET_KEY}`,
-        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': `Bearer ${DODO_API_KEY}`,
+        'Content-Type': 'application/json',
       },
-      body: new URLSearchParams({
-        'mode': 'subscription',
-        'line_items[0][price]': priceId,
-        'line_items[0][quantity]': '1',
-        'customer_email': user.email ?? '',
-        'client_reference_id': user.id,
-        'success_url': `${APP_URL}/settings?upgrade=success`,
-        'cancel_url': `${APP_URL}/settings?upgrade=cancelled`,
-        'subscription_data[metadata][user_id]': user.id,
-        'allow_promotion_codes': 'true',
-      }).toString(),
+      body: JSON.stringify({
+        product_cart: [{ product_id: productId, quantity: 1 }],
+        customer: { email: user.email ?? '' },
+        return_url: `${APP_URL}/settings?upgrade=success`,
+        metadata: { user_id: user.id },
+      }),
     })
 
-    if (!stripeRes.ok) {
-      const err = await stripeRes.text()
-      console.error('[create-checkout] Stripe error:', err)
+    if (!dodoRes.ok) {
+      const err = await dodoRes.text()
+      console.error('[create-checkout] Dodo error:', err)
       return new Response(JSON.stringify({ error: 'Payment provider error' }), {
         status: 502, headers: { ...cors, 'Content-Type': 'application/json' },
       })
     }
 
-    const session = await stripeRes.json() as { url: string; id: string }
-    return new Response(JSON.stringify({ url: session.url, sessionId: session.id }), {
+    const session = await dodoRes.json() as { checkout_url: string; session_id: string }
+    return new Response(JSON.stringify({ url: session.checkout_url, sessionId: session.session_id }), {
       status: 200, headers: { ...cors, 'Content-Type': 'application/json' },
     })
   } catch (err) {
