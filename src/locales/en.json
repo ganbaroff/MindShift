@@ -1343,5 +1343,14 @@
     "maintain": "Maintain",
     "recover": "Recover",
     "sandbox": "Sandbox"
+  },
+  "shop": {
+    "title": "Crystal Shop",
+    "formula": "1 min focus = 5 crystals · 24h refund on all",
+    "footer": "Crystals never expire · No pressure to spend",
+    "comingSoon": "Soon",
+    "comingTo": "Coming to {{dest}}",
+    "active": "Active",
+    "buy": "{{cost}} 💎"
   }
 }

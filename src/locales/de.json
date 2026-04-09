@@ -1343,5 +1343,14 @@
     "maintain": "Pflegen",
     "recover": "Genesen",
     "sandbox": "Sandkasten"
+  },
+  "shop": {
+    "title": "Kristall-Shop",
+    "formula": "1 Min. Fokus = 5 Kristalle · 24h Rückgabe",
+    "footer": "Kristalle verfallen nie · Kein Druck",
+    "comingSoon": "Bald",
+    "comingTo": "Kommt zu {{dest}}",
+    "active": "Aktiv",
+    "buy": "{{cost}} 💎"
   }
 }
