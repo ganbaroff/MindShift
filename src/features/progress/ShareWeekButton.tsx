@@ -15,11 +15,18 @@ export function ShareWeekButton() {
 
   const handleShareWeek = async () => {
     const mins = weeklyStats?.totalFocusMinutes ?? 0
+    // K-factor optimized: specific number + ADHD angle + no shame = curiosity hook
+    // One text works across LinkedIn (professional), Telegram (casual), Instagram (visual)
+    const shareText = mins >= 60
+      ? `${mins} minutes of real focus this week. No guilt trips, no fake streaks — just actual deep work. My ADHD brain finally has a system that fits. 🧠\n\nmindshift.app`
+      : completedTotal > 0
+      ? `${completedTotal} tasks done, one focused minute at a time. Built for ADHD brains, works for every brain. 🌱\n\nmindshift.app`
+      : 'Finally found a productivity app that doesn\'t shame you for being human. Made for ADHD brains. 🌱\n\nmindshift.app'
     logEvent('weekly_share_tapped', { focus_min: mins, completed_total: completedTotal })
     await nativeShare({
-      title: 'My MindShift week 🌱',
-      text: `This week I focused for ${mins} minutes and completed ${completedTotal} tasks with MindShift — ADHD-aware productivity. 💙`,
-      url: 'https://mindshift-umber.vercel.app',
+      title: 'MindShift — Focus made kind',
+      text: shareText,
+      url: 'https://mind-shift-git-main-yusifg27-3093s-projects.vercel.app',
     })
     logEvent('weekly_share_completed', { focus_min: mins })
   }
