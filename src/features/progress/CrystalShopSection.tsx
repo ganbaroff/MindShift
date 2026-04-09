@@ -75,7 +75,7 @@ const SHOP_ITEMS: ShopItem[] = [
     id: 'grove_tithe',
     emoji: '🌳',
     name: 'Grove Contribution',
-    description: 'Contribute to your focus group\'s shared crystal pool. Collective streaks unlock group rewards.',
+    description: 'Contribute to your focus group\'s shared crystal pool. Collective consistency is recognized together.',
     cost: 5,
     available: false,
     comingTo: 'Groves (coming soon)',
