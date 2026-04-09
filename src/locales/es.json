@@ -295,6 +295,8 @@
     "telegramCodeCopy": "Copiar",
     "telegramCodeExpires": "El código caduca en 10 minutos.",
     "exporting": "Exportador...",
+    "analyticsToggle": "Análisis anónimo",
+    "analyticsDesc": "Solo datos agregados — sin información personal. Ayuda a mejorar MindShift.",
     "exportJson": "Exportar (JSON)",
     "exportSignedIn": "La exportación está disponible para usuarios registrados",
     "exportFailed": "Error al exportar. Inténtelo de nuevo.",
@@ -968,7 +970,8 @@
     "queueFull": "Su cola se está llenando. ¿Quizás estacionar uno antes de agregarlo?",
     "crisisMessage": "No estás solo. Estos sentimientos son reales y hay ayuda disponible.",
     "saving": "Ahorro...",
-    "voiceHint": "Escribe con tu voz"
+    "voiceHint": "Escribe con tu voz",
+    "voicePrivacy": "Voz procesada por tu navegador — puede usar la nube de Google o Apple."
   },
   "addTaskFields": {
     "difficulty": "Dificultad",

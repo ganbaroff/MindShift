@@ -14,13 +14,13 @@ import { useTranslation } from 'react-i18next'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { useStore } from '@/store'
 import { supabase } from '@/shared/lib/supabase'
-import { Section } from './SettingsPrimitives'
+import { Section, Toggle } from './SettingsPrimitives'
 
 export function AccountSection() {
   const { t } = useTranslation()
   const { shouldAnimate } = useMotion()
   const navigate = useNavigate()
-  const { userId, email, signOut } = useStore()
+  const { userId, email, signOut, analyticsEnabled, setAnalyticsEnabled } = useStore()
 
   const isGuest = !userId || userId.startsWith('guest_')
 
@@ -111,6 +111,13 @@ export function AccountSection() {
 
       {/* Data */}
       <Section label={t('settings.yourData')}>
+        {/* Analytics consent — Data Firewall (Research #3.5) */}
+        <Toggle
+          checked={analyticsEnabled}
+          onChange={setAnalyticsEnabled}
+          label={t('settings.analyticsToggle')}
+          hint={t('settings.analyticsDesc')}
+        />
         <motion.button
           whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
           onClick={handleExport}

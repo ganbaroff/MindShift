@@ -295,6 +295,8 @@
     "telegramCodeCopy": "Copy",
     "telegramCodeExpires": "The code expires in 10 minutes",
     "exporting": "Exporting...",
+    "analyticsToggle": "Anonymous analytics",
+    "analyticsDesc": "Aggregate usage only — no personal data, no PII. Helps improve MindShift.",
     "exportJson": "Export (JSON)",
     "exportSignedIn": "Export is available for signed-in users",
     "exportFailed": "Export failed — please try again",

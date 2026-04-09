@@ -295,6 +295,8 @@
     "telegramCodeCopy": "Kopyala",
     "telegramCodeExpires": "Kodun süresi 10 dakika içinde doluyor",
     "exporting": "Dışa aktarılıyor...",
+    "analyticsToggle": "Anonim analitik",
+    "analyticsDesc": "Yalnızca toplu kullanım verileri — kişisel bilgi yok. MindShift'i geliştirmeye yardımcı olur.",
     "exportJson": "Dışa aktarma (JSON)",
     "exportSignedIn": "Dışa aktarma, oturum açmış kullanıcılar için kullanılabilir",
     "exportFailed": "Dışa aktarma başarısız oldu; lütfen tekrar deneyin",
@@ -964,7 +966,9 @@
     "addToPool": "{{pool}}'a ekle →",
     "queueFull": "Sıranız dolmaya başladı; eklemeden önce bir tane park edebilir misiniz?",
     "crisisMessage": "Yalnız değilsin. Bu duygular gerçektir ve yardım mevcuttur.",
-    "saving": "Kaydediliyor..."
+    "saving": "Kaydediliyor...",
+    "voiceHint": "Sesinizle yazın",
+    "voicePrivacy": "Ses tarayıcınız tarafından işlenir — Google veya Apple bulutu kullanılabilir."
   },
   "addTaskFields": {
     "difficulty": "Zorluk",
