@@ -1352,5 +1352,12 @@
     "comingTo": "Kommt zu {{dest}}",
     "active": "Aktiv",
     "buy": "{{cost}} 💎"
+  },
+  "shareCard": {
+    "screenshotHint": "Screenshot machen und teilen",
+    "tasksDone": "Aufgaben erledigt",
+    "dayStreak": "Tage Streak",
+    "tagline": "Fokus ohne Schuldgefühle",
+    "close": "Karte schließen"
   }
 }
