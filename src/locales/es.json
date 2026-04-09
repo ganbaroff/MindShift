@@ -1343,5 +1343,14 @@
     "maintain": "Mantener",
     "recover": "Recuperar",
     "sandbox": "Salvadera"
+  },
+  "shop": {
+    "title": "Tienda de Cristales",
+    "formula": "1 min de enfoque = 5 cristales · Reembolso 24h",
+    "footer": "Los cristales nunca expiran · Sin presión",
+    "comingSoon": "Próximamente",
+    "comingTo": "Llega a {{dest}}",
+    "active": "Activo",
+    "buy": "{{cost}} 💎"
   }
 }

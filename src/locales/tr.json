@@ -1338,5 +1338,14 @@
     "maintain": "Sürdürmek",
     "recover": "İyileşmek",
     "sandbox": "Korumalı alan"
+  },
+  "shop": {
+    "title": "Kristal Mağazası",
+    "formula": "1 dk odak = 5 kristal · 24 saat iade",
+    "footer": "Kristaller hiç dolmaz · Baskı yok",
+    "comingSoon": "Yakında",
+    "comingTo": "{{dest}} geliyor",
+    "active": "Aktif",
+    "buy": "{{cost}} 💎"
   }
 }

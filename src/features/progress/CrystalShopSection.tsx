@@ -18,6 +18,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
+import { useTranslation } from 'react-i18next'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { useStore } from '@/store'
 import { nativeHapticImpact } from '@/shared/lib/native'
@@ -89,6 +90,7 @@ interface CrystalShopSectionProps {
 
 export function CrystalShopSection({ crystalBalance }: CrystalShopSectionProps) {
   const { shouldAnimate } = useMotion()
+  const { t } = useTranslation()
   const { shopUnlocks, addShopUnlock } = useStore()
   const [purchasing, setPurchasing] = useState<string | null>(null)
   const [justPurchased, setJustPurchased] = useState<string | null>(null)
@@ -127,10 +129,10 @@ export function CrystalShopSection({ crystalBalance }: CrystalShopSectionProps) 
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-            💎 Crystal Shop
+            💎 {t('shop.title')}
           </p>
           <p className="text-[11px] mt-0.5" style={{ color: 'var(--color-text-muted)' }}>
-            1 min focus = 5 crystals · 24h refund on all
+            {t('shop.formula')}
           </p>
         </div>
         <div
@@ -179,7 +181,7 @@ export function CrystalShopSection({ crystalBalance }: CrystalShopSectionProps) 
                 <p className="text-[11px] mt-0.5 line-clamp-1" style={{ color: 'var(--color-text-muted)' }}>
                   {item.available
                     ? item.description
-                    : `Coming to ${item.comingTo}`}
+                    : t('shop.comingTo', { dest: item.comingTo })}
                 </p>
               </div>
 
@@ -192,6 +194,7 @@ export function CrystalShopSection({ crystalBalance }: CrystalShopSectionProps) 
                       initial={shouldAnimate ? { scale: 0 } : {}}
                       animate={{ scale: 1 }}
                       className="text-lg"
+                      aria-label={t('shop.active')}
                     >
                       ✨
                     </motion.span>
@@ -221,7 +224,7 @@ export function CrystalShopSection({ crystalBalance }: CrystalShopSectionProps) 
                       color: 'var(--color-text-muted)',
                     }}
                   >
-                    Soon
+                    {t('shop.comingSoon')}
                   </span>
                 )}
               </div>
@@ -232,7 +235,7 @@ export function CrystalShopSection({ crystalBalance }: CrystalShopSectionProps) 
 
       {/* Balance context — transparent formula per Constitution */}
       <p className="text-[10px] text-center" style={{ color: 'var(--color-text-muted)' }}>
-        Crystals never expire · No pressure to spend
+        {t('shop.footer')}
       </p>
     </motion.div>
   )

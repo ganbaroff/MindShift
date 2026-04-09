@@ -1342,5 +1342,14 @@
     "maintain": "Saxlamaq",
     "recover": "Bərpa edin",
     "sandbox": "Sərbəst rejim"
+  },
+  "shop": {
+    "title": "Kristal Mağazası",
+    "formula": "1 dəq fokus = 5 kristal · 24 saat geri qaytarma",
+    "footer": "Kristallar bitmir · Təzyiq yoxdur",
+    "comingSoon": "Tezliklə",
+    "comingTo": "{{dest}} gəlir",
+    "active": "Aktiv",
+    "buy": "{{cost}} 💎"
   }
 }
