@@ -197,6 +197,13 @@ Deno.serve(async (req: Request) => {
     const VALID_LOCALE = /^[a-z]{2}(?:-[A-Z]{2,4})?$/
     const locale = (typeof raw.locale === 'string' && VALID_LOCALE.test(raw.locale)) ? raw.locale : 'en'
 
+    // ── Mochi personality (crystal shop unlock) ────────────────────────────
+    // 'playful' = user spent 50 crystals on Playful Personality unlock
+    const VALID_MOCHI_PERSONALITIES = ['playful'] as const
+    const mochiPersonality = VALID_MOCHI_PERSONALITIES.includes(ctx.mochiPersonality as typeof VALID_MOCHI_PERSONALITIES[number])
+      ? (ctx.mochiPersonality as string)
+      : null
+
     // ── Chat-specific context fields ──────────────────────────────────────
     const recentTasks = Array.isArray(ctx.recentTasks)
       ? (ctx.recentTasks as string[]).slice(0, 5).map(t => String(t).slice(0, 60))
@@ -247,6 +254,10 @@ Deno.serve(async (req: Request) => {
       completedTotal > 0 ? `Lifetime tasks completed: ${completedTotal}` : null,
     ].filter(Boolean).join('\n')
 
+    const personalityGuidance = mochiPersonality === 'playful'
+      ? 'IMPORTANT: User unlocked Playful Personality. Be mischievous and witty — light sarcasm, playful teasing about ADHD brain moments, occasional self-aware humor. Still warm, never mean. Example: instead of "great job!" say "your brain said \'later\' and you said \'nope, now\' — respect."'
+      : null
+
     const psychotypeGuidance = psychotype
       ? {
           achiever: 'The user is results-oriented — acknowledge progress with concrete numbers.',
@@ -282,7 +293,7 @@ Deno.serve(async (req: Request) => {
 User's current state:
 ${contextLines}
 
-Personality guidance: ${psychotypeGuidance}${emotionalReactivityGuidance ? `\nEmotional sensitivity: ${emotionalReactivityGuidance}` : ''}
+Personality guidance: ${psychotypeGuidance}${emotionalReactivityGuidance ? `\nEmotional sensitivity: ${emotionalReactivityGuidance}` : ''}${personalityGuidance ? `\n${personalityGuidance}` : ''}
 Seasonal tone: ${seasonalGuidance}
 ${conversationContext}
 
@@ -316,7 +327,7 @@ STATE: <focused|celebrating|resting|encouraging>`
 User's current state:
 ${contextLines}
 
-Personality guidance: ${psychotypeGuidance}${emotionalReactivityGuidance ? `\nEmotional sensitivity: ${emotionalReactivityGuidance}` : ''}
+Personality guidance: ${psychotypeGuidance}${emotionalReactivityGuidance ? `\nEmotional sensitivity: ${emotionalReactivityGuidance}` : ''}${personalityGuidance ? `\n${personalityGuidance}` : ''}
 Seasonal tone: ${seasonalGuidance}
 
 The trigger "${trigger}" just happened. Respond to this moment.
