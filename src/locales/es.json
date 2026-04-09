@@ -884,6 +884,7 @@
     "basedOnSessions": "Basado en tus últimas {{count}} sesiones",
     "update": "Actualizar",
     "shareThisWeek": "Compartir esta semana",
+    "shareAsCard": "Compartir como tarjeta",
     "sessionLog": "Registro de sesión",
     "weeklyInsight": "✨ Información semanal",
     "insightPeakFocus": "🧠 Enfoque máximo: 2-4 p.m.",
