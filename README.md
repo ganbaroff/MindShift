@@ -1,73 +1,49 @@
-# React + TypeScript + Vite
+# MindShift
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+ADHD-aware productivity PWA. Calm, shame-free, mobile-first.
 
-Currently, two official plugins are available:
+**Live app:** https://mind-shift-git-main-yusifg27-3093s-projects.vercel.app
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## What it is
 
-## React Compiler
+MindShift helps people with ADHD stay focused without pressure. No streaks that shame you, no red alerts, no countdown timers in the shop. Just a calm workspace that adapts to your energy.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Key features
 
-## Expanding the ESLint configuration
+- **Focus sessions** with phase-adaptive audio and a surprise timer mode (no digits, no arc — pure flow)
+- **Task pools** — NOW (max 3), NEXT, SOMEDAY — sized for ADHD working memory
+- **Energy-aware UI** — low energy state simplifies everything automatically
+- **AI Mochi** — personalized mascot companion during sessions (Gemini 2.5 Flash, psychotype-aware)
+- **Focus Rooms** — anonymous co-working via Supabase Realtime presence (no identity exposed)
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Stack
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+| Layer | Tech |
+|-------|------|
+| Frontend | React 18 + TypeScript + Vite |
+| Styling | Tailwind CSS + CSS custom properties |
+| State | Zustand v5 + IndexedDB persistence |
+| Backend | Supabase (Auth + Postgres + Realtime + Edge Functions) |
+| AI | Gemini 2.5 Flash via Supabase Edge Functions |
+| Hosting | Vercel (auto-deploy on push to main) |
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Quick start
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Copy `.env.example` to `.env` and fill in your Supabase credentials before starting.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Build check
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+tsc -b && npm run build
 ```
+
+Always run `tsc -b` (not `tsc --noEmit`) before committing — it catches stricter errors.
+
+## Part of the VOLAURA ecosystem
+
+MindShift is one of five products. Crystal earnings (1 min focus = 5 crystals) feed into the shared VOLAURA economy.
