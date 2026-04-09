@@ -965,7 +965,8 @@
     "addToPool": "Add to {{pool}} →",
     "queueFull": "Your queue is getting full — maybe park one before adding?",
     "crisisMessage": "You're not alone. These feelings are real, and help is available.",
-    "saving": "Saving..."
+    "saving": "Saving...",
+    "voiceHint": "Type with your voice"
   },
   "addTaskFields": {
     "difficulty": "Difficulty",
@@ -1028,6 +1029,7 @@
     "waitingInNext": "It'll be waiting in NEXT when you wake up.",
     "tomorrowPlaceholder": "One thing for tomorrow...",
     "saving": "Saving...",
+    "voiceHint": "Type with your voice",
     "saveAndRest": "Save & rest",
     "skipRest": "Skip — just rest",
     "closingInMoment": "Closing in a moment...",

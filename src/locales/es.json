@@ -965,7 +965,8 @@
     "addToPool": "Añadir a {{pool}} →",
     "queueFull": "Su cola se está llenando. ¿Quizás estacionar uno antes de agregarlo?",
     "crisisMessage": "No estás solo. Estos sentimientos son reales y hay ayuda disponible.",
-    "saving": "Ahorro..."
+    "saving": "Ahorro...",
+    "voiceHint": "Escribe con tu voz"
   },
   "addTaskFields": {
     "difficulty": "Dificultad",
@@ -1028,6 +1029,7 @@
     "waitingInNext": "Estará esperando en SIGUIENTE cuando te despiertes.",
     "tomorrowPlaceholder": "Una cosa para mañana...",
     "saving": "Ahorro...",
+    "voiceHint": "Escribe con tu voz",
     "saveAndRest": "Guardar y descansar",
     "skipRest": "Saltar, solo descansar",
     "closingInMoment": "Cerrando en un momento...",
