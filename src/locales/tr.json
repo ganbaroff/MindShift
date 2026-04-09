@@ -881,6 +881,7 @@
     "basedOnSessions": "Son {{count}} oturumlarınıza göre",
     "update": "Güncelleme",
     "shareThisWeek": "Bu hafta paylaş",
+    "shareAsCard": "Kart olarak paylaş",
     "sessionLog": "Oturum Günlüğü",
     "weeklyInsight": "✨ Haftalık içgörü",
     "insightPeakFocus": "🧠 Yoğun odak: 14:00-16:00",
@@ -1347,5 +1348,12 @@
     "comingTo": "{{dest}} geliyor",
     "active": "Aktif",
     "buy": "{{cost}} 💎"
+  },
+  "shareCard": {
+    "screenshotHint": "Ekran görüntüsü alıp paylaşın",
+    "tasksDone": "görev tamamlandı",
+    "dayStreak": "günlük seri",
+    "tagline": "Utanç duygusu olmadan odak",
+    "close": "Kartı kapat"
   }
 }

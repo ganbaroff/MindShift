@@ -884,6 +884,7 @@
     "basedOnSessions": "На основе последних {{count}} сессий",
     "update": "Обновить",
     "shareThisWeek": "Поделиться неделей",
+    "shareAsCard": "Поделиться карточкой",
     "sessionLog": "Журнал сессий",
     "weeklyInsight": "✨ Недельный инсайт",
     "insightPeakFocus": "🧠 Пиковый фокус: 14-16ч",
