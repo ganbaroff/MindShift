@@ -52,6 +52,11 @@ export const useStore = create<import('./types').AppStore>()(
           if (!Array.isArray(merged.gridWidgets)) merged.gridWidgets = current.gridWidgets
           if (!Array.isArray(merged.seenHints)) merged.seenHints = current.seenHints
           if (!Array.isArray(merged.ifThenRules)) merged.ifThenRules = []
+          // Validate enum fields — guard against localStorage corruption or schema drift
+          const validMedTimes = ['morning', 'afternoon', 'evening', null] as const
+          if (!validMedTimes.includes(merged.medicationTime as typeof validMedTimes[number])) merged.medicationTime = null
+          const validTimerStyles = ['countdown', 'countup', 'surprise'] as const
+          if (!validTimerStyles.includes(merged.timerStyle as typeof validTimerStyles[number])) merged.timerStyle = 'countdown'
           return merged
         },
         // Prune completed tasks older than 30 days on every store rehydration.
