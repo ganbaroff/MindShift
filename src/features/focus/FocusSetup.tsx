@@ -16,6 +16,8 @@ import { AnimatePresence } from 'motion/react'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router-dom'
 import { logEvent } from '@/shared/lib/logger'
+import { useRapidTapDetector } from '@/shared/hooks/useRapidTapDetector'
+import { EasterEggOverlay } from './EasterEggOverlay'
 
 const LazyBreathworkRitual = lazy(() =>
   import('./BreathworkRitual').then(m => ({ default: m.BreathworkRitual }))
@@ -67,7 +69,15 @@ export function FocusSetup({
 }: FocusSetupProps) {
   const [showBreathwork, setShowBreathwork] = useState(false)
   const [showRoomSheet, setShowRoomSheet] = useState(false)
+  const [easterEggVisible, setEasterEggVisible] = useState(false)
   const { t } = useTranslation()
+
+  const { onTap: onStartTap } = useRapidTapDetector({
+    threshold: 7,
+    windowMs: 3000,
+    cooldownMs: 30_000,
+    onTriggered: () => setEasterEggVisible(true),
+  })
   const [searchParams] = useSearchParams()
   const startedRef = useRef(false)
 
@@ -180,7 +190,7 @@ export function FocusSetup({
         {/* Start button + breathwork opt-in + rooms discovery */}
         <div className="px-5 space-y-2">
           <button
-            onClick={() => handleStartTracked()}
+            onClick={() => { onStartTap(); handleStartTracked() }}
             aria-label="Start focus session"
             className="w-full py-4 rounded-2xl font-bold text-base transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none"
             style={{
@@ -245,6 +255,12 @@ export function FocusSetup({
           />
         )}
       </AnimatePresence>
+
+      {/* Easter egg — "Я не бот" */}
+      <EasterEggOverlay
+        visible={easterEggVisible}
+        onDismiss={() => setEasterEggVisible(false)}
+      />
     </>
   )
 }
