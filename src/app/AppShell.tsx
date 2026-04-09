@@ -18,8 +18,12 @@ const LazyMochiChat = lazy(() =>
 
 // ── S-7 Anti-scroll friction nudge ────────────────────────────────────────────
 // Non-blocking: shows 5 s then disappears on its own.
+// If user has an If-Then rule, shows that instead of generic copy (Research #16).
 function SessionFrictionNudge({ onDismiss }: { onDismiss: () => void }) {
   const { t } = useTranslation()
+  const ifThenRules = useStore(s => s.ifThenRules)
+  const firstRule = ifThenRules[0]
+
   useEffect(() => {
     const id = setTimeout(onDismiss, 5000)
     return () => clearTimeout(id)
@@ -47,7 +51,9 @@ function SessionFrictionNudge({ onDismiss }: { onDismiss: () => void }) {
     >
       <span className="text-base">⏱️</span>
       <p className="text-[12px] flex-1 leading-snug" style={{ color: 'var(--color-primary-light)' }}>
-        {t('appShell.sessionRunning')}
+        {firstRule
+          ? `${firstRule.when} → ${firstRule.will}`
+          : t('appShell.sessionRunning')}
       </p>
       <button onClick={onDismiss} className="text-[10px] px-2 py-0.5 rounded-lg shrink-0 focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none" style={{ color: 'var(--color-primary)' }}>
         {t('appShell.gotIt')}
