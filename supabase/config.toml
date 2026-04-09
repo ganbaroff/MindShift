@@ -103,7 +103,7 @@ verify_jwt = true
 verify_jwt = true
 
 [functions.create-checkout]
-verify_jwt = true
+verify_jwt = false
 
 [functions.stripe-webhook]
 verify_jwt = false
