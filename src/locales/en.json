@@ -968,7 +968,8 @@
     "queueFull": "Your queue is getting full — maybe park one before adding?",
     "crisisMessage": "You're not alone. These feelings are real, and help is available.",
     "saving": "Saving...",
-    "voiceHint": "Type with your voice"
+    "voiceHint": "Type with your voice",
+    "voicePrivacy": "Voice processed by your browser — may use Google or Apple cloud."
   },
   "addTaskFields": {
     "difficulty": "Difficulty",

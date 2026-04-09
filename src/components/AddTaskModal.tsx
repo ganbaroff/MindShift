@@ -245,6 +245,13 @@ export default function AddTaskModal({ open, onClose }: AddTaskModalProps) {
                 )}
               </AnimatePresence>
 
+              {/* Voice privacy disclosure — Research #7: Web Speech API routes audio to Google/Apple cloud */}
+              {voiceSupported && voiceState === 'listening' && (
+                <p className="text-[10px] -mt-2" style={{ color: 'var(--color-text-muted)', opacity: 0.6 }}>
+                  {t('addTask.voicePrivacy')}
+                </p>
+              )}
+
               {/* Task type picker */}
               <div>
                 <label className="text-caption text-ms-muted uppercase tracking-widest mb-2 block">{t('addTask.typeLabel')}</label>
