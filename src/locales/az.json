@@ -965,7 +965,8 @@
     "addToPool": "{{pool}} əlavə et →",
     "queueFull": "Növbəniz dolmaqdadır – əlavə etməzdən əvvəl birini sonraya saxlaya bilərsiniz?",
     "crisisMessage": "Sən tək deyilsən. Bu hisslər realdır və kömək mümkündür.",
-    "saving": "Yadda saxlanılır..."
+    "saving": "Yadda saxlanılır...",
+    "voiceHint": "Səsinizlə yazın"
   },
   "addTaskFields": {
     "difficulty": "Çətinlik",

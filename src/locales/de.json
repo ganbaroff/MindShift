@@ -965,7 +965,8 @@
     "addToPool": "Zu {{pool}} hinzufügen →",
     "queueFull": "Ihre Warteschlange wird langsam voll – parken Sie vielleicht eine, bevor Sie etwas hinzufügen?",
     "crisisMessage": "Du bist nicht allein. Diese Gefühle sind real und es gibt Hilfe.",
-    "saving": "Sparen..."
+    "saving": "Sparen...",
+    "voiceHint": "Mit Stimme eingeben"
   },
   "addTaskFields": {
     "difficulty": "Schwierigkeit",
@@ -1028,6 +1029,7 @@
     "waitingInNext": "Wenn Sie aufwachen, wird es in NEXT auf Sie warten.",
     "tomorrowPlaceholder": "Eine Sache für morgen...",
     "saving": "Sparen...",
+    "voiceHint": "Mit Stimme eingeben",
     "saveAndRest": "Sparen und ausruhen",
     "skipRest": "Überspringen – einfach ausruhen",
     "closingInMoment": "Ich schließe gleich ...",
