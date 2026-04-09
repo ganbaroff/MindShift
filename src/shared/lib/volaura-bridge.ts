@@ -34,7 +34,7 @@ export interface CrystalBalance {
 }
 
 interface CharacterEvent {
-  event_type: 'xp_earned' | 'buff_applied' | 'vital_logged' | 'stat_changed'
+  event_type: 'xp_earned' | 'buff_applied' | 'vital_logged' | 'stat_changed' | 'crystal_earned'
   payload: Record<string, unknown> & { _schema_version: 1 }
   source_product: 'mindshift'
 }
@@ -223,6 +223,23 @@ export function sendTaskDone(
       skill_credit:    1,
       task_difficulty: difficulty,
       source:          'task_completion',
+    },
+    source_product: 'mindshift',
+  })
+}
+
+/** Send crystal earned event — 1 min focus = 5 crystals (Constitution formula) */
+export function sendCrystalEarned(
+  token: string,
+  crystals: number,
+  source: 'focus_session' | 'task_bonus' | 'streak_bonus',
+): Promise<boolean> {
+  return sendCharacterEvent(token, {
+    event_type: 'crystal_earned',
+    payload: {
+      _schema_version: 1,
+      crystals,
+      source,
     },
     source_product: 'mindshift',
   })

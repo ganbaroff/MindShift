@@ -21,7 +21,7 @@ import { requestNotificationPermission } from '@/shared/lib/notify'
 import { TIMER_PRESETS } from '@/shared/lib/constants'
 import { logEvent } from '@/shared/lib/logger'
 import { supabase } from '@/shared/lib/supabase'
-import { sendFocusSession } from '@/shared/lib/volaura-bridge'
+import { sendFocusSession, sendCrystalEarned } from '@/shared/lib/volaura-bridge'
 import i18n from '@/i18n'
 import { ARC_SIZE } from './ArcTimer'
 import { useSessionPhase } from './useSessionPhase'
@@ -208,7 +208,12 @@ export function useFocusSession() {
       pendingSessionRef.current = null
       void supabase.auth.getSession().then(({ data }) => {
         const token = data.session?.access_token
-        if (token) void sendFocusSession(token, { ...pending, energyAfter: level })
+        if (token) {
+          void sendFocusSession(token, { ...pending, energyAfter: level })
+          // Crystal economy: 1 min focus = 5 crystals (Constitution formula)
+          const crystals = pending.durationMinutes * 5
+          if (crystals > 0) void sendCrystalEarned(token, crystals, 'focus_session')
+        }
       })
     }
   }, [_handlePostEnergy, pendingSessionRef])
