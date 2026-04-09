@@ -60,9 +60,14 @@ export function logInfo(context: string, data: ErrorMeta = {}): void {
  */
 export function logEvent(name: string, props?: Record<string, string | number>): void {
   try {
-    // Plausible (primary — loaded via script tag when configured)
+    // Respect user analytics consent — set via store.setAnalyticsEnabled()
+    // Window flag avoids import cycle between logger ↔ store
+    type MsWindow = Window & { plausible?: PlausibleFn; va?: { track: (name: string, props?: Record<string, string | number>) => void }; __MS_ANALYTICS__?: boolean }
     type PlausibleFn = (event: string, options?: { props?: Record<string, string | number> }) => void
-    const w = window as Window & { plausible?: PlausibleFn; va?: { track: (name: string, props?: Record<string, string | number>) => void } }
+    const w = window as MsWindow
+    if (w.__MS_ANALYTICS__ === false) return
+
+    // Plausible (primary — loaded via script tag when configured)
     if (w.plausible) {
       w.plausible(name, { props })
     } else if (w.va) {
