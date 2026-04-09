@@ -17,6 +17,7 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { SocialFeedbackCard } from './SocialFeedbackCard'
+import { nativeShare, canShare } from '@/shared/lib/native'
 import type { EnergyLevel, SessionPhase } from '@/types'
 import { ENERGY_EMOJI } from '@/shared/lib/constants'
 
@@ -234,6 +235,23 @@ export const NatureBuffer = memo(function NatureBuffer({
         >
           {t('focus.imReady')}
         </button>
+
+        {/* Session share — K-factor: share this session's achievement */}
+        {canShare() && sessionMinutes > 0 && (
+          <button
+            onClick={() => {
+              const mins = sessionMinutes
+              const text = mins >= 60
+                ? t('focus.sessionShareText60', { h: Math.floor(mins / 60), m: mins % 60 })
+                : t('focus.sessionShareText', { mins })
+              void nativeShare({ text, title: 'MindShift' })
+            }}
+            className="mt-3 text-[11px] focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none rounded"
+            style={{ color: 'var(--color-text-muted)', opacity: 0.6 }}
+          >
+            {t('focus.shareSession')}
+          </button>
+        )}
       </motion.div>
     </div>
   )
