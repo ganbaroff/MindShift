@@ -308,6 +308,7 @@
     "telegramCodeCopy": "Kopyala",
     "telegramCodeExpires": "Kodun süresi 10 dakika içinde doluyor",
     "exporting": "Dışa aktarılıyor...",
+    "dataFirewallNote": "Sağlık verileri (enerji seviyeleri, tükenmişlik puanları) cihazınızda kalır. Açıkça dışa aktarmadıkça hiçbir sunucuya gönderilmez.",
     "analyticsToggle": "Anonim analitik",
     "analyticsDesc": "Yalnızca toplu kullanım verileri — kişisel bilgi yok. MindShift'i geliştirmeye yardımcı olur.",
     "exportJson": "Dışa aktarma (JSON)",

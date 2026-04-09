@@ -111,6 +111,15 @@ export function AccountSection() {
 
       {/* Data */}
       <Section label={t('settings.yourData')}>
+        {/* Data transparency note — Research #3.5: privacy panel */}
+        <div
+          className="px-3 py-2.5 rounded-xl mb-1"
+          style={{ background: 'rgba(78,205,196,0.06)', border: '1px solid rgba(78,205,196,0.15)' }}
+        >
+          <p className="text-[11px] leading-relaxed" style={{ color: 'var(--color-text-muted)' }}>
+            {t('settings.dataFirewallNote')}
+          </p>
+        </div>
         {/* Analytics consent — Data Firewall (Research #3.5) */}
         <Toggle
           checked={analyticsEnabled}
