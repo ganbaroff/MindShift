@@ -21,7 +21,7 @@
     "cap:android": "npm run build && npx cap sync && npx cap open android",
     "cap:run:android": "npx cap run android --livereload --external",
     "screenshots": "tsx scripts/capture-screenshots.ts",
-    "screenshots:prod": "SCREENSHOTS_BASE_URL=https://mindshift-umber.vercel.app tsx scripts/capture-screenshots.ts",
+    "screenshots:prod": "SCREENSHOTS_BASE_URL=https://mind-shift-git-main-yusifg27-3093s-projects.vercel.app tsx scripts/capture-screenshots.ts",
     "translate": "node scripts/translate.mjs"
   },
   "dependencies": {
