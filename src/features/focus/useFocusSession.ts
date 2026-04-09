@@ -245,8 +245,9 @@ export function useFocusSession() {
     startSession(selectedTask?.id ?? null, duration, focusAnchor ?? null)
 
     try { playAnchor() } catch { /* sonic anchor unavailable */ }
-    // Auto-start ambient audio: use focusAnchor if set, else activePreset, else brown noise
-    try { play(focusAnchor ?? activePreset ?? 'brown') } catch { /* audio unavailable — session continues silently */ }
+    // Auto-start ambient audio: use focusAnchor if set, else activePreset, else pink noise
+    // Research #6: pink noise g=0.249 for ADHD (positive), brown is neutral — pink is better default
+    try { play(focusAnchor ?? activePreset ?? 'pink') } catch { /* audio unavailable — session continues silently */ }
 
     setRemainingSeconds(durationSec)
     setElapsedSeconds(0)
@@ -302,10 +303,10 @@ export function useFocusSession() {
   // ── Audio toggle ─────────────────────────────────────────────────────────────
   const handleAudioToggle = useCallback(() => {
     if (isPlaying) {
-      logEvent('audio_toggled', { preset: activePreset ?? 'brown', action: 'off' })
+      logEvent('audio_toggled', { preset: activePreset ?? 'pink', action: 'off' })
       stopAudio()
     } else {
-      const preset: AudioPreset = (focusAnchor ?? activePreset ?? 'brown')
+      const preset: AudioPreset = (focusAnchor ?? activePreset ?? 'pink')
       logEvent('audio_toggled', { preset, action: 'on' })
       play(preset)
       setPreset(preset)
