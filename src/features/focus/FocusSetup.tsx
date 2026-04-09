@@ -27,6 +27,7 @@ import { FocusSetupHeader } from './FocusSetupHeader'
 import { FocusTaskPicker } from './FocusTaskPicker'
 import { FocusDurationPicker } from './FocusDurationPicker'
 import { FocusSoundPicker } from './FocusSoundPicker'
+import { IfThenCard } from './IfThenCard'
 import { FeatureHint } from '@/shared/ui/FeatureHint'
 import type { Task, AudioPreset } from '@/types'
 import type { FocusRoomState } from '@/shared/hooks/useFocusRoom'
@@ -150,6 +151,9 @@ export function FocusSetup({
 
         {/* Sound accordion + medication badge */}
         <FocusSoundPicker focusAnchor={focusAnchor} />
+
+        {/* Implementation Intentions — Research #3.3 */}
+        <IfThenCard />
 
         {/* Focus Room — active room status chip */}
         {room.status === 'connected' && room.code && (

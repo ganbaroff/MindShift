@@ -51,6 +51,7 @@ export const useStore = create<import('./types').AppStore>()(
           if (!Array.isArray(merged.achievements)) merged.achievements = current.achievements
           if (!Array.isArray(merged.gridWidgets)) merged.gridWidgets = current.gridWidgets
           if (!Array.isArray(merged.seenHints)) merged.seenHints = current.seenHints
+          if (!Array.isArray(merged.ifThenRules)) merged.ifThenRules = []
           return merged
         },
         // Prune completed tasks older than 30 days on every store rehydration.
@@ -97,6 +98,9 @@ export const useStore = create<import('./types').AppStore>()(
             // Fire once per device — true install denominator for funnel metrics
             setTimeout(() => logEvent('app_first_open'), 0)
           }
+
+          // Sync analytics consent to window flag — logger.ts reads this without import cycle
+          ;(window as unknown as Record<string, unknown>).__MS_ANALYTICS__ = state.analyticsEnabled ?? true
         },
         partialize: (s) => ({
           userId: s.userId,
@@ -165,6 +169,8 @@ export const useStore = create<import('./types').AppStore>()(
           lastRoomLeftAt: s.lastRoomLeftAt,
           mochiMemory: s.mochiMemory,
           shopUnlocks: s.shopUnlocks,
+          analyticsEnabled: s.analyticsEnabled,
+          ifThenRules: s.ifThenRules,
         }),
       }
     )

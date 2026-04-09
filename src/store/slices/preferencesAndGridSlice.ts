@@ -3,6 +3,12 @@ import type { AppStore } from '../types'
 import type { Psychotype, WidgetConfig } from '@/types'
 import { WIDGET_DEFAULTS, WIDGET_DEFAULTS_GENERIC } from '@/types'
 
+export interface IfThenRule {
+  id: string
+  when: string
+  will: string
+}
+
 interface PreferencesSlice {
   reducedStimulation: boolean
   setReducedStimulation: (val: boolean) => void
@@ -87,6 +93,13 @@ interface PreferencesSlice {
   // Crystal shop unlocks — items purchased with crystals (client-side gates)
   shopUnlocks: string[]
   addShopUnlock: (item: string) => void
+  // Analytics consent — when false, logEvent() is a no-op (Research #3.5 data firewall)
+  analyticsEnabled: boolean
+  setAnalyticsEnabled: (enabled: boolean) => void
+  // If-Then Implementation Intentions (Research #3.3) — max 3 rules, ADHD follow-through aid
+  ifThenRules: IfThenRule[]
+  addIfThenRule: (rule: Omit<IfThenRule, 'id'>) => void
+  removeIfThenRule: (id: string) => void
 }
 
 interface GridSlice {
@@ -252,5 +265,25 @@ export const createPreferencesAndGridSlice: StateCreator<
   shopUnlocks: [],
   addShopUnlock: (item) => set((s) => ({
     shopUnlocks: s.shopUnlocks.includes(item) ? s.shopUnlocks : [...s.shopUnlocks, item],
+  })),
+
+  // Analytics consent — default true (aggregate, no PII). When false → logEvent() no-ops.
+  // Window flag allows logger.ts to read consent without import cycle.
+  analyticsEnabled: true,
+  setAnalyticsEnabled: (enabled) => {
+    ;(window as unknown as Record<string, unknown>).__MS_ANALYTICS__ = enabled
+    set({ analyticsEnabled: enabled })
+  },
+
+  // If-Then Implementation Intentions — "When [X], I will [Y]"
+  // Research #3.3: structured plans improve ADHD follow-through by 2-3×
+  ifThenRules: [],
+  addIfThenRule: (rule) => set((s) => {
+    if (s.ifThenRules.length >= 3) return s
+    const newRule: IfThenRule = { ...rule, id: Date.now().toString(36) }
+    return { ifThenRules: [...s.ifThenRules, newRule] }
+  }),
+  removeIfThenRule: (id) => set((s) => ({
+    ifThenRules: s.ifThenRules.filter(r => r.id !== id),
   })),
 })
