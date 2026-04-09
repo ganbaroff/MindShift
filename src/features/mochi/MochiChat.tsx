@@ -57,7 +57,7 @@ export function MochiChat({ open, onClose }: MochiChatProps) {
     timeBlindness, emotionalReactivity, completedTotal, currentStreak,
     nowPool, nextPool, somedayPool,
     weeklyIntention, dailyFocusGoalMin, locale, uiTone,
-    mochiMemory, setMochiMemory,
+    mochiMemory, setMochiMemory, shopUnlocks,
   } = useStore()
 
   const [messages, setMessages] = useState<ChatMessage[]>([])
@@ -129,11 +129,13 @@ export function MochiChat({ open, onClose }: MochiChatProps) {
       somedayPoolCount: somedayPool.filter((t: Task) => t.status === 'active').length,
       // Persistent memory — compressed summary from last chat session (device-only)
       mochiMemory: mochiMemory ?? undefined,
+      // Crystal shop personality unlock — 'playful' if user spent 50 crystals
+      mochiPersonality: shopUnlocks.includes('mochi_playful') ? 'playful' : undefined,
     }
   }, [
     psychotype, energyLevel, appMode, seasonalMode, timeBlindness,
     emotionalReactivity, completedTotal, currentStreak, weeklyIntention,
-    dailyFocusGoalMin, uiTone, nowPool, nextPool, somedayPool, mochiMemory,
+    dailyFocusGoalMin, uiTone, nowPool, nextPool, somedayPool, mochiMemory, shopUnlocks,
   ])
 
   // Save compressed memory when chat session ends with enough messages
