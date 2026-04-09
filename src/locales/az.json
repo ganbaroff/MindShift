@@ -1351,5 +1351,12 @@
     "comingTo": "{{dest}} gəlir",
     "active": "Aktiv",
     "buy": "{{cost}} 💎"
+  },
+  "shareCard": {
+    "screenshotHint": "Ekran görüntüsü çəkin və paylaşın",
+    "tasksDone": "tapşırıq tamamlandı",
+    "dayStreak": "gün ardıcıl",
+    "tagline": "Günahsız fokus",
+    "close": "Kartı bağla"
   }
 }

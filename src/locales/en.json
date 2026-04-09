@@ -884,6 +884,7 @@
     "basedOnSessions": "Based on your last {{count}} sessions",
     "update": "Update",
     "shareThisWeek": "Share this week",
+    "shareAsCard": "Share as card",
     "sessionLog": "Session Log",
     "weeklyInsight": "✨ Weekly insight",
     "insightPeakFocus": "🧠 Peak focus: 2-4pm",
@@ -1352,5 +1353,12 @@
     "comingTo": "Coming to {{dest}}",
     "active": "Active",
     "buy": "{{cost}} 💎"
+  },
+  "shareCard": {
+    "screenshotHint": "Screenshot to share",
+    "tasksDone": "tasks done",
+    "dayStreak": "day streak",
+    "tagline": "Focus without the shame spiral",
+    "close": "Close card"
   }
 }
