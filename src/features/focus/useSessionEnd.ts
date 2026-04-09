@@ -15,6 +15,7 @@ import { isVolauraConfigured } from '@/shared/lib/volaura-bridge'
 import { logEvent } from '@/shared/lib/logger'
 import { useStore } from '@/store'
 import { notifyFocusEnd, notifyAchievement, pushFocusComplete, pushRecoveryEnd } from '@/shared/lib/notify'
+import { nativeRequestReview } from '@/shared/lib/native'
 import { hapticDone } from '@/shared/lib/haptic'
 import { getToneCopy } from '@/shared/lib/uiTone'
 import { ACHIEVEMENT_DEFINITIONS } from '@/types'
@@ -149,6 +150,14 @@ export function useSessionEnd({
       }
 
       storeState.incrementFocusSessions()
+
+      // In-App Review — trigger on 3rd session (feel-good moment, not low energy)
+      // OS rate-limits actual dialog; calling at the right milestone maximises conversion.
+      // completedFocusSessions is pre-increment here (0-indexed), so === 2 means 3rd session.
+      const isLowEnergy = storeState.energyLevel <= 2
+      if (storeState.completedFocusSessions === 2 && !isLowEnergy) {
+        nativeRequestReview()
+      }
 
       if (isVolauraConfigured() && storeState.userId && !storeState.userId.startsWith('guest_')) {
         // Store session data — sendFocusSession fires in handlePostEnergy once

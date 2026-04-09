@@ -159,6 +159,27 @@ export const canShare = (): boolean => {
   return isNativeApp() || (typeof navigator !== 'undefined' && 'share' in navigator)
 }
 
+// ── In-App Review ────────────────────────────────────────────────────────────
+
+/**
+ * Request an in-app review dialog via Capacitor InAppReview plugin.
+ * No-op on web or when the plugin is unavailable.
+ * OS rate-limits actual dialog display — calling this is always safe.
+ */
+export const nativeRequestReview = (): void => {
+  if (!isNativeApp()) return
+  try {
+    const plugins = getPlugins() as CapPlugins & {
+      InAppReview?: { requestReview: () => Promise<void> }
+    }
+    if (plugins.InAppReview) {
+      void plugins.InAppReview.requestReview()
+    }
+  } catch {
+    // Plugin not registered — ignore silently
+  }
+}
+
 // ── Android Widget Bridge ────────────────────────────────────────────────────
 
 interface WidgetData {
