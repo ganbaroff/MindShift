@@ -857,6 +857,7 @@
     "title": "Dein Fortschritt 🌱",
     "subtitle": "Jeder Schritt zählt, egal wie klein.",
     "level": "Ebene {{level}} · {{name}}",
+    "levelNum": "Ebene {{level}}",
     "xpToNext": "Wachse zu Level {{level}}",
     "xpProgress": "{{current}}/{{next}} zum nächsten Level",
     "thisWeek": "Diese Woche",

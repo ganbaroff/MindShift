@@ -857,6 +857,7 @@
     "title": "Your Progress 🌱",
     "subtitle": "Every step counts, no matter how small.",
     "level": "Level {{level}} · {{name}}",
+    "levelNum": "Level {{level}}",
     "xpToNext": "Growing toward Level {{level}}",
     "xpProgress": "{{current}}/{{next}} to next level",
     "thisWeek": "This week",

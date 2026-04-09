@@ -857,6 +857,7 @@
     "title": "Tərəqqiniz 🌱",
     "subtitle": "Nə qədər kiçik olsa da, hər bir addım önəmlidir.",
     "level": "Səviyyə {{level}} · {{name}}",
+    "levelNum": "Səviyyə {{level}}",
     "xpToNext": "{{level}} səviyyəsinə doğru irəliləyirik",
     "xpProgress": "{{current}}/{{next}} növbəti səviyyəyə",
     "thisWeek": "Bu həftə",

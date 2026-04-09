@@ -857,6 +857,7 @@
     "title": "Ваш прогресс 🌱",
     "subtitle": "Каждый шаг важен, даже самый маленький.",
     "level": "Уровень {{level}} · {{name}}",
+    "levelNum": "Уровень {{level}}",
     "xpToNext": "Растём к уровню {{level}}",
     "xpProgress": "{{current}}/{{next}} до следующего уровня",
     "thisWeek": "Эта неделя",

@@ -39,10 +39,10 @@ export function XpCard() {
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-[15px] font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-            {t('progress.level', { level, name: levelName })}
+            {levelName}
           </p>
-          <p className="text-[13px]" style={{ color: 'var(--color-text-muted)' }}>
-            {t('progress.xpProgress', { current: xpInLevel, next: xpToNext })}
+          <p className="text-[12px]" style={{ color: 'var(--color-text-muted)' }}>
+            {t('progress.levelNum', { level })}
           </p>
           <div
             className="w-full h-1.5 rounded-full mt-1.5 overflow-hidden"

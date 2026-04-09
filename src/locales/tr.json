@@ -854,6 +854,7 @@
     "title": "İlerlemeniz 🌱",
     "subtitle": "Ne kadar küçük olursa olsun her adım önemlidir.",
     "level": "Seviye {{level}} · {{name}}",
+    "levelNum": "Seviye {{level}}",
     "xpToNext": "Seviye {{level}}'e doğru büyüyoruz",
     "xpProgress": "{{current}}/{{next}} sonraki seviyeye",
     "thisWeek": "Bu hafta",

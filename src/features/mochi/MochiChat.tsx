@@ -94,9 +94,18 @@ export function MochiChat({ open, onClose }: MochiChatProps) {
   // Welcome message on first open — with memory awareness
   useEffect(() => {
     if (open && messages.length === 0 && !isGuest) {
-      const welcomeText = mochiMemory
-        ? `Hey, you're back. I remember a bit from last time — ${mochiMemory.split('|')[0]?.replace('User: ', '').slice(0, 60)}... What's on your mind today?`
-        : "Hey! Tap me anytime you need a nudge, want to talk through a task, or just need someone in your corner. What's on your mind?"
+      const FIRST_TIME_GREETS = [
+        "Hey! I'm Mochi — tap me anytime you need a nudge, want to talk through a task, or just need someone in your corner. What's on your mind?",
+        "Hey, glad you're here. I'm your ADHD-aware companion. No judgment, no pressure. What's going on today?",
+        "Hi! I'm Mochi. I don't track streaks or guilt-trip — I just help you think out loud. What's up?",
+      ]
+      const RETURN_GREETS = [
+        "Hey, you're back. Good to see you. What are you working with today?",
+        "Welcome back. Pick up where we left off, or start fresh — either's fine. What's on your mind?",
+        "Hey! I was just thinking about you. What's going on today?",
+      ]
+      const greets = mochiMemory ? RETURN_GREETS : FIRST_TIME_GREETS
+      const welcomeText = greets[Math.floor(Math.random() * greets.length)]
       setMessages([{
         id: generateId(),
         role: 'mochi',
