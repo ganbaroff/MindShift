@@ -134,7 +134,7 @@ export function MonthlyReflection({ onDismiss }: Props) {
               />
             )}
 
-            {/* ── Step 1: Recap ──────────────────────────────────────────── */}
+            {/* -- Step 1: Recap -------------------------------------------- */}
             {step === 'recap' && (
               <motion.div
                 key="recap"
@@ -207,7 +207,7 @@ export function MonthlyReflection({ onDismiss }: Props) {
               />
             )}
 
-            {/* ── Step 3: Close ──────────────────────────────────────────── */}
+            {/* -- Step 3: Close -------------------------------------------- */}
             {step === 'close' && (
               <motion.div
                 key="close"

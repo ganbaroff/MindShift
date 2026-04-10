@@ -126,7 +126,7 @@ export const createTaskSlice: StateCreator<
     }
     })
 
-    // ── Achievement checks (post-set via get()) ────────────────────────────
+    // -- Achievement checks (post-set via get()) ----------------------------
     if (!didComplete) return
     const s2 = get()
     const toneCopy = getToneCopy(s2.uiTone)

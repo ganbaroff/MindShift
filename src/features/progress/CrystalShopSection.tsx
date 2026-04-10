@@ -23,7 +23,7 @@ import { useMotion } from '@/shared/hooks/useMotion'
 import { useStore } from '@/store'
 import { nativeHapticImpact } from '@/shared/lib/native'
 
-// ── Shop items (Denis's 5 sinks) ─────────────────────────────────────────────
+// -- Shop items (Denis's 5 sinks) ---------------------------------------------
 
 interface ShopItem {
   id: string
@@ -82,7 +82,7 @@ const SHOP_ITEMS: ShopItem[] = [
   },
 ]
 
-// ── Component ─────────────────────────────────────────────────────────────────
+// -- Component -----------------------------------------------------------------
 
 interface CrystalShopSectionProps {
   crystalBalance: number

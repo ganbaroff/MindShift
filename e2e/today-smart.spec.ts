@@ -15,7 +15,7 @@
  */
 import { test, expect, seedStore, mockSupabase } from './helpers'
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// -- Helpers -------------------------------------------------------------------
 
 function makeTask(overrides: Record<string, unknown> = {}) {
   return {
@@ -40,7 +40,7 @@ function makeTask(overrides: Record<string, unknown> = {}) {
   }
 }
 
-// ── Tests: greeting ───────────────────────────────────────────────────────────
+// -- Tests: greeting -----------------------------------------------------------
 
 test.describe('TodayPage — time-based greeting', () => {
   test('shows morning greeting during morning hours', async ({ page }) => {
@@ -72,7 +72,7 @@ test.describe('TodayPage — time-based greeting', () => {
   })
 })
 
-// ── Tests: quick capture ──────────────────────────────────────────────────────
+// -- Tests: quick capture ------------------------------------------------------
 
 test.describe('TodayPage — quick capture', () => {
   test('quick capture input is visible with correct placeholder', async ({ page }) => {
@@ -87,7 +87,7 @@ test.describe('TodayPage — quick capture', () => {
   })
 })
 
-// ── Tests: task list ──────────────────────────────────────────────────────────
+// -- Tests: task list ----------------------------------------------------------
 
 test.describe('TodayPage — task list', () => {
   test('NOW pool tasks appear in "In your NOW pool" section (morning)', async ({ page }) => {
@@ -137,7 +137,7 @@ test.describe('TodayPage — task list', () => {
   })
 })
 
-// ── Tests: low-energy mode ────────────────────────────────────────────────────
+// -- Tests: low-energy mode ----------------------------------------------------
 
 test.describe('TodayPage — low-energy mode', () => {
   test('low energy (≤2) shows energy advice copy', async ({ page }) => {
@@ -164,7 +164,7 @@ test.describe('TodayPage — low-energy mode', () => {
   })
 })
 
-// ── Tests: evening view ───────────────────────────────────────────────────────
+// -- Tests: evening view -------------------------------------------------------
 
 test.describe('TodayPage — evening view', () => {
   test('evening shows wrap-up heading', async ({ page }) => {
@@ -178,7 +178,7 @@ test.describe('TodayPage — evening view', () => {
   })
 })
 
-// ── Tests: clear day empty state ──────────────────────────────────────────────
+// -- Tests: clear day empty state ----------------------------------------------
 
 test.describe('TodayPage — empty state', () => {
   test('shows clear day message when no tasks', async ({ page }) => {

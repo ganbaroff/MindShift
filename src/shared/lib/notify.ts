@@ -1,4 +1,4 @@
-// ── Notification layer ────────────────────────────────────────────────────────
+// -- Notification layer --------------------------------------------------------
 // Two channels:
 //   1. In-app toasts (sonner)     — always shown when app is foregrounded
 //   2. Native push (Web Notification API) — shown when app is backgrounded / closed
@@ -48,7 +48,7 @@ export function notifyError(message: string): void {
   toast.error(message, { duration: 4000 })
 }
 
-// ── Native Push Notifications (Web Notification API) ─────────────────────────
+// -- Native Push Notifications (Web Notification API) -------------------------
 
 /** Request notification permission — call once before first focus session. */
 export async function requestNotificationPermission(): Promise<boolean> {

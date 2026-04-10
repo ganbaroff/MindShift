@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'motion/react'
 import { useMotion } from '@/shared/hooks/useMotion'
 import type { Achievement } from '@/types'
 
-// ── Memoized badge button (guardrail #8: list-rendered components must be React.memo) ──
+// -- Memoized badge button (guardrail #8: list-rendered components must be React.memo) --
 
 interface AchievementBadgeProps {
   achievement: Achievement
@@ -77,7 +77,7 @@ const AchievementBadge = memo(function AchievementBadge({
   prev.index === next.index
 )
 
-// ── Grid container ──
+// -- Grid container --
 
 interface AchievementGridProps {
   achievements: Achievement[]

@@ -1,4 +1,4 @@
-// ── DueDateScreen ──────────────────────────────────────────────────────────
+// -- DueDateScreen ----------------------------------------------------------
 // List of all tasks with due dates, grouped by section: Today, Tomorrow,
 // This Week, Later. Non-shaming, warm colors. Task rows are tappable.
 
@@ -12,7 +12,7 @@ import { toast } from 'sonner'
 import type { Task } from '@/types'
 import { DIFFICULTY_MAP } from '@/types'
 
-// ── Helpers ────────────────────────────────────────────────────────────────
+// -- Helpers ----------------------------------------------------------------
 
 function groupTasksByDueDate(tasks: Task[]): {
   today: Task[]
@@ -38,7 +38,7 @@ function formatDueDate(dateStr: string): string {
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
-// ── Section header ──────────────────────────────────────────────────────────
+// -- Section header ----------------------------------------------------------
 
 function SectionHeader({ title, color, count }: { title: string; color: string; count: number }) {
   if (count === 0) return null
@@ -57,7 +57,7 @@ function SectionHeader({ title, color, count }: { title: string; color: string; 
   )
 }
 
-// ── Reschedule sheet ─────────────────────────────────────────────────────────
+// -- Reschedule sheet ---------------------------------------------------------
 
 interface RescheduleSheetProps {
   task: Task
@@ -170,7 +170,7 @@ function RescheduleSheet({ task, onClose, onNavigate }: RescheduleSheetProps) {
   )
 }
 
-// ── Task row ────────────────────────────────────────────────────────────────
+// -- Task row ----------------------------------------------------------------
 
 function TaskRow({ task, onTap }: { task: Task; onTap: (t: Task) => void }) {
   const diffColor = DIFFICULTY_MAP[task.difficulty]?.color ?? '#7B72FF'
@@ -198,7 +198,7 @@ function TaskRow({ task, onTap }: { task: Task; onTap: (t: Task) => void }) {
   )
 }
 
-// ── Main component ──────────────────────────────────────────────────────────
+// -- Main component ----------------------------------------------------------
 
 export default function DueDateScreen() {
   const { nowPool, nextPool, somedayPool } = useStore()

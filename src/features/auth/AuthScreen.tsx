@@ -16,7 +16,7 @@ const CONSENT_PENDING_KEY = 'ms_consent_pending'
 
 type Step = 'email' | 'check'
 
-// ── Mochi SVG Logo ────────────────────────────────────────────────────────────
+// -- Mochi SVG Logo ------------------------------------------------------------
 function MochiLogo() {
   const { t: transition, shouldAnimate } = useMotion()
   return (
@@ -57,7 +57,7 @@ function MochiLogo() {
   )
 }
 
-// ── Background orbs ───────────────────────────────────────────────────────────
+// -- Background orbs -----------------------------------------------------------
 function BgOrbs() {
   return (
     <>
@@ -85,7 +85,7 @@ function BgOrbs() {
   )
 }
 
-// ── Main component ────────────────────────────────────────────────────────────
+// -- Main component ------------------------------------------------------------
 export default function AuthScreen() {
   const { t: transition } = useMotion()
   const { t } = useTranslation()

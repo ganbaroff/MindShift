@@ -14,7 +14,7 @@ import { computeUserBehaviorProfile } from '../useUserBehavior'
 import type { FocusSessionRow } from '@/types/database'
 import type { Task } from '@/types'
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// -- Helpers -------------------------------------------------------------------
 
 function makeSession(overrides: Partial<FocusSessionRow> = {}): FocusSessionRow {
   return {
@@ -56,7 +56,7 @@ function makeTask(overrides: Partial<Task> = {}): Task {
 
 const emptyPools = { nowPool: [], nextPool: [], somedayPool: [] }
 
-// ── Empty / zero state ────────────────────────────────────────────────────────
+// -- Empty / zero state --------------------------------------------------------
 
 describe('computeUserBehaviorProfile — empty sessions', () => {
   it('returns all zeros when no sessions', () => {
@@ -73,7 +73,7 @@ describe('computeUserBehaviorProfile — empty sessions', () => {
   })
 })
 
-// ── avgSessionMinutes ─────────────────────────────────────────────────────────
+// -- avgSessionMinutes ---------------------------------------------------------
 
 describe('avgSessionMinutes', () => {
   it('computes average from duration_ms values', () => {
@@ -110,7 +110,7 @@ describe('avgSessionMinutes', () => {
   })
 })
 
-// ── flowRate & struggleDropRate ───────────────────────────────────────────────
+// -- flowRate & struggleDropRate -----------------------------------------------
 
 describe('flowRate and struggleDropRate', () => {
   it('computes flowRate correctly', () => {
@@ -154,7 +154,7 @@ describe('flowRate and struggleDropRate', () => {
   })
 })
 
-// ── peakHour ──────────────────────────────────────────────────────────────────
+// -- peakHour ------------------------------------------------------------------
 
 describe('peakHour', () => {
   /** Build an ISO string where new Date(iso).getHours() === localHour */
@@ -187,7 +187,7 @@ describe('peakHour', () => {
   })
 })
 
-// ── avgEnergy ─────────────────────────────────────────────────────────────────
+// -- avgEnergy -----------------------------------------------------------------
 
 describe('avgEnergy', () => {
   it('prefers energy_after over energy_before', () => {
@@ -215,7 +215,7 @@ describe('avgEnergy', () => {
   })
 })
 
-// ── energyTrend ───────────────────────────────────────────────────────────────
+// -- energyTrend ---------------------------------------------------------------
 
 describe('energyTrend', () => {
   it('returns null with fewer than 2 sessions with energy_after', () => {
@@ -282,7 +282,7 @@ describe('energyTrend', () => {
   })
 })
 
-// ── completedToday ────────────────────────────────────────────────────────────
+// -- completedToday ------------------------------------------------------------
 
 describe('completedToday', () => {
   let todayISO: string
@@ -356,7 +356,7 @@ describe('completedToday', () => {
   })
 })
 
-// ── recentStruggles ───────────────────────────────────────────────────────────
+// -- recentStruggles -----------------------------------------------------------
 
 describe('recentStruggles', () => {
   it('returns null when no struggle patterns', () => {
@@ -428,7 +428,7 @@ describe('recentStruggles', () => {
   })
 })
 
-// ── totalSessions ─────────────────────────────────────────────────────────────
+// -- totalSessions -------------------------------------------------------------
 
 describe('totalSessions', () => {
   it('returns total session count regardless of phase data', () => {

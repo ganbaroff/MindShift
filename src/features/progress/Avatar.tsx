@@ -27,7 +27,7 @@ function stageFromLevel(level: number): number {
   return Math.min(Math.max(level - 1, 0), 5)
 }
 
-// ── SVG Stage Illustrations ───────────────────────────────────────────────────
+// -- SVG Stage Illustrations ---------------------------------------------------
 
 function SeedlingSvg({ size }: { size: number }) {
   return (
@@ -173,7 +173,7 @@ function OakSvg({ size }: { size: number }) {
 
 const STAGE_COMPONENTS = [SeedlingSvg, SproutSvg, SaplingSvg, BloomSvg, TreeSvg, OakSvg]
 
-// ── Exported Avatar component ─────────────────────────────────────────────────
+// -- Exported Avatar component -------------------------------------------------
 
 export default function Avatar({ level, size = 64 }: AvatarProps) {
   const stage = stageFromLevel(level)

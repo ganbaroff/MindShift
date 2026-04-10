@@ -23,7 +23,7 @@ export interface UserSlice {
   lastSessionAt: string | null
   onboardingCompleted: boolean
   recoveryShown: boolean   // flag: recovery overlay already shown this session
-  // ── Health & Rhythms (Block 1) ──────────────────────────────────────────────
+  // -- Health & Rhythms (Block 1) ----------------------------------------------
   timerStyle: 'countdown' | 'countup' | 'surprise'
   sleepQuality: 1 | 2 | 3 | null        // session-only (not persisted)
   medicationEnabled: boolean

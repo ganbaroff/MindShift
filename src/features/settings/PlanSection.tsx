@@ -18,7 +18,7 @@ export function PlanSection() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
 
-  // ── Dodo Payments return leg — sync tier from DB when redirected back after checkout ──
+  // -- Dodo Payments return leg — sync tier from DB when redirected back after checkout --
   useEffect(() => {
     if (searchParams.get('upgrade') !== 'success') return
     // Clear the param immediately so page refresh doesn't re-trigger

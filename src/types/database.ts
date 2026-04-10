@@ -1,4 +1,4 @@
-// ── Database types ────────────────────────────────────────────────────────────
+// -- Database types ------------------------------------------------------------
 // Structured to match Supabase PostgREST v12 expected format.
 
 export type Database = {

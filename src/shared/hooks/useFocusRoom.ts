@@ -60,12 +60,12 @@ export interface FocusRoomState {
   leave: () => void
 }
 
-// ── Generate a random 6-char room code (2.1B combinations vs 1.6M with 4-char) ─
+// -- Generate a random 6-char room code (2.1B combinations vs 1.6M with 4-char) -
 function genCode(): string {
   return Math.random().toString(36).slice(2, 8).toUpperCase()
 }
 
-// ── Stable local "userId" for this browser tab ────────────────────────────────
+// -- Stable local "userId" for this browser tab --------------------------------
 function getTabId(): string {
   const key = 'ms_tab_id'
   let id = sessionStorage.getItem(key)
@@ -89,7 +89,7 @@ export function useFocusRoom(): FocusRoomState {
   const prevPeersLengthRef = useRef(0)
   const graceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // ── Subscribe to a channel ─────────────────────────────────────────────────
+  // -- Subscribe to a channel -------------------------------------------------
   const subscribe = useCallback((roomCode: string) => {
     setStatus('connecting')
     setCode(roomCode)

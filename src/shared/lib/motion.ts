@@ -20,7 +20,7 @@
 
 import type { Transition } from 'motion/react'
 
-// ── Spring configs ────────────────────────────────────────────────────────────
+// -- Spring configs ------------------------------------------------------------
 
 /**
  * STANDARD spring — use for every functional UI transition.
@@ -63,7 +63,7 @@ export const INSTANT: Transition = {
   duration: 0,
 }
 
-// ── Duration constants (seconds) ──────────────────────────────────────────────
+// -- Duration constants (seconds) ----------------------------------------------
 
 export const DURATION = {
   micro:    0.15,  // 150 ms — hover, toggle, tap, checkbox
@@ -71,7 +71,7 @@ export const DURATION = {
   reveal:   0.40,  // 400 ms — screen transitions, large content reveals
 } as const
 
-// ── Easing ────────────────────────────────────────────────────────────────────
+// -- Easing --------------------------------------------------------------------
 
 export const EASE = {
   /** Standard ease-out — default for all enters */
@@ -80,7 +80,7 @@ export const EASE = {
   gentle: [0.0, 0.0, 0.4, 1.0] as const,
 } as const
 
-// ── Stagger helper ────────────────────────────────────────────────────────────
+// -- Stagger helper ------------------------------------------------------------
 
 /**
  * Returns per-item delay for staggered list animations.
@@ -90,7 +90,7 @@ export const EASE = {
 export const staggerDelay = (index: number, perItem = 0.06): number =>
   index * perItem
 
-// ── Variant presets ───────────────────────────────────────────────────────────
+// -- Variant presets -----------------------------------------------------------
 
 /** Slide-up entry — for cards, toasts, bottom sheets */
 export const slideUp = {

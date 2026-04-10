@@ -5,7 +5,7 @@
  * Constant-power fade curves prevent "dip" when crossfading correlated noise.
  */
 
-// ── Logarithmic volume mapping ────────────────────────────────────────────────
+// -- Logarithmic volume mapping ------------------------------------------------
 
 export const LOG_GAIN_MIN = 0.001  // 0% volume → ~40 dBA (nearly inaudible)
 export const LOG_GAIN_MAX = 0.10   // 100% volume → ~70 dBA (safe all-day maximum)
@@ -23,7 +23,7 @@ export function volumeToGain(volume: number): number {
   return LOG_GAIN_MIN * Math.pow(LOG_GAIN_MAX / LOG_GAIN_MIN, v)
 }
 
-// ── Constant power crossfade curves ──────────────────────────────────────────
+// -- Constant power crossfade curves ------------------------------------------
 
 export const FADE_STEPS = 64
 

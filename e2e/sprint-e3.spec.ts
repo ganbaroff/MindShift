@@ -7,7 +7,7 @@
  *   - Smart task suggestion chip (✨) shown for single NOW task
  *   - Focus Proof share button visible in Settings (layout check)
  */
-import { test, expect } from './helpers'
+import { test, expect, seedStore, mockSupabase } from './helpers'
 
 test.describe('Sprint E3: If-Then + Data Firewall + Smart Suggestion', () => {
   test('If-Then card renders in FocusSetup', async ({ authedPage: page }) => {
@@ -28,13 +28,11 @@ test.describe('Sprint E3: If-Then + Data Firewall + Smart Suggestion', () => {
     await expect(page.getByText('Anonymous analytics')).toBeVisible()
   })
 
-  test('smart suggestion ✨ shown when tasks exist', async ({ authedPage: page }) => {
-    // Seed store with one NOW task so smart suggestion fires
-    await page.evaluate(() => {
-      const raw = localStorage.getItem('mindshift-store')
-      if (!raw) return
-      const s = JSON.parse(raw)
-      s.state.nowPool = [{
+  test('smart suggestion ✨ shown when tasks exist', async ({ page }) => {
+    // Seed store with one NOW task so smart suggestion fires (use addInitScript path)
+    await mockSupabase(page)
+    await seedStore(page, {
+      nowPool: [{
         id: 'task-suggest-1',
         title: 'Write unit tests',
         status: 'active',
@@ -42,10 +40,10 @@ test.describe('Sprint E3: If-Then + Data Firewall + Smart Suggestion', () => {
         difficulty: 3,
         dueDate: null,
         repeat: 'none',
+        taskType: 'task',
         position: 0,
         createdAt: new Date().toISOString(),
       }]
-      localStorage.setItem('mindshift-store', JSON.stringify(s))
     })
     await page.goto('/focus')
     // With 1 task in NOW pool, it becomes the suggested task

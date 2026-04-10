@@ -76,7 +76,7 @@ export default function TodayPage() {
   const isLowEnergy = energyLevel <= 2 || burnoutScore > 60
   const energyEmoji = ENERGY_EMOJI[energyLevel - 1] ?? '🙂'
 
-  // ── Derived data ────────────────────────────────────────────────────────────
+  // -- Derived data ------------------------------------------------------------
 
   const allTasks = useMemo(
     () => [...nowPool, ...nextPool, ...somedayPool],
@@ -118,7 +118,7 @@ export default function TodayPage() {
   const firstTask = activeTasks[0] ?? todayTasks[0] ?? null
   const energyAdvice = getEnergyAdvice(energyLevel, todayTasks.length, copy)
 
-  // ── Handlers ────────────────────────────────────────────────────────────────
+  // -- Handlers ----------------------------------------------------------------
 
   const handleQuickSubmit = useCallback((parsed: ParsedTask) => {
     if (!parsed.title) return
@@ -178,7 +178,7 @@ export default function TodayPage() {
     addTask(sample)
   }, [addTask, todayStr, t])
 
-  // ── Render ──────────────────────────────────────────────────────────────────
+  // -- Render ------------------------------------------------------------------
 
   return (
     <PageTransition>

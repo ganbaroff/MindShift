@@ -53,7 +53,7 @@ export function AuthEmailStep({
         <span style={{ color: 'var(--color-text-muted)' }}> {t('auth.noPasswordNoFriction')}</span>
       </p>
 
-      {/* ── 1. Consent — prominent, above all CTAs ── */}
+      {/* -- 1. Consent — prominent, above all CTAs -- */}
       <motion.label
         htmlFor="consent-checkbox"
         className="flex items-start gap-3 mb-5 cursor-pointer select-none rounded-xl px-3 py-2.5 -mx-1"
@@ -117,7 +117,7 @@ export function AuthEmailStep({
         </span>
       </motion.label>
 
-      {/* ── 2. Google SSO — primary CTA, always visually active ── */}
+      {/* -- 2. Google SSO — primary CTA, always visually active -- */}
       <motion.button
         onClick={onGoogleSignIn}
         disabled={googleLoading}
@@ -146,7 +146,7 @@ export function AuthEmailStep({
         )}
       </motion.button>
 
-      {/* ── 3. Continue without account — secondary, co-equal visibility ── */}
+      {/* -- 3. Continue without account — secondary, co-equal visibility -- */}
       <button
         onClick={onContinueAsGuest}
         className="w-full mt-2.5 rounded-xl font-medium text-sm flex items-center justify-center gap-2 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-ms-primary/50 focus-visible:outline-none"
@@ -160,7 +160,7 @@ export function AuthEmailStep({
         {t('auth.continueWithout')}
       </button>
 
-      {/* ── 4. Email input — tertiary / collapsed by default ── */}
+      {/* -- 4. Email input — tertiary / collapsed by default -- */}
       <div className="mt-4">
         {!showEmail ? (
           <button

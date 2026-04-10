@@ -155,7 +155,7 @@ export function ShutdownRitual({ onDismiss }: Props) {
             ))}
           </div>
 
-          {/* ── Step 1: Wins ─────────────────────────────────────────────── */}
+          {/* -- Step 1: Wins ----------------------------------------------- */}
           <AnimatePresence mode="wait">
             {step === 'wins' && (
               <motion.div
@@ -219,7 +219,7 @@ export function ShutdownRitual({ onDismiss }: Props) {
               </motion.div>
             )}
 
-            {/* ── Step 2: Tomorrow's ONE thing ───────────────────────────── */}
+            {/* -- Step 2: Tomorrow's ONE thing ----------------------------- */}
             {step === 'tomorrow' && (
               <motion.div
                 key="tomorrow"
@@ -288,7 +288,7 @@ export function ShutdownRitual({ onDismiss }: Props) {
               </motion.div>
             )}
 
-            {/* ── Step 3: Goodnight ──────────────────────────────────────── */}
+            {/* -- Step 3: Goodnight ---------------------------------------- */}
             {step === 'goodnight' && (
               <motion.div
                 key="goodnight"

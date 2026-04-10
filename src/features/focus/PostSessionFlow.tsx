@@ -22,7 +22,7 @@ import type { EnergyLevel, SessionPhase } from '@/types'
 import { ENERGY_EMOJI } from '@/shared/lib/constants'
 export { RecoveryLock } from './RecoveryLock'
 
-// ── Hyperfocus Autopsy threshold (B-6 backlog item) ───────────────────────────
+// -- Hyperfocus Autopsy threshold (B-6 backlog item) ---------------------------
 // Research: ADHD users in hyperfocus often lose awareness of time + body state.
 // After 45+ min sessions, a brief non-judgmental reflection seeds self-awareness.
 // Three options chosen to cover the full spectrum without assigning success/failure.
@@ -34,7 +34,7 @@ const AUTOPSY_OPTIONS = [
   { key: 'scattered',emoji: '🌀', i18nKey: 'focus.autopsyScattered' },
 ] as const
 
-// ── Emotionally-adaptive closing messages ────────────────────────────────────
+// -- Emotionally-adaptive closing messages ------------------------------------
 // emotionalReactivity shapes the post-session tone: high = extra-gentle,
 // steady = direct, moderate/null = default warm message.
 
@@ -58,7 +58,7 @@ function getClosingMessageKey(
   return 'focus.closingDefault'
 }
 
-// ── Nature Buffer Screen ───────────────────────────────────────────────────────
+// -- Nature Buffer Screen -------------------------------------------------------
 
 interface NatureBufferProps {
   bufferSeconds: number
@@ -258,7 +258,7 @@ export const NatureBuffer = memo(function NatureBuffer({
   )
 })
 
-// ── Parked Thoughts Nudge ─────────────────────────────────────────────────────
+// -- Parked Thoughts Nudge -----------------------------------------------------
 
 function ParkedThoughtsNudge({ count }: { count: number }) {
   const navigate = useNavigate()

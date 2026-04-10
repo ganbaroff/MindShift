@@ -19,12 +19,12 @@ import {
 } from '../constants'
 
 describe('constants — invariant sanity checks', () => {
-  // ── Recovery
+  // -- Recovery
   it('recovery threshold is 72 hours — Research #7: RSD peaks at 3+ days', () => {
     expect(RECOVERY_THRESHOLD_HOURS).toBe(72)
   })
 
-  // ── Task pools (ADHD capacity limits)
+  // -- Task pools (ADHD capacity limits)
   it('now pool max is 3 — ADHD research limit', () => {
     expect(NOW_POOL_MAX).toBe(3)
   })
@@ -33,7 +33,7 @@ describe('constants — invariant sanity checks', () => {
     expect(NEXT_POOL_MAX).toBeGreaterThan(NOW_POOL_MAX)
   })
 
-  // ── Focus phases (Research #2: neuroscience three-phase model)
+  // -- Focus phases (Research #2: neuroscience three-phase model)
   it('struggle phase ends at 7 minutes — attention ramp-up period', () => {
     expect(PHASE_STRUGGLE_MINUTES).toBe(7)
   })
@@ -55,7 +55,7 @@ describe('constants — invariant sanity checks', () => {
     expect(RECOVERY_LOCK_MINUTES).toBeLessThan(MAX_SESSION_MINUTES)
   })
 
-  // ── XP system
+  // -- XP system
   it('XP base is positive', () => {
     expect(XP_BASE).toBeGreaterThan(0)
   })
@@ -75,7 +75,7 @@ describe('constants — invariant sanity checks', () => {
     expect(xpLow).toBeGreaterThan(xpHigh)
   })
 
-  // ── Timer
+  // -- Timer
   it('timer presets include 25-minute Pomodoro', () => {
     expect(TIMER_PRESETS).toContain(25)
   })
@@ -91,7 +91,7 @@ describe('constants — invariant sanity checks', () => {
     }
   })
 
-  // ── Audio
+  // -- Audio
   it('default volume is within 0–1 range', () => {
     expect(AUDIO_DEFAULT_VOLUME).toBeGreaterThan(0)
     expect(AUDIO_DEFAULT_VOLUME).toBeLessThan(AUDIO_HARD_LIMIT)

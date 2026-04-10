@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import type { EnergyLevel } from '@/types'
 import { ENERGY_EMOJI } from '@/shared/lib/constants'
 
-// ── Energy level options — labels resolved via i18n ──────────────────────────
+// -- Energy level options — labels resolved via i18n --------------------------
 
 const ENERGY_LEVELS: EnergyLevel[] = [1, 2, 3, 4, 5]
 const ENERGY_LABEL_KEYS = ['energy.drained', 'energy.low', 'energy.okay', 'energy.good', 'energy.wired'] as const

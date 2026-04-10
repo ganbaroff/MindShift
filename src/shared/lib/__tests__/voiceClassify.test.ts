@@ -6,7 +6,7 @@ import {
   type ClassifyResult,
 } from '../voiceClassify'
 
-// ── Test phrases ──────────────────────────────────────────────────────────────
+// -- Test phrases --------------------------------------------------------------
 // 20 representative inputs covering EN + RU, all three types, edge cases.
 // Each simulates what the edge function WOULD return for a given transcript.
 

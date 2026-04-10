@@ -187,7 +187,7 @@ export default function FocusScreen() {
     )
   }
 
-  // ── Active Session Screen ──────────────────────────────────────────────────
+  // -- Active Session Screen --------------------------------------------------
   return (
     <div
       className="flex flex-col items-center justify-center min-h-screen px-6"

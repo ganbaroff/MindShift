@@ -1,4 +1,4 @@
-// ── stripe-webhook Edge Function ──────────────────────────────────────────────
+// -- stripe-webhook Edge Function ----------------------------------------------
 // POST /functions/v1/stripe-webhook
 // Called by Stripe — no JWT required (--no-verify-jwt on deploy)
 //

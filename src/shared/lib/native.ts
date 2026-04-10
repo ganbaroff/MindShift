@@ -19,7 +19,7 @@
  *   - share → Capacitor Share plugin (native share sheet)
  */
 
-// ── Runtime detection ──────────────────────────────────────────────────────────
+// -- Runtime detection ----------------------------------------------------------
 
 /** Returns true when running inside a Capacitor native shell (iOS/Android) */
 export const isNativeApp = (): boolean => {
@@ -30,7 +30,7 @@ export const isNativeApp = (): boolean => {
   }
 }
 
-// ── Plugin accessor (avoids TypeScript imports) ───────────────────────────────
+// -- Plugin accessor (avoids TypeScript imports) -------------------------------
 
 type CapPlugins = {
   Haptics?: {
@@ -60,7 +60,7 @@ const getPlugins = (): CapPlugins => {
   }
 }
 
-// ── Haptics ───────────────────────────────────────────────────────────────────
+// -- Haptics -------------------------------------------------------------------
 
 /**
  * Trigger a native haptic impact on iOS/Android.
@@ -97,7 +97,7 @@ export const nativeHapticSelection = (): void => {
   }
 }
 
-// ── Status Bar ────────────────────────────────────────────────────────────────
+// -- Status Bar ----------------------------------------------------------------
 
 /** Hide status bar — call when entering focus session for immersive mode */
 export const nativeStatusBarHide = (): void => {
@@ -119,7 +119,7 @@ export const nativeStatusBarDark = (): void => {
   }
 }
 
-// ── Share ─────────────────────────────────────────────────────────────────────
+// -- Share ---------------------------------------------------------------------
 
 interface ShareData {
   title?: string
@@ -159,7 +159,7 @@ export const canShare = (): boolean => {
   return isNativeApp() || (typeof navigator !== 'undefined' && 'share' in navigator)
 }
 
-// ── In-App Review ────────────────────────────────────────────────────────────
+// -- In-App Review ------------------------------------------------------------
 
 /**
  * Request an in-app review dialog via Capacitor InAppReview plugin.
@@ -180,7 +180,7 @@ export const nativeRequestReview = (): void => {
   }
 }
 
-// ── Android Widget Bridge ────────────────────────────────────────────────────
+// -- Android Widget Bridge ----------------------------------------------------
 
 interface WidgetData {
   nowTaskTitle: string

@@ -24,7 +24,7 @@ export interface UserBehaviorProfile {
   completedToday: number
 }
 
-// ── Pure computation (exported for unit tests) ────────────────────────────────
+// -- Pure computation (exported for unit tests) --------------------------------
 
 interface PoolsArg { nowPool: Task[]; nextPool: Task[]; somedayPool: Task[] }
 
@@ -38,7 +38,7 @@ export function computeUserBehaviorProfile(
 ): UserBehaviorProfile {
     const totalSessions = sessions.length
 
-    // ── Average session duration ──────────────────────────────────────
+    // -- Average session duration --------------------------------------
     const durationsMs = sessions
       .map((s) => s.duration_ms)
       .filter((d): d is number => d != null && d > 0)
@@ -47,7 +47,7 @@ export function computeUserBehaviorProfile(
         ? durationsMs.reduce((sum, ms) => sum + ms, 0) / durationsMs.length / 60_000
         : 0
 
-    // ── Flow rate & struggle drop rate ────────────────────────────────
+    // -- Flow rate & struggle drop rate --------------------------------
     const sessionsWithPhase = sessions.filter((s) => s.phase_reached != null)
     const phaseCount = sessionsWithPhase.length
     const flowRate =
@@ -59,7 +59,7 @@ export function computeUserBehaviorProfile(
         ? sessionsWithPhase.filter((s) => s.phase_reached === 'struggle').length / phaseCount
         : 0
 
-    // ── Peak hour ─────────────────────────────────────────────────────
+    // -- Peak hour -----------------------------------------------------
     let peakHour: number | null = null
     if (totalSessions > 0) {
       const hourCounts = new Map<number, number>()
@@ -76,7 +76,7 @@ export function computeUserBehaviorProfile(
       }
     }
 
-    // ── Average energy ────────────────────────────────────────────────
+    // -- Average energy ------------------------------------------------
     const energyValues = sessions
       .map((s) => s.energy_after ?? s.energy_before)
       .filter((e): e is number => e != null)
@@ -85,7 +85,7 @@ export function computeUserBehaviorProfile(
         ? energyValues.reduce((sum, e) => sum + e, 0) / energyValues.length
         : 0
 
-    // ── Energy trend ──────────────────────────────────────────────────
+    // -- Energy trend --------------------------------------------------
     let energyTrend: 'improving' | 'stable' | 'declining' | null = null
     const sessionsWithEnergyAfter = sessions
       .filter((s) => s.energy_after != null)
@@ -116,7 +116,7 @@ export function computeUserBehaviorProfile(
       else energyTrend = 'stable'
     }
 
-    // ── Completed today ───────────────────────────────────────────────
+    // -- Completed today -----------------------------------------------
     const todayISO = new Date().toISOString().slice(0, 10)
     const allTasks = [...nowPool, ...nextPool, ...somedayPool]
     // Only count 'task' type completions (not reminders/meetings/ideas)
@@ -128,7 +128,7 @@ export function computeUserBehaviorProfile(
         t.completedAt.startsWith(todayISO)
     ).length
 
-    // ── Recent struggles (human-readable for AI context) ──────────────
+    // -- Recent struggles (human-readable for AI context) --------------
     const struggles: string[] = []
     if (struggleDropRate > 0.5) {
       struggles.push('Often ends sessions before reaching release phase')
@@ -157,7 +157,7 @@ export function computeUserBehaviorProfile(
     }
 }
 
-// ── Hook (thin wrapper around pure computation) ───────────────────────────────
+// -- Hook (thin wrapper around pure computation) -------------------------------
 
 /**
  * Aggregates user behavior patterns from focus sessions and store data

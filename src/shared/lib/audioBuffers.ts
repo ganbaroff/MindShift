@@ -18,7 +18,7 @@ import type { AudioPreset } from '@/types'
 
 export const BUFFER_SECONDS = 15
 
-// ── Pink (Voss-McCartney 6-gen) ───────────────────────────────────────────────
+// -- Pink (Voss-McCartney 6-gen) -----------------------------------------------
 
 export function fillPinkNoise(data: Float32Array): void {
   let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0
@@ -35,7 +35,7 @@ export function fillPinkNoise(data: Float32Array): void {
   }
 }
 
-// ── Nature (pink + 3-rate organic AM) ────────────────────────────────────────
+// -- Nature (pink + 3-rate organic AM) ----------------------------------------
 
 export function fillNatureNoise(data: Float32Array, sampleRate: number): void {
   let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0
@@ -58,7 +58,7 @@ export function fillNatureNoise(data: Float32Array, sampleRate: number): void {
   }
 }
 
-// ── Lo-fi (cassette: wow + flutter + crackle) ─────────────────────────────────
+// -- Lo-fi (cassette: wow + flutter + crackle) ---------------------------------
 
 export function fillLofiNoise(data: Float32Array, sampleRate: number): void {
   let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0
@@ -80,7 +80,7 @@ export function fillLofiNoise(data: Float32Array, sampleRate: number): void {
   }
 }
 
-// ── Brown fallback buffer (when AudioWorklet unavailable) ─────────────────────
+// -- Brown fallback buffer (when AudioWorklet unavailable) ---------------------
 
 export function fillBrownFallback(data: Float32Array): void {
   let lastOut = 0
@@ -91,7 +91,7 @@ export function fillBrownFallback(data: Float32Array): void {
   }
 }
 
-// ── Gamma binaural beats ──────────────────────────────────────────────────────
+// -- Gamma binaural beats ------------------------------------------------------
 
 /** 40 Hz gamma: L=400 Hz / R=440 Hz stereo. */
 export function createGammaBuffer(ctx: AudioContext): AudioBuffer {
@@ -121,7 +121,7 @@ export function createGamma60Buffer(ctx: AudioContext): AudioBuffer {
   return buf
 }
 
-// ── Mono noise buffer dispatcher ──────────────────────────────────────────────
+// -- Mono noise buffer dispatcher ----------------------------------------------
 
 export function createNoiseBuffer(ctx: AudioContext, preset: AudioPreset): AudioBuffer {
   const size = ctx.sampleRate * BUFFER_SECONDS

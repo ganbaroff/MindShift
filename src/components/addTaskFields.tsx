@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { DIFFICULTY_MAP, CATEGORY_CONFIG } from '@/types';
 import type { TaskType, TaskCategory } from '@/types';
 
-// ── Field visibility per task type ──────────────────────────────────────────
+// -- Field visibility per task type ------------------------------------------
 
 /* eslint-disable react-refresh/only-export-components */
 export interface FieldVisibility {
@@ -31,7 +31,7 @@ export function getPoolForType(type: TaskType, isFull: boolean): 'now' | 'next' 
   return isFull ? 'next' : 'now';
 }
 
-// ── Reusable field sub-components ───────────────────────────────────────────
+// -- Reusable field sub-components -------------------------------------------
 
 interface DifficultyPickerProps {
   difficulty: 1 | 2 | 3 | undefined;

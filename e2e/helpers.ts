@@ -10,7 +10,7 @@
  */
 import { test as base, type Page } from '@playwright/test'
 
-// ── Test user constants ────────────────────────────────────────────────────────
+// -- Test user constants --------------------------------------------------------
 
 export const TEST_USER = {
   id: 'e2e-test-user-00000000-0000-0000-0000-000000000001',
@@ -20,7 +20,7 @@ export const TEST_USER = {
 // Supabase project ref — extracted from VITE_SUPABASE_URL
 const SUPABASE_REF = 'awfoqycoltvhamtrsvxk'
 
-// ── Zustand store seed ─────────────────────────────────────────────────────────
+// -- Zustand store seed ---------------------------------------------------------
 
 /** Minimal persisted Zustand state that passes AuthGuard. */
 export function buildStoreState(overrides: Record<string, unknown> = {}) {
@@ -79,7 +79,7 @@ export function buildStoreState(overrides: Record<string, unknown> = {}) {
   }
 }
 
-// ── Supabase auth session builder ──────────────────────────────────────────────
+// -- Supabase auth session builder ----------------------------------------------
 
 /**
  * Build a fake Supabase session stored in localStorage.
@@ -126,7 +126,7 @@ function buildSupabaseSession() {
   }
 }
 
-// ── Auth mocking ───────────────────────────────────────────────────────────────
+// -- Auth mocking ---------------------------------------------------------------
 
 /** Intercept Supabase auth, DB & Edge Function calls so tests run offline. */
 export async function mockSupabase(page: Page) {
@@ -202,7 +202,7 @@ export async function mockSupabase(page: Page) {
   )
 }
 
-// ── Seed localStorage with Zustand state + Supabase session ────────────────────
+// -- Seed localStorage with Zustand state + Supabase session --------------------
 
 export async function seedStore(page: Page, overrides: Record<string, unknown> = {}) {
   const storeState = buildStoreState(overrides)
@@ -228,7 +228,7 @@ export async function seedStore(page: Page, overrides: Record<string, unknown> =
   // so seeded data is picked up immediately during Zustand hydration.
 }
 
-// ── Extended test fixture — auto-authenticates via localStorage + route mocking ─
+// -- Extended test fixture — auto-authenticates via localStorage + route mocking -
 
 type Fixtures = {
   authedPage: Page

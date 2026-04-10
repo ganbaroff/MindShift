@@ -16,7 +16,7 @@ const OUT_DIR    = path.join(process.cwd(), 'public', 'screenshots', 'playstore'
 const VIEWPORT   = { width: 390, height: 844 }
 const SUPABASE_REF = 'awfoqycoltvhamtrsvxk'
 
-// ── Demo session ──────────────────────────────────────────────────────────────
+// -- Demo session --------------------------------------------------------------
 const now = Math.floor(Date.now() / 1000)
 const expiresAt = now + 86_400
 const header  = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url')
@@ -37,7 +37,7 @@ const DEMO_SESSION = {
   },
 }
 
-// ── Demo store state ──────────────────────────────────────────────────────────
+// -- Demo store state ----------------------------------------------------------
 const DEMO_STATE = {
   state: {
     userId: 'demo-user-001', email: 'demo@mindshift.app',
@@ -89,7 +89,7 @@ const DEMO_STATE = {
   version: 0,
 }
 
-// ── Screen list ───────────────────────────────────────────────────────────────
+// -- Screen list ---------------------------------------------------------------
 const SCREENS = [
   { name: '01-today',      path: '/today',      wait: 'h1' },
   { name: '02-tasks',      path: '/tasks',       wait: 'h1' },

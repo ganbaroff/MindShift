@@ -26,7 +26,7 @@ import { logEvent } from '@/shared/lib/logger'
 // eslint-disable-next-line react-refresh/only-export-components
 export { writeLastActive, shouldShowContextRestore } from './contextRestoreUtils'
 
-// ── Component ─────────────────────────────────────────────────────────────────
+// -- Component -----------------------------------------------------------------
 
 interface Props {
   onDismiss: () => void

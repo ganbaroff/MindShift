@@ -33,7 +33,7 @@ function DifficultyDots({ difficulty }: { difficulty: 1 | 2 | 3 }) {
   );
 }
 
-// ── Completion toast messages adapted by emotional reactivity ─────────────────
+// -- Completion toast messages adapted by emotional reactivity -----------------
 const COMPLETION_TOASTS: Record<string, string[]> = {
   high: [
     "One more thing off your list. You're doing this.",
@@ -64,7 +64,7 @@ function TaskCardInner({ task, index = 0, onDone, onPark, onRemove }: TaskCardPr
     (Date.now() - new Date(task.createdAt).getTime() >= 24 * 60 * 60 * 1000);
   const hasReminder = !!task.dueDate && reminders.has(task.id);
 
-  // ── Inline edit mode ────────────────────────────────────────────────────────
+  // -- Inline edit mode --------------------------------------------------------
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(task.title);
   const [editNote, setEditNote] = useState(task.note ?? '');
@@ -101,7 +101,7 @@ function TaskCardInner({ task, index = 0, onDone, onPark, onRemove }: TaskCardPr
     if (e.key === 'Escape') handleEditCancel();
   }, [handleEditSave, handleEditCancel]);
 
-  // ── Delete confirmation — two-tap with 3s revert ───────────────────────────
+  // -- Delete confirmation — two-tap with 3s revert ---------------------------
   const [confirmRemove, setConfirmRemove] = useState(false);
   const removeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -176,7 +176,7 @@ function TaskCardInner({ task, index = 0, onDone, onPark, onRemove }: TaskCardPr
     });
   };
 
-  // ── Edit mode rendering ─────────────────────────────────────────────────────
+  // -- Edit mode rendering -----------------------------------------------------
   if (isEditing) {
     return (
       <motion.div

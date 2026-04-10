@@ -1,4 +1,4 @@
-// ── classify-voice-input Edge Function ────────────────────────────────────────
+// -- classify-voice-input Edge Function ----------------------------------------
 // POST /functions/v1/classify-voice-input
 // Body: { text: string, language: string }
 // Returns: ClassifyResult JSON (see type below)
@@ -23,7 +23,7 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    // ── Auth (JWT required) ────────────────────────────────────────────────────
+    // -- Auth (JWT required) ----------------------------------------------------
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_ANON_KEY')!,
@@ -38,7 +38,7 @@ Deno.serve(async (req: Request) => {
       )
     }
 
-    // ── Rate limit (DB-backed — 20/day free, unlimited pro) ─────────────────
+    // -- Rate limit (DB-backed — 20/day free, unlimited pro) -----------------
     const { data: userRow } = await supabase
       .from('users')
       .select('subscription_tier')

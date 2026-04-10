@@ -36,7 +36,7 @@ import type { SessionPhase, AudioPreset, Task, EnergyLevel } from '@/types'
 export type { ScreenState } from './useSessionEnd'
 export { getPhase } from './useSessionPhase'
 
-// ── Types ─────────────────────────────────────────────────────────────────────
+// -- Types ---------------------------------------------------------------------
 
 export interface InterruptBookmark {
   text: string
@@ -45,7 +45,7 @@ export interface InterruptBookmark {
   timestamp: string
 }
 
-// ── Constants ─────────────────────────────────────────────────────────────────
+// -- Constants -----------------------------------------------------------------
 
 export const PHASE_LABELS: Partial<Record<SessionPhase, string>> = {
   struggle: 'Getting into it... 💪',
@@ -86,7 +86,7 @@ export function getTimerSize(phase: SessionPhase): number {
   }
 }
 
-// ── Hook ──────────────────────────────────────────────────────────────────────
+// -- Hook ----------------------------------------------------------------------
 
 export function useFocusSession() {
   const {
@@ -103,25 +103,25 @@ export function useFocusSession() {
   const { play, stop: stopAudio, playAnchor, adaptToPhase, isPlaying, setVolume: setAudioVolume } = useAudioEngine()
   const [searchParams] = useSearchParams()
 
-  // ── Smart defaults ──────────────────────────────────────────────────────────
+  // -- Smart defaults ----------------------------------------------------------
   const smartDuration = useMemo(() => getSmartDuration(energyLevel), [energyLevel])
   const isQuickStart  = searchParams.get('quick') === '1'
 
-  // ── Setup state ─────────────────────────────────────────────────────────────
+  // -- Setup state -------------------------------------------------------------
   const [selectedTask, setSelectedTask]         = useState<Task | null>(null)
   const [selectedDuration, setSelectedDuration] = useState(smartDuration)
   const [customDuration, setCustomDuration]     = useState('')
   const [showCustom, setShowCustom]             = useState(false)
 
-  // ── Runtime state ───────────────────────────────────────────────────────────
+  // -- Runtime state -----------------------------------------------------------
   const [screen, setScreen]             = useState<ScreenState>('setup')
   const [postEnergyLogged, setPostEnergyLogged] = useState(false)
 
-  // ── Misc refs ────────────────────────────────────────────────────────────────
+  // -- Misc refs ----------------------------------------------------------------
   const quickStartedRef = useRef(false)
   const energyBeforeRef = useRef<EnergyLevel | null>(null)
 
-  // ── Timer sub-hook ───────────────────────────────────────────────────────────
+  // -- Timer sub-hook -----------------------------------------------------------
   const timer = useSessionTimer({
     screen, sessionPhase, activeSession,
     setPhase: (p) => setPhase(p),
@@ -136,7 +136,7 @@ export function useFocusSession() {
     resetPhaseTracking,
   } = timer
 
-  // ── Phase sub-hook ───────────────────────────────────────────────────────────
+  // -- Phase sub-hook -----------------------------------------------------------
   useSessionPhase({
     screen, sessionPhase, elapsedSeconds,
     softStopFiredRef, intervalRef,
@@ -144,17 +144,17 @@ export function useFocusSession() {
     adaptToPhase,
   })
 
-  // ── Persistence sub-hook ────────────────────────────────────────────────────
+  // -- Persistence sub-hook ----------------------------------------------------
   const { saveSession, handlePostEnergy: _handlePostEnergy, handleAutopsyPick } = useSessionPersistence({
     activeSession, userId, activePreset, energyLevel,
     updateLastSession, setEnergyLevel,
     savedSessionIdRef, sessionSavedRef,
   })
 
-  // ── Park-thought sub-hook ───────────────────────────────────────────────────
+  // -- Park-thought sub-hook ---------------------------------------------------
   const park = useParkThought({ addTask, userId })
 
-  // ── Session-end sub-hook ────────────────────────────────────────────────────
+  // -- Session-end sub-hook ----------------------------------------------------
   const sessionEnd = useSessionEnd({
     sessionPhase, activePreset, isPlaying, energyBeforeRef,
     intervalRef, startTimeRef, pausedMsRef, durationSecRef,
@@ -163,27 +163,27 @@ export function useFocusSession() {
   })
   const { pendingSessionRef } = sessionEnd
 
-  // ── Interrupt bookmark ──────────────────────────────────────────────────────
+  // -- Interrupt bookmark ------------------------------------------------------
   const [bookmarkText, setBookmarkText]         = useState('')
   const [savedBookmark]                         = useState<InterruptBookmark | null>(() => loadBookmark())
 
   // Only 'task' type entries can have focus sessions
   const allTasks = [...nowPool, ...nextPool].filter(t => t.status === 'active' && t.taskType === 'task')
 
-  // ── Cleanup on unmount ──────────────────────────────────────────────────────
+  // -- Cleanup on unmount ------------------------------------------------------
   useEffect(() => () => {
     if (intervalRef.current)                           clearInterval(intervalRef.current)
     if (sessionEnd.recoveryIntervalRef.current)        clearInterval(sessionEnd.recoveryIntervalRef.current)
     if (sessionEnd.bufferIntervalRef.current)          clearInterval(sessionEnd.bufferIntervalRef.current)
   }, [])
 
-  // ── Reset session ref when user changes ────────────────────────────────────
+  // -- Reset session ref when user changes ------------------------------------
   useEffect(() => {
     savedSessionIdRef.current = null
     sessionSavedRef.current = false
   }, [userId])
 
-  // ── handlePostEnergy wrapper: also flips postEnergyLogged ──────────────────
+  // -- handlePostEnergy wrapper: also flips postEnergyLogged ------------------
   const handlePostEnergy = useCallback((level: EnergyLevel) => {
     _handlePostEnergy(level)
     setPostEnergyLogged(true)
@@ -218,7 +218,7 @@ export function useFocusSession() {
     }
   }, [_handlePostEnergy, pendingSessionRef])
 
-  // ── Start ────────────────────────────────────────────────────────────────────
+  // -- Start --------------------------------------------------------------------
   const handleStart = useCallback((overrideDuration?: number) => {
     const duration = overrideDuration
       ?? (showCustom ? (parseInt(customDuration) || 25) : selectedDuration)
@@ -258,7 +258,7 @@ export function useFocusSession() {
   }, [showCustom, customDuration, selectedDuration, selectedTask, focusAnchor, activePreset,
       play, playAnchor, startSession, setPhase, startInterval, resetPhaseTracking])
 
-  // ── Quick-start auto detection ──────────────────────────────────────────────
+  // -- Quick-start auto detection ----------------------------------------------
   useEffect(() => {
     if (isQuickStart && !quickStartedRef.current && screen === 'setup') {
       quickStartedRef.current = true
@@ -266,25 +266,25 @@ export function useFocusSession() {
     }
   }, [isQuickStart, screen, handleStart])
 
-  // ── Stop → interrupt confirm ────────────────────────────────────────────────
+  // -- Stop → interrupt confirm ------------------------------------------------
   const handleStop = useCallback(() => {
     timerStop()
     setScreen('interrupt-confirm')
   }, [timerStop])
 
-  // ── Resume ──────────────────────────────────────────────────────────────────
+  // -- Resume ------------------------------------------------------------------
   const handleResume = useCallback(() => {
     timerResume()
     setScreen('session')
   }, [timerResume])
 
-  // ── Confirm end → bookmark capture ─────────────────────────────────────────
+  // -- Confirm end → bookmark capture -----------------------------------------
   const handleConfirmStop = useCallback(() => {
     setBookmarkText('')
     setScreen('bookmark-capture')
   }, [])
 
-  // ── Save bookmark and end session ───────────────────────────────────────────
+  // -- Save bookmark and end session -------------------------------------------
   const handleBookmarkSave = useCallback(() => {
     const text = bookmarkText.trim()
     if (text) {
@@ -300,7 +300,7 @@ export function useFocusSession() {
 
   const handleBookmarkSkip = useCallback(() => sessionEnd.handleSessionEnd(false), [sessionEnd])
 
-  // ── Audio toggle ─────────────────────────────────────────────────────────────
+  // -- Audio toggle -------------------------------------------------------------
   const handleAudioToggle = useCallback(() => {
     if (isPlaying) {
       logEvent('audio_toggled', { preset: activePreset ?? 'pink', action: 'off' })
@@ -313,13 +313,13 @@ export function useFocusSession() {
     }
   }, [isPlaying, focusAnchor, activePreset, play, stopAudio, setPreset])
 
-  // ── Bypass hard-stop (hyperfocus) ───────────────────────────────────────────
+  // -- Bypass hard-stop (hyperfocus) -------------------------------------------
   const handleBypassHardStop = useCallback(() => {
     setScreen('session')
     startInterval()
   }, [startInterval])
 
-  // ── Derived ──────────────────────────────────────────────────────────────────
+  // -- Derived ------------------------------------------------------------------
   const progress   = durationSecRef.current > 0 ? 1 - remainingSeconds / durationSecRef.current : 0
   const isFlow     = sessionPhase === 'flow'
   const elapsedMin = Math.floor(elapsedSeconds / 60)

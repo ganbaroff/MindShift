@@ -12,7 +12,7 @@ import { _registerHapticsGetter } from '@/shared/lib/haptic'
 import { logEvent } from '@/shared/lib/logger'
 export type { AppStore } from './types'
 
-// ── Store ─────────────────────────────────────────────────────────────────────
+// -- Store ---------------------------------------------------------------------
 
 export const useStore = create<import('./types').AppStore>()(
   subscribeWithSelector(
@@ -186,7 +186,7 @@ export const useStore = create<import('./types').AppStore>()(
 // haptic.ts uses this getter instead of importing useStore directly.
 _registerHapticsGetter(() => useStore.getState().hapticsEnabled)
 
-// ── Selectors ─────────────────────────────────────────────────────────────────
+// -- Selectors -----------------------------------------------------------------
 export const selectActiveTasks = (s: import('./types').AppStore) =>
   s.nowPool.filter(t => t.status === 'active').slice(0, 3)
 

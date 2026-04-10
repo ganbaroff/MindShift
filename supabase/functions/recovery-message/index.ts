@@ -1,4 +1,4 @@
-// ── recovery-message Edge Function ────────────────────────────────────────────
+// -- recovery-message Edge Function --------------------------------------------
 // POST /functions/v1/recovery-message
 // Body: { daysAbsent: number, incompleteCount: number }
 // Returns: { message: string }
@@ -24,7 +24,7 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    // ── Auth ───────────────────────────────────────────────────────────────────
+    // -- Auth -------------------------------------------------------------------
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_ANON_KEY')!,
@@ -39,7 +39,7 @@ Deno.serve(async (req: Request) => {
       )
     }
 
-    // ── Rate limit (DB-backed — 5/day free, unlimited pro) ────────────────────
+    // -- Rate limit (DB-backed — 5/day free, unlimited pro) --------------------
     const { data: userRow } = await supabase
       .from('users')
       .select('subscription_tier')
@@ -69,7 +69,7 @@ Deno.serve(async (req: Request) => {
       )
     }
 
-    // ── Input ──────────────────────────────────────────────────────────────────
+    // -- Input ------------------------------------------------------------------
     const body = await req.json() as {
       daysAbsent?: unknown
       incompleteCount?: unknown
@@ -97,7 +97,7 @@ Deno.serve(async (req: Request) => {
       ? (body.timeBlindness as string)
       : null
 
-    // ── Gemini call ──────────────────────────────────────────────────────────
+    // -- Gemini call ----------------------------------------------------------
     const erGuidance = emotionalReactivity === 'high'
       ? '\n- The user has HIGH emotional reactivity. Be EXTRA gentle and validating. Use phrases like "no explanation needed" and "you are here now, and that is what matters". Avoid anything that could feel like judgment or pressure. Never imply they should have come back sooner.'
       : emotionalReactivity === 'steady'

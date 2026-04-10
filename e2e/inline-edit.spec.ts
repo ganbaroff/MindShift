@@ -7,7 +7,7 @@
  */
 import { test, expect, seedStore } from './helpers'
 
-// ── Shared task fixture ────────────────────────────────────────────────────────
+// -- Shared task fixture --------------------------------------------------------
 
 const BASE_TASK = {
   id: 'e2e-edit-task-1',
@@ -52,7 +52,7 @@ function cancelEditBtn(page: PageLike) {
   return page.getByRole('button', { name: 'Cancel edit', exact: true })
 }
 
-// ── Test suite ─────────────────────────────────────────────────────────────────
+// -- Test suite -----------------------------------------------------------------
 
 test.describe('TaskCard inline edit', () => {
   test('pencil button is visible on active task', async ({ authedPage: page }) => {

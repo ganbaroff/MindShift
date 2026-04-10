@@ -46,7 +46,7 @@ export function IntegrationsSection() {
     setTimeout(() => setCodeCopied(false), 2000)
   }, [telegramLinkCode])
 
-  // ── Google Calendar inbound import ────────────────────────────────────────
+  // -- Google Calendar inbound import ----------------------------------------
   const [importLoading, setImportLoading] = useState(false)
   const [importEvents, setImportEvents] = useState<GcalEvent[] | null>(null)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())

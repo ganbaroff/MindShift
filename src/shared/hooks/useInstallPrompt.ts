@@ -1,4 +1,4 @@
-// ── useInstallPrompt ──────────────────────────────────────────────────────────
+// -- useInstallPrompt ----------------------------------------------------------
 // Handles PWA install flow for both Android (beforeinstallprompt) and iOS (manual).
 //
 // Android/Chrome: browser fires `beforeinstallprompt` → we defer it → show our

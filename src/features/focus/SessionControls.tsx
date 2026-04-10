@@ -109,7 +109,7 @@ export const SessionControls = memo(function SessionControls({
         )}
       </AnimatePresence>
 
-      {/* "Park the thought" FAB + popover ─────────────────────────────────── */}
+      {/* "Park the thought" FAB + popover ----------------------------------- */}
       <div className="fixed bottom-8 z-30" style={{ right: 'calc(max(0px, (100vw - 480px) / 2) + 20px)' }}>
         <AnimatePresence>
           {parkOpen && (
