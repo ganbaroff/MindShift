@@ -1,6 +1,7 @@
 import React from 'react'
 import { motion } from 'motion/react'
 import { useMotion } from '@/shared/hooks/useMotion'
+import { useTranslation } from 'react-i18next'
 import type { CommunityAgent } from './useCommunity'
 
 const AGENT_STATE_COLOR: Record<string, string> = {
@@ -19,8 +20,14 @@ const RANK_LABEL: Record<string, string> = {
   QUARANTINE:   'Review',
 }
 
-export const AgentCard = React.memo(function AgentCard({ agent }: { agent: CommunityAgent }) {
+interface AgentCardProps {
+  agent: CommunityAgent
+  onChat?: (agent: CommunityAgent) => void
+}
+
+export const AgentCard = React.memo(function AgentCard({ agent, onChat }: AgentCardProps) {
   const { shouldAnimate, t: transition } = useMotion()
+  const { t } = useTranslation()
   const stateColor = AGENT_STATE_COLOR[agent.state] ?? 'var(--color-text-muted)'
 
   return (
@@ -67,7 +74,7 @@ export const AgentCard = React.memo(function AgentCard({ agent }: { agent: Commu
         </p>
       </div>
 
-      <div className="text-right shrink-0">
+      <div className="text-right shrink-0 flex flex-col items-end gap-1">
         {/* Use text-primary so contrast passes at 10px (APCA Lc 60+) */}
         <p className="text-[10px]" style={{ color: 'var(--color-text-primary)' }}>
           {agent.state}
@@ -75,7 +82,28 @@ export const AgentCard = React.memo(function AgentCard({ agent }: { agent: Commu
         <p className="text-[10px]" style={{ color: 'var(--color-text-muted)' }}>
           {RANK_LABEL[agent.rank] ?? agent.rank}
         </p>
+        {onChat && agent.state !== 'offline' && (
+          <button
+            onClick={() => onChat(agent)}
+            aria-label={t('community.chatWith', { name: agent.display_name, defaultValue: `Chat with ${agent.display_name}` })}
+            className="text-[10px] px-2 py-0.5 rounded-full font-medium mt-0.5
+                       focus-visible:ring-2 focus-visible:ring-[var(--color-teal)] focus-visible:outline-none
+                       active:scale-95 transition-all duration-150"
+            style={{
+              background: 'rgba(78,205,196,0.12)',
+              border: '1px solid rgba(78,205,196,0.25)',
+              color: 'var(--color-teal)',
+            }}
+          >
+            {t('community.chatBtn', 'Chat')}
+          </button>
+        )}
       </div>
     </motion.div>
   )
-}, (prev, next) => prev.agent.id === next.agent.id && prev.agent.state === next.agent.state && prev.agent.rank === next.agent.rank)
+}, (prev, next) =>
+  prev.agent.id === next.agent.id &&
+  prev.agent.state === next.agent.state &&
+  prev.agent.rank === next.agent.rank &&
+  prev.onChat === next.onChat,
+)
