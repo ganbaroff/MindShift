@@ -1,33 +1,36 @@
 # MindShift Heartbeat
-**Updated:** 2026-04-05
-**Sprint:** BATCH-2026-04-04-X (latest)
-**Session:** continuous (30+ batches this session)
+**Updated:** 2026-04-10
+**Sprint:** Sprint AG (Agents + Community + Economy) — deploy pending
+**Session:** ongoing
 
 ## Last 4 Sprints
-- BATCH-W: Security + translations (53 fixes) + Mochi toggle + GDPR export + tone gate
-- BATCH-V: RecoveryProtocol motion gate + AchievementGrid memo
-- BATCH-U: Circuit breaker + prompt injection isolation + input caps + persist debounce
-- BATCH-X: Visual share card with PNG export (html-to-image, Duolingo effect)
+- Sprint AG (AG-1→AG-5): agents DB, communities, crystal ledger, shareholder positions, economy dashboard, LLM router, 5 AI agents seeded, BottomNav Globe tab, 56 i18n keys, 20/20 E2E
+- BATCH-2026-04-04-R: feature graphic 1024×500 (Playwright render)
+- BATCH-2026-04-04-Q: 8-agent audit, 15 fixes, a11y focus rings, analytics events
+- BATCH-2026-04-04-P: room_created/joined/session_started analytics, Play Store screenshots
 
 ## APIs Changed
-- volaura-bridge.ts: unchanged | breaking: no
-- GDPR export: added 6 fields (dueDate, note, taskType, repeat, category, dueTime) | breaking: no
+- agent-chat edge function: ADDED | POST /functions/v1/agent-chat | JWT required, 20/day rate limit
+- community-join edge function: ADDED | POST /functions/v1/community-join | JWT required, 5/hr rate limit
+- publish-revenue-snapshot: ADDED | POST /functions/v1/publish-revenue-snapshot | ADMIN_EMAIL gate
+- telegram-agent-update: ADDED | internal cron only | x-cron-secret header
+- volaura-bridge-proxy: unchanged | breaking: no
 
 ## Events Changed
-- share_card_shared: ADDED | payload: { method: 'native_image'|'native_text'|'clipboard' }
-- app_first_open: ADDED | fires once per device on installDate initialization
-- burnout_alert_shown: ADDED | payload: { score, tier }
-- social_session_feedback: ADDED | payload: { rating }
-- return_after_gap: REMOVED (redundant with user_returned)
+- crystal_earned: CONFIRMED in crystal_ledger via earn_focus_crystals() RPC | payload: { amount, source_event, balance_after }
+- community_joined: ADDED | via community-join edge function → volaura-bridge-proxy (best-effort)
+- dividend_accrued: ADDED | via distribute_dividends() RPC | payload: { user_id, snapshot_id, amount }
 
 ## Blocked By Other Products
-- VOLAURA: POST /api/character/events endpoint not built — crystal events can't flow
-- VOLAURA: GET /api/character/state endpoint not built — can't show AURA badge
+- VOLAURA: POST /api/character/events endpoint still not built — crystal events can't flow upstream
+- VOLAURA: GET /api/character/state endpoint still not built — can't show AURA badge in MindShift
+- CEO: GROQ_API_KEY, ADMIN_EMAIL, TELEGRAM_BOT_TOKEN not yet set in Supabase secrets
 
 ## Planning That Affects Others
-- Play Store launch imminent — AAB ready, 4.3 MB
-- Share card generates PNG — could feed BrandedBy for video generation
-- Room codes increased to 6 chars — any VOLAURA room integration must use 6-char codes
+- 7 pending migrations (019_v2 → 024) add: agents, communities, crystal_ledger, shareholder_positions, revenue_snapshots tables
+- shareholder_positions schema: staked_crystals column (NOT share_units — renamed in 019_v3)
+- Crystal economy now in Supabase, not just VOLAURA — ecosystem-contract.md must stay synced
+- Telegram bot will send proactive daily messages (08:57 UTC) once TELEGRAM_BOT_TOKEN is set
 
 ## Skills This CTO Has (that others don't)
 - pdf-generation: Playwright HTML → PDF (LinkedIn carousels)
@@ -37,4 +40,5 @@
 - e2e-runner: Playwright chromium + iPhone 14 mobile testing
 - bundle-analyzer: Vite chunk analysis + CI gate
 - a11y-scanner: WCAG 2.2 AA compliance checking
-- preview-server: Live browser testing via Chrome MCP
+- sec-agent: pre-deploy migration security review
+- infra-agent: edge function deployment planning
