@@ -81,9 +81,15 @@ export function RecoveryProtocol({ onDismiss }: Props) {
 
     // Fetch personalized recovery message (non-blocking)
     setLoadingAi(true)
-    supabase.functions.invoke('recovery-message', {
-      body: { daysAbsent, incompleteCount: ids.length, locale, emotionalReactivity, psychotype, timeBlindness },
-    }).then(({ data }) => {
+    const timeoutMs = 8_000
+    Promise.race([
+      supabase.functions.invoke('recovery-message', {
+        body: { daysAbsent, incompleteCount: ids.length, locale, emotionalReactivity, psychotype, timeBlindness },
+      }),
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('recovery-message timeout')), timeoutMs)
+      ),
+    ]).then(({ data }) => {
       if (data?.message) setWelcomeMsg(data.message as string)
     }).catch(() => { /* fallback already set */ }).finally(() => {
       setLoadingAi(false)

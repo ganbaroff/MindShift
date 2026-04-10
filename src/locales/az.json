@@ -1117,7 +1117,7 @@
     "intentionVisible": "Fokus sessiyasına başladığınız zaman bunu görəcəksiniz.",
     "letsGo": "gedək",
     "recap50": "{{count}} tapşırıq tamamlandı. Möhkəm.",
-    "recap20": "{{count}} tapşırıq bitdi. Pis deyil.",
+    "recap20": "{{count}} tapşırıq tamamlandı. Möhkəm.",
     "recap5": "{{count}} tapşırıq hazır. İrəliləyirsən.",
     "recapDefault": "Hər bitən tapşırıq — bir narahatlıq az."
   },
