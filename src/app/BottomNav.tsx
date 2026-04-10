@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Sun, Timer, ListTodo, CalendarDays, Settings } from 'lucide-react'
+import { Sun, Timer, ListTodo, CalendarDays, Settings, Globe } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useTranslation } from 'react-i18next'
 import { useMotion } from '@/shared/hooks/useMotion'
@@ -7,11 +7,12 @@ import { usePalette } from '@/shared/hooks/usePalette'
 import { cn } from '@/shared/lib/cn'
 
 const NAV_ITEMS = [
-  { path: '/today',     icon: Sun,          labelKey: 'nav.today'    },
-  { path: '/tasks',     icon: ListTodo,     labelKey: 'nav.tasks'    },
-  { path: '/focus',     icon: Timer,        labelKey: 'nav.focus'    },
-  { path: '/calendar',  icon: CalendarDays, labelKey: 'nav.upcoming' },
-  { path: '/settings',  icon: Settings,     labelKey: 'nav.settings' },
+  { path: '/today',     icon: Sun,          labelKey: 'nav.today'     },
+  { path: '/tasks',     icon: ListTodo,     labelKey: 'nav.tasks'     },
+  { path: '/focus',     icon: Timer,        labelKey: 'nav.focus'     },
+  { path: '/community', icon: Globe,        labelKey: 'nav.community' },
+  { path: '/calendar',  icon: CalendarDays, labelKey: 'nav.upcoming'  },
+  { path: '/settings',  icon: Settings,     labelKey: 'nav.settings'  },
 ] as const
 
 export function BottomNav() {
@@ -41,7 +42,7 @@ export function BottomNav() {
               key={path}
               onClick={() => navigate(path)}
               className={cn(
-                'relative flex flex-col items-center gap-0.5 min-w-[44px] min-h-[44px] px-3 py-1.5 rounded-xl transition-all duration-150',
+                'relative flex flex-col items-center gap-0.5 min-w-[40px] min-h-[44px] px-1.5 py-1.5 rounded-xl transition-all duration-150',
                 active
                   ? 'text-primary'
                   : 'text-muted hover:text-text'
