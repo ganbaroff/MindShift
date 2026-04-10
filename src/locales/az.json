@@ -193,7 +193,8 @@
     "tipTimeOften": "Vaxt sizin üçün sürətlə keçir - bir görünən taymer kifayətdir.",
     "tipTimeSometimes": "Başlamazdan əvvəl saatı yoxlayın - sonra onu unudun.",
     "tipEmotionHigh": "İlk 15 dəqiqəni kəsintilərdən çəkin. Kiçik başlayın.",
-    "tipEmotionModerate": "Diqqətiniz dağılırsa, fasilə verin və geri qayıdın. Bu da sayılır."
+    "tipEmotionModerate": "Diqqətiniz dağılırsa, fasilə verin və geri qayıdın. Bu da sayılır.",
+    "intentionBothRequired": "Niyyətinizi saxlamaq üçün hər iki sahəni doldurun."
   },
   "settings": {
     "title": "Parametrlər",

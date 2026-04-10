@@ -113,13 +113,19 @@ export function ShareCard({ emoji, title, subtitle, stat, onClose }: ShareCardPr
       >
         <motion.div
           initial={shouldAnimate ? { scale: 0.9, opacity: 0, y: 20 } : {}}
-          animate={{ scale: 1, opacity: 1, y: 0 }}
+          animate={shouldAnimate ? { scale: 1, opacity: 1, y: 0 } : { opacity: 1 }}
           exit={shouldAnimate ? { scale: 0.95, opacity: 0 } : {}}
-          transition={t('expressive')}
+          transition={shouldAnimate ? t('expressive') : { duration: 0 }}
           onClick={e => e.stopPropagation()}
           className="w-full max-w-[280px] flex flex-col"
         >
-          {/* Card — this exact DOM gets rendered to PNG */}
+          {/*
+           * Card — this exact DOM gets rendered to PNG via html-to-image.
+           * EXCEPTION (Rule 1/10): hex colors are intentionally hardcoded inside
+           * this cardRef div only. CSS variables (var(--color-*)) are not resolved
+           * by html-to-image's canvas renderer — it reads inline styles only.
+           * The outer chrome (backdrop, buttons) must continue using CSS variables.
+           */}
           <div
             ref={cardRef}
             className="rounded-3xl overflow-hidden"

@@ -100,6 +100,7 @@
     "intentionWill": "I will",
     "intentionWhenPlaceholder": "I sit down at my desk",
     "intentionWillPlaceholder": "open MindShift and pick one task",
+    "intentionBothRequired": "Fill in both fields to save your intention.",
     "removeIntention": "Remove intention",
     "focusRoomHint": "Focus with a friend — create a room and share the code. You'll see each other's progress.",
     "breathe": "Time to breathe 🌿",

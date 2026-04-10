@@ -193,7 +193,8 @@
     "tipTimeOften": "Sizin için zaman hızla akıyor; görünür bir zamanlayıcı yeterlidir.",
     "tipTimeSometimes": "Başlamadan önce saati kontrol edin, sonra unutun.",
     "tipEmotionHigh": "İlk 15 dakikanızı kesintilerden uzak tutun. Küçük başlayın.",
-    "tipEmotionModerate": "Dikkatiniz dağılırsa duraklayın ve geri dönün. Bu da sayılır."
+    "tipEmotionModerate": "Dikkatiniz dağılırsa duraklayın ve geri dönün. Bu da sayılır.",
+    "intentionBothRequired": "Niyetini kaydetmek için her iki alanı da doldurun."
   },
   "settings": {
     "title": "Ayarlar",

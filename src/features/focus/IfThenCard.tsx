@@ -33,7 +33,7 @@ export function IfThenCard() {
     const when = whenText.trim()
     const will = willText.trim()
     if (!when || !will) {
-      setFormError('Both fields are required')
+      setFormError(t('focus.intentionBothRequired'))
       return
     }
     setFormError(null)
@@ -151,6 +151,7 @@ export function IfThenCard() {
                 onKeyDown={handleKeyDown}
                 placeholder={t('focus.intentionWillPlaceholder')}
                 maxLength={60}
+                aria-invalid={formError ? 'true' : undefined}
                 className="flex-1 h-8 rounded-xl px-2.5 text-[12px] focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none"
                 style={{
                   background: 'var(--color-surface-raised)',

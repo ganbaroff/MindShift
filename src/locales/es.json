@@ -193,7 +193,8 @@
     "tipTimeOften": "El tiempo pasa rápido para usted: un temporizador visible es suficiente.",
     "tipTimeSometimes": "Consulta el reloj antes de empezar y luego olvídate.",
     "tipEmotionHigh": "Bloquea tus primeros 15 minutos de interrupciones. Empiece poco a poco.",
-    "tipEmotionModerate": "Si se distrae, haga una pausa y regrese. Eso también cuenta."
+    "tipEmotionModerate": "Si se distrae, haga una pausa y regrese. Eso también cuenta.",
+    "intentionBothRequired": "Completa ambos campos para guardar tu intención."
   },
   "settings": {
     "title": "Ajustes",
