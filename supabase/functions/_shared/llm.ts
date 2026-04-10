@@ -1,17 +1,22 @@
 /**
  * _shared/llm.ts — unified multi-provider LLM router
  *
- * Tier-based fallback chains using free APIs:
- *   FREE:  Gemini 2.5 Flash → OpenRouter Gemma-2-27b
- *   PRO:   Groq llama-3.3-70b → NVIDIA llama-3.3-70b → Gemini
- *   ELITE: NVIDIA Nemotron-253B → Groq llama-3.3-70b → Gemini
+ * Two routing axes (see docs/ROUTER-CONTRACT.md):
+ *   1. llm_policy (per-agent): ultra_fast | balanced | max_quality
+ *   2. subscription_tier (per-user): free | pro_trial | pro  — budget cap
  *
+ * Policy chains (empirical data from packages/swarm/discovered_models.json):
+ *   ultra_fast: Groq 8B (295ms) → Groq Llama4-Scout (299ms) → Gemini Flash Lite (590ms)
+ *   balanced:   Groq 70B (354ms) → Gemini 2.5 Flash (800ms) → OpenRouter Gemma-2-27b
+ *   max_quality: NVIDIA Nemotron → Groq Kimi-K2 (1883ms) → DeepSeek → Groq 70B → Gemini
+ *
+ * Legacy tier-based CHAINS kept for backwards compat (agent-chat pre-migration).
  * All providers except Gemini use OpenAI-compatible format.
- * Gemini uses its native generateContent format.
- * Tries each provider in chain until one succeeds or all fail.
  */
 
-export type AgentTier = 'FREE' | 'PRO' | 'ELITE'
+export type AgentTier        = 'FREE' | 'PRO' | 'ELITE'
+export type LLMPolicy        = 'ultra_fast' | 'balanced' | 'max_quality'
+export type UserSubscription = 'free' | 'pro_trial' | 'pro'
 
 export interface LLMMessage {
   role: 'system' | 'user' | 'assistant'
@@ -116,6 +121,105 @@ type ProviderDef =
   | { type: 'gemini'; key: string; model: string; provider: string }
   | { type: 'openai_compat'; baseUrl: string; key: string; model: string; provider: string; extraHeaders?: Record<string, string> }
 
+// ── Policy-based chains (agent declares quality requirement) ─────────────────
+// Source: packages/swarm/discovered_models.json — empirical latency measurements.
+// Swarm can propose updates via proposals.json (see docs/ROUTER-CONTRACT.md).
+
+const POLICY_CHAINS: Record<LLMPolicy, Array<() => ProviderDef | null>> = {
+  // ultra_fast: warm companions, mascots — sub-400ms target
+  ultra_fast: [
+    () => {
+      const key = resolveKey('GROQ_API_KEY')
+      return key ? {
+        type: 'openai_compat', baseUrl: 'https://api.groq.com/openai/v1',
+        key, model: 'llama-3.1-8b-instant', provider: 'Groq/Llama8B',
+      } : null
+    },
+    () => {
+      const key = resolveKey('GROQ_API_KEY')
+      return key ? {
+        type: 'openai_compat', baseUrl: 'https://api.groq.com/openai/v1',
+        key, model: 'meta-llama/llama-4-scout-17b-16e-instruct', provider: 'Groq/Llama4Scout',
+      } : null
+    },
+    () => {
+      const key = resolveKey('GEMINI_API_KEY')
+      return key ? { type: 'gemini', key, model: 'gemini-flash-lite-latest', provider: 'Gemini/FlashLite' } : null
+    },
+  ],
+  // balanced: analysis, security, productivity — quality + speed
+  balanced: [
+    () => {
+      const key = resolveKey('GROQ_API_KEY')
+      return key ? {
+        type: 'openai_compat', baseUrl: 'https://api.groq.com/openai/v1',
+        key, model: 'llama-3.3-70b-versatile', provider: 'Groq/Llama70B',
+      } : null
+    },
+    () => {
+      const key = resolveKey('GEMINI_API_KEY')
+      return key ? { type: 'gemini', key, model: 'gemini-2.5-flash', provider: 'Gemini/Flash' } : null
+    },
+    () => {
+      const key = resolveKey('OPENROUTER_API_KEY')
+      return key ? {
+        type: 'openai_compat', baseUrl: 'https://openrouter.ai/api/v1',
+        key, model: 'google/gemma-2-27b-it:free', provider: 'OpenRouter/Gemma2',
+        extraHeaders: { 'HTTP-Referer': 'https://mindshift.app', 'X-Title': 'MindShift' },
+      } : null
+    },
+  ],
+  // max_quality: reasoning, economy-admin, elite agents — best available
+  max_quality: [
+    () => {
+      const key = resolveKey('NVIDIA_API_KEY')
+      return key ? {
+        type: 'openai_compat', baseUrl: 'https://integrate.api.nvidia.com/v1',
+        key, model: 'nvidia/nemotron-ultra-253b-v1', provider: 'NVIDIA/Nemotron253B',
+      } : null
+    },
+    () => {
+      const key = resolveKey('GROQ_API_KEY')
+      return key ? {
+        type: 'openai_compat', baseUrl: 'https://api.groq.com/openai/v1',
+        key, model: 'moonshotai/kimi-k2-instruct', provider: 'Groq/KimiK2',
+      } : null
+    },
+    () => {
+      const key = resolveKey('DEEPSEEK_API_KEY')
+      return key ? {
+        type: 'openai_compat', baseUrl: 'https://api.deepseek.com',
+        key, model: 'deepseek-chat', provider: 'DeepSeek/Chat',
+      } : null
+    },
+    () => {
+      const key = resolveKey('GROQ_API_KEY')
+      return key ? {
+        type: 'openai_compat', baseUrl: 'https://api.groq.com/openai/v1',
+        key, model: 'llama-3.3-70b-versatile', provider: 'Groq/Llama70B',
+      } : null
+    },
+    () => {
+      const key = resolveKey('GEMINI_API_KEY')
+      return key ? { type: 'gemini', key, model: 'gemini-2.5-flash', provider: 'Gemini/Flash' } : null
+    },
+  ],
+}
+
+/**
+ * Resolve a provider chain from agent policy + user subscription tier.
+ * User tier acts as a budget cap: free users can't trigger max_quality.
+ */
+export function resolveChain(
+  policy: LLMPolicy,
+  userTier: UserSubscription = 'free',
+): Array<() => ProviderDef | null> {
+  const effectivePolicy = (userTier === 'free' && policy === 'max_quality')
+    ? 'balanced'
+    : policy
+  return POLICY_CHAINS[effectivePolicy]
+}
+
 // ── OpenAI-compatible call (Groq / NVIDIA NIM / OpenRouter / Cerebras) ─────
 
 async function callOpenAICompat(
@@ -198,7 +302,12 @@ async function callGemini(
 // ── Public API ───────────────────────────────────────────────────────────────
 
 export interface LLMCallOptions {
-  tier: AgentTier
+  // Policy-based routing (preferred, post-migration 022)
+  policy?: LLMPolicy
+  userTier?: UserSubscription
+  // Legacy tier-based routing (kept for backwards compat)
+  tier?: AgentTier
+  // Common
   messages: LLMMessage[]
   maxTokens?: number
   temperature?: number
@@ -206,12 +315,14 @@ export interface LLMCallOptions {
 }
 
 /**
- * Call LLM with tier-based fallback chain.
- * Tries providers in order until one succeeds.
+ * Call LLM using policy+userTier routing (preferred) or legacy tier routing.
+ * Tries providers in chain order until one succeeds.
  * Throws if all providers fail.
  */
 export async function callLLM(opts: LLMCallOptions): Promise<LLMResult> {
   const {
+    policy,
+    userTier  = 'free',
     tier,
     messages,
     maxTokens   = 250,
@@ -219,7 +330,10 @@ export async function callLLM(opts: LLMCallOptions): Promise<LLMResult> {
     timeoutMs   = 8_000,
   } = opts
 
-  const chain = CHAINS[tier]
+  // Policy-based routing takes precedence; fall back to legacy tier routing
+  const chain = policy
+    ? resolveChain(policy, userTier)
+    : CHAINS[tier ?? 'FREE']
   const errors: string[] = []
 
   for (const resolve of chain) {

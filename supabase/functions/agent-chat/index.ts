@@ -5,15 +5,17 @@
 // Auth: JWT required
 // Rate limit: 20/day FREE, unlimited PRO
 //
-// Model routing (tier-based, free APIs, fallback chain):
-//   FREE:  Gemini 2.5 Flash → OpenRouter Gemma-2-27b
-//   PRO:   Groq llama-3.3-70b → NVIDIA llama-3.3-70b → Gemini
-//   ELITE: NVIDIA Nemotron-253B → Groq llama-3.3-70b → Gemini
+// Model routing (policy-based — see docs/ROUTER-CONTRACT.md):
+//   agent.llm_policy + user.subscription_tier → resolveChain()
+//   ultra_fast: Groq 8B (295ms) → Groq Llama4-Scout → Gemini Flash Lite
+//   balanced:   Groq 70B (354ms) → Gemini 2.5 Flash → OpenRouter Gemma
+//   max_quality: NVIDIA Nemotron → Groq Kimi-K2 → DeepSeek → Groq 70B → Gemini
+//   free-tier cap: max_quality → balanced for free users
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { getCorsHeaders } from '../_shared/cors.ts'
 import { checkDbRateLimit } from '../_shared/rateLimit.ts'
-import { callLLM, type AgentTier, type LLMMessage } from '../_shared/llm.ts'
+import { callLLM, type LLMPolicy, type UserSubscription, type LLMMessage } from '../_shared/llm.ts'
 import { trace } from '../_shared/langfuse.ts'
 
 interface ChatMessage {
@@ -104,22 +106,32 @@ Deno.serve(async (req: Request) => {
         { status: 429, headers: { ...cors, 'Content-Type': 'application/json' } })
     }
 
-    // Fetch agent
-    const { data: agent, error: agentError } = await supabase
-      .from('agents')
-      .select('slug, display_name, tier, state, personality')
-      .eq('slug', agentSlug.trim())
-      .single()
+    // Fetch agent + user subscription tier in parallel
+    const [agentResult, userResult] = await Promise.all([
+      supabase
+        .from('agents')
+        .select('slug, display_name, tier, state, personality, llm_policy')
+        .eq('slug', agentSlug.trim())
+        .single(),
+      supabase
+        .from('users')
+        .select('subscription_tier')
+        .eq('id', user.id)
+        .single(),
+    ])
 
-    if (agentError || !agent) {
+    if (agentResult.error || !agentResult.data) {
       return new Response(JSON.stringify({ error: 'Agent not found' }),
         { status: 404, headers: { ...cors, 'Content-Type': 'application/json' } })
     }
 
-    const personality   = agent.personality as Record<string, string>
-    const systemPrompt  = buildSystemPrompt(personality, agent.display_name)
-    const fallback      = FALLBACK_BY_SLUG[agent.slug] ?? DEFAULT_FALLBACK
-    const agentTier     = (agent.tier as AgentTier) ?? 'FREE'
+    const agent    = agentResult.data
+    const userTier = ((userResult.data?.subscription_tier ?? 'free') as UserSubscription)
+
+    const personality  = agent.personality as Record<string, string>
+    const systemPrompt = buildSystemPrompt(personality, agent.display_name)
+    const fallback     = FALLBACK_BY_SLUG[agent.slug] ?? DEFAULT_FALLBACK
+    const agentPolicy  = (agent.llm_policy as LLMPolicy | null) ?? 'balanced'
 
     // Build messages for LLM
     const llmMessages: LLMMessage[] = [
@@ -128,13 +140,13 @@ Deno.serve(async (req: Request) => {
       { role: 'user', content: message.trim() },
     ]
 
-    // Call LLM with tier-based fallback chain
+    // Call LLM — policy-based routing (agent declares quality, user tier caps it)
     let reply    = fallback
     let provider = 'fallback'
     let llmResult: Awaited<ReturnType<typeof callLLM>> | null = null
 
     try {
-      llmResult = await callLLM({ tier: agentTier, messages: llmMessages, maxTokens: 250, temperature: 0.8 })
+      llmResult = await callLLM({ policy: agentPolicy, userTier, messages: llmMessages, maxTokens: 250, temperature: 0.8 })
       reply    = llmResult.text || fallback
       provider = llmResult.provider
     } catch (err) {
@@ -145,7 +157,7 @@ Deno.serve(async (req: Request) => {
         model: 'all-failed', provider: 'none',
         latencyMs: 0, success: false,
         error: err instanceof Error ? err.message : 'all providers failed',
-        metadata: { agentSlug: agent.slug, tier: agentTier },
+        metadata: { agentSlug: agent.slug, policy: agentPolicy, userTier },
       })
     }
 
@@ -158,7 +170,7 @@ Deno.serve(async (req: Request) => {
         inputTokens: llmResult.inputTokens,
         outputTokens: llmResult.outputTokens,
         success: true,
-        metadata: { agentSlug: agent.slug, tier: agentTier },
+        metadata: { agentSlug: agent.slug, policy: agentPolicy, userTier },
       })
     }
 
