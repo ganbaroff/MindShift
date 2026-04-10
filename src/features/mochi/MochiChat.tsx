@@ -15,6 +15,7 @@
  * Sub-modules:
  *   mochiChatHelpers.ts  — generateId, task helpers, fetchMochiChat, ChatMessage type
  *   MochiMessageBubble   — single message bubble UI
+ *   MochiMessageList     — message list + loading indicator + guest prompt
  */
 
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
@@ -32,7 +33,7 @@ import {
   fetchMochiChat,
 } from './mochiChatHelpers'
 import type { ChatMessage } from './mochiChatHelpers'
-import { MochiMessageBubble } from './MochiMessageBubble'
+import { MochiMessageList } from './MochiMessageList'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -63,19 +64,11 @@ export function MochiChat({ open, onClose }: MochiChatProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
-  const scrollRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
   const isGuest = !userId || userId.startsWith('guest_')
   const messageCount = messages.filter(m => m.role === 'user').length
   const atLimit = messageCount >= MAX_MESSAGES
-
-  // Auto-scroll to bottom on new messages
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight
-    }
-  }, [messages])
 
   // Save compressed memory when chat session closes
   useEffect(() => {
@@ -136,9 +129,7 @@ export function MochiChat({ open, onClose }: MochiChatProps) {
       nowPoolCount: activeTasks.length,
       nextPoolCount: nextPool.filter((t: Task) => t.status === 'active').length,
       somedayPoolCount: somedayPool.filter((t: Task) => t.status === 'active').length,
-      // Persistent memory — compressed summary from last chat session (device-only)
       mochiMemory: mochiMemory ?? undefined,
-      // Crystal shop personality unlock — 'playful' if user spent 50 crystals
       mochiPersonality: shopUnlocks.includes('mochi_playful') ? 'playful' : undefined,
     }
   }, [
@@ -150,7 +141,7 @@ export function MochiChat({ open, onClose }: MochiChatProps) {
   // Save compressed memory when chat session ends with enough messages
   const saveMemory = useCallback(() => {
     const exchanges = messages.filter(m => m.role !== 'mochi' || !messages.some(x => x.role === 'user'))
-    if (messages.length < 4) return // not enough to be meaningful
+    if (messages.length < 4) return
     const userMessages = messages.filter(m => m.role === 'user').slice(-2)
     const mochiMessages = messages.filter(m => m.role === 'mochi').slice(-2)
     const summary = [
@@ -158,7 +149,7 @@ export function MochiChat({ open, onClose }: MochiChatProps) {
       ...mochiMessages.map(m => `Mochi: ${m.text.slice(0, 80)}`),
     ].join(' | ')
     if (summary.length > 20) setMochiMemory(summary)
-    void exchanges // suppress unused warning
+    void exchanges
   }, [messages, setMochiMemory])
 
   const handleSend = useCallback(async () => {
@@ -286,74 +277,19 @@ export function MochiChat({ open, onClose }: MochiChatProps) {
               </div>
 
               {/* Messages area */}
-              <div
-                ref={scrollRef}
-                className="flex-1 overflow-y-auto px-4 py-3 space-y-3"
-                style={{ minHeight: 200 }}
-              >
-                {isGuest ? (
-                  <div className="flex flex-col items-center justify-center h-full gap-3 py-8">
-                    <Mascot state="idle" size={64} label="Mochi" />
-                    <p className="text-sm text-center" style={{ color: 'var(--color-text-primary)' }}>
-                      {t('mochi.wantsToHelp')}
-                    </p>
-                    <p className="text-xs text-center max-w-[240px]" style={{ color: 'var(--color-text-muted)' }}>
-                      {t('mochi.signInForMochi')}
-                    </p>
-                    <button
-                      onClick={() => { onClose(); window.location.href = '/auth' }}
-                      className="px-4 py-2 rounded-xl text-[13px] font-medium focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
-                      style={{
-                        background: 'linear-gradient(135deg, var(--color-primary), var(--color-teal))',
-                        color: '#FFFFFF',
-                      }}
-                    >
-                      {t('mochi.signIn')}
-                    </button>
-                    <button
-                      onClick={onClose}
-                      className="text-[12px] focus-visible:ring-1 focus-visible:ring-[var(--color-primary)] rounded px-2 py-1"
-                      style={{ color: 'var(--color-text-muted)' }}
-                    >
-                      {t('mochi.maybeLater')}
-                    </button>
-                  </div>
-                ) : (
-                  messages.map(msg => (
-                    <MochiMessageBubble key={msg.id} message={msg} />
-                  ))
-                )}
-
-                {/* Loading indicator */}
-                {loading && (
-                  <div className="flex items-start gap-2">
-                    <div className="shrink-0 mt-1">
-                      <Mascot state="focused" size={24} label="Mochi thinking" />
-                    </div>
-                    <div
-                      className="px-3 py-2 rounded-2xl rounded-bl-sm"
-                      style={{ background: 'var(--color-surface-raised)' }}
-                    >
-                      <motion.div
-                        className="flex gap-1"
-                        animate={shouldAnimate ? { opacity: [0.4, 1, 0.4] } : {}}
-                        transition={shouldAnimate ? { duration: 1.2, repeat: Infinity } : {}}
-                      >
-                        <span className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--color-primary)' }} />
-                        <span className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--color-primary)' }} />
-                        <span className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--color-primary)' }} />
-                      </motion.div>
-                    </div>
-                  </div>
-                )}
-              </div>
+              <MochiMessageList
+                messages={messages}
+                loading={loading}
+                isGuest={isGuest}
+                onClose={onClose}
+              />
 
               {/* Rate limit indicator */}
               {!isGuest && messageCount > 0 && (
                 <div className="px-4 py-1 text-center">
                   <p className="text-[10px]" style={{ color: 'var(--color-text-muted)' }}>
                     {atLimit
-                      ? 'That\'s the limit for now — Mochi needs a rest too'
+                      ? "That's the limit for now — Mochi needs a rest too"
                       : `${messageCount}/${MAX_MESSAGES} messages`}
                   </p>
                 </div>
