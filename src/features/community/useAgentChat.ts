@@ -61,9 +61,16 @@ export function useAgentChat(agentSlug: string): UseAgentChatReturn {
       .map(m => ({ role: m.role, content: m.content }))
 
     try {
-      const { data, error: fnError } = await supabase.functions.invoke('agent-chat', {
-        body: { agentSlug, message: trimmed, history },
-      })
+      // 8s timeout — Rule 7 compliance (AI edge functions must have hardcoded timeout)
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('timeout')), 8000),
+      )
+      const { data, error: fnError } = await Promise.race([
+        supabase.functions.invoke('agent-chat', {
+          body: { agentSlug, message: trimmed, history },
+        }),
+        timeoutPromise,
+      ])
 
       if (!isMountedRef.current) return
 

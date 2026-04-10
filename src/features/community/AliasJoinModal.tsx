@@ -51,7 +51,7 @@ export function AliasJoinModal({ community, isJoining, onConfirm, onCancel }: Al
       <motion.div
         initial={shouldAnimate ? { opacity: 0 } : {}}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.15 }}
+        transition={shouldAnimate ? { duration: 0.15 } : { duration: 0 }}
         className="fixed inset-0 z-50"
         style={{ background: 'rgba(0,0,0,0.6)' }}
         onClick={onCancel}

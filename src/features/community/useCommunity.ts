@@ -175,14 +175,16 @@ export function useCommunity(): UseCommunityReturn {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) return { success: false, error: 'Not authenticated' }
 
-      // 8s timeout — Rule 7 compliance
-      const controller = new AbortController()
-      const timer = setTimeout(() => controller.abort(), 8000)
-
-      const resp = await supabase.functions.invoke('community-join', {
-        body: { communityId, alias },
-      })
-      clearTimeout(timer)
+      // 8s timeout — Rule 7 compliance (Promise.race: supabase invoke has no native signal support)
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Community join timed out')), 8000),
+      )
+      const resp = await Promise.race([
+        supabase.functions.invoke('community-join', {
+          body: { communityId, alias },
+        }),
+        timeoutPromise,
+      ])
 
       if (resp.error) return { success: false, error: resp.error.message }
 

@@ -4412,3 +4412,239 @@ Deploy 4 edge functions: agent-chat, community-join, publish-revenue-snapshot, t
 Обновить heartbeat.md с реальным статусом.
 
 Работаешь автономно. Отчёт — артефактами, не словами.
+
+---
+**[2026-04-10 12:57 UTC]**
+
+<task-notification>
+<task-id>a56652b771388a417</task-id>
+<tool-use-id>toolu_0153fzxsqQVxtGtDhJsBENvM</tool-use-id>
+<output-file>C:\Users\user\AppData\Local\Temp\claude\C--Users-user-Downloads-mindshift\df1d7c22-801c-4bfd-996f-b3e900c411e7\tasks\a56652b771388a417.output</output-file>
+<status>completed</status>
+<summary>Agent "Growth analysis on community + economy features" completed</summary>
+<result>I now have everything needed for a thorough analysis. Let me compile the full report.
+
+---
+
+GROWTH ANALYSIS REPORT
+=======================
+
+## Context: What Sprint AG Actually Shipped
+
+The community layer is real infrastructure — ledger integrity enforced at DB level, policy-based LLM routing, volaura-bridge events firing on join. The bones are solid. The growth problems are not code bugs; they are funnel design gaps.
+
+---
+
+## Answers to Your Specific Questions
+
+### 1. Funnel drop-offs in the community join flow
+
+There are three distinct drop-off points, ordered by severity:
+
+**Drop-off A — Guest wall (highest impact).** `useCommunity` returns early at line 84 for any `userId` that starts with `guest_`. Guests see the crystal balance strip showing `0 / 0`, the agent list, and the discover section — but they cannot join anything or chat. The CommunityScreen has no "sign in to join" CTA and no explanation of why the Join button does nothing for guests. Guests who find the community tab (it is the 4th tab in the BottomNav) will tap "Join", nothing will happen, and they will leave. This is a silent dead end, which is the worst kind for ADHD users because there is no recovery message.
+
+**Drop-off B — SHARE crystal opacity.** The crystal balance strip shows two numbers: FOCUS and SHARE. A new user will have FOCUS crystals (earned through sessions) but zero SHARE crystals. The Foundation Club costs 10,000 SHARE crystals. There is no explanation anywhere on CommunityScreen of how SHARE crystals are earned — the `CRYSTAL_RULES` array in EconomyDashboard explains that SHARE comes from "dividends" (i.e., you already have to be a shareholder to get them). A user reading the discover section sees a locked door with no map to the key. The `fetchOpenCommunities` query filters to `tier = 'OPEN'` only, so Foundation Club does not even appear in the discover section — but a user who navigates to EconomyDashboard will see the Foundation Club referenced and not understand how to reach it.
+
+**Drop-off C — AliasJoinModal friction for anonymous communities.** The `handleJoin` function in CommunityScreen opens the `AliasJoinModal` when `community.is_anonymous === true`. Foundation Club is `is_anonymous: true`. This adds an extra step (choose an alias) before the crystal debit. For an ADHD user who has just made the decision to join, this interruption breaks the decision momentum. The modal is not lazy-loaded — it renders inline in CommunityScreen, which is fine technically, but there is no visual continuity between "tap join" and "choose your alias" that explains why the extra step exists.
+
+### 2. Is the 10,000 SHARE crystal barrier realistic?
+
+No. At the current earning model it is unreachable for almost all users.
+
+The math:
+- Earning formula: 1 focused minute = 5 FOCUS crystals (from `src/shared/lib/constants.ts` and `CRYSTAL_RULES` in EconomyDashboard)
+- SHARE crystals are earned only through dividends: "SHARE crystals from dividends — Distributed to shareholders each period."
+- This creates a circular dependency: you need SHARE crystals to become a shareholder, but you earn SHARE crystals only as a shareholder. There is no stated mechanism for a non-shareholder to accumulate SHARE crystals at all.
+
+Even ignoring the circularity and assuming a hypothetical 1:1 FOCUS-to-SHARE conversion (which does not exist in the code), 10,000 SHARE crystals would require 2,000 focused minutes = 33.3 hours of focus time. For a typical ADHD user doing 3-4 sessions/week at 25 minutes each, that is approximately 80-110 weeks — over a year and a half — to unlock one community entry.
+
+The ledger migration (`018_crystal_ledger.sql`) defines `donation_received` as a valid `source_event`, suggesting peer-to-peer SHARE crystal donation was planned but is not yet implemented (no UI, no edge function for it). Until either donations or a direct earn mechanism exists, 10,000 SHARE is a number with no path attached to it. It will read as aspirational fiction to any user who does the math.
+
+The `admin_grant` source_event exists and is the only current escape valve. That is fine for beta, but it cannot scale.
+
+### 3. Retention hook after joining a community — what brings users back?
+
+Currently: nothing. This is the most significant retention gap in the entire Sprint AG release.
+
+Looking at the code: `MembershipCard` is rendered in CommunityScreen under "My groups." The component is in the file list but its content was not in scope for this read. What is structurally visible is that after joining, `memberships` is refreshed via `fetchMemberships`, a 3-second toast appears ("You're in — Foundation Club"), and then the UI returns to the same static CommunityScreen. There is no:
+
+- Notification or push event when other members are active
+- Shared session count or any social proof within the community ("12 members focused this week")
+- Agent that is exclusive to that community (all 5 agents are `community_id IS NULL` per `fetchPublicAgents`, which filters `is('community_id', null)`)
+- Feed, message board, or any async communication layer
+- Community-specific achievement or badge progression visible from the home screen
+
+The community tab is a destination you visit once to join. There is no pull mechanism to return. For ADHD users specifically, "interesting thing I visited last week" has near-zero recall without a re-entry trigger. Day-7 retention from the community feature alone is likely near 0% without this.
+
+### 4. AgentChatSheet rate limit: 20/day — enough or too restrictive?
+
+The 20/day limit (confirmed in `agent-chat/index.ts` line 101-103: `limitFree: 20, windowMs: 86_400_000`) is close to correct for most users but will actively harm the ADHD hyperfocus case.
+
+For a typical session: a user opens AgentChatSheet, has a back-and-forth with Coach or Mochi about a stuck task, uses 6-10 messages, closes it. 20/day supports 2-3 full conversations. That is adequate for daily casual use.
+
+For the hyperfocus case: an ADHD user in a planning spiral could burn through all 20 messages with a single agent in one sitting (10 exchanges = 20 total messages including the user's turns, but the counter only tracks the user's sends per the `sendMessage` function — so actually 20 user messages = 20 API calls). A hyperfocusing user will hit the wall mid-conversation, see "Daily chat limit reached. Come back tomorrow," and experience that as rejection. Given the Constitution's Rule 3 (Shame-Free Language), this error message — while technically neutral — lands as an abrupt cutoff with no recovery path offered.
+
+The deeper problem: the rate limit error in `useAgentChat.ts` (line 72-74) is a hardcoded string, not a localized i18n key. It is also not warm — "Come back tomorrow" is a door closing in the user's face. Compare this to how MindShift handles other limits (park it, move to SOMEDAY, gentle nudge). The chat limit has none of that softness.
+
+The 20/day ceiling is defensible for cost control. The failure UX is what needs work.
+
+### 5. What is missing to make communities a daily-return feature?
+
+Five concrete missing pieces, in priority order:
+
+1. Community-specific activity signal — a number that changes daily and is visible from the home screen or bottom nav badge. Currently the Globe tab has no badge. Even a simple "N members focused today" counter pulled from `focus_sessions` (similar to how Ambient Orbit works) would give users a reason to check.
+
+2. Exclusive community agents — the `agents` table has `community_id` as a nullable FK, but all 5 seeded agents have `community_id IS NULL`. A community-exclusive agent (accessible only to members) would make community membership feel like a real unlock rather than a cosmetic badge.
+
+3. Async community layer — even a read-only feed of anonymized member activity ("someone in Foundation Club just completed a 45-minute session") would create the passive social proof loop that Focus Rooms currently provide within active sessions. The Supabase Realtime infrastructure for this already exists.
+
+4. SHARE crystal earn path for non-shareholders — without this, Foundation Club is permanently unreachable for any user who joined after the initial admin_grant period. A plausible path: earn 1 SHARE crystal per 10 FOCUS crystals earned (i.e., 2 minutes of focus per SHARE crystal), with a cap of 50 SHARE/day. At that rate, 10,000 SHARE requires 200 days of focused use — still very long, but at least there is a visible path.
+
+5. MembershipCard post-join state — after joining, the membership card should show something that changes (members active today, last community event, personal contribution this week). A static "You're in" card provides no re-entry motivation.
+
+---
+
+## Top 3 Growth Risks
+
+**Risk 1 — Foundation Club is a mirage (Critical)**
+
+There is no earning path for SHARE crystals for non-shareholders. Every user who reads the economy dashboard will see 10,000 SHARE required, check their balance (0), and conclude the feature is either broken or for someone else. This actively undermines trust in the crystal economy as a whole, because if the premium tier is unreachable, the entire system reads as vaporware. The risk is not just that Foundation Club is empty — it is that seeing it makes users doubt the value of earning FOCUS crystals at all.
+
+Fix path: define at minimum one earn mechanism for SHARE crystals that does not require being a shareholder. The `donation_received` source_event already exists in the ledger schema. Peer donation UI (gift SHARE crystals to someone) would both solve the earn path and create a social mechanic that drives community interaction.
+
+**Risk 2 — Guest users hit a silent dead end on the Community tab (High)**
+
+`useCommunity` silently returns empty data for guests. The CommunityScreen renders with zero crystals and agents visible but no interaction possible. There is no "sign in to chat with agents" prompt, no "create an account to join communities" CTA, no explanation. For new users who find the community tab during casual exploration — exactly the moment when first impressions form — this is a blank wall. This is a measurable conversion leak: if first session rate is currently below the 70% target, a silent dead end on a primary nav tab is a contributing cause.
+
+Fix: detect `userId.startsWith('guest_')` in CommunityScreen and render a focused sign-in prompt that explains the value proposition ("Chat with Mochi and focus together with others — free account required").
+
+**Risk 3 — No daily re-entry hook means community adds zero to Day-7 retention (High)**
+
+The Day-7 retention target is 40%. Sprint AG adds a community tab. But joining a community creates no persistent reason to return to that tab. Without a push notification, a badge on the nav icon, or a home-screen widget showing community activity, the community feature is invisible to returning users. Given that ADHD users rely on environmental cues rather than internal motivation to re-engage with apps, a feature that requires you to remember to check it is effectively a feature that does not exist for most of the target audience. The social hook is architecturally there (Supabase Realtime, Focus Rooms precedent) but not wired to anything that surfaces in the daily return loop.
+
+---
+
+## Top 3 Growth Opportunities
+
+**Opportunity 1 — Agent chat as the primary day-1 activation hook (P1)**
+
+The 5 free agents (mochi/coach/scout) are accessible without any crystal cost or community membership. Every new user who completes onboarding can immediately chat with Mochi. This is a faster and more personal quick-win than starting a focus session. The current onboarding flow (6 steps) ends with a CTA to start a focus session — but for an ADHD user who is still in exploration mode, having a 2-message exchange with an agent ("Hey Mochi, I don't know where to start" → warm response in their language using their psychotype) could increase first-session rate significantly. This opportunity exists today — it just requires surfacing the agent chat earlier in the onboarding flow, not building anything new.
+
+**Opportunity 2 — Community as the streak-resilience mechanism (P1)**
+
+The current streak-resilience target is 60% recovery after a 2+ day gap. The existing ContextRestore overlay handles this passively. Community can make it active: when a user returns after a gap and they have a community membership, showing "3 members in Foundation Club focused while you were away" turns an individual recovery moment into a social re-entry. This does not require a feed — it requires a single Supabase count query on `focus_sessions` filtered to community members in the last 72 hours. The ContextRestore overlay already exists at `/src/features/focus/ContextRestore.tsx`; it needs one additional data point and a conditional rendering branch.
+
+**Opportunity 3 — Crystal balance visibility on the home screen drives session starts (P2)**
+
+Currently FOCUS crystal balance is visible only in the CommunityScreen header strip. If the home screen BentoGrid (which already supports 7 widget types including LifetimeStatsWidget) had a crystal balance widget showing "💎 4,350 FOCUS — 2 focus sessions away from 5,000", it would create a goal-proximity effect. ADHD users respond strongly to visible progress toward a defined milestone. The crystal earn rate (5 per minute) and the session duration range (5-90 minutes) mean a user doing one 25-minute session earns 125 crystals — a meaningful, visible number. This bridges the gap between the core productivity loop (focus sessions) and the community economy, giving users a reason to see crystal balance as feedback from their work rather than an abstract number in a secondary screen.
+
+---
+
+## Quick Wins (MICRO)
+
+- Surface "N agents online" or agent specialty text on the Globe tab in BottomNav without a badge count — any persistent signal that makes the tab feel alive. Effort: 1-2 hours.
+- Replace the hardcoded `'Come back tomorrow'` string in `useAgentChat.ts` (line 73) with a warm i18n key that offers an alternative ("Your agents will be ready again at midnight. Start a focus session in the meantime?"). This directly addresses the hyperfocus wall without changing the limit. Effort: 30 minutes.
+- Add a guest-state render in CommunityScreen that shows a single sign-in prompt with one agent's catchphrase as the hook copy, instead of showing empty state. This converts the silent dead end into a conversion moment. Effort: 2-3 hours.
+- Show the SHARE crystal earn path (or an honest "coming soon" note) in the EconomyDashboard CRYSTAL_RULES list. Right now rule 3 says "SHARE crystals from dividends" with no path for non-shareholders. Adding "Earn SHARE through peer recognition (coming soon)" sets accurate expectations and reduces confusion. Effort: 15 minutes.
+
+---
+
+## Relevant Files
+
+- `/C:/Users/user/Downloads/mindshift/src/features/community/CommunityScreen.tsx` — guest dead-end at no explicit guard, AliasJoinModal friction point
+- `/C:/Users/user/Downloads/mindshift/src/features/community/useCommunity.ts` — guest early-return line 84, `fetchPublicAgents` community_id IS NULL filter line 148
+- `/C:/Users/user/Downloads/mindshift/src/features/community/useAgentChat.ts` — hardcoded rate limit error string line 72-74
+- `/C:/Users/user/Downloads/mindshift/src/features/community/AgentChatSheet.tsx` — chat UI, no rate-limit recovery path in UI
+- `/C:/Users/user/Downloads/mindshift/src/features/economy/EconomyDashboard.tsx` — CRYSTAL_RULES missing SHARE earn path, line 31-37
+- `/C:/Users/user/Downloads/mindshift/supabase/migrations/018_crystal_ledger.sql` — `donation_received` source_event defined but no UI/function for it, line 28
+- `/C:/Users/user/Downloads/mindshift/supabase/migrations/020_seed_elite_community.sql` — Foundation Club entry_cost_crystals: 10000, SHARE-only, is_anonymous: true, line 131-145
+- `/C:/Users/user/Downloads/mindshift/supabase/functions/agent-chat/index.ts` — rate limit: 20/day free, unlimited PRO, line 100-107
+- `/C:/Users/user/Downloads/mindshift/supabase/functions/community-join/index.ts` — atomic join, SHARE debit path confirmed, best-effort volaura event</result>
+<usage><total_tokens>61689</total_tokens><tool_uses>15</tool_uses><duration_ms>120615</duration_ms></usage>
+</task-notification>
+
+---
+**[2026-04-10 12:57 UTC]**
+
+<task-notification>
+<task-id>af4a04b6ac3839786</task-id>
+<tool-use-id>toolu_01KxLci17cR2SpWWWpz5DKmh</tool-use-id>
+<output-file>C:\Users\user\AppData\Local\Temp\claude\C--Users-user-Downloads-mindshift\df1d7c22-801c-4bfd-996f-b3e900c411e7\tasks\af4a04b6ac3839786.output</output-file>
+<status>completed</status>
+<summary>Agent "Guardrail audit on Sprint AG commits" completed</summary>
+<result>I have all the information needed. Let me compile the complete violation report.
+
+---
+
+RULE 1 VIOLATIONS (0 found):
+No hardcoded red hex values, no `red-*` Tailwind classes, no `hsl()` with forbidden hue angles found in any scanned file.
+
+RULE 2 VIOLATIONS (2 found):
+
+`C:/Users/user/Downloads/mindshift/src/features/community/AliasJoinModal.tsx:54` — backdrop `motion.div` uses hardcoded `transition={{ duration: 0.15 }}` with no `shouldAnimate` gate. When `prefers-reduced-motion` is active, this still runs a 150ms transition. The inner modal at line 70 is correctly gated; the backdrop is not.
+
+`C:/Users/user/Downloads/mindshift/src/features/community/useCommunity.ts:179-184` — an `AbortController` is created and a timer set to abort it after 8000ms, but `controller.signal` is never passed to `supabase.functions.invoke('community-join', ...)`. The abort has no effect. This is also a Rule 7 issue (AI timeout non-functional — see below).
+
+RULE 3 VIOLATIONS (0 found):
+All interactive elements examined (`button` in AgentChatSheet, AgentCard, CommunityCard, AliasJoinModal, EconomyDashboard) carry either `aria-label` or visible descriptive text. `focus-visible:ring-2` is present on all clickable elements. No expandable sections without `aria-expanded` detected. No toggle/select elements without `aria-pressed`/`aria-selected`.
+
+RULE 4 VIOLATIONS (0 found):
+All files import from `motion/react`, not `framer-motion`. All `@/` path aliases are used consistently with no multi-level relative climbing.
+
+RULE 5 VIOLATIONS (0 found):
+Sprint AG introduces no new fields to the Zustand store. The community/economy data (crystal balances, memberships, agents) is fetched and held in local component state, not in the global store. The `partialize()` function is untouched by these changes. No `cognitiveMode` reads or sets. No hardcoded `3` or `5` pool limits. No hardcoded `'Easy'`/`'Medium'`/`'Hard'` strings.
+
+RULE 6 VIOLATIONS (0 found):
+No shame language (`failed`, `overdue`, `behind`, `missed`, `wrong`), no urgency language, no sycophantic openers, no significance inflation detected in any community or economy UI copy. Error messages use warm, specific non-blame framing ("Not enough Share crystals.", "Couldn't join right now. Try again in a moment.").
+
+RULE 7 VIOLATIONS (2 found):
+
+`C:/Users/user/Downloads/mindshift/src/features/community/useAgentChat.ts:64-66` — the `agent-chat` edge function is invoked with no timeout whatsoever. No `AbortController`, no `setTimeout`, no fallback timer. Rule 7 requires an 8-second timeout on every AI edge function call. The pending `'…'` bubble serves as an optimistic placeholder (matching the "hardcoded fallback first" requirement), but the call itself can hang indefinitely.
+
+`C:/Users/user/Downloads/mindshift/src/features/community/useCommunity.ts:179-184` — the `community-join` edge function invoke has an `AbortController` created at line 179 and a timer set at line 180, but `controller.signal` is never passed into the `supabase.functions.invoke()` call at line 182. The abort is wired to nothing. The timeout is decorative and the call is effectively unbounded.
+
+RULE 8 VIOLATIONS (0 found):
+Line counts for all Sprint AG files:
+- `CommunityScreen.tsx`: 313 lines
+- `AgentChatSheet.tsx`: 255 lines
+- `useCommunity.ts`: 209 lines
+- `useAgentChat.ts`: 95 lines
+- `EconomyDashboard.tsx`: 358 lines
+- `ShareholderPanel.tsx`: 149 lines
+- `AgentCard.tsx`: 110 lines
+- `CommunityCard.tsx`: 71 lines
+- `MembershipCard.tsx`: 50 lines
+- `AliasJoinModal.tsx`: 202 lines
+
+All under the 400-line limit. `CommunityScreen`, `EconomyDashboard`, and `AgentChatSheet` are not heavy overlays requiring `React.lazy` by the guardrail definition (that requirement targets RecoveryProtocol, ContextRestore, ShutdownRitual, WeeklyPlanning, MonthlyReflection, BreathworkRitual). Both `CommunityScreen` and `EconomyDashboard` are lazy-loaded as routes via `lazyWithReload()` in `App.tsx`. List-rendered components `AgentCard` and `CommunityCard` and `MembershipCard` are all wrapped in `React.memo` with custom comparators.
+
+RULE 9 VIOLATIONS (0 found):
+No direct `supabase.from('focus_sessions')` calls in any component. The new `revenue_snapshots`, `shareholder_positions`, `communities`, `community_memberships`, and `agents` tables are Sprint AG-specific tables; they have no existing hook abstraction to violate. No second `useTaskSync`-like sync pattern introduced.
+
+RULE 10 VIOLATIONS (0 found):
+No rate limit changes, no fake payment walls, no user identity exposure in Focus Rooms (existing presence logic untouched), no shame-based push copy, no XP decay or leaderboard logic, no hardcoded colors outside the allowed token set.
+
+---
+
+SUMMARY
+
+RULES PASSED: 1, 3, 4, 5, 6, 8, 9, 10
+
+RULES WITH VIOLATIONS: 2 (1 violation), 7 (2 violations)
+
+Total violations: 3
+
+**Fixes required before commit:**
+
+1. `/C:/Users/user/Downloads/mindshift/src/features/community/AliasJoinModal.tsx` line 54 — gate the backdrop transition: change `transition={{ duration: 0.15 }}` to `transition={shouldAnimate ? { duration: 0.15 } : { duration: 0 }}`. The `shouldAnimate` value is already available from the `useMotion()` call at line 29.
+
+2. `/C:/Users/user/Downloads/mindshift/src/features/community/useAgentChat.ts` lines 63-66 — add an 8s AbortController and pass its signal to the invoke call, e.g. add `const ctrl = new AbortController(); setTimeout(() =&gt; ctrl.abort(), 8000)` and pass `{ body: ..., signal: ctrl.signal }` (or use `headers` + `fetchOptions` depending on Supabase SDK version).
+
+3. `/C:/Users/user/Downloads/mindshift/src/features/community/useCommunity.ts` lines 179-184 — the `controller.signal` created at line 179 must be passed into the `supabase.functions.invoke()` call. Currently the abort is a no-op. Add `headers: { signal: controller.signal }` or use the fetch options the Supabase JS client accepts to wire it through.</result>
+<usage><total_tokens>73424</total_tokens><tool_uses>47</tool_uses><duration_ms>151398</duration_ms></usage>
+</task-notification>
+
+---
+**[2026-04-10 14:16 UTC]**
+
+продолжи
