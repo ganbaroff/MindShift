@@ -113,8 +113,19 @@ Deno.serve(async (req: Request) => {
       )
     }
 
+    // Distribute FOCUS dividends to all shareholders — idempotent
+    let shareholdersPaid = 0
+    if (dividend_per_share_crystal > 0 && data) {
+      const { data: paidCount } = await serviceClient.rpc(
+        'distribute_dividends' as never,
+        { p_snapshot_id: (data as { id: string }).id } as never,
+      )
+      shareholdersPaid = (paidCount as number) ?? 0
+      console.log(`[publish-revenue-snapshot] distributed to ${shareholdersPaid} shareholders`)
+    }
+
     return new Response(
-      JSON.stringify({ success: true, snapshot: data }),
+      JSON.stringify({ success: true, snapshot: data, shareholders_paid: shareholdersPaid }),
       { status: 201, headers: { ...cors, 'Content-Type': 'application/json' } },
     )
 
