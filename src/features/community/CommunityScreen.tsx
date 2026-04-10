@@ -1,43 +1,20 @@
 /**
- * CommunityScreen — Sprint AG-2
+ * CommunityScreen — Sprint AG-2 (hardened)
  *
- * Shows:
- * - User's memberships (with badge + role)
- * - Public OPEN communities to join
- * - Public agents roster (FREE tier visible to all)
- *
- * Design rules:
- * - No red (Rule 1). ADHD-safe palette: teal/indigo/gold.
- * - Shame-free: "Join" not "Unlock". No pressure copy.
- * - One primary action per section (Rule 5).
- * - All animations via useMotion (Rule 2).
+ * Agents as world inhabitants + community discovery.
+ * All guardrail + a11y fixes applied per audit (2026-04-10).
  */
 
-import { useState } from 'react'
+import { useCallback, useMemo, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useTranslation } from 'react-i18next'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { useCommunity } from './useCommunity'
-import type { Community, Membership, CommunityAgent } from './useCommunity'
-
-// -- Agent state color (no red) ------------------------------------------------
-const AGENT_STATE_COLOR: Record<string, string> = {
-  idle:       'var(--color-text-muted)',
-  listening:  'var(--color-teal)',
-  working:    'var(--color-primary)',
-  recovering: '#F59E0B',
-  offline:    'var(--color-text-muted)',
-}
-
-const RANK_LABEL: Record<string, string> = {
-  PROBATIONARY: 'New',
-  MEMBER:       'Member',
-  SENIOR:       'Senior',
-  LEAD:         'Lead',
-  QUARANTINE:   'Review',
-}
-
-// -- Component -----------------------------------------------------------------
+import { AgentCard }      from './AgentCard'
+import { MembershipCard } from './MembershipCard'
+import { CommunityCard }  from './CommunityCard'
+import { useState } from 'react'
+import type { Community } from './useCommunity'
 
 export function CommunityScreen() {
   const { shouldAnimate, t: transition } = useMotion()
@@ -48,14 +25,24 @@ export function CommunityScreen() {
     agents,
     crystalBalance,
     isLoading,
+    loadError,
     joinCommunity,
   } = useCommunity()
 
-  const [joiningId, setJoiningId]   = useState<string | null>(null)
-  const [joinError, setJoinError]   = useState<string | null>(null)
+  const [joiningId, setJoiningId]     = useState<string | null>(null)
+  const [joinError, setJoinError]     = useState<string | null>(null)
   const [joinSuccess, setJoinSuccess] = useState<string | null>(null)
 
-  async function handleJoin(community: Community) {
+  // Clear timers on unmount (P2 fix)
+  const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const errorTimerRef   = useRef<ReturnType<typeof setTimeout> | null>(null)
+  useEffect(() => () => {
+    if (successTimerRef.current) clearTimeout(successTimerRef.current)
+    if (errorTimerRef.current)   clearTimeout(errorTimerRef.current)
+  }, [])
+
+  const handleJoin = useCallback(async (community: Community) => {
+    if (joiningId) return  // prevent concurrent joins (P1 fix)
     setJoiningId(community.id)
     setJoinError(null)
     setJoinSuccess(null)
@@ -63,14 +50,27 @@ export function CommunityScreen() {
     setJoiningId(null)
     if (result.success) {
       setJoinSuccess(community.name)
-      setTimeout(() => setJoinSuccess(null), 3000)
+      if (successTimerRef.current) clearTimeout(successTimerRef.current)
+      successTimerRef.current = setTimeout(() => setJoinSuccess(null), 3000)
     } else {
-      setJoinError(result.error ?? 'Something went wrong')
-      setTimeout(() => setJoinError(null), 4000)
+      // Warm, specific error copy (Rule 6)
+      setJoinError(result.error?.includes('Insufficient')
+        ? t('community.errorInsufficient', 'Not enough Share crystals.')
+        : result.error?.includes('Already')
+        ? t('community.errorAlready', 'Already in this community.')
+        : t('community.errorGeneric', "Couldn't join right now. Try again in a moment.")
+      )
+      if (errorTimerRef.current) clearTimeout(errorTimerRef.current)
+      errorTimerRef.current = setTimeout(() => setJoinError(null), 4000)
     }
-  }
+  }, [joiningId, joinCommunity, t])
 
-  const joinedIds = new Set(memberships.map(m => m.community_id))
+  // Memoize filtered list (P1 fix)
+  const joinedIds = useMemo(() => new Set(memberships.map(m => m.community_id)), [memberships])
+  const availableCommunities = useMemo(
+    () => openCommunities.filter(c => !joinedIds.has(c.id)),
+    [openCommunities, joinedIds]
+  )
 
   return (
     <div
@@ -81,7 +81,7 @@ export function CommunityScreen() {
       <motion.div
         initial={shouldAnimate ? { opacity: 0, y: -8 } : {}}
         animate={{ opacity: 1, y: 0 }}
-        transition={transition()}
+        transition={shouldAnimate ? transition() : { duration: 0 }}
         className="mb-6"
       >
         <h1 className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
@@ -96,15 +96,18 @@ export function CommunityScreen() {
       <motion.div
         initial={shouldAnimate ? { opacity: 0 } : {}}
         animate={{ opacity: 1 }}
-        transition={transition()}
+        transition={shouldAnimate ? transition() : { duration: 0 }}
         className="flex gap-3 mb-6"
       >
+        {/* role="group" + aria-label ties the number to its label (a11y fix) */}
         <div
+          role="group"
+          aria-label={`${t('community.focusCrystals', 'Focus crystals')}: ${crystalBalance.focus.toLocaleString()}`}
           className="flex-1 rounded-2xl px-4 py-3 flex items-center gap-2"
           style={{ background: 'var(--color-surface-card)', border: '1px solid rgba(78,205,196,0.15)' }}
         >
-          <span className="text-lg">💎</span>
-          <div>
+          <span aria-hidden="true" className="text-lg">💎</span>
+          <div aria-hidden="true">
             <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
               {t('community.focusCrystals', 'Focus')}
             </p>
@@ -114,11 +117,13 @@ export function CommunityScreen() {
           </div>
         </div>
         <div
+          role="group"
+          aria-label={`${t('community.shareCrystals', 'Share crystals')}: ${crystalBalance.share.toLocaleString()}`}
           className="flex-1 rounded-2xl px-4 py-3 flex items-center gap-2"
           style={{ background: 'var(--color-surface-card)', border: '1px solid rgba(123,114,255,0.15)' }}
         >
-          <span className="text-lg">🌟</span>
-          <div>
+          <span aria-hidden="true" className="text-lg">🌟</span>
+          <div aria-hidden="true">
             <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
               {t('community.shareCrystals', 'Share')}
             </p>
@@ -129,238 +134,120 @@ export function CommunityScreen() {
         </div>
       </motion.div>
 
-      {/* Toast: join result */}
+      {/* Load error (non-shame, indigo/purple) */}
+      {loadError && (
+        <div
+          role="alert"
+          aria-live="assertive"
+          className="mb-4 px-4 py-3 rounded-2xl text-sm"
+          style={{
+            background: 'rgba(212,180,255,0.10)',
+            border: '1px solid rgba(212,180,255,0.25)',
+            color: '#D4B4FF',
+          }}
+        >
+          {t('community.loadError', 'Some data took too long. Pull to refresh.')}
+        </div>
+      )}
+
+      {/* Join result toast — role="status"/"alert" for screen readers */}
       <AnimatePresence>
         {(joinError || joinSuccess) && (
           <motion.div
+            role={joinSuccess ? 'status' : 'alert'}
+            aria-live={joinSuccess ? 'polite' : 'assertive'}
+            aria-atomic="true"
             initial={shouldAnimate ? { opacity: 0, y: -8 } : {}}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            transition={transition()}
+            transition={shouldAnimate ? transition() : { duration: 0 }}
             className="mb-4 px-4 py-3 rounded-2xl text-sm font-medium"
             style={{
-              background: joinSuccess
-                ? 'rgba(78,205,196,0.12)'
-                : 'rgba(212,180,255,0.12)',
+              background: joinSuccess ? 'rgba(78,205,196,0.12)' : 'rgba(212,180,255,0.12)',
               border: `1px solid ${joinSuccess ? 'rgba(78,205,196,0.3)' : 'rgba(212,180,255,0.3)'}`,
               color: joinSuccess ? 'var(--color-teal)' : '#D4B4FF',
             }}
           >
-            {joinSuccess ? `Joined ${joinSuccess}!` : joinError}
+            {joinSuccess
+              ? t('community.joinedName', { name: joinSuccess, defaultValue: `You're in — ${joinSuccess}.` })
+              : joinError}
           </motion.div>
         )}
       </AnimatePresence>
 
       {/* My memberships */}
       {memberships.length > 0 && (
-        <section className="mb-6">
-          <p className="text-xs font-semibold mb-3 uppercase tracking-wider" style={{ color: 'var(--color-text-muted)' }}>
+        <section aria-label={t('community.myGroups', 'My groups')} className="mb-6">
+          <h2
+            aria-hidden="true"
+            className="text-xs font-semibold mb-3 uppercase tracking-wider"
+            style={{ color: 'var(--color-text-muted)' }}
+          >
             {t('community.myGroups', 'My groups')}
-          </p>
-          <div className="flex flex-col gap-2">
+          </h2>
+          <div role="list" className="flex flex-col gap-2">
             {memberships.map(m => (
-              <MembershipCard key={m.community_id} membership={m} />
+              <div role="listitem" key={m.community_id}>
+                <MembershipCard membership={m} />
+              </div>
             ))}
           </div>
         </section>
       )}
 
-      {/* Agents */}
-      <section className="mb-6">
-        <p className="text-xs font-semibold mb-3 uppercase tracking-wider" style={{ color: 'var(--color-text-muted)' }}>
+      {/* Agents — world inhabitants */}
+      <section aria-label={t('community.agents', 'World inhabitants')} className="mb-6">
+        <h2
+          aria-hidden="true"
+          className="text-xs font-semibold mb-3 uppercase tracking-wider"
+          style={{ color: 'var(--color-text-muted)' }}
+        >
           {t('community.agents', 'World inhabitants')}
-        </p>
+        </h2>
         {isLoading ? (
-          <AgentsSkeleton />
+          <div
+            role="status"
+            aria-label={t('community.loadingAgents', 'Loading agents…')}
+            aria-busy="true"
+          >
+            <AgentsSkeleton />
+          </div>
         ) : (
-          <div className="flex flex-col gap-2">
+          <div role="list" className="flex flex-col gap-2">
             {agents.map(agent => (
-              <AgentCard key={agent.id} agent={agent} />
+              <div role="listitem" key={agent.id}>
+                <AgentCard agent={agent} />
+              </div>
             ))}
           </div>
         )}
       </section>
 
-      {/* Open communities to join */}
-      {openCommunities.filter(c => !joinedIds.has(c.id)).length > 0 && (
-        <section className="mb-6">
-          <p className="text-xs font-semibold mb-3 uppercase tracking-wider" style={{ color: 'var(--color-text-muted)' }}>
+      {/* Discover: open communities */}
+      {availableCommunities.length > 0 && (
+        <section aria-label={t('community.discover', 'Discover communities')} className="mb-6">
+          <h2
+            aria-hidden="true"
+            className="text-xs font-semibold mb-3 uppercase tracking-wider"
+            style={{ color: 'var(--color-text-muted)' }}
+          >
             {t('community.discover', 'Discover')}
-          </p>
+          </h2>
           <div className="flex flex-col gap-3">
-            {openCommunities
-              .filter(c => !joinedIds.has(c.id))
-              .map(community => (
-                <CommunityCard
-                  key={community.id}
-                  community={community}
-                  isJoining={joiningId === community.id}
-                  onJoin={handleJoin}
-                />
-              ))}
+            {availableCommunities.map(community => (
+              <CommunityCard
+                key={community.id}
+                community={community}
+                isJoining={joiningId === community.id}
+                onJoin={handleJoin}
+              />
+            ))}
           </div>
         </section>
       )}
     </div>
   )
 }
-
-// -- MembershipCard ------------------------------------------------------------
-
-function MembershipCard({ membership }: { membership: Membership }) {
-  const { shouldAnimate, t: transition } = useMotion()
-  return (
-    <motion.div
-      initial={shouldAnimate ? { opacity: 0, x: -8 } : {}}
-      animate={{ opacity: 1, x: 0 }}
-      transition={transition()}
-      className="rounded-2xl px-4 py-3 flex items-center gap-3"
-      style={{ background: 'var(--color-surface-card)', border: '1px solid rgba(123,114,255,0.15)' }}
-    >
-      <div
-        className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
-        style={{ background: 'rgba(123,114,255,0.15)', color: 'var(--color-primary)' }}
-      >
-        {membership.is_shareholder ? '⬡' : membership.role[0]}
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold truncate" style={{ color: 'var(--color-text-primary)' }}>
-          {membership.community_name}
-        </p>
-        <p className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>
-          {membership.tier} · {membership.role}
-          {membership.is_shareholder ? ' · Shareholder' : ''}
-        </p>
-      </div>
-      <div
-        className="text-[10px] px-2 py-0.5 rounded-full font-medium shrink-0"
-        style={{ background: 'rgba(123,114,255,0.12)', color: 'var(--color-primary)' }}
-      >
-        #{membership.badge_id.slice(0, 6)}
-      </div>
-    </motion.div>
-  )
-}
-
-// -- AgentCard -----------------------------------------------------------------
-
-function AgentCard({ agent }: { agent: CommunityAgent }) {
-  const { shouldAnimate, t: transition } = useMotion()
-  const stateColor = AGENT_STATE_COLOR[agent.state] ?? 'var(--color-text-muted)'
-
-  return (
-    <motion.div
-      initial={shouldAnimate ? { opacity: 0, x: -8 } : {}}
-      animate={{ opacity: 1, x: 0 }}
-      transition={transition()}
-      className="rounded-2xl px-4 py-3 flex items-center gap-3"
-      style={{ background: 'var(--color-surface-card)', border: '1px solid rgba(255,255,255,0.06)' }}
-    >
-      {/* State dot */}
-      <div className="relative shrink-0">
-        <div
-          className="w-10 h-10 rounded-full flex items-center justify-center text-lg"
-          style={{ background: 'var(--color-surface-raised)' }}
-        >
-          🤖
-        </div>
-        <div
-          className="absolute bottom-0 right-0 w-3 h-3 rounded-full border-2"
-          style={{
-            background: stateColor,
-            borderColor: 'var(--color-surface-card)',
-          }}
-        />
-      </div>
-
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <p className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-            {agent.display_name}
-          </p>
-          {agent.tier === 'PRO' && (
-            <span
-              className="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
-              style={{ background: 'rgba(245,158,11,0.15)', color: '#F59E0B' }}
-            >
-              PRO
-            </span>
-          )}
-        </div>
-        <p className="text-[11px] truncate" style={{ color: 'var(--color-text-muted)' }}>
-          {agent.personality.catchphrase}
-        </p>
-      </div>
-
-      <div className="text-right shrink-0">
-        <p className="text-[10px]" style={{ color: stateColor }}>
-          {agent.state}
-        </p>
-        <p className="text-[10px]" style={{ color: 'var(--color-text-muted)' }}>
-          {RANK_LABEL[agent.rank] ?? agent.rank}
-        </p>
-      </div>
-    </motion.div>
-  )
-}
-
-// -- CommunityCard -------------------------------------------------------------
-
-function CommunityCard({
-  community,
-  isJoining,
-  onJoin,
-}: {
-  community: Community
-  isJoining: boolean
-  onJoin: (c: Community) => void
-}) {
-  const { shouldAnimate, t: transition } = useMotion()
-
-  return (
-    <motion.div
-      initial={shouldAnimate ? { opacity: 0, y: 8 } : {}}
-      animate={{ opacity: 1, y: 0 }}
-      transition={transition()}
-      className="rounded-2xl px-4 py-4"
-      style={{ background: 'var(--color-surface-card)', border: '1px solid rgba(255,255,255,0.06)' }}
-    >
-      <div className="flex items-start justify-between gap-3 mb-2">
-        <div>
-          <p className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-            {community.name}
-          </p>
-          <p className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>
-            {community.member_count} {community.member_count === 1 ? 'member' : 'members'}
-          </p>
-        </div>
-        <button
-          onClick={() => onJoin(community)}
-          disabled={isJoining}
-          className="px-4 py-2 rounded-xl text-sm font-medium transition-all duration-150
-                     focus-visible:ring-2 focus-visible:ring-[var(--color-teal)] focus-visible:outline-none
-                     active:scale-95 disabled:opacity-50"
-          style={{
-            background: 'rgba(78,205,196,0.15)',
-            border: '1px solid rgba(78,205,196,0.3)',
-            color: 'var(--color-teal)',
-          }}
-          aria-label={`Join ${community.name}`}
-        >
-          {isJoining ? '…' : 'Join'}
-        </button>
-      </div>
-
-      {community.constitution && (
-        <p className="text-[11px] leading-relaxed" style={{ color: 'var(--color-text-muted)' }}>
-          {community.constitution}
-        </p>
-      )}
-    </motion.div>
-  )
-}
-
-// -- Skeleton ------------------------------------------------------------------
 
 function AgentsSkeleton() {
   return (
