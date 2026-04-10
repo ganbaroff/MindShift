@@ -14,7 +14,8 @@ import { useCommunity } from './useCommunity'
 import { AgentCard }      from './AgentCard'
 import { MembershipCard } from './MembershipCard'
 import { CommunityCard }  from './CommunityCard'
-import { AgentChatSheet } from './AgentChatSheet'
+import { AgentChatSheet }  from './AgentChatSheet'
+import { AliasJoinModal }  from './AliasJoinModal'
 import type { Community, CommunityAgent } from './useCommunity'
 
 export function CommunityScreen() {
@@ -31,10 +32,12 @@ export function CommunityScreen() {
     joinCommunity,
   } = useCommunity()
 
-  const [joiningId, setJoiningId]       = useState<string | null>(null)
-  const [joinError, setJoinError]       = useState<string | null>(null)
-  const [joinSuccess, setJoinSuccess]   = useState<string | null>(null)
-  const [chatAgent, setChatAgent]       = useState<CommunityAgent | null>(null)
+  const [joiningId, setJoiningId]           = useState<string | null>(null)
+  const [joinError, setJoinError]           = useState<string | null>(null)
+  const [joinSuccess, setJoinSuccess]       = useState<string | null>(null)
+  const [chatAgent, setChatAgent]           = useState<CommunityAgent | null>(null)
+  // Alias join flow — for is_anonymous communities
+  const [aliasPending, setAliasPending]     = useState<Community | null>(null)
 
   // Clear timers on unmount (P2 fix)
   const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -44,12 +47,12 @@ export function CommunityScreen() {
     if (errorTimerRef.current)   clearTimeout(errorTimerRef.current)
   }, [])
 
-  const handleJoin = useCallback(async (community: Community) => {
-    if (joiningId) return  // prevent concurrent joins (P1 fix)
+  const doJoin = useCallback(async (community: Community, alias?: string) => {
     setJoiningId(community.id)
     setJoinError(null)
     setJoinSuccess(null)
-    const result = await joinCommunity(community.id)
+    const result = await joinCommunity(community.id, alias)
+    setAliasPending(null)
     setJoiningId(null)
     if (result.success) {
       setJoinSuccess(community.name)
@@ -66,7 +69,18 @@ export function CommunityScreen() {
       if (errorTimerRef.current) clearTimeout(errorTimerRef.current)
       errorTimerRef.current = setTimeout(() => setJoinError(null), 4000)
     }
-  }, [joiningId, joinCommunity, t])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [joinCommunity, t])
+
+  const handleJoin = useCallback((community: Community) => {
+    if (joiningId) return
+    if (community.is_anonymous) {
+      // Show alias picker first — doJoin called from modal
+      setAliasPending(community)
+    } else {
+      void doJoin(community)
+    }
+  }, [joiningId, doJoin])
 
   // Memoize filtered list (P1 fix)
   const joinedIds = useMemo(() => new Set(memberships.map(m => m.community_id)), [memberships])
@@ -269,6 +283,16 @@ export function CommunityScreen() {
         agent={chatAgent}
         onClose={() => setChatAgent(null)}
       />
+
+      {/* Anonymous community join */}
+      {aliasPending && (
+        <AliasJoinModal
+          community={aliasPending}
+          isJoining={joiningId === aliasPending.id}
+          onConfirm={alias => void doJoin(aliasPending, alias)}
+          onCancel={() => setAliasPending(null)}
+        />
+      )}
     </div>
   )
 }
