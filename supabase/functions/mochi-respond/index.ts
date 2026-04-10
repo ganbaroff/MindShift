@@ -718,7 +718,31 @@ STATE: <focused|celebrating|resting|encouraging>`
 
 
 
-    // -- Call Gemini ----------------------------------------------------------
+    // -- Try Cerebras fast path first (Qwen3-235B, ~2000 tok/s) ----------------
+
+    const cbController = new AbortController()
+    const cbTimeout = setTimeout(() => cbController.abort(), 3_000)
+    const cbMessages = [{ role: 'user' as const, content: isChat ? `${prompt}\n\nUser: ${userMessage}` : prompt }]
+    try {
+      const cbRaw = await callCerebras(cbMessages, isChat ? 250 : 150, cbController.signal)
+      if (cbRaw) {
+        const cbMsg = cbRaw.match(/^MESSAGE:\s*(.+)/m)?.[1]?.trim()
+        if (cbMsg) {
+          const cbStateRaw = cbRaw.match(/^STATE:\s*(.+)/m)?.[1]?.trim()?.toLowerCase()
+          const validStates = ['focused', 'celebrating', 'resting', 'encouraging'] as const
+          const cbState = validStates.includes(cbStateRaw as typeof validStates[number])
+            ? (cbStateRaw as typeof validStates[number])
+            : inferMascotState(trigger)
+          return new Response(
+            JSON.stringify({ message: cbMsg, mascotState: cbState }),
+            { status: 200, headers: { ...cors, 'Content-Type': 'application/json' } },
+          )
+        }
+      }
+    } catch { /* fall through to Gemini */ }
+    finally { clearTimeout(cbTimeout) }
+
+    // -- Call Gemini (fallback) ------------------------------------------------
 
     const apiKey = Deno.env.get('GEMINI_API_KEY')!
 
