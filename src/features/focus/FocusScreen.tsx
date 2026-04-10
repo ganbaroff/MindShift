@@ -47,6 +47,22 @@ export default function FocusScreen() {
   const { sessions: historySessions } = useSessionHistory()
   const behaviorProfile = useUserBehavior(historySessions)
 
+  // Deep-link auto-join: /focus?join=XXXX → join room on mount if idle
+  useEffect(() => {
+    if (session.screen !== 'setup') return
+    if (room.status !== 'idle') return
+    const params = new URLSearchParams(window.location.search)
+    const joinCode = params.get('join')
+    if (!joinCode) return
+    room.join(joinCode.toUpperCase())
+    // Remove the param so refreshing doesn't re-trigger
+    const url = new URL(window.location.href)
+    url.searchParams.delete('join')
+    window.history.replaceState({}, '', url.toString())
+  // Run once on mount — room.join is stable, room.status guards re-runs
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   // Broadcast phase changes to room peers
   useEffect(() => {
     if (room.status === 'connected' && session.sessionPhase !== 'idle') {

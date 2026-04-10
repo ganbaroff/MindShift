@@ -11,6 +11,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion } from 'motion/react'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { X } from 'lucide-react'
 import type { FocusRoomState } from '@/shared/hooks/useFocusRoom'
@@ -28,6 +29,7 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
   const [mode, setMode] = useState<'pick' | 'join'>('pick')
   const [codeInput, setCodeInput] = useState('')
   const [copied, setCopied] = useState(false)
+  const [linkCopied, setLinkCopied] = useState(false)
   const sheetRef = useRef<HTMLDivElement>(null)
 
   // Focus sheet on open — WCAG 2.4.3
@@ -59,6 +61,17 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
       await navigator.clipboard.writeText(room.code)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
+    } catch { /* clipboard unavailable */ }
+  }
+
+  const handleCopyLink = async () => {
+    if (!room.code) return
+    const inviteUrl = `https://mindshift.app/focus?join=${room.code}`
+    try {
+      await navigator.clipboard.writeText(inviteUrl)
+      setLinkCopied(true)
+      setTimeout(() => setLinkCopied(false), 2000)
+      toast(t('focusRoom.roomLinkCopied'))
     } catch { /* clipboard unavailable */ }
   }
 
@@ -202,27 +215,42 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
         {/* ── Connected — show room code & peers ───────────────────────────── */}
         {room.status === 'connected' && room.code && (
           <div className="space-y-4">
-            {/* Room code to share */}
+            {/* Room code + invite link */}
             <div
-              className="flex items-center justify-between px-4 py-3 rounded-2xl"
+              className="px-4 py-3 rounded-2xl"
               style={{ background: 'var(--color-surface-raised)', border: '1px solid rgba(123,114,255,0.20)' }}
             >
-              <div>
-                <p className="text-[10px] uppercase tracking-widest mb-0.5" style={{ color: 'var(--color-text-muted)' }}>{t('focusRoom.roomCode')}</p>
-                <p className="text-[24px] font-mono font-bold" style={{ color: 'var(--color-primary)', letterSpacing: '0.12em' }}>
-                  {room.code}
-                </p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] uppercase tracking-widest mb-0.5" style={{ color: 'var(--color-text-muted)' }}>{t('focusRoom.roomCode')}</p>
+                  <p className="text-[24px] font-mono font-bold" style={{ color: 'var(--color-primary)', letterSpacing: '0.12em' }}>
+                    {room.code}
+                  </p>
+                </div>
+                <button
+                  onClick={() => void handleCopy()}
+                  className="px-3 py-1.5 rounded-xl text-[12px] font-medium transition-all focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+                  style={{
+                    background: copied ? 'rgba(78,205,196,0.15)' : 'rgba(123,114,255,0.12)',
+                    border: `1px solid ${copied ? 'var(--color-teal)' : 'rgba(123,114,255,0.25)'}`,
+                    color: copied ? 'var(--color-teal)' : 'var(--color-primary)',
+                  }}
+                >
+                  {copied ? `✓ ${t('focusRoom.copied')}` : t('focusRoom.copy')}
+                </button>
               </div>
+              {/* Copy invite link — secondary, muted (not a primary CTA) */}
               <button
-                onClick={() => void handleCopy()}
-                className="px-3 py-1.5 rounded-xl text-[12px] font-medium transition-all focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+                onClick={() => void handleCopyLink()}
+                aria-label={t('focusRoom.copyInviteLink')}
+                className="mt-2 w-full py-1.5 rounded-xl text-[12px] font-medium transition-all focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] text-center"
                 style={{
-                  background: copied ? 'rgba(78,205,196,0.15)' : 'rgba(123,114,255,0.12)',
-                  border: `1px solid ${copied ? 'var(--color-teal)' : 'rgba(123,114,255,0.25)'}`,
-                  color: copied ? 'var(--color-teal)' : 'var(--color-primary)',
+                  background: linkCopied ? 'rgba(78,205,196,0.10)' : 'rgba(255,255,255,0.04)',
+                  border: `1px solid ${linkCopied ? 'rgba(78,205,196,0.30)' : 'rgba(255,255,255,0.08)'}`,
+                  color: linkCopied ? 'var(--color-teal)' : 'var(--color-text-muted)',
                 }}
               >
-                {copied ? `✓ ${t('focusRoom.copied')}` : t('focusRoom.copy')}
+                {linkCopied ? `✓ ${t('focusRoom.roomLinkCopied')}` : t('focusRoom.copyInviteLink')}
               </button>
             </div>
 

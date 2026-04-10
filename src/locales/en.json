@@ -1035,7 +1035,9 @@
     "tryAgain": "Try again",
     "partnerSteppedAway": "Your partner stepped away — keep going",
     "yourPhase": "Your focus phase",
-    "activeRoomLabel": "Room {{code}} · {{count}} focusing"
+    "activeRoomLabel": "Room {{code}} · {{count}} focusing",
+    "copyInviteLink": "Copy invite link",
+    "roomLinkCopied": "Invite link copied!"
   },
   "breathwork": {
     "breatheIn": "Breathe in...",

@@ -1035,7 +1035,9 @@
     "tryAgain": "Yenidən cəhd edin",
     "partnerSteppedAway": "Tərəfdaşınız uzaqlaşdı - davam edin",
     "yourPhase": "Sizin diqqət fazanız",
-    "activeRoomLabel": "Otaq {{code}} · {{count}} fokuslanma"
+    "activeRoomLabel": "Otaq {{code}} · {{count}} fokuslanma",
+    "copyInviteLink": "Dəvət linkini kopyala",
+    "roomLinkCopied": "Dəvət linki kopyalandı!"
   },
   "breathwork": {
     "breatheIn": "Nəfəs al...",
