@@ -1114,7 +1114,7 @@
     "intentionVisible": "Odaklanma oturumu başlattığınızda bunu göreceksiniz.",
     "letsGo": "Hadi gidelim",
     "recap50": "{{count}} görev tamamlandı. Sağlam.",
-    "recap20": "{{count}} görev bitti. Fena değil.",
+    "recap20": "{{count}} görev tamamlandı. Sağlam.",
     "recap5": "{{count}} görev hazır. İlerliyorsun.",
     "recapDefault": "Bitirilen her görev — bir endişe daha az."
   },

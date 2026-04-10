@@ -246,7 +246,7 @@ async function fetchMochiPersonalization(
 ): Promise<string | null> {
   try {
     const controller = new AbortController()
-    const timer = setTimeout(() => controller.abort(), 4000)
+    const timer = setTimeout(() => controller.abort(), 8_000)
 
     const { data, error } = await supabase.functions.invoke('mochi-respond', {
       body: {

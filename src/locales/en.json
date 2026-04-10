@@ -1118,7 +1118,7 @@
     "intentionVisible": "You'll see this when you start a focus session.",
     "letsGo": "Let's go",
     "recap50": "{{count}} tasks done so far. Solid.",
-    "recap20": "{{count}} tasks finished. Not bad.",
+    "recap20": "{{count}} tasks finished. Solid.",
     "recap5": "{{count}} tasks down. Getting there.",
     "recapDefault": "Each finished task is one less thing on your mind."
   },

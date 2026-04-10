@@ -1118,7 +1118,7 @@
     "intentionVisible": "Sie werden dies sehen, wenn Sie eine Fokussitzung starten.",
     "letsGo": "Lass uns gehen",
     "recap50": "{{count}} Aufgaben erledigt. Solide.",
-    "recap20": "{{count}} Aufgaben fertig. Nicht schlecht.",
+    "recap20": "{{count}} Aufgaben erledigt. Solide.",
     "recap5": "{{count}} Aufgaben geschafft. Läuft.",
     "recapDefault": "Jede erledigte Aufgabe ist eine Sorge weniger."
   },
