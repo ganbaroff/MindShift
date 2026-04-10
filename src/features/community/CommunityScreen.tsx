@@ -5,20 +5,22 @@
  * All guardrail + a11y fixes applied per audit (2026-04-10).
  */
 
-import { useCallback, useMemo, useRef, useEffect } from 'react'
+import { useCallback, useMemo, useRef, useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { useCommunity } from './useCommunity'
 import { AgentCard }      from './AgentCard'
 import { MembershipCard } from './MembershipCard'
 import { CommunityCard }  from './CommunityCard'
-import { useState } from 'react'
-import type { Community } from './useCommunity'
+import { AgentChatSheet } from './AgentChatSheet'
+import type { Community, CommunityAgent } from './useCommunity'
 
 export function CommunityScreen() {
   const { shouldAnimate, t: transition } = useMotion()
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const {
     openCommunities,
     memberships,
@@ -29,9 +31,10 @@ export function CommunityScreen() {
     joinCommunity,
   } = useCommunity()
 
-  const [joiningId, setJoiningId]     = useState<string | null>(null)
-  const [joinError, setJoinError]     = useState<string | null>(null)
-  const [joinSuccess, setJoinSuccess] = useState<string | null>(null)
+  const [joiningId, setJoiningId]       = useState<string | null>(null)
+  const [joinError, setJoinError]       = useState<string | null>(null)
+  const [joinSuccess, setJoinSuccess]   = useState<string | null>(null)
+  const [chatAgent, setChatAgent]       = useState<CommunityAgent | null>(null)
 
   // Clear timers on unmount (P2 fix)
   const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -90,6 +93,22 @@ export function CommunityScreen() {
         <p className="text-sm mt-1" style={{ color: 'var(--color-text-muted)' }}>
           {t('community.subtitle', 'Agents and people who focus together.')}
         </p>
+      </motion.div>
+
+      {/* Economy link */}
+      <motion.div
+        initial={shouldAnimate ? { opacity: 0 } : {}}
+        animate={{ opacity: 1 }}
+        transition={shouldAnimate ? transition() : { duration: 0 }}
+        className="flex justify-end mb-2"
+      >
+        <button
+          onClick={() => navigate('/economy')}
+          className="text-[11px] focus-visible:ring-2 focus-visible:ring-[var(--color-teal)] focus-visible:outline-none rounded"
+          style={{ color: 'var(--color-text-muted)' }}
+        >
+          {t('community.viewEconomy', 'Crystal economy →')}
+        </button>
       </motion.div>
 
       {/* Crystal balance strip */}
@@ -216,7 +235,7 @@ export function CommunityScreen() {
           <div role="list" className="flex flex-col gap-2">
             {agents.map(agent => (
               <div role="listitem" key={agent.id}>
-                <AgentCard agent={agent} />
+                <AgentCard agent={agent} onChat={setChatAgent} />
               </div>
             ))}
           </div>
@@ -245,6 +264,11 @@ export function CommunityScreen() {
           </div>
         </section>
       )}
+      {/* Agent chat */}
+      <AgentChatSheet
+        agent={chatAgent}
+        onClose={() => setChatAgent(null)}
+      />
     </div>
   )
 }

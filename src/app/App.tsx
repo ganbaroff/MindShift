@@ -50,6 +50,7 @@ const SettingsPage     = lazyWithReload(() => import('@/features/settings/Settin
 const DueDateScreen    = lazyWithReload(() => import('@/features/calendar/DueDateScreen'))
 const HistoryPage      = lazyWithReload(() => import('@/features/history/HistoryPage'))
 const CommunityScreen  = lazyWithReload(() => import('@/features/community/CommunityScreen').then(m => ({ default: m.CommunityScreen })))
+const EconomyDashboard = lazyWithReload(() => import('@/features/economy/EconomyDashboard').then(m => ({ default: m.EconomyDashboard })))
 const TodayPage        = lazyWithReload(() => import('@/features/today/TodayPage'))
 const PrivacyPage      = lazyWithReload(() => import('@/features/legal/PrivacyPage'))
 const TermsPage        = lazyWithReload(() => import('@/features/legal/TermsPage'))
@@ -355,6 +356,11 @@ export default function App() {
                 <Route path="/community" element={
                   <ErrorBoundary fallback={<RouteError label="Community" />}>
                     <CommunityScreen />
+                  </ErrorBoundary>
+                } />
+                <Route path="/economy" element={
+                  <ErrorBoundary fallback={<RouteError label="Economy" />}>
+                    <EconomyDashboard />
                   </ErrorBoundary>
                 } />
               </Route>
