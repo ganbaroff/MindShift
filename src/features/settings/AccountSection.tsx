@@ -138,7 +138,7 @@ export function AccountSection() {
         </motion.button>
         <button
           onClick={() => { setShowDeleteConfirm(true); setDeleteConfirmText('') }}
-          className="text-[13px] font-medium w-full text-center mt-2"
+          className="text-[13px] font-medium w-full text-center mt-2 focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] rounded focus-visible:outline-none"
           style={{ color: 'var(--color-gold)' }}
         >
           {t('settings.deleteAccount')}
