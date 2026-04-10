@@ -217,11 +217,11 @@ values (
   'ELITE',
   10000,
   true,
-  E'Members are known by their badge only.\n\n'
-  E'Focus is the only currency here. No ranks, no flex, no identity — only work.\n\n'
-  E'Rule 1: Never reveal member identities outside this community.\n'
-  E'Rule 2: Shareholders receive 50% of net revenue each period.\n'
-  E'Rule 3: Entry is permanent. Badges cannot be transferred.'
+  'Members are known by their badge only.' || chr(10) || chr(10) ||
+  'Focus is the only currency here. No ranks, no flex, no identity — only work.' || chr(10) || chr(10) ||
+  'Rule 1: Never reveal member identities outside this community.' || chr(10) ||
+  'Rule 2: Shareholders receive 50% of net revenue each period.' || chr(10) ||
+  'Rule 3: Entry is permanent. Badges cannot be transferred.'
 )
 on conflict (slug) do nothing;
 
