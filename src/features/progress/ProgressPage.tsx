@@ -28,7 +28,7 @@ import { logEvent } from '@/shared/lib/logger';
 export default function ProgressPage() {
   const { shouldAnimate } = useMotion();
   const { t } = useTranslation();
-  const { achievements, burnoutScore } = useStore();
+  const { achievements, burnoutScore, subscriptionTier } = useStore();
   const { energyTrend, weeklyInsight, loading, sessions } = useSessionHistory();
 
   useEffect(() => { logEvent('progress_page_viewed') }, []);
@@ -81,6 +81,31 @@ export default function ProgressPage() {
 
           {/* Crystal Shop — spend path (Constitution: ≥1 sink required before crystals shown) */}
           {auraState && <CrystalShopSection crystalBalance={auraState.crystal_balance} />}
+
+          {/* Pro upgrade CTA — inline on ProgressPage so users in shop context can upgrade without navigation */}
+          {subscriptionTier === 'free' && (
+            <Link
+              to="/settings"
+              className="flex items-center justify-between px-4 py-3 rounded-2xl focus-visible:ring-2 focus-visible:ring-[var(--color-teal)] focus-visible:outline-none"
+              style={{
+                background: 'rgba(78,205,196,0.07)',
+                border: '1px solid rgba(78,205,196,0.22)',
+              }}
+              aria-label={t('progress.upgradeProHint')}
+            >
+              <div>
+                <p className="text-[13px] font-semibold" style={{ color: 'var(--color-teal)' }}>
+                  {t('progress.upgradeProHint')}
+                </p>
+                <p className="text-[11px] mt-0.5" style={{ color: 'var(--color-text-muted)' }}>
+                  {t('progress.upgradeProDesc')}
+                </p>
+              </div>
+              <span className="text-[11px] px-2.5 py-1 rounded-lg font-medium shrink-0" style={{ background: 'rgba(78,205,196,0.15)', color: 'var(--color-teal)' }}>
+                {t('progress.upgradeProCTA')}
+              </span>
+            </Link>
+          )}
 
           {/* VOLAURA AURA Badges */}
           {auraState && <VolauraAuraBadges auraState={auraState} />}
