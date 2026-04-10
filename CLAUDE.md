@@ -53,6 +53,7 @@ Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ latest. Status: **prod
 ## Sprint History
 | Sprint | Commit | What landed |
 |--------|--------|-------------|
+| Sprint AG "Agents + Community + Economy" | `e2e0db9` | Migrations 016-022: agents, communities, crystal_ledger, shareholder_positions, revenue_snapshots, llm_policy. 5 seed agents (mochi/guardian/strategist/coach/scout). CommunityScreen, AgentCard, AgentChatSheet, AliasJoinModal, MembershipCard, CommunityCard, useCommunity, useAgentChat. EconomyDashboard, ShareholderPanel. community-join edge function. agent-chat upgraded to policy-based LLM routing (ultra_fast/balanced/max_quality). BottomNav: Globe tab → /community. 56 i18n keys × 5 locales. 20/20 E2E. tsc -b ✅ |
 | BATCH-2026-04-04-R "feature graphic" | `d20591c` | Feature graphic 1024×500 (2048×1000 @2×) via Playwright HTML render. Dark theme, ADHD-safe palette, phone mockup. capture-feature-graphic.ts script added. tsc -b ✅ |
 | BATCH-2026-04-04-Q "launch readiness" | `f030eb1` | Full 8-agent audit → 15 fixes. A11y: AddTaskModal role=dialog, AuthEmailStep checkbox, focus rings on RecoveryProtocol+WeeklyPlanning+MonthlyReflection+SessionControls+AppShell. Analytics: app_first_open, burnout_alert_shown, return_after_gap removed. Guardrails: App.tsx 449→345 lines (useAuthInit extracted), #E8976B+#C8C0FF tokenized. Tests: 207/207 unit + 201/201 E2E. tsc -b ✅ |
 | BATCH-2026-04-04-P "analytics + screenshots" | `9512424` | room_created/joined/session_started analytics in useFocusRoom. 8 Play Store screenshots refreshed (Apr 4). supabase/config.toml backlog closed. tsc -b ✅ |
@@ -369,6 +370,18 @@ Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ latest. Status: **prod
 - **Recurring tasks:** `repeat: 'none'|'daily'|'weekly'` on `Task` type. `completeTask` creates next occurrence with `+1/+7` day `dueDate` when `repeat !== 'none'`. AddTaskModal: Once/Daily/Weekly chips.
 - **Task search:** `searchQuery` state in TasksPage; filters all three pools simultaneously via useMemo with case-insensitive `.includes()`. Lucide `Search`/`X` icons.
 - **Ambient Orbit (S-2):** `useAmbientOrbit(active)` in `FocusScreen.tsx` — Supabase `count` query on `focus_sessions` WHERE `started_at > now()-30m`; refreshes every 5 min; teal pill fades in with 10s delay at 55% opacity; `pointer-events:none`.
+
+## Architecture (Sprint AG additions)
+- **agents table:** `src/features/community/useCommunity.ts` fetches from `public.agents` (RLS: public agents = community_id IS NULL). Agent has `slug/display_name/tier/rank/state/personality/llm_policy/zeus_agent_id`. 5 seeded agents: mochi(FREE)/coach(FREE)/scout(FREE)/guardian(PRO)/strategist(PRO).
+- **CommunityScreen:** `src/features/community/CommunityScreen.tsx` — crystal balance strip (FOCUS+SHARE), agent list (AgentCard), membership list (MembershipCard), discover section (CommunityCard + AliasJoinModal for anonymous). `useCommunity` hook fetches agents/communities/memberships/balance from Supabase.
+- **AgentChatSheet:** `src/features/community/AgentChatSheet.tsx` + `useAgentChat.ts` — bottom sheet with `role="dialog"`. Calls `supabase.functions.invoke('agent-chat', { agentSlug, message, history })`. Optimistic pending message → replace with reply. History limited to last 10 turns.
+- **community-join edge function:** `supabase/functions/community-join/index.ts` — atomic: rate limit (5/hr) → `join_community()` RPC (SECURITY DEFINER: validates crystal balance, debits, inserts membership) → fires `community_joined` character_event via volaura-bridge-proxy (best-effort). Returns 402 on insufficient crystals, 409 on already member.
+- **LLM policy routing:** `supabase/functions/_shared/llm.ts` — `POLICY_CHAINS { ultra_fast, balanced, max_quality }`. `resolveChain(policy, userTier)` — free users capped at balanced. agent-chat reads `agent.llm_policy` from DB. mochi/coach/scout = ultra_fast (Groq 8B first). guardian/strategist = balanced (Groq 70B first).
+- **EconomyDashboard:** `src/features/economy/EconomyDashboard.tsx` — /economy route. Shows CRYSTAL_RULES (hardcoded ethics: 5 rules), revenue_snapshots (public table), BalancePill (FOCUS+SHARE balance via get_crystal_balance RPC). ShareholderPanel shows shareholder_positions.
+- **Crystal ledger:** `crystal_ledger` table — append-only. `crystal_type: FOCUS|SHARE`. `get_crystal_balance(p_user_id, p_type)` RPC: sums amount per type.
+- **BottomNav:** Now 6 tabs — Today/Tasks/Focus/Community/Calendar/Settings. Globe icon for Community. Compact px-1.5/min-w-[40px].
+- **i18n:** `community.*` (36 keys) + `economy.*` (20 keys) in 5 locales. Russian fully translated. EN strings used as fallback for de/es/az.
+- **Supabase migrations:** 016 (agents+seed) → 017 (communities) → 018 (crystal_ledger) → 019 (revenue_snapshots) → 020 (seed ELITE community) → 021 (crystal_earn RPC) → 022 (llm_policy column).
 
 ## AI Toolchain (for any AI agent picking up this project)
 | What | Where | Purpose |
