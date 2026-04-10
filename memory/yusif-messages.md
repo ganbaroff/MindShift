@@ -4648,3 +4648,60 @@ Total violations: 3
 **[2026-04-10 14:16 UTC]**
 
 продолжи
+
+---
+**[2026-04-10 14:24 UTC]**
+
+<task-notification>
+<task-id>a9c1b211a224de3b5</task-id>
+<tool-use-id>toolu_01GRizttvtNHRrrZTtHJ7LCD</tool-use-id>
+<output-file>C:\Users\user\AppData\Local\Temp\claude\C--Users-user-Downloads-mindshift\df1d7c22-801c-4bfd-996f-b3e900c411e7\tasks\a9c1b211a224de3b5.output</output-file>
+<status>completed</status>
+<summary>Agent "Post-deploy production health check" completed</summary>
+<result>The Vercel TLS failure is a consistent machine-level issue — both hosts ping fine (47ms to Vercel, 5ms to Supabase), Supabase HTTPS works fine, but Vercel's CDN endpoints are being reset by the local TLS stack. This is not a production outage — it's a network path issue on this machine. Let me compile the full report.
+
+---
+
+LIVEOPS HEALTH REPORT — 2026-04-10
+=====================================
+
+**Vercel:** INCONCLUSIVE — TLS handshake reset from this machine's network path to Vercel CDN IPs (64.29.17.67, 216.198.79.3). DNS resolves correctly, ICMP responds at 44ms. Supabase HTTPS (different CDN — Cloudflare) works normally. This is a local schannel/WinHTTP issue, not a Vercel outage. Recommend confirming from a browser or external monitor.
+
+**Supabase:** HEALTHY — REST endpoint at 104.18.38.10 returns 401 (correct, anon access requires auth). 8ms latency.
+
+**Edge functions (all 4 new Sprint AG functions):**
+- agent-chat: 401 (deployed, auth guard working)
+- community-join: 401 (deployed, auth guard working)
+- publish-revenue-snapshot: 401 (deployed, auth guard working)
+- telegram-agent-update: 401 (deployed, auth guard working)
+
+**Edge functions (existing):**
+- decompose-task, recovery-message, weekly-insight, classify-voice-input, mochi-respond, gdpr-export, gdpr-delete, scheduled-push, gcal-store-token, gcal-sync, dodo-webhook, volaura-bridge-proxy, create-checkout, stripe-webhook, gcal-inbound: all return 401 (correct)
+- telegram-webhook: 500 — KNOWN ISSUE (pre-existing, documented below)
+- send-magic-link: 404 — KNOWN ISSUE (pre-existing, no source directory in repo)
+
+**Migrations:** 24 files present (001-024). All Sprint AG migrations (020-024) are on disk.
+
+---
+
+INCIDENTS:
+
+**P2 — telegram-webhook returning 500 on every unauthenticated call**
+Root cause: Line 125-128 of the function explicitly returns HTTP 500 when `TELEGRAM_WEBHOOK_SECRET` env var is not set. The function cannot process real Telegram updates without this secret being set as a Supabase secret. This is a pre-existing gap, not a regression from Sprint AG. Real webhook calls from Telegram will have the secret header and will be processed — but any monitoring or test that calls without the header hits the 500. Action needed: run `supabase secrets set TELEGRAM_WEBHOOK_SECRET=&lt;random-string&gt;` and re-register the webhook URL with Telegram.
+
+**P2 — telegram-agent-update cron will send empty x-cron-secret header**
+Root cause: Migration 023 schedules the pg_cron job with `current_setting('app.cron_secret', true)` — but the GUC is documented as NOT set in migration 024 (line 127-133). The cron job will call the function with an empty header. The function will reject it. Action needed: after setting `CRON_SECRET` as a Supabase secret, run: `ALTER DATABASE postgres SET "app.cron_secret" = '&lt;CRON_SECRET_VALUE&gt;';` in the Supabase SQL editor.
+
+**P3 — send-magic-link returns 404**
+No source directory exists in `supabase/functions/`. This function was in the CLAUDE.md health checklist but was never built for this project. Not blocking anything current.
+
+---
+
+NEXT ACTION (priority order):
+
+1. Confirm Vercel deploy from a browser — open `https://mindshift-umber.vercel.app` and verify the app loads. The TLS failure here is environment-specific.
+2. Set `TELEGRAM_WEBHOOK_SECRET` via Supabase dashboard secrets, re-deploy telegram-webhook, then re-register the webhook URL with Telegram BotFather.
+3. Run `ALTER DATABASE postgres SET "app.cron_secret" = '&lt;CRON_SECRET_VALUE&gt;';` in the Supabase SQL editor so the daily telegram-agent-update cron job authenticates correctly.
+4. The 4 Sprint AG edge functions (agent-chat, community-join, publish-revenue-snapshot, telegram-agent-update) are all deployed and responding correctly. No action needed there.</result>
+<usage><total_tokens>56305</total_tokens><tool_uses>33</tool_uses><duration_ms>175435</duration_ms></usage>
+</task-notification>
