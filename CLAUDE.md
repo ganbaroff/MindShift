@@ -338,8 +338,8 @@ Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ latest. Status: **prod
 
 ## Known Gaps (not yet implemented)
 - ~~**energy_after**~~ ✅ Resolved Sprint M — `handlePostEnergy` in `useFocusSession.ts` calls `supabase.update({ energy_after: level })` using `savedSessionIdRef.current`.
-- **Server-side push (v2)** — SW showNotification works when tab is in background (Sprint F). Full push when app is closed needs VAPID keys + Supabase cron.
-- **Stripe integration** — subscriptionTier exists in store, ProBanner UI removed (Sprint A). Zero payment logic. Restore ProBanner when Stripe ready.
+- ~~**Server-side push (v2)**~~ ✅ `scheduled-push` edge function deployed, pg_cron active (*/15 min), VAPID keys set. Known gap: push payload is payloadless (aes128gcm encryption pending Sprint CG) — notifications show SW fallback text, not task-specific content.
+- ~~**Stripe integration**~~ ✅ Replaced by **Dodo Payments** — `create-checkout` + `dodo-webhook` edge functions fully implemented. `PlanSection.tsx` handles checkout redirect and tier sync.
 - **classify-voice-input** — edge function written + wired in AddTaskModal. Unconfirmed in production (`supabase functions list` to verify).
 - ~~**Social layer**~~ ✅ Sprint X — Focus Rooms via Supabase Realtime presence.
 - **Health signals** — sleepQuality, chronotype, medicationTime removed from UI (Sprint A). Store fields remain. Re-add when wired to recommendations.
@@ -355,9 +355,9 @@ Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ latest. Status: **prod
 - ~~S-2: Ambient Orbit (anonymous "47 people focusing now" counter)~~ ✅ Sprint Q (Supabase count proxy, 30-min window)
 - ~~S-3: 1:1 Focus Partner (Model A — Supabase Realtime)~~ ✅ Sprint X (useFocusRoom + FocusRoomSheet — create/join room, peer phases)
 - ~~S-4: Quiet Room (Model B — 2-4 person rooms)~~ ✅ Sprint X (same room supports up to N people via presence)
-- S-5: Ghosting Grace protocol
+- ~~S-5: Ghosting Grace protocol~~ ✅ Sprint N2 — lastRoomCode/lastRoomLeftAt persisted, wasRecentlyInRoom in useOverlayState, ContextRestore teal re-entry card
 - ~~S-7: Anti-social-scroll friction~~ ✅ Sprint Z (SessionFrictionNudge in AppShell — 5s auto-dismiss)
-- S-9: Post-social cool-down ritual
+- ~~S-9: Post-social cool-down ritual~~ ✅ Sprint O2 — SocialFeedbackCard.tsx, shown in NatureBuffer when wasInRoom
 - ~~S-11: Anonymous encouragement in rooms~~ ✅ Sprint X (ROOM_ENCOURAGEMENTS rotating text shown during sessions)
 - ~~B-5: Monthly reflection ritual~~ ✅ Sprint L
 - ~~B-6: Hyperfocus Autopsy~~ ✅ Sprint K
@@ -392,11 +392,12 @@ Owner: **Yusif** (ganbarov.y@gmail.com). Branch: `main` @ latest. Status: **prod
 | Play Store listing text | ✅ | Ready |
 | CI/CD edge functions | ✅ | GitHub Action |
 | Telegram bot | ✅ | Code ready, migration applied |
-| Feature graphic 1024x500 | ❌ | Needs design |
-| 8 phone + 4 tablet screenshots | ❌ | Needs capture |
+| Feature graphic 1024x500 | ✅ | public/feature-graphic.png exists |
+| 8 phone screenshots | ✅ | public/screenshots/playstore/ (01-08) |
+| 4 tablet screenshots | ❌ | Not found — may need capture |
 | Android AAB build | ❌ | After account verification |
 | Google Play account | ⏳ | Waiting verification |
-| In-App Review API | ❌ | Trigger after 3rd session, not in low energy |
+| In-App Review API | ✅ | Implemented in useSessionEnd.ts — triggers on 3rd session if not low energy |
 | Home screen widget | ❌ | Post-launch (30 days) |
 
 ## Working Protocol
