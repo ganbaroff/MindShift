@@ -44,19 +44,29 @@ Deno.serve(async (req: Request) => {
       )
     }
 
-    const { communityId, alias } = await req.json() as { communityId?: string; alias?: string }
-
-    if (!communityId) {
+    let body: unknown
+    try {
+      body = await req.json()
+    } catch {
       return new Response(
-        JSON.stringify({ error: 'communityId required' }),
+        JSON.stringify({ error: 'Invalid JSON body' }),
         { status: 400, headers: { ...cors, 'Content-Type': 'application/json' } }
       )
     }
+    const { communityId, alias } = body as { communityId?: unknown; alias?: unknown }
+
+    if (typeof communityId !== 'string' || !communityId.trim()) {
+      return new Response(
+        JSON.stringify({ error: 'communityId must be a non-empty string' }),
+        { status: 400, headers: { ...cors, 'Content-Type': 'application/json' } }
+      )
+    }
+    const safeAlias = typeof alias === 'string' ? alias.trim() || null : null
 
     // Atomic join via SECURITY DEFINER DB function (checks crystals, debits, inserts)
     const { error: joinError } = await supabase.rpc('join_community', {
       p_community_id: communityId,
-      p_alias:        alias ?? null,
+      p_alias:        safeAlias,
     })
 
     if (joinError) {
