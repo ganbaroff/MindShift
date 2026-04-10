@@ -116,7 +116,7 @@ export function AccountSection() {
           className="px-3 py-2.5 rounded-xl mb-1"
           style={{ background: 'rgba(78,205,196,0.06)', border: '1px solid rgba(78,205,196,0.15)' }}
         >
-          <p className="text-[11px] leading-relaxed" style={{ color: 'var(--color-text-muted)' }}>
+          <p className="text-[12px] leading-relaxed" style={{ color: 'var(--color-text-muted)' }}>
             {t('settings.dataFirewallNote')}
           </p>
         </div>
@@ -131,7 +131,7 @@ export function AccountSection() {
           whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
           onClick={handleExport}
           disabled={exportLoading}
-          className="w-full h-10 rounded-xl text-[14px] font-medium disabled:opacity-50"
+          className="w-full h-10 rounded-xl text-[14px] font-medium disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-[var(--color-teal)] focus-visible:outline-none"
           style={{ backgroundColor: 'rgba(78,205,196,0.12)', color: 'var(--color-teal)' }}
         >
           {exportLoading ? t('settings.exporting') : `📦 ${t('settings.exportJson')}`}
@@ -178,7 +178,7 @@ export function AccountSection() {
             <div className="flex gap-2">
               <button
                 onClick={() => setShowDeleteConfirm(false)}
-                className="flex-1 h-9 rounded-xl text-[13px] font-medium"
+                className="flex-1 h-9 rounded-xl text-[13px] font-medium focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none"
                 style={{ backgroundColor: 'rgba(139,139,167,0.15)', color: 'var(--color-text-muted)' }}
               >
                 {t('common.cancel')}
@@ -186,7 +186,7 @@ export function AccountSection() {
               <button
                 onClick={handleDeleteAccount}
                 disabled={deleteLoading || (!isGuest && deleteConfirmText !== DELETE_WORD)}
-                className="flex-1 h-9 rounded-xl text-[13px] font-medium disabled:opacity-50"
+                className="flex-1 h-9 rounded-xl text-[13px] font-medium disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none"
                 style={{ backgroundColor: 'rgba(245,158,11,0.15)', color: 'var(--color-gold)' }}
               >
                 {deleteLoading ? t('settings.deleting') : t('settings.yesDelete')}
@@ -199,7 +199,7 @@ export function AccountSection() {
       {/* Sign out */}
       <button
         onClick={handleSignOut}
-        className="text-[13px] font-medium w-full text-center py-2"
+        className="text-[13px] font-medium w-full text-center py-2 rounded focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none"
         style={{ color: 'var(--color-gold)' }}
       >
         {t('settings.signOut')}
