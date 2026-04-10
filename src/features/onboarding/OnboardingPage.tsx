@@ -21,14 +21,14 @@ import { useStore } from '@/store';
 import { logEvent } from '@/shared/lib/logger';
 import type { EnergyLevel, AppMode } from '@/types';
 
-// ── Maps ──────────────────────────────────────────────────────────────────────
+// -- Maps ----------------------------------------------------------------------
 const modeMap = ['minimal', 'habit', 'system'] as const
 const tbMap   = ['often', 'sometimes', 'rarely'] as const
 const erMap   = ['high', 'moderate', 'steady'] as const
 
 const TOTAL_STEPS = 5
 
-// ── Steps definition ──────────────────────────────────────────────────────────
+// -- Steps definition ----------------------------------------------------------
 interface Step {
   title: string
   subtitle?: string
@@ -74,7 +74,7 @@ function useSteps(): Step[] {
   ], [t])
 }
 
-// ── Revisit pre-fill helpers ──────────────────────────────────────────────────
+// -- Revisit pre-fill helpers --------------------------------------------------
 function modeToIdx(m: AppMode | string | undefined): number | null {
   const i = modeMap.indexOf(m as typeof modeMap[number])
   return i >= 0 ? i : null
@@ -90,7 +90,7 @@ function erToIdx(v: typeof erMap[number] | null | undefined): number | null {
   return i >= 0 ? i : null
 }
 
-// ── Component ─────────────────────────────────────────────────────────────────
+// -- Component -----------------------------------------------------------------
 export default function OnboardingPage() {
   const navigate = useNavigate()
   const { shouldAnimate } = useMotion()

@@ -39,7 +39,7 @@ export const TONE_DENSITY: Record<UITone, UIDensity> = {
   neutral: 'normal',
 }
 
-// ── Cohort detection ────────────────────────────────────────────────────────
+// -- Cohort detection --------------------------------------------------------
 
 // CohortSignals interface — inlined into deriveUITone parameter type.
 // Kept as documentation reference:
@@ -78,7 +78,7 @@ export function deriveUITone(
   return 'neutral'
 }
 
-// ── Copy variants per tone ──────────────────────────────────────────────────
+// -- Copy variants per tone --------------------------------------------------
 
 export interface ToneCopy {
   // Mochi greetings

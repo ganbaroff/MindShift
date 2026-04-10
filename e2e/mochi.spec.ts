@@ -15,7 +15,7 @@ const MOCHI_AI_RESPONSE = {
   mascotState: 'focused',
 }
 
-// ── Fixtures ─────────────────────────────────────────────────────────────────
+// -- Fixtures -----------------------------------------------------------------
 
 async function openMochiChat(page: import('@playwright/test').Page) {
   await page.goto('/today')
@@ -23,8 +23,8 @@ async function openMochiChat(page: import('@playwright/test').Page) {
   const fab = page.getByRole('button', { name: /Chat with Mochi/i })
   await expect(fab).toBeVisible({ timeout: 5000 })
   await fab.click()
-  // Sheet opens — welcome message visible (hardcoded English string in MochiChat.tsx)
-  await expect(page.getByText(/Hey.*Tap me|Hey.*nudge/i)).toBeVisible({ timeout: 4000 })
+  // Sheet opens — welcome message visible (one of several hardcoded English strings in MochiChat.tsx)
+  await expect(page.getByText(/Hey|Hi!|Welcome back/i).first()).toBeVisible({ timeout: 4000 })
 }
 
 // Helper: get the chat input regardless of locale (uses aria-label or role)
@@ -32,7 +32,7 @@ function getChatInput(page: import('@playwright/test').Page) {
   return page.getByRole('textbox', { name: /message|mochi|ask|сообщение|спроси/i })
 }
 
-// ── Tests ─────────────────────────────────────────────────────────────────────
+// -- Tests ---------------------------------------------------------------------
 
 test.describe('MochiChat — sheet and welcome', () => {
   test('opens from FAB and shows welcome message', async ({ page }) => {

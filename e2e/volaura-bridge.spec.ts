@@ -21,7 +21,7 @@
 
 import { test, expect, request as pwRequest } from '@playwright/test'
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// -- Helpers -------------------------------------------------------------------
 
 const MS_URL     = process.env.VITE_SUPABASE_URL           ?? ''
 const MS_SVC     = process.env.SUPABASE_SERVICE_KEY_MS      ?? ''  // service_role for MindShift project
@@ -121,7 +121,7 @@ async function queryIdentityMap(
   return (await res.json()) as Array<Record<string, unknown>>
 }
 
-// ── Tests ─────────────────────────────────────────────────────────────────────
+// -- Tests ---------------------------------------------------------------------
 
 test.describe('volaura-bridge-proxy integration', () => {
   test.beforeEach(({ }, testInfo) => {
@@ -213,7 +213,7 @@ test.describe('volaura-bridge-proxy integration', () => {
         return
       }
 
-      // ── Verify identity mapping was created ───────────────────────────────
+      // -- Verify identity mapping was created -------------------------------
       const sharedUserId = proxyBody.shared_user_id
       expect(sharedUserId, 'shared_user_id must be returned').toBeTruthy()
 
@@ -224,7 +224,7 @@ test.describe('volaura-bridge-proxy integration', () => {
       expect(mappings[0].standalone_project_ref).toBe('awfoqycoltvhamtrsvxk')
       expect(mappings[0].source_product).toBe('mindshift')
 
-      // ── Verify character_events row was written ───────────────────────────
+      // -- Verify character_events row was written ---------------------------
       // Allow up to 3s for the Railway backend to persist the event
       let events: Array<Record<string, unknown>> = []
       for (let attempt = 0; attempt < 6; attempt++) {

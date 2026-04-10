@@ -1,4 +1,4 @@
-// ── Reminders service ─────────────────────────────────────────────────────────
+// -- Reminders service ---------------------------------------------------------
 // Singleton that schedules browser push notifications for tasks with due dates.
 // Uses setTimeout (current session) + localStorage (persistence across reloads).
 
@@ -17,7 +17,7 @@ export interface ScheduledReminder {
 // Active timeout handles (session-only, not persisted)
 const activeTimeouts = new Map<string, ReturnType<typeof setTimeout>>()
 
-// ── Push notification helper (inline to avoid circular import) ────────────────
+// -- Push notification helper (inline to avoid circular import) ----------------
 
 function pushReminderNotify(reminder: ScheduledReminder): void {
   // In-app toast (always visible when app is foregrounded)
@@ -49,7 +49,7 @@ function pushReminderNotify(reminder: ScheduledReminder): void {
   } catch { /* non-critical */ }
 }
 
-// ── Core service ─────────────────────────────────────────────────────────────
+// -- Core service -------------------------------------------------------------
 
 function loadAll(): ScheduledReminder[] {
   try {

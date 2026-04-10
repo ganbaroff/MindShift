@@ -16,7 +16,7 @@ import { useStore } from '@/store'
 import type { Task } from '@/types'
 import { todayISO } from '@/shared/lib/dateUtils'
 
-// ── Smart suggestion ──────────────────────────────────────────────────────────
+// -- Smart suggestion ----------------------------------------------------------
 // Scores tasks to suggest the best one for right now.
 // Factors: due urgency, pool priority, difficulty vs time-of-day, difficulty vs energy.
 // Returns the id of the suggested task or null if there's nothing useful.
@@ -63,7 +63,7 @@ function getSuggestedTaskId(
   return sorted[0].id
 }
 
-// ── Props ─────────────────────────────────────────────────────────────────────
+// -- Props ---------------------------------------------------------------------
 
 export interface FocusTaskPickerProps {
   allTasks: Task[]

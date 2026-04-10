@@ -32,7 +32,7 @@ export interface Palette {
   flatMode:    boolean
 }
 
-// ── Full saturation (normal mode) ─────────────────────────────────────────────
+// -- Full saturation (normal mode) ---------------------------------------------
 const NORMAL: Palette = {
   primary:   '#7B72FF',   // WCAG AA: 5.0:1 on #0F1117 (was #6C63FF — 4.37:1)
   teal:      '#4ECDC4',
@@ -41,7 +41,7 @@ const NORMAL: Palette = {
   flatMode:  false,
 }
 
-// ── Desaturated (calm / reduced-stimulation mode) ─────────────────────────────
+// -- Desaturated (calm / reduced-stimulation mode) -----------------------------
 // Hue preserved, saturation reduced ~50%, lightness slightly lowered
 // to maintain legibility while reducing arousal.
 const CALM: Palette = {
@@ -52,7 +52,7 @@ const CALM: Palette = {
   flatMode:  true,
 }
 
-// ── Light mode palettes ───────────────────────────────────────────────────────
+// -- Light mode palettes -------------------------------------------------------
 // Accents darkened for APCA contrast on warm ivory #F5F3EE background
 const LIGHT: Palette = {
   primary:   '#6C63FF',

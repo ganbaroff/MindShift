@@ -85,7 +85,7 @@ export const idbStorage: StateStorage = {
   },
 }
 
-// ── Cross-tab sync ─────────────────────────────────────────────────────────
+// -- Cross-tab sync ---------------------------------------------------------
 // When tab A saves state, the _backup key in localStorage changes.
 // Tab B detects this via the `storage` event and merges state instead of
 // reloading — a full reload would interrupt in-progress focus sessions,

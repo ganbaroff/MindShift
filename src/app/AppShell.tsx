@@ -16,7 +16,7 @@ const LazyMochiChat = lazy(() =>
   import('@/features/mochi/MochiChat').then(m => ({ default: m.MochiChat }))
 )
 
-// ── S-7 Anti-scroll friction nudge ────────────────────────────────────────────
+// -- S-7 Anti-scroll friction nudge --------------------------------------------
 // Non-blocking: shows 5 s then disappears on its own.
 // If user has an If-Then rule, shows that instead of generic copy (Research #16).
 function SessionFrictionNudge({ onDismiss }: { onDismiss: () => void }) {

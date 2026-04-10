@@ -35,20 +35,20 @@ import {
 import type { ChatMessage } from './mochiChatHelpers'
 import { MochiMessageList } from './MochiMessageList'
 
-// ── Types ─────────────────────────────────────────────────────────────────────
+// -- Types ---------------------------------------------------------------------
 
 interface MochiChatProps {
   open: boolean
   onClose: () => void
 }
 
-// ── Constants ─────────────────────────────────────────────────────────────────
+// -- Constants -----------------------------------------------------------------
 
 const MAX_MESSAGES = 20
 const MAX_INPUT_LENGTH = 500
 const HISTORY_CONTEXT_COUNT = 3
 
-// ── Component ─────────────────────────────────────────────────────────────────
+// -- Component -----------------------------------------------------------------
 
 export function MochiChat({ open, onClose }: MochiChatProps) {
   const { shouldAnimate, t: transition } = useMotion()

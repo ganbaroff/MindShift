@@ -12,7 +12,7 @@ import { useMotion } from '@/shared/hooks/useMotion'
 import { clearBookmark } from './useFocusSession'
 import type { Task } from '@/types'
 
-// ── Props ─────────────────────────────────────────────────────────────────────
+// -- Props ---------------------------------------------------------------------
 
 export interface FocusSetupHeaderProps {
   energyLabel: { text: string; color: string }
@@ -39,13 +39,13 @@ export function FocusSetupHeader({
     emotionalReactivity,
   } = useStore()
 
-  // ── Today's focused minutes (W) ───────────────────────────────────────────
+  // -- Today's focused minutes (W) -------------------------------------------
   const todayFocusMin = useMemo(() => {
     const idx = (new Date().getDay() + 6) % 7 // Mon=0…Sun=6
     return weeklyStats?.dailyMinutes?.[idx] ?? 0
   }, [weeklyStats])
 
-  // ── Adaptive ADHD tip (W) ─────────────────────────────────────────────────
+  // -- Adaptive ADHD tip (W) -------------------------------------------------
   const adaptiveTip = useMemo<{ emoji: string; text: string } | null>(() => {
     if (timeBlindness === 'often')
       return { emoji: '⏰', text: t('focus.tipTimeOften') }

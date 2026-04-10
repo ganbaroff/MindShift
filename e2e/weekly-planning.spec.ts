@@ -19,7 +19,7 @@
 import { test, expect, seedStore } from './helpers'
 import type { Page } from '@playwright/test'
 
-// ── Time fixture ───────────────────────────────────────────────────────────────
+// -- Time fixture ---------------------------------------------------------------
 
 /** Monday 2025-01-06, 10:00 AM — satisfies the "Monday before noon" guard. */
 const MONDAY_10AM = new Date('2025-01-06T10:00:00')
@@ -30,7 +30,7 @@ const MONDAY_10AM = new Date('2025-01-06T10:00:00')
  */
 const PAST_WEEK = '2025-W01'
 
-// ── Store helpers ──────────────────────────────────────────────────────────────
+// -- Store helpers --------------------------------------------------------------
 
 function weeklyStore(extra: Record<string, unknown> = {}) {
   return {
@@ -52,7 +52,7 @@ function weeklyStore(extra: Record<string, unknown> = {}) {
   }
 }
 
-// ── Clock helper ───────────────────────────────────────────────────────────────
+// -- Clock helper ---------------------------------------------------------------
 
 /**
  * Install a fake clock at MONDAY_10AM, navigate, then advance 3 s to fire
@@ -65,7 +65,7 @@ async function gotoWithClock(page: Page, path = '/') {
   await page.clock.runFor(3000)
 }
 
-// ── Tests ──────────────────────────────────────────────────────────────────────
+// -- Tests ----------------------------------------------------------------------
 
 test.describe('WeeklyPlanning overlay', () => {
   test('appears on Monday morning with heading and CTA', async ({ authedPage: page }) => {

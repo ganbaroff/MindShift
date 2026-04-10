@@ -25,7 +25,7 @@ interface MascotProps {
   className?: string
 }
 
-// ── State → visual config ──────────────────────────────────────────────────────
+// -- State → visual config ------------------------------------------------------
 
 const STATE_CONFIG: Record<MascotState, {
   bodyColor1: string
@@ -78,7 +78,7 @@ const STATE_CONFIG: Record<MascotState, {
   },
 }
 
-// ── Sparkle star (for celebrating) ────────────────────────────────────────────
+// -- Sparkle star (for celebrating) --------------------------------------------
 
 function Star({ x, y, delay }: { x: number; y: number; delay: number }) {
   return (
@@ -92,7 +92,7 @@ function Star({ x, y, delay }: { x: number; y: number; delay: number }) {
   )
 }
 
-// ── ZZZ (for resting) ─────────────────────────────────────────────────────────
+// -- ZZZ (for resting) ---------------------------------------------------------
 
 function ZZZ() {
   return (
@@ -105,7 +105,7 @@ function ZZZ() {
   )
 }
 
-// ── Eyes ──────────────────────────────────────────────────────────────────────
+// -- Eyes ----------------------------------------------------------------------
 
 function Eyes({ state }: { state: MascotState }) {
   if (state === 'resting') {
@@ -165,7 +165,7 @@ function Eyes({ state }: { state: MascotState }) {
   )
 }
 
-// ── Main component ─────────────────────────────────────────────────────────────
+// -- Main component -------------------------------------------------------------
 
 export function Mascot({ state = 'idle', size = 80, label, className }: MascotProps) {
   const { shouldAnimate } = useMotion()

@@ -17,7 +17,7 @@ export interface ParsedTask {
   confidence: number
 }
 
-// ── Day name maps ─────────────────────────────────────────────────────────────
+// -- Day name maps -------------------------------------------------------------
 
 const EN_DAYS: Record<string, number> = {
   sunday: 0, sun: 0,
@@ -39,7 +39,7 @@ const RU_DAYS: Record<string, number> = {
   'суббота': 6, 'субботу': 6, 'сб': 6,
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// -- Helpers -------------------------------------------------------------------
 
 function nextWeekday(target: number): string {
   const now = new Date()
@@ -55,7 +55,7 @@ function stripMatch(text: string, match: string): string {
   return text.replace(match, '').replace(/\s{2,}/g, ' ').trim()
 }
 
-// ── Date extraction ───────────────────────────────────────────────────────────
+// -- Date extraction -----------------------------------------------------------
 
 function extractDate(text: string): { date: string | null; cleaned: string } {
   const lower = text.toLowerCase()
@@ -109,7 +109,7 @@ function extractDate(text: string): { date: string | null; cleaned: string } {
   return { date: null, cleaned: text }
 }
 
-// ── Time extraction ───────────────────────────────────────────────────────────
+// -- Time extraction -----------------------------------------------------------
 
 function extractTime(text: string): { time: string | null; cleaned: string } {
   // "at 3pm", "at 3:30pm", "at 15:00"
@@ -201,7 +201,7 @@ function extractTime(text: string): { time: string | null; cleaned: string } {
   return { time: null, cleaned: text }
 }
 
-// ── Type extraction ───────────────────────────────────────────────────────────
+// -- Type extraction -----------------------------------------------------------
 
 function extractType(text: string): { type: TaskType; cleaned: string } {
   const lower = text.toLowerCase()
@@ -232,7 +232,7 @@ function extractType(text: string): { type: TaskType; cleaned: string } {
   return { type: 'task', cleaned: text }
 }
 
-// ── Main parser ───────────────────────────────────────────────────────────────
+// -- Main parser ---------------------------------------------------------------
 
 export function parseQuickInput(text: string): ParsedTask {
   const trimmed = text.trim()

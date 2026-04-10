@@ -12,7 +12,7 @@
  * Sprint E2 Phase 4 — see memory/wip-sprint-e2-phase3.md
  */
 
-// ── Types ─────────────────────────────────────────────────────────────────────
+// -- Types ---------------------------------------------------------------------
 
 export interface CharacterState {
   crystal_balance: number
@@ -39,7 +39,7 @@ interface CharacterEvent {
   source_product: 'mindshift'
 }
 
-// ── Config ────────────────────────────────────────────────────────────────────
+// -- Config --------------------------------------------------------------------
 
 // The proxy edge function lives in the same Supabase project as MindShift.
 // No cross-project JWT issues — Supabase validates the JWT internally.
@@ -47,12 +47,12 @@ const SUPABASE_URL   = import.meta.env.VITE_SUPABASE_URL ?? ''
 const SUPABASE_ANON  = import.meta.env.VITE_SUPABASE_ANON_KEY ?? ''
 const PROXY_ENDPOINT = `${SUPABASE_URL}/functions/v1/volaura-bridge-proxy`
 
-// ── Cache ─────────────────────────────────────────────────────────────────────
+// -- Cache ---------------------------------------------------------------------
 
 const stateCache = new Map<string, { data: CharacterState; ts: number }>()
 const CACHE_TTL  = 5 * 60 * 1000 // 5 minutes client-side cache
 
-// ── Proxy helper ──────────────────────────────────────────────────────────────
+// -- Proxy helper --------------------------------------------------------------
 
 function isConfigured(): boolean {
   return SUPABASE_URL.length > 0 && SUPABASE_ANON.length > 0
@@ -87,7 +87,7 @@ async function proxyCall<T>(
   }
 }
 
-// ── Public API ────────────────────────────────────────────────────────────────
+// -- Public API ----------------------------------------------------------------
 
 /**
  * Fetch user's VOLAURA character state (AURA badge, crystals, stats).
@@ -132,7 +132,7 @@ async function sendCharacterEvent(
   return result !== null
 }
 
-// ── Convenience senders ───────────────────────────────────────────────────────
+// -- Convenience senders -------------------------------------------------------
 
 /** Send focus session completion event
  *

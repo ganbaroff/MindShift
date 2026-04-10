@@ -10,7 +10,7 @@
  */
 import { test, expect, seedStore } from './helpers'
 
-// ── Shared task fixture ────────────────────────────────────────────────────────
+// -- Shared task fixture --------------------------------------------------------
 
 function makeTask(id: string, pool: 'now' | 'next' = 'now') {
   return {
@@ -35,7 +35,7 @@ function makeTask(id: string, pool: 'now' | 'next' = 'now') {
   }
 }
 
-// ── 1. Park it ─────────────────────────────────────────────────────────────────
+// -- 1. Park it -----------------------------------------------------------------
 
 test.describe('Park it (snooze NOW → NEXT)', () => {
   test('task card shows "Park it →" button', async ({ authedPage: page }) => {
@@ -78,7 +78,7 @@ test.describe('Park it (snooze NOW → NEXT)', () => {
   })
 })
 
-// ── 2. Task completion undo ────────────────────────────────────────────────────
+// -- 2. Task completion undo ----------------------------------------------------
 
 test.describe('Task completion undo', () => {
   test('completing a task shows "✓ Done" button state', async ({ authedPage: page }) => {
@@ -133,7 +133,7 @@ test.describe('Task completion undo', () => {
   })
 })
 
-// ── 3. NatureBuffer post-session ───────────────────────────────────────────────
+// -- 3. NatureBuffer post-session -----------------------------------------------
 
 test.describe('NatureBuffer post-session screen', () => {
   test('NatureBuffer shows energy check-in after session end', async ({ authedPage: page }) => {

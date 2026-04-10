@@ -14,7 +14,7 @@ import { getToneCopy } from '@/shared/lib/uiTone'
 import { ACHIEVEMENT_DEFINITIONS } from '@/types'
 import { SpicinessPicker } from './SpicinessPicker'
 
-// ── Fallback messages (Research #7: identity-reinforcing, shame-free) ────────
+// -- Fallback messages (Research #7: identity-reinforcing, shame-free) --------
 // Rules: no quantifying absence, no streaks, forward-looking, persona-voiced.
 // Fifth message explicitly reinforces resilient identity ("consistent returner").
 
@@ -26,7 +26,7 @@ import { SpicinessPicker } from './SpicinessPicker'
 // "Back again 🌸 Opening this app took courage. What's one thing we can do together?"
 // "You always come back. 💫 That's who you are — a consistent returner, not a perfect one."
 
-// ── Micro-win suggestion chips (Research #7: pre-populated options lower barrier) ──
+// -- Micro-win suggestion chips (Research #7: pre-populated options lower barrier) --
 // Low-stakes, achievable in minutes — generate immediate dopamine burst before backlog.
 
 const MICRO_WIN_KEYS = [

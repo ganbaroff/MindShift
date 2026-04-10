@@ -33,12 +33,12 @@ interface Props {
   behaviorProfile?: UserBehaviorProfile | null
 }
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
+// -- Helpers ------------------------------------------------------------------
 
 const getRandomMessage = (messages: string[]): string =>
   messages[Math.floor(Math.random() * messages.length)]
 
-// ── Bubble triggers ───────────────────────────────────────────────────────────
+// -- Bubble triggers -----------------------------------------------------------
 
 interface BubbleTrigger {
   id: string
@@ -58,7 +58,7 @@ const BUBBLE_TRIGGERS: BubbleTrigger[] = [
 
 const MIN_GAP_SECONDS = 20 * 60  // max 1 bubble per 20 min
 
-// ── AI fetch helper ──────────────────────────────────────────────────────────
+// -- AI fetch helper ----------------------------------------------------------
 
 interface MochiAIResponse {
   message: string
@@ -104,7 +104,7 @@ async function fetchMochiAI(
   }
 }
 
-// ── Component ──────────────────────────────────────────────────────────────────
+// -- Component ------------------------------------------------------------------
 
 interface ActiveBubble {
   id: string
@@ -197,7 +197,7 @@ function MochiSessionCompanionInner({ elapsedSeconds, sessionPhase, behaviorProf
     }
   }, [psychotype, effectiveTone, getPool])
 
-  // ── Trigger logic ───────────────────────────────────────────────────────────
+  // -- Trigger logic -----------------------------------------------------------
   // Runs at most once per threshold crossing (4 thresholds total) rather than
   // every second — elapsedBucket changes only when elapsed crosses 7/15/30/60 min.
   useEffect(() => {

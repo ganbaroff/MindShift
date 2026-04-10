@@ -15,7 +15,7 @@ import { useMotion } from '@/shared/hooks/useMotion'
 import { useStore } from '@/store'
 import type { Psychotype } from '@/types'
 
-// ── Types ─────────────────────────────────────────────────────────────────────
+// -- Types ---------------------------------------------------------------------
 
 interface FocusProofCardProps {
   open: boolean
@@ -23,7 +23,7 @@ interface FocusProofCardProps {
   weeklyMinutes: number
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// -- Helpers -------------------------------------------------------------------
 
 const PSYCHOTYPE_DATA: Record<Psychotype, { emoji: string; label: string; tagline: string }> = {
   achiever:  { emoji: '🎯', label: 'Achiever',  tagline: 'Deep work, done right.' },
@@ -55,7 +55,7 @@ function getMinsLabel(mins: number): { big: string; unit: string } {
   return { big: `${mins}`, unit: mins === 1 ? 'minute focused' : 'minutes focused' }
 }
 
-// ── Component ─────────────────────────────────────────────────────────────────
+// -- Component -----------------------------------------------------------------
 
 export function FocusProofCard({ open, onClose, weeklyMinutes }: FocusProofCardProps) {
   const { shouldAnimate } = useMotion()

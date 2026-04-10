@@ -80,7 +80,7 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
     onReady()
   }
 
-  // ── Phase dot helper — CSS custom properties (guardrail: no hardcoded colors)
+  // -- Phase dot helper — CSS custom properties (guardrail: no hardcoded colors)
   const phaseColor = (phase: string) => {
     if (phase === 'flow')    return 'var(--color-teal)'
     if (phase === 'release') return 'var(--color-gold)'
@@ -140,7 +140,7 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
           </button>
         </div>
 
-        {/* ── Idle / Pick mode ─────────────────────────────────────────────── */}
+        {/* -- Idle / Pick mode ----------------------------------------------- */}
         {room.status === 'idle' && mode === 'pick' && (
           <div className="space-y-3">
             <p className="text-[13px] leading-relaxed mb-4" style={{ color: 'var(--color-text-muted)' }}>
@@ -167,7 +167,7 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
           </div>
         )}
 
-        {/* ── Join mode ────────────────────────────────────────────────────── */}
+        {/* -- Join mode ------------------------------------------------------ */}
         {room.status === 'idle' && mode === 'join' && (
           <div className="space-y-3">
             <p className="text-[12px] mb-2" style={{ color: 'var(--color-text-muted)' }}>{t('focusRoom.enterCode')}</p>
@@ -204,7 +204,7 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
           </div>
         )}
 
-        {/* ── Connecting ───────────────────────────────────────────────────── */}
+        {/* -- Connecting ----------------------------------------------------- */}
         {room.status === 'connecting' && (
           <div className="flex flex-col items-center py-8 gap-3">
             <div className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin motion-reduce:animate-none" style={{ borderColor: 'var(--color-primary)', borderTopColor: 'transparent' }} />
@@ -212,7 +212,7 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
           </div>
         )}
 
-        {/* ── Connected — show room code & peers ───────────────────────────── */}
+        {/* -- Connected — show room code & peers ----------------------------- */}
         {room.status === 'connected' && room.code && (
           <div className="space-y-4">
             {/* Room code + invite link */}
@@ -300,7 +300,7 @@ export function FocusRoomSheet({ room, onClose, onReady }: FocusRoomSheetProps) 
           </div>
         )}
 
-        {/* ── Error ────────────────────────────────────────────────────────── */}
+        {/* -- Error ---------------------------------------------------------- */}
         {room.status === 'error' && (
           <div className="text-center py-6 space-y-3">
             <p className="text-[14px]" style={{ color: 'var(--color-gold)' }}>⚠ {t('focusRoom.connectionError')}</p>

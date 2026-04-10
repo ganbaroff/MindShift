@@ -4,7 +4,7 @@ import { getPhase } from './useSessionPhase'
 import type { SessionPhase, ActiveSession } from '@/types'
 import type { ScreenState } from './useFocusSession'
 
-// ── Types ─────────────────────────────────────────────────────────────────────
+// -- Types ---------------------------------------------------------------------
 
 interface UseSessionTimerOptions {
   screen: ScreenState
@@ -35,17 +35,17 @@ export interface UseSessionTimerReturn {
   resetPhaseTracking: () => void
 }
 
-// ── Hook ──────────────────────────────────────────────────────────────────────
+// -- Hook ----------------------------------------------------------------------
 
 export function useSessionTimer(options: UseSessionTimerOptions): UseSessionTimerReturn {
   const { screen, sessionPhase, activeSession, setPhase, onTimerEnd } = options
 
-  // ── State ─────────────────────────────────────────────────────────────────
+  // -- State -----------------------------------------------------------------
   const [remainingSeconds, setRemaining]  = useState(0)
   const [elapsedSeconds, setElapsed]      = useState(0)
   const [showDigits, setShowDigits]       = useState(false)
 
-  // ── Refs ──────────────────────────────────────────────────────────────────
+  // -- Refs ------------------------------------------------------------------
   const startTimeRef        = useRef(0)
   const pausedMsRef         = useRef(0)
   const pauseStartRef       = useRef(0)
@@ -56,7 +56,7 @@ export function useSessionTimer(options: UseSessionTimerOptions): UseSessionTime
   const sessionSavedRef     = useRef(false)
   const lastPhaseRef        = useRef<SessionPhase>('idle')  // tracks phase for haptic on transition
 
-  // ── Interval runner ──────────────────────────────────────────────────────────
+  // -- Interval runner ----------------------------------------------------------
   const startInterval = useCallback(() => {
     // BUG-D3: clear any orphaned interval before creating a new one —
     // rapid taps on "bypass hard-stop" could stack multiple intervals
@@ -81,24 +81,24 @@ export function useSessionTimer(options: UseSessionTimerOptions): UseSessionTime
     }, 250)
   }, [setPhase, onTimerEnd])
 
-  // ── Stop (pause mechanics only — screen transition stays in useFocusSession) ──
+  // -- Stop (pause mechanics only — screen transition stays in useFocusSession) --
   const handleStop = useCallback(() => {
     if (intervalRef.current) clearInterval(intervalRef.current)
     pauseStartRef.current = Date.now()
   }, [])
 
-  // ── Resume (accumulate pause time — screen transition stays in useFocusSession) ─
+  // -- Resume (accumulate pause time — screen transition stays in useFocusSession) -
   const handleResume = useCallback(() => {
     pausedMsRef.current += Date.now() - pauseStartRef.current
     startInterval()
   }, [startInterval])
 
-  // ── Reset phase tracking (called from handleStart in useFocusSession) ────────
+  // -- Reset phase tracking (called from handleStart in useFocusSession) --------
   const resetPhaseTracking = useCallback(() => {
     lastPhaseRef.current = 'struggle'
   }, [])
 
-  // ── Visibility change — correct timer on background return ─────────────────
+  // -- Visibility change — correct timer on background return -----------------
   useEffect(() => {
     const handleVisibility = () => {
       if (document.visibilityState === 'visible' && screen === 'session' && startTimeRef.current > 0) {
@@ -115,7 +115,7 @@ export function useSessionTimer(options: UseSessionTimerOptions): UseSessionTime
     return () => document.removeEventListener('visibilitychange', handleVisibility)
   }, [screen, onTimerEnd, setPhase])
 
-  // ── beforeunload — persist in-progress session to localStorage ───────────────
+  // -- beforeunload — persist in-progress session to localStorage ---------------
   // If the tab is closed mid-session, Supabase insert never runs.
   // We save a snapshot so the next app load can detect and recover it.
   useEffect(() => {

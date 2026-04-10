@@ -1,4 +1,4 @@
-// ── App constants ─────────────────────────────────────────────────────────────
+// -- App constants -------------------------------------------------------------
 
 export const RECOVERY_THRESHOLD_HOURS = 72  // Research #7: RSD spiral peaks at 3+ days absence
 export const NOW_POOL_MAX = 3
@@ -50,7 +50,7 @@ export const PSYCHOTYPE_DETECTION_DAYS = 7
 // Avatars
 export const AVATAR_COUNT = 6
 
-// ── App mode configuration — drives pool limits + HomeScreen visibility ───────
+// -- App mode configuration — drives pool limits + HomeScreen visibility -------
 // Each appMode maps to a specific NOW pool max and HomeScreen layout.
 // Used by HomeScreen, AddTaskModal, and NowPoolWidget.
 export const APP_MODE_CONFIG = {
@@ -74,7 +74,7 @@ export const APP_MODE_CONFIG = {
   },
 } as const
 
-// ── Seasonal mode configuration — overrides NOW pool max per life phase ────────
+// -- Seasonal mode configuration — overrides NOW pool max per life phase --------
 // recover: gentle mode caps NOW tasks at 2. launch: high capacity at 5.
 // null = use appMode default (no seasonal override).
 export const SEASONAL_MODE_CONFIG = {
@@ -94,7 +94,7 @@ export function getNowPoolMax(
   return SEASONAL_MODE_CONFIG[seasonalMode].nowPoolMaxOverride ?? APP_MODE_CONFIG[appMode].nowPoolMax
 }
 
-// ── Energy labels — canonical set used across all UI ──────────────────────────
+// -- Energy labels — canonical set used across all UI --------------------------
 // Drained(1) → Low(2) → Okay(3) → Good(4) → Wired(5)
 // Keep in sync: EnergyCheckin, HomeScreen, PostSessionFlow, SettingsScreen
 export const ENERGY_LABELS = ['Drained', 'Low', 'Okay', 'Good', 'Wired'] as const

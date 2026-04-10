@@ -4,7 +4,7 @@ import { useMotion } from '@/shared/hooks/useMotion'
 import i18n from '@/i18n'
 import type { SessionPhase } from '@/types'
 
-// ── Arc geometry ───────────────────────────────────────────────────────────────
+// -- Arc geometry ---------------------------------------------------------------
 
 const RADIUS = 90
 const STROKE = 10
@@ -21,7 +21,7 @@ const PHASE_COLORS: Record<SessionPhase, string> = {
   recovery: '#F59E0B',   // amber — recovery (Research #8: #F59E0B not neon #FFE66D)
 }
 
-// ── Helpers ────────────────────────────────────────────────────────────────────
+// -- Helpers --------------------------------------------------------------------
 
 function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60)
@@ -29,7 +29,7 @@ function formatTime(seconds: number): string {
   return `${m}:${s.toString().padStart(2, '0')}`
 }
 
-// ── Component ─────────────────────────────────────────────────────────────────
+// -- Component -----------------------------------------------------------------
 
 interface Props {
   progress: number        // 1.0 = full, 0.0 = empty
@@ -209,7 +209,7 @@ function ArcTimerInner({
   )
 }
 
-// ── memo wrapper — ArcTimer re-renders every 250ms from the parent interval ──
+// -- memo wrapper — ArcTimer re-renders every 250ms from the parent interval --
 // With memo, React skips re-render when props are shallowly equal.
 // Critical for SVG-heavy arc animation performance.
 export const ArcTimer = memo(ArcTimerInner)

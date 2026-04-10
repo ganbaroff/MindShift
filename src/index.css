@@ -1,4 +1,12 @@
 @import "tailwindcss";
+@source "./**/*.{ts,tsx}";
+@source "../e2e/**/*.ts";
+@source not "../memory/**";
+@source not "../test-results/**";
+@source not "../playwright-report/**";
+@source not "../dist/**";
+@source not "../scripts/**/*.md";
+@source not "../**/*.md";
 
 @theme {
   /* -- MindShift Design Tokens ----------------------------- */

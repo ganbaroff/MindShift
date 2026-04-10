@@ -29,7 +29,7 @@ import { nativeHapticImpact } from '@/shared/lib/native'
 import { supabase } from '@/shared/lib/supabase'
 import { useStore } from '@/store'
 
-// ── Hardcoded lines (psychotype-aware, shown instantly) ───────────────────────
+// -- Hardcoded lines (psychotype-aware, shown instantly) -----------------------
 
 const INITIAL_LINES: Record<string, string> = {
   achiever:  'Рекорд по нажатиям не считается. 😤',
@@ -45,14 +45,14 @@ const PRESSED_LINES = [
   'Серьёзно? 🙄',
 ]
 
-// ── Types ─────────────────────────────────────────────────────────────────────
+// -- Types ---------------------------------------------------------------------
 
 interface EasterEggOverlayProps {
   visible: boolean
   onDismiss: () => void
 }
 
-// ── Component ─────────────────────────────────────────────────────────────────
+// -- Component -----------------------------------------------------------------
 
 export function EasterEggOverlay({ visible, onDismiss }: EasterEggOverlayProps) {
   const { shouldAnimate, t: transition } = useMotion()
@@ -237,7 +237,7 @@ export function EasterEggOverlay({ visible, onDismiss }: EasterEggOverlayProps) 
   )
 }
 
-// ── AI personalization (best-effort, 4s window) ────────────────────────────────
+// -- AI personalization (best-effort, 4s window) --------------------------------
 
 async function fetchMochiPersonalization(
   psychotype: string | null,

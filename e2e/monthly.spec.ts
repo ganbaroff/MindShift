@@ -27,12 +27,12 @@
 import { test, expect, seedStore } from './helpers'
 import type { Page } from '@playwright/test'
 
-// ── Time fixture ───────────────────────────────────────────────────────────────
+// -- Time fixture ---------------------------------------------------------------
 
 /** 2025-01-03, 14:00 — Friday, day 3 ≤ 5, satisfies monthly guard. */
 const JAN_3_2PM = new Date('2025-01-03T14:00:00')
 
-// ── Store seed ─────────────────────────────────────────────────────────────────
+// -- Store seed -----------------------------------------------------------------
 
 function monthlyStore(extra: Record<string, unknown> = {}) {
   return {
@@ -58,7 +58,7 @@ function monthlyStore(extra: Record<string, unknown> = {}) {
   }
 }
 
-// ── Clock helpers ──────────────────────────────────────────────────────────────
+// -- Clock helpers --------------------------------------------------------------
 
 /** Navigate with fake clock, advance 2500ms to fire the 2000ms overlay timeout. */
 async function gotoWithClock(page: Page, path = '/') {
@@ -87,7 +87,7 @@ async function clickAndAdvance(page: Page, button: ReturnType<Page['getByRole']>
   }
 }
 
-// ── Tests ──────────────────────────────────────────────────────────────────────
+// -- Tests ----------------------------------------------------------------------
 
 test.describe('MonthlyReflection overlay', () => {
   test('appears on day 3 of month with wrapped heading', async ({ authedPage: page }) => {

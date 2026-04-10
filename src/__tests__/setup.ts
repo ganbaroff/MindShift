@@ -7,7 +7,7 @@
 
 import { vi, afterEach } from 'vitest'
 
-// ── crypto.randomUUID ─────────────────────────────────────────────────────────
+// -- crypto.randomUUID ---------------------------------------------------------
 // jsdom doesn't expose crypto.randomUUID in all versions.
 // Use a simple counter-based stub that produces unique deterministic IDs.
 let _uuidCounter = 0
@@ -18,7 +18,7 @@ Object.defineProperty(globalThis, 'crypto', {
   configurable: true,
 })
 
-// ── navigator.vibrate ─────────────────────────────────────────────────────────
+// -- navigator.vibrate ---------------------------------------------------------
 // jsdom doesn't implement the Vibration API. Stub it so haptic.ts doesn't throw.
 Object.defineProperty(navigator, 'vibrate', {
   value: vi.fn(() => true),
@@ -26,7 +26,7 @@ Object.defineProperty(navigator, 'vibrate', {
   writable: true,
 })
 
-// ── localStorage reset between tests ──────────────────────────────────────────
+// -- localStorage reset between tests ------------------------------------------
 // Prevent test state leaking through localStorage (offlineQueue, store persist).
 afterEach(() => {
   localStorage.clear()

@@ -1,4 +1,4 @@
-// ── SpicinessPicker — overwhelm selector for decompose-task granularity ──────
+// -- SpicinessPicker — overwhelm selector for decompose-task granularity ------
 // Research #3 (Goblin Tools): 1 = very overwhelmed, 5 = barely overwhelmed.
 // Higher spiciness = fewer, smaller decomposition steps.
 

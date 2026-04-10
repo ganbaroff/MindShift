@@ -38,7 +38,7 @@ export function deriveFromSessions(sessions: FocusSessionRow[]): Psychotype | nu
     planner:   0,
   }
 
-  // ── Achiever: reached flow or release in majority of sessions ──────────────
+  // -- Achiever: reached flow or release in majority of sessions --------------
   const deep = sessions.filter(
     s => s.phase_reached === 'flow' || s.phase_reached === 'release',
   )
@@ -52,7 +52,7 @@ export function deriveFromSessions(sessions: FocusSessionRow[]): Psychotype | nu
     sessions.reduce((a, s) => a + (s.duration_ms ?? 0), 0) / sessions.length / 60000
   if (avgMinutes > 25) scores.achiever += 1
 
-  // ── Explorer: high variance in session durations AND start hours ───────────
+  // -- Explorer: high variance in session durations AND start hours -----------
   const durations = sessions.map(s => (s.duration_ms ?? 0) / 60000)
   const hours     = sessions.map(s => new Date(s.started_at).getHours())
   const durStd    = stdDev(durations)
@@ -61,7 +61,7 @@ export function deriveFromSessions(sessions: FocusSessionRow[]): Psychotype | nu
   else if (durStd > 10 || hourStd > 4) scores.explorer += 2
   else if (durStd > 5)  scores.explorer += 1
 
-  // ── Connector: sessions spread across many unique days ─────────────────────
+  // -- Connector: sessions spread across many unique days ---------------------
   const uniqueDays = new Set(sessions.map(s => new Date(s.started_at).toDateString())).size
   // Out of a 30-day window
   const dayRate = uniqueDays / 30
@@ -78,7 +78,7 @@ export function deriveFromSessions(sessions: FocusSessionRow[]): Psychotype | nu
     if (avgDelta >= 0) scores.connector += 1  // sessions feel restorative
   }
 
-  // ── Planner: consistent start times (low hour variance) ───────────────────
+  // -- Planner: consistent start times (low hour variance) -------------------
   if (hourStd < 2) scores.planner += 3
   else if (hourStd < 3.5) scores.planner += 2
   else if (hourStd < 5) scores.planner += 1
@@ -86,7 +86,7 @@ export function deriveFromSessions(sessions: FocusSessionRow[]): Psychotype | nu
   // Bonus: consistent session lengths (focused routine)
   if (durStd < 5) scores.planner += 1
 
-  // ── Winner ─────────────────────────────────────────────────────────────────
+  // -- Winner -----------------------------------------------------------------
   const sorted = (Object.entries(scores) as [Psychotype, number][])
     .sort((a, b) => b[1] - a[1])
 

@@ -12,7 +12,7 @@
  */
 import { test, expect, seedStore, mockSupabase, TEST_USER } from './helpers'
 
-// ── Fixtures ──────────────────────────────────────────────────────────────────
+// -- Fixtures ------------------------------------------------------------------
 
 const today = new Date()
 const yesterday = new Date(today)
@@ -92,7 +92,7 @@ async function goToHistory(page: import('@playwright/test').Page) {
   ).toBeVisible({ timeout: 5000 })
 }
 
-// ── Tests: summary stats ──────────────────────────────────────────────────────
+// -- Tests: summary stats ------------------------------------------------------
 
 test.describe('HistoryPage — summary stats', () => {
   test.beforeEach(async ({ page }) => {
@@ -130,7 +130,7 @@ test.describe('HistoryPage — summary stats', () => {
   })
 })
 
-// ── Tests: timeline grouping and content ──────────────────────────────────────
+// -- Tests: timeline grouping and content --------------------------------------
 
 test.describe('HistoryPage — timeline', () => {
   test.beforeEach(async ({ page }) => {
@@ -188,7 +188,7 @@ test.describe('HistoryPage — timeline', () => {
   })
 })
 
-// ── Tests: guest state ────────────────────────────────────────────────────────
+// -- Tests: guest state --------------------------------------------------------
 
 test.describe('HistoryPage — guest user', () => {
   test('shows sign-in prompt for guest user', async ({ page }) => {
@@ -247,7 +247,7 @@ test.describe('HistoryPage — guest user', () => {
   })
 })
 
-// ── Tests: empty state ────────────────────────────────────────────────────────
+// -- Tests: empty state --------------------------------------------------------
 
 test.describe('HistoryPage — empty state', () => {
   test('shows encouraging empty state when no sessions', async ({ page }) => {
@@ -264,7 +264,7 @@ test.describe('HistoryPage — empty state', () => {
   })
 })
 
-// ── Tests: navigation ─────────────────────────────────────────────────────────
+// -- Tests: navigation ---------------------------------------------------------
 
 test.describe('HistoryPage — navigation', () => {
   test('is reachable from progress page via session log link', async ({ page }) => {

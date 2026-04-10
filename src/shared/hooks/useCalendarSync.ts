@@ -1,4 +1,4 @@
-// ── useCalendarSync — reactive Google Calendar sync ─────────────────────────
+// -- useCalendarSync — reactive Google Calendar sync -------------------------
 // Watches store for task create/update/complete/delete and syncs to Google Calendar.
 // Fire-and-forget: never blocks the UI. Gentle toast on failure.
 

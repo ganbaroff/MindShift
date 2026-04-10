@@ -20,7 +20,7 @@ import { useCalendarSync } from '@/shared/hooks/useCalendarSync'
 import { useInAppReview } from '@/shared/hooks/useInAppReview'
 import { useAuthInit } from './useAuthInit'
 
-// ── Lazy import with auto-reload on stale chunk (PWA cache invalidation) ────
+// -- Lazy import with auto-reload on stale chunk (PWA cache invalidation) ----
 function lazyWithReload<T extends { default: React.ComponentType<unknown> }>(
   factory: () => Promise<T>
 ): React.LazyExoticComponent<T['default']> {
@@ -38,7 +38,7 @@ function lazyWithReload<T extends { default: React.ComponentType<unknown> }>(
   )
 }
 
-// ── Lazy routes — Lovable redesign pages ───────────────────────────────────────
+// -- Lazy routes — Lovable redesign pages ---------------------------------------
 const PreviewScreen    = lazyWithReload(() => import('@/features/preview/PreviewScreen'))
 const AuthScreen       = lazyWithReload(() => import('@/features/auth/AuthScreen'))
 const OnboardingPage   = lazyWithReload(() => import('@/features/onboarding/OnboardingPage'))
@@ -110,12 +110,12 @@ export default function App() {
     )
   }, [reducedStimulation])
 
-  // ── Apply font scale to DOM (ADHD+dyslexia accessibility) ─────────────────
+  // -- Apply font scale to DOM (ADHD+dyslexia accessibility) -----------------
   useEffect(() => {
     document.documentElement.style.setProperty('--font-scale', String(fontScale))
   }, [fontScale])
 
-  // ── Apply theme to DOM ──────────────────────────────────────────────────────
+  // -- Apply theme to DOM ------------------------------------------------------
   useEffect(() => {
     const resolved = userTheme === 'system'
       ? (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
@@ -130,7 +130,7 @@ export default function App() {
 
   useEffect(() => { reminders.restore() }, [])
 
-  // ── Re-engagement signal — fires once per app-open after a ≥1-day gap ──────
+  // -- Re-engagement signal — fires once per app-open after a ≥1-day gap ------
   // Moved from TodayPage so direct-to-/focus and push-notification deep-link
   // users are counted correctly in Day-3/Day-7 retention cohorts.
   useEffect(() => {

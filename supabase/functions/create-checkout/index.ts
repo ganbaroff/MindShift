@@ -1,4 +1,4 @@
-// ── create-checkout Edge Function ─────────────────────────────────────────────
+// -- create-checkout Edge Function ---------------------------------------------
 // POST /functions/v1/create-checkout
 // Body: { plan?: 'pro_monthly' | 'pro_yearly' }
 // Returns: { url: string, sessionId: string }

@@ -32,7 +32,7 @@ import { FeatureHint } from '@/shared/ui/FeatureHint'
 import type { Task, AudioPreset } from '@/types'
 import type { FocusRoomState } from '@/shared/hooks/useFocusRoom'
 
-// ── Props ─────────────────────────────────────────────────────────────────────
+// -- Props ---------------------------------------------------------------------
 
 export interface FocusSetupProps {
   // Setup state from useFocusSession

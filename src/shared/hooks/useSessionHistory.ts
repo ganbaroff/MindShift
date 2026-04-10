@@ -27,7 +27,7 @@ import { ACHIEVEMENT_DEFINITIONS } from '@/types'
 import type { WeeklyStats, AudioPreset, EnergyLevel } from '@/types'
 import type { FocusSessionRow } from '@/types/database'
 
-// ── Static fallback insights ──────────────────────────────────────────────────
+// -- Static fallback insights --------------------------------------------------
 
 // i18n keys — resolved at render time via t() in ProgressPage
 const FALLBACK_INSIGHTS = [
@@ -36,7 +36,7 @@ const FALLBACK_INSIGHTS = [
   'progress.insightOneStep',
 ]
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// -- Helpers -------------------------------------------------------------------
 
 /** Mode of an array of strings — returns null for empty arrays */
 function modeOf(arr: string[]): string | null {
@@ -116,7 +116,7 @@ function computeWeeklyStats(sessions: FocusSessionRow[]): WeeklyStats {
   }
 }
 
-// ── Data types ───────────────────────────────────────────────────────────────
+// -- Data types ---------------------------------------------------------------
 
 interface SessionQueryResult {
   sessions: FocusSessionRow[]
@@ -125,7 +125,7 @@ interface SessionQueryResult {
   stats: WeeklyStats
 }
 
-// ── Query function ───────────────────────────────────────────────────────────
+// -- Query function -----------------------------------------------------------
 
 async function fetchSessionHistory(
   userId: string,
@@ -200,7 +200,7 @@ async function fetchSessionHistory(
   return { sessions, energyTrend, weeklyInsight, stats }
 }
 
-// ── Hook ──────────────────────────────────────────────────────────────────────
+// -- Hook ----------------------------------------------------------------------
 
 export interface SessionHistoryResult {
   /** Last 10 energy_after values, most recent first (null filtered out) */

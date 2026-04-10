@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { computeBurnoutScore, getBurnoutTier, deriveBehaviors } from '../burnout'
 
-// ── computeBurnoutScore ──────────────────────────────────────────────────────
+// -- computeBurnoutScore ------------------------------------------------------
 
 describe('computeBurnoutScore', () => {
   it('returns 0 for all-zero inputs', () => {
@@ -58,7 +58,7 @@ describe('computeBurnoutScore', () => {
   })
 })
 
-// ── getBurnoutTier ───────────────────────────────────────────────────────────
+// -- getBurnoutTier -----------------------------------------------------------
 
 describe('getBurnoutTier', () => {
   it('returns healthy for score 0', () => {
@@ -86,7 +86,7 @@ describe('getBurnoutTier', () => {
   })
 })
 
-// ── deriveBehaviors ──────────────────────────────────────────────────────────
+// -- deriveBehaviors ----------------------------------------------------------
 
 describe('deriveBehaviors', () => {
   it('returns all zeros when no activity', () => {

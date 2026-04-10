@@ -63,7 +63,7 @@ export function useOverlayState(): OverlayState {
   const [showMonthly, setShowMonthly] = useState(false)
   const [showWeeklyPlan, setShowWeeklyPlan] = useState(false)
 
-  // ── ContextRestore: show when user returns from background with active tasks ──
+  // -- ContextRestore: show when user returns from background with active tasks --
   useEffect(() => {
     const hasActiveTasks = nowPool.some(t => t.status === 'active')
     const onVisibilityChange = () => {
@@ -80,7 +80,7 @@ export function useOverlayState(): OverlayState {
     return () => document.removeEventListener('visibilitychange', onVisibilityChange)
   }, [nowPool, onboardingCompleted])
 
-  // ── ShutdownRitual: once per day after 9pm ────────────────────────────────────
+  // -- ShutdownRitual: once per day after 9pm ------------------------------------
   useEffect(() => {
     if (!onboardingCompleted) return
     const hour = new Date().getHours()
@@ -91,7 +91,7 @@ export function useOverlayState(): OverlayState {
     return () => clearTimeout(id)
   }, [onboardingCompleted, shutdownShownDate])
 
-  // ── MonthlyReflection: first 5 days of each month, once per month ────────────
+  // -- MonthlyReflection: first 5 days of each month, once per month ------------
   useEffect(() => {
     if (!onboardingCompleted) return
     if (completedTotal < 3) return
@@ -103,7 +103,7 @@ export function useOverlayState(): OverlayState {
     return () => clearTimeout(id)
   }, [onboardingCompleted, completedTotal, monthlyReflectionShownMonth])
 
-  // ── WeeklyPlanning: Sunday 18pm+ or Monday before noon, once per ISO week ────
+  // -- WeeklyPlanning: Sunday 18pm+ or Monday before noon, once per ISO week ----
   useEffect(() => {
     if (!onboardingCompleted) return
     if (completedTotal < 3) return
@@ -116,7 +116,7 @@ export function useOverlayState(): OverlayState {
     return () => clearTimeout(id)
   }, [onboardingCompleted, completedTotal, weeklyPlanShownWeek])
 
-  // ── Derived ───────────────────────────────────────────────────────────────────
+  // -- Derived -------------------------------------------------------------------
   const showRecovery = (() => {
     if (recoveryShown || !lastSessionAt) return false
     return (Date.now() - new Date(lastSessionAt).getTime()) / 3_600_000 >= RECOVERY_THRESHOLD_HOURS
@@ -138,7 +138,7 @@ export function useOverlayState(): OverlayState {
     return Date.now() - new Date(lastRoomLeftAt).getTime() < 86_400_000
   }, [lastRoomCode, lastRoomLeftAt])
 
-  // ── Dismiss handlers ──────────────────────────────────────────────────────────
+  // -- Dismiss handlers ----------------------------------------------------------
   const dismissContextRestore = () => setShowContextRestore(false)
 
   const dismissShutdown = () => {

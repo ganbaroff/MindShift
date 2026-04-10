@@ -22,7 +22,7 @@ import type { TaskRow } from '@/types/database'
 // Valid TaskCategory values — used to safely cast DB strings
 const VALID_CATEGORIES = new Set<string>(['work', 'personal', 'health', 'learning', 'finance'])
 
-// ── Row → Task mapping ────────────────────────────────────────────────────────
+// -- Row → Task mapping --------------------------------------------------------
 
 function rowToTask(row: TaskRow): Task {
   return {
@@ -60,7 +60,7 @@ function rowToTask(row: TaskRow): Task {
   }
 }
 
-// ── Task → Row mapping (for initial push) ────────────────────────────────────
+// -- Task → Row mapping (for initial push) ------------------------------------
 
 function taskToInsertRow(task: Task, userId: string): Omit<TaskRow, 'id' | 'created_at' | 'completed_at' | 'snooze_count'> & { id: string; user_id: string } {
   return {
@@ -84,7 +84,7 @@ function taskToInsertRow(task: Task, userId: string): Omit<TaskRow, 'id' | 'crea
   } as Omit<TaskRow, 'id' | 'created_at' | 'completed_at' | 'snooze_count'> & { id: string; user_id: string; repeat: string; category: string | null }
 }
 
-// ── Push local tasks to Supabase (first-device scenario) ─────────────────────
+// -- Push local tasks to Supabase (first-device scenario) ---------------------
 
 async function pushLocalTasksToSupabase(tasks: Task[], userId: string): Promise<void> {
   const rows = tasks.map(t => taskToInsertRow(t, userId))
@@ -98,7 +98,7 @@ async function pushLocalTasksToSupabase(tasks: Task[], userId: string): Promise<
   }
 }
 
-// ── Hook ──────────────────────────────────────────────────────────────────────
+// -- Hook ----------------------------------------------------------------------
 
 export function useTaskSync(): void {
   const { userId, nowPool, nextPool, somedayPool, setTasks } = useStore()
@@ -141,7 +141,7 @@ export function useTaskSync(): void {
   // Intentionally omitting pool/setTasks from deps — we only re-sync on login
 }
 
-// ── Standalone fire-and-forget helpers ───────────────────────────────────────
+// -- Standalone fire-and-forget helpers ---------------------------------------
 
 /**
  * Upsert a full Task record to Supabase.

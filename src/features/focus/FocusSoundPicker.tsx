@@ -17,7 +17,7 @@ import { useAudioEngine } from '@/shared/hooks/useAudioEngine'
 import { useMotion } from '@/shared/hooks/useMotion'
 import type { AudioPreset } from '@/types'
 
-// ── Sound preset metadata ─────────────────────────────────────────────────────
+// -- Sound preset metadata -----------------------------------------------------
 // eslint-disable-next-line react-refresh/only-export-components
 export const SOUND_PRESETS: { key: AudioPreset; emoji: string; labelKey: string }[] = [
   { key: 'brown',   emoji: '🌊', labelKey: 'settings.soundBrown' },
@@ -28,7 +28,7 @@ export const SOUND_PRESETS: { key: AudioPreset; emoji: string; labelKey: string 
   { key: 'gamma60', emoji: '🧠', labelKey: 'settings.soundGamma60' },
 ]
 
-// ── Medication peak window helper (B-12) ──────────────────────────────────────
+// -- Medication peak window helper (B-12) --------------------------------------
 const MED_PEAK_HOURS: Record<string, [number, number]> = {
   morning:   [8,  11],
   afternoon: [13, 16],
@@ -47,7 +47,7 @@ function getMedPeakLabel(medicationTime: string | null): string | null {
   return null
 }
 
-// ── Props ─────────────────────────────────────────────────────────────────────
+// -- Props ---------------------------------------------------------------------
 
 export interface FocusSoundPickerProps {
   focusAnchor: AudioPreset | null
@@ -63,7 +63,7 @@ export function FocusSoundPicker({ focusAnchor }: FocusSoundPickerProps) {
   const [soundPickerOpen, setSoundPickerOpen] = useState(false)
   const [previewingKey, setPreviewingKey] = useState<AudioPreset | null>(null)
 
-  // ── Sound pick handler ───────────────────────────────────────────────────
+  // -- Sound pick handler ---------------------------------------------------
   const handleSoundPick = useCallback((key: AudioPreset | null) => {
     setFocusAnchor(key)
     if (key) {
@@ -78,7 +78,7 @@ export function FocusSoundPicker({ focusAnchor }: FocusSoundPickerProps) {
     setSoundPickerOpen(false)
   }, [setFocusAnchor, play, stop, isPlaying])
 
-  // ── Medication peak window (B-12) ─────────────────────────────────────────
+  // -- Medication peak window (B-12) -----------------------------------------
   const medPeakLabel = useMemo(
     () => medicationEnabled ? getMedPeakLabel(medicationTime ?? null) : null,
     [medicationEnabled, medicationTime],

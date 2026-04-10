@@ -1,4 +1,4 @@
-// ── gcal-inbound Edge Function ────────────────────────────────────────────────
+// -- gcal-inbound Edge Function ------------------------------------------------
 // GET /functions/v1/gcal-inbound?days=7
 // Returns: { events: GcalEvent[] }
 //
@@ -31,7 +31,7 @@ Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors })
 
   try {
-    // ── Auth ──────────────────────────────────────────────────────────────────
+    // -- Auth ------------------------------------------------------------------
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) {
       return new Response(JSON.stringify({ error: 'Missing auth' }), {
@@ -52,7 +52,7 @@ Deno.serve(async (req: Request) => {
       })
     }
 
-    // ── Rate limit (50/day free) ──────────────────────────────────────────────
+    // -- Rate limit (50/day free) ----------------------------------------------
     const { allowed, retryAfterSeconds } = await checkDbRateLimit(
       supabase, user.id, false, { fnName: 'gcal-inbound', limitFree: 50, windowMs: 86_400_000 }
     )
@@ -62,7 +62,7 @@ Deno.serve(async (req: Request) => {
       })
     }
 
-    // ── Get Google tokens ────────────────────────────────────────────────────
+    // -- Get Google tokens ----------------------------------------------------
     const { data: tokenRow, error: tokenError } = await supabase
       .from('google_tokens')
       .select('*')
@@ -75,7 +75,7 @@ Deno.serve(async (req: Request) => {
       })
     }
 
-    // ── Refresh token if expired ─────────────────────────────────────────────
+    // -- Refresh token if expired ---------------------------------------------
     let accessToken = tokenRow.access_token
     const expiresAt = new Date(tokenRow.expires_at).getTime()
 
@@ -117,7 +117,7 @@ Deno.serve(async (req: Request) => {
       } as never).eq('user_id', user.id)
     }
 
-    // ── Fetch upcoming events ─────────────────────────────────────────────────
+    // -- Fetch upcoming events -------------------------------------------------
     const daysParam = new URL(req.url).searchParams.get('days')
     const days = Math.min(Math.max(parseInt(daysParam ?? '7', 10) || 7, 1), 30)
 

@@ -29,7 +29,7 @@ export function haptic(pattern: number | number[] = 150): void {
   } catch { /* non-critical */ }
 }
 
-// ── Confirmations ─────────────────────────────────────────────────────────────
+// -- Confirmations -------------------------------------------------------------
 
 /** Micro tap — button press, toggle */
 export const hapticTap = () => haptic(10)
@@ -42,7 +42,7 @@ export const hapticDone = () => haptic([15, 50, 25])
  * Sub-50ms gaps fuse into a single jarring buzz (unpleasant for ADHD). */
 export const hapticWow = () => haptic([25, 60, 25, 70, 80])
 
-// ── Attention ─────────────────────────────────────────────────────────────────
+// -- Attention -----------------------------------------------------------------
 
 /** Gentle warning — avoid startle (no sharp spikes) */
 export const hapticWarning = () => haptic([20, 40, 20, 40, 20])
@@ -59,7 +59,7 @@ export const hapticStart = () => haptic([30, 100, 20])
  * Gaps widened to 60ms: 30ms was below LRA decay threshold. */
 export const hapticEnd = () => haptic([18, 60, 18, 60, 60])
 
-// ── Breathwork sync ───────────────────────────────────────────────────────────
+// -- Breathwork sync -----------------------------------------------------------
 
 /**
  * Rhythmic breathe pulse — synced with visual breathwork animation.
@@ -68,7 +68,7 @@ export const hapticEnd = () => haptic([18, 60, 18, 60, 60])
  */
 export const hapticBreathe = () => haptic(15)
 
-// ── Snoooze / park ────────────────────────────────────────────────────────────
+// -- Snoooze / park ------------------------------------------------------------
 
 /** Task parked to NEXT — gentle "sliding" feel.
  * Gap 30→50ms: minimum for distinct pulse perception on LRA. */

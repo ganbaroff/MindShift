@@ -7,7 +7,7 @@
 
 import { useTranslation } from 'react-i18next'
 
-// ── Props ─────────────────────────────────────────────────────────────────────
+// -- Props ---------------------------------------------------------------------
 
 export interface FocusDurationPickerProps {
   timerStyle: string

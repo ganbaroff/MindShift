@@ -31,7 +31,7 @@
  */
 import { test, expect, seedStore, mockSupabase } from './helpers'
 
-// ── Helpers ────────────────────────────────────────────────────────────────────
+// -- Helpers --------------------------------------------------------------------
 
 function makeTask(id: string, pool: 'now' | 'next' | 'someday', index: number) {
   return {
@@ -57,7 +57,7 @@ function hoursAgo(h: number) {
   return new Date(Date.now() - h * 60 * 60 * 1000).toISOString()
 }
 
-// ── Test 1: 500 tasks in store ─────────────────────────────────────────────────
+// -- Test 1: 500 tasks in store -------------------------------------------------
 
 test.describe('Stress: 500 tasks', () => {
   test('TasksPage renders without crashing when store has 500 tasks', async ({ authedPage: page }) => {
@@ -88,7 +88,7 @@ test.describe('Stress: 500 tasks', () => {
   })
 })
 
-// ── Test 2: Offline → complete task → online → state preserved ────────────────
+// -- Test 2: Offline → complete task → online → state preserved ----------------
 
 test.describe('Stress: offline task completion', () => {
   test('completing a task while offline is reflected in the store after reconnect', async ({ authedPage: page }) => {
@@ -125,7 +125,7 @@ test.describe('Stress: offline task completion', () => {
   })
 })
 
-// ── Test 3: Tab-close simulation (beforeunload) → ms_pending_session ──────────
+// -- Test 3: Tab-close simulation (beforeunload) → ms_pending_session ----------
 
 test.describe('Stress: beforeunload pending session', () => {
   test('ms_pending_session is written to localStorage when beforeunload fires during a session', async ({ authedPage: page }) => {
@@ -160,7 +160,7 @@ test.describe('Stress: beforeunload pending session', () => {
   })
 })
 
-// ── Test 4: IDB quota exceeded → localStorage fallback ────────────────────────
+// -- Test 4: IDB quota exceeded → localStorage fallback ------------------------
 
 test.describe('Stress: localStorage fallback when IDB unavailable', () => {
   test('store state seeded into localStorage is readable even when IDB is blocked', async ({ page }) => {
@@ -196,7 +196,7 @@ test.describe('Stress: localStorage fallback when IDB unavailable', () => {
   })
 })
 
-// ── Test 5: Low energy mode (energyLevel=1) ───────────────────────────────────
+// -- Test 5: Low energy mode (energyLevel=1) -----------------------------------
 
 test.describe('Stress: low energy mode', () => {
   test('low energy banner is visible and NOW pool shows only 1 task', async ({ authedPage: page }) => {
@@ -243,7 +243,7 @@ test.describe('Stress: low energy mode', () => {
   })
 })
 
-// ── Test 6: RecoveryProtocol after 72h absence ────────────────────────────────
+// -- Test 6: RecoveryProtocol after 72h absence --------------------------------
 
 test.describe('Stress: 72h recovery protocol', () => {
   test('RecoveryProtocol shows after 73h absence', async ({ authedPage: page }) => {
@@ -275,7 +275,7 @@ test.describe('Stress: 72h recovery protocol', () => {
   })
 })
 
-// ── Test 7: Auth token expired → app shows auth screen gracefully ─────────────
+// -- Test 7: Auth token expired → app shows auth screen gracefully -------------
 
 test.describe('Stress: expired auth token', () => {
   test('expired token returns 401 → app routes to /auth without crashing', async ({ page }) => {
@@ -321,7 +321,7 @@ test.describe('Stress: expired auth token', () => {
   })
 })
 
-// ── Test 8: Empty pools → empty state shown ───────────────────────────────────
+// -- Test 8: Empty pools → empty state shown -----------------------------------
 
 test.describe('Stress: empty pool states', () => {
   test('TasksPage shows 0/3 and 0/6 counters with empty pools', async ({ authedPage: page }) => {
@@ -353,7 +353,7 @@ test.describe('Stress: empty pool states', () => {
   })
 })
 
-// ── Test 9: 90-min soft-stop / 120-min hard-stop ──────────────────────────────
+// -- Test 9: 90-min soft-stop / 120-min hard-stop ------------------------------
 
 test.describe('Stress: session hard-stop screen', () => {
   /**
@@ -392,7 +392,7 @@ test.describe('Stress: session hard-stop screen', () => {
   })
 })
 
-// ── Test 10: Service worker registered ────────────────────────────────────────
+// -- Test 10: Service worker registered ----------------------------------------
 
 test.describe('Stress: service worker', () => {
   test('service worker is registered on app load (navigator.serviceWorker exists)', async ({ authedPage: page }) => {

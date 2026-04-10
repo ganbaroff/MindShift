@@ -11,7 +11,7 @@ import type { SessionPhase, AudioPreset } from '@/types'
 import type { ScreenState } from './useFocusSession'
 import { useStore } from '@/store'
 
-// ── Pure function ─────────────────────────────────────────────────────────────
+// -- Pure function -------------------------------------------------------------
 
 export function getPhase(elapsedMinutes: number): SessionPhase {
   if (elapsedMinutes < PHASE_STRUGGLE_MINUTES) return 'struggle'
@@ -19,7 +19,7 @@ export function getPhase(elapsedMinutes: number): SessionPhase {
   return 'flow'
 }
 
-// ── Hook ──────────────────────────────────────────────────────────────────────
+// -- Hook ----------------------------------------------------------------------
 
 interface UseSessionPhaseOptions {
   screen: ScreenState
@@ -42,7 +42,7 @@ export function useSessionPhase(options: UseSessionPhaseOptions): void {
 
   const { flexiblePauseUntil } = useStore()
 
-  // ── Phase-adaptive audio volume ────────────────────────────────────────────
+  // -- Phase-adaptive audio volume --------------------------------------------
   // Research #1: sound adapts to cognitive phase — full masking in struggle,
   // quiet ambient in flow to avoid disrupting hyperfocus state.
   useEffect(() => {
@@ -52,7 +52,7 @@ export function useSessionPhase(options: UseSessionPhaseOptions): void {
     }
   }, [sessionPhase, screen, adaptToPhase])
 
-  // ── Soft-stop toast at 90 min ──────────────────────────────────────────────
+  // -- Soft-stop toast at 90 min ----------------------------------------------
   useEffect(() => {
     if (screen !== 'session') return
     if (softStopFiredRef.current) return
@@ -68,7 +68,7 @@ export function useSessionPhase(options: UseSessionPhaseOptions): void {
     }
   }, [elapsedSeconds, screen, flexiblePauseUntil, softStopFiredRef])
 
-  // ── Hard-stop half-sheet at 120 min ───────────────────────────────────────
+  // -- Hard-stop half-sheet at 120 min ---------------------------------------
   useEffect(() => {
     if (screen !== 'session') return
     const isFlexPauseActive = !!flexiblePauseUntil && new Date(flexiblePauseUntil) > new Date()

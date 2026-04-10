@@ -19,7 +19,7 @@ import {
   VR_MULTIPLIER_JACKPOT, VR_MULTIPLIER_BONUS,
 } from '@/shared/lib/constants'
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// -- Helpers -------------------------------------------------------------------
 
 function makeTask(overrides: Partial<Task> = {}): Task {
   return {
@@ -61,7 +61,7 @@ function resetStore() {
   })
 }
 
-// ── Task slice ─────────────────────────────────────────────────────────────────
+// -- Task slice -----------------------------------------------------------------
 
 describe('Store — addTask', () => {
   beforeEach(resetStore)
@@ -178,7 +178,7 @@ describe('Store — snoozeTask (now → next)', () => {
 // archiveAllOverdue tests removed — method was never implemented in the store.
 // If this feature is needed later, re-add tests + implementation together.
 
-// ── XP slice ──────────────────────────────────────────────────────────────────
+// -- XP slice ------------------------------------------------------------------
 
 describe('Store — addXP', () => {
   beforeEach(resetStore)
@@ -206,7 +206,7 @@ describe('Store — addXP', () => {
     expect(xpHigh).toBe(16)
   })
 
-  // ── Research #5: Variable Ratio XP schedule ─────────────────────────────────
+  // -- Research #5: Variable Ratio XP schedule ---------------------------------
 
   it('VR: bucket < VR_JACKPOT_THRESHOLD → jackpot multiplier (2×)', () => {
     // Set completedTotal so bucket = VR_JACKPOT_THRESHOLD - 1 (last slot of jackpot range)
@@ -243,7 +243,7 @@ describe('Store — addXP', () => {
   })
 })
 
-// ── Preferences slice ─────────────────────────────────────────────────────────
+// -- Preferences slice ---------------------------------------------------------
 
 describe('Store — isProActive', () => {
   beforeEach(resetStore)
@@ -276,7 +276,7 @@ describe('Store — isProActive', () => {
   })
 })
 
-// ── Selectors ─────────────────────────────────────────────────────────────────
+// -- Selectors -----------------------------------------------------------------
 
 describe('selectActiveTasks', () => {
   beforeEach(resetStore)

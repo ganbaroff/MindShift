@@ -1,4 +1,4 @@
-// ── Domain types (app-level, not DB-level) ────────────────────────────────────
+// -- Domain types (app-level, not DB-level) ------------------------------------
 
 export type { Database, UserRow, TaskRow, FocusSessionRow, AchievementRow, EnergyLogRow } from './database'
 
@@ -88,7 +88,7 @@ export interface Achievement {
   unlockedAt: string | null
 }
 
-// ── Bento grid widget system ───────────────────────────────────────────────────
+// -- Bento grid widget system ---------------------------------------------------
 
 /**
  * Widget types available in the home screen bento grid.

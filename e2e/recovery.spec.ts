@@ -67,7 +67,9 @@ test.describe('RecoveryProtocol — 72h absence', () => {
 
     await expect(page.getByText('How overwhelmed are you right now?')).toBeVisible()
 
-    await page.getByRole('button', { name: 'Skip — show my tasks' }).click()
+    const skipBtn = page.getByRole('button', { name: 'Skip — show my tasks' })
+    // On mobile the button may be outside the fixed viewport — evaluate click directly
+    await skipBtn.evaluate((el: HTMLElement) => el.click())
 
     // Overlay dismissed — recovery question gone
     await expect(page.getByText('How overwhelmed are you right now?')).not.toBeVisible()

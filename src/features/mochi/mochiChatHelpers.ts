@@ -8,7 +8,7 @@ import { supabase } from '@/shared/lib/supabase'
 import type { MascotState } from '@/shared/ui/Mascot'
 import type { Task } from '@/types'
 
-// ── Types ─────────────────────────────────────────────────────────────────────
+// -- Types ---------------------------------------------------------------------
 
 export interface ChatMessage {
   id: string
@@ -23,7 +23,7 @@ export interface MochiChatResponse {
   mascotState: MascotState
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// -- Helpers -------------------------------------------------------------------
 
 export function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
@@ -60,7 +60,7 @@ export function getActiveTaskTypes(tasks: Task[]): Record<string, number> | null
   return Object.keys(counts).length > 0 ? counts : null
 }
 
-// ── AI fetch ──────────────────────────────────────────────────────────────────
+// -- AI fetch ------------------------------------------------------------------
 
 export async function fetchMochiChat(
   userMessage: string,

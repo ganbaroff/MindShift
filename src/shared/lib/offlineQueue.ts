@@ -13,7 +13,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { logError, logInfo } from '@/shared/lib/logger'
 
-// ── Types ─────────────────────────────────────────────────────────────────────
+// -- Types ---------------------------------------------------------------------
 
 export interface QueueItem {
   id: string
@@ -28,13 +28,13 @@ const QUEUE_KEY_PREFIX = 'ms_offline_queue'
 const MAX_RETRIES = 5
 const MAX_QUEUE_SIZE = 50   // guard against localStorage bloat
 
-// ── Key helper (per-user namespace) ──────────────────────────────────────────
+// -- Key helper (per-user namespace) ------------------------------------------
 
 function queueKey(userId?: string): string {
   return userId ? `${QUEUE_KEY_PREFIX}_${userId}` : QUEUE_KEY_PREFIX
 }
 
-// ── Read / Write helpers ──────────────────────────────────────────────────────
+// -- Read / Write helpers ------------------------------------------------------
 
 function getQueue(userId?: string): QueueItem[] {
   try {
@@ -61,7 +61,7 @@ function saveQueue(q: QueueItem[], userId?: string): void {
   }
 }
 
-// ── Public API ────────────────────────────────────────────────────────────────
+// -- Public API ----------------------------------------------------------------
 
 /**
  * Callback for when items are permanently dropped after MAX_RETRIES.

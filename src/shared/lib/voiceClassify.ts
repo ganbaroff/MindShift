@@ -5,7 +5,7 @@
  * tested in isolation and reused.
  */
 
-// ── ClassifyResult type ───────────────────────────────────────────────────────
+// -- ClassifyResult type -------------------------------------------------------
 
 export interface ClassifyResult {
   type: 'task' | 'idea' | 'reminder'
@@ -20,7 +20,7 @@ export interface ClassifyResult {
   confidence: number
 }
 
-// ── Validation constants ──────────────────────────────────────────────────────
+// -- Validation constants ------------------------------------------------------
 
 const VALID_TYPES = ['task', 'idea', 'reminder'] as const
 const VALID_POOLS = ['now', 'next', 'someday'] as const
@@ -30,7 +30,7 @@ const VALID_REMINDER_MINUTES = [15, 30, 60, 1440] as const
 /** Minimum confidence for auto-classification. Below this → ask user. */
 export const CONFIDENCE_THRESHOLD = 0.7
 
-// ── parseClassifyResult ───────────────────────────────────────────────────────
+// -- parseClassifyResult -------------------------------------------------------
 
 /**
  * Safely parse and validate a raw classify-voice-input response.
@@ -119,7 +119,7 @@ export function parseClassifyResult(
   }
 }
 
-// ── isLowConfidence ───────────────────────────────────────────────────────────
+// -- isLowConfidence -----------------------------------------------------------
 
 /** Returns true when the user should confirm classification manually. */
 export function isLowConfidence(result: ClassifyResult): boolean {

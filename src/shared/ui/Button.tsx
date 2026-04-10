@@ -3,7 +3,7 @@ import { cn } from '@/shared/lib/cn'
 import { useMotion } from '@/shared/hooks/useMotion'
 import type { ReactNode, MouseEventHandler } from 'react'
 
-// ── Explicit, conflict-free Button props ──────────────────────────────────────
+// -- Explicit, conflict-free Button props --------------------------------------
 // We don't spread all HTMLButtonElement props onto motion.button to avoid
 // type conflicts between React DOM handlers and Framer Motion handlers.
 

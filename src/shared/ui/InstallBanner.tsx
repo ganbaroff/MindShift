@@ -1,4 +1,4 @@
-// ── InstallBanner ─────────────────────────────────────────────────────────────
+// -- InstallBanner -------------------------------------------------------------
 // Contextual "install the app" nudge — appears once, dismissed forever.
 //
 // Android/Chrome → native install sheet via beforeinstallprompt.

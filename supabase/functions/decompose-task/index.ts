@@ -1,4 +1,4 @@
-// ── decompose-task Edge Function ───────────────────────────────────────────────
+// -- decompose-task Edge Function -----------------------------------------------
 // POST /functions/v1/decompose-task
 // Body: { taskTitle: string, taskDescription?: string, taskType?: string, category?: string }
 // Returns: { steps: string[], estimatedMinutes: number }
@@ -26,7 +26,7 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    // ── Auth ───────────────────────────────────────────────────────────────────
+    // -- Auth -------------------------------------------------------------------
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_ANON_KEY')!,
@@ -41,7 +41,7 @@ Deno.serve(async (req: Request) => {
       )
     }
 
-    // ── Rate limit (DB-backed — persists across cold starts + isolates) ─────────
+    // -- Rate limit (DB-backed — persists across cold starts + isolates) ---------
     const { data: userRow } = await supabase
       .from('users')
       .select('subscription_tier')
@@ -71,7 +71,7 @@ Deno.serve(async (req: Request) => {
       )
     }
 
-    // ── Input (with size validation) ──────────────────────────────────────────
+    // -- Input (with size validation) ------------------------------------------
     const { taskTitle, taskDescription, locale, spiciness, taskType, category } = await req.json() as {
       taskTitle: string
       taskDescription?: string
@@ -102,7 +102,7 @@ Deno.serve(async (req: Request) => {
       )
     }
 
-    // ── Gemini call (with AbortController timeout) ──────────────────────────
+    // -- Gemini call (with AbortController timeout) --------------------------
     const apiKey = Deno.env.get('GEMINI_API_KEY')
     if (!apiKey) {
       return new Response(
@@ -126,7 +126,7 @@ Deno.serve(async (req: Request) => {
         ? 'moderately detailed (each step under 5 minutes)'
         : 'standard (each step under 10 minutes)'
 
-    // ── Task-type-aware prompt construction ──────────────────────────────────
+    // -- Task-type-aware prompt construction ----------------------------------
     const validTaskTypes = ['task', 'idea', 'meeting', 'reminder']
     const resolvedType = validTaskTypes.includes(taskType ?? '') ? taskType! : 'task'
     const validCategories = ['work', 'personal', 'health', 'learning', 'finance']

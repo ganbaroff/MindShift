@@ -118,7 +118,7 @@ export const createPreferencesAndGridSlice: StateCreator<
   [],
   PreferencesAndGridSlice
 > = (set, get) => ({
-  // ── Grid ─────────────────────────────────────────────────────────
+  // -- Grid ---------------------------------------------------------
   gridWidgets: WIDGET_DEFAULTS_GENERIC,
 
   setGridWidgets: (widgets) => set({ gridWidgets: widgets }),
@@ -129,7 +129,7 @@ export const createPreferencesAndGridSlice: StateCreator<
     set({ gridWidgets: defaults })
   },
 
-  // ── Preferences ────────────────────────────────────────────────────
+  // -- Preferences ----------------------------------------------------
   reducedStimulation: false,
   setReducedStimulation: (val) => set({ reducedStimulation: val }),
   hapticsEnabled: true,

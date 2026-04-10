@@ -24,7 +24,7 @@ import { toast } from 'sonner'
 import { useStore } from '@/store'
 import type { Task, TaskType } from '@/types'
 
-// ── Constants ──────────────────────────────────────────────────────────────────
+// -- Constants ------------------------------------------------------------------
 
 const CHECK_INTERVAL_MS = 15 * 60 * 1000 // 15 minutes
 const INITIAL_DELAY_MS = 5_000            // 5s after mount (let app settle)
@@ -34,7 +34,7 @@ const WINDOW_1H = 60
 const WINDOW_30M = 30
 const WINDOW_15M = 15
 
-// ── Helpers ────────────────────────────────────────────────────────────────────
+// -- Helpers --------------------------------------------------------------------
 
 /** Build a due timestamp from task's dueDate + optional dueTime. */
 function getDueTimestamp(task: Task): number | null {
@@ -76,11 +76,11 @@ function isMeeting(taskType: TaskType): boolean {
   return taskType === 'meeting'
 }
 
-// ── Types ─────────────────────────────────────────────────────────────────────
+// -- Types ---------------------------------------------------------------------
 
 type TFn = (key: string, opts?: Record<string, string>) => string
 
-// ── Core check logic ───────────────────────────────────────────────────────────
+// -- Core check logic -----------------------------------------------------------
 
 function checkDeadlines(
   tasks: Task[],
@@ -98,7 +98,7 @@ function checkDeadlines(
     const minutesUntilDue = (dueTs - now) / 60_000
     const meeting = isMeeting(task.taskType)
 
-    // ── Overdue (missed deadline) ──────────────────────────────────────────
+    // -- Overdue (missed deadline) ------------------------------------------
     if (minutesUntilDue < -1) {
       const key = reminderKey(task.id, 'overdue')
       if (!shownSet.has(key)) {
@@ -116,7 +116,7 @@ function checkDeadlines(
       continue
     }
 
-    // ── 15 minutes before ──────────────────────────────────────────────────
+    // -- 15 minutes before --------------------------------------------------
     if (minutesUntilDue <= WINDOW_15M && minutesUntilDue > 0) {
       const key = reminderKey(task.id, '15m')
       if (!shownSet.has(key)) {
@@ -136,7 +136,7 @@ function checkDeadlines(
       continue
     }
 
-    // ── 30 minutes before (meetings only) ──────────────────────────────────
+    // -- 30 minutes before (meetings only) ----------------------------------
     if (meeting && minutesUntilDue <= WINDOW_30M && minutesUntilDue > WINDOW_15M) {
       const key = reminderKey(task.id, '30m')
       if (!shownSet.has(key)) {
@@ -154,7 +154,7 @@ function checkDeadlines(
       continue
     }
 
-    // ── 1 hour before ──────────────────────────────────────────────────────
+    // -- 1 hour before ------------------------------------------------------
     if (minutesUntilDue <= WINDOW_1H && minutesUntilDue > WINDOW_30M) {
       const key = reminderKey(task.id, '1h')
       if (!shownSet.has(key)) {
@@ -173,7 +173,7 @@ function checkDeadlines(
   }
 }
 
-// ── Hook ───────────────────────────────────────────────────────────────────────
+// -- Hook -----------------------------------------------------------------------
 
 /**
  * Runs a deadline reminder check every 15 minutes.
