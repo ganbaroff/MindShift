@@ -8,7 +8,7 @@
  * Shown in FocusSetup above the Start button.
  */
 
-import { useState } from 'react'
+import { useState, useId } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useTranslation } from 'react-i18next'
 import { useMotion } from '@/shared/hooks/useMotion'
@@ -22,6 +22,9 @@ export function IfThenCard() {
   const [showForm, setShowForm] = useState(false)
   const [whenText, setWhenText] = useState('')
   const [willText, setWillText] = useState('')
+  const [formError, setFormError] = useState<string | null>(null)
+  const whenId = useId()
+  const willId = useId()
 
   const canAdd = ifThenRules.length < 3
   const hasRules = ifThenRules.length > 0
@@ -29,7 +32,11 @@ export function IfThenCard() {
   const handleSave = () => {
     const when = whenText.trim()
     const will = willText.trim()
-    if (!when || !will) return
+    if (!when || !will) {
+      setFormError('Both fields are required')
+      return
+    }
+    setFormError(null)
     addIfThenRule({ when, will })
     setWhenText('')
     setWillText('')
@@ -111,17 +118,19 @@ export function IfThenCard() {
             className="space-y-2 mb-2"
           >
             <div className="flex items-center gap-2">
-              <span className="text-[11px] w-16 flex-shrink-0 text-right" style={{ color: 'var(--color-text-muted)' }}>
+              <label htmlFor={whenId} className="text-[11px] w-16 flex-shrink-0 text-right" style={{ color: 'var(--color-text-muted)' }}>
                 {t('focus.intentionWhen')}
-              </span>
+              </label>
               <input
+                id={whenId}
                 autoFocus
                 type="text"
                 value={whenText}
-                onChange={e => setWhenText(e.target.value)}
+                onChange={e => { setWhenText(e.target.value); setFormError(null) }}
                 onKeyDown={handleKeyDown}
                 placeholder={t('focus.intentionWhenPlaceholder')}
                 maxLength={60}
+                aria-invalid={formError ? 'true' : undefined}
                 className="flex-1 h-8 rounded-xl px-2.5 text-[12px] focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none"
                 style={{
                   background: 'var(--color-surface-raised)',
@@ -131,13 +140,14 @@ export function IfThenCard() {
               />
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-[11px] w-16 flex-shrink-0 text-right" style={{ color: 'var(--color-text-muted)' }}>
+              <label htmlFor={willId} className="text-[11px] w-16 flex-shrink-0 text-right" style={{ color: 'var(--color-text-muted)' }}>
                 {t('focus.intentionWill')}
-              </span>
+              </label>
               <input
+                id={willId}
                 type="text"
                 value={willText}
-                onChange={e => setWillText(e.target.value)}
+                onChange={e => { setWillText(e.target.value); setFormError(null) }}
                 onKeyDown={handleKeyDown}
                 placeholder={t('focus.intentionWillPlaceholder')}
                 maxLength={60}
@@ -149,6 +159,11 @@ export function IfThenCard() {
                 }}
               />
             </div>
+            {formError && (
+              <p role="alert" aria-live="assertive" className="text-[11px]" style={{ color: 'var(--color-gold)' }}>
+                {formError}
+              </p>
+            )}
             <div className="flex gap-2 justify-end">
               <button
                 onClick={() => { setShowForm(false); setWhenText(''); setWillText('') }}

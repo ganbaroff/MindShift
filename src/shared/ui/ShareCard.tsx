@@ -12,7 +12,7 @@
  * Never red, never shame, never comparison to others — only YOUR progress.
  */
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { useStore } from '@/store'
@@ -41,6 +41,12 @@ export function ShareCard({ emoji, title, subtitle, stat, onClose }: ShareCardPr
   const [sharing, setSharing] = useState(false)
   const [copied, setCopied] = useState(false)
   const cardRef = useRef<HTMLDivElement>(null)
+  const shareButtonRef = useRef<HTMLButtonElement>(null)
+
+  // 2.4.3 + 4.1.2: move focus to first interactive element on mount
+  useEffect(() => {
+    shareButtonRef.current?.focus()
+  }, [])
 
   const TIER_NAMES = ['Seedling','Sprout','Grower','Bloomer','Flourisher','Cultivator','Nurturer','Luminary','Pathfinder','Sage']
   const level = Math.min(Math.floor(xpTotal / 1000), TIER_NAMES.length - 1)
@@ -95,6 +101,9 @@ export function ShareCard({ emoji, title, subtitle, stat, onClose }: ShareCardPr
   return (
     <AnimatePresence>
       <motion.div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="share-card-title"
         initial={shouldAnimate ? { opacity: 0 } : {}}
         animate={{ opacity: 1 }}
         exit={shouldAnimate ? { opacity: 0 } : {}}
@@ -146,7 +155,7 @@ export function ShareCard({ emoji, title, subtitle, stat, onClose }: ShareCardPr
                 >
                   {emoji}
                 </motion.p>
-                <h3 className="text-lg font-bold text-center" style={{ color: '#E8E8F0' }}>
+                <h3 id="share-card-title" className="text-lg font-bold text-center" style={{ color: '#E8E8F0' }}>
                   {title}
                 </h3>
                 <p className="text-sm text-center leading-relaxed" style={{ color: '#8B8BA7' }}>
@@ -204,8 +213,10 @@ export function ShareCard({ emoji, title, subtitle, stat, onClose }: ShareCardPr
           {/* Actions below card */}
           <div className="flex gap-3 mt-4">
             <button
+              ref={shareButtonRef}
               onClick={handleShare}
               disabled={sharing}
+              aria-busy={sharing}
               className="flex-1 py-3 rounded-2xl font-semibold text-sm focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:outline-none"
               style={{ background: 'var(--color-primary)', color: '#FFFFFF', opacity: sharing ? 0.7 : 1 }}
             >
