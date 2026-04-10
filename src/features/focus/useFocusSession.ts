@@ -212,7 +212,14 @@ export function useFocusSession() {
           void sendFocusSession(token, { ...pending, energyAfter: level })
           // Crystal economy: 1 min focus = 5 crystals (Constitution formula)
           const crystals = pending.durationMinutes * 5
-          if (crystals > 0) void sendCrystalEarned(token, crystals, 'focus_session')
+          if (crystals > 0) {
+            void sendCrystalEarned(token, crystals, 'focus_session')
+            // Write to MindShift crystal_ledger — source of truth for community economy
+            void supabase.rpc(
+              'earn_focus_crystals' as never,
+              { p_amount: crystals, p_source_event: 'focus_session' } as never,
+            )
+          }
         }
       })
     }
