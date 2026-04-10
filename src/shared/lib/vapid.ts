@@ -6,4 +6,4 @@
  *
  * Generated with: npx web-push generate-vapid-keys
  */
-export const VAPID_PUBLIC_KEY = 'BMSkaBzl1bIDFaa8fIxxo40FZ3e4Z302xEIMUOiN9Qbmix9QjY1zth5Nx8d1I8D8jlL_pM3aeSWuWyi-Q_poVPo'
+export const VAPID_PUBLIC_KEY = 'BFcL702uYDK6deRQY9xgKsCZN-d-MJ2RviPcco91hLrjkyCRlcscKe4i4d7yuiw5q-bqxL0oUfLorzz76heFfuY'
