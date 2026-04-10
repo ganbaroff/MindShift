@@ -1035,7 +1035,9 @@
     "tryAgain": "Попробовать снова",
     "partnerSteppedAway": "Ваш партнер отошел — продолжайте",
     "yourPhase": "Ваша фаза концентрации",
-    "activeRoomLabel": "Комната {{code}} · {{count}} фокусировка"
+    "activeRoomLabel": "Комната {{code}} · {{count}} фокусировка",
+    "copyInviteLink": "Скопировать ссылку-приглашение",
+    "roomLinkCopied": "Ссылка скопирована!"
   },
   "breathwork": {
     "breatheIn": "Вдох...",

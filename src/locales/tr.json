@@ -1032,7 +1032,9 @@
     "tryAgain": "Tekrar deneyin",
     "partnerSteppedAway": "Partneriniz uzaklaştı – devam edin",
     "yourPhase": "Odaklanma aşamanız",
-    "activeRoomLabel": "Oda {{code}} · {{count}} odaklanma"
+    "activeRoomLabel": "Oda {{code}} · {{count}} odaklanma",
+    "copyInviteLink": "Davet bağlantısını kopyala",
+    "roomLinkCopied": "Davet bağlantısı kopyalandı!"
   },
   "breathwork": {
     "breatheIn": "Nefes alın...",

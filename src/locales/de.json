@@ -1035,7 +1035,9 @@
     "tryAgain": "Versuchen Sie es erneut",
     "partnerSteppedAway": "Ihr Partner hat sich zurückgezogen – machen Sie weiter",
     "yourPhase": "Ihre Fokusphase",
-    "activeRoomLabel": "Raum {{code}} · {{count}} Fokussierung"
+    "activeRoomLabel": "Raum {{code}} · {{count}} Fokussierung",
+    "copyInviteLink": "Einladungslink kopieren",
+    "roomLinkCopied": "Einladungslink kopiert!"
   },
   "breathwork": {
     "breatheIn": "Einatmen...",
