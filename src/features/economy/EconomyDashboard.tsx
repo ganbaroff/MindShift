@@ -15,6 +15,7 @@ import { useMotion } from '@/shared/hooks/useMotion'
 import { supabase } from '@/shared/lib/supabase'
 import { useStore } from '@/store'
 import { useNavigate } from 'react-router-dom'
+import { ShareholderPanel } from './ShareholderPanel'
 
 interface RevenueSnapshot {
   id: string
@@ -246,6 +247,24 @@ export function EconomyDashboard() {
             ))}
           </div>
         )}
+      </motion.section>
+
+      {/* Shareholder panel */}
+      <motion.section
+        aria-label={t('economy.shareholderSection', 'Shareholder positions')}
+        initial={shouldAnimate ? { opacity: 0, y: 8 } : {}}
+        animate={{ opacity: 1, y: 0 }}
+        transition={shouldAnimate ? { ...(transition() as object), delay: 0.08 } : { duration: 0 }}
+        className="mb-6"
+      >
+        <h2
+          aria-hidden="true"
+          className="text-xs font-semibold mb-3 uppercase tracking-wider"
+          style={{ color: 'var(--color-text-muted)' }}
+        >
+          {t('economy.shareholderTitle', 'Your positions')}
+        </h2>
+        <ShareholderPanel latestDividend={latest?.dividend_per_share_crystal ?? 0} />
       </motion.section>
 
       {/* Latest snapshot highlight */}
