@@ -99,6 +99,7 @@ export default function OnboardingPage() {
   const {
     setAppMode, setEnergyLevel, setOnboardingCompleted,
     setTimeBlindness, setEmotionalReactivity,
+    setDailyFocusGoalMin, setFocusAnchor,
     appMode, timeBlindness, emotionalReactivity, onboardingCompleted,
   } = useStore()
 
@@ -200,6 +201,9 @@ export default function OnboardingPage() {
     // Set neutral ADHD profile defaults so FocusSetupHeader adaptive tips work for quick-start users
     setTimeBlindness('sometimes')
     setEmotionalReactivity('moderate')
+    // ADHD-optimal defaults: pink noise (Research #3) + achievable 25-min goal
+    setFocusAnchor('pink')
+    setDailyFocusGoalMin(25)
     setOnboardingCompleted()
     navigate('/')
   }
