@@ -86,6 +86,13 @@ Deno.serve(async (req: Request) => {
     return new Response('Unauthorized', { status: 401 })
   }
 
+  // Standard Webhooks spec: reject replays older than 5 minutes
+  const tsSeconds = parseInt(timestamp, 10)
+  const nowSeconds = Math.floor(Date.now() / 1000)
+  if (isNaN(tsSeconds) || Math.abs(nowSeconds - tsSeconds) > 300) {
+    return new Response('Webhook timestamp out of window', { status: 401 })
+  }
+
   let event: DodoEvent
   try {
     event = JSON.parse(body) as DodoEvent
