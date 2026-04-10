@@ -193,7 +193,8 @@
     "tipTimeOften": "Die Zeit vergeht schnell – ein sichtbarer Timer reicht aus.",
     "tipTimeSometimes": "Schauen Sie auf die Uhr, bevor Sie beginnen – und vergessen Sie es dann.",
     "tipEmotionHigh": "Blockieren Sie Ihre ersten 15 Minuten vor Unterbrechungen. Fangen Sie klein an.",
-    "tipEmotionModerate": "Wenn Sie abgelenkt sind, halten Sie inne und kehren Sie zurück. Das zählt auch."
+    "tipEmotionModerate": "Wenn Sie abgelenkt sind, halten Sie inne und kehren Sie zurück. Das zählt auch.",
+    "intentionBothRequired": "Füll beide Felder aus, um deine Absicht zu speichern."
   },
   "settings": {
     "title": "Einstellungen",

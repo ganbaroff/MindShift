@@ -23,6 +23,7 @@ function SessionFrictionNudge({ onDismiss }: { onDismiss: () => void }) {
   const { t } = useTranslation()
   const ifThenRules = useStore(s => s.ifThenRules)
   const firstRule = ifThenRules[0]
+  const { shouldAnimate } = useMotion()
 
   useEffect(() => {
     const id = setTimeout(onDismiss, 5000)
@@ -39,9 +40,9 @@ function SessionFrictionNudge({ onDismiss }: { onDismiss: () => void }) {
     <motion.div
       role="status"
       aria-live="polite"
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 8 }}
+      initial={shouldAnimate ? { opacity: 0, y: 8 } : {}}
+      animate={shouldAnimate ? { opacity: 1, y: 0 } : { opacity: 1 }}
+      exit={shouldAnimate ? { opacity: 0, y: 8 } : {}}
       className="fixed left-1/2 z-40 -translate-x-1/2 px-4 py-2.5 rounded-2xl flex items-center gap-2"
       style={{
         bottom: 'calc(80px + env(safe-area-inset-bottom))',
