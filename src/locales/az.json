@@ -919,7 +919,11 @@
     "connectorDesc": "Ardıcıllıq vasitəsilə təcil yaradırsınız",
     "plannerLabel": "Planlayıcı",
     "plannerDesc": "Siz proqnozlaşdırıla bilən bir ritmlə ən yaxşı şəkildə fokuslanırsınız",
-    "firstBadgeWaiting": "İlk nişanınız gözləyir. Davam edin."
+    "firstBadgeWaiting": "İlk nişanınız gözləyir. Davam edin.",
+    "firstWeek0": "İlk sessiya tamamlandı. Ən çətin hissə başlamaqdır.",
+    "firstWeek2": "{{count}} sessiya. Siz real bir şey qurursunuz.",
+    "firstWeek4": "{{count}} sessiya. 5-ə çatanların əksəriyyəti davam edir.",
+    "firstWeek6": "7 sessiya. Siz həddini keçdiniz."
   },
   "history": {
     "title": "Sessiya Qeydiyyatı 📋",

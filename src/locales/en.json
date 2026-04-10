@@ -919,7 +919,11 @@
     "connectorDesc": "You build momentum through consistency",
     "plannerLabel": "Planner",
     "plannerDesc": "You focus best with a predictable rhythm",
-    "firstBadgeWaiting": "Your first badge is waiting. Keep going."
+    "firstBadgeWaiting": "Your first badge is waiting. Keep going.",
+    "firstWeek0": "First session done. The hardest part is starting.",
+    "firstWeek2": "{{count}} sessions in. You're building something real.",
+    "firstWeek4": "{{count}} sessions. Most people who reach 5 keep going.",
+    "firstWeek6": "7 sessions. You've crossed the threshold."
   },
   "history": {
     "title": "Session Log 📋",

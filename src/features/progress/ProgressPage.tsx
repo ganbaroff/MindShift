@@ -23,12 +23,13 @@ import { CrystalShopSection } from './CrystalShopSection';
 import { VolauraAuraBadges } from './VolauraAuraBadges';
 import { ShareWeekButton } from './ShareWeekButton';
 import { WeeklyInsights } from './WeeklyInsights';
+import { FirstWeekCard } from './FirstWeekCard';
 import { logEvent } from '@/shared/lib/logger';
 
 export default function ProgressPage() {
   const { shouldAnimate } = useMotion();
   const { t } = useTranslation();
-  const { achievements, burnoutScore, subscriptionTier } = useStore();
+  const { achievements, burnoutScore, subscriptionTier, installDate } = useStore();
   const { energyTrend, weeklyInsight, loading, sessions } = useSessionHistory();
 
   useEffect(() => { logEvent('progress_page_viewed') }, []);
@@ -68,6 +69,7 @@ export default function ProgressPage() {
           <BurnoutAlert score={burnoutScore} />
 
           <XpCard />
+          <FirstWeekCard sessionCount={sessions.length} installDate={installDate ?? null} />
           <WeeklyActivityChart loading={loading} />
           <StatsGrid />
           <FocusScoreCard />

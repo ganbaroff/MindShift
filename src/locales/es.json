@@ -919,7 +919,11 @@
     "connectorDesc": "Generas impulso a través de la coherencia",
     "plannerLabel": "Planificador",
     "plannerDesc": "Te concentras mejor con un ritmo predecible",
-    "firstBadgeWaiting": "Tu primera insignia te espera. Sigue adelante."
+    "firstBadgeWaiting": "Tu primera insignia te espera. Sigue adelante.",
+    "firstWeek0": "Primera sesión completada. Lo más difícil es empezar.",
+    "firstWeek2": "{{count}} sesiones. Estás construyendo algo real.",
+    "firstWeek4": "{{count}} sesiones. La mayoría que llega a 5 sigue adelante.",
+    "firstWeek6": "7 sesiones. Has cruzado el umbral."
   },
   "history": {
     "title": "Registro de sesión 📋",

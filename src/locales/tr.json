@@ -916,7 +916,11 @@
     "connectorDesc": "Tutarlılıkla ivme kazanırsınız",
     "plannerLabel": "Planlayıcı",
     "plannerDesc": "Tahmin edilebilir bir ritimle en iyi şekilde odaklanırsınız",
-    "firstBadgeWaiting": "İlk rozetiniz sizi bekliyor. Devam edin."
+    "firstBadgeWaiting": "İlk rozetiniz sizi bekliyor. Devam edin.",
+    "firstWeek0": "İlk oturum tamam. En zor kısım başlamaktı.",
+    "firstWeek2": "{{count}} oturum. Gerçek bir şey inşa ediyorsunuz.",
+    "firstWeek4": "{{count}} oturum. 5'e ulaşanların çoğu devam eder.",
+    "firstWeek6": "7 oturum. Eşiği geçtiniz."
   },
   "history": {
     "title": "Oturum Kaydı 📋",
