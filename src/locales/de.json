@@ -919,7 +919,11 @@
     "connectorDesc": "Sie bauen Schwung durch Beständigkeit auf",
     "plannerLabel": "Planer",
     "plannerDesc": "Mit einem vorhersehbaren Rhythmus können Sie sich am besten konzentrieren",
-    "firstBadgeWaiting": "Dein erstes Abzeichen wartet. Mach weiter."
+    "firstBadgeWaiting": "Dein erstes Abzeichen wartet. Mach weiter.",
+    "firstWeek0": "Erste Sitzung geschafft. Der schwierigste Teil ist der Anfang.",
+    "firstWeek2": "{{count}} Sitzungen. Du baust etwas Echtes auf.",
+    "firstWeek4": "{{count}} Sitzungen. Die meisten, die 5 erreichen, machen weiter.",
+    "firstWeek6": "7 Sitzungen. Du hast die Schwelle überschritten."
   },
   "history": {
     "title": "Sitzungsprotokoll 📋",
