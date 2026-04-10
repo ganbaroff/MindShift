@@ -32,7 +32,7 @@ export function FirstFocusTutorial() {
   const { shouldAnimate, t: transition } = useMotion()
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const { setFirstFocusTutorialCompleted, addTask, removeTask, markHintSeen } = useStore()
+  const { setFirstFocusTutorialCompleted, addTask, markHintSeen } = useStore()
 
   const [step, setStep] = useState<Step>('intro')
   const [elapsed, setElapsed] = useState(0)
@@ -90,10 +90,9 @@ export function FirstFocusTutorial() {
 
   const handleSkip = useCallback(() => {
     if (intervalRef.current) clearInterval(intervalRef.current)
-    if (sampleTaskIdRef.current) {
-      removeTask(sampleTaskIdRef.current)
-      sampleTaskIdRef.current = null
-    }
+    // Do NOT remove the sample task — skippers arrive at FocusSetup with it pre-loaded,
+    // preventing ADHD cold-start paralysis (zero tasks = worst possible entry state).
+    // The task persists until they complete or delete it naturally.
     const installDate = useStore.getState().installDate
     const dsi = installDate ? Math.floor((Date.now() - new Date(installDate).getTime()) / 86_400_000) : undefined
     logEvent('tutorial_skipped', {
@@ -107,8 +106,8 @@ export function FirstFocusTutorial() {
     setFirstFocusTutorialCompleted()
     markHintSeen('first_focus_tutorial')
     markHintSeen('welcome_walkthrough')
-    navigate('/focus')
-  }, [setFirstFocusTutorialCompleted, markHintSeen, removeTask, step, navigate])
+    navigate('/focus?from=tutorial')
+  }, [setFirstFocusTutorialCompleted, markHintSeen, step, navigate])
 
   const handleStartTimer = useCallback(() => {
     // Create sample task in NOW pool — tracked for cleanup on complete/skip

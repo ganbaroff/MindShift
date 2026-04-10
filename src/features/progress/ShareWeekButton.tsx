@@ -28,7 +28,7 @@ export function ShareWeekButton() {
     await nativeShare({
       title: 'MindShift — Focus made kind',
       text: shareText,
-      url: 'https://mind-shift-git-main-yusifg27-3093s-projects.vercel.app',
+      url: 'https://mindshift.app',
     })
     logEvent('weekly_share_completed', { focus_min: mins })
   }
