@@ -188,9 +188,9 @@ export function EasterEggOverlay({ visible, onDismiss }: EasterEggOverlayProps) 
                                focus-visible:ring-4 focus-visible:ring-white focus-visible:outline-none
                                active:scale-95 transition-transform"
                     style={{
-                      /* Product owner override: red is the joke. See file header. */
-                      background: 'radial-gradient(circle at 35% 35%, #FF4444, #CC0000)',
-                      boxShadow: '0 8px 24px rgba(200,0,0,0.5), 0 2px 0 #990000, inset 0 1px 0 rgba(255,100,100,0.4)',
+                      /* Rule 1: no red. Deep purple keeps the "forbidden" joke without RSD trigger. */
+                      background: 'radial-gradient(circle at 35% 35%, #9B4DCA, #5B2D8E)',
+                      boxShadow: '0 8px 24px rgba(91,45,142,0.5), 0 2px 0 #3B1A6B, inset 0 1px 0 rgba(180,130,255,0.4)',
                     }}
                     aria-label="Do not press this button"
                   >
@@ -206,8 +206,8 @@ export function EasterEggOverlay({ visible, onDismiss }: EasterEggOverlayProps) 
                     transition={transition()}
                     className="w-32 h-32 rounded-full flex items-center justify-center"
                     style={{
-                      background: 'rgba(200,0,0,0.15)',
-                      border: '2px solid rgba(200,0,0,0.3)',
+                      background: 'rgba(91,45,142,0.15)',
+                      border: '2px solid rgba(91,45,142,0.3)',
                     }}
                   >
                     <span className="text-4xl">🙄</span>
