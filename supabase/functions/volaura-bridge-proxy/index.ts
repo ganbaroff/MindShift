@@ -338,12 +338,12 @@ Deno.serve(async (req: Request) => {
 
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Unknown error'
-    console.error('[volaura-bridge-proxy]', msg)
+    console.error('[volaura-bridge-proxy] internal error:', msg)
 
     // Return 200 with ok:false — MindShift is best-effort, never surface
-    // VOLAURA failures to the user.
+    // VOLAURA failures to the user. Do not leak internal error details.
     return new Response(
-      JSON.stringify({ ok: false, reason: msg.slice(0, 200) }),
+      JSON.stringify({ ok: false, reason: 'upstream_error' }),
       { status: 200, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } },
     )
   }

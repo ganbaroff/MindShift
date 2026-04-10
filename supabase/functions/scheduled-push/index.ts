@@ -28,7 +28,6 @@ function base64UrlEncode(data: Uint8Array): string {
   return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function base64UrlDecode(str: string): Uint8Array {
   const base64 = str.replace(/-/g, '+').replace(/_/g, '/')
   const padding = '='.repeat((4 - (base64.length % 4)) % 4)
@@ -93,6 +92,149 @@ async function createVapidJwt(audience: string): Promise<string> {
   return `${unsigned}.${signatureB64}`
 }
 
+// ── RFC 8291 aes128gcm payload encryption ────────────────────────────────────
+
+/**
+ * Concatenate multiple Uint8Arrays into one.
+ */
+function concat(...arrays: Uint8Array[]): Uint8Array {
+  const total = arrays.reduce((n, a) => n + a.length, 0)
+  const out = new Uint8Array(total)
+  let offset = 0
+  for (const a of arrays) {
+    out.set(a, offset)
+    offset += a.length
+  }
+  return out
+}
+
+/**
+ * HKDF-SHA-256 expand: derive `length` bytes from `prk` and `info`.
+ * Uses crypto.subtle — no external deps, same pattern as VAPID signing above.
+ */
+async function hkdfExpand(prk: Uint8Array, info: Uint8Array, length: number): Promise<Uint8Array> {
+  const key = await crypto.subtle.importKey(
+    'raw', prk,
+    { name: 'HMAC', hash: 'SHA-256' },
+    false, ['sign']
+  )
+  // T(1) = HMAC(PRK, info || 0x01) — sufficient because length ≤ 32 always here
+  const t1Input = concat(info, new Uint8Array([0x01]))
+  const t1 = new Uint8Array(await crypto.subtle.sign('HMAC', key, t1Input))
+  return t1.slice(0, length)
+}
+
+/**
+ * Encrypt a push payload per RFC 8291 §2 using aes128gcm content encoding.
+ *
+ * Returns the binary body ready to POST to the push endpoint.
+ */
+async function encryptPayload(
+  p256dhB64: string,
+  authB64: string,
+  payload: { title: string; body: string; url: string }
+): Promise<Uint8Array> {
+  // 1. Decode subscription keys
+  const receiverPublicKey = base64UrlDecode(p256dhB64)  // 65-byte uncompressed P-256 point
+  const authSecret = base64UrlDecode(authB64)            // 16-byte random secret
+
+  // 2. Generate ephemeral P-256 keypair (sender)
+  const ephemeralKeyPair = await crypto.subtle.generateKey(
+    { name: 'ECDH', namedCurve: 'P-256' },
+    true,
+    ['deriveBits']
+  )
+
+  // Export ephemeral public key as raw uncompressed point (65 bytes)
+  const ephemeralPublicKeyRaw = new Uint8Array(
+    await crypto.subtle.exportKey('raw', ephemeralKeyPair.publicKey)
+  )
+
+  // 3. Import receiver's public key for ECDH
+  const receiverKey = await crypto.subtle.importKey(
+    'raw',
+    receiverPublicKey,
+    { name: 'ECDH', namedCurve: 'P-256' },
+    false,
+    []
+  )
+
+  // 4. ECDH — derive 32-byte shared secret
+  const sharedSecretBits = await crypto.subtle.deriveBits(
+    { name: 'ECDH', public: receiverKey },
+    ephemeralKeyPair.privateKey,
+    256
+  )
+  const sharedSecret = new Uint8Array(sharedSecretBits)
+
+  // 5. HKDF — RFC 8291 §2 two-step key derivation
+  //    Step A: extract PRK using auth as salt
+  //    info = "WebPush: info\x00" || receiverPublicKey(65) || senderPublicKey(65)
+  //    IMPORTANT: info contains literal null bytes — built with Uint8Array, NOT TextEncoder
+  const webPushInfoPrefix = new TextEncoder().encode('WebPush: info')
+  const prkInfo = concat(
+    webPushInfoPrefix,
+    new Uint8Array([0x00]),       // literal \x00
+    receiverPublicKey,            // 65 bytes
+    ephemeralPublicKeyRaw         // 65 bytes
+  )
+
+  // PRK = HMAC-SHA-256(salt=authSecret, IKM=sharedSecret||prkInfo||0x01)
+  // Per RFC 8291 §2: PRK is derived from auth secret + shared secret + WebPush info context
+  const prkExtractKey = await crypto.subtle.importKey(
+    'raw', authSecret,
+    { name: 'HMAC', hash: 'SHA-256' },
+    false, ['sign']
+  )
+  const prk = new Uint8Array(
+    await crypto.subtle.sign('HMAC', prkExtractKey, concat(sharedSecret, prkInfo, new Uint8Array([0x01])))
+  )
+
+  // Step B: derive AES-128-GCM key (16 bytes) and nonce (12 bytes)
+  // info strings with literal null bytes and 0x01 terminator
+  const aesKeyInfo = concat(
+    new TextEncoder().encode('Content-Encoding: aes128gcm'),
+    new Uint8Array([0x00, 0x01])  // \x00 separator + \x01 counter
+  )
+  const nonceInfo = concat(
+    new TextEncoder().encode('Content-Encoding: nonce'),
+    new Uint8Array([0x00, 0x01])
+  )
+
+  const contentEncryptionKey = await hkdfExpand(prk, aesKeyInfo, 16)
+  const nonce = await hkdfExpand(prk, nonceInfo, 12)
+
+  // 6. Encrypt plaintext with AES-128-GCM
+  //    Plaintext = UTF-8 JSON + 0x02 padding byte (RFC 8291 delimiter)
+  const plaintext = concat(
+    new TextEncoder().encode(JSON.stringify(payload)),
+    new Uint8Array([0x02])
+  )
+
+  const aesKey = await crypto.subtle.importKey(
+    'raw', contentEncryptionKey,
+    { name: 'AES-GCM' },
+    false, ['encrypt']
+  )
+
+  const ciphertext = new Uint8Array(
+    await crypto.subtle.encrypt(
+      { name: 'AES-GCM', iv: nonce },
+      aesKey,
+      plaintext
+    )
+  )
+
+  // 7. Assemble RFC 8291 §2.1 binary body:
+  //    salt (16) | rs (4, big-endian uint32) | idlen (1) | keyid (65) | ciphertext
+  const salt = crypto.getRandomValues(new Uint8Array(16))
+  const rs = new Uint8Array(4)
+  new DataView(rs.buffer).setUint32(0, 4096, false)  // big-endian record size = 4096
+  const idLen = new Uint8Array([65])                  // ephemeral public key length
+
+  return concat(salt, rs, idLen, ephemeralPublicKeyRaw, ciphertext)
+}
+
 // ── Push notification sender ──────────────────────────────────────────────────
 
 interface PushSubscription {
@@ -114,17 +256,19 @@ async function sendPush(
     const audience = new URL(sub.endpoint).origin
     const jwt = await createVapidJwt(audience)
 
-    // Payloadless push — encryption (RFC 8291 ECDH) is non-trivial in Deno without
-    // Node crypto. SW fallback shows "Time to check in 🌊" for any empty push.
-    // TODO Sprint CG: implement full aes128gcm payload encryption for custom titles.
-    void title; void body; void url // suppress unused-var warnings until encryption lands
+    // RFC 8291 aes128gcm encrypted payload
+    const payloadJson = { title, body, url }
+    const encryptedBody = await encryptPayload(sub.p256dh, sub.auth, payloadJson)
 
     const response = await fetch(sub.endpoint, {
       method: 'POST',
       headers: {
         'Authorization': `vapid t=${jwt}, k=${VAPID_PUBLIC_KEY}`,
+        'Content-Type': 'application/octet-stream',
+        'Content-Encoding': 'aes128gcm',
         'TTL': '86400',
       },
+      body: encryptedBody,
     })
 
     if (response.status === 410 || response.status === 404) {
@@ -193,12 +337,12 @@ Deno.serve(async (req) => {
 
     if (!subs?.length) continue
 
-    // ADHD-safe copy: warm, not urgent
+    // ADHD-safe copy: warm, specific, non-urgent
     const title = 'MindShift'
-    const body = `Heads up: "${task.title}" is coming up`
+    const body = `Heads up — "${task.title}" is coming up`
 
     for (const sub of subs) {
-      const ok = await sendPush(sub, title, body, supabase, '/today')
+      const ok = await sendPush(sub, title, body, supabase, '/tasks')
       if (ok) sent++
     }
   }
