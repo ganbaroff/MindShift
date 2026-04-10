@@ -222,7 +222,7 @@ export function RecoveryProtocol({ onDismiss }: Props) {
         exit={shouldAnimate ? { opacity: 0 } : {}}
         className="fixed inset-0 z-50 flex flex-col justify-center px-6"
         style={{
-          background: 'linear-gradient(180deg, #0F1117 0%, #1A1B30 50%, #1E1A2E 100%)',
+          background: 'linear-gradient(180deg, var(--color-bg) 0%, var(--color-surface) 50%, var(--color-surface) 100%)',
         }}
       >
         {/* Warm glow accent — deep blue → warm purple (feels like a hug) */}

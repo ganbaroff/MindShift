@@ -50,7 +50,7 @@ export function AuthEmailStep({
       </h2>
       <p className="text-[13px] mb-5 leading-relaxed" style={{ color: 'var(--color-text-muted)' }}>
         {t('auth.enterEmailDesc')}
-        <span style={{ color: '#6B7280' }}> {t('auth.noPasswordNoFriction')}</span>
+        <span style={{ color: 'var(--color-text-muted)' }}> {t('auth.noPasswordNoFriction')}</span>
       </p>
 
       {/* ── 1. Consent — prominent, above all CTAs ── */}
@@ -78,7 +78,7 @@ export function AuthEmailStep({
             className="w-5 h-5 rounded-md flex items-center justify-center"
             animate={{
               background: consented ? 'var(--color-primary)' : 'rgba(25,28,48,0.8)',
-              borderColor: consented ? 'var(--color-primary)' : '#3D4060',
+              borderColor: consented ? 'var(--color-primary)' : 'rgba(255,255,255,0.06)',
               scale: consented ? [1, 1.15, 1] : 1,
             }}
             transition={{ duration: 0.2 }}
@@ -100,7 +100,7 @@ export function AuthEmailStep({
           </motion.div>
         </div>
         <span className="text-xs leading-relaxed" style={{ color: 'var(--color-text-muted)' }}>
-          I'm <strong style={{ color: '#C4C4D4' }}>{t('auth.consentAge')}</strong> and agree to MindShift's{' '}
+          I'm <strong style={{ color: 'var(--color-text-primary)' }}>{t('auth.consentAge')}</strong> and agree to MindShift's{' '}
           <Link to="/terms" target="_blank" rel="noopener noreferrer"
             className="underline decoration-dotted hover:no-underline transition-all"
             style={{ color: 'var(--color-primary)' }}
@@ -125,7 +125,7 @@ export function AuthEmailStep({
         className="w-full rounded-xl font-semibold text-sm flex items-center justify-center gap-2.5 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-ms-primary/50 focus-visible:outline-none"
         style={{
           height: 48,
-          background: '#1C1F38',
+          background: 'var(--color-surface-raised)',
           border: '1.5px solid rgba(255,255,255,0.10)',
           color: 'var(--color-text-primary)',
         }}
@@ -166,7 +166,7 @@ export function AuthEmailStep({
           <button
             onClick={() => setShowEmail(true)}
             className="w-full text-center text-[12px] py-1 focus-visible:outline-none focus-visible:underline"
-            style={{ color: '#4A4D6A' }}
+            style={{ color: 'var(--color-text-muted)' }}
           >
             {t('auth.orUseEmail')} →
           </button>
@@ -178,13 +178,13 @@ export function AuthEmailStep({
           >
             <div className="flex items-center gap-2 mb-2 pt-1">
               <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.06)' }} />
-              <span className="text-[11px]" style={{ color: '#4A4D6A' }}>{t('auth.or')}</span>
+              <span className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>{t('auth.or')}</span>
               <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.06)' }} />
             </div>
 
             <label htmlFor="auth-email" className="sr-only">Email address</label>
             <div className="relative mb-3">
-              <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" size={16} color="#505370" strokeWidth={2} />
+              <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" size={16} style={{ color: 'var(--color-text-muted)' }} strokeWidth={2} />
               <input
                 id="auth-email"
                 type="email"
@@ -194,9 +194,9 @@ export function AuthEmailStep({
                 onKeyDown={e => e.key === 'Enter' && onSubmit()}
                 autoFocus
                 autoComplete="email"
-                className="w-full pl-10 pr-4 rounded-xl text-sm outline-none transition-all duration-200 placeholder:text-[#484B68] focus:ring-2 focus:ring-ms-primary/40"
+                className="w-full pl-10 pr-4 rounded-xl text-sm outline-none transition-all duration-200 placeholder:text-[var(--color-text-muted)] focus:ring-2 focus:ring-ms-primary/40"
                 style={{
-                  background: '#191C30',
+                  background: 'var(--color-surface)',
                   color: 'var(--color-text-primary)',
                   border: '1.5px solid rgba(40,43,70,0.8)',
                   height: 46,
