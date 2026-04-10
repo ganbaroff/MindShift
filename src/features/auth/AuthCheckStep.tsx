@@ -58,7 +58,7 @@ export function AuthCheckStep({ email, onBack, onResend }: AuthCheckStepProps) {
       </p>
 
       {/* Spam hint — helps ADHD users who won't find it otherwise */}
-      <p className="text-xs leading-relaxed mb-5 px-2" style={{ color: '#6B7280' }}>
+      <p className="text-xs leading-relaxed mb-5 px-2" style={{ color: 'var(--color-text-muted)' }}>
         {t('auth.checkSpam')}
       </p>
 

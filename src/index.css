@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @theme {
-  /* ── MindShift Design Tokens ───────────────────────────── */
+  /* -- MindShift Design Tokens ----------------------------- */
   --color-bg:        #0F1120;
   --color-surface:   #171A2B;
   --color-card:      #1E2136;
@@ -15,7 +15,7 @@
   --color-success:   #4ECDC4;
   --color-border:    #2D3150;
 
-  /* ── ms.* aliases (Lovable component classes) ─────────── */
+  /* -- ms.* aliases (Lovable component classes) ----------- */
   --color-ms-primary: #7B72FF;
   --color-ms-teal:    #4ECDC4;
   --color-ms-gold:    #F59E0B;
@@ -28,7 +28,7 @@
 
   /* Typography */
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  /* Font scale — controlled by store.fontScale. 1 = default, 1.15 = large, 1.3 = XL.
+  /* Font scale -- controlled by store.fontScale. 1 = default, 1.15 = large, 1.3 = XL.
      Applied to html font-size so all rem-based Tailwind classes scale automatically. */
   --font-scale: 1;
 
@@ -41,7 +41,7 @@
   --radius: 1rem;
 }
 
-/* ── shadcn/ui HSL variables (for Radix-based components) ── */
+/* -- shadcn/ui HSL variables (for Radix-based components) -- */
 :root {
   --background: 228 60% 9%;
   --foreground: 240 33% 93%;
@@ -76,7 +76,9 @@
   --sidebar-border: 0 0% 100% / 0.06;
   --sidebar-ring: 244 100% 72%;
 
-  /* ── Runtime CSS tokens ─────────────────────────────────── */
+  /* -- Runtime CSS tokens ----------------------------------- */
+  --color-bg:              #0F1120;
+  --color-surface:         #171A2B;
   --color-primary:         #7B72FF;
   --color-teal:            #4ECDC4;
   --color-gold:            #F59E0B;
@@ -115,8 +117,8 @@
   --color-teal-dark:     #2E7A77;
 }
 
-/* ── Light theme — ADHD-safe warm ivory ────────────────────── */
-/* Research: BDA style guide + CMU reading study → warm off-white */
+/* -- Light theme -- ADHD-safe warm ivory ---------------------- */
+/* Research: BDA style guide + CMU reading study -> warm off-white */
 /* bg reduces glare vs pure #FFF; text avoids harsh #000        */
 [data-theme="light"] {
   --color-bg:            #F5F3EE;
@@ -184,7 +186,7 @@
   --ring:                244 100% 69%;
 }
 
-/* Light + Calm — desaturated light palette */
+/* Light + Calm -- desaturated light palette */
 [data-theme="light"][data-mode="calm"] {
   --color-primary:       #8080B8;
   --color-teal:          #4A8A87;
@@ -200,7 +202,7 @@
   --color-teal-dark:     #3A7A77;
 }
 
-/* ── Base ─────────────────────────────────────────────────── */
+/* -- Base --------------------------------------------------- */
 @layer base {
   *, *::before, *::after {
     box-sizing: border-box;
@@ -211,7 +213,7 @@
   }
 
   html {
-    /* Scale entire UI for dyslexia/low-vision users — all rem units inherit this */
+    /* Scale entire UI for dyslexia/low-vision users -- all rem units inherit this */
     font-size: calc(16px * var(--font-scale));
     transition: font-size 0.2s ease;
   }
@@ -221,7 +223,7 @@
     width: 100%;
     background: var(--color-bg);
     color: var(--color-text);
-    /* Smooth theme transition — gentle for ADHD (no harsh flash) */
+    /* Smooth theme transition -- gentle for ADHD (no harsh flash) */
     transition: background-color 0.4s ease, color 0.35s ease;
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
@@ -241,7 +243,7 @@
   ::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 2px; }
 }
 
-/* ── Reduced motion ─────────────────────────────────────── */
+/* -- Reduced motion --------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -249,7 +251,7 @@
   }
 }
 
-/* ── Theme transition — applies to surfaces on theme change ── */
+/* -- Theme transition -- applies to surfaces on theme change -- */
 /* Scoped to key elements only (not *) to avoid perf hit     */
 [data-theme] .rounded-2xl,
 [data-theme] nav,
@@ -257,7 +259,7 @@
   transition: background-color 0.35s ease, border-color 0.35s ease, color 0.3s ease;
 }
 
-/* ── Utility classes ────────────────────────────────────── */
+/* -- Utility classes -------------------------------------- */
 .glass {
   background: var(--color-glass-dark);
   backdrop-filter: blur(24px);
@@ -276,7 +278,7 @@
   box-shadow: 0 8px 32px rgba(123, 114, 255, 0.3);
 }
 
-/* ── Typography utilities ────────────────────────────────── */
+/* -- Typography utilities ---------------------------------- */
 .text-caption    { font-size: 11px; line-height: 1.4; }
 .text-secondary  { font-size: 13px; line-height: 1.5; }
 .text-body       { font-size: 15px; line-height: 1.6; }
@@ -285,7 +287,7 @@
 .text-screen-title { font-size: 24px; line-height: 1.2; font-weight: 700; }
 .text-hero       { font-size: 30px; line-height: 1.1; font-weight: 700; }
 
-/* ── Tablet / large-screen adaptive layout ──────────────── */
+/* -- Tablet / large-screen adaptive layout ---------------- */
 @media (min-width: 640px) {
   #root {
     display: flex;
@@ -294,14 +296,14 @@
   }
 }
 
-/* ── Safe area ───────────────────────────────────────────── */
+/* -- Safe area --------------------------------------------- */
 .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 16px); }
 
-/* ── Input ────────────────────────────────────────────────── */
+/* -- Input -------------------------------------------------- */
 .ms-input::placeholder { color: var(--color-muted); opacity: 1; }
 .ms-input:focus { border-color: var(--color-primary) !important; }
 
-/* ── Animations ───────────────────────────────────────────── */
+/* -- Animations --------------------------------------------- */
 @keyframes shrinkBar {
   from { width: 100%; }
   to   { width: 0%;   }

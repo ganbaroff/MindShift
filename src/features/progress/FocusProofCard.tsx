@@ -106,7 +106,7 @@ export function FocusProofCard({ open, onClose, weeklyMinutes }: FocusProofCardP
               onClick={e => e.stopPropagation()}
               className="w-full max-w-[340px] rounded-3xl overflow-hidden"
               style={{
-                background: 'linear-gradient(145deg, #1a1535 0%, #0e0e1f 55%, #141428 100%)',
+                background: 'linear-gradient(145deg, var(--color-surface) 0%, var(--color-bg) 55%, var(--color-bg) 100%)',
                 boxShadow: '0 24px 64px rgba(0,0,0,0.7), 0 0 0 1px rgba(123,114,255,0.2)',
                 minHeight: 440,
               }}
@@ -180,7 +180,7 @@ export function FocusProofCard({ open, onClose, weeklyMinutes }: FocusProofCardP
                   >
                     <span className="text-[18px]">{pt.emoji}</span>
                     <div>
-                      <p className="text-[12px] font-semibold" style={{ color: '#C4C0FF' }}>
+                      <p className="text-[12px] font-semibold" style={{ color: 'var(--color-primary-light)' }}>
                         {pt.label}
                       </p>
                       <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.35)' }}>

@@ -9,13 +9,13 @@ import Fab from '@/components/Fab';
 import AddTaskModal from '@/components/AddTaskModal';
 import { useStore } from '@/store';
 import type { EnergyLevel } from '@/types';
-import { getNowPoolMax, APP_MODE_CONFIG, ENERGY_EMOJI } from '@/shared/lib/constants';
+import { getNowPoolMax, APP_MODE_CONFIG } from '@/shared/lib/constants';
 import { useTranslation } from 'react-i18next';
 import { useUITone } from '@/shared/hooks/useUITone';
-import { BurnoutGauge } from './BurnoutGauge';
 import { BurnoutNudgeCard } from './BurnoutNudgeCard';
 import { DailyBriefCard } from './DailyBriefCard';
 import { StreakBadge } from './StreakBadge';
+import { HomeDailyBrief } from './HomeDailyBrief';
 import { PageTransition } from '@/shared/ui/PageTransition';
 import { getMochiMessage } from './mochiMessages';
 import { toast } from 'sonner';
@@ -142,41 +142,6 @@ export default function HomePage() {
     }
   }, [goalReached, goalCelebratedDate, todayISO, dailyFocusGoalMin, setGoalCelebratedDate])
 
-  const TIER_NAMES = ['Seedling','Sprout','Grower','Bloomer','Flourisher','Cultivator','Nurturer','Luminary','Pathfinder','Sage']
-  const xpLevel = Math.min(Math.floor((xpTotal ?? 0) / 1000), TIER_NAMES.length - 1)
-  const tierName = TIER_NAMES[xpLevel]
-
-  const bentoCards = useMemo(() => [
-    {
-      content: (
-        <>
-          <span className="text-[20px] font-bold" style={{ color: 'var(--color-text-primary)' }}>{completedTotal ?? 0}</span>
-          <span className="text-[11px] ml-1" style={{ color: 'var(--color-text-muted)' }}>{t('home.doneSub')}</span>
-          {focusMinutes !== null && (
-            <>
-              <span className="text-[11px] mx-1" style={{ color: 'var(--color-text-muted)' }}>·</span>
-              <span className="text-[20px] font-bold" style={{ color: 'var(--color-text-primary)' }}>{(focusMinutes / 60).toFixed(1)}h</span>
-            </>
-          )}
-        </>
-      ),
-      sub: `Level ${xpLevel} · ${tierName}`,
-    },
-    {
-      content: <span className="text-[28px]">{ENERGY_EMOJI[energyLevel - 1]}</span>,
-      sub: t('home.tapToUpdate'),
-    },
-    {
-      content: <span className="text-[20px] font-bold" style={{ color: 'var(--color-text-primary)' }}>✅ {completedTotal}</span>,
-      sub: t('home.tasksCompleted'),
-    },
-    {
-      content: <BurnoutGauge score={isNaN(burnoutScore) ? 0 : (burnoutScore ?? 0)} />,
-      sub: t('home.burnoutGauge'),
-    },
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  ], [completedTotal, focusMinutes, xpTotal, energyLevel, burnoutScore, t]);
-
   const greeting =
     hour < 5  ? t('home.greeting.night') :
     hour < 12 ? t('home.greeting.morning') :
@@ -244,42 +209,6 @@ export default function HomePage() {
             />
           )}
         </AnimatePresence>
-
-        {/* Daily focus goal progress */}
-        {weeklyStats && (
-          <motion.div
-            initial={shouldAnimate ? { opacity: 0, y: 8 } : false}
-            animate={shouldAnimate ? { opacity: 1, y: 0 } : false}
-            className="rounded-2xl px-4 py-3"
-            style={{ backgroundColor: 'var(--color-surface-card)' }}
-          >
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[13px] font-semibold" style={{ color: goalReached ? 'var(--color-teal)' : 'var(--color-text-primary)' }}>
-                {goalReached ? `🎯 ${t('home.goalReached')}` : `🎯 ${t('home.todaysFocus')}`}
-              </span>
-              <span className="text-[12px]" style={{ color: 'var(--color-text-muted)' }}>
-                {todayMin} / {dailyFocusGoalMin} min
-              </span>
-            </div>
-            <div
-              className="h-1.5 rounded-full overflow-hidden"
-              style={{ backgroundColor: 'rgba(255,255,255,0.06)' }}
-              role="progressbar"
-              aria-valuenow={Math.round(goalProgress * 100)}
-              aria-valuemin={0}
-              aria-valuemax={100}
-              aria-label={t('home.todaysFocus')}
-            >
-              <motion.div
-                className="h-full rounded-full"
-                initial={shouldAnimate ? { width: 0 } : false}
-                animate={{ width: `${goalProgress * 100}%` }}
-                transition={shouldAnimate ? { duration: 0.8, ease: 'easeOut' } : { duration: 0 }}
-                style={{ background: goalReached ? 'var(--color-teal)' : 'linear-gradient(90deg, var(--color-primary), var(--color-primary-light, #9B8EFF))' }}
-              />
-            </div>
-          </motion.div>
-        )}
 
         {/* Low-energy banner */}
         <AnimatePresence>
@@ -402,46 +331,20 @@ export default function HomePage() {
           </motion.div>
         )}
 
-        {/* Bento Grid — hidden in low-energy mode */}
-        {!isLowEnergy && (
-          <div className="grid grid-cols-2 gap-2">
-            {bentoCards.map((card, i) => (
-              <motion.div
-                key={i}
-                initial={shouldAnimate ? { opacity: 0, y: 12 } : false}
-                animate={shouldAnimate ? { opacity: 1, y: 0 } : false}
-                transition={shouldAnimate ? { delay: 0.2 + i * 0.05 } : undefined}
-                className="rounded-2xl p-3 flex flex-col items-center justify-center min-h-[80px]"
-                style={{ backgroundColor: 'var(--color-surface-card)' }}
-              >
-                <div className="flex items-baseline">{card.content}</div>
-                <p className="text-[11px] mt-0.5" style={{ color: 'var(--color-text-muted)' }}>{card.sub}</p>
-              </motion.div>
-            ))}
-          </div>
-        )}
-
-        {/* Low-energy gentle card */}
-        {isLowEnergy && (
-          <motion.div
-            initial={shouldAnimate ? { opacity: 0, y: 12 } : false}
-            animate={shouldAnimate ? { opacity: 1, y: 0 } : false}
-            className="rounded-2xl p-4"
-            style={{ backgroundColor: 'var(--color-surface-card)' }}
-          >
-            <div className="flex items-center gap-3">
-              <span className="text-[32px]">{ENERGY_EMOJI[energyLevel - 1]}</span>
-              <div>
-                <p className="text-[15px] font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-                  Level {xpLevel} · {tierName} · {completedTotal ?? 0} done
-                </p>
-                <p className="text-[12px]" style={{ color: 'var(--color-text-muted)' }}>
-                  {burnoutScore > 60 ? t('home.hardWork') : t('home.easyDoesIt')}
-                </p>
-              </div>
-            </div>
-          </motion.div>
-        )}
+        {/* Stats panel: focus goal + bento grid + low-energy card */}
+        <HomeDailyBrief
+          completedTotal={completedTotal ?? 0}
+          focusMinutes={focusMinutes}
+          xpTotal={xpTotal ?? 0}
+          energyLevel={energyLevel}
+          burnoutScore={burnoutScore ?? 0}
+          isLowEnergy={isLowEnergy}
+          goalReached={goalReached}
+          goalProgress={goalProgress}
+          todayMin={todayMin}
+          dailyFocusGoalMin={dailyFocusGoalMin}
+          weeklyStats={weeklyStats}
+        />
       </div>
 
       <Fab onClick={() => setShowAddTask(true)} />

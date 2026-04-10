@@ -84,7 +84,7 @@ function SortableTaskCardInner({ task, index, onDone, onPark, onRemove, onMove, 
             <button
               onClick={() => setShowMoveOptions(true)}
               className="text-[10px] px-2 py-0.5 focus-visible:ring-1 focus-visible:ring-[var(--color-primary)] rounded"
-              style={{ color: '#3A3B52' }}
+              style={{ color: 'var(--color-text-muted)' }}
             >
               {t('tasks.move')}
             </button>

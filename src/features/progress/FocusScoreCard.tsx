@@ -37,7 +37,7 @@ export function FocusScoreCard() {
 
   const barGradient = focusScore >= 70
     ? 'linear-gradient(90deg, #4ECDC4, #7B72FF)'
-    : 'linear-gradient(90deg, #7B72FF, #9B8EFF)'
+    : 'linear-gradient(90deg, var(--color-primary), var(--color-primary-light))'
 
   return (
     <motion.div
