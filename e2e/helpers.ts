@@ -187,14 +187,20 @@ export async function mockSupabase(page: Page) {
     })
   })
 
-  // Intercept Edge Functions — return valid decompose-task response
+  // Intercept Edge Functions — return valid response covering all edge function shapes
   await page.route('**/functions/v1/**', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({
+        // agent-chat
+        reply: "I'm here. Go ahead.",
+        agentState: 'idle',
+        provider: 'fallback',
+        // decompose-task
         steps: ['Step 1: Break it into small pieces', 'Step 2: Do the first piece', 'Step 3: Check your work'],
         estimatedMinutes: 15,
+        // recovery-message / weekly-insight
         message: 'Welcome back — you showed up, and that\'s what matters.',
         insights: ['Great consistency this week.', 'Your peak focus is in the morning.', 'Try a 25-minute session tomorrow.'],
       }),
