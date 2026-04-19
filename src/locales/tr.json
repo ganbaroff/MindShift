@@ -882,6 +882,7 @@
     "achievements": "Başarılar",
     "tasksDone": "Tamamlanan Görevler",
     "burnoutScoreLabel": "Tükenmişlik puanı",
+    "burnoutScoreEmptyA11y": "Tükenmişlik verileri henüz mevcut değil",
     "focusHealthScore": "Odaklanma sağlığı puanı",
     "thriving": "🌿 Gelişen",
     "growing": "🌱 Büyüyor",
