@@ -67,9 +67,7 @@ h1 {
 }
 
 h1 span {
-  background: linear-gradient(135deg, #7B72FF 0%, #4ECDC4 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: #4ECDC4;
 }
 
 .subtitle {
@@ -132,16 +130,6 @@ h1 span {
 .phone-greeting {
   font-size: 11px;
   color: #8B8BA7;
-}
-
-.phone-xp {
-  font-size: 10px;
-  background: rgba(123,114,255,0.15);
-  border: 1px solid rgba(123,114,255,0.25);
-  border-radius: 8px;
-  padding: 2px 8px;
-  color: #7B72FF;
-  font-weight: 600;
 }
 
 .phone-title {
@@ -213,7 +201,9 @@ h1 span {
   font-size: 12px;
   font-weight: 700;
   color: white;
-  margin-top: auto;
+  /* 2026-04-19: auto → 16px — close the empty gap between checklist and CTA
+     per Design-Atlas recapture packet edit #5 (Option A). */
+  margin-top: 16px;
   letter-spacing: 0.3px;
 }
 
@@ -235,9 +225,9 @@ h1 span {
     <div class="left">
       <div class="badge">Built for ADHD brains</div>
       <h1>Focus without<br>the <span>friction</span></h1>
-      <p class="subtitle">Tasks, timers, and gentle accountability designed around how your brain actually works.</p>
+      <p class="subtitle">Tasks and timers built around how your brain works.</p>
       <div class="features">
-        <div class="feature-chip">Focus Rooms</div>
+        <div class="feature-chip">Voice capture</div>
         <div class="feature-chip">Smart Timer</div>
         <div class="feature-chip">No Shame</div>
       </div>
@@ -246,9 +236,7 @@ h1 span {
       <div class="phone-screen">
         <div class="phone-status">
           <span class="phone-greeting">Good afternoon</span>
-          <span class="phone-xp">2,450 XP</span>
         </div>
-        <div class="phone-title">Your calm space</div>
         <div class="phone-sub">In your NOW pool</div>
         <div class="phone-card">
           <div class="task-row">
