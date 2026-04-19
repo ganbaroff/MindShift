@@ -886,6 +886,7 @@
     "achievements": "Nailiyyətlər",
     "tasksDone": "Tapşırıqlar Tamamlandı",
     "burnoutScoreLabel": "Tükənmişlik hesabı",
+    "burnoutScoreEmptyA11y": "Tükənmişlik məlumatı hələ mövcud deyil",
     "focusHealthScore": "Sağlamlığa diqqət yetirin",
     "thriving": "🌿 İnkişaf edən",
     "growing": "🌱 Artır",
