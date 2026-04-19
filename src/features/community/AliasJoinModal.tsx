@@ -51,31 +51,32 @@ export function AliasJoinModal({ community, isJoining, onConfirm, onCancel }: Al
       <motion.div
         initial={shouldAnimate ? { opacity: 0 } : {}}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.15 }}
+        transition={shouldAnimate ? { duration: 0.15 } : { duration: 0 }}
         className="fixed inset-0 z-50"
         style={{ background: 'rgba(0,0,0,0.6)' }}
         onClick={onCancel}
         aria-hidden="true"
       />
 
-      {/* Modal */}
-      <motion.div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={titleId}
-        initial={shouldAnimate ? { opacity: 0, scale: 0.95, y: 8 } : {}}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={shouldAnimate ? { type: 'spring', damping: 22, stiffness: 300 } : { duration: 0 }}
-        className="fixed inset-x-4 z-50 rounded-3xl px-6 py-6"
-        style={{
-          top: '50%',
-          transform: 'translateY(-50%)',
-          background: 'var(--color-bg)',
-          border: '1px solid rgba(255,255,255,0.08)',
-          maxWidth: 420,
-          margin: '0 auto',
-        }}
-      >
+      {/* Centering shell — flex avoids top/transform conflict with motion's y animation */}
+      <div className="fixed inset-0 z-50 flex items-center justify-center px-4 pointer-events-none">
+        {/* Modal */}
+        <motion.div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={titleId}
+          initial={shouldAnimate ? { opacity: 0, scale: 0.95, y: 8 } : {}}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={shouldAnimate ? { type: 'spring', damping: 22, stiffness: 300 } : { duration: 0 }}
+          className="w-full rounded-3xl px-6 py-6 pointer-events-auto"
+          style={{
+            background: 'var(--color-bg)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            maxWidth: 420,
+            maxHeight: '90dvh',
+            overflowY: 'auto',
+          }}
+        >
         {/* Lock icon — decorative */}
         <div aria-hidden="true" className="text-3xl mb-4 text-center">🔒</div>
 
@@ -193,7 +194,8 @@ export function AliasJoinModal({ community, isJoining, onConfirm, onCancel }: Al
             {t('community.aliasCancel', 'Not now')}
           </button>
         </div>
-      </motion.div>
+        </motion.div>
+      </div>
     </>
   )
 }

@@ -170,7 +170,9 @@ export const createUserSlice: StateCreator<
       nextPool: [...s.nextPool, ...overflow],
     }
   }),
-  setBurnoutScore: (score) => set({ burnoutScore: score }),
+  // Number.isFinite guard (2026-04-19) — callers may feed NaN (offline path / pre-hydration);
+  // store must never persist NaN. Defaults to 0 when input is not a finite number.
+  setBurnoutScore: (score) => set({ burnoutScore: Number.isFinite(score) ? score : 0 }),
   setFlexiblePauseUntil: (until) => set({ flexiblePauseUntil: until }),
   setLastRoomCode: (code) => set({ lastRoomCode: code }),
   setLastRoomLeftAt: (at) => set({ lastRoomLeftAt: at }),

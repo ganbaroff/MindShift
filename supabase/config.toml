@@ -116,3 +116,15 @@ verify_jwt = false
 
 [functions.gcal-inbound]
 verify_jwt = true
+
+[functions.telegram-agent-update]
+verify_jwt = false
+
+[functions.agent-chat]
+verify_jwt = true
+
+[functions.community-join]
+verify_jwt = true
+
+[functions.publish-revenue-snapshot]
+verify_jwt = false
