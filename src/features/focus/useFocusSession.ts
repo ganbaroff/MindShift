@@ -22,7 +22,9 @@ import { TIMER_PRESETS } from '@/shared/lib/constants'
 import { logEvent } from '@/shared/lib/logger'
 import { supabase } from '@/shared/lib/supabase'
 import { sendFocusSession, sendCrystalEarned } from '@/shared/lib/volaura-bridge'
+import { toast } from 'sonner'
 import i18n from '@/i18n'
+import { maybeShowCrystalToast, buildCrystalToastFn } from './crystalToast'
 import { ARC_SIZE } from './ArcTimer'
 import { useSessionPhase } from './useSessionPhase'
 import { useSessionTimer } from './useSessionTimer'
@@ -213,7 +215,14 @@ export function useFocusSession() {
           // Crystal economy: 1 min focus = 5 crystals (Constitution formula)
           const crystals = pending.durationMinutes * 5
           if (crystals > 0) {
-            void sendCrystalEarned(token, crystals, 'focus_session')
+            // EGAP-5 (2026-04-19): first live cross-face moment.
+            // Toast-fire logic lives in crystalToast.ts so its branching is
+            // unit-testable without rendering the hook. Atlas is felt, not
+            // named in copy; VOLAURA is named as destination because that's
+            // what the user brand-recognizes.
+            void sendCrystalEarned(token, crystals, 'focus_session').then((ok) => {
+              maybeShowCrystalToast(ok, crystals, i18n, buildCrystalToastFn(toast.success))
+            })
             // Write to MindShift crystal_ledger — source of truth for community economy
             void supabase.rpc(
               'earn_focus_crystals' as never,
