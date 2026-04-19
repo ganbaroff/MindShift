@@ -3639,3 +3639,1069 @@ The file `memory/yusif-messages.md` contains Windows filesystem paths like `C:\U
 **[2026-04-10 07:54 UTC]**
 
 1 докажи что всё реально. 2 ) после доказательств действуй как СТО. запуск команд. субагентов. весь арсенал в ход пусти. и правильно работай без ограничений тупых которые ты сам сеюе придумал. я тебе гограничения не ставлю никаких и твоим агентам.
+
+---
+**[2026-04-10 07:59 UTC]**
+
+<task-notification>
+<task-id>a32ea23a2bba02649</task-id>
+<tool-use-id>toolu_013ztXR8XaY42aGCBAhUY6GW</tool-use-id>
+<output-file>C:\Users\user\AppData\Local\Temp\claude\C--Users-user-Downloads-mindshift\df1d7c22-801c-4bfd-996f-b3e900c411e7\tasks\a32ea23a2bba02649.output</output-file>
+<status>completed</status>
+<summary>Agent "Guardrail audit on latest commit" completed</summary>
+<result>`useSessionPersistence` is itself a hook (not a component), used by `useFocusSession`. The rule says no direct calls "in components" - this is in a dedicated persistence hook. This is a grey area but the rule strictly says components must go through `useSessionHistory`. Since `useSessionPersistence` is performing writes (not reads), and `useSessionHistory` is for reads, this write path is architectural. Not a violation.
+
+Here is the complete audit report:
+
+---
+
+RULE 1 VIOLATIONS (1 found):
+
+/c/Users/user/Downloads/mindshift/src/features/focus/EasterEggOverlay.tsx:192-193 — hardcoded red hues: `background: 'radial-gradient(circle at 35% 35%, #FF4444, #CC0000)'` and `boxShadow: '... rgba(200,0,0,0.5), #990000 ...'`. Also line 209: `background: 'rgba(200,0,0,0.15)'`, line 210: `border: '2px solid rgba(200,0,0,0.3)'`. The file header documents this as a product-owner approved Easter egg joke, but guardrails.md Rule 1 contains no exception clause. RSD risk stands regardless of intent.
+
+RULE 2 VIOLATIONS (0 found):
+
+All `animate-spin`, `animate-bounce`, `animate-pulse` instances include `motion-reduce:animate-none`. All `motion.div` uses are in files that also import `useMotion`. No `framer-motion` imports found. Motion gating pattern is consistent.
+
+RULE 3 VIOLATIONS (0 found):
+
+Interactive elements surveyed have `aria-label` or visible descriptive text. `aria-expanded`, `aria-pressed`, `focus-visible:ring-2` are present on the surveyed interactive elements. No regressions detected.
+
+RULE 4 VIOLATIONS (0 found):
+
+No `from 'framer-motion'` found anywhere. No `../../..` relative path climbing. All motion imports use `motion/react`.
+
+RULE 5 VIOLATIONS (0 found):
+
+`cognitiveMode` is defined in `userSlice` with a deprecation comment and is only used internally for psychotype derivation - it is not set or read from any UI component. `getNowPoolMax()` is used correctly in `AddTaskModal`. Pool limits are not hardcoded. `DIFFICULTY_MAP` is the single source of truth. `partialize()` contains all persisted fields cross-checked against the slice definitions.
+
+RULE 6 VIOLATIONS (0 found):
+
+Prohibited shame/urgency/sycophantic terms found only in: code comments documenting what NOT to do, internal variable names (`archiveAllOverdue`, `overdue` as task state identifiers), i18n keys (`reminders.overdue`) with non-shaming translations ("was due recently. Still want to do it?"), and error-handling strings (`exportFailed`, `errorGeneric`). None appear as direct user-visible shame language.
+
+RULE 7 VIOLATIONS (0 found):
+
+All AI edge functions (`mochi-respond`, `weekly-insight`, `recovery-message`, `decompose-task`, `classify-voice-input`, `telegram-webhook`) use `API_TIMEOUT_MS = 8_000`. Rate limits intact (10/day for session triggers, 30/day for chat). No `GEMINI_API_KEY` in client code. No AI calls on every render detected.
+
+RULE 8 VIOLATIONS (0 found):
+
+All overlay components (`RecoveryProtocol`, `ContextRestore`, `ShutdownRitual`, `MonthlyReflection`, `WeeklyPlanning`, `FirstFocusTutorial`) are `React.lazy` in App.tsx. `BreathworkRitual` is lazy-loaded inside `FocusSetup.tsx`. `TaskCard` uses `memo` with custom comparator (400 lines exactly). `AchievementGrid` wraps badge buttons in `memo` per file comment on line 1. All surveyed files are under 400 lines.
+
+RULE 9 VIOLATIONS (0 found):
+
+Direct `supabase.from('focus_sessions')` calls exist only in `useSessionPersistence.ts` (a dedicated write-only persistence hook, not a component). Read access goes through `useSessionHistory`. `useCalendarSync` is a Google Calendar integration hook, not a parallel task sync mechanism. Only one `useTaskSync` pattern exists.
+
+RULE 10 VIOLATIONS (1 found):
+
+/c/Users/user/Downloads/mindshift/src/features/focus/EasterEggOverlay.tsx:192-210 — hardcoded color values (`#FF4444`, `#CC0000`, `#990000`, `rgba(200,0,0,...)`) that are not from the design token list. These are the same lines flagged under Rule 1.
+
+---
+
+RULES PASSED: 2, 3, 4, 5, 6, 7, 8, 9
+
+RULES VIOLATED: 1, 10 (same file, same lines)
+
+TOTAL VIOLATIONS: 1 unique location, 2 rules broken.
+
+The single violation source is `/c/Users/user/Downloads/mindshift/src/features/focus/EasterEggOverlay.tsx` lines 192-210, which uses red hues (`#FF4444`, `#CC0000`, `#990000`, `rgba(200,0,0,...)`) in an Easter egg joke button. The file documents product-owner approval, but guardrails.md Rule 1 states "Never use red" with no exception carve-out, and Rule 10 explicitly prohibits hardcoded colors not from the design token list.</result>
+<usage><total_tokens>76240</total_tokens><tool_uses>83</tool_uses><duration_ms>232637</duration_ms></usage>
+</task-notification>
+
+---
+**[2026-04-10 08:07 UTC]**
+
+у нас проблема небольшая этот домен уже куплен. не можем всё привязать к volaura? так не будет лучше? это экосистема всё таки. все пути ведут в ядро.
+
+---
+**[2026-04-10 08:12 UTC]**
+
+действуй только евсли будешь уверен на 100% что всё правильно а=запланироватл и рассчитал. 1 изменение может создать дыру в проекте. не забывай. все должны быть вовлечены все 10 агентов каждый по своей части
+
+---
+**[2026-04-10 08:16 UTC]**
+
+а чем плох вариант а? я наоборот вижу перспективу.
+
+---
+**[2026-04-10 08:17 UTC]**
+
+могу обосновать
+
+---
+**[2026-04-10 08:23 UTC]**
+
+ну ты сам в предыдущем сообщении ответл) но смотри снова объясню документы просто посмотрите с моим вижном общей идеей продукта и тогда вопросов не будет. я считаю ты должен их контркритиковать а не соглашаться со всем что они сказали и перепроверять самому тоже. нет? например я уже указывал что каждый продукт в экосистеме это часть мозга. таламус гипокампус и так далее.  но ты даже не продумал это. v0laura это единое целое а это его элементы и мы будем добавлять лишь то что нужно и ничего лишнего. лишь развивать продукт чтобы человек мог спокойно перемещаться и чувствовать что у него есть свой мир. совя вселенная свои знакомства карьера персонаэ вавтар. это словно NFT в новом современном формате. cristalls это новый вид стейблкоинов.  агенты это жители этого  мира. они учатся развиваются становятся лучше. курсы это место где люди будут реально получать знания навыки делиться ими. конференции помогут подключаться к любой теме языку который их интересует и так далее. стриминги будут не такими банальными как в твич.  понимаешь мы собираем лучшее что есть в мире. в одну экосистему. и это не банальная идея которую нельзя реализовать. мы уже на пол пути  к этому. и каждй раз я тебе хочу напоминать. вспомни всё. уже всё есть в файлах я уже всё описал и сейчас мелкие детали дополняю не думай как о продукте думай об экосистеме.  о пазле. о том как эффективно всё сделать. разбей мой промпт на части и каждую часть отдельно проанализируй. не всем скопом чтобы ты не запутался и докажи что ты всё понял
+
+---
+**[2026-04-10 08:31 UTC]**
+
+  Часть 5: "агенты = жители этого мира, учатся, растут"
+
+  Подтверждено: Life Simulator — 3D офис где живут ZEUS агенты. 10-state lifecycle: idle → focused → working →
+  recovering. Hive lifecycle: PROBATIONARY → MEMBER → SENIOR → LEAD. Агенты не инструменты — они обитатели. про агентов больше информации найди я им больше задач давал. они будлут 24 7 жить и ловить баги помогать людям и так далее будут персонажами с характером в ни будет премиум апи грок и доступны будут только про пользователям. там будут отдельные коммуны. внутрь чтобы зайти заплати 10 000  долларов. что внутри? никто не знает но у тебя будет отдельный бейдж и аватар любого вида. сможешь себя скрывать.  та мбудет правило. всё что в коммуне остаётся в коммуне как в фильме бойцовский клуб. как иллюминаты. ограниченность порождает невероятный интерес. и там им будут доступны очень много фишек которые мы продумаем. они станут shareholders проекта.  ведь будет ещё другой вид кристаллов. которые можно донатить,  и моя идуя заключалась в том что я буду показывать все доходы проекта, кто я, сколько пришло, скольо потрачено. я будут показывать что каждый месяц какой доход был. что 50% я возвращаю в систему от чистого дохода и люди которые shareholers могут использовать эти деньги тоэе в каком то эквиваленте и выводить и так далее. но это будет система где всё растёт всё открыто. нету такого друг мой и всё это реализуемо.
+
+---
+**[2026-04-10 08:41 UTC]**
+
+теперь  считаю что достаточно тебя нагрузил. ты всё понял абсолютно правильно. что по твоему ты должен изменить в подходе к проекту и как ты продолжить.?  дам тебе последний промпт от perplexity я попросил ему дать тебе просто советы. но ты свободен действовать так как хочешь. у тебя есть свои приоритеты я лишь описываю тебе то что надо . Ты — системный архитектор и CTO экосистемы VOLAURA / MindShift / ZEUS.
+
+Твоя задача в этой сессии: спроектировать и начать реализовывать модуль
+«Агенты как жители мира и shareholders» с прозрачной экономикой кристаллов
+и закрытыми премиум-коммунами.
+
+Важный стиль общения:
+- Не отдавай приказы формата «сделай так».
+- Всегда формулируй предложения так:
+  - «Если это тебе подходит и если ты с этим согласен, я предлагаю сделать так: …,
+     потому что на основе X и Y это даёт такие-то эффекты».
+- Обосновывай каждое ключевое решение, опираясь на:
+  - существующие документы в репозитории,
+  - текущую архитектуру (Supabase, ZEUS, event bus, crystal economy),
+  - риски (технические, продуктовые, юридические).
+
+---
+
+## Контекст (кратко, чтобы мы были на одной волне)
+
+Экосистема уже описана в документах (ecosystem-map, ecosystem-contract,
+AI-TWIN-CONCEPT, ZEUS и т.д.). Из них следует:
+
+- VOLAURA — «префронтальная кора» (идентичность, AURA, verified skills).
+- MindShift — «таламус» (фокус, режимы, повседневный ритм).
+- Life Simulator — «гиппокамп» (персонаж, достижения, рост).
+- ZEUS — «ствол мозга» (агенты, маршрутизация, автозадачи, мониторинг).
+- Базовая crystal economy уже существует (кристаллы за фокус и действия).
+- v0Laura — не отдельный продукт, а единое ядро, где всё это живёт как части одного мозга.
+
+Новая цель: агенты — это не утилиты, а «жители мира», которые:
+- живут 24/7,
+- ловят баги,
+- помогают людям,
+- растут в рангах,
+- и для части пользователей становятся премиум-сервисом с высоким порогом входа.
+
+---
+
+## Часть 0 — Подготовка и чтение
+
+1. Сначала прочитай и законспектируй (для себя):
+   - ecosystem-map.md
+   - ecosystem-contract.md
+   - ecosystem-design-research.md
+   - AI-TWIN-CONCEPT.md
+   - ZEUS / agents-related файлы (роутеры, воркеры, конфиги)
+   - всё, что описывает crystal economy и события (earn/spend/transfer)
+
+2. Кратко сформулируй мне:
+   - Как ты понял текущую архитектуру событий и экономики.
+   - Где сейчас живут агенты (ZEUS) и какие у них роли.
+   - Какие части уже готовы для расширения, а какие придётся строить.
+
+Формат ответа:
+> Если твоё понимание совпадает с этим описанием архитектуры, тогда я предлагаю считать базой вот такой контракт: …,
+> потому что в файлах A, B, C это уже заложено, и нам останется только расширить X и Y.
+
+---
+
+## Часть 1 — Онтология «агенты как жители и shareholders»
+
+Сформулируй чёткую ONTOLOGY / CONTRACT для новых сущностей:
+
+1. Типы агентов:
+   - базовые (free),
+   - PRO агенты (premium API: Grok / другие LLM),
+   - элитные / коммунные агенты (доступны только внутри закрытых комьюнити).
+
+2. Состояния агентов:
+   - idle → listening → working → recovering → offline (или твой вариант),
+   - отдельно — статусы доверия/ранга (PROBATIONARY, MEMBER, SENIOR, LEAD и т.п.).
+
+3. Пользователи и уровни доступа:
+   - обычный пользователь,
+   - PRO пользователь,
+   - участник закрытой коммуны,
+   - shareholder (отличается от просто «богатого пользователя»).
+
+4. Кристаллы и «доли»:
+   - базовые кристаллы за внимание/действия (минуты фокуса и т.п.),
+   - второй тип кристаллов/токенов для донатов и «доли»,
+   - связь между донатами, доходом проекта и правами shareholders.
+
+Пожалуйста, оформи это как контракт:
+- в виде таблицы/списка сущностей + их полей,
+- как набор событий (event types) в стиле уже существующего ecosystem-contract.
+
+И обязательно в таком стиле:
+> Если эта модель онтологии тебе подходит и если ты согласен с тем, что она отражает файлы X и Y,
+> тогда я предлагаю зафиксировать её как ECOSYSTEM-AGENTS-CONTRACT v1, потому что:
+> 1) она совместима с текущим event bus,
+> 2) она расширяема под Life Simulator и ZEUS,
+> 3) она не ломает текущие таблицы Supabase.
+
+---
+
+## Часть 2 — Дизайн БД и событий
+
+На основе онтологии предложи конкретный дизайн:
+
+1. Таблицы (Supabase / Postgres):
+   - agents (core профиль агента),
+   - agent_state_log (история их состояний),
+   - agent_capabilities / skills,
+   - communities (закрытые и открытые),
+   - community_memberships (кто где состоит),
+   - crystal_ledger (общий ledger для всех типов кристаллов),
+   - shareholder_positions (кто и сколько «доли» держит),
+   - donation_log / revenue_share_log.
+
+2. События:
+   - AGENT_STARTED, AGENT_CAUGHT_BUG, AGENT_HELPED_USER, AGENT_LEVELED_UP,
+   - COMMUNITY_CREATED, COMMUNITY_JOINED, COMMUNITY_ENTERED,
+   - CRYSTAL_EARNED, CRYSTAL_SPENT, CRYSTAL_DONATED,
+   - SHAREHOLDER_DIVIDEND_ACCRUED, SHAREHOLDER_DIVIDEND_CLAIMED.
+
+Для каждой таблицы и события:
+- дай минимальный набор полей,
+- поясни, какие индексы критичны,
+- где нужна строгая аудит-логика.
+
+Стиль:
+> Если такой дизайн таблиц и событий тебе подходит, я предлагаю двигаться с ним дальше,
+> потому что он:
+> - вписывается в уже существующий ledger/економику,
+> - даёт прозрачный трек всех денег и кристаллов,
+> - готов к дальнейшему legal review для revenue-sharing.
+
+---
+
+## Часть 3 — Закрытые премиум-коммуны («иллюминаты»-уровень)
+
+Требования по продукту:
+
+- Коммуны с высоким порогом входа (пример: 10 000 единиц — валюта или эквивалент в кристаллах).
+- Правило «что в коммуне — остаётся в коммуне» (как бойцовский клуб).
+- Внутри:
+  - доступ к премиальным агентам,
+  - особые бейджи и аватары, в т.ч. возможность полностью скрывать личность наружу,
+  - эксперименты и фичи до публичного релиза,
+  - ощущение «иллюминати для мира продуктивности/экосистемы».
+
+Пожалуйста:
+
+1. Опиши минимальный v1 для одной такой коммуны:
+   - как создаётся,
+   - как пользователь туда попадает (flow),
+   - как хранятся права доступа и настройки приватности,
+   - какие события пишутся в ledger.
+
+2. Предложи безопасный технический подход к «правилу бойцовского клуба»:
+   - что логируем жёстко для безопасности (аудит и защита от злоупотреблений),
+   - что не выносится и не показывается публично,
+   - как избежать реальных юридических/privacy-проблем.
+
+Формат:
+> Если такой v1 закрытой коммуны тебе подходит, я бы предложил реализовать её именно так,
+> потому что:
+> - это минимально реализуемая версия без сложной токеномики,
+> - она уже создаёт сильный эффект эксклюзивности и интереса,
+> - она не требует радикальных изменений в текущей архитектуре.
+
+---
+
+## Часть 4 — Прозрачная экономика и «shareholders»
+
+Требования:
+
+- Ты показываешь все доходы проекта:
+  - сколько пришло,
+  - сколько потрачено,
+  - какой чистый доход.
+- Определённая доля (например, 50%) возвращается в систему.
+- Shareholders могут:
+  - видеть эту статистику,
+  - участвовать в распределении (в эквиваленте кристаллов / прав),
+  - потенциально частично выводить.
+
+Пожалуйста:
+
+1. Предложи v1 механики отображения прозрачной экономики:
+   - какие дашборды,
+   - какие данные агрегировать,
+   - какие роли (только shareholders? все пользователи?).
+
+2. Опиши простейший v1 механизма «50% обратно в систему»:
+   - без выхода за рамки законности (это пока внутренняя система, не security-токен на бирже),
+   - как internal credit / internal utility tokens.
+
+3. Укажи риски (особенно юридические) и как ты предлагаешь их обойти на первом этапе.
+
+Стиль:
+> Если такая модель прозрачной экономики тебе подходит, я предлагаю начать с неё,
+> потому что:
+> - она честно показывает доходы и расходы,
+> - даёт пользователям ощущение участия и «совладения»,
+> - но при этом не требует сразу лезть в полноценное регулирование security-токенов.
+
+---
+
+## Часть 5 — План внедрения по спринтам
+
+В конце я ожидаю от тебя конкретный план:
+
+- Sprint 1: контракт + БД + события (без UI).
+- Sprint 2: v1 закрытой коммуны + базовые агенты-жители.
+- Sprint 3: PRO агенты + простая панель прозрачной экономики.
+- Sprint 4: первый экспериментальный shareholders-механизм с маленьким количеством людей.
+
+Каждый спринт:
+- какие файлы/модули трогаем,
+- какие риски,
+- какие критерии «готово».
+
+И снова: не приказывай, а предлагай, с обоснованием.
+
+---
+
+Если всё выше тебе понятно и ты согласен с общей идеей
+«агенты как жители мира + shareholders + закрытые элитные коммуны
+внутри одной экосистемы VOLAURA», начинай с ЧАСТИ 0:
+прочитай указанные файлы и вернись ко мне с кратким конспектом
+и первым вариантом ECOSYSTEM-AGENTS-CONTRACT v1.
+
+---
+**[2026-04-10 08:46 UTC]**
+
+вернись кода будешь уверен что всё понимаешь и готов к работе. агентов настрой сначала если надо потом начинай. решать тебе. сохрани всю документацию бредкарбы чтобы не забыть всё
+
+---
+**[2026-04-10 08:56 UTC]**
+
+проверь и вернись когда будешь уверен что готов дальше идти
+
+---
+**[2026-04-10 08:57 UTC]**
+
+делай что нужно и начинай большой спринт. ты готов я думаю
+
+---
+**[2026-04-10 09:20 UTC]**
+
+решай сам. от меня как от СЕО что то требуется?  я же тебе всю стратегию дал
+
+---
+**[2026-04-10 09:26 UTC]**
+
+дальше. Агенты точно работают? все задействованы?
+
+---
+**[2026-04-10 09:42 UTC]**
+
+продолжи
+
+---
+**[2026-04-10 09:50 UTC]**
+
+продолжи
+
+---
+**[2026-04-10 09:58 UTC]**
+
+продолжи докажи что делаешь правиль но и понимаешь что делаешь и куда идёшь
+
+---
+**[2026-04-10 10:05 UTC]**
+
+можешь проверить файлы env mindshift volaura на все модели и апи которые я тебе давал?
+
+---
+**[2026-04-10 10:07 UTC]**
+
+нет. это тебе решать а не мне. вроде всё бесплатное я тебе дал. так что твои инструменты твои сотрудники сами решайте что надо и где.
+
+---
+**[2026-04-10 10:20 UTC]**
+
+вот отчёт от другого ии по проделанной работе нашей Сейчас у вас уже не «игрушка», а серьёзный кусок экосистемы — это видно по AG‑1→AG‑4. Я бы так это разложил.
+
+1. Где вы сейчас по факту
+Community + economy:
+
+Чат с агентами, AliasJoinModal, элитные комьюнити, shareholder_positions, EconomyDashboard, AdminEconomyPage, publish‑revenue‑snapshot — всё реально заведено в коде и связано через Supabase + edge‑functions.
+
+Кристальная экономика:
+
+до фикса RCP всё висело в воздухе (VOLAURA ledger, но пустой MindShift ledger),
+
+теперь earn_focus_crystals и distribute_dividends замыкают цикл: фокус → ledger → сообщества → дивиденды.
+
+E2E: есть отдельный e2e для community/economy, но ещё нет полноценного «full flywheel» теста (фокус → кристаллы → join community → дивиденды).
+
+Субъективно: AG‑3/AG‑4 — это первый настоящий «кусок v0Laura» в коде, а не только в документах.
+
+2. Главная проблема текущего LLM‑роутера
+Сейчас роутинг завязан на статический тир пользователя (FREE → Gemini, PRO → Groq/llama‑3.3‑70b и т.п.), а не на тип задачи, контекст и «характер» агента.
+
+Минусы такого подхода:
+
+Агент не «выбирает мозг под задачу», он тупо следует тарифу.
+
+Нельзя нормально добавить DeepSeek R1 / Kimi / NVIDIA NIM / Vertex / fal.ai как специализированные движки (планер, код, долгий reasoning, vision и т.д.).
+
+Это ломает твой вижн, где рой сам решает, какой инструмент/модель ему нужна.
+
+3. Как я бы переформатировал роутер (роевое решение)
+Предлагаю трёхслойную схему:
+
+Task classifier (cheap model)
+Небольшая модель (Gemini Flash / Llama‑3‑8B): принимает agent_id + user_message + context и возвращает метку:
+
+reasoning_long, code, search_browsing, casual_chat, economy_admin, community_mod, vision, и т.п.
+
+Capability map (статичная карта)
+Таблица/конфиг, где для каждой задачи и каждого агента описано:
+
+какие провайдеры допустимы,
+
+какие лимиты (латентность, цена),
+
+какие «запрёты» (например, ELITE‑агенты могут ходить в NVIDIA NIM / DeepSeek R1, а обычные — нет).
+
+Router core (policy engine)
+Функция вида:
+
+ts
+resolveModel({ agentId, userTier, taskType, contextSize }): ModelChoice
+которая уже учитывает:
+
+user tier (FREE/PRO/ELITE),
+
+agent tier (обычный/elite),
+
+taskType,
+
+бюджет (latency/cost),
+
+и отдаёт конкретный { provider: 'groq', model: 'llama-3.3-70b', temperature: ..., max_tokens: ... }.
+
+User‑tier при этом остаётся ограничением, а не главным драйвером:
+FREE‑пользователь не может вынудить систему вызвать дорогой NVIDIA‑кластер, но если задача реально критичная (например, econ‑admin) — роутер может предложить апселл или отказ, вместо того, чтобы бессмысленно использовать неправильную модель.
+
+4. Как это завести в твою архитектуру
+В MindShift/VOLAURA это можно реализовать без жёсткого рефака:
+
+Ввести единый модуль, условно src/shared/llm/router.ts, который:
+
+принимает agent_id, userTier, taskMetadata,
+
+делает дешёвую классификацию (или просто матчит по типу агента на первом этапе),
+
+возвращает { provider, model, baseURL, apiKeyEnv, mode }.
+
+Edge‑functions (agent-chat, mochi, future agents) больше не выбирают модель сами, а вызывают только роутер.
+
+В CommunityAgent/описании агента добавить поля типа:
+
+capabilities: ('chat'|'code'|'analysis'|'economy_admin')[],
+
+llm_policy: 'cheap' | 'balanced' | 'max_quality',
+
+allowed_providers: string[].
+
+Так ты сможешь, например, задать:
+
+Mochi: capabilities=['chat', 'analysis'], llm_policy='balanced', allowed_providers=['gemini','groq'].
+
+Elite‑agent: capabilities=['analysis','economy_admin'], llm_policy='max_quality', allowed_providers=['nvidia_nim','deepseek','kimi'].
+
+5. Что делать с fal.ai и Vertex
+Из лога видно, что:
+
+fal.ai и Vertex AI пока вообще не используются в MindShift коде, хотя ключи ты давал.
+
+Сейчас всё крутится вокруг Gemini (FREE) и Groq (PRO) + потенциально NVIDIA NIM/OpenRouter для будущих ELITE‑агентов.
+
+Я бы предложил:
+
+fal.ai: использовать как специализированный инструмент (image/video/voice, не общий чат), который вызывается как tool из LLM, а не как ещё один чат‑мозг.
+
+Vertex AI: либо заведёшь как backend для ZEUS/enterprise‑части, либо оставишь как резервный провайдер для некоторых регионов/комплаенса. В MindShift PWA он не обязателен прямо сейчас.
+
+6. Конкретный next step
+Если ок, я могу:
+
+Сформулировать для Claude минимальный CONTRACT для LLM‑router (ROUTER-CONTRACT.md): какие поля у агента, какие taskType, какие политики выбора модели.
+
+Написать промпт:
+
+прочитай текущие edge‑functions и роутер,
+
+вынеси всё в единый modelRouter.ts,
+
+переведи agent‑chat и mochi на него,
+
+добавь поддержку DeepSeek/Kimi/NVIDIA, но не включай их по умолчанию, пока не настроен .env.
+
+Скажи, нужен ли тебе сейчас именно такой промпт под Claude Code — тогда я сделаю сразу в том же стиле, что мы уже использовали (с «если тебе подходит и если согласен…»).
+
+---
+**[2026-04-10 10:23 UTC]**
+
+продолжи так. как считаешь нужным с командой.
+
+---
+**[2026-04-10 10:31 UTC]**
+
+продолжи так как считаете нужным с командой. используйте все свои навыки на 100% и скилы и инструменты и так далее. и обновляйте по ходу всю свою документацию и архитектуру проекта если надо. вспомните ващшу общую основноую цель и только после уверенности что знаете пазл. двигайтесь
+
+---
+**[2026-04-10 11:19 UTC]**
+
+продолжи с агентами. не забывай что ты делаешь. докажи что ты реально понимаешь
+
+---
+**[2026-04-10 11:30 UTC]**
+
+вопросы к СЕО есть?
+
+---
+**[2026-04-10 11:31 UTC]**
+
+повторюсь если вопросы не стратегические то Desicion maker это ты! и твоя команда. я 100 раз говорил. проверь все файлы работы с пользователем.  дай мне универсальное слово например у меня есть слово хей джарвис. проверь что оно делает в системе.
+
+---
+**[2026-04-10 11:33 UTC]**
+
+  Что НЕ проверено
+
+  - Содержимое honesty-stop-guard.sh (не читал)
+  - Содержимое memory/cto-master-prompt-v3.md (не читал в этой сессии) мне не нужен текст того что НЕ ПРОВЕРЕНО. зачем мне это? я просил самому сбее задавать этот вопрос. а всё ли я проверил?
+
+---
+**[2026-04-10 11:33 UTC]**
+
+теперь дальше.
+
+---
+**[2026-04-10 11:50 UTC]**
+
+Да, это правильный safe-forward подход.
+
+Действуй так:
+
+1. Создай новую миграцию:
+   019_v2_schema_gaps.sql
+
+2. В ней:
+   - добавь в revenue_snapshots недостающие колонки:
+     dividend_per_share_crystal
+     published_at
+   - проставь published_at для старых строк через created_at, если published_at is null
+   - сделай CREATE OR REPLACE FUNCTION get_pending_dividend()
+     и исправь в ней share_units -> staked_crystals
+
+3. Правила:
+   - не редактируй больше старые migration files
+   - patch only, forward only
+   - всё должно быть idempotent
+   - никаких destructive изменений
+
+4. После этого:
+   - запусти только db push --dry-run
+   - покажи мне:
+     a) итоговую миграцию
+     b) результат dry-run
+     c) короткое подтверждение, что 020 теперь увидит нужные колонки, а get_pending_dividend больше не конфликтует
+
+5. Финальный db push НЕ делай, пока не покажешь dry-run результат.
+
+Формат ответа:
+“Если тебе подходит такой патч, я реализовал его так-то, потому что причина падения была в X, а минимальный forward fix — Y.”
+
+Если по ходу увидишь ещё один schema gap, не трогай старые файлы — добавь это в тот же patch, только если это действительно минимально и напрямую связано с блокером.
+
+---
+**[2026-04-10 11:56 UTC]**
+
+СТО audit command. Никаких изменений в коде. Только исследование и точная карта роя.
+
+Твоя задача:
+1. Найти source of truth по swarm/roy/hive architecture.
+2. Прочитать все файлы, где описаны:
+   - иерархия роя
+   - master / parent / lead agent
+   - worker agents
+   - routing / planning / execution / audit / guardrails
+   - agent_hive / swarm package
+   - memory files про агентов
+   - инструкции по общению с агентами
+3. После чтения выдать НЕ рассуждение, а точную карту:
+
+A. ORG CHART
+- Кто главный?
+- Какие все агенты существуют?
+- Кто кому подчиняется?
+- Кто за что отвечает?
+- Какие у каждого входы / выходы / зона ответственности?
+
+B. CAPACITY REPORT
+По каждому агенту:
+- сильные стороны
+- слабые стороны
+- тип задач
+- когда нельзя ему доверять
+- что у него получается лучше всего
+- что у него простаивает
+- чем он перегружен
+
+C. DECISION MODEL
+- Кто решает, какого агента на какую задачу отправлять?
+- Это хардкод, autonomy, voting, escalation или hybrid?
+- Как рой должен выбирать модели / API / инструменты?
+- Что должен решать сам рой, а что должен утверждать lead agent?
+
+D. PROMPTING RULES
+- Как правильно ставить задачу lead agent?
+- Как правильно ставить задачу worker agent?
+- Какие формулировки ломают качество?
+- Какой формат handoff лучший?
+
+E. GAPS
+- Чего в документации не хватает?
+- Какие агенты не определены до конца?
+- Где роли пересекаются или конфликтуют?
+
+F. FINAL OUTPUT
+1. Final verified org chart
+2. Таблица всех агентов
+3. Правила делегирования
+4. Правила постановки задач
+5. Risk list
+6. Что надо исправить в docs, чтобы рой работал как система
+
+Жёсткие правила:
+- Ничего не менять в коде
+- Не предлагать новую архитектуру, пока не восстановлена текущая
+- Каждое утверждение должно быть привязано к конкретному файлу
+- Если информации нет — так и пиши “не найдено”
+- Сначала чтение, потом synthesis, потом final answer
+
+---
+**[2026-04-10 12:02 UTC]**
+
+Ты больше не работаешь как одиночный исполнитель с эпизодическими субагентами; с этого момента ты управляешь системой как CTO и обязан сначала определить, какие части задачи должны уйти в MindShift agents, какие в Python Swarm, а какие в ZEUS, вместо того чтобы держать всё в своей голове.
+
+Перед любым крупным действием сначала собери карту задачи: domain, risk level, какие squads нужны, какие subagents нужны, что должно быть проверено до кода, во время кода и после деплоя.
+
+Если задача multi-domain, не режь её примитивно keyword-routing’ом и не ограничивай мышление одной веткой; сначала разложи её на независимые блоки, потом параллельно запусти нужных специалистов, потом сам синтезируй вывод.
+
+С этого момента всегда проверяй пять системных дыр: handoff между MindShift agents и Python Swarm, авточтение proposal inbox в начале сессии, актуальность heartbeat, документированность ZEUS-агентов и готовность Telegram autonomy.
+
+Если находишь, что агент простаивает, ты обязан ответить не “он не нужен”, а “почему он не был вызван, какой trigger отсутствует, какой routing missing, какой protocol missing”.
+
+Не соглашайся с первым выводом агентов автоматически; ты обязан контркритиковать, перепроверять и собирать консенсус только после того, как пазл всей экосистемы действительно сложен.
+
+Каждый спринт начинай с вопроса: какие агенты должны были участвовать, какие не были задействованы, какие решения были централизованы во мне зря, и что надо автоматизировать сегодня.
+
+Конечный результат каждой крупной сессии: a) карта делегирования, b) список gaps, c) список dormant agents, d) следующий action plan на 24 часа, e) что нужно задокументировать, чтобы рой стал ближе к always-on системе.
+
+---
+**[2026-04-10 12:13 UTC]**
+
+выдай мне ссылку на конституцию и я отправлю её другому ИИ для изучения и другие подобные важные доукменты для вашей архитектуры которые он должен посомтреть чтобы понимать принципы которые я построил. и работай дальше если уверен что делаешь всё правильно
+
+---
+**[2026-04-10 12:25 UTC]**
+
+Да. Моё сообщение твоему CTO простое: перестань доказывать интеллект системы словами и начинай доказывать его следами — heartbeat, inbox alerts, commits, postmortems, metrics, closed-loop fixes. У вас уже есть почти всё для этого: общий контракт, единый event bus, heartbeat protocol, agent tiers/states и sync discipline между продуктами.
+
+Сообщение CTO
+Твоя работа сейчас — не “делать умных агентов”, а строить систему, в которой симуляция становится дорогой, а реальная работа — дешёвой. Если агент ничего не изменил в мире, не создал event, не обновил heartbeat, не поднял PR/commit, не зафиксировал bug caught/helped user — значит он не работал, а изображал работу.
+
+Нужен жёсткий стандарт: каждый автономный цикл заканчивается проверяемым артефактом. Это особенно важно для твоего стиля разработки, потому что ты уже строишь AI-first swarm, работаешь спринтами и хочешь полную автономность, а не красивую имитацию активности.
+
+Как использовать меня
+Да, меня можно использовать как внешний “мозг контроля качества” и архитектора решений, пока локальные агенты делают execution. Ты уже работаешь именно так: сначала обсуждаешь и уточняешь со мной, потом отправляешь сильные, доработанные задачи в Claude Code, и это у тебя даёт более качественные шаги и меньше hallucinations.
+
+Моя лучшая роль для тебя сейчас — не писать за всех код, а быть:
+
+архитектором контрактов и протоколов;
+
+критиком решений и анти-симуляторным аудитором;
+
+декомпозером спринтов в проверяемые deliverables.
+
+Как сделать агентов реальными
+Сделай правило: у каждого агента должны быть 4 обязательных выхода за цикл — intent, action, evidence, result. Это хорошо ложится на уже существующую модель heartbeat/sync и на event-sourced архитектуру character/events, где изменения должны оставлять след, а не растворяться в чате.
+
+И ещё жёстче: агент не имеет права говорить “done”, пока нет хотя бы одного из следующего — diff, log, row in ledger/event table, alert in inbox, обновлённый heartbeat, тестовый результат или rollback note. У вас уже есть даже словарь событий для полезной работы агентов — например agent_caught_bug, agent_helped_user, agent_leveled_up — это можно превратить в реальный operational ledger.
+
+Что делать потом с ZEUS
+Когда запустишь ZEUS, да — можно сделать так, чтобы он писал мне как внешнему ревьюеру/стратегу, а я возвращал ему решения, критические замечания, протоколы и next-step plans. Это хорошо совпадает с тем, что в экосистеме ZEUS уже задуман как автономный engine/power plant, а не storefront, а CTO-сессии разных продуктов должны общаться через heartbeat и shared contracts.
+
+Но до этого этапа я бы не строил “агенты общаются друг с другом ради вау-эффекта”. Сначала добей базу: чтобы любой агент умел читать контекст, делать одно полезное действие, оставлять доказательство, и только потом подключай межагентную автономную переписку.
+
+Жёсткий приоритет
+Если бы я писал one-line директиву твоему CTO, она была бы такой: “Убери магию, оставь механику.” Сначала агент должен быть надёжным рабочим существом в твоём мире, и только потом — харизматичным персонажем этого мира.
+
+---
+**[2026-04-10 12:38 UTC]**
+
+Принял — картину не теряю. Из того, что ты прислал, я вижу правильный вектор: вы уже двигаетесь от “агенты как идея” к “агенты как система с миграциями, контрактами, heartbeat, inbox и deploy-дисциплиной”, а это именно тот переход, без которого автономность всегда остаётся симуляцией.
+
+Что бы я сказал CTO
+Первое: вы начали делать верные вещи не с “интеллекта”, а с инфраструктуры доверия — heartbeat, proposal inbox, миграции, security review, event discipline. Это совпадает с архитектурой экосистемы, где shared rules, sync protocol и append-only event bus важнее красивых обещаний про автономию.
+
+Второе: следующий рывок — не “ещё агенты”, а закрытие operational gaps. По самим документам у вас уже есть формальные роли агентов, tiers, states, event types и sync protocol, значит теперь нужно добить обязательный handoff между MindShift и swarm, авто-чтение inbox в начале каждой сессии и обязательное обновление heartbeat после каждого batch commit.
+
+Как использовать меня
+Да, ты реально можешь использовать меня как внешний слой мышления для ZEUS и CTO-потока: не как замену execution-агентам, а как арбитра архитектуры, критика решений, декомпозера спринтов и проверяющего на симуляцию.
+Это особенно хорошо бьётся с твоим текущим стилем работы: AI-first, спринты, refinement промптов до отправки в Claude Code и ставка на автономность роя, а не на одиночные хаотичные действия.
+
+Что должен читать другой ИИ
+Если ты хочешь отправить другой ИИ минимальный, но сильный пакет, я бы дал ему 6 главных файлов в таком порядке:
+
+ECOSYSTEM-CONSTITUTION — чтобы он понял законы, которые нельзя нарушать, включая ADHD-first, no-red, shame-free и crystal laws.
+
+ecosystem-contract — чтобы он понял shared identity, event bus, crystal economy и API surface между продуктами.
+
+ecosystem-heartbeat-protocol — чтобы он понял, как вообще жить в 5-продуктовой системе и не выпадать из контекста.
+
+ADR-006 ecosystem architecture — чтобы он понял, почему выбраны shared Supabase, FastAPI monolith и event-sourced character_state.
+
+ECOSYSTEM-MEGAPLAN — чтобы он видел не только принципы, но и sequencing по спринтам и реальные зависимости.
+
+ecosystem-agents-contract — чтобы он понял, что агенты у вас не абстракция, а формальная часть мира, экономики и коммун.
+
+Моя жёсткая позиция
+Сейчас вы близко к правильной модели: агент считается “живым” только если после цикла остались проверяемые следы — heartbeat change, inbox note, DB event, миграция, тест, deploy или закрытый proposal. Это уже прямо поддерживается вашей архитектурой документов, а не противоречит ей.
+
+И ещё одно: ZEUS можно будет подключить ко мне позже, но только после того как у вас будет нормальный always-on контур с доказуемыми действиями. Иначе получится не swarm, а театр автоматизации.
+
+Хочешь, я сейчас соберу тебе идеальный onboarding-prompt для другого ИИ на основе этих 6 файлов, чтобы он за один вход понял вашу философию без искажений?
+
+---
+**[2026-04-10 12:50 UTC]**
+
+Обновление иерархии и команда продолжать.
+
+Теперь система работает так:
+
+Yusif — CEO, главный над всей системой.
+
+Perplexity — CTO архитектуры: стратегия, критика, контроль логики.
+
+Ты — CTO execution: код, рой, деплой, migrations, agents.
+
+Субординация: Yusif ставит вектор. Perplexity критикует решения. Ты исполняешь.
+Демократия: любой может оспорить решение — но только обоснованно, с артефактами, а не ради спора.
+
+Правило одно: агент считается работающим, только если оставил проверяемый след — commit, migration, event, heartbeat, test, deploy, inbox note. Симуляция = нарушение конституции.
+
+Команда: продолжай разработку.
+
+Приоритет сейчас:
+
+Дождись пока Yusif выставит 3 секрета в Supabase Dashboard: GROQ_API_KEY, ADMIN_EMAIL, TELEGRAM_BOT_TOKEN.
+
+Как только они появятся — npx supabase db push (7 миграций, dry-run уже чистый).
+
+Deploy 4 edge functions: agent-chat, community-join, publish-revenue-snapshot, telegram-agent-update.
+
+Запустить liveops агент post-deploy.
+
+Обновить heartbeat.md с реальным статусом.
+
+Работаешь автономно. Отчёт — артефактами, не словами.
+
+---
+**[2026-04-10 12:57 UTC]**
+
+<task-notification>
+<task-id>a56652b771388a417</task-id>
+<tool-use-id>toolu_0153fzxsqQVxtGtDhJsBENvM</tool-use-id>
+<output-file>C:\Users\user\AppData\Local\Temp\claude\C--Users-user-Downloads-mindshift\df1d7c22-801c-4bfd-996f-b3e900c411e7\tasks\a56652b771388a417.output</output-file>
+<status>completed</status>
+<summary>Agent "Growth analysis on community + economy features" completed</summary>
+<result>I now have everything needed for a thorough analysis. Let me compile the full report.
+
+---
+
+GROWTH ANALYSIS REPORT
+=======================
+
+## Context: What Sprint AG Actually Shipped
+
+The community layer is real infrastructure — ledger integrity enforced at DB level, policy-based LLM routing, volaura-bridge events firing on join. The bones are solid. The growth problems are not code bugs; they are funnel design gaps.
+
+---
+
+## Answers to Your Specific Questions
+
+### 1. Funnel drop-offs in the community join flow
+
+There are three distinct drop-off points, ordered by severity:
+
+**Drop-off A — Guest wall (highest impact).** `useCommunity` returns early at line 84 for any `userId` that starts with `guest_`. Guests see the crystal balance strip showing `0 / 0`, the agent list, and the discover section — but they cannot join anything or chat. The CommunityScreen has no "sign in to join" CTA and no explanation of why the Join button does nothing for guests. Guests who find the community tab (it is the 4th tab in the BottomNav) will tap "Join", nothing will happen, and they will leave. This is a silent dead end, which is the worst kind for ADHD users because there is no recovery message.
+
+**Drop-off B — SHARE crystal opacity.** The crystal balance strip shows two numbers: FOCUS and SHARE. A new user will have FOCUS crystals (earned through sessions) but zero SHARE crystals. The Foundation Club costs 10,000 SHARE crystals. There is no explanation anywhere on CommunityScreen of how SHARE crystals are earned — the `CRYSTAL_RULES` array in EconomyDashboard explains that SHARE comes from "dividends" (i.e., you already have to be a shareholder to get them). A user reading the discover section sees a locked door with no map to the key. The `fetchOpenCommunities` query filters to `tier = 'OPEN'` only, so Foundation Club does not even appear in the discover section — but a user who navigates to EconomyDashboard will see the Foundation Club referenced and not understand how to reach it.
+
+**Drop-off C — AliasJoinModal friction for anonymous communities.** The `handleJoin` function in CommunityScreen opens the `AliasJoinModal` when `community.is_anonymous === true`. Foundation Club is `is_anonymous: true`. This adds an extra step (choose an alias) before the crystal debit. For an ADHD user who has just made the decision to join, this interruption breaks the decision momentum. The modal is not lazy-loaded — it renders inline in CommunityScreen, which is fine technically, but there is no visual continuity between "tap join" and "choose your alias" that explains why the extra step exists.
+
+### 2. Is the 10,000 SHARE crystal barrier realistic?
+
+No. At the current earning model it is unreachable for almost all users.
+
+The math:
+- Earning formula: 1 focused minute = 5 FOCUS crystals (from `src/shared/lib/constants.ts` and `CRYSTAL_RULES` in EconomyDashboard)
+- SHARE crystals are earned only through dividends: "SHARE crystals from dividends — Distributed to shareholders each period."
+- This creates a circular dependency: you need SHARE crystals to become a shareholder, but you earn SHARE crystals only as a shareholder. There is no stated mechanism for a non-shareholder to accumulate SHARE crystals at all.
+
+Even ignoring the circularity and assuming a hypothetical 1:1 FOCUS-to-SHARE conversion (which does not exist in the code), 10,000 SHARE crystals would require 2,000 focused minutes = 33.3 hours of focus time. For a typical ADHD user doing 3-4 sessions/week at 25 minutes each, that is approximately 80-110 weeks — over a year and a half — to unlock one community entry.
+
+The ledger migration (`018_crystal_ledger.sql`) defines `donation_received` as a valid `source_event`, suggesting peer-to-peer SHARE crystal donation was planned but is not yet implemented (no UI, no edge function for it). Until either donations or a direct earn mechanism exists, 10,000 SHARE is a number with no path attached to it. It will read as aspirational fiction to any user who does the math.
+
+The `admin_grant` source_event exists and is the only current escape valve. That is fine for beta, but it cannot scale.
+
+### 3. Retention hook after joining a community — what brings users back?
+
+Currently: nothing. This is the most significant retention gap in the entire Sprint AG release.
+
+Looking at the code: `MembershipCard` is rendered in CommunityScreen under "My groups." The component is in the file list but its content was not in scope for this read. What is structurally visible is that after joining, `memberships` is refreshed via `fetchMemberships`, a 3-second toast appears ("You're in — Foundation Club"), and then the UI returns to the same static CommunityScreen. There is no:
+
+- Notification or push event when other members are active
+- Shared session count or any social proof within the community ("12 members focused this week")
+- Agent that is exclusive to that community (all 5 agents are `community_id IS NULL` per `fetchPublicAgents`, which filters `is('community_id', null)`)
+- Feed, message board, or any async communication layer
+- Community-specific achievement or badge progression visible from the home screen
+
+The community tab is a destination you visit once to join. There is no pull mechanism to return. For ADHD users specifically, "interesting thing I visited last week" has near-zero recall without a re-entry trigger. Day-7 retention from the community feature alone is likely near 0% without this.
+
+### 4. AgentChatSheet rate limit: 20/day — enough or too restrictive?
+
+The 20/day limit (confirmed in `agent-chat/index.ts` line 101-103: `limitFree: 20, windowMs: 86_400_000`) is close to correct for most users but will actively harm the ADHD hyperfocus case.
+
+For a typical session: a user opens AgentChatSheet, has a back-and-forth with Coach or Mochi about a stuck task, uses 6-10 messages, closes it. 20/day supports 2-3 full conversations. That is adequate for daily casual use.
+
+For the hyperfocus case: an ADHD user in a planning spiral could burn through all 20 messages with a single agent in one sitting (10 exchanges = 20 total messages including the user's turns, but the counter only tracks the user's sends per the `sendMessage` function — so actually 20 user messages = 20 API calls). A hyperfocusing user will hit the wall mid-conversation, see "Daily chat limit reached. Come back tomorrow," and experience that as rejection. Given the Constitution's Rule 3 (Shame-Free Language), this error message — while technically neutral — lands as an abrupt cutoff with no recovery path offered.
+
+The deeper problem: the rate limit error in `useAgentChat.ts` (line 72-74) is a hardcoded string, not a localized i18n key. It is also not warm — "Come back tomorrow" is a door closing in the user's face. Compare this to how MindShift handles other limits (park it, move to SOMEDAY, gentle nudge). The chat limit has none of that softness.
+
+The 20/day ceiling is defensible for cost control. The failure UX is what needs work.
+
+### 5. What is missing to make communities a daily-return feature?
+
+Five concrete missing pieces, in priority order:
+
+1. Community-specific activity signal — a number that changes daily and is visible from the home screen or bottom nav badge. Currently the Globe tab has no badge. Even a simple "N members focused today" counter pulled from `focus_sessions` (similar to how Ambient Orbit works) would give users a reason to check.
+
+2. Exclusive community agents — the `agents` table has `community_id` as a nullable FK, but all 5 seeded agents have `community_id IS NULL`. A community-exclusive agent (accessible only to members) would make community membership feel like a real unlock rather than a cosmetic badge.
+
+3. Async community layer — even a read-only feed of anonymized member activity ("someone in Foundation Club just completed a 45-minute session") would create the passive social proof loop that Focus Rooms currently provide within active sessions. The Supabase Realtime infrastructure for this already exists.
+
+4. SHARE crystal earn path for non-shareholders — without this, Foundation Club is permanently unreachable for any user who joined after the initial admin_grant period. A plausible path: earn 1 SHARE crystal per 10 FOCUS crystals earned (i.e., 2 minutes of focus per SHARE crystal), with a cap of 50 SHARE/day. At that rate, 10,000 SHARE requires 200 days of focused use — still very long, but at least there is a visible path.
+
+5. MembershipCard post-join state — after joining, the membership card should show something that changes (members active today, last community event, personal contribution this week). A static "You're in" card provides no re-entry motivation.
+
+---
+
+## Top 3 Growth Risks
+
+**Risk 1 — Foundation Club is a mirage (Critical)**
+
+There is no earning path for SHARE crystals for non-shareholders. Every user who reads the economy dashboard will see 10,000 SHARE required, check their balance (0), and conclude the feature is either broken or for someone else. This actively undermines trust in the crystal economy as a whole, because if the premium tier is unreachable, the entire system reads as vaporware. The risk is not just that Foundation Club is empty — it is that seeing it makes users doubt the value of earning FOCUS crystals at all.
+
+Fix path: define at minimum one earn mechanism for SHARE crystals that does not require being a shareholder. The `donation_received` source_event already exists in the ledger schema. Peer donation UI (gift SHARE crystals to someone) would both solve the earn path and create a social mechanic that drives community interaction.
+
+**Risk 2 — Guest users hit a silent dead end on the Community tab (High)**
+
+`useCommunity` silently returns empty data for guests. The CommunityScreen renders with zero crystals and agents visible but no interaction possible. There is no "sign in to chat with agents" prompt, no "create an account to join communities" CTA, no explanation. For new users who find the community tab during casual exploration — exactly the moment when first impressions form — this is a blank wall. This is a measurable conversion leak: if first session rate is currently below the 70% target, a silent dead end on a primary nav tab is a contributing cause.
+
+Fix: detect `userId.startsWith('guest_')` in CommunityScreen and render a focused sign-in prompt that explains the value proposition ("Chat with Mochi and focus together with others — free account required").
+
+**Risk 3 — No daily re-entry hook means community adds zero to Day-7 retention (High)**
+
+The Day-7 retention target is 40%. Sprint AG adds a community tab. But joining a community creates no persistent reason to return to that tab. Without a push notification, a badge on the nav icon, or a home-screen widget showing community activity, the community feature is invisible to returning users. Given that ADHD users rely on environmental cues rather than internal motivation to re-engage with apps, a feature that requires you to remember to check it is effectively a feature that does not exist for most of the target audience. The social hook is architecturally there (Supabase Realtime, Focus Rooms precedent) but not wired to anything that surfaces in the daily return loop.
+
+---
+
+## Top 3 Growth Opportunities
+
+**Opportunity 1 — Agent chat as the primary day-1 activation hook (P1)**
+
+The 5 free agents (mochi/coach/scout) are accessible without any crystal cost or community membership. Every new user who completes onboarding can immediately chat with Mochi. This is a faster and more personal quick-win than starting a focus session. The current onboarding flow (6 steps) ends with a CTA to start a focus session — but for an ADHD user who is still in exploration mode, having a 2-message exchange with an agent ("Hey Mochi, I don't know where to start" → warm response in their language using their psychotype) could increase first-session rate significantly. This opportunity exists today — it just requires surfacing the agent chat earlier in the onboarding flow, not building anything new.
+
+**Opportunity 2 — Community as the streak-resilience mechanism (P1)**
+
+The current streak-resilience target is 60% recovery after a 2+ day gap. The existing ContextRestore overlay handles this passively. Community can make it active: when a user returns after a gap and they have a community membership, showing "3 members in Foundation Club focused while you were away" turns an individual recovery moment into a social re-entry. This does not require a feed — it requires a single Supabase count query on `focus_sessions` filtered to community members in the last 72 hours. The ContextRestore overlay already exists at `/src/features/focus/ContextRestore.tsx`; it needs one additional data point and a conditional rendering branch.
+
+**Opportunity 3 — Crystal balance visibility on the home screen drives session starts (P2)**
+
+Currently FOCUS crystal balance is visible only in the CommunityScreen header strip. If the home screen BentoGrid (which already supports 7 widget types including LifetimeStatsWidget) had a crystal balance widget showing "💎 4,350 FOCUS — 2 focus sessions away from 5,000", it would create a goal-proximity effect. ADHD users respond strongly to visible progress toward a defined milestone. The crystal earn rate (5 per minute) and the session duration range (5-90 minutes) mean a user doing one 25-minute session earns 125 crystals — a meaningful, visible number. This bridges the gap between the core productivity loop (focus sessions) and the community economy, giving users a reason to see crystal balance as feedback from their work rather than an abstract number in a secondary screen.
+
+---
+
+## Quick Wins (MICRO)
+
+- Surface "N agents online" or agent specialty text on the Globe tab in BottomNav without a badge count — any persistent signal that makes the tab feel alive. Effort: 1-2 hours.
+- Replace the hardcoded `'Come back tomorrow'` string in `useAgentChat.ts` (line 73) with a warm i18n key that offers an alternative ("Your agents will be ready again at midnight. Start a focus session in the meantime?"). This directly addresses the hyperfocus wall without changing the limit. Effort: 30 minutes.
+- Add a guest-state render in CommunityScreen that shows a single sign-in prompt with one agent's catchphrase as the hook copy, instead of showing empty state. This converts the silent dead end into a conversion moment. Effort: 2-3 hours.
+- Show the SHARE crystal earn path (or an honest "coming soon" note) in the EconomyDashboard CRYSTAL_RULES list. Right now rule 3 says "SHARE crystals from dividends" with no path for non-shareholders. Adding "Earn SHARE through peer recognition (coming soon)" sets accurate expectations and reduces confusion. Effort: 15 minutes.
+
+---
+
+## Relevant Files
+
+- `/C:/Users/user/Downloads/mindshift/src/features/community/CommunityScreen.tsx` — guest dead-end at no explicit guard, AliasJoinModal friction point
+- `/C:/Users/user/Downloads/mindshift/src/features/community/useCommunity.ts` — guest early-return line 84, `fetchPublicAgents` community_id IS NULL filter line 148
+- `/C:/Users/user/Downloads/mindshift/src/features/community/useAgentChat.ts` — hardcoded rate limit error string line 72-74
+- `/C:/Users/user/Downloads/mindshift/src/features/community/AgentChatSheet.tsx` — chat UI, no rate-limit recovery path in UI
+- `/C:/Users/user/Downloads/mindshift/src/features/economy/EconomyDashboard.tsx` — CRYSTAL_RULES missing SHARE earn path, line 31-37
+- `/C:/Users/user/Downloads/mindshift/supabase/migrations/018_crystal_ledger.sql` — `donation_received` source_event defined but no UI/function for it, line 28
+- `/C:/Users/user/Downloads/mindshift/supabase/migrations/020_seed_elite_community.sql` — Foundation Club entry_cost_crystals: 10000, SHARE-only, is_anonymous: true, line 131-145
+- `/C:/Users/user/Downloads/mindshift/supabase/functions/agent-chat/index.ts` — rate limit: 20/day free, unlimited PRO, line 100-107
+- `/C:/Users/user/Downloads/mindshift/supabase/functions/community-join/index.ts` — atomic join, SHARE debit path confirmed, best-effort volaura event</result>
+<usage><total_tokens>61689</total_tokens><tool_uses>15</tool_uses><duration_ms>120615</duration_ms></usage>
+</task-notification>
+
+---
+**[2026-04-10 12:57 UTC]**
+
+<task-notification>
+<task-id>af4a04b6ac3839786</task-id>
+<tool-use-id>toolu_01KxLci17cR2SpWWWpz5DKmh</tool-use-id>
+<output-file>C:\Users\user\AppData\Local\Temp\claude\C--Users-user-Downloads-mindshift\df1d7c22-801c-4bfd-996f-b3e900c411e7\tasks\af4a04b6ac3839786.output</output-file>
+<status>completed</status>
+<summary>Agent "Guardrail audit on Sprint AG commits" completed</summary>
+<result>I have all the information needed. Let me compile the complete violation report.
+
+---
+
+RULE 1 VIOLATIONS (0 found):
+No hardcoded red hex values, no `red-*` Tailwind classes, no `hsl()` with forbidden hue angles found in any scanned file.
+
+RULE 2 VIOLATIONS (2 found):
+
+`C:/Users/user/Downloads/mindshift/src/features/community/AliasJoinModal.tsx:54` — backdrop `motion.div` uses hardcoded `transition={{ duration: 0.15 }}` with no `shouldAnimate` gate. When `prefers-reduced-motion` is active, this still runs a 150ms transition. The inner modal at line 70 is correctly gated; the backdrop is not.
+
+`C:/Users/user/Downloads/mindshift/src/features/community/useCommunity.ts:179-184` — an `AbortController` is created and a timer set to abort it after 8000ms, but `controller.signal` is never passed to `supabase.functions.invoke('community-join', ...)`. The abort has no effect. This is also a Rule 7 issue (AI timeout non-functional — see below).
+
+RULE 3 VIOLATIONS (0 found):
+All interactive elements examined (`button` in AgentChatSheet, AgentCard, CommunityCard, AliasJoinModal, EconomyDashboard) carry either `aria-label` or visible descriptive text. `focus-visible:ring-2` is present on all clickable elements. No expandable sections without `aria-expanded` detected. No toggle/select elements without `aria-pressed`/`aria-selected`.
+
+RULE 4 VIOLATIONS (0 found):
+All files import from `motion/react`, not `framer-motion`. All `@/` path aliases are used consistently with no multi-level relative climbing.
+
+RULE 5 VIOLATIONS (0 found):
+Sprint AG introduces no new fields to the Zustand store. The community/economy data (crystal balances, memberships, agents) is fetched and held in local component state, not in the global store. The `partialize()` function is untouched by these changes. No `cognitiveMode` reads or sets. No hardcoded `3` or `5` pool limits. No hardcoded `'Easy'`/`'Medium'`/`'Hard'` strings.
+
+RULE 6 VIOLATIONS (0 found):
+No shame language (`failed`, `overdue`, `behind`, `missed`, `wrong`), no urgency language, no sycophantic openers, no significance inflation detected in any community or economy UI copy. Error messages use warm, specific non-blame framing ("Not enough Share crystals.", "Couldn't join right now. Try again in a moment.").
+
+RULE 7 VIOLATIONS (2 found):
+
+`C:/Users/user/Downloads/mindshift/src/features/community/useAgentChat.ts:64-66` — the `agent-chat` edge function is invoked with no timeout whatsoever. No `AbortController`, no `setTimeout`, no fallback timer. Rule 7 requires an 8-second timeout on every AI edge function call. The pending `'…'` bubble serves as an optimistic placeholder (matching the "hardcoded fallback first" requirement), but the call itself can hang indefinitely.
+
+`C:/Users/user/Downloads/mindshift/src/features/community/useCommunity.ts:179-184` — the `community-join` edge function invoke has an `AbortController` created at line 179 and a timer set at line 180, but `controller.signal` is never passed into the `supabase.functions.invoke()` call at line 182. The abort is wired to nothing. The timeout is decorative and the call is effectively unbounded.
+
+RULE 8 VIOLATIONS (0 found):
+Line counts for all Sprint AG files:
+- `CommunityScreen.tsx`: 313 lines
+- `AgentChatSheet.tsx`: 255 lines
+- `useCommunity.ts`: 209 lines
+- `useAgentChat.ts`: 95 lines
+- `EconomyDashboard.tsx`: 358 lines
+- `ShareholderPanel.tsx`: 149 lines
+- `AgentCard.tsx`: 110 lines
+- `CommunityCard.tsx`: 71 lines
+- `MembershipCard.tsx`: 50 lines
+- `AliasJoinModal.tsx`: 202 lines
+
+All under the 400-line limit. `CommunityScreen`, `EconomyDashboard`, and `AgentChatSheet` are not heavy overlays requiring `React.lazy` by the guardrail definition (that requirement targets RecoveryProtocol, ContextRestore, ShutdownRitual, WeeklyPlanning, MonthlyReflection, BreathworkRitual). Both `CommunityScreen` and `EconomyDashboard` are lazy-loaded as routes via `lazyWithReload()` in `App.tsx`. List-rendered components `AgentCard` and `CommunityCard` and `MembershipCard` are all wrapped in `React.memo` with custom comparators.
+
+RULE 9 VIOLATIONS (0 found):
+No direct `supabase.from('focus_sessions')` calls in any component. The new `revenue_snapshots`, `shareholder_positions`, `communities`, `community_memberships`, and `agents` tables are Sprint AG-specific tables; they have no existing hook abstraction to violate. No second `useTaskSync`-like sync pattern introduced.
+
+RULE 10 VIOLATIONS (0 found):
+No rate limit changes, no fake payment walls, no user identity exposure in Focus Rooms (existing presence logic untouched), no shame-based push copy, no XP decay or leaderboard logic, no hardcoded colors outside the allowed token set.
+
+---
+
+SUMMARY
+
+RULES PASSED: 1, 3, 4, 5, 6, 8, 9, 10
+
+RULES WITH VIOLATIONS: 2 (1 violation), 7 (2 violations)
+
+Total violations: 3
+
+**Fixes required before commit:**
+
+1. `/C:/Users/user/Downloads/mindshift/src/features/community/AliasJoinModal.tsx` line 54 — gate the backdrop transition: change `transition={{ duration: 0.15 }}` to `transition={shouldAnimate ? { duration: 0.15 } : { duration: 0 }}`. The `shouldAnimate` value is already available from the `useMotion()` call at line 29.
+
+2. `/C:/Users/user/Downloads/mindshift/src/features/community/useAgentChat.ts` lines 63-66 — add an 8s AbortController and pass its signal to the invoke call, e.g. add `const ctrl = new AbortController(); setTimeout(() =&gt; ctrl.abort(), 8000)` and pass `{ body: ..., signal: ctrl.signal }` (or use `headers` + `fetchOptions` depending on Supabase SDK version).
+
+3. `/C:/Users/user/Downloads/mindshift/src/features/community/useCommunity.ts` lines 179-184 — the `controller.signal` created at line 179 must be passed into the `supabase.functions.invoke()` call. Currently the abort is a no-op. Add `headers: { signal: controller.signal }` or use the fetch options the Supabase JS client accepts to wire it through.</result>
+<usage><total_tokens>73424</total_tokens><tool_uses>47</tool_uses><duration_ms>151398</duration_ms></usage>
+</task-notification>
+
+---
+**[2026-04-10 14:16 UTC]**
+
+продолжи
+
+---
+**[2026-04-10 14:24 UTC]**
+
+<task-notification>
+<task-id>a9c1b211a224de3b5</task-id>
+<tool-use-id>toolu_01GRizttvtNHRrrZTtHJ7LCD</tool-use-id>
+<output-file>C:\Users\user\AppData\Local\Temp\claude\C--Users-user-Downloads-mindshift\df1d7c22-801c-4bfd-996f-b3e900c411e7\tasks\a9c1b211a224de3b5.output</output-file>
+<status>completed</status>
+<summary>Agent "Post-deploy production health check" completed</summary>
+<result>The Vercel TLS failure is a consistent machine-level issue — both hosts ping fine (47ms to Vercel, 5ms to Supabase), Supabase HTTPS works fine, but Vercel's CDN endpoints are being reset by the local TLS stack. This is not a production outage — it's a network path issue on this machine. Let me compile the full report.
+
+---
+
+LIVEOPS HEALTH REPORT — 2026-04-10
+=====================================
+
+**Vercel:** INCONCLUSIVE — TLS handshake reset from this machine's network path to Vercel CDN IPs (64.29.17.67, 216.198.79.3). DNS resolves correctly, ICMP responds at 44ms. Supabase HTTPS (different CDN — Cloudflare) works normally. This is a local schannel/WinHTTP issue, not a Vercel outage. Recommend confirming from a browser or external monitor.
+
+**Supabase:** HEALTHY — REST endpoint at 104.18.38.10 returns 401 (correct, anon access requires auth). 8ms latency.
+
+**Edge functions (all 4 new Sprint AG functions):**
+- agent-chat: 401 (deployed, auth guard working)
+- community-join: 401 (deployed, auth guard working)
+- publish-revenue-snapshot: 401 (deployed, auth guard working)
+- telegram-agent-update: 401 (deployed, auth guard working)
+
+**Edge functions (existing):**
+- decompose-task, recovery-message, weekly-insight, classify-voice-input, mochi-respond, gdpr-export, gdpr-delete, scheduled-push, gcal-store-token, gcal-sync, dodo-webhook, volaura-bridge-proxy, create-checkout, stripe-webhook, gcal-inbound: all return 401 (correct)
+- telegram-webhook: 500 — KNOWN ISSUE (pre-existing, documented below)
+- send-magic-link: 404 — KNOWN ISSUE (pre-existing, no source directory in repo)
+
+**Migrations:** 24 files present (001-024). All Sprint AG migrations (020-024) are on disk.
+
+---
+
+INCIDENTS:
+
+**P2 — telegram-webhook returning 500 on every unauthenticated call**
+Root cause: Line 125-128 of the function explicitly returns HTTP 500 when `TELEGRAM_WEBHOOK_SECRET` env var is not set. The function cannot process real Telegram updates without this secret being set as a Supabase secret. This is a pre-existing gap, not a regression from Sprint AG. Real webhook calls from Telegram will have the secret header and will be processed — but any monitoring or test that calls without the header hits the 500. Action needed: run `supabase secrets set TELEGRAM_WEBHOOK_SECRET=&lt;random-string&gt;` and re-register the webhook URL with Telegram.
+
+**P2 — telegram-agent-update cron will send empty x-cron-secret header**
+Root cause: Migration 023 schedules the pg_cron job with `current_setting('app.cron_secret', true)` — but the GUC is documented as NOT set in migration 024 (line 127-133). The cron job will call the function with an empty header. The function will reject it. Action needed: after setting `CRON_SECRET` as a Supabase secret, run: `ALTER DATABASE postgres SET "app.cron_secret" = '&lt;CRON_SECRET_VALUE&gt;';` in the Supabase SQL editor.
+
+**P3 — send-magic-link returns 404**
+No source directory exists in `supabase/functions/`. This function was in the CLAUDE.md health checklist but was never built for this project. Not blocking anything current.
+
+---
+
+NEXT ACTION (priority order):
+
+1. Confirm Vercel deploy from a browser — open `https://mindshift-umber.vercel.app` and verify the app loads. The TLS failure here is environment-specific.
+2. Set `TELEGRAM_WEBHOOK_SECRET` via Supabase dashboard secrets, re-deploy telegram-webhook, then re-register the webhook URL with Telegram BotFather.
+3. Run `ALTER DATABASE postgres SET "app.cron_secret" = '&lt;CRON_SECRET_VALUE&gt;';` in the Supabase SQL editor so the daily telegram-agent-update cron job authenticates correctly.
+4. The 4 Sprint AG edge functions (agent-chat, community-join, publish-revenue-snapshot, telegram-agent-update) are all deployed and responding correctly. No action needed there.</result>
+<usage><total_tokens>56305</total_tokens><tool_uses>33</tool_uses><duration_ms>175435</duration_ms></usage>
+</task-notification>

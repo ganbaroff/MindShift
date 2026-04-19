@@ -12,10 +12,14 @@ export function StatsGrid() {
 
   const unlockedCount = achievements.filter(a => a.unlockedAt).length
 
+  // NaN-guard (2026-04-19): offline/pre-hydration paths could push NaN into store.burnoutScore;
+  // mirrors the proven pattern at HomeDailyBrief.tsx:72.
+  const safeBurnoutScore = isNaN(burnoutScore) ? 0 : (burnoutScore ?? 0)
+
   const stats = [
     { value: String(unlockedCount), emoji: '🏆', label: t('progress.achievements') },
     { value: String(completedTotal), emoji: '✅', label: t('progress.tasksDone') },
-    { value: String(burnoutScore), emoji: '🧠', label: t('progress.burnoutScoreLabel') },
+    { value: String(safeBurnoutScore), emoji: '🧠', label: t('progress.burnoutScoreLabel') },
   ]
 
   return (

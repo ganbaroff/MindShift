@@ -1,5 +1,86 @@
--- Sprint AG-4 | Foundation Club seed + shareholder_positions
--- Seeds the first ELITE community and adds shareholder position tracking
+-- Sprint AG-4 | Schema patches + Foundation Club seed + shareholder_positions
+--
+-- Includes forward-only patches previously in 019_v2 + 019_v3 (those files used
+-- version prefix "019" which conflicted with applied migration 019_revenue_snapshots).
+-- Content merged here so version "020" is unique.
+--
+-- ── Patch A: rename share_units → staked_crystals ───────────────────────────
+-- 018_crystal_ledger.sql created shareholder_positions with column share_units.
+-- All downstream code (021, 022, 024) expects staked_crystals.
+-- Idempotent: only renames if share_units still exists.
+
+do $$
+begin
+  if exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public'
+      and table_name   = 'shareholder_positions'
+      and column_name  = 'share_units'
+  ) then
+    alter table public.shareholder_positions
+      rename column share_units to staked_crystals;
+  end if;
+
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public'
+      and table_name   = 'shareholder_positions'
+      and column_name  = 'created_at'
+  ) then
+    alter table public.shareholder_positions
+      add column created_at timestamptz not null default now();
+  end if;
+end;
+$$;
+
+-- ── Patch B: add missing columns to revenue_snapshots ───────────────────────
+-- 019_revenue_snapshots.sql did not include dividend_per_share_crystal or
+-- published_at, which are referenced by get_latest_dividend() and
+-- distribute_dividends() below.
+
+alter table public.revenue_snapshots
+  add column if not exists dividend_per_share_crystal integer not null default 0,
+  add column if not exists published_at               timestamptz;
+
+update public.revenue_snapshots
+  set published_at = created_at
+  where published_at is null;
+
+-- ── Patch C: get_pending_dividend() with correct column name ─────────────────
+-- Replaces 019 version that used share_units (wrong — staked_crystals is used here).
+
+create or replace function public.get_pending_dividend(
+  p_user_id       uuid,
+  p_community_id  uuid
+) returns integer
+language sql stable security definer set search_path = public as $$
+  with my_pos as (
+    select staked_crystals
+    from public.shareholder_positions
+    where user_id = p_user_id
+      and community_id = p_community_id
+  ),
+  total_staked as (
+    select coalesce(sum(staked_crystals), 1) as total
+    from public.shareholder_positions
+    where community_id = p_community_id
+  ),
+  pending_pool as (
+    select coalesce(sum(dividend_pool_cents), 0) as pool
+    from public.revenue_snapshots
+    where distributed_at is null
+      and net_income_cents > 0
+  )
+  select coalesce(
+    (
+      (pending_pool.pool / 100.0)
+      * (my_pos.staked_crystals::float / total_staked.total::float)
+    )::integer,
+    0
+  )
+  from total_staked, pending_pool
+  left join my_pos on true;
+$$;
 
 -- ── shareholder_positions ──────────────────────────────────────────────────
 -- Tracks staked SHARE crystals per user per community
@@ -136,11 +217,11 @@ values (
   'ELITE',
   10000,
   true,
-  E'Members are known by their badge only.\n\n'
-  E'Focus is the only currency here. No ranks, no flex, no identity — only work.\n\n'
-  E'Rule 1: Never reveal member identities outside this community.\n'
-  E'Rule 2: Shareholders receive 50% of net revenue each period.\n'
-  E'Rule 3: Entry is permanent. Badges cannot be transferred.'
+  'Members are known by their badge only.' || chr(10) || chr(10) ||
+  'Focus is the only currency here. No ranks, no flex, no identity — only work.' || chr(10) || chr(10) ||
+  'Rule 1: Never reveal member identities outside this community.' || chr(10) ||
+  'Rule 2: Shareholders receive 50% of net revenue each period.' || chr(10) ||
+  'Rule 3: Entry is permanent. Badges cannot be transferred.'
 )
 on conflict (slug) do nothing;
 
