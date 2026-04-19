@@ -55,10 +55,14 @@ export function BottomNav() {
                   layoutId="nav-indicator"
                   className="absolute inset-0 rounded-xl"
                   style={{
-                    background: `${palette.primary}1E`,   // 12% alpha
+                    // EGAP-1 (2026-04-19): read from Tier-3 face accent token so
+                    // BottomNav re-themes automatically when <html data-face>
+                    // switches. MindShift: color-mix of #7B72FF at ~12% alpha,
+                    // visually identical to prior `${palette.primary}1E` hardcode.
+                    background: 'color-mix(in oklab, var(--color-face-accent) 12%, transparent)',
                     // Research #8: no glow in calm mode (glowAlpha = 0)
                     boxShadow: palette.glowAlpha > 0
-                      ? `0 0 12px ${palette.primary}26`   // 15% alpha glow
+                      ? '0 0 12px color-mix(in oklab, var(--color-face-accent) 15%, transparent)'
                       : 'none',
                   }}
                   transition={shouldAnimate ? transition() : { duration: 0 }}
