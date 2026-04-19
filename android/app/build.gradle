@@ -16,11 +16,27 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        release {
+            def storeFilePath = System.getenv("MINDSHIFT_KEYSTORE_PATH") ?: "../release.keystore"
+            def storePasswordValue = System.getenv("MINDSHIFT_KEYSTORE_PASSWORD")
+            def keyAliasValue = System.getenv("MINDSHIFT_KEY_ALIAS") ?: "mindshift"
+            def keyPasswordValue = System.getenv("MINDSHIFT_KEY_PASSWORD")
+
+            if (storePasswordValue && keyPasswordValue && file(storeFilePath).exists()) {
+                storeFile file(storeFilePath)
+                storePassword storePasswordValue
+                keyAlias keyAliasValue
+                keyPassword keyPasswordValue
+            }
+        }
+    }
     buildTypes {
         release {
             minifyEnabled true
             shrinkResources true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
 }
@@ -45,11 +61,19 @@ dependencies {
 
 apply from: 'capacitor.build.gradle'
 
-try {
-    def servicesJSON = file('google-services.json')
-    if (servicesJSON.text) {
-        apply plugin: 'com.google.gms.google-services'
+def googleServicesFile = file('google-services.json')
+if (googleServicesFile.exists() && googleServicesFile.text.trim().length() > 0) {
+    apply plugin: 'com.google.gms.google-services'
+} else {
+    // For release builds we want this to be loud, not silent
+    if (project.hasProperty('enforceGoogleServices') || gradle.startParameter.taskNames.any { it.toLowerCase().contains('release') }) {
+        throw new GradleException(
+            "google-services.json is missing. " +
+            "Download from Firebase Console → Project Settings → Your Android app → google-services.json, " +
+            "place at android/app/google-services.json, then rebuild. " +
+            "Push Notifications (FCM) will not work without it."
+        )
+    } else {
+        logger.warn("google-services.json not found — FCM push disabled for this debug build")
     }
-} catch(Exception e) {
-    logger.info("google-services.json not found, google-services plugin not applied. Push Notifications won't work")
 }
