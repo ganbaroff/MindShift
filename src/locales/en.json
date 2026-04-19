@@ -194,7 +194,10 @@
     "tipTimeOften": "Time slips fast for you — one visible timer is enough.",
     "tipTimeSometimes": "Check the clock before you start — then forget about it.",
     "tipEmotionHigh": "Block your first 15 min from interruptions. Start small.",
-    "tipEmotionModerate": "If distracted, pause and return. That counts too."
+    "tipEmotionModerate": "If distracted, pause and return. That counts too.",
+    "crystalsEarnedHeadline": "+{{count}} crystals charged your AURA",
+    "crystalsEarnedDesc": "Your focus session strengthened your character in VOLAURA.",
+    "crystalsEarnedCta": "See your character"
   },
   "settings": {
     "title": "Settings",
