@@ -122,7 +122,14 @@ interface SessionQueryResult {
   sessions: FocusSessionRow[]
   energyTrend: number[]
   weeklyInsight: string[]
-  stats: WeeklyStats
+  /**
+   * 2026-04-19: stats is nullable. null = "no fresh data this fetch" (error OR
+   * empty sessions). Downstream useEffect short-circuits on null, leaving
+   * store.weeklyStats at its last-known-good value instead of overwriting with
+   * zeros — fixes the "Great week 👏 · 0m focus this week" contradiction seen
+   * on Progress screen when Supabase returns empty.
+   */
+  stats: WeeklyStats | null
 }
 
 // -- Query function -----------------------------------------------------------
@@ -146,14 +153,15 @@ async function fetchSessionHistory(
       sessions: [],
       energyTrend: [],
       weeklyInsight: FALLBACK_INSIGHTS,
-      stats: computeWeeklyStats([]),
+      stats: null,
     }
   }
 
   const sessions: FocusSessionRow[] = (data ?? []) as FocusSessionRow[]
 
-  // Compute WeeklyStats
-  const stats = computeWeeklyStats(sessions)
+  // Compute WeeklyStats only when we have real data. Empty array → null so the
+  // store-writing useEffect doesn't clobber last-known values with zeros.
+  const stats = sessions.length === 0 ? null : computeWeeklyStats(sessions)
 
   // Energy trend — last 10 sessions with a non-null energy_after
   const energyTrend = sessions
