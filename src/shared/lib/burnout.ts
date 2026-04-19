@@ -93,3 +93,42 @@ export function deriveBehaviors(params: {
 
   return { snoozeRatio, completionDecay, sessionDecay, energyDecay }
 }
+
+// -- Render-layer display policy ----------------------------------------------
+//
+// 2026-04-19 (Design-Atlas REV2): When the Burnout cell has no data to stand
+// behind its number — burnoutScore is not a finite number — the cell renders
+// an em-dash instead of fabricating "0". "0" in this context reads as "zero
+// burnout = you're fine" (false positive on empty data) and belongs to the
+// same failure class as the earlier "Great week 👏 · 0m focus this week"
+// contradiction surfaced during the Play Store screenshot audit.
+//
+// Returns both the visible glyph and the i18n key consumers should use for
+// aria-label so screen readers announce "data not yet available" rather than
+// reading "Burnout score — em-dash" out loud.
+
+export const EMPTY_BURNOUT_GLYPH = '\u2014' // em-dash, U+2014
+
+export interface BurnoutCellDisplay {
+  /** Text to place in the numeric slot of the Burnout cell. */
+  value: string
+  /** i18n key for aria-label. Empty data uses the a11y-specific key. */
+  a11yKey: 'progress.burnoutScoreLabel' | 'progress.burnoutScoreEmptyA11y'
+  /** True when the cell is in empty-state (score is not finite). */
+  isEmpty: boolean
+}
+
+export function formatBurnoutCell(score: unknown): BurnoutCellDisplay {
+  if (typeof score !== 'number' || !Number.isFinite(score)) {
+    return {
+      value: EMPTY_BURNOUT_GLYPH,
+      a11yKey: 'progress.burnoutScoreEmptyA11y',
+      isEmpty: true,
+    }
+  }
+  return {
+    value: String(Math.round(score)),
+    a11yKey: 'progress.burnoutScoreLabel',
+    isEmpty: false,
+  }
+}
