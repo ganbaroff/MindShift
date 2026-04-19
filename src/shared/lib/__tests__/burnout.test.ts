@@ -160,3 +160,100 @@ describe('deriveBehaviors', () => {
     expect(result.completionDecay).toBe(0)
   })
 })
+
+// -- formatBurnoutCell (render-layer em-dash policy, 2026-04-19) ---------------
+
+import { formatBurnoutCell, EMPTY_BURNOUT_GLYPH } from '../burnout'
+
+describe('formatBurnoutCell', () => {
+  it('returns em-dash and a11y-empty key when score is undefined', () => {
+    const r = formatBurnoutCell(undefined)
+    expect(r.value).toBe(EMPTY_BURNOUT_GLYPH)
+    expect(r.value).toBe('\u2014')
+    expect(r.a11yKey).toBe('progress.burnoutScoreEmptyA11y')
+    expect(r.isEmpty).toBe(true)
+  })
+
+  it('returns em-dash when score is NaN', () => {
+    const r = formatBurnoutCell(NaN)
+    expect(r.value).toBe(EMPTY_BURNOUT_GLYPH)
+    expect(r.a11yKey).toBe('progress.burnoutScoreEmptyA11y')
+    expect(r.isEmpty).toBe(true)
+  })
+
+  it('returns em-dash when score is Infinity', () => {
+    const r = formatBurnoutCell(Infinity)
+    expect(r.value).toBe(EMPTY_BURNOUT_GLYPH)
+    expect(r.isEmpty).toBe(true)
+  })
+
+  it('returns em-dash when score is -Infinity', () => {
+    const r = formatBurnoutCell(-Infinity)
+    expect(r.value).toBe(EMPTY_BURNOUT_GLYPH)
+    expect(r.isEmpty).toBe(true)
+  })
+
+  it('returns em-dash when score is null', () => {
+    const r = formatBurnoutCell(null)
+    expect(r.value).toBe(EMPTY_BURNOUT_GLYPH)
+    expect(r.isEmpty).toBe(true)
+  })
+
+  it('returns em-dash when score is a non-number type', () => {
+    expect(formatBurnoutCell('42').isEmpty).toBe(true)
+    expect(formatBurnoutCell({} as unknown).isEmpty).toBe(true)
+    expect(formatBurnoutCell([] as unknown).isEmpty).toBe(true)
+  })
+
+  it('returns numeric string and standard label for a real finite score', () => {
+    const r = formatBurnoutCell(42)
+    expect(r.value).toBe('42')
+    expect(r.a11yKey).toBe('progress.burnoutScoreLabel')
+    expect(r.isEmpty).toBe(false)
+  })
+
+  it('passes 0 through as a real score (0 is honest data, not absence)', () => {
+    const r = formatBurnoutCell(0)
+    expect(r.value).toBe('0')
+    expect(r.a11yKey).toBe('progress.burnoutScoreLabel')
+    expect(r.isEmpty).toBe(false)
+  })
+
+  it('rounds fractional scores to integer', () => {
+    expect(formatBurnoutCell(7.5).value).toBe('8')
+    expect(formatBurnoutCell(7.4).value).toBe('7')
+    expect(formatBurnoutCell(99.9).value).toBe('100')
+  })
+})
+
+// -- Locale a11y contract ------------------------------------------------------
+//
+// Asserts that each supported locale has a non-empty burnoutScoreEmptyA11y
+// translation so screen readers never fall back to the key name or English.
+
+import enTranslations from '@/locales/en.json'
+import ruTranslations from '@/locales/ru.json'
+import azTranslations from '@/locales/az.json'
+import deTranslations from '@/locales/de.json'
+import esTranslations from '@/locales/es.json'
+import trTranslations from '@/locales/tr.json'
+
+describe('burnoutScoreEmptyA11y — i18n coverage', () => {
+  const locales: Array<[string, { progress?: { burnoutScoreEmptyA11y?: string } }]> = [
+    ['en', enTranslations],
+    ['ru', ruTranslations],
+    ['az', azTranslations],
+    ['de', deTranslations],
+    ['es', esTranslations],
+    ['tr', trTranslations],
+  ]
+
+  for (const [locale, dict] of locales) {
+    it(`${locale} has progress.burnoutScoreEmptyA11y`, () => {
+      const value = dict.progress?.burnoutScoreEmptyA11y
+      expect(value, `missing a11y translation for locale=${locale}`).toBeTruthy()
+      expect(typeof value).toBe('string')
+      expect(String(value).length).toBeGreaterThan(8)
+    })
+  }
+})

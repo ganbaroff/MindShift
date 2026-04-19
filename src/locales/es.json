@@ -886,6 +886,7 @@
     "achievements": "Logros",
     "tasksDone": "Tareas realizadas",
     "burnoutScoreLabel": "Puntuación de agotamiento",
+    "burnoutScoreEmptyA11y": "Datos de agotamiento aún no disponibles",
     "focusHealthScore": "Puntuación de salud de enfoque",
     "thriving": "🌿 Prosperando",
     "growing": "🌱 Creciendo",

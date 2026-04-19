@@ -164,15 +164,20 @@ export default function App() {
   )
 
   useEffect(() => {
+    // energyLevel guard (2026-04-19) — pre-hydration or capture-script seeds without
+    // energyLevel produce `undefined / 3 = NaN`, which cascades through deriveBehaviors
+    // into computeBurnoutScore and poisons store.burnoutScore. Default 3 is mid-scale
+    // (semantic neutrality) and matches the store's initial value.
+    const energyForMath = Number.isFinite(energyLevel) && energyLevel > 0 ? energyLevel : 3
     const avgCompletedPerDay = completedTotal / 7
     const behaviors = deriveBehaviors({
       snoozedCount: poolSnoozedCount,
       activeCount: Math.max(poolActiveCount, 1),
-      recentCompletedPerDay: avgCompletedPerDay * (energyLevel / 3),
+      recentCompletedPerDay: avgCompletedPerDay * (energyForMath / 3),
       avgCompletedPerDay,
-      recentSessionMinutes: 20 * (energyLevel / 3),
+      recentSessionMinutes: 20 * (energyForMath / 3),
       avgSessionMinutes: 20,
-      recentAvgEnergy: energyLevel,
+      recentAvgEnergy: energyForMath,
     })
     const rawScore = computeBurnoutScore(behaviors)
     // High emotional reactivity = feel burnout sooner (1.2x multiplier, capped at 100)
