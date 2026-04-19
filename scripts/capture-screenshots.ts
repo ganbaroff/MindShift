@@ -122,9 +122,34 @@ async function main() {
     await page.route('**/auth/v1/**', (route) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: sessionJSON })
     )
-    await page.route('**/rest/v1/**', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) })
-    )
+    // 2026-04-19 (Design-Atlas recapture packet): seed focus_sessions with
+    // realistic rows so screenshot #7 (Session Log) shows a populated history
+    // instead of a first-run placeholder. Play Store carousel = peak-experience
+    // signal to installers. Empty state reads as "nothing is happening here"
+    // and is the wrong install-decision frame.
+    const dayMs = 86_400_000
+    const iso = (offsetDays: number, hour: number) =>
+      new Date(Date.now() - offsetDays * dayMs + hour * 3_600_000).toISOString()
+    const DEMO_FOCUS_SESSIONS = [
+      { id: 's-01', user_id: 'demo-user-001', started_at: iso(0, -2), ended_at: iso(0, -1), duration_ms: 25 * 60_000, phase_reached: 'flow',     audio_preset: 'brown',   task_id: 't1', energy_before: 3, energy_after: 4 },
+      { id: 's-02', user_id: 'demo-user-001', started_at: iso(0, -5), ended_at: iso(0, -4), duration_ms: 20 * 60_000, phase_reached: 'release',  audio_preset: 'lofi',    task_id: 't2', energy_before: 2, energy_after: 3 },
+      { id: 's-03', user_id: 'demo-user-001', started_at: iso(1, -3), ended_at: iso(1, -2), duration_ms: 45 * 60_000, phase_reached: 'flow',     audio_preset: 'brown',   task_id: 't3', energy_before: 4, energy_after: 4 },
+      { id: 's-04', user_id: 'demo-user-001', started_at: iso(1, -7), ended_at: iso(1, -6), duration_ms: 15 * 60_000, phase_reached: 'struggle', audio_preset: null,       task_id: null, energy_before: 2, energy_after: 2 },
+      { id: 's-05', user_id: 'demo-user-001', started_at: iso(3, -4), ended_at: iso(3, -3), duration_ms: 30 * 60_000, phase_reached: 'flow',     audio_preset: 'nature',  task_id: null, energy_before: 3, energy_after: 5 },
+      { id: 's-06', user_id: 'demo-user-001', started_at: iso(4, -5), ended_at: iso(4, -4), duration_ms: 25 * 60_000, phase_reached: 'recovery', audio_preset: 'brown',   task_id: null, energy_before: 2, energy_after: 3 },
+      { id: 's-07', user_id: 'demo-user-001', started_at: iso(6, -6), ended_at: iso(6, -5), duration_ms: 42 * 60_000, phase_reached: 'flow',     audio_preset: 'pink',    task_id: null, energy_before: 3, energy_after: 4 },
+    ]
+    await page.route('**/rest/v1/**', (route) => {
+      const url = route.request().url()
+      if (url.includes('focus_sessions')) {
+        return route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify(DEMO_FOCUS_SESSIONS),
+        })
+      }
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) })
+    })
     await page.route('**/functions/v1/**', (route) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({
         steps: [], message: 'Great work today.', insights: [],
