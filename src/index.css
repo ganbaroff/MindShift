@@ -34,6 +34,14 @@
   --color-ms-text:    #E8E8F0;
   --color-ms-muted:   #8B8BA7;
 
+  /* -- Tier-3 face accent (EGAP-1 foundation, 2026-04-19) --- */
+  /* One token. Changes when <html data-face="..."> changes.
+     Everything else inherited. See DESIGN-MANIFESTO.md Law 7
+     "One Body, N Faces" inheritance contract. The per-face
+     overrides are declared OUTSIDE @theme — see below after
+     shadcn HSL variables. */
+  --color-face-accent: var(--color-primary);
+
   /* Typography */
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   /* Font scale -- controlled by store.fontScale. 1 = default, 1.15 = large, 1.3 = XL.
@@ -109,6 +117,17 @@
   --color-teal-alpha:      rgba(78,205,196,0.20);
   --color-gold-alpha:      rgba(245,158,11,0.15);
 }
+
+/* -- Per-face accent overrides (EGAP-1 foundation, 2026-04-19) --
+   Each selector matches <html data-face="..."> set in App.tsx.
+   Only --color-face-accent changes per face — everything else
+   inherits from @theme. Law 7: One Body, N Faces.
+   MindShift accent mirrors --color-primary. VOLAURA and Life Sim
+   values pulled from VOLAURA/docs/design/BRAND-IDENTITY.md §3.
+   Stubs are inert until the corresponding face actually renders. */
+[data-face="mindshift"] { --color-face-accent: #7B72FF; }
+[data-face="volaura"]   { --color-face-accent: #6C63FF; }
+[data-face="lifesim"]   { --color-face-accent: #F59E0B; }
 
 [data-mode="calm"] {
   --color-primary:       #7878B8;

@@ -113,6 +113,16 @@ export default function App() {
     )
   }, [reducedStimulation])
 
+  // -- Data-face attribute (EGAP-1 foundation, 2026-04-19) -------------------
+  // Sets <html data-face="mindshift"> on first mount. Drives the Tier-3 accent
+  // token (--color-face-accent) defined in index.css. Hardcoded literal for
+  // v1.0 single-face ship; becomes reactive when face #2 (VOLAURA, Life Sim)
+  // plugs into the Tab Bar. See DESIGN-MANIFESTO.md Law 7 "One Body, N Faces"
+  // and MANIFESTO-GAP-ANALYSIS.md EGAP-1.
+  useEffect(() => {
+    document.documentElement.setAttribute('data-face', 'mindshift')
+  }, [])
+
   // -- Apply font scale to DOM (ADHD+dyslexia accessibility) -----------------
   useEffect(() => {
     document.documentElement.style.setProperty('--font-scale', String(fontScale))
