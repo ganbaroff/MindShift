@@ -194,7 +194,10 @@
     "tipTimeSometimes": "Schauen Sie auf die Uhr, bevor Sie beginnen – und vergessen Sie es dann.",
     "tipEmotionHigh": "Blockieren Sie Ihre ersten 15 Minuten vor Unterbrechungen. Fangen Sie klein an.",
     "tipEmotionModerate": "Wenn Sie abgelenkt sind, halten Sie inne und kehren Sie zurück. Das zählt auch.",
-    "intentionBothRequired": "Füll beide Felder aus, um deine Absicht zu speichern."
+    "intentionBothRequired": "Füll beide Felder aus, um deine Absicht zu speichern.",
+    "crystalsEarnedHeadline": "+{{count}} Kristalle haben deine AURA aufgeladen",
+    "crystalsEarnedDesc": "Deine Fokus-Sitzung hat deinen Charakter in VOLAURA gestärkt.",
+    "crystalsEarnedCta": "Deinen Charakter sehen"
   },
   "settings": {
     "title": "Einstellungen",

@@ -194,7 +194,10 @@
     "tipTimeSometimes": "Başlamazdan əvvəl saatı yoxlayın - sonra onu unudun.",
     "tipEmotionHigh": "İlk 15 dəqiqəni kəsintilərdən çəkin. Kiçik başlayın.",
     "tipEmotionModerate": "Diqqətiniz dağılırsa, fasilə verin və geri qayıdın. Bu da sayılır.",
-    "intentionBothRequired": "Niyyətinizi saxlamaq üçün hər iki sahəni doldurun."
+    "intentionBothRequired": "Niyyətinizi saxlamaq üçün hər iki sahəni doldurun.",
+    "crystalsEarnedHeadline": "+{{count}} kristal AURA-nı yüklədi",
+    "crystalsEarnedDesc": "Fokus sessiyan VOLAURA-dakı xarakterini gücləndirdi.",
+    "crystalsEarnedCta": "Xarakterinə bax"
   },
   "settings": {
     "title": "Parametrlər",

@@ -194,7 +194,10 @@
     "tipTimeSometimes": "Başlamadan önce saati kontrol edin, sonra unutun.",
     "tipEmotionHigh": "İlk 15 dakikanızı kesintilerden uzak tutun. Küçük başlayın.",
     "tipEmotionModerate": "Dikkatiniz dağılırsa duraklayın ve geri dönün. Bu da sayılır.",
-    "intentionBothRequired": "Niyetini kaydetmek için her iki alanı da doldurun."
+    "intentionBothRequired": "Niyetini kaydetmek için her iki alanı da doldurun.",
+    "crystalsEarnedHeadline": "+{{count}} kristal AURA'nı doldurdu",
+    "crystalsEarnedDesc": "Odak seansın VOLAURA'daki karakterini güçlendirdi.",
+    "crystalsEarnedCta": "Karakterini gör"
   },
   "settings": {
     "title": "Ayarlar",

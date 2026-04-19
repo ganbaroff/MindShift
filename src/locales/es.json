@@ -194,7 +194,10 @@
     "tipTimeSometimes": "Consulta el reloj antes de empezar y luego olvídate.",
     "tipEmotionHigh": "Bloquea tus primeros 15 minutos de interrupciones. Empiece poco a poco.",
     "tipEmotionModerate": "Si se distrae, haga una pausa y regrese. Eso también cuenta.",
-    "intentionBothRequired": "Completa ambos campos para guardar tu intención."
+    "intentionBothRequired": "Completa ambos campos para guardar tu intención.",
+    "crystalsEarnedHeadline": "+{{count}} cristales cargaron tu AURA",
+    "crystalsEarnedDesc": "Tu sesión de enfoque fortaleció tu personaje en VOLAURA.",
+    "crystalsEarnedCta": "Ver tu personaje"
   },
   "settings": {
     "title": "Ajustes",

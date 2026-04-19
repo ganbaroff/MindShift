@@ -194,7 +194,10 @@
     "tipTimeSometimes": "Глянь на часы перед стартом — и забудь о них.",
     "tipEmotionHigh": "Защити первые 15 мин от прерываний. Начни с малого.",
     "tipEmotionModerate": "Отвлёкся — пауза и обратно. Это тоже считается.",
-    "intentionBothRequired": "Заполни оба поля, чтобы сохранить намерение."
+    "intentionBothRequired": "Заполни оба поля, чтобы сохранить намерение.",
+    "crystalsEarnedHeadline": "+{{count}} кристаллов зарядили твою AURA",
+    "crystalsEarnedDesc": "Фокус-сессия усилила твоего персонажа в VOLAURA.",
+    "crystalsEarnedCta": "Увидеть персонажа"
   },
   "settings": {
     "title": "Настройки",
