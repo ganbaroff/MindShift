@@ -292,10 +292,21 @@ test.describe('HomePage', () => {
   })
 
   test('shows daily focus goal card', async ({ authedPage: page }) => {
+    // 2026-04-19: HomeDailyBrief gates "Today's focus" on weeklyStats truthy.
+    // Prior test-pass relied on useSessionHistory overwriting store with zeros;
+    // fix now preserves last-known values, so test seeds real stats explicitly.
+    await seedStore(page, {
+      weeklyStats: {
+        peakFocusTime: '10-12am',
+        tasksCompleted: 3,
+        mostUsedPreset: 'brown',
+        peakEnergyLevel: 3,
+        consistencyScore: 0.5,
+        totalFocusMinutes: 60,
+        dailyMinutes: [0, 10, 20, 0, 30, 0, 0],
+      },
+    })
     await page.goto('/home')
-    // The daily focus goal card always shows when weeklyStats exist
-    // The mocked Supabase returns empty arrays, so weeklyStats may be null
-    // But the card shows "Today's focus" text
     await expect(page.getByText("Today's focus")).toBeVisible({ timeout: 8000 })
   })
 

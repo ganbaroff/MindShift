@@ -886,6 +886,7 @@
     "achievements": "Достижения",
     "tasksDone": "Задач выполнено",
     "burnoutScoreLabel": "Уровень выгорания",
+    "burnoutScoreEmptyA11y": "Данных о выгорании пока нет",
     "focusHealthScore": "Оценка фокус-здоровья",
     "thriving": "🌿 Расцвет",
     "growing": "🌱 Рост",
