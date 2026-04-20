@@ -329,3 +329,36 @@ describe('selectSessionProgress', () => {
     expect(selectSessionProgress(useStore.getState())).toBeGreaterThan(0.99)
   })
 })
+
+// -- setBurnoutScore NaN guard (2026-04-19 NaN-fix) ----------------------------
+
+describe('Store — setBurnoutScore NaN guard', () => {
+  beforeEach(() => {
+    useStore.setState({ burnoutScore: 42 })
+  })
+
+  it('coerces NaN to 0', () => {
+    useStore.getState().setBurnoutScore(NaN)
+    expect(useStore.getState().burnoutScore).toBe(0)
+  })
+
+  it('coerces Infinity to 0', () => {
+    useStore.getState().setBurnoutScore(Infinity)
+    expect(useStore.getState().burnoutScore).toBe(0)
+  })
+
+  it('coerces -Infinity to 0', () => {
+    useStore.getState().setBurnoutScore(-Infinity)
+    expect(useStore.getState().burnoutScore).toBe(0)
+  })
+
+  it('passes finite numbers through unchanged', () => {
+    useStore.getState().setBurnoutScore(73)
+    expect(useStore.getState().burnoutScore).toBe(73)
+  })
+
+  it('accepts 0 as a valid finite value', () => {
+    useStore.getState().setBurnoutScore(0)
+    expect(useStore.getState().burnoutScore).toBe(0)
+  })
+})
