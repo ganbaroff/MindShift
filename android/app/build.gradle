@@ -1,5 +1,24 @@
 apply plugin: 'com.android.application'
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Release keystore — pulled from environment. Required for APK sideload flow.
+// ENV vars (set in shell before invoking ./gradlew assembleRelease):
+//   MINDSHIFT_KEYSTORE_PATH      — absolute path to release.keystore
+//                                  (default: <module>/release.keystore)
+//   MINDSHIFT_KEYSTORE_PASSWORD  — store password
+//   MINDSHIFT_KEY_ALIAS          — key alias inside the keystore
+//   MINDSHIFT_KEY_PASSWORD       — key password
+// If any required ENV var is missing, the release config is left unset and
+// assembleRelease will fail loudly (we DO NOT silently fall back to debug —
+// signing with debug = different signature = APK install collision = data
+// loss on update). Build script scripts/build_apk.sh does the same check
+// before invoking gradlew so the failure is fast.
+// ─────────────────────────────────────────────────────────────────────────────
+def releaseStoreFilePath = System.getenv("MINDSHIFT_KEYSTORE_PATH") ?: "${projectDir}/release.keystore"
+def releaseStorePassword = System.getenv("MINDSHIFT_KEYSTORE_PASSWORD")
+def releaseKeyAlias      = System.getenv("MINDSHIFT_KEY_ALIAS")
+def releaseKeyPassword   = System.getenv("MINDSHIFT_KEY_PASSWORD")
+
 android {
     namespace = "com.mindshift.app"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -7,7 +26,7 @@ android {
         applicationId "com.mindshift.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
+        versionCode 3
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
@@ -16,11 +35,25 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        release {
+            // Configure only when all required env vars are present.
+            // If any are missing, gradle leaves the config empty and the
+            // release build will fail with a clear "no signingConfig" error.
+            if (releaseStorePassword && releaseKeyAlias && releaseKeyPassword) {
+                storeFile file(releaseStoreFilePath)
+                storePassword releaseStorePassword
+                keyAlias releaseKeyAlias
+                keyPassword releaseKeyPassword
+            }
+        }
+    }
     buildTypes {
         release {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
 }

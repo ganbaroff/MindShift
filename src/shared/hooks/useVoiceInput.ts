@@ -1,5 +1,7 @@
 import { useState, useRef, useCallback } from 'react';
 import { toast } from 'sonner';
+import { Capacitor } from '@capacitor/core';
+import { SpeechRecognition } from '@capgo/capacitor-speech-recognition';
 import { supabase } from '@/shared/lib/supabase';
 import { logError } from '@/shared/lib/logger';
 import { detectCrisis, getCrisisResources } from '@/shared/lib/crisisDetection';
@@ -9,13 +11,27 @@ import { getToneCopy } from '@/shared/lib/uiTone';
 import { ACHIEVEMENT_DEFINITIONS } from '@/types';
 import type { TaskType, TaskCategory } from '@/types';
 
-// SpeechRecognition browser compatibility
+// Voice input strategy:
+//   1. On native (Capacitor Android/iOS): use @capgo/capacitor-speech-recognition
+//      plugin which bridges to Android SpeechRecognizer / iOS SFSpeechRecognizer.
+//      Requires RECORD_AUDIO permission (declared in AndroidManifest.xml).
+//   2. On web (browser): use Web Speech API (webkitSpeechRecognition) — works
+//      in Chrome desktop and mobile Chrome PWA contexts.
+//   3. Otherwise: voiceSupported = false, mic button hidden / disabled.
+//
+// This is the fix for Session 125 P0: voice was silently broken on Android
+// because Capacitor WebView does not expose webkitSpeechRecognition globally.
+// Native plugin bridges the gap.
+
+// SpeechRecognition browser compatibility (web fallback)
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type SpeechRecognitionInstance = any;
 const SpeechRecognitionAPI: (new () => SpeechRecognitionInstance) | null =
   (typeof window !== 'undefined' &&
     ((window as unknown as { SpeechRecognition?: new () => SpeechRecognitionInstance }).SpeechRecognition ??
      (window as unknown as { webkitSpeechRecognition?: new () => SpeechRecognitionInstance }).webkitSpeechRecognition)) || null;
+
+const IS_NATIVE = Capacitor.isNativePlatform();
 
 export type VoiceState = 'idle' | 'listening' | 'classifying';
 
@@ -55,7 +71,8 @@ export function useVoiceInput({ locale, onResult }: UseVoiceInputOptions): UseVo
   const onResultRef = useRef(onResult);
   onResultRef.current = onResult;
 
-  const voiceSupported = !!SpeechRecognitionAPI;
+  // Native platform always supported via plugin; web depends on browser API
+  const voiceSupported = IS_NATIVE || !!SpeechRecognitionAPI;
 
   const classifyTranscript = useCallback(async (transcript: string) => {
     if (!transcript.trim()) { setVoiceState('idle'); return; }
@@ -143,7 +160,59 @@ export function useVoiceInput({ locale, onResult }: UseVoiceInputOptions): UseVo
     }
   }, [locale]);
 
-  const handleVoiceTap = useCallback(() => {
+  // ── Native (Capacitor Android/iOS) speech recognition ──────────────────
+  const handleVoiceTapNative = useCallback(async () => {
+    if (voiceState === 'listening') {
+      try { await SpeechRecognition.stop(); } catch { /* ignore */ }
+      return;
+    }
+    if (voiceState === 'classifying') return;
+
+    setVoiceError(null);
+    setClassifyConfidence(null);
+
+    try {
+      // Check / request permission (RECORD_AUDIO on Android, microphone on iOS)
+      const avail = await SpeechRecognition.available();
+      if (!avail.available) {
+        setVoiceError('Voice input is not available on this device.');
+        return;
+      }
+      const perm = await SpeechRecognition.checkPermissions();
+      if (perm.speechRecognition !== 'granted') {
+        const req = await SpeechRecognition.requestPermissions();
+        if (req.speechRecognition !== 'granted') {
+          setVoiceError('Microphone permission denied.');
+          return;
+        }
+      }
+
+      setVoiceState('listening');
+      const result = await SpeechRecognition.start({
+        language: locale + '-' + locale.toUpperCase(),
+        maxResults: 1,
+        prompt: '',
+        partialResults: false,
+        popup: false,
+      });
+
+      const transcript = (result.matches?.[0] ?? '').trim();
+      if (!transcript) {
+        setVoiceError('Could not hear you. Try again?');
+        setVoiceState('idle');
+        return;
+      }
+      void classifyTranscript(transcript);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      logError('useVoiceInput.native', err);
+      setVoiceError(msg.includes('denied') ? 'Microphone permission denied.' : 'Could not hear you. Try again?');
+      setVoiceState('idle');
+    }
+  }, [voiceState, locale, classifyTranscript]);
+
+  // ── Web (browser) speech recognition fallback ──────────────────────────
+  const handleVoiceTapWeb = useCallback(() => {
     if (!SpeechRecognitionAPI) {
       setVoiceError('Voice input not supported on this browser.');
       return;
@@ -190,8 +259,20 @@ export function useVoiceInput({ locale, onResult }: UseVoiceInputOptions): UseVo
     rec.start();
   }, [voiceState, locale, classifyTranscript]);
 
+  const handleVoiceTap = useCallback(() => {
+    if (IS_NATIVE) {
+      void handleVoiceTapNative();
+    } else {
+      handleVoiceTapWeb();
+    }
+  }, [handleVoiceTapNative, handleVoiceTapWeb]);
+
   const reset = useCallback(() => {
-    recognitionRef.current?.abort();
+    if (IS_NATIVE) {
+      void SpeechRecognition.stop().catch(() => { /* ignore */ });
+    } else {
+      recognitionRef.current?.abort();
+    }
     setVoiceState('idle');
     setVoiceError(null);
     setClassifyConfidence(null);
