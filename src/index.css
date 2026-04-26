@@ -341,3 +341,83 @@
   from { height: var(--radix-accordion-content-height); }
   to   { height: 0; }
 }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Capacitor Native Feel — Sprint 1, Session 125 (2026-04-26)
+   CEO: «APK ощущается как веб-сайт в обертке, а не нативное приложение»
+
+   Three fixes:
+   1. Safe-area-inset for notch / status bar / home indicator
+   2. Disable text selection and tap highlight (web artefact removal)
+   3. Disable double-tap zoom on inputs (font-size 16px+ already in design)
+   ───────────────────────────────────────────────────────────────────────── */
+
+/* Safe-area CSS variables — usable from any container via env() */
+:root {
+  --safe-area-top:    env(safe-area-inset-top, 0px);
+  --safe-area-right:  env(safe-area-inset-right, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-left:   env(safe-area-inset-left, 0px);
+}
+
+/* Apply safe-area padding to root containers — no content under notch */
+html,
+body {
+  padding-top:    env(safe-area-inset-top, 0px);
+  padding-right:  env(safe-area-inset-right, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-left:   env(safe-area-inset-left, 0px);
+}
+
+/* Apply to #root for SPA mounted content */
+#root {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* Native feel: no text selection on UI chrome (selectively re-enable for inputs) */
+html,
+body,
+#root,
+button,
+.no-select {
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+
+/* Re-enable text selection inside inputs, textareas, and explicitly-selectable content */
+input,
+textarea,
+[contenteditable="true"],
+.select-text,
+.allow-select,
+[data-allow-select="true"] {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* Native feel: kill blue tap highlight on Android Chrome / WebView */
+* {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+/* Capacitor WebView rendering: prevent overscroll bounce showing white edges */
+html,
+body {
+  overscroll-behavior-y: none;
+  overscroll-behavior-x: none;
+}
+
+/* Status bar safe-area helper class — apply to top app bar so content sits
+   below the notch / dynamic island */
+.safe-top {
+  padding-top: calc(env(safe-area-inset-top, 0px) + var(--app-top-padding, 0px));
+}
+
+/* Bottom navigation safe-area helper class — apply to fixed bottom bars
+   so they don't overlap the home indicator */
+.safe-bottom {
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + var(--app-bottom-padding, 0px));
+}

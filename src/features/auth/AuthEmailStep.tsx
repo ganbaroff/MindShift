@@ -117,17 +117,17 @@ export function AuthEmailStep({
         </span>
       </motion.label>
 
-      {/* -- 2. Google SSO — primary CTA, always visually active -- */}
+      {/* -- 2. Google SSO — sole primary CTA (Law 5), filled brand style -- */}
       <motion.button
         onClick={onGoogleSignIn}
         disabled={googleLoading}
         whileTap={{ scale: 0.97 }}
-        className="w-full rounded-xl font-semibold text-sm flex items-center justify-center gap-2.5 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-ms-primary/50 focus-visible:outline-none"
+        className="w-full rounded-xl font-semibold text-sm flex items-center justify-center gap-2.5 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-ms-primary/50 focus-visible:outline-none shadow-md"
         style={{
           height: 48,
-          background: 'var(--color-surface-raised)',
-          border: '1.5px solid rgba(255,255,255,0.10)',
-          color: 'var(--color-text-primary)',
+          background: 'var(--color-primary, #7B72FF)',
+          border: 'none',
+          color: '#FFFFFF',
         }}
         aria-label={t('auth.continueWithGoogle')}
       >
