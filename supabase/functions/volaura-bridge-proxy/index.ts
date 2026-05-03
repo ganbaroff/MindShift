@@ -33,7 +33,7 @@ const VALID_ACTIONS = ['character_event', 'fetch_state', 'fetch_crystals'] as co
 type Action = typeof VALID_ACTIONS[number]
 
 const VALID_EVENT_TYPES = [
-  'xp_earned', 'buff_applied', 'vital_logged', 'stat_changed',
+  'xp_earned', 'buff_applied', 'vital_logged', 'stat_changed', 'crystal_earned',
 ] as const
 
 // -- In-memory JWT cache -------------------------------------------------------
