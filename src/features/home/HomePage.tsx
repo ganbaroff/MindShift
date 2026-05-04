@@ -274,8 +274,8 @@ export default function HomePage() {
                 key={t.id}
                 task={t}
                 index={i}
-                onDone={(id) => completeTask(id)}
-                onPark={(id) => snoozeTask(id)}
+                onDone={completeTask}
+                onPark={snoozeTask}
               />
             ))}
             {isLowEnergy && nowTasks.length > 1 && (

@@ -57,6 +57,9 @@ export function ContextRestore({ onDismiss, wasRecentlyInRoom, lastRoomCode }: P
         initial={shouldAnimate ? { opacity: 0 } : {}}
         animate={{ opacity: 1 }}
         exit={shouldAnimate ? { opacity: 0 } : {}}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Welcome back"
         className="fixed inset-0 z-40 flex flex-col justify-end px-4 pb-32"
         style={{ background: 'rgba(15, 17, 23, 0.75)', backdropFilter: 'blur(4px)' }}
         onClick={onDismiss}

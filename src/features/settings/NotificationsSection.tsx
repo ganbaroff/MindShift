@@ -55,7 +55,7 @@ export function NotificationsSection() {
         <motion.button
           whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
           onClick={requestNotifications}
-          className="w-full h-10 rounded-xl text-[14px] font-medium"
+          className="w-full h-10 rounded-xl text-[14px] font-medium focus-visible:ring-2 focus-visible:ring-[var(--color-teal)] focus-visible:outline-none"
           style={{ backgroundColor: 'rgba(78,205,196,0.12)', color: 'var(--color-teal)' }}
         >
           🔔 {t('settings.enableReminders')}

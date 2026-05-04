@@ -88,7 +88,10 @@ export default function HistoryPage() {
     sessions.reduce((sum, s) => sum + Math.round((s.duration_ms ?? 0) / 60000), 0),
     [sessions]
   )
-  const flowSessions = sessions.filter(s => s.phase_reached === 'flow').length
+  const flowSessions = useMemo(() =>
+    sessions.filter(s => s.phase_reached === 'flow').length,
+    [sessions]
+  )
 
   return (
     <div className="min-h-screen px-5 pb-36 pt-10" style={{ backgroundColor: 'var(--color-bg)' }}>

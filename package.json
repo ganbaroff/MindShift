@@ -22,7 +22,11 @@
     "cap:run:android": "npx cap run android --livereload --external",
     "screenshots": "tsx scripts/capture-screenshots.ts",
     "screenshots:prod": "SCREENSHOTS_BASE_URL=https://mind-shift-git-main-yusifg27-3093s-projects.vercel.app tsx scripts/capture-screenshots.ts",
-    "translate": "node scripts/translate.mjs"
+    "translate": "node scripts/translate.mjs",
+    "swarm": "node \"C:/Users/user/OneDrive/Documents/GitHub/ANUS/dist/cli.js\" swarm",
+    "swarm:audit": "node \"C:/Users/user/OneDrive/Documents/GitHub/ANUS/dist/cli.js\" swarm \"Audit MindShift PWA at C:/Users/user/Downloads/mindshift for release readiness. Check: ADHD-safe design (no red, shame-free copy, energy adaptation), accessibility (WCAG AA focus rings, aria attributes), bundle size, TypeScript strictness, Supabase RLS, offline support, PWA manifest, Android Capacitor config. Report P0/P1/P2 issues with file:line references.\"",
+    "swarm:review": "node \"C:/Users/user/OneDrive/Documents/GitHub/ANUS/dist/cli.js\" swarm \"Code review the latest changes in MindShift at C:/Users/user/Downloads/mindshift. Run: git diff HEAD~1. Check for: security issues, accessibility regressions, Constitution law violations (never red, shame-free, animation safety), store integrity (partialize), bundle impact. Report violations with severity.\"",
+    "swarm:test": "node \"C:/Users/user/OneDrive/Documents/GitHub/ANUS/dist/cli.js\" swarm \"Run full test suite for MindShift at C:/Users/user/Downloads/mindshift. Execute: tsc -b, npm run build, npx vitest run, npx playwright test. Analyze failures. For each failure: root cause, fix suggestion, severity. Report pass/fail counts.\""
   },
   "dependencies": {
     "@capacitor/android": "^8.3.0",

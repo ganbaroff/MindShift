@@ -155,7 +155,7 @@ function AgentChatSheetInner({ agent, onClose, shouldAnimate, motionT, t }: Inne
                        focus-visible:ring-2 focus-visible:ring-[var(--color-teal)] focus-visible:outline-none"
             style={{ background: 'var(--color-surface-raised)', color: 'var(--color-text-muted)' }}
           >
-            ×
+            <span aria-hidden="true">×</span>
           </button>
         </div>
 

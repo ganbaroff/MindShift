@@ -20,6 +20,7 @@ import { useTranslation } from 'react-i18next'
 import { hapticBreathe } from '@/shared/lib/haptic'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { playInhaleCue, playExhaleCue } from '@/shared/lib/breathCue'
+import { logError } from '@/shared/lib/logger'
 
 interface BreathworkRitualProps {
   onComplete: () => void
@@ -48,7 +49,7 @@ export function BreathworkRitual({ onComplete, onSkip }: BreathworkRitualProps) 
       // Web Audio not available (e.g. in E2E tests) — silent fallback
     }
     return () => {
-      audioCtxRef.current?.close().catch(() => {})
+      audioCtxRef.current?.close().catch((e) => { try { logError('BreathworkRitual.closeAudio', e) } catch { /* non-critical */ } })
       audioCtxRef.current = null
     }
   }, [])
@@ -195,7 +196,7 @@ export function BreathworkRitual({ onComplete, onSkip }: BreathworkRitualProps) 
       </AnimatePresence>
 
       {/* Progress bar */}
-      <div className="w-48 h-1 rounded-full mt-6 overflow-hidden" style={{ backgroundColor: 'rgba(255,255,255,0.08)' }}>
+      <div role="progressbar" aria-valuenow={cycle} aria-valuemin={0} aria-valuemax={CYCLES} aria-label="Breathing exercise progress" className="w-48 h-1 rounded-full mt-6 overflow-hidden" style={{ backgroundColor: 'rgba(255,255,255,0.08)' }}>
         <motion.div
           className="h-full rounded-full"
           animate={{ width: `${progress * 100}%` }}

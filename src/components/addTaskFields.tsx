@@ -272,7 +272,7 @@ export function DueDatePicker({ dueDate, required, today, tomorrow, shouldAnimat
           value={dueDate ?? ''}
           min={today}
           onChange={e => onSelect(e.target.value || null)}
-          className="flex-1 h-9 rounded-xl px-2 text-secondary outline-none transition-all"
+          className="flex-1 h-9 rounded-xl px-2 text-secondary outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] transition-all"
           style={{
             backgroundColor: (dueDate && dueDate !== today && dueDate !== tomorrow) ? 'rgba(123,114,255,0.15)' : 'var(--color-surface-raised)',
             border: `${(dueDate && dueDate !== today && dueDate !== tomorrow) ? 1.5 : 1}px solid ${(dueDate && dueDate !== today && dueDate !== tomorrow) ? 'var(--color-primary)' : 'rgba(255,255,255,0.06)'}`,
@@ -316,7 +316,7 @@ export function DueTimePicker({ dueTime, required, onSelect }: DueTimePickerProp
         type="time"
         value={dueTime ?? ''}
         onChange={e => onSelect(e.target.value || null)}
-        className="w-full h-9 rounded-xl px-4 text-secondary outline-none transition-all"
+        className="w-full h-9 rounded-xl px-4 text-secondary outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] transition-all"
         style={{
           backgroundColor: dueTime ? 'rgba(123,114,255,0.15)' : 'var(--color-surface-raised)',
           border: `${dueTime ? 1.5 : 1}px solid ${dueTime ? 'var(--color-primary)' : 'rgba(255,255,255,0.06)'}`,

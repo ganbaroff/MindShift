@@ -35,7 +35,7 @@ function groupTasksByDueDate(tasks: Task[]): {
 
 function formatDueDate(dateStr: string): string {
   const d = new Date(dateStr)
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
 }
 
 // -- Section header ----------------------------------------------------------

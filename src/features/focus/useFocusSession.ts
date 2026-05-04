@@ -216,7 +216,7 @@ export function useFocusSession() {
             void sendCrystalEarned(token, crystals, 'focus_session')
             // Write to MindShift crystal_ledger — source of truth for community economy
             void supabase.rpc(
-              'earn_focus_crystals' as never,
+              'earn_focus_crystals' as never, // Supabase untyped RPC
               { p_amount: crystals, p_source_event: 'focus_session' } as never,
             )
           }
@@ -263,7 +263,8 @@ export function useFocusSession() {
     setScreen('session')
     startInterval()
   }, [showCustom, customDuration, selectedDuration, selectedTask, focusAnchor, activePreset,
-      play, playAnchor, startSession, setPhase, startInterval, resetPhaseTracking])
+      play, playAnchor, startSession, setPhase, startInterval, resetPhaseTracking,
+      energyLevel, completedFocusSessions, searchParams])
 
   // -- Quick-start auto detection ----------------------------------------------
   useEffect(() => {

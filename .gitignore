@@ -49,3 +49,10 @@ supabase/.temp/
 docs/visual-audit/
 
 .vercel
+
+# Android build artifacts — keystore, APKs, Firebase config
+android/
+*.apk
+
+# Design project files
+design-project/

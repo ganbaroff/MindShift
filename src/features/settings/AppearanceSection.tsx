@@ -179,7 +179,7 @@ export function AppearanceSection() {
       <Section label={t('settings.preferences')}>
         <button
           onClick={() => navigate('/onboarding')}
-          className="flex items-center gap-3 w-full h-10 rounded-xl px-3 text-[14px] font-medium"
+          className="flex items-center gap-3 w-full h-10 rounded-xl px-3 text-[14px] font-medium focus-visible:ring-2 focus-visible:ring-[var(--color-teal)] focus-visible:outline-none"
           style={{ backgroundColor: 'rgba(78,205,196,0.08)', color: 'var(--color-teal)', border: '1px solid rgba(78,205,196,0.15)' }}
         >
           <span>🔄</span>

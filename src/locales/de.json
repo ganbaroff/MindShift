@@ -314,7 +314,7 @@
     "analyticsDesc": "Nur aggregierte Nutzungsdaten — keine persönlichen Daten. Hilft, MindShift zu verbessern.",
     "exportJson": "Exportieren (JSON)",
     "exportSignedIn": "Der Export ist für angemeldete Benutzer verfügbar",
-    "exportFailed": "Der Export ist fehlgeschlagen. Bitte versuchen Sie es erneut",
+    "exportFailed": "Export konnte nicht abgeschlossen werden — bitte erneut versuchen",
     "dataExported": "Daten exportiert",
     "deleteAccount": "Konto löschen",
     "deleteConfirm": "Dadurch werden Ihr Konto und alle Daten dauerhaft gelöscht. Dies kann nicht rückgängig gemacht werden.",
@@ -1382,7 +1382,8 @@
     "comingSoon": "Bald",
     "comingTo": "Kommt zu {{dest}}",
     "active": "Aktiv",
-    "buy": "{{cost}} 💎"
+    "buy": "{{cost}} 💎",
+    "refundHint": "24h Rückgabe"
   },
   "shareCard": {
     "screenshotHint": "Screenshot machen und teilen",

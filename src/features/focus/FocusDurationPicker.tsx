@@ -97,6 +97,7 @@ export function FocusDurationPicker({
         <button
           onClick={() => setShowCustom(true)}
           aria-label="Custom duration"
+          aria-pressed={showCustom}
           className="flex-1 py-3 rounded-xl font-semibold text-sm transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none"
           style={{
             background: showCustom ? 'var(--color-primary-alpha)' : 'var(--color-card)',

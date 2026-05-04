@@ -118,6 +118,9 @@ export function ShutdownRitual({ onDismiss }: Props) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Shutdown ritual"
         className="fixed inset-0 z-50 flex flex-col justify-center px-6"
         style={{
           background: 'linear-gradient(180deg, #0F1117 0%, #0D0E1E 50%, #12102A 100%)',
@@ -201,7 +204,7 @@ export function ShutdownRitual({ onDismiss }: Props) {
                 <div className="flex flex-col gap-3">
                   <button
                     onClick={() => setStep('tomorrow')}
-                    className="w-full py-4 rounded-2xl font-semibold text-base transition-all duration-200"
+                    className="w-full py-4 rounded-2xl font-semibold text-base transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[var(--color-teal)] focus-visible:outline-none"
                     style={{ background: 'var(--color-teal)', color: '#0F1117' }}
                     aria-label="Set tomorrow's task"
                   >
@@ -209,7 +212,7 @@ export function ShutdownRitual({ onDismiss }: Props) {
                   </button>
                   <button
                     onClick={handleSkip}
-                    className="w-full py-3 text-sm"
+                    className="w-full py-3 text-sm rounded-xl focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none"
                     style={{ color: 'var(--color-text-muted)' }}
                     aria-label="Skip shutdown ritual"
                   >
@@ -267,7 +270,7 @@ export function ShutdownRitual({ onDismiss }: Props) {
                     onClick={() => void handleSetTomorrow()}
                     disabled={!tomorrowInput.trim() || isSubmitting}
                     aria-label="Save tomorrow's task and rest"
-                    className="w-full py-4 rounded-2xl font-semibold text-base transition-all duration-200"
+                    className="w-full py-4 rounded-2xl font-semibold text-base transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[var(--color-teal)] focus-visible:outline-none"
                     style={{
                       background: tomorrowInput.trim() ? 'var(--color-teal)' : 'var(--color-surface-raised)',
                       color: tomorrowInput.trim() ? 'var(--color-bg)' : 'var(--color-text-muted)',
@@ -278,7 +281,7 @@ export function ShutdownRitual({ onDismiss }: Props) {
                   </button>
                   <button
                     onClick={() => setStep('goodnight')}
-                    className="w-full py-3 text-sm"
+                    className="w-full py-3 text-sm rounded-xl focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none"
                     style={{ color: 'var(--color-text-muted)' }}
                     aria-label="Skip and rest"
                   >

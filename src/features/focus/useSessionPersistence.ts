@@ -56,7 +56,7 @@ export function useSessionPersistence({
           energy_before: null,
           energy_after: null,
           audio_preset: null,
-        } as never).then(({ error }: { error: unknown }) => {
+        } as never).then(({ error }: { error: unknown }) => { // eslint-disable-line -- Supabase untyped client requires `as never`
           if (error) logError('useSessionPersistence.pendingRecovery', error)
         })
       }
@@ -77,7 +77,7 @@ export function useSessionPersistence({
       }
       const { data: saved } = await supabase
         .from('focus_sessions')
-        .insert(row as never)
+        .insert(row as never) // Supabase untyped client
         .select('id')
         .single()
       // Only mark saved after confirmed insert — allows retry on network error

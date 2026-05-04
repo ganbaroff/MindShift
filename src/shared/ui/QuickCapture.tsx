@@ -69,6 +69,7 @@ function QuickCaptureInner({ onSubmit, onExpand, placeholder }: QuickCaptureProp
   const [listening, setListening] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined)
   const inputRef = useRef<HTMLInputElement>(null)
+  // Web Speech API types not in TS lib — browser-only API
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const recognitionRef = useRef<any>(null)
 
@@ -82,6 +83,7 @@ function QuickCaptureInner({ onSubmit, onExpand, placeholder }: QuickCaptureProp
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+    if (!SR) return
     const recognition = new SR()
     recognition.lang = navigator.language || 'en-US'
     recognition.interimResults = false

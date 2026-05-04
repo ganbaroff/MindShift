@@ -220,6 +220,9 @@ export function RecoveryProtocol({ onDismiss }: Props) {
         initial={shouldAnimate ? { opacity: 0 } : {}}
         animate={shouldAnimate ? { opacity: 1 } : {}}
         exit={shouldAnimate ? { opacity: 0 } : {}}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Welcome back"
         className="fixed inset-0 z-50 flex flex-col justify-center px-6"
         style={{
           background: 'linear-gradient(180deg, var(--color-bg) 0%, var(--color-surface) 50%, var(--color-surface) 100%)',
