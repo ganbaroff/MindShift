@@ -200,22 +200,27 @@ export function CrystalShopSection({ crystalBalance }: CrystalShopSectionProps) 
                     </motion.span>
                   </AnimatePresence>
                 ) : item.available ? (
-                  <button
-                    onClick={() => void handlePurchase(item)}
-                    disabled={!canAfford || !!purchasing}
-                    className="px-3 py-1 rounded-lg text-[12px] font-semibold
-                               focus-visible:ring-2 focus-visible:ring-[var(--color-gold)]
-                               disabled:opacity-40 transition-all"
-                    style={{
-                      background: canAfford
-                        ? 'rgba(245,158,11,0.15)'
-                        : 'rgba(255,255,255,0.05)',
-                      color: canAfford ? 'var(--color-gold)' : 'var(--color-text-muted)',
-                    }}
-                    aria-label={`Buy ${item.name} for ${item.cost} crystals`}
-                  >
-                    {isPurchasing ? '...' : `${item.cost} 💎`}
-                  </button>
+                  <div className="flex flex-col items-end gap-0.5">
+                    <button
+                      onClick={() => void handlePurchase(item)}
+                      disabled={!canAfford || !!purchasing}
+                      className="px-3 py-1 rounded-lg text-[12px] font-semibold
+                                 focus-visible:ring-2 focus-visible:ring-[var(--color-gold)]
+                                 disabled:opacity-40 transition-all"
+                      style={{
+                        background: canAfford
+                          ? 'rgba(245,158,11,0.15)'
+                          : 'rgba(255,255,255,0.05)',
+                        color: canAfford ? 'var(--color-gold)' : 'var(--color-text-muted)',
+                      }}
+                      aria-label={`Buy ${item.name} for ${item.cost} crystals`}
+                    >
+                      {isPurchasing ? '...' : `${item.cost} 💎`}
+                    </button>
+                    <span className="text-[9px]" style={{ color: 'var(--color-text-muted)' }}>
+                      {t('shop.refundHint')}
+                    </span>
+                  </div>
                 ) : (
                   <span
                     className="text-[11px] px-2 py-1 rounded-lg"

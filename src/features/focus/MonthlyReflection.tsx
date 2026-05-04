@@ -81,15 +81,25 @@ export function MonthlyReflection({ onDismiss }: Props) {
     return () => clearTimeout(timer)
   }, [step, handleDismiss])
 
+  // aria-live announcement for auto-dismiss
+  const [closingAnnounce, setClosingAnnounce] = useState(false)
+  useEffect(() => {
+    if (step === 'close') setClosingAnnounce(true)
+  }, [step])
+
   return (
     <AnimatePresence>
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Monthly reflection"
         className="fixed inset-0 z-50 flex flex-col justify-center px-6"
         style={{ background: 'linear-gradient(180deg, #0F1117 0%, #1A1B30 50%, #141228 100%)' }}
       >
+        {closingAnnounce && <span className="sr-only" aria-live="polite">Closing in 3 seconds</span>}
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 0.10, scale: 1 }}
@@ -100,7 +110,7 @@ export function MonthlyReflection({ onDismiss }: Props) {
 
         <div className="relative max-w-sm mx-auto w-full flex flex-col gap-8">
           {/* Step dots */}
-          <div className="flex justify-center gap-2">
+          <div className="flex justify-center gap-2" role="group" aria-label={`Step ${(['wrapped','recap','intention','close'].indexOf(step)) + 1} of 4`}>
             {(['wrapped', 'recap', 'intention', 'close'] as Step[]).map((s, i) => (
               <motion.div
                 key={s}

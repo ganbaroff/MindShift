@@ -34,7 +34,7 @@ export function EnergyCheckin({ onSelect, selected, compact = false }: Props) {
             onClick={() => onSelect(level)}
             aria-label={`Energy level ${level} — ${label}`}
             aria-pressed={isSelected}
-            className="flex flex-col items-center gap-1 flex-1 rounded-2xl transition-all duration-200"
+            className="flex flex-col items-center gap-1 flex-1 rounded-2xl transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none"
             style={{
               padding: compact ? '10px 4px' : '14px 4px',
               background: isSelected ? 'rgba(123, 114, 255, 0.18)' : 'var(--color-surface-card)',

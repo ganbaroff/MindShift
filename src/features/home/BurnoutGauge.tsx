@@ -24,7 +24,7 @@ export const BurnoutGauge = memo(function BurnoutGauge({ score }: BurnoutGaugePr
       aria-valuemax={100}
       aria-label={t('home.burnoutGauge')}
     >
-      <svg width="72" height="44" viewBox="0 0 72 44">
+      <svg width="72" height="44" viewBox="0 0 72 44" aria-hidden="true">
         <path d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="5" strokeLinecap="round" />
         <path d={`M ${cx - r} ${cy} A ${r} ${r} 0 ${largeArc} 1 ${endX} ${endY}`} fill="none" stroke="var(--color-teal)" strokeWidth="5" strokeLinecap="round" />
       </svg>

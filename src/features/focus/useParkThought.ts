@@ -48,7 +48,7 @@ export function useParkThought({ addTask, userId }: UseParkThoughtParams) {
           id: task.id, user_id: userId, title: task.title,
           pool: task.pool, status: task.status, difficulty: task.difficulty,
           estimated_minutes: task.estimatedMinutes, parent_task_id: null, position: 0,
-        } as never)
+        } as never) // Supabase untyped client
       } catch (err) {
         logError('FocusScreen.parkThought.insert', err, { taskId: task.id })
       }

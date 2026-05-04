@@ -96,7 +96,8 @@ export function BehaviorSection() {
               key={i}
               whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
               onClick={() => setSeasonalMode(phaseKeys[i])}
-              className="p-2.5 rounded-xl text-left"
+              aria-pressed={phase === i}
+              className="p-2.5 rounded-xl text-left focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none"
               style={{
                 backgroundColor: phase === i ? 'rgba(123,114,255,0.15)' : 'var(--color-surface-raised)',
                 borderWidth: phase === i ? 1.5 : 1,
@@ -165,7 +166,8 @@ export function BehaviorSection() {
                     <button
                       key={key}
                       onClick={() => setMedicationTime(sel ? null : key)}
-                      className="flex-1 flex flex-col items-center gap-0.5 py-2.5 rounded-xl transition-all text-xs"
+                      aria-pressed={sel}
+                      className="flex-1 flex flex-col items-center gap-0.5 py-2.5 rounded-xl transition-all text-xs focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none"
                       style={{
                         background: sel ? 'rgba(123,114,255,0.18)' : 'var(--color-surface-raised)',
                         border: `1px solid ${sel ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,
@@ -195,7 +197,8 @@ export function BehaviorSection() {
               key={min}
               whileTap={shouldAnimate ? { scale: 0.95 } : undefined}
               onClick={() => setDailyFocusGoalMin(min)}
-              className="flex-1 h-9 rounded-full text-[13px] font-medium"
+              aria-pressed={dailyFocusGoalMin === min}
+              className="flex-1 h-9 rounded-full text-[13px] font-medium focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none"
               style={{
                 backgroundColor: dailyFocusGoalMin === min ? 'rgba(123,114,255,0.15)' : 'var(--color-surface-raised)',
                 border: `${dailyFocusGoalMin === min ? 1.5 : 1}px solid ${dailyFocusGoalMin === min ? '#7B72FF' : 'rgba(255,255,255,0.06)'}`,

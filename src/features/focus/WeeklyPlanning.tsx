@@ -75,6 +75,9 @@ export const WeeklyPlanning = memo(function WeeklyPlanning({ onDismiss }: Weekly
 
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Weekly planning"
       className="fixed inset-0 z-50 flex flex-col items-center justify-center px-6"
       style={{ background: 'rgba(15,17,32,0.96)', backdropFilter: 'blur(8px)' }}
     >

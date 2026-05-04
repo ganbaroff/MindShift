@@ -35,7 +35,8 @@ export function Chip({
     <motion.button
       whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
       onClick={onClick}
-      className="flex-1 h-9 rounded-full flex items-center justify-center gap-1 text-[13px] font-medium"
+      aria-pressed={selected}
+      className="flex-1 h-9 rounded-full flex items-center justify-center gap-1 text-[13px] font-medium focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none"
       style={{
         backgroundColor: selected ? 'rgba(123,114,255,0.15)' : 'var(--color-surface-raised)',
         borderWidth: selected ? 1.5 : 1,
@@ -59,7 +60,7 @@ export function Toggle({
 }) {
   const { shouldAnimate } = useMotion()
   return (
-    <button onClick={() => onChange(!checked)} className="flex items-center justify-between w-full gap-3">
+    <button onClick={() => onChange(!checked)} aria-pressed={checked} aria-label={label} className="flex items-center justify-between w-full gap-3 rounded-xl focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none">
       <span className="flex flex-col items-start text-left">
         <span className="text-[14px]" style={{ color: 'var(--color-text-primary)' }}>{label}</span>
         {hint && <span className="text-[11px] mt-0.5 leading-snug" style={{ color: 'var(--color-text-muted)' }}>{hint}</span>}

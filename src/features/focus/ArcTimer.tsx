@@ -89,7 +89,7 @@ function ArcTimerInner({
       // Bolt 6.16: smooth size transition between phases
       animate={{ width: size, height: size }}
       transition={shouldAnimate ? { duration: 1.2, ease: 'easeInOut' } : { duration: 0 }}
-      className="relative flex items-center justify-center focus:outline-none"
+      className="relative flex items-center justify-center focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2 focus-visible:outline-none"
       style={{ cursor: effectiveDisable ? 'default' : 'pointer' }}
       aria-label={
         isSurprise || effectiveDisable ? i18n.t('focus.arcTimerSurprise') :
@@ -157,7 +157,7 @@ function ArcTimerInner({
           />
         ) : effectiveShowDigits && !effectiveDisable ? (
           <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
+            initial={shouldAnimate ? { opacity: 0, scale: 0.8 } : {}}
             animate={{ opacity: 1, scale: 1 }}
             className="flex flex-col items-center"
           >

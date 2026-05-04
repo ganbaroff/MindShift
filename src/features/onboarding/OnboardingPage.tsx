@@ -255,7 +255,7 @@ export default function OnboardingPage() {
             ? <button onClick={() => setStep(step - 1)} className="text-[13px] focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none rounded" style={{ color: 'var(--color-text-muted)' }}>{t('onboarding.back')}</button>
             : <div />
           }
-          <span className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>{t('onboarding.step', { current: step + 1, total: TOTAL_STEPS })}</span>
+          <span className="text-[11px]" style={{ color: 'var(--color-text-muted)' }} aria-live="polite" aria-atomic="true">{t('onboarding.step', { current: step + 1, total: TOTAL_STEPS })}</span>
         </div>
       </div>
 

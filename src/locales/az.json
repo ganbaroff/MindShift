@@ -314,7 +314,7 @@
     "analyticsDesc": "Yalnız ümumi məlumatlar — şəxsi məlumat yoxdur. MindShift-i inkişaf etdirməyə kömək edir.",
     "exportJson": "İxrac (JSON)",
     "exportSignedIn": "Eksport daxil olmuş istifadəçilər üçün əlçatandır",
-    "exportFailed": "Eksport alınmadı — yenidən cəhd edin",
+    "exportFailed": "Eksportu tamamlamaq mümkün olmadı — yenidən cəhd edin",
     "dataExported": "Data ixrac edildi",
     "deleteAccount": "Hesabı silin",
     "deleteConfirm": "Bu, hesabınızı və bütün məlumatlarınızı həmişəlik siləcək. Bu geri qaytarıla bilməz.",
@@ -1381,7 +1381,8 @@
     "comingSoon": "Tezliklə",
     "comingTo": "{{dest}} gəlir",
     "active": "Aktiv",
-    "buy": "{{cost}} 💎"
+    "buy": "{{cost}} 💎",
+    "refundHint": "24s iade"
   },
   "shareCard": {
     "screenshotHint": "Ekran görüntüsü çəkin və paylaşın",

@@ -59,7 +59,7 @@ export function AudioSection() {
               <motion.button
                 whileTap={shouldAnimate ? { scale: 0.97 } : undefined}
                 onClick={() => handlePresetPreview(p.key)}
-                className="flex-1 flex items-center gap-2 h-10 rounded-xl px-3 text-left"
+                className="flex-1 flex items-center gap-2 h-10 rounded-xl px-3 text-left focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none"
                 style={{
                   backgroundColor: isPreviewing ? 'rgba(123,114,255,0.15)' : 'var(--color-surface-raised)',
                   borderWidth: isPreviewing ? 1.5 : 1,
@@ -83,7 +83,7 @@ export function AudioSection() {
               <motion.button
                 whileTap={shouldAnimate ? { scale: 0.9 } : undefined}
                 onClick={() => handleSetFocusAnchor(p.key)}
-                className="w-9 h-10 rounded-xl flex items-center justify-center text-[16px]"
+                className="w-9 h-10 rounded-xl flex items-center justify-center text-[16px] focus-visible:ring-2 focus-visible:ring-[var(--color-teal)] focus-visible:outline-none"
                 style={{
                   backgroundColor: isAnchor ? 'rgba(78,205,196,0.15)' : 'var(--color-surface-raised)',
                   borderWidth: isAnchor ? 1.5 : 1,

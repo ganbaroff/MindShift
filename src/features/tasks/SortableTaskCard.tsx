@@ -65,7 +65,7 @@ function SortableTaskCardInner({ task, index, onDone, onPark, onRemove, onMove, 
                 <button
                   key={pool}
                   onClick={() => { onMove(task.id, pool); setShowMoveOptions(false) }}
-                  className="text-[10px] px-2 py-0.5 rounded-lg focus-visible:ring-1 focus-visible:ring-[var(--color-primary)]"
+                  className="text-[10px] px-2 py-0.5 rounded-lg focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none"
                   style={{ background: 'rgba(123,114,255,0.08)', color: 'var(--color-text-muted)' }}
                 >
                   {emoji} {label}

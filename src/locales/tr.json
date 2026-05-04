@@ -314,7 +314,7 @@
     "analyticsDesc": "Yalnızca toplu kullanım verileri — kişisel bilgi yok. MindShift'i geliştirmeye yardımcı olur.",
     "exportJson": "Dışa aktarma (JSON)",
     "exportSignedIn": "Dışa aktarma, oturum açmış kullanıcılar için kullanılabilir",
-    "exportFailed": "Dışa aktarma başarısız oldu; lütfen tekrar deneyin",
+    "exportFailed": "Dışa aktarma tamamlanamadı — lütfen tekrar deneyin",
     "dataExported": "Dışa aktarılan veriler",
     "deleteAccount": "Hesabı sil",
     "deleteConfirm": "Bu, hesabınızı ve tüm verilerinizi kalıcı olarak silecektir. Bu geri alınamaz.",
@@ -1377,7 +1377,8 @@
     "comingSoon": "Yakında",
     "comingTo": "{{dest}} geliyor",
     "active": "Aktif",
-    "buy": "{{cost}} 💎"
+    "buy": "{{cost}} 💎",
+    "refundHint": "24s iade"
   },
   "shareCard": {
     "screenshotHint": "Ekran görüntüsü alıp paylaşın",

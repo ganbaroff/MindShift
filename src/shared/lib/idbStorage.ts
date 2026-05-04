@@ -17,6 +17,7 @@
 
 import { get, set, del } from 'idb-keyval'
 import type { StateStorage } from 'zustand/middleware'
+import { logError } from './logger'
 
 // Debounce writes to prevent serializing 200 KB on every drag-move event
 let writeTimer: ReturnType<typeof setTimeout> | null = null
@@ -31,7 +32,7 @@ export const idbStorage: StateStorage = {
     const lsVal = localStorage.getItem(name)
     if (lsVal !== null) {
       // Fire-and-forget migration to IDB
-      set(name, lsVal).then(() => localStorage.removeItem(name)).catch(() => {})
+      set(name, lsVal).then(() => localStorage.removeItem(name)).catch((e) => logError('idbStorage.migrate', e))
       return lsVal
     }
 
@@ -44,7 +45,7 @@ export const idbStorage: StateStorage = {
     const backup = localStorage.getItem(backupKey)
     if (backup !== null) {
       // Restore from backup into IDB
-      set(name, backup).catch(() => {})
+      set(name, backup).catch((e) => logError('idbStorage.restoreBackup', e))
       return backup
     }
 
