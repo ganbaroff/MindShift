@@ -53,6 +53,17 @@ docs/visual-audit/
 # Android build artifacts — keystore, APKs, Firebase config
 android/
 *.apk
+*.aab
+
+# Signing credentials — NEVER commit (loss/leak = lose Play Store update slot)
+# Same patterns mirrored in android/.gitignore for defence in depth.
+*.keystore
+*.jks
+*.p12
+*.p8
+*.pem
+release.keystore.bak-*
+keystore.properties
 
 # Design project files
 design-project/
