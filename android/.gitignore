@@ -54,10 +54,15 @@ captures/
 
 # Keystore files — NEVER commit. Loss of keystore = cannot update Play Store app forever.
 # Uncommented 2026-04-21 after Gemini audit caught these as commented-out (security risk).
+# Extended 2026-05-23 to cover all cert/key formats + .bak rotations.
 *.jks
 *.keystore
 release.keystore
+release.keystore.bak-*
 keystore.properties
+*.p12
+*.p8
+*.pem
 
 # External native build folder generated in Android Studio 2.2 and later
 .externalNativeBuild

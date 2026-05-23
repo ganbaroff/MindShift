@@ -1,5 +1,26 @@
 apply plugin: 'com.android.application'
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Release signing — pulled from environment. Required for `bundleRelease`
+// (Play Store AAB) and `assembleRelease` (sideload APK).
+// ENV vars (set in shell before invoking gradle):
+//   MINDSHIFT_KEYSTORE_PATH      — path to release.keystore.
+//                                  Default: ../release.keystore (resolved
+//                                  from android/app/ → android/release.keystore).
+//   MINDSHIFT_KEYSTORE_PASSWORD  — store password (required).
+//   MINDSHIFT_KEY_ALIAS          — key alias inside the keystore (required).
+//   MINDSHIFT_KEY_PASSWORD       — key password (required).
+// If any of the three required ENV vars is missing, the release config is
+// left empty and the release build fails loudly with "Keystore file ... not
+// found" / "no signingConfig". We do NOT silently fall back to the debug
+// signing key — debug signature on a release AAB would break Play Store
+// upgrade-data-preservation and lock the app out of the install slot.
+// ─────────────────────────────────────────────────────────────────────────────
+def releaseStoreFilePath = System.getenv("MINDSHIFT_KEYSTORE_PATH") ?: "../release.keystore"
+def releaseStorePassword = System.getenv("MINDSHIFT_KEYSTORE_PASSWORD")
+def releaseKeyAlias      = System.getenv("MINDSHIFT_KEY_ALIAS")
+def releaseKeyPassword   = System.getenv("MINDSHIFT_KEY_PASSWORD")
+
 android {
     namespace = "com.mindshift.app"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -16,11 +37,25 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        release {
+            // Configure only when all required env vars are present.
+            // If any are missing, the config stays empty and the release
+            // build will fail with a clear "no signingConfig" error.
+            if (releaseStorePassword && releaseKeyAlias && releaseKeyPassword) {
+                storeFile file(releaseStoreFilePath)
+                storePassword releaseStorePassword
+                keyAlias releaseKeyAlias
+                keyPassword releaseKeyPassword
+            }
+        }
+    }
     buildTypes {
         release {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
 }
