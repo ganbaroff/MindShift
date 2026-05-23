@@ -22,10 +22,10 @@ def releaseKeyAlias      = System.getenv("MINDSHIFT_KEY_ALIAS")
 def releaseKeyPassword   = System.getenv("MINDSHIFT_KEY_PASSWORD")
 
 android {
-    namespace = "com.mindshift.app"
+    namespace = "com.v0laura.mindshift"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.mindshift.app"
+        applicationId "com.v0laura.mindshift"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

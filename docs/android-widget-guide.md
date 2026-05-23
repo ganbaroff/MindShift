@@ -142,10 +142,10 @@ Notes:
 
 ## Step 4: Widget Provider (Kotlin)
 
-Create `android/app/src/main/java/com/mindshift/app/MindShiftWidgetProvider.kt`:
+Create `android/app/src/main/java/com/v0laura/mindshift/MindShiftWidgetProvider.kt`:
 
 ```kotlin
-package com.mindshift.app
+package com.v0laura.mindshift
 
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
@@ -243,10 +243,10 @@ The web app needs to push data to SharedPreferences so the widget can read it. C
 
 ### Plugin Definition (Kotlin)
 
-Create `android/app/src/main/java/com/mindshift/app/WidgetBridgePlugin.kt`:
+Create `android/app/src/main/java/com/v0laura/mindshift/WidgetBridgePlugin.kt`:
 
 ```kotlin
-package com.mindshift.app
+package com.v0laura.mindshift
 
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
@@ -286,7 +286,7 @@ class WidgetBridgePlugin : Plugin() {
 
 ### Register Plugin in MainActivity
 
-In `android/app/src/main/java/com/mindshift/app/MainActivity.kt`, add:
+In `android/app/src/main/java/com/v0laura/mindshift/MainActivity.kt`, add:
 
 ```kotlin
 import com.getcapacitor.BridgeActivity
@@ -385,7 +385,7 @@ After implementation, these files should exist in the `android/` directory:
 
 ```
 android/app/src/main/
-  java/com/mindshift/app/
+  java/com/v0laura/mindshift/
     MainActivity.kt              (modified — register WidgetBridgePlugin)
     MindShiftWidgetProvider.kt   (new)
     WidgetBridgePlugin.kt        (new)
