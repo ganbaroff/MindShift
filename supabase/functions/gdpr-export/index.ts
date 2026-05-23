@@ -78,6 +78,10 @@ Deno.serve(async (req: Request) => {
       { data: behavior },
       { data: subscriptions },
       { data: googleTokens },
+      { data: crystalLedger },
+      { data: communityMemberships },
+      { data: shareholderPositions },
+      { data: agentStateLog },
     ] = await Promise.all([
       supabase.from('users').select('*').eq('id', userId).single(),
       supabase.from('tasks').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
@@ -87,12 +91,16 @@ Deno.serve(async (req: Request) => {
       supabase.from('user_behavior').select('*').eq('user_id', userId).order('date', { ascending: false }),
       supabase.from('subscriptions').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
       supabase.from('google_tokens').select('calendar_id, expires_at, created_at, updated_at').eq('user_id', userId).maybeSingle(),
+      supabase.from('crystal_ledger').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
+      supabase.from('community_memberships').select('*').eq('user_id', userId).order('joined_at', { ascending: false }),
+      supabase.from('shareholder_positions').select('*').eq('user_id', userId).order('updated_at', { ascending: false }),
+      supabase.from('agent_state_log').select('*').eq('user_id', userId).order('started_at', { ascending: false }),
     ])
 
     // -- Build export package --------------------------------------------------
     const exportData = {
       exportedAt: new Date().toISOString(),
-      exportVersion: '1.0',
+      exportVersion: '1.1',
       gdprArticle: 'Article 20 — Right to Data Portability',
       user: userProfile ? {
         id: userProfile.id,
@@ -168,6 +176,40 @@ Deno.serve(async (req: Request) => {
         lastUpdated: googleTokens.updated_at,
         hasRefreshToken: !!googleTokens.refresh_token,
       } : null,
+      crystalLedger: (crystalLedger ?? []).map(c => ({
+        id: c.id,
+        crystalType: c.crystal_type,
+        amount: c.amount,
+        sourceEvent: c.source_event,
+        referenceId: c.reference_id,
+        balanceAfter: c.balance_after,
+        createdAt: c.created_at,
+      })),
+      communityMemberships: (communityMemberships ?? []).map(m => ({
+        id: m.id,
+        communityId: m.community_id,
+        role: m.role,
+        alias: m.alias,
+        badgeId: m.badge_id,
+        isShareholder: m.is_shareholder,
+        joinedAt: m.joined_at,
+      })),
+      shareholderPositions: (shareholderPositions ?? []).map(p => ({
+        id: p.id,
+        communityId: p.community_id,
+        shareUnits: p.share_units,
+        dividendEarned: p.dividend_earned,
+        dividendClaimed: p.dividend_claimed,
+        updatedAt: p.updated_at,
+      })),
+      agentStateLog: (agentStateLog ?? []).map(l => ({
+        id: l.id,
+        agentId: l.agent_id,
+        state: l.state,
+        reason: l.reason,
+        startedAt: l.started_at,
+        endedAt: l.ended_at,
+      })),
     }
 
     return new Response(
