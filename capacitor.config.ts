@@ -21,7 +21,7 @@
 import type { CapacitorConfig } from '@capacitor/cli'
 
 const config: CapacitorConfig = {
-  appId: 'com.mindshift.app',
+  appId: 'com.v0laura.mindshift',
   appName: 'MindShift',
   webDir: 'dist',
 

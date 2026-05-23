@@ -3,7 +3,7 @@
     "apps": [],
     "details": [
       {
-        "appID": "TEAMID.com.mindshift.app",
+        "appID": "TEAMID.com.v0laura.mindshift",
         "paths": ["*"]
       }
     ]
