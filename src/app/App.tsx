@@ -93,10 +93,25 @@ export default function App() {
   const userTheme = useStore(s => s.userTheme)
   const fontScale = useStore(s => s.fontScale)
   const firstFocusTutorialCompleted = useStore(s => s.firstFocusTutorialCompleted)
+  const setFirstFocusTutorialCompleted = useStore(s => s.setFirstFocusTutorialCompleted)
+  const markHintSeen = useStore(s => s.markHintSeen)
   const setRecoveryShown = useStore(s => s.setRecoveryShown)
   const currentStreak = useStore(s => s.currentStreak)
   const userId = useStore(s => s.userId)
   const _hasHydrated = useStore(s => s._hasHydrated)
+
+  // -- E2E / automation escape hatch: ?skipTutorial=1 -------------------------
+  // Navigating with this param marks both the FirstFocusTutorial and the
+  // WelcomeWalkthrough as completed on app mount, preventing either overlay
+  // from blocking test selectors. Has no effect in production (param absent).
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('skipTutorial') !== '1') return
+    if (!firstFocusTutorialCompleted) setFirstFocusTutorialCompleted()
+    markHintSeen('welcome_walkthrough')
+    markHintSeen('first_focus_tutorial')
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // intentionally run once on mount
 
   const {
     showRecovery,
