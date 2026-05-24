@@ -4,6 +4,12 @@
 
 **Authored:** 2026-05-24 ~12:30 AST by Atlas/CLI-side Claude Opus 4.7. Cross-referenced against `CLAUDE.md` Supabase Edge Functions table, Sprint A-AG history, `apps/web/src/store/index.ts` partialize, `supabase/functions/gdpr-*` source, `public/privacy.html` (HTTP 200 prod) and `public/terms.html`.
 
+**Updated:** 2026-05-24 ~13:00 AST after Atlas self-verified Play Console + Firebase via Chrome MCP + Read of `useVoiceInput.ts`. Confirmed:
+- Play Console "Требуется действие (10)" lists exactly these 10 sections: Политика конфиденциальности, Реклама, Доступ к приложениям, Возрастные ограничения, Целевая аудитория и возрастные ограничения, Безопасность данных, **Рекламный идентификатор**, **Приложения государственных учреждений**, Финансовые функции, **Приложения для здоровья**. The three bolded were under-covered in original draft; sections §6 below added.
+- Voice/audio (verify) mark closed: `src/shared/hooks/useVoiceInput.ts` reads browser Web Speech API via `new SpeechRecognitionAPI()` (line 161). The `rec.onresult` handler (lines 168-172) extracts ONLY the `transcript` text string. Edge function call at line 81 is `supabase.functions.invoke('classify-voice-input', { body: { text: transcript.trim(), language: locale } })` — text only, no audio blob. No `MediaRecorder`, `MediaStream`, or `AudioContext.toBlob` usage anywhere in the hook. **Confirmed: audio is processed locally in browser by Web Speech API and never leaves user's device as audio data; only the text transcript is sent to backend.**
+- Firebase Console state verified via Chrome MCP at `https://console.firebase.google.com/u/0/project/mindshift-441e8/settings/general/android:com.mindshift.app`: ONE Android app registered with package `com.mindshift.app` (OLD), SHA-256 `45:81:6b:2a:4f:44:ca:14:fd:e1:d0:38:8b:1b:22:08:44:c2:33:5a:d0:57:b9:9f:0e:9e:d4:a4:07:3e:c2:83`. Current keystore SHA-256 for new package `com.v0laura.mindshift` is `CE:21:45:66:89:D4:A9:D1:70:7C:74:AE:77:5D:E3:DC:93:58:78:99:CD:B3:B5:60:51:A6:55:A6:D5:57:F2:C4`. CEO must "Add app → Android" in Firebase Console with new package + new SHA-256 + download fresh `google-services.json` + replace `android/app/google-services.json`. Note: this requires AAB rebuild + versionCode bump (to 101) + re-upload to Play Console library.
+- Sentry org region still UNVERIFIED — sentry.io session is not logged in on CEO's current Chrome; CEO must log in OR I dig the actual DSN domain from prod bundle source-map. Pre-draft kept the `(verify)` mark on §1.3 Sentry data-residency.
+
 **Repo HEAD at draft time:** main `8f6c65a`.
 
 ---
@@ -30,7 +36,7 @@ Tick the following data types per Google's taxonomy. For each, set: collected �
 | **Name** (Personal info) | ✅ optional in profile | ❌ | ❌ | App functionality (personalisation) | Optional | ✅ Yes |
 | **User IDs** (Personal info) | ✅ Supabase UUID + Google OAuth sub | ❌ | ❌ | App functionality, Account management | Required | ✅ Yes |
 | **Health info** (Health and fitness — ADHD context) | ✅ self-reported energy levels + ADHD signals (timeBlindness, emotionalReactivity, medicationTime if user enters) | ❌ | ❌ | App functionality, Personalization | Optional | ✅ Yes |
-| **Voice or sound recordings** (Audio files) | ✅ Web Speech API transcript via `useVoiceInput` → `classify-voice-input` edge function | ❌ — text transcript only, audio not stored | ✅ ephemeral (browser SpeechRecognition processes locally; only resulting text is sent to backend) | App functionality (voice task creation) | Optional | ✅ Yes (sent with user JWT) |
+| **Voice or sound recordings** (Audio files) | ❌ — audio never collected by MindShift code (verified `useVoiceInput.ts` lines 161-172: browser Web Speech API processes audio locally; only the resulting `transcript` text string is sent to backend via `supabase.functions.invoke('classify-voice-input', { body: { text: transcript, language: locale } })`) | ❌ | N/A | N/A | N/A | N/A |
 | **Calendar events** (Calendar) | ✅ optional, only if user enables Google Calendar integration | ❌ | ❌ | App functionality (calendar sync for tasks) | Optional | ✅ Yes |
 | **App interactions** (App activity) | ✅ focus_sessions, tasks, energy_logs, achievements, snooze counts | ❌ | ❌ | App functionality, Analytics, Personalization | Required (for core features to work) | ✅ Yes |
 | **Crash logs** (App info and performance) | ✅ Sentry | ✅ Sentry (third-party processor) | ❌ | Analytics (crash diagnostics) | Required | ❌ No (anonymous crash digest) `(verify)` |
@@ -126,6 +132,41 @@ These rows depend on legal interpretation, account-specific account choices, or 
 - Whether to declare `(verify)` items as Required/Optional for medical-data-like fields (ADHD signal).
 - Whether 13-17 age band is included in target audience.
 - Any new questions Google added since this draft was written.
+
+---
+
+## 6. Three additional declarations (verified missing from initial draft)
+
+Atlas Chrome MCP enumeration of Play Console "Требуется действие (10)" confirmed three more sections that needed dedicated answers. Treating them here.
+
+### 6.1 Рекламный идентификатор (Advertising ID)
+
+**Does your app collect and use the Android Advertising ID (AAID)?** → **No**.
+
+Source of truth: `package.json` has no ad-network or measurement-SDK that consumes AAID (no `react-native-google-mobile-ads`, no `@google-analytics/firebase`, no `applovin`, no `unity-ads`, no `branch-io`, no `appsflyer`). Plausible analytics is cookieless + no AAID usage. Sentry crash reports do not require AAID.
+
+Per Google policy: if app does not collect AAID, no further declaration needed for this section; answer N/A or "Do not collect" depending on form wording.
+
+### 6.2 Приложения государственных учреждений (Government Apps)
+
+**Is this app distributed or affiliated with a government entity?** → **No**.
+
+MindShift is a private-sector ADHD productivity tool under v0Laura (Yusif Ganbarov as sole owner). No government affiliation, no public-sector contract, no political content.
+
+### 6.3 Приложения для здоровья (Health Apps)
+
+This is the most nuanced of the three because MindShift sits adjacent to health/wellness. The form asks several sub-questions; recommended answers:
+
+| Sub-question | Recommended answer | Reasoning |
+|---|---|---|
+| Does your app contain health-related features or content? | **Yes, but limited** | Self-reported energy levels, ADHD-related signals (timeBlindness, emotionalReactivity, medicationTime), focus-session tracking. No medical advice, no diagnosis, no clinical claims. |
+| Is your app considered a medical device under any regulation (FDA, EU MDR, etc.)? | **No** | No clinical-grade claims; no diagnosis output; no treatment plan; no prescription interaction. App is a self-help productivity + cognitive-training tool, not a medical device. |
+| Does your app provide professional medical advice? | **No** | All Mochi mascot copy + recovery messages are warm-companion tone, explicitly not coach/therapist. AI edge function `mochi-respond` is wrapped with "not medical advice" guardrail in system prompt. `(verify)` — re-read `supabase/functions/mochi-respond/index.ts` system prompt before submitting. |
+| Does your app handle Protected Health Information (PHI / HIPAA-covered data)? | **No** | User-entered ADHD signals + energy levels are self-reported preferences, not clinical PHI. App does not interact with healthcare providers, EHRs, or insurance systems. |
+| Mental health / wellness category claim? | **Yes — wellness category** | App functions as a wellness/productivity tool. Recommend selecting Play Store category "Productivity" primary, "Health & Fitness" secondary (or omit secondary). |
+| Children-targeted? | **No** (see §3) | |
+
+If Google asks for a "Health App safety disclaimer" or required warning text — recommend the in-app boilerplate: "MindShift is a self-help productivity tool. It is not a substitute for professional medical advice, diagnosis, or treatment. If you are experiencing a mental health crisis, please contact your local emergency services." (atlas can add this string to `src/locales/*/common.json` under `legal.disclaimer.health` as a separate ticket if Play requires it).
 
 ---
 

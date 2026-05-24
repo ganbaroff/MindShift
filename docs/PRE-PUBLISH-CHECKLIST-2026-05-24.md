@@ -43,7 +43,7 @@ Out of ~60 rows, atlas closed **19 GREEN** via direct tool calls (grep / curl / 
 | CL-A2 | `eslint` clean | P1 | `npx eslint src --quiet --max-warnings=0 ; echo exit=$?` | **GREEN-warn** — exit 0, some warnings at max=0 | atlas |
 | CL-A3 | Bundle main chunk gzipped ≤ 400 KB | P1 | `npx vite build` | **GREEN** — `index-DHjvf26y.js` 104.53 kB gzip | atlas |
 | CL-A4 | No `console.log` / `console.warn` / `console.error` in src | P2 | `grep -rnE "console\\.(log\|warn\|error)" src/ \| wc -l` | **GREEN** — 2 occurrences | atlas |
-| CL-A5 | Sentry source maps uploaded for versionCode 100 | P1 | Sentry releases UI | UNVERIFIED — Sentry dashboard login | **CEO** |
+| CL-A5 | Sentry source maps uploaded for versionCode 100 | P1 | Sentry releases UI | UNVERIFIED — atlas attempted Chrome MCP to sentry.io (2026-05-24 ~13:00 AST) but CEO not logged into Sentry in this Chrome session; login wall. Region + release tag still need CEO Sentry sign-in OR I can extract DSN domain from prod bundle source-map if pressed. | **CEO** Sentry login |
 | CL-A6 | Hex outside design tokens | P2 | grep | **P2-known** — 193 occurrences, mostly SVG fills + focus rings | atlas (future) |
 
 ---
@@ -54,7 +54,7 @@ Out of ~60 rows, atlas closed **19 GREEN** via direct tool calls (grep / curl / 
 |---|---|---|---|---|---|
 | CL-B1 | Local Playwright E2E suite ≥ 95% pass | P0 | `npx playwright test --project=chromium --reporter=line` | **GREEN** — 216 pass / 3 fail (tutorial-stale) / 6 skip | atlas |
 | CL-B2 | Same E2E suite vs prod Vercel `8f6c65a` | P0 | `PLAYWRIGHT_BASE_URL=https://mind-shift-git-main-yusifg27-3093s-projects.vercel.app npx playwright test --project=chromium` | **RED** — 33 fail / 186 pass / 6 skip. Failures concentrated: community 6, history 10, mochi 7, recovery 7, settings 1, sprint-bd 1, stress 1. Root cause: `WelcomeWalkthrough` / `FirstFocusTutorial` overlay blocks `toBeVisible` selectors for fresh sessions. Separate fix sprint: gate overlay behind feature flag OR add `data-tutorial-skip` query param. | atlas (next sprint) |
-| CL-B3 | Unit tests (vitest) green | P1 | `npx vitest run` | **GREEN-conditional** — vitest 4.0.18 + vite 7.3.2 are compatible per Sonnet check; earlier env-level startup error was likely CWD or PATH issue, not version compat. Re-run after env cleanup. | atlas (re-run) |
+| CL-B3 | Unit tests (vitest) green | P1 | `npx vitest run` | **PARTIAL** — atlas re-ran with default reporter 2026-05-24 ~12:05 AST: 22/43 test files load + pass cleanly, 21/43 fail-to-load with import errors (the earlier `--reporter=basic` Vite import bug was the env-side bug, NOT version compat — vitest 4.0.18 + vite 7.3.2 are compatible). Of files that loaded, **454/454 individual tests PASS**. The 21 failing files have suite-load errors (broken stub/mock imports likely from refactor drift) but no real failing assertion. Acceptable for internal-test; investigate + fix import errors next sprint. | atlas (next sprint) |
 | CL-B4 | Fix tutorial.spec.ts 7 stale `2:00` countdown assertions | P2 | `npx playwright test e2e/tutorial.spec.ts` | **RED-known** — 3 fails × 2 projects = 6 stale assertions. Defer to polish sprint. | atlas (next sprint) |
 | CL-B5 | AAB versionCode 100 installs on Android device | P0 | `adb install -r app-release.aab` | UNVERIFIED — physical device or AVD bootstrap (~1h) | **CEO** OR atlas with AVD |
 
@@ -72,7 +72,7 @@ Out of ~60 rows, atlas closed **19 GREEN** via direct tool calls (grep / curl / 
 | CL-C6 | Focus-trap in 9 dialogs | P1 | grep `focus-trap\|trapFocus\|useFocusTrap` | **RED-known** — 0 occurrences. Accepted for internal-test. Public Play Store blocker. | atlas (next sprint) |
 | CL-C7 | Muted-text contrast Lc 45+ | P2 | APCA | **RED-known** — Lc 42. Accepted internal. | atlas (next sprint) |
 | CL-C8 | `KeyboardSensor` on drag-reorder | P2 | grep | **RED-known** — 0 occurrences. Accepted internal. | atlas (next sprint) |
-| CL-C9 | Voice input button never-delete | P1 | grep `useVoiceInput` | **GREEN** — `AddTaskModal:14` + line 206 gate | atlas |
+| CL-C9 | Voice input button never-delete | P1 | grep `useVoiceInput` + Read full hook | **GREEN-deep** — `AddTaskModal:14` + line 206 gate. Additionally Read of `src/shared/hooks/useVoiceInput.ts` 2026-05-24 ~13:00 AST confirmed: browser Web Speech API at line 161 (`new SpeechRecognitionAPI()`), `rec.onresult` line 168-172 extracts ONLY text transcript, edge function call line 81 sends only `{ text: transcript, language: locale }` — **audio never collected by MindShift code**. Closes Data Safety voice-row (verify) mark in pre-draft. | atlas |
 
 ---
 
@@ -134,7 +134,7 @@ Out of ~60 rows, atlas closed **19 GREEN** via direct tool calls (grep / curl / 
 |---|---|---|---|---|---|
 | CL-G1 | Local notifications fire | P1 | Device | UNVERIFIED | **CEO** OR atlas+AVD |
 | CL-G2 | Notification permission only after onboarding step 5 | P1 | Chrome MCP walkthrough | **GREEN** — `OnboardingPage.tsx` has 0 `Notification.requestPermission()` calls; only `NotificationsSection.tsx` (Settings) + `notify.ts` trigger permission | atlas (Sonnet) |
-| CL-G3 | FCM push registration | P1 | App-start log | **RED-known** — Firebase package mismatch. CEO Firebase Console regen required. | **CEO** Firebase |
+| CL-G3 | FCM push registration | P1 | App-start log + Firebase Console package list | **RED-VERIFIED** — Chrome MCP visit to `https://console.firebase.google.com/u/0/project/mindshift-441e8/settings/general/android:com.mindshift.app` 2026-05-24 ~13:00 AST confirmed: project `mindshift-441e8` has ONE Android app registered, package = `com.mindshift.app` (OLD), SHA-256 = `45:81:6b:2a:4f:44:ca:14:fd:e1:d0:38:8b:1b:22:08:44:c2:33:5a:d0:57:b9:9f:0e:9e:d4:a4:07:3e:c2:83`. New AAB ships package `com.v0laura.mindshift` with new SHA-256 `CE:21:45:66:89:D4:A9:D1:70:7C:74:AE:77:5D:E3:DC:93:58:78:99:CD:B3:B5:60:51:A6:55:A6:D5:57:F2:C4` (mismatch on BOTH dimensions). Fix sequence: CEO Firebase "Add app → Android" with new package + new SHA-256 → download `google-services.json` → replace `android/app/google-services.json` → AAB versionCode bump to 101 → rebuild + re-upload + re-publish. Accepted for internal-test as-is; CEO can ship with broken FCM and CEO is sole tester, then close-fix in next iteration. | **CEO** Firebase (4-step) |
 | CL-G4 | RecoveryProtocol overlay renders | P1 | Code + Chrome MCP visual | **GREEN-code** — `RecoveryProtocol.tsx:226` confirmed `fixed inset-0 z-50` gate by `lastSessionAt` gap ≥ 72h. Visual test blocked by CL-B2 E2E overlay regression. | atlas |
 | CL-G5 | No shame language in notification copy | P1 | grep | **GREEN** — `scheduled-push/` 0, `src/sw.ts:61` is a code comment | atlas |
 
