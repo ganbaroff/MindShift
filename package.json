@@ -22,6 +22,8 @@
     "cap:run:android": "npx cap run android --livereload --external",
     "screenshots": "tsx scripts/capture-screenshots.ts",
     "screenshots:prod": "SCREENSHOTS_BASE_URL=https://mind-shift-git-main-yusifg27-3093s-projects.vercel.app tsx scripts/capture-screenshots.ts",
+    "screenshots:tablet": "tsx scripts/capture-tablet-screenshots.ts",
+    "screenshots:tablet:prod": "SCREENSHOTS_BASE_URL=https://mind-shift-git-main-yusifg27-3093s-projects.vercel.app tsx scripts/capture-tablet-screenshots.ts",
     "translate": "node scripts/translate.mjs",
     "swarm": "node \"C:/Users/user/OneDrive/Documents/GitHub/ANUS/dist/cli.js\" swarm",
     "swarm:audit": "node \"C:/Users/user/OneDrive/Documents/GitHub/ANUS/dist/cli.js\" swarm \"Audit MindShift PWA at C:/Users/user/Downloads/mindshift for release readiness. Check: ADHD-safe design (no red, shame-free copy, energy adaptation), accessibility (WCAG AA focus rings, aria attributes), bundle size, TypeScript strictness, Supabase RLS, offline support, PWA manifest, Android Capacitor config. Report P0/P1/P2 issues with file:line references.\"",
