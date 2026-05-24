@@ -67,7 +67,9 @@ export function buildStoreState(overrides: Record<string, unknown> = {}) {
       uiTone: 'neutral',
       completedTotal: 0,
       psychotypeLastDerived: null,
-      seenHints: [],
+      // Prevents WelcomeWalkthrough from rendering on /today:
+      // it shows when firstFocusTutorialCompleted:true AND 'welcome_walkthrough' not in seenHints.
+      seenHints: ['welcome_walkthrough', 'first_focus_tutorial'],
       // Prevents FirstFocusTutorial overlay from blocking tests
       firstFocusTutorialCompleted: true,
       // i18n + theme fields added in recent sprints
