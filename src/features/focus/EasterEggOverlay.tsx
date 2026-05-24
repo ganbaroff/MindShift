@@ -23,6 +23,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
+import FocusTrap from 'focus-trap-react'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { Confetti } from '@/shared/ui/Confetti'
 import { nativeHapticImpact } from '@/shared/lib/native'
@@ -121,119 +122,123 @@ export function EasterEggOverlay({ visible, onDismiss }: EasterEggOverlayProps) 
   if (!visible) return null
 
   return (
-    <AnimatePresence>
-      {visible && (
-        <>
-          <Confetti active={showConfetti} onComplete={() => setShowConfetti(false)} />
+    <FocusTrap active={visible} focusTrapOptions={{ allowOutsideClick: true, escapeDeactivates: false }}>
+      <div>
+        <AnimatePresence>
+          {visible && (
+            <>
+              <Confetti active={showConfetti} onComplete={() => setShowConfetti(false)} />
 
-          {/* Backdrop */}
-          <motion.div
-            key="easter-backdrop"
-            initial={shouldAnimate ? { opacity: 0 } : {}}
-            animate={{ opacity: 1 }}
-            exit={shouldAnimate ? { opacity: 0 } : {}}
-            transition={transition()}
-            className="fixed inset-0 z-50 flex flex-col items-center justify-center px-6"
-            style={{ backdropFilter: 'blur(12px)', background: 'rgba(0,0,0,0.6)' }}
-            onClick={onDismiss}
-            role="dialog"
-            aria-modal="true"
-            aria-label="Easter egg overlay"
-          >
-            {/* Card */}
-            <motion.div
-              key="easter-card"
-              initial={shouldAnimate ? { scale: 0.85, opacity: 0 } : {}}
-              animate={shouldAnimate
-                ? { scale: [0.85, 1.05, 1], opacity: 1, x: [0, -8, 8, -8, 8, 0] }
-                : { opacity: 1 }}
-              exit={shouldAnimate ? { scale: 0.85, opacity: 0 } : {}}
-              transition={shouldAnimate ? { duration: 0.5 } : { duration: 0 }}
-              className="w-full max-w-[320px] rounded-3xl px-6 py-8 flex flex-col items-center gap-6 text-center"
-              style={{
-                background: 'var(--color-surface)',
-                border: '1px solid rgba(123,114,255,0.2)',
-                boxShadow: '0 24px 64px rgba(0,0,0,0.5)',
-              }}
-              onClick={e => e.stopPropagation()}
-            >
-              {/* Main text */}
-              <AnimatePresence mode="wait">
-                <motion.p
-                  key={mainText}
-                  initial={shouldAnimate ? { opacity: 0, y: 6 } : {}}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={shouldAnimate ? { opacity: 0, y: -6 } : {}}
-                  transition={transition()}
-                  className="text-xl font-bold leading-snug"
-                  style={{ color: 'var(--color-text-primary)' }}
+              {/* Backdrop */}
+              <motion.div
+                key="easter-backdrop"
+                initial={shouldAnimate ? { opacity: 0 } : {}}
+                animate={{ opacity: 1 }}
+                exit={shouldAnimate ? { opacity: 0 } : {}}
+                transition={transition()}
+                className="fixed inset-0 z-50 flex flex-col items-center justify-center px-6"
+                style={{ backdropFilter: 'blur(12px)', background: 'rgba(0,0,0,0.6)' }}
+                onClick={onDismiss}
+                role="dialog"
+                aria-modal="true"
+                aria-label="Easter egg overlay"
+              >
+                {/* Card */}
+                <motion.div
+                  key="easter-card"
+                  initial={shouldAnimate ? { scale: 0.85, opacity: 0 } : {}}
+                  animate={shouldAnimate
+                    ? { scale: [0.85, 1.05, 1], opacity: 1, x: [0, -8, 8, -8, 8, 0] }
+                    : { opacity: 1 }}
+                  exit={shouldAnimate ? { scale: 0.85, opacity: 0 } : {}}
+                  transition={shouldAnimate ? { duration: 0.5 } : { duration: 0 }}
+                  className="w-full max-w-[320px] rounded-3xl px-6 py-8 flex flex-col items-center gap-6 text-center"
+                  style={{
+                    background: 'var(--color-surface)',
+                    border: '1px solid rgba(123,114,255,0.2)',
+                    boxShadow: '0 24px 64px rgba(0,0,0,0.5)',
+                  }}
+                  onClick={e => e.stopPropagation()}
                 >
-                  {mainText}
-                </motion.p>
-              </AnimatePresence>
+                  {/* Main text */}
+                  <AnimatePresence mode="wait">
+                    <motion.p
+                      key={mainText}
+                      initial={shouldAnimate ? { opacity: 0, y: 6 } : {}}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={shouldAnimate ? { opacity: 0, y: -6 } : {}}
+                      transition={transition()}
+                      className="text-xl font-bold leading-snug"
+                      style={{ color: 'var(--color-text-primary)' }}
+                    >
+                      {mainText}
+                    </motion.p>
+                  </AnimatePresence>
 
-              {/* The big red button — intentional, product-owner approved */}
-              <AnimatePresence>
-                {showButton && !pressed && (
-                  <motion.button
-                    key="red-btn"
-                    initial={shouldAnimate ? { scale: 0, opacity: 0 } : {}}
-                    animate={shouldAnimate
-                      ? { scale: [0, 1.15, 0.95, 1], opacity: 1 }
-                      : { opacity: 1 }}
-                    exit={shouldAnimate ? { scale: 0, opacity: 0 } : {}}
-                    transition={shouldAnimate ? { duration: 0.4 } : { duration: 0 }}
-                    onClick={handleButtonPress}
-                    className="w-32 h-32 rounded-full font-bold text-lg text-white
-                               focus-visible:ring-4 focus-visible:ring-white focus-visible:outline-none
-                               active:scale-95 transition-transform"
-                    style={{
-                      /* Rule 1: no red. Deep purple keeps the "forbidden" joke without RSD trigger. */
-                      background: 'radial-gradient(circle at 35% 35%, #9B4DCA, #5B2D8E)',
-                      boxShadow: '0 8px 24px rgba(91,45,142,0.5), 0 2px 0 #3B1A6B, inset 0 1px 0 rgba(180,130,255,0.4)',
-                    }}
-                    aria-label="Do not press this button"
-                  >
-                    НЕ<br />НАЖИМАЙ
-                  </motion.button>
-                )}
+                  {/* The big red button — intentional, product-owner approved */}
+                  <AnimatePresence>
+                    {showButton && !pressed && (
+                      <motion.button
+                        key="red-btn"
+                        initial={shouldAnimate ? { scale: 0, opacity: 0 } : {}}
+                        animate={shouldAnimate
+                          ? { scale: [0, 1.15, 0.95, 1], opacity: 1 }
+                          : { opacity: 1 }}
+                        exit={shouldAnimate ? { scale: 0, opacity: 0 } : {}}
+                        transition={shouldAnimate ? { duration: 0.4 } : { duration: 0 }}
+                        onClick={handleButtonPress}
+                        className="w-32 h-32 rounded-full font-bold text-lg text-white
+                                   focus-visible:ring-4 focus-visible:ring-white focus-visible:outline-none
+                                   active:scale-95 transition-transform"
+                        style={{
+                          /* Rule 1: no red. Deep purple keeps the "forbidden" joke without RSD trigger. */
+                          background: 'radial-gradient(circle at 35% 35%, #9B4DCA, #5B2D8E)',
+                          boxShadow: '0 8px 24px rgba(91,45,142,0.5), 0 2px 0 #3B1A6B, inset 0 1px 0 rgba(180,130,255,0.4)',
+                        }}
+                        aria-label="Do not press this button"
+                      >
+                        НЕ<br />НАЖИМАЙ
+                      </motion.button>
+                    )}
 
-                {pressed && (
-                  <motion.div
-                    key="pressed-state"
-                    initial={shouldAnimate ? { scale: 0.8 } : {}}
-                    animate={{ scale: 1 }}
-                    transition={transition()}
-                    className="w-32 h-32 rounded-full flex items-center justify-center"
-                    style={{
-                      background: 'rgba(91,45,142,0.15)',
-                      border: '2px solid rgba(91,45,142,0.3)',
-                    }}
-                  >
-                    <span className="text-4xl">🙄</span>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                    {pressed && (
+                      <motion.div
+                        key="pressed-state"
+                        initial={shouldAnimate ? { scale: 0.8 } : {}}
+                        animate={{ scale: 1 }}
+                        transition={transition()}
+                        className="w-32 h-32 rounded-full flex items-center justify-center"
+                        style={{
+                          background: 'rgba(91,45,142,0.15)',
+                          border: '2px solid rgba(91,45,142,0.3)',
+                        }}
+                      >
+                        <span className="text-4xl">🙄</span>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
-              {/* Subtext */}
-              <AnimatePresence>
-                {showButton && !pressed && (
-                  <motion.p
-                    initial={shouldAnimate ? { opacity: 0 } : {}}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="text-xs"
-                    style={{ color: 'var(--color-text-muted)' }}
-                  >
-                    Я знаю, тебя это бесит 😏
-                  </motion.p>
-                )}
-              </AnimatePresence>
-            </motion.div>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
+                  {/* Subtext */}
+                  <AnimatePresence>
+                    {showButton && !pressed && (
+                      <motion.p
+                        initial={shouldAnimate ? { opacity: 0 } : {}}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="text-xs"
+                        style={{ color: 'var(--color-text-muted)' }}
+                      >
+                        Я знаю, тебя это бесит 😏
+                      </motion.p>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
+      </div>
+    </FocusTrap>
   )
 }
 

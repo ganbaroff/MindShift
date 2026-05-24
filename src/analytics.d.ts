@@ -2,6 +2,26 @@
 // These are declared here so tsc passes before `npm install` is run.
 // Real types are provided by @vercel/analytics and web-vitals once installed.
 
+// focus-trap-react — CJS module. verbatimModuleSyntax requires a value export.
+// Use `const` (not a type alias) so TypeScript treats FocusTrap as a value.
+declare module 'focus-trap-react' {
+  import type { ReactNode } from 'react'
+  interface FocusTrapProps {
+    active?: boolean
+    paused?: boolean
+    focusTrapOptions?: {
+      allowOutsideClick?: boolean
+      escapeDeactivates?: boolean
+      initialFocus?: string | (() => HTMLElement | null) | false
+      returnFocusOnDeactivate?: boolean
+      [key: string]: unknown
+    }
+    children: ReactNode
+  }
+  const FocusTrap: (props: FocusTrapProps) => JSX.Element
+  export default FocusTrap
+}
+
 declare module '@vercel/analytics' {
   export function inject(options?: { mode?: 'production' | 'development' }): void
   export function track(name: string, properties?: Record<string, string | number | boolean>): void
