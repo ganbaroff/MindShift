@@ -22,6 +22,7 @@ import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'motion/react'
 import { Send, X, Loader2 } from 'lucide-react'
+import FocusTrap from 'focus-trap-react'
 import { Mascot } from '@/shared/ui/Mascot'
 import { useMotion } from '@/shared/hooks/useMotion'
 import { useStore } from '@/store'
@@ -214,127 +215,131 @@ export function MochiChat({ open, onClose }: MochiChatProps) {
   if (!open) return null
 
   return (
-    <AnimatePresence>
-      {open && (
-        <>
-          {/* Backdrop */}
-          <motion.div
-            key="mochi-backdrop"
-            initial={shouldAnimate ? { opacity: 0 } : {}}
-            animate={{ opacity: 1 }}
-            exit={shouldAnimate ? { opacity: 0 } : {}}
-            transition={transition()}
-            className="fixed inset-0 z-50"
-            style={{ background: 'rgba(0,0,0,0.5)' }}
-            onClick={onClose}
-            aria-hidden="true"
-          />
-
-          {/* Chat sheet */}
-          <motion.div
-            key="mochi-chat"
-            initial={shouldAnimate ? { y: '100%' } : {}}
-            animate={{ y: 0 }}
-            exit={shouldAnimate ? { y: '100%' } : {}}
-            transition={shouldAnimate ? { type: 'spring', damping: 28, stiffness: 300 } : { duration: 0 }}
-            className="fixed bottom-0 left-0 right-0 z-50 flex justify-center"
-            role="dialog"
-            aria-label="Chat with Mochi"
-            aria-modal="true"
-          >
-            <div
-              className="w-full max-w-[480px] flex flex-col rounded-t-2xl overflow-hidden"
-              style={{
-                background: 'var(--color-surface-card)',
-                maxHeight: '70vh',
-                border: '1px solid rgba(123,114,255,0.15)',
-                borderBottom: 'none',
-                boxShadow: '0 -8px 32px rgba(0,0,0,0.4)',
-              }}
-            >
-              {/* Header */}
-              <div
-                className="flex items-center gap-3 px-4 py-3 shrink-0"
-                style={{ borderBottom: '1px solid rgba(123,114,255,0.1)' }}
-              >
-                <Mascot state="encouraging" size={32} label="Mochi" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
-                    Mochi
-                  </p>
-                  <p className="text-[10px]" style={{ color: 'var(--color-text-muted)' }}>
-                    {t('mochi.companion')}
-                  </p>
-                </div>
-                <button
-                  onClick={onClose}
-                  className="p-1.5 rounded-lg focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
-                  style={{ color: 'var(--color-text-muted)' }}
-                  aria-label={t('mochi.closeChat')}
-                >
-                  <X size={18} />
-                </button>
-              </div>
-
-              {/* Messages area */}
-              <MochiMessageList
-                messages={messages}
-                loading={loading}
-                isGuest={isGuest}
-                onClose={onClose}
+    <FocusTrap active={open} focusTrapOptions={{ allowOutsideClick: true, escapeDeactivates: false }}>
+      <div>
+        <AnimatePresence>
+          {open && (
+            <>
+              {/* Backdrop */}
+              <motion.div
+                key="mochi-backdrop"
+                initial={shouldAnimate ? { opacity: 0 } : {}}
+                animate={{ opacity: 1 }}
+                exit={shouldAnimate ? { opacity: 0 } : {}}
+                transition={transition()}
+                className="fixed inset-0 z-50"
+                style={{ background: 'rgba(0,0,0,0.5)' }}
+                onClick={onClose}
+                aria-hidden="true"
               />
 
-              {/* Rate limit indicator */}
-              {!isGuest && messageCount > 0 && (
-                <div className="px-4 py-1 text-center">
-                  <p className="text-[10px]" style={{ color: 'var(--color-text-muted)' }}>
-                    {atLimit
-                      ? "That's the limit for now — Mochi needs a rest too"
-                      : `${messageCount}/${MAX_MESSAGES} messages`}
-                  </p>
-                </div>
-              )}
-
-              {/* Input area */}
-              {!isGuest && (
+              {/* Chat sheet */}
+              <motion.div
+                key="mochi-chat"
+                initial={shouldAnimate ? { y: '100%' } : {}}
+                animate={{ y: 0 }}
+                exit={shouldAnimate ? { y: '100%' } : {}}
+                transition={shouldAnimate ? { type: 'spring', damping: 28, stiffness: 300 } : { duration: 0 }}
+                className="fixed bottom-0 left-0 right-0 z-50 flex justify-center"
+                role="dialog"
+                aria-label="Chat with Mochi"
+                aria-modal="true"
+              >
                 <div
-                  className="flex items-center gap-2 px-3 py-3 shrink-0"
+                  className="w-full max-w-[480px] flex flex-col rounded-t-2xl overflow-hidden"
                   style={{
-                    borderTop: '1px solid rgba(123,114,255,0.1)',
-                    paddingBottom: 'calc(12px + env(safe-area-inset-bottom))',
+                    background: 'var(--color-surface-card)',
+                    maxHeight: '70vh',
+                    border: '1px solid rgba(123,114,255,0.15)',
+                    borderBottom: 'none',
+                    boxShadow: '0 -8px 32px rgba(0,0,0,0.4)',
                   }}
                 >
-                  <input
-                    ref={inputRef}
-                    type="text"
-                    value={input}
-                    onChange={e => setInput(e.target.value.slice(0, MAX_INPUT_LENGTH))}
-                    onKeyDown={handleKeyDown}
-                    placeholder={atLimit ? t('mochi.inputLimitReached') : t('mochi.inputPlaceholder')}
-                    disabled={atLimit || loading}
-                    className="flex-1 px-3 py-2 rounded-xl text-sm outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
-                    style={{
-                      background: 'var(--color-surface-raised)',
-                      color: 'var(--color-text-primary)',
-                      border: 'none',
-                    }}
-                    aria-label={t('mochi.inputAriaLabel')}
-                  />
-                  <button
-                    onClick={handleSend}
-                    disabled={!input.trim() || atLimit || loading}
-                    className="p-2 rounded-xl shrink-0 focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] disabled:opacity-30"
-                    style={{ background: 'var(--color-teal)', color: 'var(--color-bg)' }}
-                    aria-label={t('mochi.sendAriaLabel')}
+                  {/* Header */}
+                  <div
+                    className="flex items-center gap-3 px-4 py-3 shrink-0"
+                    style={{ borderBottom: '1px solid rgba(123,114,255,0.1)' }}
                   >
-                    {loading ? <Loader2 size={18} className="motion-reduce:animate-none animate-spin" /> : <Send size={18} />}
-                  </button>
+                    <Mascot state="encouraging" size={32} label="Mochi" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
+                        Mochi
+                      </p>
+                      <p className="text-[10px]" style={{ color: 'var(--color-text-muted)' }}>
+                        {t('mochi.companion')}
+                      </p>
+                    </div>
+                    <button
+                      onClick={onClose}
+                      className="p-1.5 rounded-lg focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+                      style={{ color: 'var(--color-text-muted)' }}
+                      aria-label={t('mochi.closeChat')}
+                    >
+                      <X size={18} />
+                    </button>
+                  </div>
+
+                  {/* Messages area */}
+                  <MochiMessageList
+                    messages={messages}
+                    loading={loading}
+                    isGuest={isGuest}
+                    onClose={onClose}
+                  />
+
+                  {/* Rate limit indicator */}
+                  {!isGuest && messageCount > 0 && (
+                    <div className="px-4 py-1 text-center">
+                      <p className="text-[10px]" style={{ color: 'var(--color-text-muted)' }}>
+                        {atLimit
+                          ? "That's the limit for now — Mochi needs a rest too"
+                          : `${messageCount}/${MAX_MESSAGES} messages`}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Input area */}
+                  {!isGuest && (
+                    <div
+                      className="flex items-center gap-2 px-3 py-3 shrink-0"
+                      style={{
+                        borderTop: '1px solid rgba(123,114,255,0.1)',
+                        paddingBottom: 'calc(12px + env(safe-area-inset-bottom))',
+                      }}
+                    >
+                      <input
+                        ref={inputRef}
+                        type="text"
+                        value={input}
+                        onChange={e => setInput(e.target.value.slice(0, MAX_INPUT_LENGTH))}
+                        onKeyDown={handleKeyDown}
+                        placeholder={atLimit ? t('mochi.inputLimitReached') : t('mochi.inputPlaceholder')}
+                        disabled={atLimit || loading}
+                        className="flex-1 px-3 py-2 rounded-xl text-sm outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+                        style={{
+                          background: 'var(--color-surface-raised)',
+                          color: 'var(--color-text-primary)',
+                          border: 'none',
+                        }}
+                        aria-label={t('mochi.inputAriaLabel')}
+                      />
+                      <button
+                        onClick={handleSend}
+                        disabled={!input.trim() || atLimit || loading}
+                        className="p-2 rounded-xl shrink-0 focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] disabled:opacity-30"
+                        style={{ background: 'var(--color-teal)', color: 'var(--color-bg)' }}
+                        aria-label={t('mochi.sendAriaLabel')}
+                      >
+                        {loading ? <Loader2 size={18} className="motion-reduce:animate-none animate-spin" /> : <Send size={18} />}
+                      </button>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
+      </div>
+    </FocusTrap>
   )
 }
