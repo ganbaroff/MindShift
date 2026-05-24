@@ -65,7 +65,7 @@ export function BottomNav() {
                 />
               )}
               <Icon size={20} strokeWidth={active ? 2.5 : 1.8} />
-              <span className="text-[11px] font-medium leading-none">{label}</span>
+              <span className="text-[11px] font-medium leading-none truncate max-w-full w-full text-center">{label}</span>
             </button>
           )
         })}
