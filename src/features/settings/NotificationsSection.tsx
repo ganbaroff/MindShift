@@ -26,7 +26,7 @@ export function NotificationsSection() {
   // C4 — iOS PWA: Web Push requires standalone mode (Add to Home Screen).
   // Safari tab cannot receive push notifications even with permission granted.
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !('MSStream' in window)
-  const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+  const isStandalone = window.matchMedia?.('(display-mode: standalone)')?.matches ?? false
     || (window.navigator as unknown as { standalone?: boolean }).standalone === true
   const needsIOSInstall = isIOS && !isStandalone
 

@@ -45,6 +45,7 @@ export function useAuthInit() {
               )
             }
           })
+          .catch(() => { /* API unreachable — keep current tier, sync on next login */ })
 
         // Guard: don't reset lastSessionAt when the recovery protocol should show
         const s = useStore.getState()

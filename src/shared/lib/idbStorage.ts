@@ -98,7 +98,10 @@ if (typeof window !== 'undefined') {
         // Dynamically import store to avoid circular dependency at module init
         import('@/store').then(({ useStore }) => {
           const parsed = JSON.parse(e.newValue!) as { state?: Record<string, unknown> }
-          if (parsed?.state) useStore.setState(parsed.state)
+          if (parsed?.state) {
+            try { useStore.setState(parsed.state) }
+            catch { /* stale schema in cross-tab sync — skip silently */ }
+          }
         }).catch(() => { /* non-critical — tab will sync on next interaction */ })
       } catch { /* non-critical */ }
     }

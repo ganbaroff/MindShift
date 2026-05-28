@@ -32,8 +32,10 @@ function lazyWithReload<T extends { default: React.ComponentType<unknown> }>(
         sessionStorage.setItem(key, '1')
         window.location.reload()
       }
-      // Fallback: return empty component to avoid infinite loop
-      return { default: (() => null) as unknown as T['default'] } as T
+      // Fallback: return error component so route is not silently blank
+      return { default: (() => {
+        throw new Error('Failed to load page after retry. Please refresh.')
+      }) as unknown as T['default'] } as T
     })
   )
 }

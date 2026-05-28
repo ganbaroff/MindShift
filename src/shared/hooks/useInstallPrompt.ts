@@ -28,7 +28,7 @@ const SESSION_KEY   = 'mindshift_install_session_shown'
 
 function isRunningStandalone(): boolean {
   return (
-    window.matchMedia('(display-mode: standalone)').matches ||
+    (window.matchMedia?.('(display-mode: standalone)')?.matches ?? false) ||
     ('standalone' in navigator && (navigator as { standalone?: boolean }).standalone === true)
   )
 }
