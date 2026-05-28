@@ -72,6 +72,7 @@ if (initialLng !== 'en') {
 // store/index.ts imports i18n indirectly. Dynamic import + setTimeout(0) breaks the cycle.
 setTimeout(() => {
   import('@/store').then(({ useStore }) => {
+    if (!useStore?.getState) return // Store not yet initialized (test env or cold-start race)
     // Sync once immediately in case IDB has already hydrated
     const resolved = resolveLocale(useStore.getState().userLocale)
     void loadLocale(resolved).then(() => {
