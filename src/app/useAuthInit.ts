@@ -36,16 +36,18 @@ export function useAuthInit() {
           .select('subscription_tier, trial_ends_at')
           .eq('id', session.user.id)
           .single()
-          .then(({ data }) => {
-            const row = data as { subscription_tier?: string; trial_ends_at?: string | null } | null
-            if (row?.subscription_tier) {
-              useStore.getState().setSubscription(
-                row.subscription_tier as 'free' | 'pro_trial' | 'pro',
-                row.trial_ends_at ?? null
-              )
-            }
-          })
-          .catch(() => { /* API unreachable — keep current tier, sync on next login */ })
+          .then(
+            ({ data }) => {
+              const row = data as { subscription_tier?: string; trial_ends_at?: string | null } | null
+              if (row?.subscription_tier) {
+                useStore.getState().setSubscription(
+                  row.subscription_tier as 'free' | 'pro_trial' | 'pro',
+                  row.trial_ends_at ?? null
+                )
+              }
+            },
+            () => { /* API unreachable — keep current tier, sync on next login */ }
+          )
 
         // Guard: don't reset lastSessionAt when the recovery protocol should show
         const s = useStore.getState()
