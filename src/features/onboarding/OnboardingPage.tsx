@@ -338,7 +338,7 @@ export default function OnboardingPage() {
       )}
 
       {/* Step indicator dots */}
-      <div className="flex items-center justify-center gap-2 py-4">
+      <div className="flex items-center justify-center gap-2 py-4" aria-hidden="true">
         {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
           <motion.div
             key={i}

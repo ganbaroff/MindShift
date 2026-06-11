@@ -146,7 +146,7 @@ export function BreathworkRitual({ onComplete, onSkip }: BreathworkRitualProps) 
       </div>
 
       {/* Breathing orb */}
-      <div className="relative flex items-center justify-center mb-8">
+      <div className="relative flex items-center justify-center mb-8" aria-hidden="true">
         {/* Outer glow ring */}
         <motion.div
           className="absolute rounded-full"

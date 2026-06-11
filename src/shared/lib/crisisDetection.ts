@@ -34,7 +34,57 @@ const CRISIS_KEYWORDS_RU = [
   'лучше бы умерла',
 ]
 
-const ALL_KEYWORDS = [...CRISIS_KEYWORDS_EN, ...CRISIS_KEYWORDS_RU]
+const CRISIS_KEYWORDS_TR = [
+  'kendini oldurmek',
+  'intihar',
+  'olmek istiyorum',
+  'hayatima son vermek',
+  'kendime zarar vermek',
+  'yasamak icin bir sebep yok',
+  'olsem daha iyi',
+]
+
+const CRISIS_KEYWORDS_DE = [
+  'mich umbringen',
+  'selbstmord',
+  'suizid',
+  'ich will sterben',
+  'mein leben beenden',
+  'selbstverletzung',
+  'mir wehtun',
+  'kein grund zu leben',
+  'lieber tot',
+]
+
+const CRISIS_KEYWORDS_ES = [
+  'matarme',
+  'suicidio',
+  'quiero morir',
+  'terminar con mi vida',
+  'autolesionarse',
+  'hacerme dano',
+  'no vale la pena vivir',
+  'mejor estar muerto',
+]
+
+const CRISIS_KEYWORDS_AZ = [
+  'ozumu oldurmek',
+  'intihar',
+  'olmek isteyirem',
+  'heyatima son qoymaq',
+  'ozume zerer vermek',
+  'yasamagın menası yoxdur',
+  'olsem daha yaxsıdır',
+]
+
+const ALL_KEYWORDS = [
+  ...CRISIS_KEYWORDS_EN,
+  ...CRISIS_KEYWORDS_RU,
+  ...CRISIS_KEYWORDS_TR,
+  ...CRISIS_KEYWORDS_DE,
+  ...CRISIS_KEYWORDS_ES,
+  ...CRISIS_KEYWORDS_AZ,
+]
 
 /**
  * Normalize text before crisis keyword matching.

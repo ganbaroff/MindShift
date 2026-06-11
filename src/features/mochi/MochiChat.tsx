@@ -89,14 +89,14 @@ export function MochiChat({ open, onClose }: MochiChatProps) {
   useEffect(() => {
     if (open && messages.length === 0 && !isGuest) {
       const FIRST_TIME_GREETS = [
-        "Hey! I'm Mochi — tap me anytime you need a nudge, want to talk through a task, or just need someone in your corner. What's on your mind?",
-        "Hey, glad you're here. I'm your ADHD-aware companion. No judgment, no pressure. What's going on today?",
-        "Hi! I'm Mochi. I don't track streaks or guilt-trip — I just help you think out loud. What's up?",
+        t('mochi.chat.firstTimeGreet1'),
+        t('mochi.chat.firstTimeGreet2'),
+        t('mochi.chat.firstTimeGreet3'),
       ]
       const RETURN_GREETS = [
-        "Hey, you're back. Good to see you. What are you working with today?",
-        "Welcome back. Pick up where we left off, or start fresh — either's fine. What's on your mind?",
-        "Hey! I was just thinking about you. What's going on today?",
+        t('mochi.chat.returnGreet1'),
+        t('mochi.chat.returnGreet2'),
+        t('mochi.chat.returnGreet3'),
       ]
       const greets = mochiMemory ? RETURN_GREETS : FIRST_TIME_GREETS
       const welcomeText = greets[Math.floor(Math.random() * greets.length)]
@@ -196,7 +196,7 @@ export function MochiChat({ open, onClose }: MochiChatProps) {
       const fallbackMsg: ChatMessage = {
         id: generateId(),
         role: 'mochi',
-        text: "I couldn't quite get that thought together. Try again in a sec?",
+        text: t('mochi.chat.fallback'),
         mascotState: 'encouraging',
       }
       setMessages(prev => [...prev, fallbackMsg])

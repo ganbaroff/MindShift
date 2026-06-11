@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { persist, createJSONStorage, subscribeWithSelector } from 'zustand/middleware'
+import { devtools, persist, createJSONStorage, subscribeWithSelector } from 'zustand/middleware'
 import type { Task } from '@/types'
 import { idbStorage } from '@/shared/lib/idbStorage'
 import { createUserSlice } from './slices/userSlice'
@@ -15,9 +15,10 @@ export type { AppStore } from './types'
 // -- Store ---------------------------------------------------------------------
 
 export const useStore = create<import('./types').AppStore>()(
-  subscribeWithSelector(
-    persist(
-      (...a) => ({
+  devtools(
+    subscribeWithSelector(
+      persist(
+        (...a) => ({
         _hasHydrated: false,
         ...createUserSlice(...a),
         ...createTaskSlice(...a),
@@ -179,7 +180,9 @@ export const useStore = create<import('./types').AppStore>()(
         }),
       }
     )
-  )
+  ),
+  { name: 'mindshift-store' }
+)
 )
 
 // Break circular dep: store → taskSlice → notify → haptic → store

@@ -47,11 +47,11 @@ export interface InterruptBookmark {
 
 // -- Constants -----------------------------------------------------------------
 
-export const PHASE_LABELS: Partial<Record<SessionPhase, string>> = {
-  struggle: 'Getting into it... 💪',
-  release:  'Finding your flow... 🌊',
-  flow:     'Deep flow 🌊',
-  recovery: 'Rest time. You did it! 🌟',
+export const PHASE_LABELS: Record<string, string> = {
+  get struggle() { return i18n.t('focus.phaseLabel.struggle') },
+  get release() { return i18n.t('focus.phaseLabel.release') },
+  get flow() { return i18n.t('focus.phaseLabel.flow') },
+  get recovery() { return i18n.t('focus.phaseLabel.recovery') },
 }
 
 const BOOKMARK_KEY = 'ms_interrupt_bookmark'

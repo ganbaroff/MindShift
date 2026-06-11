@@ -194,7 +194,13 @@
     "tipTimeSometimes": "Başlamazdan əvvəl saatı yoxlayın - sonra onu unudun.",
     "tipEmotionHigh": "İlk 15 dəqiqəni kəsintilərdən çəkin. Kiçik başlayın.",
     "tipEmotionModerate": "Diqqətiniz dağılırsa, fasilə verin və geri qayıdın. Bu da sayılır.",
-    "intentionBothRequired": "Niyyətinizi saxlamaq üçün hər iki sahəni doldurun."
+    "intentionBothRequired": "Niyyətinizi saxlamaq üçün hər iki sahəni doldurun.",
+    "phaseLabel": {
+      "struggle": "Başlayırıq... 💪",
+      "release": "Axını tapırıq... 🌊",
+      "flow": "Dərin axın 🌊",
+      "recovery": "İstirahət vaxtı. Bacardın! 🌟"
+    }
   },
   "settings": {
     "title": "Parametrlər",
@@ -820,7 +826,16 @@
         ]
       }
     },
-    "fallback": "Hələ burada səninlə."
+    "fallback": "Hələ burada səninlə.",
+    "chat": {
+      "firstTimeGreet1": "Hey! Mən Mochi-yəm — dəstəyə ehtiyacın olanda, tapşırığı müzakirə etmək istəyəndə ya da sadəcə yanında birini istəyəndə mənə toxun. Ağlında nə var?",
+      "firstTimeGreet2": "Hey, xoş gəldin. Mən sənin ADHD-yə uyğun yoldaşınam. Mühakimə yoxdur, təzyiq yoxdur. Bu gün nə baş verir?",
+      "firstTimeGreet3": "Salam! Mən Mochi-yəm. Mən seriyaları izləmirəm və günahkarlıq hissi yaratmıram — sadəcə səsli düşünməyə kömək edirəm. Nə var nə yox?",
+      "returnGreet1": "Hey, qayıtdın. Səni görmək xoşdur. Bu gün nə üzərində işləyirsən?",
+      "returnGreet2": "Yenidən xoş gəldin. Qaldığımız yerdən davam et və ya yenidən başla — hər ikisi olar. Ağlında nə var?",
+      "returnGreet3": "Hey! Mən də elə səni düşünürdüm. Bu gün necə keçir?",
+      "fallback": "Bu fikri tam toplaya bilmədim. Bir saniyə sonra yenidən cəhd edə bilərsən?"
+    }
   },
   "transition": {
     "next": "Sonrakı: {{title}}",

@@ -194,7 +194,13 @@
     "tipTimeSometimes": "Schauen Sie auf die Uhr, bevor Sie beginnen – und vergessen Sie es dann.",
     "tipEmotionHigh": "Blockieren Sie Ihre ersten 15 Minuten vor Unterbrechungen. Fangen Sie klein an.",
     "tipEmotionModerate": "Wenn Sie abgelenkt sind, halten Sie inne und kehren Sie zurück. Das zählt auch.",
-    "intentionBothRequired": "Füll beide Felder aus, um deine Absicht zu speichern."
+    "intentionBothRequired": "Füll beide Felder aus, um deine Absicht zu speichern.",
+    "phaseLabel": {
+      "struggle": "Reinkommen... 💪",
+      "release": "Fokus finden... 🌊",
+      "flow": "Tiefer Fokus 🌊",
+      "recovery": "Erholungszeit. Du hast es geschafft! 🌟"
+    }
   },
   "settings": {
     "title": "Einstellungen",
@@ -820,7 +826,16 @@
         ]
       }
     },
-    "fallback": "Immer noch hier bei dir."
+    "fallback": "Immer noch hier bei dir.",
+    "chat": {
+      "firstTimeGreet1": "Hey! Ich bin Mochi – tippe mich an, wenn du einen Anstoß brauchst, eine Aufgabe durchsprechen willst oder einfach jemanden an deiner Seite brauchst. Was geht dir durch den Kopf?",
+      "firstTimeGreet2": "Hey, schön, dass du da bist. Ich bin dein ADHS-freundlicher Begleiter. Kein Urteil, kein Druck. Was steht heute an?",
+      "firstTimeGreet3": "Hi! Ich bin Mochi. Ich tracke keine Streaks und mache keine Schuldgefühle – ich helfe dir nur, laut zu denken. Was gibt's Neues?",
+      "returnGreet1": "Hey, du bist zurück. Schön, dich zu sehen. Woran arbeitest du heute?",
+      "returnGreet2": "Willkommen zurück. Mach da weiter, wo wir aufgehört haben, oder fang neu an – beides ist okay. Was liegt an?",
+      "returnGreet3": "Hey! Ich habe gerade an dich gedacht. Wie läuft's heute?",
+      "fallback": "Ich konnte diesen Gedanken nicht ganz fassen. Versuchst du es gleich noch einmal?"
+    }
   },
   "transition": {
     "next": "Weiter: {{title}}",

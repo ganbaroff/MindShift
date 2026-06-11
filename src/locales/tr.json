@@ -194,7 +194,13 @@
     "tipTimeSometimes": "Başlamadan önce saati kontrol edin, sonra unutun.",
     "tipEmotionHigh": "İlk 15 dakikanızı kesintilerden uzak tutun. Küçük başlayın.",
     "tipEmotionModerate": "Dikkatiniz dağılırsa duraklayın ve geri dönün. Bu da sayılır.",
-    "intentionBothRequired": "Niyetini kaydetmek için her iki alanı da doldurun."
+    "intentionBothRequired": "Niyetini kaydetmek için her iki alanı da doldurun.",
+    "phaseLabel": {
+      "struggle": "Başlıyoruz... 💪",
+      "release": "Akışı buluyoruz... 🌊",
+      "flow": "Derin akış 🌊",
+      "recovery": "Dinlenme zamanı. Başardın! 🌟"
+    }
   },
   "settings": {
     "title": "Ayarlar",
@@ -819,7 +825,16 @@
         ]
       }
     },
-    "fallback": "Hala burada seninle."
+    "fallback": "Hala burada seninle.",
+    "chat": {
+      "firstTimeGreet1": "Hey! Ben Mochi — ne zaman bir dürtmeye ihtiyacın olursa, bir görev üzerine konuşmak istersen ya da sadece yanında birini istersen bana dokun. Aklında ne var?",
+      "firstTimeGreet2": "Hey, geldiğine sevindim. Ben senin DEHB dostu arkadaşınım. Yargılama yok, baskı yok. Bugün neler oluyor?",
+      "firstTimeGreet3": "Selam! Ben Mochi. Serileri takip etmem ya da suçluluk hissettirmem — sadece sesli düşünmene yardımcı olurum. Ne var ne yok?",
+      "returnGreet1": "Hey, döndün. Seni görmek güzel. Bugün ne üzerinde çalışıyorsun?",
+      "returnGreet2": "Tekrar hoş geldin. Kaldığımız yerden devam et ya da temiz bir sayfa aç — ikisi de olur. Aklında ne var?",
+      "returnGreet3": "Hey! Ben de tam seni düşünüyordum. Bugün nasıl gidiyor?",
+      "fallback": "Bu düşünceyi tam toparlayamadım. Bir saniye sonra tekrar dener misin?"
+    }
   },
   "transition": {
     "next": "Sonraki: {{title}}",

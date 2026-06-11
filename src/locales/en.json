@@ -194,7 +194,13 @@
     "tipTimeOften": "Time slips fast for you — one visible timer is enough.",
     "tipTimeSometimes": "Check the clock before you start — then forget about it.",
     "tipEmotionHigh": "Block your first 15 min from interruptions. Start small.",
-    "tipEmotionModerate": "If distracted, pause and return. That counts too."
+    "tipEmotionModerate": "If distracted, pause and return. That counts too.",
+    "phaseLabel": {
+      "struggle": "Getting into it... 💪",
+      "release": "Finding your flow... 🌊",
+      "flow": "Deep flow 🌊",
+      "recovery": "Rest time. You did it! 🌟"
+    }
   },
   "settings": {
     "title": "Settings",
@@ -820,7 +826,16 @@
         ]
       }
     },
-    "fallback": "Still here with you."
+    "fallback": "Still here with you.",
+    "chat": {
+      "firstTimeGreet1": "Hey! I'm Mochi — tap me anytime you need a nudge, want to talk through a task, or just need someone in your corner. What's on your mind?",
+      "firstTimeGreet2": "Hey, glad you're here. I'm your ADHD-aware companion. No judgment, no pressure. What's going on today?",
+      "firstTimeGreet3": "Hi! I'm Mochi. I don't track streaks or guilt-trip — I just help you think out loud. What's up?",
+      "returnGreet1": "Hey, you're back. Good to see you. What are you working with today?",
+      "returnGreet2": "Welcome back. Pick up where we left off, or start fresh — either's fine. What's on your mind?",
+      "returnGreet3": "Hey! I was just thinking about you. What's going on today?",
+      "fallback": "I couldn't quite get that thought together. Try again in a sec?"
+    }
   },
   "transition": {
     "next": "Next: {{title}}",

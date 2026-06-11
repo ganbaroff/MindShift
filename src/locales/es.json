@@ -194,7 +194,13 @@
     "tipTimeSometimes": "Consulta el reloj antes de empezar y luego olvídate.",
     "tipEmotionHigh": "Bloquea tus primeros 15 minutos de interrupciones. Empiece poco a poco.",
     "tipEmotionModerate": "Si se distrae, haga una pausa y regrese. Eso también cuenta.",
-    "intentionBothRequired": "Completa ambos campos para guardar tu intención."
+    "intentionBothRequired": "Completa ambos campos para guardar tu intención.",
+    "phaseLabel": {
+      "struggle": "Empezando... 💪",
+      "release": "Buscando tu flujo... 🌊",
+      "flow": "Flujo profundo 🌊",
+      "recovery": "Tiempo de descanso. ¡Lo lograste! 🌟"
+    }
   },
   "settings": {
     "title": "Ajustes",
@@ -820,7 +826,16 @@
         ]
       }
     },
-    "fallback": "Todavía aquí contigo."
+    "fallback": "Todavía aquí contigo.",
+    "chat": {
+      "firstTimeGreet1": "¡Hola! Soy Mochi. Tócame cuando necesites un empujón, quieras hablar de una tarea o solo necesites a alguien de tu lado. ¿Qué tienes en mente?",
+      "firstTimeGreet2": "Hola, me alegro de que estés aquí. Soy tu compañero adaptado al TDAH. Sin juicios ni presiones. ¿Qué pasa hoy?",
+      "firstTimeGreet3": "¡Hola! Soy Mochi. No controlo rachas ni hago sentir culpable — solo te ayudo a pensar en voz alta. ¿Qué tal?",
+      "returnGreet1": "Hola, volviste. Qué bueno verte. ¿En qué estás trabajando hoy?",
+      "returnGreet2": "Te doy la bienvenida de nuevo. Sigue donde lo dejamos o empieza de cero — ambas están bien. ¿Qué tienes en mente?",
+      "returnGreet3": "¡Hola! Justo estaba pensando en ti. ¿Qué tal va el día?",
+      "fallback": "No he podido ordenar ese pensamiento. ¿Lo intentas de nuevo en un segundo?"
+    }
   },
   "transition": {
     "next": "Siguiente: {{title}}",

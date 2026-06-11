@@ -46,7 +46,12 @@
 
 // Rate limit: 10 calls/day per user (free), unlimited (pro) — DB-backed
 
-// AI: Google Gemini 2.5 Flash
+// AI routing — THREE paths in priority order:
+//   1. Cerebras fast path  — callCerebras() from _shared/llm.ts (qwen-3-235b, ~2000 tok/s, 3s timeout)
+//   2. Direct Gemini call  — fetch() to GEMINI_URL with GEMINI_API_KEY (8s timeout)
+//   3. FALLBACK_MESSAGES   — 3 hardcoded ADHD-safe messages (no AI key configured or all paths failed)
+// WARNING: If GEMINI_API_KEY is not set, path 2 silently fails and path 3 is used.
+//          Operators MUST monitor for '[mochi-respond] ALL AI paths failed' in edge function logs.
 
 
 
@@ -177,22 +182,26 @@ Deno.serve(async (req: Request) => {
 
 
     // -- Rate limit (DB-backed — 10/day free, unlimited pro) -----------------
+    let isPro = false
+    try {
+      const { data: userRow, error: dbError } = await supabase
+        .from('users')
+        .select('subscription_tier')
+        .eq('id', user.id)
+        .single()
 
-    const { data: userRow } = await supabase
-
-      .from('users')
-
-      .select('subscription_tier')
-
-      .eq('id', user.id)
-
-      .single()
-
-
-
-    const isPro = userRow?.subscription_tier === 'pro' ||
-
-      userRow?.subscription_tier === 'pro_trial'
+      if (dbError) {
+        console.warn('[mochi-respond] DB subscription_tier query failed, checking JWT claims:', dbError.message)
+        const jwtTier = user.app_metadata?.subscription_tier || user.user_metadata?.subscription_tier
+        isPro = jwtTier === 'pro' || jwtTier === 'pro_trial'
+      } else {
+        isPro = userRow?.subscription_tier === 'pro' || userRow?.subscription_tier === 'pro_trial'
+      }
+    } catch (e) {
+      console.warn('[mochi-respond] Unexpected database error fetching subscription_tier, checking JWT claims:', e)
+      const jwtTier = user.app_metadata?.subscription_tier || user.user_metadata?.subscription_tier
+      isPro = jwtTier === 'pro' || jwtTier === 'pro_trial'
+    }
 
 
 
@@ -861,6 +870,9 @@ STATE: <focused|celebrating|resting|encouraging>`
 
 
     // Fallback — pick a random generic ADHD-safe message
+    // ALERT: This path is reached when ALL AI providers failed (missing API keys or network errors).
+    // Check Supabase Edge Function logs for the root cause above.
+    console.error('[mochi-respond] ALL AI paths failed — returning hardcoded fallback. Check GEMINI_API_KEY and CEREBRAS_API_KEY env vars.')
 
     const fallback = FALLBACK_MESSAGES[Math.floor(Math.random() * FALLBACK_MESSAGES.length)]
 
