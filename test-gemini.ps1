@@ -1,4 +1,4 @@
-$apiKey = 'AIzaSyA-2eTA9jCsWalZ_DVBeA5NagV-gEQOJ_Q'
+$apiKey = $env:GEMINI_API_KEY
 $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=$apiKey"
 $body = @{
     contents = @(
