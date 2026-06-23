@@ -12,7 +12,7 @@ Welcome, incoming agent. This document serves as the absolute source of truth fo
 ### The Real Tech Stack:
 * **Frontend:** React 19 + TypeScript + Vite (`src/main.tsx`, `vite.config.ts`)
 * **State Management:** Zustand v5 + idbStorage (`src/store/index.ts`)
-* **Routing:** React Router v6 (`src/app/App.tsx`)
+* **Routing:** React Router v7 (`src/app/App.tsx`)
 * **Styling:** Tailwind CSS v4 + Vanilla CSS custom variables (`src/index.css`)
 * **Backend & Auth:** Supabase Client (`src/shared/lib/supabase.ts`)
 * **Edge Functions:** Deno runtime in `supabase/functions/`

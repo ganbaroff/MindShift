@@ -482,9 +482,9 @@ WHAT'S NEXT:
 
 | Layer | Tech | Key file |
 |-------|------|---------|
-| Frontend | React 18 + TypeScript + Vite | `vite.config.ts` |
+| Frontend | React 19 + TypeScript + Vite | `vite.config.ts` |
 | State | Zustand v5 + idbStorage | `src/store/index.ts` |
-| Routing | React Router v6 | `src/app/App.tsx` |
+| Routing | React Router v7 | `src/app/App.tsx` |
 | Animation | motion/react (NOT framer-motion) | — |
 | Backend | Supabase (project: `awfoqycoltvhamtrsvxk`) | `src/shared/lib/supabase.ts` |
 | Edge Functions | Deno + Gemini 2.5 Flash (primary) / NVIDIA NIM (available) | `supabase/functions/` |
