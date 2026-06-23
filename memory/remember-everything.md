@@ -47,7 +47,7 @@ I am acting as **CTO of MindShift** within Yusif's VOLAURA ecosystem.
 
 **ADHD-aware productivity PWA** — the flagship product of the VOLAURA ecosystem.
 
-**Stack:** React 18 + TypeScript + Vite + Zustand v5 + Supabase + Tailwind CSS
+**Stack:** React 19 + TypeScript + Vite + Zustand v5 + Supabase + Tailwind CSS
 **Key design laws:**
 - NEVER RED (RSD trigger). Palette: teal `#4ECDC4` / indigo `#7B72FF` / gold `#F59E0B`
 - Energy adaptation (simplify at low energy)

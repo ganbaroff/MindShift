@@ -20,7 +20,7 @@ MindShift helps people with ADHD stay focused without pressure. No streaks that 
 
 | Layer | Tech |
 |-------|------|
-| Frontend | React 18 + TypeScript + Vite |
+| Frontend | React 19 + TypeScript + Vite |
 | Styling | Tailwind CSS + CSS custom properties |
 | State | Zustand v5 + IndexedDB persistence |
 | Backend | Supabase (Auth + Postgres + Realtime + Edge Functions) |

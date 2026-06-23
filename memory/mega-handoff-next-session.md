@@ -197,7 +197,7 @@ After reading these, update C:\Users\user\Downloads\mindshift\memory\blind-spots
 ## TECH STACK QUICK REFERENCE
 
 ### MindShift
-React 18 + TypeScript + Vite + Zustand v5 + idbStorage + Supabase + Capacitor
+React 19 + TypeScript + Vite + Zustand v5 + idbStorage + Supabase + Capacitor
 Hosting: Vercel. Tests: Vitest + Playwright. Audio: Web Audio API.
 Build gate: tsc -b && vite build. 207 unit + 201 E2E.
 
