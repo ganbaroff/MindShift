@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<style>
+  :root{ --ob0:#080915; --indigo:#C0C1FF; --indigo2:#7B72FF; --teal:#4ECDC4; --gold:#F2C94C; --ink:#F0F0F8; --muted:#9A9AC0; --wt:#7B72FF; }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{width:1080px;height:1920px;overflow:hidden;background:var(--ob0);font-family:'Plus Jakarta Sans','Inter',system-ui,sans-serif;}
+  #stage{position:relative;width:1080px;height:1920px;overflow:hidden;
+    background:radial-gradient(120% 70% at 50% 20%, #1a1c3c 0%, #0c0d20 52%, #070812 100%);}
+  /* restrained depth: one soft glow behind the monitor + subtle floor */
+  #glow{position:absolute;left:50%;top:300px;width:820px;height:560px;transform:translateX(-50%);
+    background:radial-gradient(ellipse at center, rgba(123,114,255,.22), transparent 68%);filter:blur(30px);}
+  #floor{position:absolute;left:-8%;right:-8%;bottom:0;height:520px;opacity:.35;
+    background:linear-gradient(0deg, rgba(123,114,255,.10), transparent 70%),
+      repeating-linear-gradient(90deg, rgba(192,193,255,.07) 0 2px, transparent 2px 104px);
+    transform:perspective(900px) rotateX(67deg);transform-origin:bottom;}
+  #particles{position:absolute;inset:0;z-index:1;}
+  .pt{position:absolute;border-radius:50%;}
+  #vig{position:absolute;inset:0;z-index:6;pointer-events:none;box-shadow:inset 0 0 300px 70px rgba(4,5,12,.78);}
+
+  /* ── ONE styled brand bug, top-left (title-safe) ── */
+  #brand{position:absolute;z-index:7;top:54px;left:60px;display:flex;align-items:center;gap:16px;}
+  #brand .badge{width:78px;height:78px;border-radius:20px;background:linear-gradient(160deg,#2b2f57,#181a32);
+    border:2px solid rgba(192,193,255,.32);box-shadow:0 8px 24px rgba(0,0,0,.4), inset 0 0 18px rgba(123,114,255,.22);display:grid;place-items:center;}
+  #brand .wm{display:flex;flex-direction:column;line-height:1;}
+  #brand .wm b{color:#fff;font-weight:900;font-size:36px;letter-spacing:2px;}
+  #brand .wm span{color:var(--teal);font-weight:800;font-size:21px;letter-spacing:7px;margin-top:6px;}
+
+  /* live + ai disclosure, top-right */
+  #tr{position:absolute;z-index:7;top:58px;right:60px;display:flex;flex-direction:column;align-items:flex-end;gap:10px;}
+  #live{display:flex;align-items:center;gap:9px;color:var(--teal);font-size:23px;font-weight:800;letter-spacing:1px;
+    background:rgba(20,22,40,.6);border:1px solid rgba(78,205,196,.3);padding:8px 16px;border-radius:999px;}
+  #live .d{width:12px;height:12px;border-radius:50%;background:var(--teal);box-shadow:0 0 12px var(--teal);}
+  #ai{color:var(--muted);font-size:19px;font-weight:600;opacity:.85;}
+
+  /* ── story monitor (the focal graphic) ── */
+  #wall{position:absolute;z-index:2;left:96px;top:188px;width:888px;height:516px;border-radius:28px;
+    background:linear-gradient(160deg,#1c1f3a,#11132690);
+    border:2px solid rgba(192,193,255,.16);
+    box-shadow:0 26px 80px rgba(0,0,0,.5), inset 0 0 70px rgba(123,114,255,.10);overflow:hidden;}
+  #wallEdge{position:absolute;left:0;top:0;height:6px;width:100%;background:var(--wt);opacity:.9;}
+  #wallSheen{position:absolute;inset:0;background:linear-gradient(120deg, rgba(255,255,255,.05), transparent 32%);}
+  #wallInner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:48px 44px;}
+  #wIcon{width:188px;height:188px;display:grid;place-items:center;filter:drop-shadow(0 6px 14px rgba(0,0,0,.35));}
+  #wTitle{color:#fff;font-weight:900;font-size:62px;text-align:center;line-height:1.04;}
+  #wSub{font-weight:900;font-size:50px;color:var(--wt);}
+  #wSrc{margin-top:4px;color:#0a0b18;font-weight:800;font-size:24px;padding:7px 20px;border-radius:999px;background:var(--wt);}
+
+  /* ── anchor ── */
+  #spot{position:absolute;z-index:2;left:50%;top:700px;width:720px;height:560px;transform:translateX(-50%);
+    background:radial-gradient(ellipse 46% 52% at 50% 42%, rgba(123,114,255,.26), rgba(78,205,196,.08) 56%, transparent 72%);filter:blur(6px);}
+  #anchor{position:absolute;z-index:3;left:50%;top:660px;transform:translateX(-50%);width:560px;height:560px;}
+  #capy{display:block;width:560px;height:560px;filter:drop-shadow(0 18px 24px rgba(0,0,0,.45)) drop-shadow(0 0 22px rgba(123,114,255,.22));}
+
+  /* clean desk, no text */
+  #deskEdge{position:absolute;z-index:4;left:50%;bottom:1.0px;transform:translateX(-50%);}
+  #desk{position:absolute;z-index:4;left:50%;bottom:560px;transform:translateX(-50%);width:1040px;height:200px;
+    border-radius:38px 38px 0 0;background:linear-gradient(180deg,#2e3257 0%,#1c1e3a 30%,#11132a 100%);
+    border-top:2px solid rgba(192,193,255,.22);box-shadow:0 -14px 60px rgba(123,114,255,.16), inset 0 3px 0 rgba(192,193,255,.16);}
+  #desk:before{content:'';position:absolute;left:0;right:0;top:-3px;height:3px;background:linear-gradient(90deg,transparent,rgba(78,205,196,.85),rgba(192,193,255,.7),transparent);box-shadow:0 0 18px rgba(78,205,196,.45);}
+
+  /* ── subtitle (clear band, generous) ── */
+  #sub{position:absolute;z-index:7;left:64px;right:64px;top:1356px;text-align:center;color:#fff;
+    font-size:62px;line-height:1.18;font-weight:800;min-height:200px;text-shadow:0 4px 22px rgba(0,0,0,.85),0 0 2px rgba(0,0,0,.95);}
+  #sub b{color:var(--gold);}
+
+  /* ── ticker ── */
+  #ticker{position:absolute;z-index:7;left:0;right:0;bottom:90px;height:78px;background:rgba(8,9,21,.95);
+    border-top:2px solid rgba(192,193,255,.16);border-bottom:2px solid rgba(192,193,255,.16);overflow:hidden;display:flex;align-items:center;}
+  #ticker .lbl{position:absolute;left:0;top:0;bottom:0;z-index:2;display:flex;align-items:center;padding:0 24px;background:var(--teal);color:#06231f;font-weight:900;font-size:28px;letter-spacing:1px;}
+  #tick{position:absolute;white-space:nowrap;color:var(--ink);font-size:31px;font-weight:600;}#tick span{color:var(--teal);margin:0 12px;font-weight:900;}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="glow"></div><div id="floor"></div><div id="particles"></div>
+
+  <div id="wall">
+    <div id="wallEdge"></div><div id="wallSheen"></div>
+    <div id="wallInner"><div id="wIcon"></div><div id="wTitle"></div><div id="wSub"></div><div id="wSrc"></div></div>
+  </div>
+
+  <div id="spot"></div>
+  <div id="anchor">
+    <svg id="capy" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="100" cy="186" rx="52" ry="5" fill="#000" opacity="0.18"/>
+      <g id="capyG">
+        <ellipse cx="68" cy="66" rx="12" ry="14" fill="#E9D9B5" stroke="#7A5C3A" stroke-width="2.2"/><ellipse cx="68" cy="67" rx="6" ry="7.5" fill="#CBB488"/>
+        <ellipse cx="132" cy="66" rx="12" ry="14" fill="#E9D9B5" stroke="#7A5C3A" stroke-width="2.2"/><ellipse cx="132" cy="67" rx="6" ry="7.5" fill="#CBB488"/>
+        <ellipse cx="100" cy="112" rx="58" ry="55" fill="#E9D9B5" stroke="#7A5C3A" stroke-width="2.4"/><ellipse cx="100" cy="126" rx="36" ry="26" fill="#F4EBD6" opacity="0.45"/>
+        <ellipse cx="64" cy="116" rx="8" ry="4.5" fill="rgba(231,140,120,0.30)"/><ellipse cx="136" cy="116" rx="8" ry="4.5" fill="rgba(231,140,120,0.30)"/>
+        <g id="eyesOpen"><circle cx="82" cy="100" r="3.4" fill="#5A4632"/><circle cx="118" cy="100" r="3.4" fill="#5A4632"/><circle cx="83.2" cy="98.8" r="1.1" fill="#fff" opacity=".85"/><circle cx="119.2" cy="98.8" r="1.1" fill="#fff" opacity=".85"/></g>
+        <g id="eyesBlink" style="display:none"><path d="M 76 100 Q 82 104, 88 100" stroke="#5A4632" stroke-width="2.6" fill="none" stroke-linecap="round"/><path d="M 112 100 Q 118 104, 124 100" stroke="#5A4632" stroke-width="2.6" fill="none" stroke-linecap="round"/></g>
+        <ellipse cx="100" cy="112" rx="4" ry="2.8" fill="#5A4632"/>
+        <ellipse id="mouth" cx="100" cy="123" rx="9" ry="1.6" fill="#3A2A1E"/><ellipse id="tongue" cx="100" cy="125" rx="5" ry="0.4" fill="#C77B6B" opacity="0"/>
+        <!-- AZ motif: buta collar (gold buta on teal neckband) -->
+        <path d="M62 156 Q100 176 138 156" fill="none" stroke="#4ECDC4" stroke-width="10" stroke-linecap="round"/>
+        <g fill="#F2C94C" stroke="#C99A2E" stroke-width="0.7">
+          <path d="M80 162 c-5 -1 -6 -8 -1 -11 c5 2 5 8 1 11 z"/>
+          <path d="M100 169 c-5 -1 -6 -8 -1 -11 c5 2 5 8 1 11 z"/>
+          <path d="M120 162 c-5 -1 -6 -8 -1 -11 c5 2 5 8 1 11 z"/>
+        </g>
+        <!-- AZ motif: papaq hat (dark fur, Constitution-safe, no red) -->
+        <ellipse cx="100" cy="62" rx="33" ry="7" fill="#1C140D"/>
+        <path d="M71 63 Q67 27 100 22 Q133 27 129 63 Z" fill="#2A1F16" stroke="#160F08" stroke-width="2"/>
+        <path d="M78 41 Q100 31 122 41" stroke="#3A2A1E" stroke-width="3.5" fill="none" stroke-linecap="round" opacity=".85"/>
+      </g>
+    </svg>
+  </div>
+  <div id="desk"></div>
+
+  <div id="brand">
+    <div class="badge">
+      <svg width="58" height="58" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="32" cy="30" rx="10" ry="12" fill="#E9D9B5" stroke="#7A5C3A" stroke-width="2.4"/>
+        <ellipse cx="68" cy="30" rx="10" ry="12" fill="#E9D9B5" stroke="#7A5C3A" stroke-width="2.4"/>
+        <ellipse cx="50" cy="56" rx="33" ry="29" fill="#E9D9B5" stroke="#7A5C3A" stroke-width="2.6"/>
+        <circle cx="40" cy="52" r="3.2" fill="#5A4632"/><circle cx="60" cy="52" r="3.2" fill="#5A4632"/>
+        <ellipse cx="50" cy="60" rx="3" ry="2" fill="#5A4632"/>
+        <path d="M44 66 Q50 71 56 66" stroke="#5A4632" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="wm"><b>КАПИБАРА</b><span>НОВОСТИ</span></div>
+  </div>
+  <div id="tr"><div id="live"><span class="d"></span>В ЭФИРЕ</div><div id="ai">AI · сгенерировано</div></div>
+
+  <div id="sub"></div>
+  <div id="ticker"><div class="lbl">СВОДКА</div><div id="tick"></div></div>
+  <div id="vig"></div>
+</div>
+
+<script>
+let DATA=null
+const TINT={indigo:'#7B72FF',teal:'#4ECDC4',gold:'#F2C94C'}
+function icon(key,c){const s=(b)=>`<svg viewBox="0 0 100 100" width="188" height="188" fill="none" xmlns="http://www.w3.org/2000/svg">${b}</svg>`
+  if(key==='spacex')return s(`<path d="M50 8 C66 22 70 44 64 66 H36 C30 44 34 22 50 8Z" fill="${c}22" stroke="${c}" stroke-width="3.4"/><circle cx="50" cy="38" r="9" fill="#0b0c1a" stroke="${c}" stroke-width="3.2"/><path d="M36 60 L24 76 L38 70Z M64 60 L76 76 L62 70Z" fill="${c}" stroke="${c}" stroke-width="2" stroke-linejoin="round"/><path d="M44 70 Q50 92 56 70" fill="${TINT.gold}" opacity=".9"/>`)
+  if(key==='gemini')return s(`<rect x="26" y="26" width="48" height="48" rx="12" fill="${c}22" stroke="${c}" stroke-width="3.4"/><circle cx="42" cy="44" r="4.5" fill="${c}"/><circle cx="58" cy="44" r="4.5" fill="${c}"/><path d="M40 60 Q50 68 60 60" stroke="${c}" stroke-width="3.4" stroke-linecap="round"/><path d="M26 40 H16 M26 54 H16 M74 40 H84 M74 54 H84 M40 26 V16 M60 26 V16 M40 74 V84 M60 74 V84" stroke="${c}" stroke-width="3" stroke-linecap="round"/>`)
+  if(key==='fable')return s(`<rect x="28" y="46" width="44" height="36" rx="8" fill="${c}22" stroke="${c}" stroke-width="3.4"/><path d="M37 46 V36 a13 13 0 0 1 26 0 V46" stroke="${c}" stroke-width="3.4" fill="none"/><circle cx="50" cy="62" r="5" fill="${c}"/><rect x="48" y="64" width="4" height="9" rx="2" fill="${c}"/>`)
+  if(key==='signoff')return s(`<ellipse cx="34" cy="34" rx="9" ry="11" fill="#E9D9B5" stroke="#7A5C3A" stroke-width="2.6"/><ellipse cx="66" cy="34" rx="9" ry="11" fill="#E9D9B5" stroke="#7A5C3A" stroke-width="2.6"/><ellipse cx="50" cy="56" rx="34" ry="30" fill="#E9D9B5" stroke="#7A5C3A" stroke-width="2.8"/><circle cx="40" cy="52" r="3" fill="#5A4632"/><circle cx="60" cy="52" r="3" fill="#5A4632"/><path d="M44 64 Q50 70 56 64" stroke="#5A4632" stroke-width="2.6" fill="none" stroke-linecap="round"/>`)
+  if(key==='news')return s(`<rect x="18" y="24" width="58" height="52" rx="6" fill="${c}22" stroke="${c}" stroke-width="3.2"/><rect x="58" y="30" width="13" height="13" rx="3" fill="${c}"/><path d="M28 36 H52 M28 46 H76 M28 56 H72 M28 66 H60" stroke="${c}" stroke-width="3" stroke-linecap="round"/>`)
+  if(key==='rocket')return s(`<path d="M50 8 C66 22 70 44 64 66 H36 C30 44 34 22 50 8Z" fill="${c}22" stroke="${c}" stroke-width="3.4"/><circle cx="50" cy="38" r="9" fill="#0b0c1a" stroke="${c}" stroke-width="3.2"/><path d="M36 60 L24 76 L38 70Z M64 60 L76 76 L62 70Z" fill="${c}" stroke="${c}" stroke-width="2" stroke-linejoin="round"/><path d="M44 70 Q50 92 56 70" fill="${TINT.gold}" opacity=".9"/>`)
+  if(key==='chip')return s(`<rect x="30" y="30" width="40" height="40" rx="6" fill="${c}22" stroke="${c}" stroke-width="3.2"/><rect x="38" y="38" width="24" height="24" rx="3" fill="${c}22" stroke="${c}" stroke-width="2.6"/><path d="M50 30 V20 M70 50 H80 M50 70 V80 M30 50 H20 M36 36 L30 30 M64 36 L70 30 M64 64 L70 70 M36 64 L30 70" stroke="${c}" stroke-width="3" stroke-linecap="round"/>`)
+  if(key==='lock')return s(`<rect x="26" y="48" width="48" height="36" rx="8" fill="${c}22" stroke="${c}" stroke-width="3.4"/><path d="M36 48 V36 a14 14 0 0 1 28 0 V48" stroke="${c}" stroke-width="3.4" fill="none"/><circle cx="50" cy="64" r="6" fill="${c}"/><rect x="47" y="67" width="6" height="10" rx="3" fill="${c}"/>`)
+  if(key==='chart')return s(`<rect x="14" y="68" width="14" height="22" rx="3" fill="${c}44"/><rect x="32" y="52" width="14" height="38" rx="3" fill="${c}77"/><rect x="50" y="38" width="14" height="52" rx="3" fill="${c}aa"/><rect x="68" y="22" width="14" height="68" rx="3" fill="${c}"/><path d="M12 92 H90" stroke="${c}" stroke-width="2.6" stroke-linecap="round"/><path d="M14 70 L32 54 L50 40 L68 24" stroke="${TINT.gold}" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>`)
+  if(key==='robot')return s(`<rect x="22" y="34" width="56" height="46" rx="10" fill="${c}22" stroke="${c}" stroke-width="3.2"/><rect x="38" y="20" width="24" height="16" rx="5" fill="${c}22" stroke="${c}" stroke-width="3"/><rect x="14" y="52" width="8" height="20" rx="4" fill="${c}44" stroke="${c}" stroke-width="2.4"/><rect x="78" y="52" width="8" height="20" rx="4" fill="${c}44" stroke="${c}" stroke-width="2.4"/><circle cx="39" cy="55" r="7" fill="${c}22" stroke="${c}" stroke-width="2.8"/><circle cx="61" cy="55" r="7" fill="${c}22" stroke="${c}" stroke-width="2.8"/><circle cx="39" cy="55" r="3.5" fill="${c}"/><circle cx="61" cy="55" r="3.5" fill="${c}"/><rect x="36" y="68" width="28" height="7" rx="3.5" fill="${c}33" stroke="${c}" stroke-width="2.4"/>`)
+  if(key==='ball')return s(`<circle cx="50" cy="50" r="33" fill="${c}22" stroke="${c}" stroke-width="3.2"/><path d="M50 31 l12 9 -4.5 14 h-15 l-4.5 -14 z" fill="${c}" stroke="${c}" stroke-width="1.5" stroke-linejoin="round"/><path d="M50 17 v14 M62 40 l13 -4 M57.5 54 l9 11 M42.5 54 l-9 11 M38 40 l-13 -4" stroke="${c}" stroke-width="2.6" stroke-linecap="round"/>`)
+  if(key==='trophy')return s(`<path d="M35 22 H65 V35 A15 15 0 0 1 35 35 Z" fill="${c}22" stroke="${c}" stroke-width="3.2"/><path d="M35 26 H25 A10 10 0 0 0 38 39 M65 26 H75 A10 10 0 0 1 62 39" stroke="${c}" stroke-width="3" fill="none"/><rect x="46" y="50" width="8" height="13" fill="${c}"/><rect x="34" y="63" width="32" height="9" rx="2" fill="${c}22" stroke="${c}" stroke-width="3"/>`)
+  if(key==='gloves')return s(`<rect x="33" y="42" width="34" height="28" rx="9" fill="${c}22" stroke="${c}" stroke-width="3"/><path d="M39 42 V30 a4 4 0 0 1 8 0 v12 M49 42 V26 a4 4 0 0 1 8 0 v16 M59 42 V32 a4 4 0 0 1 8 0 v10" fill="${c}22" stroke="${c}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M33 54 l-6 4 a4 4 0 0 0 0 7 l6 3" fill="none" stroke="${c}" stroke-width="3" stroke-linejoin="round"/>`)
+  if(key==='boot')return s(`<path d="M22 46 H46 c12 0 16 6 28 10 c6 2 5 11 -3 11 H28 c-5 0 -6 -4 -6 -9 z" fill="${c}22" stroke="${c}" stroke-width="3" stroke-linejoin="round"/><path d="M30 67 v5 M40 67 v5 M50 67 v5 M61 67 v4" stroke="${c}" stroke-width="3" stroke-linecap="round"/><path d="M28 52 h16" stroke="${TINT.gold}" stroke-width="2.6" stroke-linecap="round"/>`)
+  return s(`<rect x="22" y="26" width="56" height="48" rx="8" fill="${c}22" stroke="${c}" stroke-width="3.4"/><path d="M32 40 H56 M32 50 H68 M32 60 H60" stroke="${c}" stroke-width="3.2" stroke-linecap="round"/><rect x="60" y="38" width="12" height="12" rx="2" fill="${c}"/>`)}
+const $=(i)=>document.getElementById(i)
+const headlines=['Brent $72.9 ▼ — Ормузский пролив открыт, поставки растут','BTC $59 800 ▼','ETH $1 575 ▼','USD/AZN 1.70','EUR/USD 1.14','SpaceX купил Cursor за $60 млрд','Tether обогнал Ethereum по капитализации','ИИ-модели выходят каждые два дня']
+const P=[],parts=$('particles')
+for(let k=0;k<10;k++){const el=document.createElement('div');el.className='pt';const sz=3+(k*53%4);const teal=k%3===0;el.style.width=el.style.height=sz+'px';el.style.background=teal?'rgba(78,205,196,.4)':'rgba(192,193,255,.36)';el.style.boxShadow=`0 0 ${sz*2}px ${teal?'rgba(78,205,196,.3)':'rgba(123,114,255,.3)'}`;parts.appendChild(el);P.push({el,x0:k*157%1080,y0:k*271%1920,sp:22+k*13%34,ph:k*1.3})}
+const mouth=$('mouth'),tongue=$('tongue'),capyG=$('capyG'),eO=$('eyesOpen'),eB=$('eyesBlink'),subEl=$('sub')
+function esc(s){return s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
+let curItem=-1
+function paintItem(it){const c=TINT[it.tint]||TINT.indigo;document.documentElement.style.setProperty('--wt',c)
+  $('wIcon').innerHTML=icon(it.key,c);$('wTitle').textContent=it.title;$('wSub').textContent=it.sub;$('wSrc').textContent=it.source}
+window.loadData=(d)=>{DATA=d
+  const tk=(d.tickers&&d.tickers.length)?d.tickers:headlines
+  $('tick').innerHTML=(tk.join('  <span>•</span>  ')+'  <span>•</span>  ').repeat(3)
+  if(d.brand){document.querySelector('#brand .wm b').textContent=d.brand.top;document.querySelector('#brand .wm span').textContent=d.brand.bottom}
+  $('live').innerHTML='<span class="d"></span>'+(d.live||'В ЭФИРЕ')
+  $('ai').textContent=d.ai||'AI · сгенерировано'
+  document.querySelector('#ticker .lbl').textContent=d.tickerLabel||'СВОДКА'
+}
+window.setFrame=(i)=>{
+  if(!DATA)return
+  const t=i/DATA.fps, open=DATA.env[Math.min(i,DATA.env.length-1)]||0
+  mouth.setAttribute('ry',(1.6+open*8.5).toFixed(2));mouth.setAttribute('rx',(9-open*1.2).toFixed(2))
+  tongue.setAttribute('opacity',(open>0.35?(open-0.35)*0.9:0).toFixed(2));tongue.setAttribute('ry',(0.4+open*2.4).toFixed(2))
+  const bob=Math.sin(t*2*Math.PI*0.42)*4,tilt=Math.sin(t*2*Math.PI*0.9)*0.6+open*0.4
+  capyG.setAttribute('transform',`translate(0 ${bob.toFixed(2)}) rotate(${tilt.toFixed(2)} 100 120)`)
+  const bl=(i%84)<4;eO.style.display=bl?'none':'block';eB.style.display=bl?'block':'none'
+  let line=DATA.lines[0],idx=0
+  for(let n=0;n<DATA.lines.length;n++){if(t>=DATA.lines[n].s){line=DATA.lines[n];idx=n}}
+  if(line.item!==curItem){curItem=line.item;paintItem(DATA.items[line.item])}
+  const ip=Math.min(1,Math.max(0,(t-(line.itemStart??line.s))/0.45));const ease=1-Math.pow(1-ip,3)
+  $('wallInner').style.opacity=ease.toFixed(3);$('wallInner').style.transform=`translateY(${((1-ease)*-18).toFixed(1)}px)`
+  const active=t>=line.s&&t<(line.e+0.35)
+  if(active){subEl.innerHTML=esc(line.text);subEl.style.opacity=Math.min(1,(t-line.s)/0.15).toFixed(2)}else{subEl.style.opacity='0'}
+  for(const p of P){const y=((p.y0-t*p.sp)%1980+1980)%1980-30;const x=p.x0+Math.sin(t*0.5+p.ph)*18;p.el.style.transform=`translate(${x.toFixed(1)}px,${y.toFixed(1)}px)`}
+  $('tick').style.transform=`translateX(${(-t*150).toFixed(1)}px)`
+}
+</script>
+</body>
+</html>

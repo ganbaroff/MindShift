@@ -25,6 +25,8 @@ voiceline_meta.json
 
 # final renders (hosted on GCS, not git)
 *.mp4
+# …except the static brand outro — committed so CI skips the outro rebuild path
+!outro.mp4
 
 # news script snapshots (regenerated daily)
 today.json

@@ -25,8 +25,14 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install ffmpeg
-        run: sudo apt-get install -y ffmpeg
+      - name: Install ffmpeg + fonts (cyrillic / AZ diacritics / brand)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg fonts-noto-core fonts-noto-color-emoji
+          mkdir -p ~/.fonts
+          curl -sL "https://github.com/google/fonts/raw/main/ofl/plusjakartasans/PlusJakartaSans%5Bwght%5D.ttf" -o ~/.fonts/PlusJakartaSans.ttf \
+            || echo "[fonts] Jakarta download failed — Noto fallback renders text without tofu"
+          fc-cache -f
 
       - name: Install Playwright + Chromium
         run: |
