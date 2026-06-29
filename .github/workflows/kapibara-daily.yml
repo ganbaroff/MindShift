@@ -36,7 +36,8 @@ jobs:
 
       - name: Install Playwright + Chromium
         run: |
-          npm install -g playwright@latest
+          npm init -y >/dev/null 2>&1 || true
+          npm install @playwright/test          # render6/render_outro do `import from '@playwright/test'` (local ESM resolve)
           npx playwright install chromium --with-deps
 
       - name: Write env files from secrets
@@ -66,8 +67,8 @@ jobs:
           ARGS="--upload"
           [ "${{ github.event.inputs.dry_run }}" = "true" ] && ARGS="$ARGS --no-preview"
           node make-clip.mjs $ARGS
-        env:
-          PLAYWRIGHT_BROWSERS_PATH: /root/.cache/ms-playwright
+        # no PLAYWRIGHT_BROWSERS_PATH override — chromium installs to the runner's
+        # default ~/.cache/ms-playwright; the old /root/.cache path was wrong (runner != root)
 
       - name: Upload video artifact (30 days retention)
         if: always()

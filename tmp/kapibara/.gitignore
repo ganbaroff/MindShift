@@ -1,6 +1,11 @@
 # Build artifacts — never source. See AGENTS.md §6.
 # Source .mjs / .html stay tracked (or move to kapibara-studio); only generated junk is ignored.
 
+# node deps (CI installs @playwright/test here; never commit)
+node_modules/
+package.json
+package-lock.json
+
 # rendered frames + preview dirs
 frames_fast/
 frames_outro/
