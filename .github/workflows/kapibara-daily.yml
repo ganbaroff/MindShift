@@ -5,12 +5,8 @@ on:
     - cron: '25 4 * * *'   # 04:25 UTC = 08:25 Baku (UTC+4)
   workflow_dispatch:        # manual trigger (test button in GitHub UI)
     inputs:
-      skip_news:
-        description: 'Skip news generation (use existing today.json)'
-        required: false
-        default: 'false'
       dry_run:
-        description: 'Dry run: skip Telegram + Buffer publish'
+        description: 'Dry run: generate video but skip Telegram preview + publish'
         required: false
         default: 'false'
 
@@ -61,9 +57,8 @@ jobs:
 
       - name: Run pipeline
         run: |
-          ARGS=""
-          [ "${{ github.event.inputs.skip_news }}" = "true" ] && ARGS="$ARGS --skip-news"
-          [ "${{ github.event.inputs.dry_run }}"   = "true" ] && ARGS="$ARGS --no-preview"
+          ARGS="--upload"
+          [ "${{ github.event.inputs.dry_run }}" = "true" ] && ARGS="$ARGS --no-preview"
           node make-clip.mjs $ARGS
         env:
           PLAYWRIGHT_BROWSERS_PATH: /root/.cache/ms-playwright
