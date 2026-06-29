@@ -1,5 +1,7 @@
 # MindShift — Claude Working Memory
 
+> 🧭 **New here / cross-tool handoff? Read [AGENTS.md](AGENTS.md) first** — it's the single tool-agnostic map (what's where, what works, what's broken, what's trash, what's next). This file is the deep Claude-specific detail underneath it.
+
 ## Ecosystem Context
 
 MindShift is **one of 5 products** in the VOLAURA ecosystem:

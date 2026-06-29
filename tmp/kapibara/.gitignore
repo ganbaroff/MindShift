@@ -1,0 +1,31 @@
+# Build artifacts — never source. See AGENTS.md §6.
+# Source .mjs / .html stay tracked (or move to kapibara-studio); only generated junk is ignored.
+
+# rendered frames + preview dirs
+frames_fast/
+frames_outro/
+prev6/
+prev_outro/
+verify/
+
+# audio intermediates
+*.wav
+*.pcm
+voice.mp3
+voice.vtt
+voice_outro.mp3
+
+# generated data / state snapshots
+data.json
+data_az.json
+data_subs_az.json
+az_final.json
+latest_output.json
+voiceline_meta.json
+
+# final renders (hosted on GCS, not git)
+*.mp4
+
+# news script snapshots (regenerated daily)
+today.json
+today_*.json
