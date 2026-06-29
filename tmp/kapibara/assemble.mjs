@@ -56,11 +56,14 @@ if (!KEEP_FRAMES) {
 }
 
 // Step 4: optional GCS upload (for Buffer/IG publish)
+// Bucket kapibara-news-pub-* has uniform bucket-level access ON, so per-object ACLs
+// are disabled. Objects are public via a ONE-TIME bucket IAM grant
+// (allUsers:objectViewer) — no per-object `acl ch` needed (it errors under UBLA).
+// `gcloud storage` works in CI + on the CEO's machine (local gsutil python shim is broken).
 let gcsUrl = null
 if (UPLOAD) {
   const gcsKey = `kapibara-${dateStr}.mp4`
-  run('gcs-upload', 'gsutil', ['-q', 'cp', outFinal, `${GCS_BUCKET}/${gcsKey}`])
-  run('gcs-acl', 'gsutil', ['-q', 'acl', 'ch', '-u', 'AllUsers:R', `${GCS_BUCKET}/${gcsKey}`])
+  run('gcs-upload', 'gcloud', ['storage', 'cp', outFinal, `${GCS_BUCKET}/${gcsKey}`])
   gcsUrl = `https://storage.googleapis.com/kapibara-news-pub-0321449510/${gcsKey}`
   console.log(`[assemble] GCS public: ${gcsUrl}`)
 }
