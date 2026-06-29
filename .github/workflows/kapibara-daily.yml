@@ -1,0 +1,77 @@
+name: Kapibara Daily
+
+on:
+  schedule:
+    - cron: '25 4 * * *'   # 04:25 UTC = 08:25 Baku (UTC+4)
+  workflow_dispatch:        # manual trigger (test button in GitHub UI)
+    inputs:
+      skip_news:
+        description: 'Skip news generation (use existing today.json)'
+        required: false
+        default: 'false'
+      dry_run:
+        description: 'Dry run: skip Telegram + Buffer publish'
+        required: false
+        default: 'false'
+
+jobs:
+  make-video:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: tmp/kapibara
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install ffmpeg
+        run: sudo apt-get install -y ffmpeg
+
+      - name: Install Playwright + Chromium
+        run: |
+          npm install -g playwright@latest
+          npx playwright install chromium --with-deps
+
+      - name: Write env files from secrets
+        run: |
+          cat > .env <<'ENVEOF'
+          GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
+          VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          ENVEOF
+          cat > .secrets.env <<'SEOF'
+          BUFFER_ACCESS_TOKEN=${{ secrets.BUFFER_ACCESS_TOKEN }}
+          TELEGRAM_CREATORBOT_TOKEN=${{ secrets.TELEGRAM_CREATORBOT_TOKEN }}
+          TELEGRAM_CHANNEL_ID=${{ secrets.TELEGRAM_CHANNEL_ID }}
+          GCS_BUCKET=kapibara-news-pub-0321449510
+          SEOF
+
+      - name: Authenticate to GCS
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Setup gcloud
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Run pipeline
+        run: |
+          ARGS=""
+          [ "${{ github.event.inputs.skip_news }}" = "true" ] && ARGS="$ARGS --skip-news"
+          [ "${{ github.event.inputs.dry_run }}"   = "true" ] && ARGS="$ARGS --no-preview"
+          node make-clip.mjs $ARGS
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: /root/.cache/ms-playwright
+
+      - name: Upload video artifact (30 days retention)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kapibara-video-${{ github.run_id }}
+          path: tmp/kapibara/kapibara-*.mp4
+          retention-days: 30
