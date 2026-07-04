@@ -17,7 +17,7 @@ import { checkDbRateLimit } from '../_shared/rateLimit.ts'
 const DODO_API_KEY = Deno.env.get('DODO_API_KEY')
 const DODO_PRODUCT_ID = Deno.env.get('DODO_PRODUCT_ID') ?? ''
 const APP_URL = Deno.env.get('APP_URL') ?? 'https://mind-shift-git-main-yusifg27-3093s-projects.vercel.app'
-const DODO_API_BASE = 'https://live.dodopayments.com'
+const DODO_API_BASE = Deno.env.get('DODO_API_BASE') ?? 'https://live.dodopayments.com'
 
 Deno.serve(async (req: Request) => {
   const cors = getCorsHeaders(req)
