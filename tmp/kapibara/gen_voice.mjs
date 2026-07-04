@@ -68,7 +68,7 @@ if (process.env.DRY) {
 
 async function tts(text, outWav) {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`
-  for (let attempt = 0; attempt < 3; attempt++) {
+  for (let attempt = 0; attempt < 6; attempt++) {
     const res = await fetch(url, {
       method: 'POST',
       headers: { 'x-goog-api-key': key, 'Content-Type': 'application/json' },
@@ -94,8 +94,10 @@ async function tts(text, outWav) {
     } else {
       const body = (await res.text()).slice(0, 200)
       console.error(`  retry ${attempt} HTTP ${res.status} ${body}`)
+      if (res.status !== 429 && res.status >= 400 && res.status < 500) break // auth/bad-request — retrying won't help
     }
-    await new Promise(r => setTimeout(r, 800))
+    // free-tier 429 clears in tens of seconds, not 800ms — flat 800ms killed the 06-29..07-02 CI runs
+    await new Promise(r => setTimeout(r, 20000 * (attempt + 1)))
   }
   throw new Error('TTS failed after retries')
 }
