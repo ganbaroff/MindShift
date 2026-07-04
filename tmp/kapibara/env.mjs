@@ -47,3 +47,12 @@ export function requireEnv(name) {
 }
 export function hasEnv(name) { ensure(); return cache[name] != null && cache[name] !== '' }
 export const PROJECT_ROOT = ROOT
+
+// Factory Law 6 — ONE voice per format, hardcoded. Change ONLY with a fresh CEO
+// ear-test receipt (approve a short sample first), NEVER via a CLI flag.
+export const LOCKED_VOICE = 'Puck'
+
+// Factory Law 2 — news pace-lock. Voice-body target in seconds; +~12.8s outro
+// ≈ 42s total, top of the 32-42s completion band. reconcat.mjs atempo-clamps to hit this.
+// 27 produced tempo ~1.26 → critic heard "robotic/sped-up"; 29 trades 2s for naturalness.
+export const NEWS_TARGET_SEC = 29

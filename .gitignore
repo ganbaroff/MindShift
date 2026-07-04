@@ -72,3 +72,9 @@ keystore.properties
 
 # Design project files
 design-project/
+
+# Kapibara scratch/working artifacts. The 19 CI-path scripts already tracked here STAY tracked
+# (gitignore never un-tracks). This only hides scratch: renders, frames, images, audio, run dirs,
+# and test_kling.mjs (CEO-consented zero-balance key — kept out of git). New CI scripts need `git add -f`.
+# Canonical engine home = C:/Projects/kapibara-studio.
+tmp/

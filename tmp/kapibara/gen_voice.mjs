@@ -1,23 +1,26 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
-import { requireEnv } from './env.mjs'
+import { requireEnv, LOCKED_VOICE } from './env.mjs'
 const key = requireEnv('GEMINI_API_KEY')
 
-const VOICE = process.argv[2] || 'Puck'
+// Factory Law 6 — voice is the LOCKED_VOICE constant, not a CLI flag. No argv override.
+const VOICE = LOCKED_VOICE
 const MODEL = 'gemini-2.5-flash-preview-tts'
 
-// delivery styles
-const B = 'Read aloud in an energetic, charismatic, lively Russian TV news-anchor voice — clear, upbeat, dynamic, never monotone:'
-const F = 'Read aloud as a Russian news anchor delivering a punchline — playful comedic timing, a little smirk, land it:'
+// Factory Law 7 — ONE frozen style directive for every line (was two: B anchor + F punchline,
+// which made lines sound like different speakers). Punchline flavor now comes from the TEXT,
+// not a different voice directive. Same warm, energetic, charismatic Russian news-anchor
+// delivery that also lands jokes with light comedic timing.
+const STYLE = 'Read aloud in one warm, energetic, charismatic Russian TV news-anchor voice — clear, upbeat, and lively, never monotone; keep the same speaker throughout and land the jokes with light comedic timing:'
 
-// 11-line template → [scene-item index, pause(s) after, delivery]
+// 11-line template → [scene-item index, pause(s) after]. One STYLE for all lines.
 // [0] title, [1] hook(item0), [2-4] news1, [5-6] news2, [7-8] news3, [9] title, [10] signoff
 const TPL = [
-  { i: 0, p: 0.18, d: B }, { i: 0, p: 0.55, d: B },
-  { i: 1, p: 0.22, d: B }, { i: 1, p: 0.2, d: B }, { i: 1, p: 0.6, d: F },
-  { i: 2, p: 0.22, d: B }, { i: 2, p: 0.6, d: F },
-  { i: 3, p: 0.22, d: B }, { i: 3, p: 0.6, d: F },
-  { i: 4, p: 0.14, d: B }, { i: 4, p: 0.3, d: B },
+  { i: 0, p: 0.18, d: STYLE }, { i: 0, p: 0.55, d: STYLE },
+  { i: 1, p: 0.22, d: STYLE }, { i: 1, p: 0.2, d: STYLE }, { i: 1, p: 0.6, d: STYLE },
+  { i: 2, p: 0.22, d: STYLE }, { i: 2, p: 0.6, d: STYLE },
+  { i: 3, p: 0.22, d: STYLE }, { i: 3, p: 0.6, d: STYLE },
+  { i: 4, p: 0.14, d: STYLE }, { i: 4, p: 0.3, d: STYLE },
 ]
 
 // FALLBACK content — used ONLY if today.json is missing/invalid (preserves the proven path). Hook de-shamed (Constitution Law 3).
@@ -55,12 +58,12 @@ if (existsSync('today.json')) {
   } catch (e) { console.warn('[gen_voice] today.json parse failed → fallback:', e.message) }
 }
 const LINES = texts.map((t, n) => ({ t, i: TPL[n].i, p: TPL[n].p, d: TPL[n].d }))
-console.log(`[gen_voice] script source: ${srcTag} (${LINES.length} lines, voice=${VOICE})`)
+console.log(`[gen_voice] script source: ${srcTag} (${LINES.length} lines, voice=${VOICE} [LOCKED], single STYLE for all lines)`)
 
 // DRY=1 → print the mapped script and exit, no TTS (cheap connection check)
 if (process.env.DRY) {
   console.log('\n=== MAPPED LINES ===')
-  LINES.forEach((L, n) => console.log(`  ${n} [item ${L.i} / ${L.d === F ? 'punch' : 'read'}]  ${L.t}`))
+  LINES.forEach((L, n) => console.log(`  ${n} [item ${L.i} / STYLE]  ${L.t}`))
   console.log('\n=== SCENE ITEMS ===')
   items.forEach((it, n) => console.log(`  ${n} [${it.key}] ${it.title} — ${it.sub} (${it.source}) {${it.tint}}`))
   process.exit(0)

@@ -7,6 +7,15 @@ const prompt = `Use Google Search to find the THREE biggest, REAL artificial-int
 
 STYLE: warm, clever, ADHD-safe (no shame, no panic, never "red"/doom). Short punchy lines. Each news beat ends with a light, intelligent joke. Keep proper nouns & numbers exact. Russian.
 
+HARD CHARACTER BUDGETS (Factory Law 2 — physically shorter script so the ~40s runtime holds):
+- lines[0] = "Капибара Новости!" (fixed).
+- lines[1] (hook) ≤ 70 characters.
+- Each news SETUP line (lines[2], [3], [5], [7]) ≤ 85 characters.
+- Each PUNCHLINE line (lines[4], [6], [8]) ≤ 55 characters.
+- lines[9] = "Это была Капибара Новости." (fixed short).
+- lines[10] (sign-off) fixed short, ≤ 45 characters, ends with "До завтра!".
+Total spoken text across all 11 lines MUST be under 700 characters.
+
 Return ONLY valid JSON (no markdown), this exact shape:
 {
  "lines": [ 11 strings: [0] "Капибара Новости!", [1] one-line hook (NOT shaming the viewer), [2-4] news #1 (2 setup + 1 punchline), [5-6] news #2 (setup + punchline), [7-8] news #3 (setup + punchline), [9] "Это была Капибара Новости.", [10] sign-off + "До завтра!" ],
@@ -26,6 +35,12 @@ let txt = j.candidates?.[0]?.content?.parts?.map(p => p.text).filter(Boolean).jo
 const m = txt.match(/\{[\s\S]*\}/)
 if (!m) { console.error('no JSON in response:', txt.slice(0, 300)); process.exit(3) }
 const data = JSON.parse(m[0])
+// Factory Law 2 — soft validate the character budget. The atempo pace-lock in reconcat.mjs is the
+// HARD guarantee, so an over-budget script only warns; it never crashes the daily run.
+const totalChars = Array.isArray(data.lines) ? data.lines.reduce((a, l) => a + String(l).length, 0) : 0
+if (totalChars > 850) {
+  console.warn(`[gen_news] WARNING: spoken text is ${totalChars} chars (budget <700, hard cap 850). Pace-lock (atempo) will compensate, but shorten next time.`)
+}
 writeFileSync('today.json', JSON.stringify(data, null, 2))
 // grounding sources (proof it used real search)
 const srcs = j.candidates?.[0]?.groundingMetadata?.groundingChunks?.map(c => c.web?.title).filter(Boolean) || []

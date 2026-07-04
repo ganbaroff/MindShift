@@ -32,14 +32,21 @@ if (state.lastRan === dateStr && !FORCE) {
   process.exit(0)
 }
 
+const CWD = new URL('.', import.meta.url).pathname.replace(/^\/([A-Z]:)/, '$1')
 function run(label, args) {
   console.log(`\n━━━ ${label}`)
   try {
-    execFileSync('node', args, { stdio: 'inherit', cwd: new URL('.', import.meta.url).pathname.replace(/^\/([A-Z]:)/, '$1') })
+    execFileSync('node', args, { stdio: 'inherit', cwd: CWD })
   } catch (e) {
     console.error(`\n✗ Stage "${label}" failed — pipeline stopped.`)
     process.exit(1)
   }
+}
+// Soft stage: runs, surfaces its output, but NEVER stops the pipeline (used for the report-mode QA gate).
+function runSoft(label, args, env) {
+  console.log(`\n━━━ ${label}`)
+  try { execFileSync('node', args, { stdio: 'inherit', cwd: CWD, env: { ...process.env, ...env } }) }
+  catch { console.warn(`[make-clip] ${label}: flagged (non-blocking in preview; hard gate lives on publish)`) }
 }
 
 // ── Stage 1: Fresh news script ────────────────────────────────────────────
@@ -47,7 +54,7 @@ if (SKIP_NEWS) {
   if (!existsSync('today.json')) { console.error('[make-clip] --skip-news but today.json missing'); process.exit(1) }
   console.log('[make-clip] --skip-news: reusing today.json')
 } else {
-  run('gen_news  →  today.json', ['gen_news.mjs'])
+  run('gen_news  →  today.json', ['gen_news.mjs', dateStr]) // pass real date — default was frozen at 2026-06-28
 }
 
 // ── Stage 2: TTS synthesis ────────────────────────────────────────────────
@@ -93,6 +100,10 @@ if (REBUILD_OUTRO || !existsSync('outro.mp4')) {
 const assembleArgs = ['assemble.mjs']
 if (UPLOAD) assembleArgs.push('--upload')
 run(`assemble  →  kapibara-${dateStr}.mp4`, assembleArgs)
+
+// ── Stage 9.5: QA gate (Factory Law 10) — content-critic verdict on the assembled clip ──
+// REPORT mode here so the daily preview is never blocked; the HARD gate belongs on buffer_publish.
+runSoft('content_critic (report)  →  ship_ready verdict', ['content_critic.mjs', `kapibara-${dateStr}.mp4`], { CRITIC_NONBLOCKING: '1' })
 
 // ── Stage 10: Telegram preview ────────────────────────────────────────────
 if (!NO_PREVIEW) {

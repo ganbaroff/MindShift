@@ -1,4 +1,5 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs'
+import { execFileSync } from 'node:child_process'
 import { requireEnv } from './env.mjs'
 const ONLY = (process.argv.find(a => a.startsWith('--only=')) || '').split('=')[1] || null
 const tok = requireEnv('BUFFER_ACCESS_TOKEN')
@@ -11,6 +12,25 @@ if (!videoUrl && existsSync('latest_output.json')) {
   videoUrl = out.gcsUrl || `${BUCKET}/${out.file}`
 }
 if (!videoUrl) { console.error('[buffer_publish] no video URL'); process.exit(1) }
+
+// ── HARD QA GATE (Factory Law 10) — refuse to publish a clip that fails content-critic ──
+// This is the real block: it guards the public IG/TikTok push, never the preview. Override: --force-publish.
+if (!process.argv.includes('--force-publish') && process.env.PUBLISH_OVERRIDE !== '1') {
+  let localClip = null
+  if (existsSync('latest_output.json')) { try { localClip = JSON.parse(readFileSync('latest_output.json', 'utf8')).file } catch {} }
+  if (localClip && existsSync(localClip)) {
+    console.log(`[buffer_publish] QA gate → content_critic on ${localClip}`)
+    try {
+      execFileSync('node', ['content_critic.mjs', localClip], { stdio: 'inherit', cwd: new URL('.', import.meta.url).pathname.replace(/^\/([A-Z]:)/, '$1') })
+      console.log('[buffer_publish] ✓ QA gate passed (ship_ready) — publishing')
+    } catch {
+      console.error('[buffer_publish] ✗ BLOCKED: clip not ship_ready (content-critic). Fix + re-render, or override with --force-publish. NOT publishing.')
+      process.exit(1)
+    }
+  } else {
+    console.warn('[buffer_publish] ⚠ QA gate SKIPPED — local clip not found for critique; publishing URL unguarded. Run the critic before publish or pass the local mp4.')
+  }
+}
 
 // Build an ENGAGING caption from today.json — TOPIC-AWARE (football vs AI)
 const KEY_EMOJI = { news: '📰', rocket: '🚀', chip: '🧠', lock: '🔒', chart: '📈', robot: '🤖', trophy: '🏆', ball: '⚽', gloves: '🧤', boot: '👟', whistle: '📣' }
