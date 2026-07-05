@@ -17,7 +17,10 @@ import { checkDbRateLimit } from '../_shared/rateLimit.ts'
 const DODO_API_KEY = Deno.env.get('DODO_API_KEY')
 const DODO_PRODUCT_ID = Deno.env.get('DODO_PRODUCT_ID') ?? ''
 const APP_URL = Deno.env.get('APP_URL') ?? 'https://mind-shift-git-main-yusifg27-3093s-projects.vercel.app'
-const DODO_API_BASE = Deno.env.get('DODO_API_BASE') ?? 'https://live.dodopayments.com'
+// Require DODO_API_BASE explicitly — no live default. A missing/typo'd env must NOT
+// silently point checkout at live.dodopayments.com while the funnel assumes TEST mode.
+// Boot-time 503 (below) surfaces the misconfig instead of charging real money by accident.
+const DODO_API_BASE = Deno.env.get('DODO_API_BASE') ?? ''
 
 Deno.serve(async (req: Request) => {
   const cors = getCorsHeaders(req)
@@ -25,7 +28,16 @@ Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors })
 
   if (!DODO_API_KEY) {
-    return new Response(JSON.stringify({ error: 'Payments not configured' }), {
+    return new Response(JSON.stringify({ error: 'Payments not configured', reason: 'config_missing_api_key' }), {
+      status: 503, headers: { ...cors, 'Content-Type': 'application/json' },
+    })
+  }
+  if (!DODO_API_BASE) {
+    // Fail loud instead of defaulting to the LIVE endpoint. Set DODO_API_BASE
+    // (e.g. https://test.dodopayments.com) explicitly so TEST intent is never
+    // silently promoted to live.
+    console.error('[create-checkout] DODO_API_BASE not set — refusing to guess (would risk live mode)')
+    return new Response(JSON.stringify({ error: 'Payments not configured', reason: 'config_missing_api_base' }), {
       status: 503, headers: { ...cors, 'Content-Type': 'application/json' },
     })
   }
@@ -73,8 +85,22 @@ Deno.serve(async (req: Request) => {
 
     if (!dodoRes.ok) {
       const err = await dodoRes.text()
-      console.error('[create-checkout] Dodo error:', err)
-      return new Response(JSON.stringify({ error: 'Payment provider error' }), {
+      console.error('[create-checkout] Dodo error:', dodoRes.status, err)
+      // Coarse machine-readable classification so a broken checkout is diagnosable
+      // in production WITHOUT leaking the API key or raw provider body:
+      //   401/403 -> config (bad/expired key or wrong mode)
+      //   400/404/422 -> request (bad product id / payload)
+      //   else -> upstream (provider 5xx / transient)
+      const cls = dodoRes.status === 401 || dodoRes.status === 403
+        ? 'config'
+        : (dodoRes.status === 400 || dodoRes.status === 404 || dodoRes.status === 422)
+          ? 'request'
+          : 'upstream'
+      return new Response(JSON.stringify({
+        error: 'Payment provider error',
+        reason: cls,
+        provider_status: dodoRes.status,
+      }), {
         status: 502, headers: { ...cors, 'Content-Type': 'application/json' },
       })
     }

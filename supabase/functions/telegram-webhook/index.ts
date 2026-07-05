@@ -287,6 +287,23 @@ Deno.serve(async (req: Request) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     )
 
+    // -- Idempotency: skip duplicate update_id (Telegram retries slow/non-2xx) --
+    // Cold starts run 11-12s; Telegram redelivers the SAME update_id on timeout.
+    // First delivery inserts the row and proceeds; any retry hits the PK conflict,
+    // gets 0 rows back, and we return 200 immediately with NO side effects
+    // (no duplicate task insert, no double agent-chat LLM call, no double checkout).
+    if (typeof update.update_id === 'number') {
+      const { data: dedupRows, error: dedupErr } = await supabase
+        .from('telegram_processed_updates')
+        .upsert({ update_id: update.update_id }, { onConflict: 'update_id', ignoreDuplicates: true })
+        .select('update_id')
+      // On a genuine duplicate, ignoreDuplicates returns an empty array (no error).
+      // Fail OPEN only on a real DB error so a transient hiccup never drops traffic.
+      if (!dedupErr && Array.isArray(dedupRows) && dedupRows.length === 0) {
+        return new Response('ok (duplicate update_id, skipped)', { status: 200 })
+      }
+    }
+
     // -- FUNNEL: cold-guest quiz deep link (/start quiz) ------------------------
     // t.me/<bot>?start=quiz  ->  text === "/start quiz". Reuses agent-chat +
     // create-checkout AS-IS via an admin-minted guest Supabase user. No /link.
@@ -295,6 +312,18 @@ Deno.serve(async (req: Request) => {
       : ''
 
     if (text.startsWith('/start') && startArg === FUNNEL_START_PARAM) {
+      // Rate-limit guest minting BEFORE ensureGuestSession (which calls admin.createUser
+      // + a password login). The mid-quiz branch is already limited; this closes the
+      // /start-quiz hole so a leaked webhook secret cannot mint unbounded auth users.
+      const { allowed: startAllowed } = await checkDbRateLimit(supabase, `tg-start-${telegramId}`, false, {
+        fnName: 'funnel-start', limitFree: 3, windowMs: LINK_RATE_WINDOW_MS,
+      })
+      if (!startAllowed) {
+        await sendTelegramMessage(chatId, lang === 'ru'
+          ? 'Секунду — слишком быстро. Попробуй ещё раз через минуту.'
+          : 'One sec — a bit too fast. Try again in a minute.')
+        return new Response('ok', { status: 200 })
+      }
       const guest = await ensureGuestSession(supabase, telegramId)
       if (!guest) {
         // Degrade: hand a web-app entry so the guest can still convert.
@@ -368,9 +397,15 @@ Deno.serve(async (req: Request) => {
             : `\n\n👉 Ready to try MindShift Pro? Get it here:\n${ctaUrl}`
           await sendTelegramMessage(chatId, ctaMsg)
           // Quiz done — park guest (quiz_step = 0) so further messages fall through.
-          await supabase.from('funnel_guests').update({ quiz_step: 0 }).eq('telegram_id', telegramId)
+          // Compare-and-swap on the step we read: a concurrent message that already
+          // advanced/reset the row won't be clobbered (rows-affected = 0, harmless).
+          await supabase.from('funnel_guests').update({ quiz_step: 0 })
+            .eq('telegram_id', telegramId).eq('quiz_step', step)
         } else {
-          await supabase.from('funnel_guests').update({ quiz_step: step + 1 }).eq('telegram_id', telegramId)
+          // Atomic advance: only bump if quiz_step is still the value we read.
+          // Prevents two concurrent messages from double-advancing or skipping a turn.
+          await supabase.from('funnel_guests').update({ quiz_step: step + 1 })
+            .eq('telegram_id', telegramId).eq('quiz_step', step)
         }
         return new Response('ok', { status: 200 })
       }
