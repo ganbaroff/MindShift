@@ -46,7 +46,10 @@ jobs:
           deploy telegram-webhook --no-verify-jwt
           deploy gcal-sync
           deploy gcal-store-token
-          deploy scheduled-push
+          # scheduled-push is cron-invoked with a CRON_SECRET bearer (not a JWT);
+          # platform JWT verification 401s every cron call, so it MUST stay no-verify-jwt.
+          # Auth is enforced in-code via the CRON_SECRET check.
+          deploy scheduled-push --no-verify-jwt
           deploy create-checkout
           deploy stripe-webhook --no-verify-jwt
           deploy gcal-inbound
