@@ -65,7 +65,7 @@ jobs:
       - name: Run pipeline
         run: |
           ARGS="--upload"
-          [ "${{ github.event.inputs.dry_run }}" = "true" ] && ARGS="$ARGS --no-preview"
+          [ "${{ github.event.inputs.dry_run }}" = "true" ] && ARGS="$ARGS --no-preview --no-publish"
           node make-clip.mjs $ARGS
         # no PLAYWRIGHT_BROWSERS_PATH override — chromium installs to the runner's
         # default ~/.cache/ms-playwright; the old /root/.cache path was wrong (runner != root)

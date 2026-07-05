@@ -7,6 +7,7 @@
  *   node make-clip.mjs --upload         # upload final mp4 to GCS (required for Buffer/IG)
  *   node make-clip.mjs --force          # re-run even if already ran today
  *   node make-clip.mjs --no-preview     # skip Telegram preview post
+ *   node make-clip.mjs --no-publish     # skip IG/TikTok auto-publish (default = publish after QA gate)
  *   node make-clip.mjs --rebuild-outro  # re-voice and re-render outro (normally static)
  *
  * Stops on any stage failure (Disconnect #12 fix).
@@ -20,6 +21,7 @@ const FORCE = A.includes('--force')
 const SKIP_NEWS = A.includes('--skip-news')
 const UPLOAD = A.includes('--upload')
 const NO_PREVIEW = A.includes('--no-preview')
+const NO_PUBLISH = A.includes('--no-publish')
 const REBUILD_OUTRO = A.includes('--rebuild-outro')
 
 const dateStr = new Date().toISOString().slice(0, 10)
@@ -46,7 +48,7 @@ function run(label, args) {
 function runSoft(label, args, env) {
   console.log(`\n━━━ ${label}`)
   try { execFileSync('node', args, { stdio: 'inherit', cwd: CWD, env: { ...process.env, ...env } }) }
-  catch { console.warn(`[make-clip] ${label}: flagged (non-blocking in preview; hard gate lives on publish)`) }
+  catch { console.warn(`[make-clip] ${label}: failed/blocked — non-blocking, pipeline continues (hard gate lives inside buffer_publish)`) }
 }
 
 // ── Stage 1: Fresh news script ────────────────────────────────────────────
@@ -108,10 +110,32 @@ runSoft('content_critic (report)  →  ship_ready verdict', ['content_critic.mjs
 // ── Stage 10: Telegram preview ────────────────────────────────────────────
 if (!NO_PREVIEW) {
   run('tg_post  →  @atlasvideos preview', ['tg_post.mjs'])
-  console.log('\n📨 Preview posted to Telegram. Awaiting CEO "го" before IG/TikTok publish.')
-  console.log('   Publish command: node buffer_create.mjs --upload && node buffer_publish.mjs')
+  console.log('\n📨 Preview posted to Telegram.')
 } else {
   console.log('\n[make-clip] --no-preview: skipping Telegram post')
+}
+
+// ── Stage 10.5: AUTO-PUBLISH (Вариант Б, CEO 2026-07-05: «всё публикуй, но только после проверок») ──
+// buffer_publish.mjs enforces the HARD gates itself: content_critic ship_ready + published.json idempotency.
+// Opt-out: --no-publish (used by CI dry_run).
+if (!NO_PUBLISH) {
+  let out = {}
+  try { out = JSON.parse(readFileSync('latest_output.json', 'utf8')) } catch {}
+  if (!out.gcsUrl && out.file) {
+    // Buffer needs a public URL — upload if assemble ran without --upload (local runs)
+    console.log('\n━━━ gcs-upload (auto-publish needs public URL)')
+    const gcloud = process.platform === 'win32' ? 'gcloud.cmd' : 'gcloud'
+    try {
+      execFileSync(gcloud, ['storage', 'cp', out.file, `gs://kapibara-news-pub-0321449510/${out.file}`], { stdio: 'inherit', cwd: CWD })
+      out.gcsUrl = `https://storage.googleapis.com/kapibara-news-pub-0321449510/${out.file}`
+      writeFileSync('latest_output.json', JSON.stringify(out))
+    } catch { console.error('[make-clip] ✗ GCS upload failed — cannot auto-publish (clip stays local + TG preview only)') }
+  }
+  if (out.gcsUrl) {
+    runSoft('buffer_publish  →  IG+TikTok (auto, QA-gated)', ['buffer_publish.mjs'])
+  }
+} else {
+  console.log('\n[make-clip] --no-publish: skipping IG/TikTok publish')
 }
 
 // ── Done ──────────────────────────────────────────────────────────────────

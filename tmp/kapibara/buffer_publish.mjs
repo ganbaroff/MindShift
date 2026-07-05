@@ -13,6 +13,22 @@ if (!videoUrl && existsSync('latest_output.json')) {
 }
 if (!videoUrl) { console.error('[buffer_publish] no video URL'); process.exit(1) }
 
+// ── IDEMPOTENCY GUARD — never double-publish the same episode (auto-publish safety) ──
+// Keyed on date+format in published.json. Override: --republish. --only=<svc> retries bypass (per-channel retry).
+if (!process.argv.includes('--republish') && !ONLY && existsSync('published.json')) {
+  try {
+    const _tj = existsSync('today.json') ? JSON.parse(readFileSync('today.json', 'utf8')) : {}
+    const _fb = new Set(['trophy', 'ball', 'gloves', 'boot', 'whistle'])
+    const _fmt = (_tj.items || []).some(it => _fb.has(it.key)) ? 'football' : 'ai-news'
+    const _date = (existsSync('latest_output.json') ? JSON.parse(readFileSync('latest_output.json', 'utf8')).date : null) || new Date().toISOString().slice(0, 10)
+    const _log = JSON.parse(readFileSync('published.json', 'utf8'))
+    if (_log.some(e => e.date === _date && e.format === _fmt)) {
+      console.log(`[buffer_publish] already published ${_fmt} for ${_date} (published.json) — skipping. Override: --republish`)
+      process.exit(0)
+    }
+  } catch { /* unreadable log — proceed, QA gate still guards */ }
+}
+
 // ── HARD QA GATE (Factory Law 10) — refuse to publish a clip that fails content-critic ──
 // This is the real block: it guards the public IG/TikTok push, never the preview. Override: --force-publish.
 if (!process.argv.includes('--force-publish') && process.env.PUBLISH_OVERRIDE !== '1') {
