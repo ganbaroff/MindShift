@@ -7,7 +7,7 @@
   "durationSec": 24,
   "bot": "@mindfocus_mebot",
   "series": { "top": "Kapibara Ladder", "bottom": "AI · ONE RUNG A DAY" },
-  "teaser": "fun fact: capybara = 2 tokens",
+  "teaser": "rung 1 of 5 · this week's ladder",
   "question": "When AI reads your message, what is a TOKEN?",
   "options": [
     { "id": "A", "text": "A whole sentence" },

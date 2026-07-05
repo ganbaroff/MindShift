@@ -165,7 +165,9 @@ const DEFAULT_EP = {
   correctId:"B", eliminateEarlyId:"C",
   teachLine:"A token is a piece of a word. AI reads in tokens, not letters.",
   callbackFact:"capybara = 2 tokens: capy + bara",
-  teaser:"fun fact: capybara = 2 tokens",
+  // CEO catch 2026-07-05: the capybara=2-tokens fact HALF-SPOILS answer B when shown before the
+  // question — the fact belongs to the REVEAL (callbackFact). Hook teaser = series progress only.
+  teaser:"rung 1 of 5 · this week's ladder",
   disclosure:"AI-made · Kapibara"
 };
 const EP = window.EP || DEFAULT_EP;
