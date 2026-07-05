@@ -37,12 +37,14 @@ const PAD = 0.28 // seconds of held silence after each VO line
 // in the JSON's phrasing? it does (vo.think). options+micro are one JSON line ("options" ends with the
 // eliminate payoff); split here so the beat holds long enough — but text stays sourced from EP.vo.
 const V = EP.vo
+// CEO 2026-07-05: NO option may disappear before the viewer's think-time — all 4 chips live
+// through the countdown; the elimination beat comes AFTER 3-2-1 as the reveal warm-up.
 const BEATS = [
   { state: 'hook',     text: V.hook },
   { state: 'question', text: V.question },
   { state: 'options',  text: 'A: a whole sentence. B: a chunk of text. C: a password. D: a payment coin.' },
-  { state: 'micro',    text: "Not a password — that one's out." },
   { state: 'think',    text: V.think },
+  { state: 'micro',    text: "Not a password — that one's out." },
   { state: 'reveal',   text: V.reveal },
   { state: 'cta',      text: V.cta },
 ]

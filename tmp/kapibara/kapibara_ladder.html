@@ -145,9 +145,10 @@
   <div class="teaser hidden" id="teaser"></div>
   <div class="options hidden" id="options"></div>
   <div class="ring hidden" id="ring">
-    <svg width="280" height="280"><circle cx="140" cy="140" r="128" stroke="#33374d" stroke-width="16" fill="none"/>
-      <circle id="arc" cx="140" cy="140" r="128" stroke="#4ECDC4" stroke-width="16" fill="none"
-        stroke-linecap="round" stroke-dasharray="804.2" stroke-dashoffset="0"/></svg>
+    <!-- viewBox required: without it the 280 svg is CLIPPED (not scaled) by the 260px CSS box — CEO catch: круг обрезан -->
+    <svg viewBox="0 0 280 280" width="260" height="260"><circle cx="140" cy="140" r="120" stroke="#33374d" stroke-width="16" fill="none"/>
+      <circle id="arc" cx="140" cy="140" r="120" stroke="#4ECDC4" stroke-width="16" fill="none"
+        stroke-linecap="round" stroke-dasharray="754" stroke-dashoffset="0"/></svg>
     <div class="count" id="count">3</div>
   </div>
   <div class="teach hidden" id="teach"></div>
@@ -214,7 +215,7 @@ window.__setState = setState;
 let DATA=null;
 const mouth=$('mouth'),tongue=$('tongue'),capyG=$('capyG'),eO=$('eyesOpen'),eB=$('eyesBlink');
 const earL=$('earL'),earR=$('earR');
-const ARC_LEN=2*Math.PI*128; // 804.25
+const ARC_LEN=2*Math.PI*120; // 753.98 — matches r=120 (r shrunk so the 16px stroke clears the viewBox)
 
 window.loadData=(d)=>{
   DATA=d;
@@ -322,7 +323,7 @@ window.setFrame=(i)=>{
           // brief shrink as it drops out
           const p=clamp((t-b.s)/0.4,0,1); sc=1-eoc(p)*0.04; }
       } else if(state==='think'){
-        if(id===EP.eliminateEarlyId){ op=0.32; border='#33374d'; col='var(--muted)'; labcol='var(--muted)'; }
+        // CEO rule: ALL FOUR options stay live through the countdown — elimination only on 'micro' (after 3-2-1)
       } else if(state==='reveal'){
         if(id===EP.correctId){
           const p=clamp((t-b.s)/0.5,0,1),e=eoc(p);
