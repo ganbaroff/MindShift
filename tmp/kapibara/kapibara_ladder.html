@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  /* Kapibara Ladder — 1080x1920 AI-education quiz-short. ADHD-safe: teal/indigo/gold, NEVER red.
+     Two APIs:
+       window.__setState(s)  — static preview of one beat (hook/question/options/micro/think/reveal/cta)
+       window.loadData(d) + window.setFrame(i) — per-frame animation engine (render6 pattern).
+         Everything in setFrame is deterministic from t=i/fps: mascot breathing/ear-wiggle/blink,
+         mouth ry from d.env (audio envelope), and beat-driven UI (chip fade-in, elimination fade,
+         countdown ring sweep, reveal snap, XP rung pulse, CTA slide-in). NO CSS animations — frames
+         are screenshots, so any keyframe animation would be frozen. All motion computed here. */
+  :root{
+    --bg:#0F1117; --teal:#4ECDC4; --indigo:#7B72FF; --gold:#F59E0B;
+    --surface:#252840; --surface2:#1E2136; --text:#E8E8F0; --muted:#8B8BA7;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;font-family:'Plus Jakarta Sans','Segoe UI',system-ui,sans-serif}
+  html,body{width:1080px;height:1920px;background:var(--bg);overflow:hidden}
+  #stage{width:1080px;height:1920px;position:relative;
+    background:radial-gradient(120% 78% at 50% 20%, #1c2140 0%, #12142c 54%, var(--bg) 100%)}
+  #glow{position:absolute;left:50%;top:120px;width:760px;height:520px;transform:translateX(-50%);
+    background:radial-gradient(ellipse at center, rgba(123,114,255,.30), transparent 66%);filter:blur(28px)}
+  #vig{position:absolute;inset:0;z-index:9;pointer-events:none;box-shadow:inset 0 0 300px 70px rgba(6,7,18,.6)}
+
+  /* AI disclosure — persistent every frame (Factory Law 5) */
+  .disclosure{position:absolute;z-index:8;top:46px;right:54px;color:var(--muted);
+    font-size:30px;letter-spacing:.5px;opacity:.9;border:1px solid #33374d;
+    background:rgba(20,22,40,.5);padding:9px 20px;border-radius:999px}
+
+  /* Kapibara host (gradient SVG) — top-left, above the options */
+  #host{position:absolute;z-index:4;left:60px;top:96px;width:360px;height:360px;
+    filter:drop-shadow(0 18px 26px rgba(0,0,0,.45)) drop-shadow(0 0 22px rgba(123,114,255,.22))}
+  #hostSpot{position:absolute;z-index:3;left:60px;top:150px;width:360px;height:340px;
+    background:radial-gradient(ellipse 46% 50% at 50% 44%, rgba(123,114,255,.24), rgba(78,205,196,.06) 58%, transparent 74%);filter:blur(6px)}
+
+  /* Series title chip (top, next to host) */
+  .series{position:absolute;z-index:5;left:452px;top:150px;right:54px}
+  .series b{display:block;color:var(--text);font-size:52px;font-weight:900;letter-spacing:1px;line-height:1}
+  .series span{display:block;margin-top:12px;color:var(--teal);font-size:30px;font-weight:800;letter-spacing:5px}
+
+  /* XP crystal ladder — HORIZONTAL row of rungs under the title (dodges money-tree trade dress) */
+  .ladder{position:absolute;z-index:5;left:452px;top:296px;display:flex;gap:22px}
+  .rung{width:70px;height:70px;transform:rotate(45deg);background:var(--surface);
+    border:3px solid #3a3f5c;border-radius:14px}
+  .rung .core{position:absolute;inset:16px;border-radius:8px;background:transparent}
+
+  /* Headline / question / teaser */
+  .headline{position:absolute;z-index:5;left:56px;right:56px;top:540px;color:var(--text);
+    font-size:78px;font-weight:800;line-height:1.14;text-align:center;text-shadow:0 3px 14px rgba(0,0,0,.55)}
+  .headline .kw{color:var(--gold)}
+  .banner{position:absolute;z-index:5;left:56px;right:56px;top:560px;background:rgba(123,114,255,.16);
+    border:2px solid var(--indigo);border-radius:34px;padding:44px 46px;color:var(--text);
+    font-size:62px;font-weight:800;text-align:center;line-height:1.18}
+  .teaser{position:absolute;z-index:5;left:56px;top:470px;color:var(--muted);font-size:38px;
+    background:var(--surface2);border-radius:16px;padding:14px 26px;border:1px solid #33374d}
+
+  /* Options — sized so all 4 chips end well above the subtitle band (no overlap with option D) */
+  .options{position:absolute;z-index:5;left:56px;right:56px;top:790px;display:grid;gap:24px}
+  .chip{background:var(--surface);border:3px solid var(--teal);border-radius:26px;
+    padding:32px 44px;color:var(--text);font-size:56px;font-weight:700;display:flex;gap:30px;align-items:center;position:relative}
+  .chip .lab{color:var(--gold);font-weight:900;min-width:64px}
+  .chip .mark{margin-left:auto;color:var(--teal);font-size:60px;font-weight:900;opacity:0}
+
+  /* Countdown ring — sits in the empty gap ABOVE the options (never over the chips) */
+  .ring{position:absolute;z-index:6;left:50%;top:540px;transform:translateX(-50%);width:260px;height:260px}
+  .ring svg{transform:rotate(-90deg);width:260px;height:260px}
+  .count{position:absolute;left:0;right:0;top:66px;text-align:center;color:var(--teal);
+    font-size:128px;font-weight:900;text-shadow:0 4px 18px rgba(0,0,0,.6)}
+
+  /* Teach + CTA — teach sits in the upper gap on reveal (options fade below it, no collision) */
+  .teach{position:absolute;z-index:6;left:56px;right:56px;top:470px;background:rgba(123,114,255,.24);
+    border:2px solid var(--indigo);border-radius:30px;padding:36px 40px;color:var(--text);
+    font-size:52px;font-weight:700;text-align:center;line-height:1.22;
+    box-shadow:0 18px 50px rgba(0,0,0,.5)}
+  .teach .fact{display:block;margin-top:18px;color:var(--teal);font-size:44px}
+  .cta{position:absolute;z-index:5;left:56px;right:56px;bottom:340px;text-align:center}
+  .cta .big{color:var(--text);font-size:64px;font-weight:800}
+  .cta .bot{display:inline-block;margin-top:28px;color:var(--teal);font-size:62px;font-weight:900;
+    background:rgba(78,205,196,.12);border:2px solid var(--teal);border-radius:22px;padding:20px 42px}
+  .cta .sec{margin-top:24px;color:var(--muted);font-size:40px}
+
+  /* Subtitle band (bottom, dark backing for separation) */
+  .cap{position:absolute;z-index:7;left:56px;right:56px;bottom:150px;text-align:center;color:#fff;
+    font-size:54px;font-weight:800;line-height:1.16;padding:18px 30px;border-radius:24px;
+    background:rgba(8,9,21,.55);text-shadow:0 5px 24px rgba(0,0,0,.9),0 2px 6px rgba(0,0,0,.95)}
+  .cap:empty{padding:0;background:transparent}
+  .cap b{color:var(--gold)}
+  .hidden{display:none!important}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="glow"></div>
+  <div class="disclosure" id="disc">AI-made · Kapibara</div>
+
+  <div id="hostSpot"></div>
+  <div id="host">
+    <svg id="capy" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="gBody" cx="42%" cy="32%" r="78%">
+          <stop offset="0%" stop-color="#F4EBD6"/><stop offset="52%" stop-color="#E9D9B5"/><stop offset="100%" stop-color="#CBB488"/>
+        </radialGradient>
+        <radialGradient id="gEar" cx="40%" cy="30%" r="85%">
+          <stop offset="0%" stop-color="#F1E4C9"/><stop offset="60%" stop-color="#E9D9B5"/><stop offset="100%" stop-color="#CBB488"/>
+        </radialGradient>
+        <linearGradient id="gBelly" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#F8F0DE"/><stop offset="100%" stop-color="#F4EBD6" stop-opacity="0"/>
+        </linearGradient>
+        <linearGradient id="gHat" x1="0.2" y1="0" x2="0.8" y2="1">
+          <stop offset="0%" stop-color="#3B2C1E"/><stop offset="55%" stop-color="#2A1F16"/><stop offset="100%" stop-color="#160F08"/>
+        </linearGradient>
+      </defs>
+      <ellipse cx="100" cy="186" rx="52" ry="5" fill="#000" opacity="0.18"/>
+      <g id="capyG">
+        <g id="earL"><ellipse cx="68" cy="66" rx="12" ry="14" fill="url(#gEar)" stroke="#7A5C3A" stroke-width="2.2"/><ellipse cx="68" cy="67" rx="6" ry="7.5" fill="#CBB488"/></g>
+        <g id="earR"><ellipse cx="132" cy="66" rx="12" ry="14" fill="url(#gEar)" stroke="#7A5C3A" stroke-width="2.2"/><ellipse cx="132" cy="67" rx="6" ry="7.5" fill="#CBB488"/></g>
+        <ellipse cx="100" cy="112" rx="58" ry="55" fill="url(#gBody)" stroke="#7A5C3A" stroke-width="2.4"/>
+        <path d="M 55 78 A 58 55 0 0 1 128 60" fill="none" stroke="#FBF4E4" stroke-width="2.4" stroke-linecap="round" opacity="0.55"/>
+        <ellipse cx="100" cy="126" rx="36" ry="26" fill="url(#gBelly)" opacity="0.85"/>
+        <ellipse cx="64" cy="116" rx="8" ry="4.5" fill="rgba(231,140,120,0.30)"/><ellipse cx="136" cy="116" rx="8" ry="4.5" fill="rgba(231,140,120,0.30)"/>
+        <g id="eyesOpen"><circle cx="82" cy="100" r="3.4" fill="#5A4632"/><circle cx="118" cy="100" r="3.4" fill="#5A4632"/><circle cx="83.4" cy="98.5" r="1.7" fill="#fff" opacity=".92"/><circle cx="119.4" cy="98.5" r="1.7" fill="#fff" opacity=".92"/><circle cx="80.8" cy="101.4" r="0.8" fill="#fff" opacity=".6"/><circle cx="116.8" cy="101.4" r="0.8" fill="#fff" opacity=".6"/></g>
+        <g id="eyesBlink" style="display:none"><path d="M 76 100 Q 82 104, 88 100" stroke="#5A4632" stroke-width="2.6" fill="none" stroke-linecap="round"/><path d="M 112 100 Q 118 104, 124 100" stroke="#5A4632" stroke-width="2.6" fill="none" stroke-linecap="round"/></g>
+        <ellipse cx="100" cy="112" rx="4" ry="2.8" fill="#5A4632"/>
+        <ellipse id="mouth" cx="100" cy="123" rx="9" ry="1.6" fill="#3A2A1E"/><ellipse id="tongue" cx="100" cy="125" rx="5" ry="0.4" fill="#C77B6B" opacity="0"/>
+        <path d="M62 156 Q100 176 138 156" fill="none" stroke="#4ECDC4" stroke-width="10" stroke-linecap="round"/>
+        <g fill="#F2C94C" stroke="#C99A2E" stroke-width="0.7">
+          <path d="M80 162 c-5 -1 -6 -8 -1 -11 c5 2 5 8 1 11 z"/>
+          <path d="M100 169 c-5 -1 -6 -8 -1 -11 c5 2 5 8 1 11 z"/>
+          <path d="M120 162 c-5 -1 -6 -8 -1 -11 c5 2 5 8 1 11 z"/>
+        </g>
+        <ellipse cx="100" cy="62" rx="33" ry="7" fill="#1C140D"/>
+        <path d="M71 63 Q67 27 100 22 Q133 27 129 63 Z" fill="url(#gHat)" stroke="#160F08" stroke-width="2"/>
+        <path d="M74 55 Q70 30 99 24" stroke="#4A3826" stroke-width="2.2" fill="none" stroke-linecap="round" opacity=".7"/>
+        <path d="M78 41 Q100 31 122 41" stroke="#3A2A1E" stroke-width="3.5" fill="none" stroke-linecap="round" opacity=".85"/>
+      </g>
+    </svg>
+  </div>
+
+  <div class="series"><b id="seriesTop">Kapibara Ladder</b><span id="seriesBot">AI · ONE RUNG A DAY</span></div>
+  <div class="ladder" id="ladder"></div>
+
+  <div class="headline hidden" id="headline"></div>
+  <div class="banner hidden" id="banner"></div>
+  <div class="teaser hidden" id="teaser"></div>
+  <div class="options hidden" id="options"></div>
+  <div class="ring hidden" id="ring">
+    <svg width="280" height="280"><circle cx="140" cy="140" r="128" stroke="#33374d" stroke-width="16" fill="none"/>
+      <circle id="arc" cx="140" cy="140" r="128" stroke="#4ECDC4" stroke-width="16" fill="none"
+        stroke-linecap="round" stroke-dasharray="804.2" stroke-dashoffset="0"/></svg>
+    <div class="count" id="count">3</div>
+  </div>
+  <div class="teach hidden" id="teach"></div>
+  <div class="cta hidden" id="cta"></div>
+  <div class="cap" id="cap"></div>
+</div>
+<script>
+const DEFAULT_EP = {
+  keyword:"TOKEN", bot:"@KapibaraSchoolBot",
+  series:{top:"Kapibara Ladder", bottom:"AI · ONE RUNG A DAY"},
+  question:"When AI reads your message, what is a TOKEN?",
+  options:[{id:"A",text:"A whole sentence"},{id:"B",text:"A chunk of text"},
+           {id:"C",text:"A password"},{id:"D",text:"A payment coin"}],
+  correctId:"B", eliminateEarlyId:"C",
+  teachLine:"A token is a piece of a word. AI reads in tokens, not letters.",
+  callbackFact:"capybara = 2 tokens: capy + bara",
+  teaser:"fun fact: capybara = 2 tokens",
+  disclosure:"AI-made · Kapibara"
+};
+const EP = window.EP || DEFAULT_EP;
+const $ = id => document.getElementById(id);
+const show = (id,on=true)=>$(id).classList.toggle('hidden',!on);
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const eoc=(x)=>1-Math.pow(1-clamp(x,0,1),3); // easeOutCubic — deterministic pops (no CSS keyframes)
+
+// build ladder: 5 rungs
+$('ladder').innerHTML = Array.from({length:5}).map((_,i)=>`<div class="rung" id="rung${i}"><div class="core"></div></div>`).join('');
+$('disc').textContent = EP.disclosure || 'AI-made · Kapibara';
+if(EP.series){ $('seriesTop').textContent = EP.series.top||'Kapibara Ladder'; $('seriesBot').textContent = EP.series.bottom||'AI · ONE RUNG A DAY'; }
+
+// ── STATIC PREVIEW (keeps template proof; not used by the frame engine) ──
+function renderOptions(state){
+  $('options').innerHTML = EP.options.map(o=>{
+    const correct = state==='reveal' && o.id===EP.correctId;
+    const dim = (state==='reveal' && o.id!==EP.correctId) || (state==='micro' && o.id===EP.eliminateEarlyId);
+    const style = dim?'opacity:.34;border-color:#33374d;color:var(--muted)':'';
+    const cstyle = correct?'border-color:var(--teal);background:rgba(78,205,196,.20);box-shadow:0 0 0 6px rgba(78,205,196,.30),0 0 60px rgba(78,205,196,.35);transform:scale(1.03)':'';
+    const lab = dim?'style="color:var(--muted)"':'';
+    return `<div class="chip" style="${style}${cstyle}"><span class="lab" ${lab}>${o.id}</span><span>${o.text}</span><span class="mark" style="opacity:${correct?1:0}">✓</span></div>`;
+  }).join('');
+}
+function litRungs(n){for(let i=0;i<5;i++){const r=$('rung'+i);const on=i<n;r.style.background=on?'rgba(78,205,196,.25)':'var(--surface)';r.style.borderColor=on?'var(--teal)':'#3a3f5c';r.style.boxShadow=on?'0 0 40px rgba(78,205,196,.5)':'none';}}
+function setState(s){
+  ['headline','banner','teaser','options','ring','teach','cta'].forEach(id=>show(id,false));
+  $('cap').innerHTML='';
+  if(s==='hook'){
+    $('headline').innerHTML = `You use AI every day —<br>but do you know what a <span class="kw">${EP.keyword}</span> is?`;
+    show('headline'); if(EP.teaser){$('teaser').textContent=EP.teaser; show('teaser');} litRungs(0);
+  } else if(s==='question'){
+    $('banner').innerHTML = EP.question.replace(EP.keyword,`<span style="color:var(--gold)">${EP.keyword}</span>`);
+    show('banner'); litRungs(0);
+  } else if(s==='options'){ renderOptions('options'); show('options'); litRungs(0); }
+  else if(s==='micro'){ renderOptions('micro'); show('options'); $('cap').textContent="It's not a password — that one's out."; }
+  else if(s==='think'){ renderOptions('options'); show('options'); show('ring'); $('cap').textContent='Three… two… one… lock it in.'; }
+  else if(s==='reveal'){ renderOptions('reveal'); show('options'); litRungs(1);
+    $('teach').innerHTML = `${EP.teachLine}<span class="fact">${EP.callbackFact}</span>`; show('teach'); }
+  else if(s==='cta'){ $('cta').innerHTML = `<div class="big">Want the next rung?</div>
+      <div class="bot">${EP.bot}</div><div class="sec">free AI lessons · or comment ${EP.keyword}</div>`;
+    show('cta'); litRungs(1); }
+}
+window.__setState = setState;
+
+// ── FRAME ENGINE (render6 pattern) ──
+let DATA=null;
+const mouth=$('mouth'),tongue=$('tongue'),capyG=$('capyG'),eO=$('eyesOpen'),eB=$('eyesBlink');
+const earL=$('earL'),earR=$('earR');
+const ARC_LEN=2*Math.PI*128; // 804.25
+
+window.loadData=(d)=>{
+  DATA=d;
+  if(d.disclosure) $('disc').textContent=d.disclosure;
+  if(d.series){ $('seriesTop').textContent=d.series.top||$('seriesTop').textContent; $('seriesBot').textContent=d.series.bottom||$('seriesBot').textContent; }
+};
+
+// resolve current beat from timeline (beats: [{state,s,e,idx}], sorted by s)
+function beatAt(t){
+  let b=DATA.beats[0],idx=0;
+  for(let n=0;n<DATA.beats.length;n++){ if(t>=DATA.beats[n].s){ b=DATA.beats[n]; idx=n; } }
+  return {b,idx};
+}
+
+window.setFrame=(i)=>{
+  if(!DATA) return;
+  const t=i/DATA.fps, TP=2*Math.PI;
+  const open=DATA.env[Math.min(i,DATA.env.length-1)]||0;
+  const {b,idx}=beatAt(t);
+  const state=b.state;
+
+  // ── MASCOT lip-sync: mouth ry driven by audio envelope ──
+  mouth.setAttribute('ry',(1.6+open*8.5).toFixed(2));
+  mouth.setAttribute('rx',(9-open*1.2).toFixed(2));
+  tongue.setAttribute('opacity',(open>0.35?(open-0.35)*0.9:0).toFixed(2));
+  tongue.setAttribute('ry',(0.4+open*2.4).toFixed(2));
+
+  // ── breathing bob (~6px) + counter-phase squash/stretch ──
+  const bobAmp=6.5*(1+0.25*Math.sin(t*TP*(1/9)));
+  const breathe=Math.sin(t*TP*0.42);
+  let bobY=breathe*bobAmp;
+  const sy=1-breathe*0.018, sx=1+breathe*0.018;
+
+  // ── head nod at each beat change (0.4s eased dip) ──
+  const nprog=(t-b.s)/0.40; let nod=0;
+  if(nprog>=0&&nprog<=1){const e=Math.sin(eoc(nprog)*Math.PI);nod=-4.5*e; bobY+=2.4*e;}
+  // ── excited double-bob on reveal ──
+  if(state==='reveal'){const dp=(t-b.s)/0.6; if(dp>=0&&dp<=1) bobY-=Math.abs(Math.sin(dp*TP*2))*(1-dp)*8;}
+
+  const tilt=Math.sin(t*TP*0.9)*0.6+open*0.4+nod;
+  capyG.setAttribute('transform',`translate(0 ${bobY.toFixed(2)}) rotate(${tilt.toFixed(2)} 100 120) scale(${sx.toFixed(4)} ${sy.toFixed(4)}) translate(0 ${((1-sy)*120).toFixed(2)})`);
+
+  // ── ear micro-wiggle ──
+  const ew=1.3;
+  earL.setAttribute('transform',`rotate(${(Math.sin(t*TP*ew)*2.0).toFixed(2)} 68 78)`);
+  earR.setAttribute('transform',`rotate(${(Math.sin(t*TP*ew+1.7)*2.0).toFixed(2)} 132 78)`);
+
+  // ── blink: non-periodic irrational sine mix crossing a threshold ──
+  const bw=Math.sin(t*2.3)+Math.sin(t*3.7+1.1)*0.7+Math.sin(t*1.03+2.4)*0.5;
+  const bl=bw>2.02;
+  eO.style.display=bl?'none':'block'; eB.style.display=bl?'block':'none';
+
+  // ── UI VISIBILITY per beat ──
+  const showHead = state==='hook';
+  const showBan  = state==='question';
+  const showOpts = state==='options'||state==='micro'||state==='think'||state==='reveal';
+  const showRing = state==='think';
+  const showTeach= state==='reveal';
+  const showCta  = state==='cta';
+  show('headline',showHead); show('teaser',showHead&&!!EP.teaser);
+  show('banner',showBan);
+  show('options',showOpts);
+  show('ring',showRing);
+  show('teach',showTeach);
+  show('cta',showCta);
+
+  // ── HOOK headline fade+rise ──
+  if(showHead){
+    if($('headline').innerHTML.indexOf('<br>')<0)
+      $('headline').innerHTML=`You use AI every day —<br>but do you know what a <span class="kw">${EP.keyword}</span> is?`;
+    const p=eoc(clamp((t-b.s)/0.5,0,1));
+    $('headline').style.opacity=p.toFixed(3);
+    $('headline').style.transform=`translateY(${((1-p)*24).toFixed(1)}px)`;
+    if(EP.teaser){$('teaser').textContent=EP.teaser; $('teaser').style.opacity=clamp((t-b.s-0.3)/0.4,0,1).toFixed(3);}
+  }
+
+  // ── QUESTION banner pop ──
+  if(showBan){
+    $('banner').innerHTML=EP.question.replace(EP.keyword,`<span style="color:var(--gold)">${EP.keyword}</span>`);
+    const p=clamp((t-b.s)/0.45,0,1),e=eoc(p);
+    const sc=p>=1?1:clamp(0.94+e*0.09-Math.pow(Math.max(0,p-0.7)/0.3,1)*0.05,0.94,1.02);
+    $('banner').style.opacity=e.toFixed(3);
+    $('banner').style.transform=`scale(${sc.toFixed(3)})`;
+  }
+
+  // ── OPTIONS: chips fade/slide in one-by-one during 'options'; eliminated fades on 'micro';
+  //    reveal SNAP: correct chip scale-pop 0.96→1.05→1 + teal glow, others fade ──
+  if(showOpts){
+    // rebuild only when the chip set/structure could differ (cheap: always rebuild deterministic)
+    $('options').innerHTML=EP.options.map(o=>
+      `<div class="chip" data-id="${o.id}"><span class="lab">${o.id}</span><span>${o.text}</span><span class="mark">✓</span></div>`
+    ).join('');
+    const chips=$('options').querySelectorAll('.chip');
+    chips.forEach((c,k)=>{
+      const id=c.getAttribute('data-id');
+      const mark=c.querySelector('.mark');
+      // defaults: neutral teal-bordered chip
+      let op=1, ty=0, sc=1, border='var(--teal)', bg='var(--surface)', col='var(--text)', labcol='var(--gold)', box='none', markOp=0;
+      if(state==='options'){
+        // stagger in from beat start: chip k appears at s + k*0.18, over 0.32s
+        const p=clamp((t-b.s-k*0.18)/0.32,0,1),e=eoc(p);
+        op=e; ty=(1-e)*26;
+      } else if(state==='micro'){
+        if(id===EP.eliminateEarlyId){ op=0.32; border='#33374d'; col='var(--muted)'; labcol='var(--muted)';
+          // brief shrink as it drops out
+          const p=clamp((t-b.s)/0.4,0,1); sc=1-eoc(p)*0.04; }
+      } else if(state==='think'){
+        if(id===EP.eliminateEarlyId){ op=0.32; border='#33374d'; col='var(--muted)'; labcol='var(--muted)'; }
+      } else if(state==='reveal'){
+        if(id===EP.correctId){
+          const p=clamp((t-b.s)/0.5,0,1),e=eoc(p);
+          // 0.96 → 1.05 → 1 pop
+          sc = p<0.5 ? 0.96+(e/eoc(0.5))*0.09 : 1.05-eoc((p-0.5)/0.5)*0.05;
+          sc = clamp(sc,0.96,1.05);
+          border='var(--teal)'; bg='rgba(78,205,196,.20)';
+          const glow=e; box=`0 0 0 6px rgba(78,205,196,${(0.30*glow).toFixed(2)}),0 0 ${(60*glow).toFixed(0)}px rgba(78,205,196,${(0.38*glow).toFixed(2)})`;
+          markOp=clamp((t-b.s-0.2)/0.3,0,1);
+        } else {
+          const p=clamp((t-b.s)/0.45,0,1); op=1-p*0.66; border='#33374d'; col='var(--muted)'; labcol='var(--muted)';
+        }
+      }
+      c.style.opacity=op.toFixed(3);
+      c.style.transform=`translateY(${ty.toFixed(1)}px) scale(${sc.toFixed(3)})`;
+      c.style.borderColor=border; c.style.background=bg; c.style.color=col; c.style.boxShadow=box;
+      c.querySelector('.lab').style.color=labcol;
+      mark.style.opacity=markOp.toFixed(3);
+    });
+  }
+
+  // ── COUNTDOWN ring sweeps during 'think' (teal→gold arc, dashoffset from t) ──
+  if(showRing){
+    const dur=Math.max(0.6,b.e-b.s);
+    const p=clamp((t-b.s)/dur,0,1);
+    $('arc').setAttribute('stroke-dashoffset',(ARC_LEN*p).toFixed(1)); // arc empties as time runs
+    // teal → gold as it nears zero
+    const g=p; const col=g<0.66?'#4ECDC4':'#F59E0B';
+    $('arc').setAttribute('stroke',col);
+    const n=Math.max(1,Math.ceil((1-p)*3)); // 3,2,1
+    $('count').textContent=String(n);
+    $('count').style.color=col;
+  }
+
+  // ── XP RUNG lights with a small pulse on reveal ──
+  {
+    const litN = (state==='reveal'||state==='cta') ? 1 : 0;
+    for(let r=0;r<5;r++){
+      const el=$('rung'+r), on=r<litN;
+      let extra=1;
+      if(on&&state==='reveal'){ const p=clamp((t-b.s-0.15)/0.5,0,1); extra=1+Math.sin(eoc(p)*Math.PI)*0.18; }
+      el.style.background=on?'rgba(78,205,196,.25)':'var(--surface)';
+      el.style.borderColor=on?'var(--teal)':'#3a3f5c';
+      el.style.boxShadow=on?`0 0 ${(40*extra).toFixed(0)}px rgba(78,205,196,${(0.5*extra).toFixed(2)})`:'none';
+      el.style.transform=`rotate(45deg) scale(${on?extra.toFixed(3):'1'})`;
+    }
+  }
+
+  // ── TEACH fade-in on reveal ──
+  if(showTeach){
+    $('teach').innerHTML=`${EP.teachLine}<span class="fact">${EP.callbackFact}</span>`;
+    const p=eoc(clamp((t-b.s-0.35)/0.5,0,1));
+    $('teach').style.opacity=p.toFixed(3);
+    $('teach').style.transform=`translateY(${((1-p)*18).toFixed(1)}px)`;
+  }
+
+  // ── CTA slide-in ──
+  if(showCta){
+    $('cta').innerHTML=`<div class="big">Want the next rung?</div>
+      <div class="bot">${EP.bot}</div><div class="sec">free AI lessons · or comment ${EP.keyword}</div>`;
+    const p=eoc(clamp((t-b.s)/0.55,0,1));
+    $('cta').style.opacity=p.toFixed(3);
+    $('cta').style.transform=`translateY(${((1-p)*40).toFixed(1)}px)`;
+  }
+
+  // ── SUBTITLE (per-beat text, dark band) — suppressed on reveal/cta where the teach/CTA card
+  //    already carries the words (prevents the subtitle band colliding with those cards) ──
+  const capEl=$('cap');
+  const capBeat = state!=='reveal' && state!=='cta';
+  if(capBeat && b.text){
+    const active=t>=b.s&&t<(b.e+0.3);
+    if(active){ capEl.textContent=b.text; capEl.style.opacity=clamp((t-b.s)/0.15,0,1).toFixed(2); }
+    else capEl.style.opacity='0';
+  } else { capEl.textContent=''; capEl.style.opacity='0'; }
+};
+
+// initial static render for standalone opens / preview
+setState((location.hash||'#reveal').slice(1));
+</script>
+</body>
+</html>

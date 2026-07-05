@@ -1,0 +1,37 @@
+{
+  "format": "kapibara-ladder",
+  "rung": 1,
+  "concept": "token",
+  "keyword": "TOKEN",
+  "lang": "en",
+  "durationSec": 24,
+  "bot": "@KapibaraSchoolBot",
+  "series": { "top": "Kapibara Ladder", "bottom": "AI · ONE RUNG A DAY" },
+  "teaser": "fun fact: capybara = 2 tokens",
+  "question": "When AI reads your message, what is a TOKEN?",
+  "options": [
+    { "id": "A", "text": "A whole sentence" },
+    { "id": "B", "text": "A chunk of text" },
+    { "id": "C", "text": "A password" },
+    { "id": "D", "text": "A payment coin" }
+  ],
+  "correctId": "B",
+  "eliminateEarlyId": "C",
+  "teachLine": "A token is a piece of a word. AI reads in tokens, not letters.",
+  "callbackFact": "capybara = 2 tokens: capy + bara",
+  "musicTag": "original rising quiz chime + soft lo-fi bed, 90-100 BPM, no Millionaire heartbeat",
+  "vo": {
+    "hook": "You use AI every day. But do you actually know what a token is?",
+    "question": "Here's rung one. When AI reads your message — what exactly is a token?",
+    "options": "A: a whole sentence. B: a chunk of text, like a word-piece. C: a password. D: a payment coin. It's not a password — that one's out.",
+    "think": "Three, two, one, lock it in.",
+    "reveal": "It's B — a chunk of text. AI doesn't read letters or whole words, it reads tokens. Capybara? That's two: capy, bara.",
+    "cta": "Want the next rung? Tap my profile — Kapibara School sends you a free lesson. Or just comment TOKEN."
+  },
+  "vo_ar": {
+    "hook": "أنت تستخدم الذكاء الاصطناعي كل يوم. لكن هل تعرف فعلاً ما هو الـتوكن؟",
+    "reveal": "الإجابة ب — قطعة نص. الذكاء الاصطناعي يقرأ التوكنز، لا الحروف. كابيبارا؟ توكنان: كابي، بارا."
+  },
+  "palette": { "bg": "#0F1117", "teal": "#4ECDC4", "indigo": "#7B72FF", "gold": "#F59E0B", "surface": "#252840", "text": "#E8E8F0", "muted": "#8B8BA7" },
+  "disclosure": "AI-made · Kapibara"
+}
