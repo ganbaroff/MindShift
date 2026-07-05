@@ -50,8 +50,17 @@ jobs:
           # platform JWT verification 401s every cron call, so it MUST stay no-verify-jwt.
           # Auth is enforced in-code via the CRON_SECRET check.
           deploy scheduled-push --no-verify-jwt
-          deploy create-checkout
+          # create-checkout is live as verify_jwt=false — it runs its OWN in-code JWT
+          # gate (401s a request without a real user JWT) and the Telegram funnel calls
+          # it directly with the anon key + a minted guest JWT. Pin --no-verify-jwt so
+          # CI stops silently flipping it back to platform-verified (which would 401 the
+          # funnel's final checkout turn).
+          deploy create-checkout --no-verify-jwt
           deploy stripe-webhook --no-verify-jwt
+          # dodo-webhook: provider callback, authenticated in-code by signature — no JWT.
+          deploy dodo-webhook --no-verify-jwt
+          # agent-chat: platform JWT-verified (default). Listed so CI owns it (was drifting).
+          deploy agent-chat
           deploy gcal-inbound
           if [ -n "$FAILED" ]; then
             echo "::error::Failed to deploy:$FAILED"

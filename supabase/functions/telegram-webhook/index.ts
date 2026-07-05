@@ -143,6 +143,32 @@ async function checkFunnelRateLimit(
   }
 }
 
+// Look up an existing auth user id by exact email via the GoTrue admin REST API.
+// supabase-js v2 has no admin.getUserByEmail; the admin /auth/v1/admin/users
+// endpoint supports an exact ?email= filter. Returns the user id or null (not
+// found / any error — caller then falls through to createUser).
+async function findAuthUserIdByEmail(supabase: Sb, email: string): Promise<string | null> {
+  try {
+    const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    const url = `${Deno.env.get('SUPABASE_URL')!}/auth/v1/admin/users?email=${encodeURIComponent(email)}`
+    const resp = await fetch(url, {
+      headers: { 'apikey': serviceKey, 'Authorization': `Bearer ${serviceKey}` },
+    })
+    if (!resp.ok) {
+      console.error('[funnel] admin users lookup status', resp.status)
+      return null
+    }
+    const body = await resp.json() as { users?: { id: string; email?: string }[] }
+    const match = (body.users ?? []).find(
+      (u) => (u.email ?? '').toLowerCase() === email.toLowerCase(),
+    )
+    return match?.id ?? null
+  } catch (err) {
+    console.error('[funnel] findAuthUserIdByEmail error:', err instanceof Error ? err.message : err)
+    return null
+  }
+}
+
 // Ensure a Supabase user exists for this telegram guest and return a fresh JWT.
 // Returns null on any failure (caller then degrades to a web-app signup link).
 async function ensureGuestSession(supabase: Sb, telegramId: number): Promise<FunnelGuest | null> {
@@ -163,21 +189,38 @@ async function ensureGuestSession(supabase: Sb, telegramId: number): Promise<Fun
     let userId = existing?.user_id as string | undefined
 
     if (!userId) {
-      // Create a confirmed auth user via admin API (works even if signups disabled).
-      const { data: created, error: createErr } = await supabase.auth.admin.createUser({
-        email,
-        password,
-        email_confirm: true,
-        user_metadata: { source: 'telegram_funnel', telegram_id: telegramId },
-      })
-      if (createErr || !created?.user) {
-        console.error('[funnel] createUser failed:', createErr?.message)
-        return null
+      // No funnel_guests row. Before minting, check whether the deterministic-email
+      // auth user ALREADY exists (partial insert / cleanup left an orphan). If we
+      // blindly call createUser here it hits a duplicate-email error, returns null,
+      // and that telegram_id is bricked to the APP_URL link forever. Recover the
+      // existing user id and (re)create the funnel_guests row instead — idempotent
+      // guest minting.
+      const existingUserId = await findAuthUserIdByEmail(supabase, email)
+
+      if (existingUserId) {
+        userId = existingUserId
+      } else {
+        // Create a confirmed auth user via admin API (works even if signups disabled).
+        const { data: created, error: createErr } = await supabase.auth.admin.createUser({
+          email,
+          password,
+          email_confirm: true,
+          user_metadata: { source: 'telegram_funnel', telegram_id: telegramId },
+        })
+        if (createErr || !created?.user) {
+          console.error('[funnel] createUser failed:', createErr?.message)
+          return null
+        }
+        userId = created.user.id
       }
-      userId = created.user.id
-      await supabase.from('funnel_guests').insert({
-        telegram_id: telegramId, user_id: userId, quiz_step: 0,
-      })
+
+      // Upsert the funnel_guests row (idempotent on the telegram_id PK). Whether we
+      // recovered an orphan user or freshly minted one, this guarantees the guest
+      // row exists so the next message doesn't re-enter this branch.
+      await supabase.from('funnel_guests').upsert(
+        { telegram_id: telegramId, user_id: userId, quiz_step: 0 },
+        { onConflict: 'telegram_id' },
+      )
     }
 
     // Sign in to get a JWT the JWT-gated functions will accept.
@@ -378,10 +421,16 @@ Deno.serve(async (req: Request) => {
 
       // Active quiz = quiz_step between 1 and FUNNEL_QUIZ_TURNS, and not a command.
       if (fg && fg.quiz_step >= 1 && fg.quiz_step <= FUNNEL_QUIZ_TURNS && !text.startsWith('/')) {
-        // Rate-limit guest turns (reuse DB limiter, per telegram id).
-        const { allowed: qAllowed } = await checkDbRateLimit(supabase, `funnel-${telegramId}`, false, {
-          fnName: 'funnel-quiz', limitFree: 12, windowMs: LINK_RATE_WINDOW_MS,
-        })
+        // Rate-limit guest turns via the TEXT-keyed funnel limiter (migration 032).
+        // The old checkDbRateLimit path passed the text key 'funnel-<tgid>' into
+        // increment_rate_limit(p_user_id uuid) → Postgres 22P02, and the caller
+        // failed OPEN, leaving every mid-quiz turn (guest login + agent-chat LLM
+        // call, + create-checkout on the final turn) UNTHROTTLED. A normal quiz is
+        // 3 turns; 10/10min gives a little slack while bounding a spammer.
+        // CEO spend non-negotiable.
+        const qAllowed = await checkFunnelRateLimit(
+          supabase, `funnel-msg-${telegramId}`, 10, LINK_RATE_WINDOW_MS,
+        )
         if (!qAllowed) {
           await sendTelegramMessage(chatId, lang === 'ru'
             ? 'Секунду — слишком быстро. Попробуй ещё раз через минуту.'
