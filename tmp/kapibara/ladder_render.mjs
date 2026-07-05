@@ -19,8 +19,23 @@ import { requireEnv, LOCKED_VOICE, NEWS_TARGET_WPM } from './env.mjs'
 
 const key = requireEnv('GEMINI_API_KEY')
 const VOICE = LOCKED_VOICE                 // Factory Law 6 — one voice per character, no CLI override
+
+// CTA guard — the on-screen bot username must EXIST in Telegram before it gets baked into frames.
+// (Live catch 2026-07-05: placeholder @KapibaraSchoolBot from the strategy doc shipped into the
+// exemplar; the CEO caught it, no gate did. A t.me page titled "Telegram: Contact @x" = unregistered.)
+async function assertBotExists(handle) {
+  const u = handle.replace(/^@/, '')
+  const html = await (await fetch(`https://t.me/${u}`)).text()
+  const title = (html.match(/property="og:title" content="([^"]*)"/) || [])[1] || ''
+  if (!title || /^Telegram: Contact/i.test(title)) {
+    console.error(`[cta-guard] bot ${handle} does NOT exist in Telegram (t.me title: "${title}") — fix EP.bot before rendering.`)
+    process.exit(1)
+  }
+  console.log(`[cta-guard] ${handle} exists: "${title}" ✓`)
+}
 const TTS_MODEL = 'gemini-2.5-flash-preview-tts'
 const EP = JSON.parse(readFileSync('ladder_ep01_token.json', 'utf8'))
+await assertBotExists(EP.bot) // CTA guard fires before any TTS/render spend
 const OUT = 'ladder_runs/ep01'
 const FPS = 30, SR = 16000
 mkdirSync(OUT, { recursive: true })

@@ -5,7 +5,7 @@
   "keyword": "TOKEN",
   "lang": "en",
   "durationSec": 24,
-  "bot": "@KapibaraSchoolBot",
+  "bot": "@mindfocus_mebot",
   "series": { "top": "Kapibara Ladder", "bottom": "AI · ONE RUNG A DAY" },
   "teaser": "fun fact: capybara = 2 tokens",
   "question": "When AI reads your message, what is a TOKEN?",
