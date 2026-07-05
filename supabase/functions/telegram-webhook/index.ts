@@ -115,6 +115,21 @@ function guestEmail(telegramId: number): string {
   return `tg-guest-${telegramId}@funnel.mindshift.app`
 }
 
+// increment_rate_limit(p_user_id uuid, ...) REQUIRES a UUID. Passing a raw string
+// key (e.g. `tg-start-<id>`) makes the RPC throw, and checkDbRateLimit then fails
+// OPEN — silently disabling the limit. Derive a stable v5-style UUID from a label
+// so the limiter actually records and enforces per telegram id.
+async function rateLimitUuid(label: string): Promise<string> {
+  const digest = new Uint8Array(
+    await crypto.subtle.digest('SHA-1', new TextEncoder().encode(`mindshift-funnel:${label}`)),
+  )
+  const b = digest.slice(0, 16)
+  b[6] = (b[6] & 0x0f) | 0x50 // version 5
+  b[8] = (b[8] & 0x3f) | 0x80 // RFC 4122 variant
+  const h = [...b].map((x) => x.toString(16).padStart(2, '0')).join('')
+  return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`
+}
+
 // Ensure a Supabase user exists for this telegram guest and return a fresh JWT.
 // Returns null on any failure (caller then degrades to a web-app signup link).
 async function ensureGuestSession(supabase: Sb, telegramId: number): Promise<FunnelGuest | null> {
@@ -315,7 +330,8 @@ Deno.serve(async (req: Request) => {
       // Rate-limit guest minting BEFORE ensureGuestSession (which calls admin.createUser
       // + a password login). The mid-quiz branch is already limited; this closes the
       // /start-quiz hole so a leaked webhook secret cannot mint unbounded auth users.
-      const { allowed: startAllowed } = await checkDbRateLimit(supabase, `tg-start-${telegramId}`, false, {
+      const startKey = await rateLimitUuid(`start-${telegramId}`)
+      const { allowed: startAllowed } = await checkDbRateLimit(supabase, startKey, false, {
         fnName: 'funnel-start', limitFree: 3, windowMs: LINK_RATE_WINDOW_MS,
       })
       if (!startAllowed) {
