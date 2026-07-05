@@ -1,0 +1,36 @@
+name: dodo-fix-oneshot
+
+# One-shot maintenance workflow (manual dispatch only).
+# 1. Corrects DODO_PRODUCT_ID (homoglyph typo I->l) as a Supabase secret.
+# 2. Re-mints TELEGRAM_WEBHOOK_SECRET from a temp GH repo secret.
+# 3. Deletes the temporary dodo-diag edge function.
+# Removed from the repo immediately after a green run.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Set corrected Supabase secrets
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          WEBHOOK_SECRET: ${{ secrets.DODO_FIX_WEBHOOK_SECRET }}
+        run: |
+          supabase secrets set \
+            DODO_PRODUCT_ID=pdt_0NiT4X3ILVls4wA4uktYn \
+            TELEGRAM_WEBHOOK_SECRET="$WEBHOOK_SECRET" \
+            --project-ref ${{ secrets.SUPABASE_PROJECT_ID }}
+
+      - name: Delete temporary dodo-diag function
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          supabase functions delete dodo-diag --project-ref ${{ secrets.SUPABASE_PROJECT_ID }} || true
