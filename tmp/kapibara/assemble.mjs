@@ -20,6 +20,13 @@ function run(label, cmd, args) {
 // Guard: ensure inputs exist
 if (!existsSync('frames_fast/f_00000.jpg')) { console.error('[assemble] frames_fast/ empty — run render6 first'); process.exit(1) }
 if (!existsSync('voice.mp3')) { console.error('[assemble] voice.mp3 missing — run gen_voice first'); process.exit(1) }
+// Guard: frame COUNT must match data.json — a crashed renderer leaves a partial frames_fast/
+// and -shortest silently ships a truncated clip (live catch 2026-07-05: 1.8MB stub passed the critic).
+const gotFrames = readdirSync('frames_fast').filter(f => /^f_\d+\.jpg$/.test(f)).length
+if (gotFrames < data.frameCount) {
+  console.error(`[assemble] frames_fast/ has ${gotFrames}/${data.frameCount} frames — renderer died mid-run. Re-run render6. NOT assembling a stub.`)
+  process.exit(1)
+}
 
 // Step 1: frames + audio → news mp4 (mix a low music bed under the voice if music/bed.* exists)
 const MUSIC = ['music/bed.mp3', 'music/bed.m4a', 'music/bed.wav'].find(f => existsSync(f))
@@ -68,6 +75,14 @@ if (UPLOAD) {
   console.log(`[assemble] GCS public: ${gcsUrl}`)
 }
 
+// Duration sanity gate — final must be ≈ voice + outro; a short clip means truncation upstream.
+const dur = f => parseFloat(execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', f]).toString().trim())
+const expected = data.duration + (existsSync('outro.mp4') ? dur('outro.mp4') : 0)
+const actual = dur(outFinal)
+if (Math.abs(actual - expected) > 2.5) {
+  console.error(`[assemble] duration sanity FAIL: got ${actual.toFixed(1)}s, expected ≈${expected.toFixed(1)}s — truncated/corrupt output. NOT publishing this.`)
+  process.exit(1)
+}
 const sz = readFileSync(outFinal).length
-console.log(`\n✓ ${outFinal}  (${(sz / 1e6).toFixed(1)} MB)`)
+console.log(`\n✓ ${outFinal}  (${(sz / 1e6).toFixed(1)} MB, ${actual.toFixed(1)}s ≈ expected ${expected.toFixed(1)}s)`)
 writeFileSync('latest_output.json', JSON.stringify({ file: outFinal, date: dateStr, gcsUrl, sizeMB: +(sz / 1e6).toFixed(1) }))
