@@ -1,6 +1,6 @@
 import { readFileSync, writeFileSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
-import { NEWS_TARGET_SEC } from './env.mjs'
+import { NEWS_TARGET_WPM } from './env.mjs'
 
 const meta = JSON.parse(readFileSync('voiceline_meta.json', 'utf8'))
 const pads = [0.18, 0.45, 0.22, 0.2, 0.55, 0.22, 0.55, 0.22, 0.55, 0.14, 0.3]
@@ -20,10 +20,12 @@ for (let n = 0; n < N; n++) {
   trimmed.push({ wav: out, dur: dur(out), pad: pads[n] ?? 0.3 })
 }
 
-// Factory Law 2 — pace-lock. Raw timeline length = sum(dur + pad). Speed up only (never slow
-// down), clamped to 1.5x max so speech stays intelligible. Long scripts clamp at 1.5 (expected).
+// Factory Law 2 — pace-lock in WORDS PER MINUTE (CEO 2026-07-05: 135). Target seconds derive
+// from the actual script length; speed up only (never slow), clamp 1.5x for intelligibility.
 const rawTotal = trimmed.reduce((a, it) => a + it.dur + it.pad, 0)
-const tempo = Math.min(1.5, Math.max(1.0, rawTotal / NEWS_TARGET_SEC))
+const words = meta.lines.reduce((a, L) => a + L.text.split(/\s+/).filter(Boolean).length, 0)
+const targetSec = words / NEWS_TARGET_WPM * 60
+const tempo = Math.min(1.5, Math.max(1.0, rawTotal / targetSec))
 
 // rebuild raw timeline, then scale s/e by tempo so subtitles/mouth stay in sync with the sped-up audio
 let t = 0
@@ -45,6 +47,6 @@ execFileSync('ffmpeg', args, { stdio: 'ignore' })
 // total = REAL ffprobe duration of the sped-up output (not the arithmetic estimate)
 const total = dur('voice.mp3')
 writeFileSync('voiceline_meta.json', JSON.stringify({ total, voice: meta.voice, lines, items: meta.items }))
-console.log(`tempo=${tempo.toFixed(3)} raw=${rawTotal.toFixed(1)}s -> final=${total.toFixed(1)}s`)
+console.log(`tempo=${tempo.toFixed(3)} raw=${rawTotal.toFixed(1)}s -> final=${total.toFixed(1)}s | ${words} words @ ${(words / total * 60).toFixed(0)} wpm (law ${NEWS_TARGET_WPM})`)
 console.log(`trimmed+reconcat: ${total.toFixed(2)}s (was ${meta.total.toFixed(2)}s), ${lines.length} lines`)
 console.log('line ends:', lines.map(l => l.e.toFixed(1)).join(' '))

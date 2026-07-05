@@ -54,7 +54,7 @@ export const PROJECT_ROOT = ROOT
 // («я выбирал другой голос, один голос постоянно») — Puck was a default nobody chose.
 export const LOCKED_VOICE = 'Algieba'
 
-// Factory Law 2 — news pace-lock. Voice-body target in seconds; +~12.8s outro
-// ≈ 42s total, top of the 32-42s completion band. reconcat.mjs atempo-clamps to hit this.
-// 27 produced tempo ~1.26 → critic heard "robotic/sped-up"; 29 trades 2s for naturalness.
-export const NEWS_TARGET_SEC = 29
+// Factory Law 2 — news pace-lock is WORDS PER MINUTE, not seconds (CEO 2026-07-05:
+// «замедли до 135 слов»). Duration follows the script length; script budgets keep it sane.
+// reconcat.mjs computes targetSec = words/WPM*60 and atempo-clamps [1.0, 1.5].
+export const NEWS_TARGET_WPM = 135
