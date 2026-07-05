@@ -115,19 +115,32 @@ function guestEmail(telegramId: number): string {
   return `tg-guest-${telegramId}@funnel.mindshift.app`
 }
 
-// increment_rate_limit(p_user_id uuid, ...) REQUIRES a UUID. Passing a raw string
-// key (e.g. `tg-start-<id>`) makes the RPC throw, and checkDbRateLimit then fails
-// OPEN — silently disabling the limit. Derive a stable v5-style UUID from a label
-// so the limiter actually records and enforces per telegram id.
-async function rateLimitUuid(label: string): Promise<string> {
-  const digest = new Uint8Array(
-    await crypto.subtle.digest('SHA-1', new TextEncoder().encode(`mindshift-funnel:${label}`)),
-  )
-  const b = digest.slice(0, 16)
-  b[6] = (b[6] & 0x0f) | 0x50 // version 5
-  b[8] = (b[8] & 0x3f) | 0x80 // RFC 4122 variant
-  const h = [...b].map((x) => x.toString(16).padStart(2, '0')).join('')
-  return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`
+// FK-free funnel rate limiter. The shared checkDbRateLimit uses
+// increment_rate_limit(p_user_id uuid) whose user_id has a FK to public.users —
+// so it can ONLY throttle real logged-in users. The funnel must throttle BEFORE
+// a guest user exists (the /start-quiz guest-minting branch), keyed by telegram
+// id. A synthetic key violated that FK and the caller failed OPEN, disabling the
+// limit. This uses public.funnel_rate_limits (migration 032), keyed by text.
+// Returns true when the call is allowed, false when the limit is exceeded.
+// Fails OPEN on DB error (never blocks real traffic on a transient hiccup).
+async function checkFunnelRateLimit(
+  supabase: Sb, key: string, limit: number, windowMs: number,
+): Promise<boolean> {
+  try {
+    const now = Date.now()
+    const windowStart = new Date(Math.floor(now / windowMs) * windowMs).toISOString()
+    const { data: count, error } = await supabase.rpc('increment_funnel_rate_limit', {
+      p_key: key, p_window_start: windowStart,
+    })
+    if (error) {
+      console.warn('[funnel] rate-limit RPC error, failing open:', error.message)
+      return true
+    }
+    return (count as number) <= limit
+  } catch (err) {
+    console.warn('[funnel] rate-limit unexpected error, failing open:', err instanceof Error ? err.message : err)
+    return true
+  }
 }
 
 // Ensure a Supabase user exists for this telegram guest and return a fresh JWT.
@@ -330,10 +343,9 @@ Deno.serve(async (req: Request) => {
       // Rate-limit guest minting BEFORE ensureGuestSession (which calls admin.createUser
       // + a password login). The mid-quiz branch is already limited; this closes the
       // /start-quiz hole so a leaked webhook secret cannot mint unbounded auth users.
-      const startKey = await rateLimitUuid(`start-${telegramId}`)
-      const { allowed: startAllowed } = await checkDbRateLimit(supabase, startKey, false, {
-        fnName: 'funnel-start', limitFree: 3, windowMs: LINK_RATE_WINDOW_MS,
-      })
+      const startAllowed = await checkFunnelRateLimit(
+        supabase, `start-${telegramId}`, 3, LINK_RATE_WINDOW_MS,
+      )
       if (!startAllowed) {
         await sendTelegramMessage(chatId, lang === 'ru'
           ? 'Секунду — слишком быстро. Попробуй ещё раз через минуту.'
