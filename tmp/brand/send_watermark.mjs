@@ -1,0 +1,10 @@
+import { readFileSync } from 'node:fs'
+const env = readFileSync('C:/Users/user/Downloads/videos/.secrets.env', 'utf8')
+const tok = (env.match(/^TELEGRAM_CREATORBOT_TOKEN=(.*)$/m) || [])[1]?.trim().replace(/^["']|["']$/g, '')
+const fd = new FormData()
+fd.append('chat_id', '5150355926')
+fd.append('caption', 'YouTube водяной знак (Branding → Video watermark). Задача для perplexity готова — заполнит описание/ключевики/ссылки/страну/секции. Одна загвоздка в чате.')
+fd.append('document', new Blob([readFileSync('C:/Projects/mindshift/tmp/brand/kapibara-watermark-240.png')], { type: 'image/png' }), 'kapibara-watermark-240.png')
+const r = await fetch(`https://api.telegram.org/bot${tok}/sendDocument`, { method: 'POST', body: fd })
+const j = await r.json()
+console.log('watermark sent ok=', j.ok, j.ok ? '' : JSON.stringify(j).slice(0, 160))
