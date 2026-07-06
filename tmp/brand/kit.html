@@ -108,7 +108,12 @@ const BIOS={
 
 const t=(new URLSearchParams(location.search).get('t'))||'board';
 const stage=document.getElementById('stage');
-if(t==='avatar'){
+if(t==='watermark'){
+ // transparent YouTube video watermark — just Mochi, no bg (renderer uses omitBackground)
+ stage.innerHTML=`<div style="width:240px;height:240px;display:grid;place-items:center;background:transparent">${capy('happy')}</div>`;
+ document.querySelector('#stage svg.capy').style.width='240px';
+ document.querySelector('#stage svg.capy').style.height='240px';
+}else if(t==='avatar'){
  stage.innerHTML=`<div class="avatar"><div class="glow"></div><div class="ring"></div>${capy('happy')}</div>`;
 }else if(t==='banner'){
  stage.innerHTML=`<div class="banner"><div class="safe">${capy('happy')}<div class="txt"><h1 class="jakarta">Kapibara AI</h1><div class="tag">The day's AI news, in 60 seconds.</div><div class="by">${ORB}<span>MADE&nbsp;BY&nbsp;VOLAURA</span></div></div></div></div>`;

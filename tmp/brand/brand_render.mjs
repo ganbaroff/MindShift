@@ -9,6 +9,7 @@ const targets = [
   { t: 'avatar', w: 1080, h: 1080, sel: '.avatar', file: 'kapibara-avatar-1080.png' },
   { t: 'banner', w: 2560, h: 1440, sel: '.banner', file: 'kapibara-youtube-banner.png' },
   { t: 'board',  w: 1600, h: 1000, sel: '.board',  file: 'kapibara-brand-board.png' },
+  { t: 'watermark', w: 240, h: 240, sel: '#stage > div', file: 'kapibara-watermark-240.png', transparent: true },
 ]
 const b = await chromium.launch()
 for (const g of targets) {
@@ -17,7 +18,7 @@ for (const g of targets) {
   await p.waitForFunction(() => document.title.startsWith('ready-'))
   await p.waitForTimeout(500) // let webfonts settle
   const el = await p.$(g.sel)
-  await el.screenshot({ path: `${OUT}/${g.file}` })
+  await el.screenshot({ path: `${OUT}/${g.file}`, omitBackground: !!g.transparent })
   console.log('rendered', g.file, `${g.w}x${g.h}`)
   await p.close()
 }
