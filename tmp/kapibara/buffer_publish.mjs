@@ -1,8 +1,30 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
 import { requireEnv } from './env.mjs'
+import { isPublished, recordPublish, closeJournal } from './journal.mjs'
 const ONLY = (process.argv.find(a => a.startsWith('--only=')) || '').split('=')[1] || null
 const tok = requireEnv('BUFFER_ACCESS_TOKEN')
+
+// Episode identity — computed once, shared by the journal guard + record + published.json write.
+// Format follows the same football-vs-ai-news signal used everywhere else in this file.
+const FB_KEYS = new Set(['trophy', 'ball', 'gloves', 'boot', 'whistle'])
+const EP_TODAY = existsSync('today.json') ? JSON.parse(readFileSync('today.json', 'utf8')) : {}
+const EP_FORMAT = (EP_TODAY.items || []).some(it => FB_KEYS.has(it.key)) ? 'football' : 'ai-news'
+const EP_DATE = (existsSync('latest_output.json') ? JSON.parse(readFileSync('latest_output.json', 'utf8')).date : null) || new Date().toISOString().slice(0, 10)
+
+// ── CROSS-RUNNER GUARD (Supabase publish_journal) — FIRST, before the Gemini QA gate ──
+// state.json/published.json are runner-local; the journal is the cross-runner truth. This
+// stops a backup cron slot on a FRESH runner from re-publishing (incident 2026-07-06).
+// Skipped by --republish / --only=<svc> (deliberate re-push / per-channel retry).
+// pub === null (journal unreachable) => fall through to the local published.json guard below.
+if (!process.argv.includes('--republish') && !ONLY) {
+  const pub = await isPublished(EP_DATE, EP_FORMAT)
+  if (pub === true) {
+    console.log('[buffer_publish] BLOCKED: already published today per journal (cross-runner guard)')
+    await closeJournal() // drain undici before exit(0) so the skip stays exit 0 in CI
+    process.exit(0) // a skip is SUCCESS — the pipeline must not go red
+  }
+}
 
 // Resolve public video URL from latest_output.json (dated filename on the public bucket)
 const BUCKET = 'https://storage.googleapis.com/kapibara-news-pub-0321449510'
@@ -17,13 +39,9 @@ if (!videoUrl) { console.error('[buffer_publish] no video URL'); process.exit(1)
 // Keyed on date+format in published.json. Override: --republish. --only=<svc> retries bypass (per-channel retry).
 if (!process.argv.includes('--republish') && !ONLY && existsSync('published.json')) {
   try {
-    const _tj = existsSync('today.json') ? JSON.parse(readFileSync('today.json', 'utf8')) : {}
-    const _fb = new Set(['trophy', 'ball', 'gloves', 'boot', 'whistle'])
-    const _fmt = (_tj.items || []).some(it => _fb.has(it.key)) ? 'football' : 'ai-news'
-    const _date = (existsSync('latest_output.json') ? JSON.parse(readFileSync('latest_output.json', 'utf8')).date : null) || new Date().toISOString().slice(0, 10)
     const _log = JSON.parse(readFileSync('published.json', 'utf8'))
-    if (_log.some(e => e.date === _date && e.format === _fmt)) {
-      console.log(`[buffer_publish] already published ${_fmt} for ${_date} (published.json) — skipping. Override: --republish`)
+    if (_log.some(e => e.date === EP_DATE && e.format === EP_FORMAT)) {
+      console.log(`[buffer_publish] already published ${EP_FORMAT} for ${EP_DATE} (published.json) — skipping. Override: --republish`)
       process.exit(0)
     }
   } catch { /* unreadable log — proceed, QA gate still guards */ }
@@ -135,14 +153,27 @@ for (const ch of channels) {
   if (ok && id) posts.push({ svc: ch.svc, id })
 }
 
+// ── CROSS-RUNNER RECORD (Supabase publish_journal) — so a backup slot on a fresh runner skips ──
+// One row per published svc. Fires only for real posts; journal-unreachable returns null and we
+// carry on (the local published.json write below is the fallback metrics.mjs reads).
+if (posts.length) {
+  const captionLang = (existsSync('latest_output.json') ? (new Date().getUTCDate() % 2 === 1 ? 'ar' : 'en') : 'en')
+  try {
+    const jr = await recordPublish({
+      date: EP_DATE, format: EP_FORMAT, posts,
+      gcsUrl: videoUrl, lang: captionLang,
+      runId: process.env.GITHUB_RUN_ID || 'local',
+    })
+    console.log(`[buffer_publish] journal ${jr === null ? 'UNREACHABLE (local published.json is the fallback)' : 'recorded ' + posts.length + ' post(s)'}`)
+  } catch (e) { console.warn('[buffer_publish] journal record skipped:', e.message) }
+}
+
 // record episode → published.json so metrics.mjs tracks it + failures get caught (no more blind "sent")
+// Kept alongside the journal: metrics.mjs reads this file locally.
 try {
-  const tj = existsSync('today.json') ? JSON.parse(readFileSync('today.json', 'utf8')) : {}
-  const fmt = (tj.items || []).some(it => FOOTBALL_KEYS.has(it.key)) ? 'football' : 'ai-news'
-  const date = (latestFile => latestFile?.date)(existsSync('latest_output.json') ? JSON.parse(readFileSync('latest_output.json', 'utf8')) : null) || new Date().toISOString().slice(0, 10)
   const log = existsSync('published.json') ? JSON.parse(readFileSync('published.json', 'utf8')) : []
   if (posts.length) {
-    log.push({ episode: `${fmt === 'football' ? 'Футбол / ЧМ' : 'AI-новости'} ${date}${ONLY ? ' (' + ONLY + ' retry)' : ''}`, date, format: fmt, posts })
+    log.push({ episode: `${EP_FORMAT === 'football' ? 'Футбол / ЧМ' : 'AI-новости'} ${EP_DATE}${ONLY ? ' (' + ONLY + ' retry)' : ''}`, date: EP_DATE, format: EP_FORMAT, posts })
     writeFileSync('published.json', JSON.stringify(log, null, 2))
     console.log(`[buffer_publish] записано в published.json (${posts.length} пост(ов)) — metrics.mjs подхватит`)
   }

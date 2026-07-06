@@ -165,7 +165,14 @@ async function doPublish(row) {
   let tail = ''
   try {
     const outBuf = _run('node', ['buffer_publish.mjs'], { cwd: PROJECT_ROOT })
-    tail = (outBuf ? outBuf.toString() : '').split('\n').filter(Boolean).slice(-6).join('\n')
+    const full = outBuf ? outBuf.toString() : ''
+    tail = full.split('\n').filter(Boolean).slice(-6).join('\n')
+    // buffer_publish exits 0 on a duplicate SKIP (journal or published.json guard) — that's
+    // success, not a publish. Give the CEO a clear "already published" note, not a green ✅.
+    if (/BLOCKED: already published today per journal|already published .* — skipping/.test(full)) {
+      await sendMessage(row.chat_id, 'ℹ️ Уже опубликовано сегодня — дубль заблокирован журналом. Ничего не отправлял.')
+      return { status: 'done', result: `publish skipped (already published today): ${tail.slice(0, 200)}` }
+    }
     await sendMessage(row.chat_id, `✅ Публикация отработала:\n<code>${tail.slice(0, 500) || '(no output)'}</code>`)
     return { status: 'done', result: `publish ok: ${tail.slice(0, 300)}` }
   } catch (e) {

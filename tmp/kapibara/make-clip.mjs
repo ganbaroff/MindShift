@@ -15,6 +15,7 @@
  */
 import { readFileSync, writeFileSync, existsSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
+import { isPublished, closeJournal } from './journal.mjs'
 
 const A = process.argv
 const FORCE = A.includes('--force')
@@ -32,6 +33,21 @@ try { state = JSON.parse(readFileSync(STATE_FILE, 'utf8')) } catch {}
 if (state.lastRan === dateStr && !FORCE) {
   console.log(`[make-clip] Already ran for ${dateStr}. Use --force to rerun.`)
   process.exit(0)
+}
+
+// ── Stage 0: CROSS-RUNNER PUBLISH GUARD (Supabase publish_journal) ──────────────
+// state.json above is runner-local + gitignored, so a FRESH CI runner (backup cron slot)
+// sails past it and re-renders/re-previews/re-publishes (incident 2026-07-06: CEO got 3
+// previews). The journal is the cross-runner truth. If already published today, this whole
+// run is a true no-op. Exceptions: --force overrides everything; --no-publish still renders
+// (CI dry-run testing needs the render). journal-unreachable (null) falls through and the
+// local state.json + buffer_publish guards still apply.
+if (!FORCE && !NO_PUBLISH) {
+  if (await isPublished(dateStr, 'ai-news') === true) {
+    console.log('[make-clip] Already published today per journal — skipping full run (cross-runner guard).')
+    await closeJournal() // drain undici before exit(0) so the no-op stays exit 0 in CI
+    process.exit(0)
+  }
 }
 
 const CWD = new URL('.', import.meta.url).pathname.replace(/^\/([A-Z]:)/, '$1')
