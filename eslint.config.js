@@ -6,8 +6,11 @@ import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  // Ignore build output, Playwright E2E (not React code), Android build artifacts, and worktree copies
-  globalIgnores(['dist', 'e2e/**', 'android/**', '.claude/worktrees/**']),
+  // Ignore build output, Playwright E2E (not React code), Android build artifacts,
+  // worktree copies, and Supabase edge functions (Deno runtime — they use Deno
+  // globals + URL imports + `deno-lint-ignore` directives, and are linted by
+  // `deno lint`, not this browser/React ESLint config).
+  globalIgnores(['dist', 'e2e/**', 'android/**', '.claude/worktrees/**', 'supabase/functions/**']),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [
