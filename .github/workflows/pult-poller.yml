@@ -1,0 +1,70 @@
+name: Pult Poller
+
+# «Пульт v1» queue drainer. Every 10 min it claims pending pult_commands rows
+# (enqueued by the creator-pult edge fn) and runs the heavy work (make-clip /
+# ladder_render / buffer_publish), sending previews back to the CEO's Telegram.
+# Also runnable on-demand from the Actions UI.
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'   # every 10 minutes
+  workflow_dispatch: {}       # manual "Run workflow" button
+
+concurrency:
+  group: pult
+  cancel-in-progress: false   # never kill an in-flight render mid-drain
+
+jobs:
+  drain:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45        # one drain of up to 20 rows; renders are 15-40 min each
+    defaults:
+      run:
+        working-directory: tmp/kapibara
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install ffmpeg + fonts (cyrillic / AZ diacritics / brand)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg fonts-noto-core fonts-noto-color-emoji
+          mkdir -p ~/.fonts
+          curl -sL "https://github.com/google/fonts/raw/main/ofl/plusjakartasans/PlusJakartaSans%5Bwght%5D.ttf" -o ~/.fonts/PlusJakartaSans.ttf \
+            || echo "[fonts] Jakarta download failed — Noto fallback renders text without tofu"
+          fc-cache -f
+
+      - name: Install Playwright + Chromium
+        run: |
+          npm init -y >/dev/null 2>&1 || true
+          npm install @playwright/test
+          npx playwright install chromium --with-deps
+
+      - name: Write env files from secrets
+        run: |
+          cat > .env <<'ENVEOF'
+          GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
+          VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          ENVEOF
+          cat > .secrets.env <<'SEOF'
+          BUFFER_ACCESS_TOKEN=${{ secrets.BUFFER_ACCESS_TOKEN }}
+          TELEGRAM_CREATORBOT_TOKEN=${{ secrets.TELEGRAM_CREATORBOT_TOKEN }}
+          TELEGRAM_CHANNEL_ID=${{ secrets.TELEGRAM_CHANNEL_ID }}
+          GCS_BUCKET=kapibara-news-pub-0321449510
+          SEOF
+
+      - name: Authenticate to GCS
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Setup gcloud
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Drain the Пульт queue
+        run: node pult_worker.mjs --drain
