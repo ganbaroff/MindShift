@@ -14,9 +14,13 @@ jobs:
     env:
       # Supabase public keys — safe to embed (anon key is client-facing by design)
       VITE_SUPABASE_URL: https://awfoqycoltvhamtrsvxk.supabase.co
-      VITE_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpbmN0YnNsdmVqcWljeGFudm5yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMjkzNTYsImV4cCI6MjA4ODYwNTM1Nn0.QWSu9zWLk4VgUYp-I2QBd1MbAXforqY1vMtgcAiv2FQ
+      VITE_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF3Zm9xeWNvbHR2aGFtdHJzdnhrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4OTQ2NDMsImV4cCI6MjA5MDQ3MDY0M30.GnlWq1WyCjY1nHNt9E1TD8_ibUlnKS9F7sOQpylb4TM
       # Sentry DSN for CI — set VITE_SENTRY_DSN in repo Secrets to enable
       VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
+      # Mapped here so the source-map step's `if:` can gate on it. The `secrets`
+      # context is NOT available in a step-level `if:` — referencing it there fails
+      # the whole workflow at startup (0 jobs, no steps run). Gate on `env` instead.
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
     steps:
       - uses: actions/checkout@v4
@@ -53,9 +57,8 @@ jobs:
           retention-days: 14
 
       - name: Upload Sentry source maps
-        if: ${{ secrets.SENTRY_AUTH_TOKEN != '' }}
+        if: ${{ env.SENTRY_AUTH_TOKEN != '' }}
         env:
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_ORG: yusif-ganbarov
           SENTRY_PROJECT: mindshift
         run: |
