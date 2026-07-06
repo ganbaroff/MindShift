@@ -44,6 +44,9 @@ jobs:
           deploy gdpr-export
           deploy gdpr-delete
           deploy telegram-webhook --no-verify-jwt
+          # creator-pult: @CreatorBy_bot webhook, authed in-code by the
+          # X-Telegram-Bot-Api-Secret-Token header (PULT_WEBHOOK_SECRET). No Supabase JWT.
+          deploy creator-pult --no-verify-jwt
           deploy gcal-sync
           deploy gcal-store-token
           # scheduled-push is cron-invoked with a CRON_SECRET bearer (not a JWT);

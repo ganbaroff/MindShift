@@ -42,10 +42,9 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 // and is registered with Telegram via setWebhook({ secret_token }). Fail-closed.
 
 // -- Chat allowlist ---------------------------------------------------------------
-// TODO(pin CEO id): set to the CEO's numeric chat_id once he runs /whoami. While this
-// is 0, we ALLOW ALL senders but log each one (so a stranger who guesses the URL can
-// enqueue — bounded by the worker's own gates, but pin this ASAP). When non-zero, only
-// that chat_id may issue commands; everyone else gets a polite refusal.
+// Only this chat_id may issue commands (fail-closed: 0 or any other id is refused).
+// chat.id is trusted because the secret-token header already proved the update is a
+// genuine Telegram delivery for @CreatorBy_bot.
 const ALLOWED_CHAT_ID = 5150355926 // CEO — pinned 2026-07-06 from his live /news command
 
 // -- Telegram types (minimal) -----------------------------------------------------
