@@ -32,11 +32,16 @@ jobs:
       - name: Install ffmpeg + fonts (cyrillic / AZ diacritics / Arabic subs / brand)
         run: |
           sudo apt-get update
-          sudo apt-get install -y ffmpeg fonts-noto-core fonts-noto-color-emoji fonts-noto-naskh-arabic
+          # fonts-noto-naskh-arabic is NOT a real noble package (live catch 2026-07-06, run 28785553589);
+          # NotoNaskhArabic ships inside fonts-noto-core + we download the TTF as a second source.
+          sudo apt-get install -y ffmpeg fonts-noto-core fonts-noto-color-emoji
           mkdir -p ~/.fonts
           curl -sL "https://github.com/google/fonts/raw/main/ofl/plusjakartasans/PlusJakartaSans%5Bwght%5D.ttf" -o ~/.fonts/PlusJakartaSans.ttf \
             || echo "[fonts] Jakarta download failed — Noto fallback renders text without tofu"
+          curl -sL "https://github.com/google/fonts/raw/main/ofl/notonaskharabic/NotoNaskhArabic%5Bwght%5D.ttf" -o ~/.fonts/NotoNaskhArabic.ttf \
+            || echo "[fonts] Naskh download failed — relying on fonts-noto-core copy"
           fc-cache -f
+          fc-list | grep -qi "naskh" || { echo "::error::No Arabic Naskh font available — AR-subs day would render tofu"; exit 1; }
 
       - name: Install Playwright + Chromium
         run: |
