@@ -1,0 +1,61 @@
+name: enable-hibp-oneshot
+
+on:
+  workflow_dispatch:
+
+jobs:
+  enable-hibp:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enable leaked-password (HIBP) protection via Management API
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          set -euo pipefail
+          PROJECT_REF="awfoqycoltvhamtrsvxk"
+          BASE="https://api.supabase.com/v1/projects/${PROJECT_REF}/config/auth"
+
+          echo "::group::Discover the exact HIBP/leaked-password key (before)"
+          # Fetch full config but NEVER print it. Extract only keys matching hibp/leaked/pwned.
+          BEFORE_OBJ="$(curl -sS "$BASE" \
+            -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
+            | jq -c 'to_entries | map(select(.key|test("hibp|leaked|pwned";"i"))) | from_entries')"
+          echo "hibp-related keys BEFORE: $BEFORE_OBJ"
+          echo "::endgroup::"
+
+          # Determine the actual key name; prefer password_hibp_enabled if present.
+          if echo "$BEFORE_OBJ" | jq -e 'has("password_hibp_enabled")' >/dev/null; then
+            KEY="password_hibp_enabled"
+          else
+            KEY="$(echo "$BEFORE_OBJ" | jq -r 'keys[0] // empty')"
+          fi
+          if [ -z "$KEY" ]; then
+            echo "ERROR: could not find any hibp/leaked/pwned key in auth config" >&2
+            exit 1
+          fi
+          echo "Using HIBP key: $KEY"
+          BEFORE_VAL="$(echo "$BEFORE_OBJ" | jq -c --arg k "$KEY" '.[$k]')"
+          echo "BEFORE value: ${KEY}=${BEFORE_VAL}"
+
+          echo "::group::PATCH (surgical partial update) -> ${KEY}=true"
+          PATCH_OBJ="$(curl -sS -X PATCH "$BASE" \
+            -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d "{\"${KEY}\": true}" \
+            | jq -c --arg k "$KEY" '{($k): .[$k]}')"
+          echo "PATCH response (hibp field only): $PATCH_OBJ"
+          echo "::endgroup::"
+
+          echo "::group::GET again + ASSERT true (after)"
+          AFTER_OBJ="$(curl -sS "$BASE" \
+            -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
+            | jq -c --arg k "$KEY" '{($k): .[$k]}')"
+          AFTER_VAL="$(echo "$AFTER_OBJ" | jq -c --arg k "$KEY" '.[$k]')"
+          echo "AFTER value: ${KEY}=${AFTER_VAL}"
+          echo "::endgroup::"
+
+          echo "SUMMARY: ${KEY} before=${BEFORE_VAL} after=${AFTER_VAL}"
+
+          # Hard assert: exit nonzero -> fail the job if not true.
+          echo "$AFTER_OBJ" | jq -e --arg k "$KEY" '.[$k] == true' >/dev/null
+          echo "ASSERT PASSED: ${KEY} is true"
