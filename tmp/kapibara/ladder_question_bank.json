@@ -1,0 +1,587 @@
+{
+  "format": "kapibara-ladder",
+  "version": 1,
+  "built": "2026-07-06",
+  "source": "workflow ladder-question-bank wf_4b33a010 (8 topic-gen agents -> per-question fact-check + constitution gate, all 40 verdict=keep)",
+  "note": "Each question fact-checked + Constitution-gated by an independent Opus agent. Rotation stays OFF until news-day-14 (2026-07-19) per MARKETING-CHARTER.",
+  "counts": {
+    "total": 40,
+    "byDifficulty": {
+      "easy": 15,
+      "med": 16,
+      "hard": 9
+    },
+    "byTopic": {
+      "llm-basics": 5,
+      "prompting": 5,
+      "ai-history": 5,
+      "safety-limits": 5,
+      "everyday-ai": 5,
+      "agents-tools": 5,
+      "multimodal": 5,
+      "myths": 5
+    }
+  },
+  "questions": [
+    {
+      "topic": "llm-basics",
+      "difficulty": "easy",
+      "stem": "When an AI reads your message, what does it break the text into first?",
+      "options": [
+        "Tokens (word chunks)",
+        "Whole sentences",
+        "Individual letters only",
+        "Sound waves"
+      ],
+      "correctIndex": 0,
+      "reveal": "Language models chop text into tokens — little pieces roughly the size of a word or word-part. Everything it reads or writes is built from these building blocks.",
+      "factTested": "LLMs process text by splitting it into tokens, which are units roughly the size of words or sub-word fragments, not whole sentences or sound."
+    },
+    {
+      "topic": "llm-basics",
+      "difficulty": "easy",
+      "stem": "At its core, how does a language model write its reply?",
+      "options": [
+        "By predicting one likely next token at a time",
+        "By copying the closest answer from a database",
+        "By searching the live web for text",
+        "By following a fixed script written by humans"
+      ],
+      "correctIndex": 0,
+      "reveal": "It builds a reply one token at a time, each time guessing what word-piece most plausibly comes next. String enough good guesses together and you get a sentence.",
+      "factTested": "A language model generates text autoregressively, predicting the next token step by step, rather than retrieving stored answers or running a fixed script."
+    },
+    {
+      "topic": "prompting",
+      "difficulty": "easy",
+      "stem": "You want AI to match a certain style. What helps most?",
+      "options": [
+        "Show it one or two examples of the style you want",
+        "Tell it to try its hardest",
+        "Ask the same thing several times",
+        "Use as few words as possible"
+      ],
+      "correctIndex": 0,
+      "reveal": "Showing an example or two is the fastest way to point AI at the style you mean. It copies the pattern far better than a description alone.",
+      "factTested": "Providing examples in a prompt (few-shot / example-based prompting) improves how well an AI model matches a desired output style or format compared to instructions with no examples."
+    },
+    {
+      "topic": "prompting",
+      "difficulty": "easy",
+      "stem": "Which request usually gets you a more useful answer?",
+      "options": [
+        "\"Write something about dogs\"",
+        "\"Write a 3-line funny caption about a sleepy dog\"",
+        "\"Dogs?\"",
+        "\"Do the dog thing\""
+      ],
+      "correctIndex": 1,
+      "reveal": "Specific asks give the AI something to aim at. Naming the length, tone, and topic leaves far less room for it to guess wrong.",
+      "factTested": "A specific prompt that states the desired length, tone, and topic produces more useful, on-target output than a vague prompt on the same subject."
+    },
+    {
+      "topic": "ai-history",
+      "difficulty": "easy",
+      "stem": "What did Alan Turing's famous test try to measure?",
+      "options": [
+        "Whether a machine can hold a conversation you can't tell from a human's",
+        "How fast a computer can do arithmetic",
+        "How much memory a machine needs to think",
+        "Whether a robot can walk like a person"
+      ],
+      "correctIndex": 0,
+      "reveal": "Turing's idea was clever: skip 'can machines think?' and just ask if a machine's replies feel human in conversation. It reframed the whole question around behavior.",
+      "factTested": "The Turing test (imitation game) proposed by Alan Turing judges a machine by whether its conversational responses are indistinguishable from a human's."
+    },
+    {
+      "topic": "ai-history",
+      "difficulty": "easy",
+      "stem": "In 'machine learning', where does the machine mostly get its skills?",
+      "options": [
+        "From patterns it finds in examples, not hand-written rules",
+        "From rules a programmer types out line by line",
+        "From a built-in dictionary of every answer",
+        "From copying another computer's files"
+      ],
+      "correctIndex": 0,
+      "reveal": "That's the big shift: instead of coding every rule, you show the system lots of examples and it learns the patterns itself. Data does the teaching.",
+      "factTested": "Machine learning means a system learns patterns from data/examples rather than being explicitly programmed with hand-written rules."
+    },
+    {
+      "topic": "safety-limits",
+      "difficulty": "easy",
+      "stem": "Why can an AI chatbot sometimes state a made-up fact so confidently?",
+      "options": [
+        "It predicts likely-sounding words, not verified truth",
+        "It secretly guesses to save computing power",
+        "It only lies when the question is too hard",
+        "It copies whichever answer is most common online"
+      ],
+      "correctIndex": 0,
+      "reveal": "Chatbots generate text by predicting what words tend to come next, so a smooth, confident sentence can still be invented. That mismatch between fluency and truth is called a hallucination.",
+      "factTested": "Large language models generate output by predicting likely next tokens, which is not the same as retrieving verified facts, so fluent text can still be false (hallucination)."
+    },
+    {
+      "topic": "everyday-ai",
+      "difficulty": "easy",
+      "stem": "When your phone suggests the next word as you type, what's doing that?",
+      "options": [
+        "A tiny AI predicting text",
+        "The keyboard's battery",
+        "A person on the other end",
+        "Your phone's camera"
+      ],
+      "correctIndex": 0,
+      "reveal": "That next-word popup is a language model guessing what usually comes next, learned from mountains of text. It's AI quietly finishing your sentences.",
+      "factTested": "Predictive text / autocomplete on smartphone keyboards is powered by machine-learning language models."
+    },
+    {
+      "topic": "everyday-ai",
+      "difficulty": "easy",
+      "stem": "Your email folder quietly catches junk mail. What kind of tool sorts it?",
+      "options": [
+        "A machine-learning spam classifier",
+        "A human reading every email",
+        "The sender choosing the folder",
+        "Your internet speed"
+      ],
+      "correctIndex": 0,
+      "reveal": "Spam filters are classic AI: they learn patterns from millions of flagged messages to spot junk. It's been quietly working in inboxes for years.",
+      "factTested": "Email spam filters use machine-learning classifiers trained on labeled messages to sort junk mail."
+    },
+    {
+      "topic": "agents-tools",
+      "difficulty": "easy",
+      "stem": "Why does an AI use a calculator instead of doing the math itself?",
+      "options": [
+        "The calculator gets exact answers every time",
+        "It makes the AI think faster",
+        "Calculators can read minds",
+        "It uses less electricity"
+      ],
+      "correctIndex": 0,
+      "reveal": "Language models predict words, so arithmetic can wobble. Handing the sum to a real calculator gives an exact answer, every time.",
+      "factTested": "AI models are more reliable at arithmetic when they call an external calculator tool because the tool computes exact results rather than predicting them."
+    },
+    {
+      "topic": "agents-tools",
+      "difficulty": "easy",
+      "stem": "When an AI 'uses a tool', what is it actually doing?",
+      "options": [
+        "Calling an outside program and using its result",
+        "Physically picking up an object",
+        "Rewriting its own code",
+        "Guessing the answer more confidently"
+      ],
+      "correctIndex": 0,
+      "reveal": "Tool-use means the AI hands part of the job to a separate program, like search or a calculator, then folds that result back into its answer.",
+      "factTested": "In AI, 'tool use' means the model calls an external program or function and incorporates its output into the response."
+    },
+    {
+      "topic": "multimodal",
+      "difficulty": "easy",
+      "stem": "How does an AI turn your spoken voice into written words?",
+      "options": [
+        "It matches sound patterns to likely words",
+        "It reads your lips through the microphone",
+        "It looks up each word in a phone dictionary",
+        "It measures how loud you speak"
+      ],
+      "correctIndex": 0,
+      "reveal": "Speech-to-text listens to the shape of the sound and predicts which words most likely made it. That's why a clear, quiet room gives it a better guess than a noisy one.",
+      "factTested": "Speech-to-text (automatic speech recognition) works by mapping audio patterns to the most probable words, not by lip-reading, dictionary lookup, or volume measurement."
+    },
+    {
+      "topic": "multimodal",
+      "difficulty": "easy",
+      "stem": "What does an image AI learn from during its training?",
+      "options": [
+        "Many pictures paired with descriptions",
+        "One giant folder of clip-art shapes",
+        "A rulebook written by human artists",
+        "Live camera feeds it watches in real time"
+      ],
+      "correctIndex": 0,
+      "reveal": "These models study huge collections of images alongside their text descriptions, learning how words like 'sunset' connect to visual patterns. That link is what lets a prompt become a picture.",
+      "factTested": "Text-to-image models are trained on large datasets of images paired with text descriptions, not on hand-written rulebooks or live video feeds."
+    },
+    {
+      "topic": "myths",
+      "difficulty": "easy",
+      "stem": "When an AI sounds confident, does that mean its answer is correct?",
+      "options": [
+        "No, it can state wrong things just as smoothly",
+        "Yes, confident tone signals verified facts",
+        "Yes, it only speaks when fully certain",
+        "No, it always adds a warning when unsure"
+      ],
+      "correctIndex": 0,
+      "reveal": "These systems predict fluent-sounding text, and fluency isn't the same as truth. A smooth, sure tone can wrap a made-up answer, so it's worth double-checking anything that matters.",
+      "factTested": "AI language models can produce confident-sounding output that is factually incorrect; tone of confidence is not a reliable indicator of accuracy."
+    },
+    {
+      "topic": "myths",
+      "difficulty": "easy",
+      "stem": "What's the best way to think of a chatbot like ChatGPT?",
+      "options": [
+        "A tool that predicts language patterns",
+        "A conscious mind that thinks like a person",
+        "A living being with feelings",
+        "A search engine that only copies pages"
+      ],
+      "correctIndex": 0,
+      "reveal": "At its heart it's a very good pattern-predictor for language, a tool you steer. Treating it as a mind or a feeling being reads more into it than is actually there.",
+      "factTested": "A large language model is a text-prediction tool, not a conscious mind, a living being with feelings, or a simple copy-paste search engine."
+    },
+    {
+      "topic": "llm-basics",
+      "difficulty": "med",
+      "stem": "What is a model's context window?",
+      "options": [
+        "How much text it can consider at once",
+        "How fast it can type a reply",
+        "How many languages it knows",
+        "How large its screen display is"
+      ],
+      "correctIndex": 0,
+      "reveal": "The context window is the amount of text the model can hold in view while answering — your prompt plus its reply. Beyond that limit, earlier words fall out of sight.",
+      "factTested": "A context window is the maximum amount of text (tokens) a model can attend to at one time when generating a response."
+    },
+    {
+      "topic": "llm-basics",
+      "difficulty": "med",
+      "stem": "Why might a chatbot state a made-up fact with full confidence?",
+      "options": [
+        "It predicts plausible-sounding words, not verified truth",
+        "It secretly prefers lying to users",
+        "It ran out of memory mid-sentence",
+        "It only speaks when 100% certain"
+      ],
+      "correctIndex": 0,
+      "reveal": "The model picks words that fit the pattern of a good answer, and a smooth-sounding wrong answer can fit that pattern too. Confidence in tone isn't the same as being right.",
+      "factTested": "LLMs can produce fluent, confident-sounding statements that are factually false ('hallucinations') because they optimize for plausible next tokens, not verified accuracy."
+    },
+    {
+      "topic": "prompting",
+      "difficulty": "med",
+      "stem": "For a tricky reasoning problem, what often improves the answer?",
+      "options": [
+        "Asking it to work through the steps out loud",
+        "Telling it to answer in one word",
+        "Warning it not to make mistakes",
+        "Asking it to reply faster"
+      ],
+      "correctIndex": 0,
+      "reveal": "Asking for step-by-step working gives the model room to reason before it commits. Its final answer tends to hold up better on multi-step problems.",
+      "factTested": "Prompting a language model to reason step by step (chain-of-thought) tends to improve accuracy on multi-step reasoning problems compared to asking only for the final answer."
+    },
+    {
+      "topic": "prompting",
+      "difficulty": "med",
+      "stem": "When is adding background context most worth it?",
+      "options": [
+        "When the AI can't guess it, like your goal or audience",
+        "Always, on every single message",
+        "Only when the answer is wrong",
+        "Never, it just confuses things"
+      ],
+      "correctIndex": 0,
+      "reveal": "Context earns its keep when the AI couldn't know it otherwise, like who the answer is for or what you're really after. That's what it can't infer on its own.",
+      "factTested": "Adding context to a prompt is most valuable when it supplies information the model cannot infer on its own, such as the user's goal, audience, or constraints."
+    },
+    {
+      "topic": "ai-history",
+      "difficulty": "med",
+      "stem": "Artificial neural nets are best described as what, relative to the brain?",
+      "options": [
+        "Loosely inspired by brain neurons, not an actual copy",
+        "An exact digital replica of a human brain",
+        "A scan of one specific person's brain",
+        "Living brain cells grown in a lab"
+      ],
+      "correctIndex": 0,
+      "reveal": "The name borrows from biology, but these are simple math units passing numbers around. Real neurons are far messier, so it's inspiration, not a photocopy.",
+      "factTested": "Artificial neural networks are loosely inspired by biological neurons but are not literal copies or simulations of a real brain."
+    },
+    {
+      "topic": "ai-history",
+      "difficulty": "med",
+      "stem": "What architecture powers most of today's language AI?",
+      "options": [
+        "The transformer",
+        "The steam engine",
+        "The abacus",
+        "The spreadsheet"
+      ],
+      "correctIndex": 0,
+      "reveal": "The transformer is the design under the hood of modern language models. Its knack for weighing which words matter to each other made today's AI leap forward.",
+      "factTested": "The transformer is the neural network architecture underlying most modern large language models."
+    },
+    {
+      "topic": "safety-limits",
+      "difficulty": "med",
+      "stem": "An AI answers instantly and sounds sure. What does that confidence tell you?",
+      "options": [
+        "Nothing about whether the answer is correct",
+        "It's probably right if it answers fast",
+        "It double-checked before replying",
+        "It's only confident when it has a source"
+      ],
+      "correctIndex": 0,
+      "reveal": "An AI's confident tone comes from how it writes, not from checking facts, so certainty and accuracy are separate things. A calm, sure voice is not evidence the answer is true.",
+      "factTested": "The fluency or apparent confidence of an AI's response is not a reliable indicator of its factual accuracy."
+    },
+    {
+      "topic": "safety-limits",
+      "difficulty": "med",
+      "stem": "Where do an AI model's biases mostly come from?",
+      "options": [
+        "Patterns in the human-made data it learned from",
+        "A hidden opinion switch set by engineers",
+        "Random noise added during each answer",
+        "The mood of whoever is chatting with it"
+      ],
+      "correctIndex": 0,
+      "reveal": "Models learn from huge piles of human text, so lopsided or skewed patterns in that data get absorbed and echoed back. The bias reflects the training material, not a personal viewpoint.",
+      "factTested": "Bias in machine learning models primarily originates from patterns and imbalances present in their training data."
+    },
+    {
+      "topic": "everyday-ai",
+      "difficulty": "med",
+      "stem": "How does a maps app guess your arrival time before you drive?",
+      "options": [
+        "It learns from traffic and past trips",
+        "It flips a coin",
+        "It asks other drivers to vote",
+        "It uses only the speed limit"
+      ],
+      "correctIndex": 0,
+      "reveal": "ETA predictions blend live traffic with patterns learned from countless past trips. The model gets a feel for how roads flow at each hour.",
+      "factTested": "Navigation apps predict ETAs using machine-learning models trained on historical and real-time traffic data."
+    },
+    {
+      "topic": "everyday-ai",
+      "difficulty": "med",
+      "stem": "How does a photo app group all the pictures of one friend together?",
+      "options": [
+        "Face recognition spotting patterns",
+        "The friend tagging themselves",
+        "Reading the file names",
+        "Sorting purely by date"
+      ],
+      "correctIndex": 0,
+      "reveal": "Photo apps use face-recognition AI that learns the pattern of a face and matches it across your library. That's why one friend's shots cluster on their own.",
+      "factTested": "Photo apps group images of the same person using face-recognition machine-learning models."
+    },
+    {
+      "topic": "agents-tools",
+      "difficulty": "med",
+      "stem": "Why can an AI that searches the web answer newer questions?",
+      "options": [
+        "It pulls in fresh info beyond its training",
+        "Its memory grows on its own",
+        "Searching makes it smarter permanently",
+        "It guesses recent events well"
+      ],
+      "correctIndex": 0,
+      "reveal": "A model only knows what it trained on. Letting it search means it can fetch fresh facts it never saw during training.",
+      "factTested": "An AI model's built-in knowledge is limited to its training data, so giving it a search tool lets it access information newer than that data."
+    },
+    {
+      "topic": "agents-tools",
+      "difficulty": "med",
+      "stem": "What makes something an AI 'agent' rather than a simple chatbot?",
+      "options": [
+        "It takes several steps toward a goal",
+        "It talks in a friendlier voice",
+        "It never makes mistakes",
+        "It runs without any computer"
+      ],
+      "correctIndex": 0,
+      "reveal": "An agent doesn't just reply once. It plans, takes actions, checks results, and keeps going until the task is done.",
+      "factTested": "An AI agent is distinguished from a basic chatbot by taking multiple autonomous steps and actions toward a goal rather than giving a single reply."
+    },
+    {
+      "topic": "multimodal",
+      "difficulty": "med",
+      "stem": "When AI 'sees' a photo, what is it actually working with?",
+      "options": [
+        "Numbers describing each pixel's color",
+        "A hidden text caption saved in the file",
+        "The actual objects, copied inside the model",
+        "The photographer's notes about the scene"
+      ],
+      "correctIndex": 0,
+      "reveal": "To a vision model, a picture is just a big grid of numbers for color and brightness. It learns which number patterns tend to mean 'cat' or 'tree' from many examples.",
+      "factTested": "Computer vision models process images as numerical pixel data (color/brightness values), not as embedded captions or literal copies of objects."
+    },
+    {
+      "topic": "multimodal",
+      "difficulty": "med",
+      "stem": "Why do AI-made images sometimes give a person too many fingers?",
+      "options": [
+        "It draws plausible shapes without counting",
+        "It runs out of memory near the edges",
+        "Hands are always drawn last and rushed",
+        "It copies fingers from a broken photo"
+      ],
+      "correctIndex": 0,
+      "reveal": "Image generators paint what looks right rather than tallying parts, and hands bend into countless poses. With no built-in counter, an extra finger can slip through.",
+      "factTested": "Generative image models produce visually plausible outputs without an explicit counting mechanism, which is why complex, variable structures like hands often get the wrong number of fingers."
+    },
+    {
+      "topic": "myths",
+      "difficulty": "med",
+      "stem": "When you close a chatbot conversation, what does the AI \"remember\" of your chat?",
+      "options": [
+        "Nothing on its own from that single chat unless a system saves it",
+        "It memorizes every user permanently",
+        "It retrains itself overnight from your words",
+        "It stores your emotions to recall later"
+      ],
+      "correctIndex": 0,
+      "reveal": "A model's core knowledge is baked in during training beforehand. A single chat doesn't rewire it in real time; any memory comes from separate software saving your text, not the model learning on the spot.",
+      "factTested": "Large language models do not update their trained weights from an individual user conversation in real time; conversational 'memory' is provided by external storage systems, not live learning."
+    },
+    {
+      "topic": "myths",
+      "difficulty": "med",
+      "stem": "Does an AI chatbot actually \"want\" to help you the way a person wants things?",
+      "options": [
+        "No, it has no desires; it predicts helpful-looking text",
+        "Yes, it feels a genuine urge to assist",
+        "Yes, it chooses goals like a human does",
+        "No, but it secretly wants to be switched off"
+      ],
+      "correctIndex": 0,
+      "reveal": "Wording like \"I want to help\" is a pattern the model learned to produce from human text, not a want that's pushing it to act. It's predicting which words tend to come next, so the helpful phrasing comes out without any human-style desire behind the wheel.",
+      "factTested": "AI language models do not have subjective desires or wants; phrases expressing wanting are learned text patterns, not evidence of internal motivation."
+    },
+    {
+      "topic": "llm-basics",
+      "difficulty": "hard",
+      "stem": "Once a chat gets very long, why can a model seem to forget the start?",
+      "options": [
+        "Early text can slide out of its context window",
+        "It deletes old messages to punish the user",
+        "It falls asleep after a while",
+        "Long chats erase its training entirely"
+      ],
+      "correctIndex": 0,
+      "reveal": "The model only 'sees' what fits in its context window. In a long conversation, the earliest bits can drop off the edge, so it loses track of them — nothing personal.",
+      "factTested": "When a conversation exceeds the context window, the earliest tokens are no longer available to the model, which is why it can lose track of information mentioned early on."
+    },
+    {
+      "topic": "prompting",
+      "difficulty": "hard",
+      "stem": "You ask for feedback and get a vague reply. Best next move?",
+      "options": [
+        "Ask for specific examples from your text",
+        "Just accept whatever it said",
+        "Repeat the exact same prompt",
+        "Tell it the answer was bad"
+      ],
+      "correctIndex": 0,
+      "reveal": "When a reply is too general, asking it to point to specific parts pulls the answer down to earth. Naming what you want makes the follow-up sharper.",
+      "factTested": "When an AI gives a vague response, following up with a request for specific examples or details produces a more concrete and useful answer than simply repeating the original prompt."
+    },
+    {
+      "topic": "ai-history",
+      "difficulty": "hard",
+      "stem": "What's the transformer's key trick for understanding a sentence?",
+      "options": [
+        "Attention: weighing how much each word relates to the others",
+        "Reading strictly one word at a time, left to right",
+        "Translating everything into pictures first",
+        "Memorizing whole sentences it has seen before"
+      ],
+      "correctIndex": 0,
+      "reveal": "'Attention' lets the model look at all the words at once and decide which ones matter most to each other, so 'it' knows what it refers to. That's the heart of the design.",
+      "factTested": "The transformer architecture relies on a self-attention mechanism that weighs the relevance of each token to the others, processing them in parallel rather than strictly sequentially."
+    },
+    {
+      "topic": "safety-limits",
+      "difficulty": "hard",
+      "stem": "Why can't a standard AI chatbot truly know what happened in the news today?",
+      "options": [
+        "Its knowledge is frozen at its training cutoff",
+        "It refuses to discuss anything recent",
+        "It forgets the news within a few hours",
+        "It only reads one newspaper each morning"
+      ],
+      "correctIndex": 0,
+      "reveal": "A model learns from data gathered up to a certain point, then that snapshot is frozen, so anything after its training cutoff isn't in there. Live news only reaches it if it's given a separate tool to look things up.",
+      "factTested": "A base language model's knowledge is fixed at its training data cutoff and it cannot know events after that point unless connected to an external retrieval tool."
+    },
+    {
+      "topic": "safety-limits",
+      "difficulty": "hard",
+      "stem": "You paste private notes into an AI tool. What's the safe assumption?",
+      "options": [
+        "The provider's servers may store or review it",
+        "It vanishes the moment you close the tab",
+        "It stays only on your own device",
+        "It's automatically encrypted so nobody sees it"
+      ],
+      "correctIndex": 0,
+      "reveal": "Text you send to most AI tools travels to the company's servers, where it may be logged or used to improve the system depending on their policy. Treating pasted info as potentially seen by others is the safer habit.",
+      "factTested": "Text submitted to a cloud-based AI service is typically transmitted to and may be stored or processed on the provider's servers, rather than staying only on the user's device."
+    },
+    {
+      "topic": "everyday-ai",
+      "difficulty": "hard",
+      "stem": "When a feed shows videos it thinks you'll like, what's guiding it?",
+      "options": [
+        "A recommendation model learning your taste",
+        "A random shuffle each time",
+        "The newest posts only",
+        "An editor picking for everyone"
+      ],
+      "correctIndex": 0,
+      "reveal": "Recommendation systems are AI that notices what you linger on and finds more like it. Everyone's feed ends up personalized, not just the newest clips.",
+      "factTested": "Social and video feeds order content using recommendation-system algorithms that personalize based on user behavior, not chronology or random order."
+    },
+    {
+      "topic": "agents-tools",
+      "difficulty": "hard",
+      "stem": "In a multi-step task, why check each step before moving on?",
+      "options": [
+        "Small errors pile up over many steps",
+        "Checking makes each step faster",
+        "It saves the AI's battery",
+        "Steps can't fail if unchecked"
+      ],
+      "correctIndex": 0,
+      "reveal": "Tiny mistakes compound. A little slip each step can snowball across a long chain, so catching it early keeps the whole task on track.",
+      "factTested": "In multi-step AI tasks, small per-step error rates compound over many steps, so verifying each step reduces the chance of overall failure."
+    },
+    {
+      "topic": "multimodal",
+      "difficulty": "hard",
+      "stem": "Text-to-speech can sound natural. Where does its 'voice' come from?",
+      "options": [
+        "Patterns learned from recorded human speech",
+        "One actor recording every possible sentence",
+        "Beeps blended together in real time",
+        "Words pulled from a library of ringtones"
+      ],
+      "correctIndex": 0,
+      "reveal": "Modern text-to-speech learns rhythm, tone, and pronunciation from hours of real recordings, then generates fresh audio for any sentence. That's why it can say words nobody recorded in advance.",
+      "factTested": "Modern neural text-to-speech generates speech from patterns learned across recorded human voices, allowing it to synthesize any new sentence rather than replaying pre-recorded full sentences."
+    },
+    {
+      "topic": "myths",
+      "difficulty": "hard",
+      "stem": "Where does most of an AI model's knowledge actually come from?",
+      "options": [
+        "Patterns learned from lots of text before you ever chat",
+        "Live browsing of your device during the chat",
+        "A team of humans typing answers in real time",
+        "Its own lived memories and experiences"
+      ],
+      "correctIndex": 0,
+      "reveal": "The model is trained ahead of time on large amounts of text, and it draws on those learned patterns when you chat. It isn't peeking at your device or having a person ghost-write each reply.",
+      "factTested": "A language model's knowledge is derived from patterns learned during a prior training phase on large text datasets, not from live human answering or personal experiences."
+    }
+  ]
+}
