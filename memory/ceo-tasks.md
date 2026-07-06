@@ -1,48 +1,52 @@
 # CEO Task Tracker — Yusif's Pending Actions
 
-**Purpose:** CTO tracks CEO tasks. CEO is self-described "раздолбай" — needs external accountability.
-**Updated:** 2026-04-05
+**Purpose:** Atlas tracks CEO-only tasks. These block launch — no agent can substitute.
+**Updated:** 2026-07-06 (Atlas — added 🔒 SECURITY section from authz audit)
 
 ---
 
-## OVERDUE
+## 🔴 LAUNCH BLOCKERS (only you can do these)
 
-| # | Task | Created | Status | Blocker |
-|---|------|---------|--------|---------|
-| 1 | **LinkedIn post (EN)** — ecosystem vision carousel | Apr 4 | ❌ NOT DONE | Text ready, PDF ready (`public/linkedin-carousel.pdf`), just needs upload |
-| 2 | **Telegram bot setup** — `supabase secrets set TELEGRAM_BOT_TOKEN=8670831012:AAG...` + register webhook | Apr 4 | ❌ NOT DONE | Needs Supabase access token (login required) |
-| 3 | **Play Store Console** — Data Safety form + Content Rating + listing text | Apr 4 | ❌ NOT DONE | AAB ready (4.3 MB), needs manual upload |
-| 4 | **Secret rotation** — Supabase service role key + Sentry auth token | Apr 4 | ❌ NOT DONE | Dashboard access only |
-| 5 | **Gemini budget cap** — Google AI Studio → Project → Budget alert | Apr 4 | ❌ NOT DONE | 5 min task |
+| # | Task | Overdue since | Time needed | Impact |
+|---|------|---------------|-------------|--------|
+| 1 | **Google Play verification** — complete account verification | Apr 4 (80 days) | varies | Blocks Android distribution entirely |
+| 2 | **Play Store listing** — Data Safety form + Content Rating + upload AAB (4.3 MB ready) | Apr 4 (80 days) | ~30 min | Blocks Android beta |
+| 3 | **Supabase: Google OAuth provider** — enable in Dashboard → Auth → Providers | Apr 4 (80 days) | 5 min | Enables social login (only magic link works now) |
+| 4 | **Supabase: pg_cron activation** — enable in Dashboard → Database → Extensions | Apr 4 (80 days) | 2 min | Enables scheduled push notifications |
+| 5 | **Secret rotation** — Supabase service role key + Sentry auth token + NVIDIA key | Apr 4 (80 days) | 15 min | ⚠️ SECURITY: keys potentially leaked, still unrotated |
+| 6 | **Gemini budget cap** — Google AI Studio → Project → Budget alert | Apr 4 (80 days) | 5 min | Prevents surprise billing |
 
-## PENDING (from mega-plan)
+## 🔒 SECURITY — authz audit 2026-07-06 (report: `audit/SECURITY-AUDIT-2026-07-06-authz.md`)
 
-| # | Task | Phase | Due |
-|---|------|-------|-----|
-| 6 | Approve mega-plan (read `memory/mega-plan-april-2026.md`) | Phase 0 | Apr 5 |
-| 7 | Send 5 research prompts to AI models (file: `5-research-prompts.md`) | Parallel | Apr 6-7 |
-| 8 | Review crystal economy changes after Phase 2 | Phase 2 | Apr 8 |
-| 9 | Validate with Supabase Dashboard: is migration 006 (activate_trial guard) applied? | Security | Apr 6 |
+| # | Task | Owner | Status | Impact |
+|---|------|-------|--------|--------|
+| S1 | **creator-pult**: `supabase secrets set PULT_WEBHOOK_SECRET=<rand 32+ch>` → re-register @CreatorBy_bot webhook with that `secret_token` → deploy | CEO (then live) | Code **DONE** (commit `2e9ab1e`); **NOT deployed** — fail-closes until the secret is set. Exact steps in the file header. | 🟠 HIGH: burned URL key in public repo → anyone can flood render/publish queue + burn compute |
+| S2 | **earn_focus_crystals (CRITICAL)**: greenlight the phased fix — session-validated RPC + UNIQUE idempotency + source_event CHECK, paired with a `useFocusSession.ts` client change | CEO decide → Atlas ships | Design ready in report; Phase-1 migration is additive/safe — Atlas ships on «го» | 🔴 CRITICAL: any signed-in user mints unlimited FOCUS crystals + can suppress the dividend payout for all shareholders |
+| S3 | **Enable leaked-password protection** (Supabase → Auth → HaveIBeenPwned) — still OFF | CEO | ~2 min dashboard toggle | Breached passwords accepted at signup |
+| S4 | subscriptions latent self-grant + agent-chat prompt-injection guard | Atlas | Queued (low sev, safe standalone edits) | Billing foot-gun; brand-surface guardrail bypass |
 
-## COMPLETED
+## 🟡 DISTRIBUTION (first 20 users)
 
-| # | Task | Completed |
-|---|------|-----------|
-| ✅ | Capacitor install (`npm install @capacitor/core @capacitor/cli @capacitor/android`) | Apr 4 |
-| ✅ | Gradle download (manual) | Apr 4 |
-| ✅ | JDK 21 installed (via winget) | Apr 4 |
-| ✅ | Sent Supabase API keys | Apr 4 |
-| ✅ | Sent Telegram bot token | Apr 4 |
-| ✅ | Sent all 17 research documents | Apr 4-5 |
+| # | Task | Time needed | Impact |
+|---|------|-------------|--------|
+| 7 | **Post to r/ADHD** — "I built an ADHD focus app, looking for beta testers" + PWA link | 20 min | First real users |
+| 8 | **LinkedIn carousel post** — text+PDF ready at `public/linkedin-carousel.pdf` | 5 min (upload) | Professional visibility |
+| 9 | **Telegram bot webhook** — `supabase secrets set TELEGRAM_BOT_TOKEN=...` + register | 10 min | Enables bot-based task creation |
+
+## ✅ COMPLETED
+
+| Task | When |
+|------|------|
+| Capacitor install + Gradle + JDK 21 | Apr 4 |
+| Supabase API keys sent | Apr 4 |
+| Telegram bot token sent | Apr 4 |
+| 17 research documents sent | Apr 4-5 |
+| Code: 26 sprints shipped (A→AG) | Apr–Jun |
+| Code: 227 tests passing, tsc clean | Jun 24 |
+| Android native resources tracked in git | Jun 24 |
 
 ---
 
-## RECURRING
+## THE TRUTH (from strategic audit 2026-06-24)
 
-- [ ] LinkedIn: 4 posts/week (Tue carousel, Wed text, Thu poll, Sun reflection)
-- [ ] Review CTO output at end of each session
-- [ ] Telegram bot: check for swarm proposals daily
-
-## NOTE
-
-Telegram task creation from bot — discussed, code exists in `supabase/functions/telegram-webhook/index.ts` (606 lines). Bot can already classify messages and create tasks. Just needs webhook registration (Task #2 above).
+MindShift is code-complete. 15 routes, AI mascot, community, economy, 227 tests, live on Vercel. **But 0 users besides you.** The code is at 95th percentile quality. Distribution is at 0th percentile. The product doesn't need more code — it needs its first 20 users. Every day without users is a day without learning what's actually wrong.
