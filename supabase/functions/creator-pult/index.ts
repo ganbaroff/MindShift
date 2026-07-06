@@ -1,5 +1,5 @@
 // -- creator-pult Edge Function -------------------------------------------------
-// POST /functions/v1/creator-pult?k=<PULT_URL_KEY>
+// POST /functions/v1/creator-pult  (auth: X-Telegram-Bot-Api-Secret-Token header)
 //
 // «Пульт v1» — the CEO's phone control panel for the media factory, driven from his
 // Telegram bot @CreatorBy_bot. This function is a THIN dispatcher: it authenticates the
@@ -8,38 +8,38 @@
 // replies immediately. The actual render (15-40 min) is done out-of-band by
 // pult_worker.mjs (GitHub Actions poller). An edge function cannot render — 150s limit.
 //
-// -- AUTH (v1) ------------------------------------------------------------------
-// We cannot set new Supabase secrets for this build, so instead of the usual
-// X-Telegram-Bot-Api-Secret-Token header (which would need a new secret), auth is a
-// URL query param `?k=<PULT_URL_KEY>` — a random constant compiled in below. Telegram
-// is the only party that knows the URL (set once via setWebhook). This is v1 OBSCURITY,
-// not real auth: anyone who learns the URL can enqueue commands. Mitigations:
-//   * every command is idempotent / bounded (queue rows, no direct spend here);
-//   * the worker's make/publish steps have their own hard gates (content_critic,
-//     published.json idempotency);
-//   * ALLOWED_CHAT_ID pins the CEO's chat once known (see below).
-// v2 hardening: promote PULT_URL_KEY to a real Supabase secret + header check.
+// -- AUTH (v2, 2026-07-06 hardening) ---------------------------------------------
+// Two unforgeable layers:
+//   1. X-Telegram-Bot-Api-Secret-Token header must equal the Supabase secret
+//      PULT_WEBHOOK_SECRET (registered with Telegram via setWebhook secret_token).
+//      Only Telegram knows it → proves the update is genuine. Fail-closed: if the
+//      secret env is unset, the function refuses (500).
+//   2. ALLOWED_CHAT_ID pins the CEO's chat. Because layer 1 proved the update is a
+//      genuine Telegram delivery, message.chat.id is trustworthy here (not spoofable).
+// (v1 used a `?k=` URL key compiled into source — it burned in the public repo, removed.)
 //
 // -- INSTANT REPLIES (no bot token needed) --------------------------------------
 // We answer the webhook HTTP request with JSON {method:'sendMessage', chat_id, text}.
 // Telegram executes that method against the SAME update — so this function never needs
 // the bot token. (Only pult_worker.mjs needs the token, to send video files back.)
 //
-// -- SETUP ----------------------------------------------------------------------
-// 1. Deploy:   supabase functions deploy creator-pult --no-verify-jwt
-//    (--no-verify-jwt: Telegram sends no Supabase JWT.)
-// 2. Register: node tmp/kapibara/pult_setwebhook.mjs
-//    (points Telegram at .../creator-pult?k=<PULT_URL_KEY>)
-// 3. First use: CEO sends /whoami → reads his chat_id → we pin ALLOWED_CHAT_ID → redeploy.
+// -- SETUP (CEO, one-time — needed before this hardened code will accept traffic) -
+// 1. Secret:   supabase secrets set PULT_WEBHOOK_SECRET=<random 32+ char string>
+// 2. Deploy:   supabase functions deploy creator-pult --no-verify-jwt
+//    (--no-verify-jwt: Telegram sends no Supabase JWT; auth is the header above.)
+// 3. Register: curl -X POST "https://api.telegram.org/bot<CREATORBY_BOT_TOKEN>/setWebhook" \
+//      -H "Content-Type: application/json" \
+//      -d '{"url":"https://<ref>.supabase.co/functions/v1/creator-pult","secret_token":"<same PULT_WEBHOOK_SECRET>"}'
+//    (URL carries NO ?k=; Telegram attaches secret_token as the header on every update.)
 //
 // Uses the auto-injected SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY (same as telegram-webhook).
 // ---------------------------------------------------------------------------------
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-// -- v1 URL obscurity key (see AUTH note). Random, compiled-in constant. ----------
-// The webhook URL carries ?k=<this>. Telegram is the only holder of that URL.
-const PULT_URL_KEY = 'HPKaWGb6sjdGIG-5c1NXtnMOP9NEXKmQ'
+// -- Auth is the Telegram secret-token header (checked in the handler below). ------
+// No key in source. The secret lives ONLY as the Supabase secret PULT_WEBHOOK_SECRET
+// and is registered with Telegram via setWebhook({ secret_token }). Fail-closed.
 
 // -- Chat allowlist ---------------------------------------------------------------
 // TODO(pin CEO id): set to the CEO's numeric chat_id once he runs /whoami. While this
@@ -97,9 +97,14 @@ Deno.serve(async (req: Request) => {
     return new Response('Method not allowed', { status: 405 })
   }
 
-  // -- AUTH: URL ?k= must equal the compiled key --------------------------------
-  const url = new URL(req.url)
-  if (url.searchParams.get('k') !== PULT_URL_KEY) {
+  // -- AUTH: verify the Telegram secret-token header. Unforgeable — only Telegram
+  // (via our setWebhook registration) knows it. Fail closed if the secret is unset. -
+  const webhookSecret = Deno.env.get('PULT_WEBHOOK_SECRET')
+  if (!webhookSecret) {
+    console.error('[creator-pult] PULT_WEBHOOK_SECRET not set — refusing to process')
+    return new Response('Misconfigured: PULT_WEBHOOK_SECRET not set', { status: 500 })
+  }
+  if (req.headers.get('x-telegram-bot-api-secret-token') !== webhookSecret) {
     return new Response('Forbidden', { status: 403 })
   }
 
@@ -120,22 +125,16 @@ Deno.serve(async (req: Request) => {
   const text = message.text.trim()
   const cmd = text.split(/\s+/)[0].toLowerCase()
 
-  // -- /whoami — always answered (this is how the CEO reads his id to pin it) ----
-  if (cmd === '/whoami') {
-    return reply(
-      chatId,
-      `Твой chat_id: <code>${chatId}</code>\n\nПришли его — впишу в ALLOWED_CHAT_ID, и Пульт станет только твой.`,
-    )
-  }
-
-  // -- Chat allowlist gate ------------------------------------------------------
-  if (ALLOWED_CHAT_ID !== 0 && chatId !== ALLOWED_CHAT_ID) {
-    // Not the CEO. Refuse politely; do not enqueue anything.
+  // -- Chat allowlist gate. chat.id is trustworthy now: the secret-token header
+  // above proves the update genuinely came from Telegram, so it cannot be forged. --
+  // Fail closed — an unpinned (0) allowlist refuses everyone, never allow-all.
+  if (ALLOWED_CHAT_ID === 0 || chatId !== ALLOWED_CHAT_ID) {
     return reply(chatId, 'Этот пульт закреплён за владельцем. Доступа нет.')
   }
-  if (ALLOWED_CHAT_ID === 0) {
-    // v1: allow-all but log so a stray sender is visible in the function logs.
-    console.warn(`[creator-pult] ALLOWED_CHAT_ID=0 (allow-all) — command "${cmd}" from chat_id=${chatId} (@${message.from.username ?? '?'})`)
+
+  // -- /whoami — behind the gate, owner-only. Handy to reconfirm the pinned id. ---
+  if (cmd === '/whoami') {
+    return reply(chatId, `Твой chat_id: <code>${chatId}</code>`)
   }
 
   // -- Instant, no-DB commands --------------------------------------------------
