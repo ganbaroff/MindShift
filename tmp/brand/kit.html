@@ -1,0 +1,133 @@
+<!doctype html>
+<html data-energy="full" data-product="volaura">
+<head>
+<meta charset="utf-8" />
+<style>
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap");
+:root{
+  --surface:#13131b; --lowest:#0d0d15; --low:#1b1b23; --container:#1f1f27; --high:#292932;
+  --primary:#c0c1ff; --primary-c:#8083ff; --deep:#6366ff; --on:#e4e1ed; --muted:#c7c4d7;
+  --gold:#e9c400; --outline:#464554;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#0b0b12}
+body{font-family:"Inter",system-ui,sans-serif;color:var(--on)}
+#stage{position:relative;overflow:hidden}
+.jakarta{font-family:"Plus Jakarta Sans","Inter",sans-serif}
+.mark{display:inline-block;vertical-align:middle}
+
+/* ---------- AVATAR 1080 ---------- */
+.avatar{width:1080px;height:1080px;
+  background:radial-gradient(circle at 50% 44%, #232338 0%, #15151f 55%, #0d0d15 100%);
+  display:grid;place-items:center;position:relative}
+.avatar .glow{position:absolute;width:940px;height:940px;top:70px;left:70px;border-radius:50%;
+  background:radial-gradient(circle, rgba(128,131,255,.26) 0%, rgba(128,131,255,0) 66%);filter:blur(6px)}
+.avatar .ring{position:absolute;width:1012px;height:1012px;border-radius:50%;
+  border:6px solid transparent;background:linear-gradient(#0d0d15,#0d0d15) padding-box,
+  linear-gradient(135deg,#e1e0ff,#8083ff 55%,#6366ff) border-box;opacity:.9}
+.avatar svg.capy{width:860px;height:860px;position:relative;transform:translateY(6px)}
+
+/* ---------- YOUTUBE BANNER 2560x1440 ---------- */
+.banner{width:2560px;height:1440px;position:relative;
+  background:
+   radial-gradient(ellipse at 22% 52%, rgba(128,131,255,.20) 0%, transparent 52%),
+   radial-gradient(ellipse at 78% 24%, rgba(189,194,255,.12) 0%, transparent 42%),
+   radial-gradient(ellipse at 62% 82%, rgba(99,102,241,.12) 0%, transparent 46%),
+   #13131b;}
+.banner .safe{position:absolute;left:507px;top:508px;width:1546px;height:423px;
+  display:flex;align-items:center;gap:70px}
+.banner svg.capy{width:360px;height:360px;flex:0 0 auto;
+  filter:drop-shadow(0 0 40px rgba(128,131,255,.35))}
+.banner .txt{display:flex;flex-direction:column;gap:16px}
+.banner h1{font-family:"Plus Jakarta Sans";font-weight:800;font-size:112px;line-height:1;
+  letter-spacing:-.02em;background:linear-gradient(135deg,#ffffff,#c0c1ff 70%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.banner .tag{font-size:40px;font-weight:500;color:var(--muted)}
+.banner .by{display:flex;align-items:center;gap:14px;font-family:"Plus Jakarta Sans";font-weight:700;
+  font-size:30px;letter-spacing:.16em;color:var(--primary);margin-top:8px;opacity:.9}
+
+/* ---------- BRAND BOARD 1600x1000 (CEO preview) ---------- */
+.board{width:1600px;height:1000px;background:
+   radial-gradient(ellipse at 18% 30%, rgba(128,131,255,.10) 0%, transparent 46%),#0f0f17;
+  padding:52px 60px;display:flex;flex-direction:column;gap:30px}
+.board .head{display:flex;align-items:center;justify-content:space-between}
+.board .head h2{font-family:"Plus Jakarta Sans";font-weight:800;font-size:34px;letter-spacing:-.01em}
+.board .head .kick{font-size:14px;letter-spacing:.22em;text-transform:uppercase;color:var(--primary);opacity:.8;font-weight:700}
+.board .body{display:flex;gap:40px;flex:1;min-height:0}
+.board .left{width:430px;flex:0 0 auto;display:flex;flex-direction:column;gap:24px}
+.board .avmock{width:430px;height:430px;border-radius:50%;overflow:hidden;position:relative;
+  background:radial-gradient(circle at 50% 44%, #232338 0%, #15151f 58%, #0d0d15 100%);
+  border:4px solid transparent;background-clip:padding-box;
+  box-shadow:0 0 0 4px #6366ff55, 0 20px 50px rgba(0,0,0,.5);display:grid;place-items:center}
+.board .avmock svg.capy{width:300px;height:300px;transform:translateY(-4px)}
+.board .avmock .glow{position:absolute;width:340px;height:340px;border-radius:50%;
+  background:radial-gradient(circle, rgba(128,131,255,.30) 0%, transparent 68%)}
+.board .idblock{text-align:center}
+.board .idblock .name{font-family:"Plus Jakarta Sans";font-weight:800;font-size:34px}
+.board .idblock .handle{color:var(--primary);font-weight:600;font-size:20px;margin-top:4px}
+.board .idblock .tag{color:var(--muted);font-size:16px;margin-top:8px}
+.board .swatches{display:flex;gap:10px;justify-content:center;margin-top:6px}
+.board .sw{width:46px;height:46px;border-radius:12px;border:1px solid #ffffff18}
+.board .right{flex:1;display:flex;flex-direction:column;gap:16px;min-width:0}
+.card{background:#1b1b23;border:1px solid var(--outline);border-radius:20px;padding:20px 24px}
+.card .plat{display:flex;align-items:center;gap:10px;font-family:"Plus Jakarta Sans";font-weight:700;font-size:17px;color:var(--primary)}
+.card .lim{margin-left:auto;font-size:12px;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.card .nm{margin-top:10px;font-weight:700;font-size:16px}
+.card .bio{margin-top:6px;font-size:15.5px;line-height:1.5;color:var(--on);white-space:pre-line}
+.card .lnk{margin-top:8px;font-size:13.5px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script>
+/* --- Mochi mascot generator (canon from capy-render.html) --- */
+const PAL={mochi:{body:'#E9D9B5',shadow:'#CBB488',belly:'#F4EBD6',nose:'#5A4632',stroke:'#7A5C3A',cheek:'rgba(231,140,120,0.30)'}};
+const A={orange:'#F2994A',leaf:'#7BA05B',sparkle:'#F2C94C'};
+const MOOD={happy:{eyes:'joy',mouth:'joySmile',cheeks:true,accent:'sparkle'}};
+function eyes(k,n){if(k==='joy')return `<path d="M 76 102 Q 82 96, 88 102" stroke="${n}" stroke-width="2.6" fill="none" stroke-linecap="round"/><path d="M 112 102 Q 118 96, 124 102" stroke="${n}" stroke-width="2.6" fill="none" stroke-linecap="round"/>`;return '';}
+function mouth(k,n){if(k==='joySmile')return `<path d="M 92 121 Q 100 129, 108 121 Q 100 127, 92 121 Z" fill="${n}" opacity="0.85"/>`;return '';}
+function accent(k){if(k==='sparkle')return `<path d="M 154 56 L 157 62 L 163 64 L 157 66 L 154 72 L 151 66 L 145 64 L 151 62 Z" fill="${A.sparkle}" stroke="${A.orange}" stroke-width="1.2" stroke-linejoin="round"/>`;return '';}
+function capy(m){const c=MOOD[m],p=PAL.mochi;
+ const cheeks=c.cheeks?`<ellipse cx="64" cy="116" rx="8" ry="4.5" fill="${p.cheek}"/><ellipse cx="136" cy="116" rx="8" ry="4.5" fill="${p.cheek}"/>`:'';
+ return `<svg class="capy" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <ellipse cx="100" cy="182" rx="50" ry="5" fill="${p.stroke}" opacity="0.10"/>
+  <ellipse cx="68" cy="66" rx="12" ry="14" fill="${p.body}" stroke="${p.stroke}" stroke-width="2.2"/><ellipse cx="68" cy="67" rx="6" ry="7.5" fill="${p.shadow}"/>
+  <ellipse cx="132" cy="66" rx="12" ry="14" fill="${p.body}" stroke="${p.stroke}" stroke-width="2.2"/><ellipse cx="132" cy="67" rx="6" ry="7.5" fill="${p.shadow}"/>
+  <ellipse cx="100" cy="112" rx="58" ry="55" fill="${p.body}" stroke="${p.stroke}" stroke-width="2.4"/>
+  <ellipse cx="100" cy="126" rx="36" ry="26" fill="${p.belly}" opacity="0.45"/>
+  ${cheeks}${eyes(c.eyes,p.nose)}
+  <ellipse cx="100" cy="112" rx="4" ry="2.8" fill="${p.nose}"/>
+  ${mouth(c.mouth,p.nose)}${accent(c.accent)}
+ </svg>`;}
+const ORB=`<svg class="mark" width="34" height="34" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="o" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#e1e0ff"/><stop offset="55%" stop-color="#c0c1ff"/><stop offset="100%" stop-color="#6366ff"/></linearGradient></defs><g fill="none" stroke="url(#o)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"><path d="M 12 14 L 32 50"/><path d="M 52 14 L 38 39.2"/></g><circle cx="38" cy="39.2" r="2.4" fill="#e1e0ff"/></svg>`;
+
+const BIOS={
+ ig:{plat:'Instagram',lim:'≤150',name:'Kapibara AI · daily AI news',bio:"🦫 The day's AI, in 60 seconds.\nOne calm capybara. Three stories. Zero hype.\nMade by VOLAURA ↓",lnk:'Link: volaura.com  (swap to funnel bot when live)'},
+ tt:{plat:'TikTok',lim:'≤80',name:'Kapibara AI',bio:"Daily AI news in 60s 🦫 three stories, no hype. Made by VOLAURA",lnk:'Link: volaura.com'},
+ yt:{plat:'YouTube',lim:'long',name:'Kapibara AI',bio:"The biggest AI stories of the day, in one calm 60-second brief — hosted by Mochi the capybara. New episode every day.\nMade by VOLAURA · volaura.com",lnk:'Handle: @volaura.kapibara  ·  Banner: separate 2560×1440 file'}
+};
+
+const t=(new URLSearchParams(location.search).get('t'))||'board';
+const stage=document.getElementById('stage');
+if(t==='avatar'){
+ stage.innerHTML=`<div class="avatar"><div class="glow"></div><div class="ring"></div>${capy('happy')}</div>`;
+}else if(t==='banner'){
+ stage.innerHTML=`<div class="banner"><div class="safe">${capy('happy')}<div class="txt"><h1 class="jakarta">Kapibara AI</h1><div class="tag">The day's AI news, in 60 seconds.</div><div class="by">${ORB}<span>MADE&nbsp;BY&nbsp;VOLAURA</span></div></div></div></div>`;
+}else{
+ const card=(b)=>`<div class="card"><div class="plat">${b.plat}<span class="lim">${b.lim}</span></div><div class="nm">${b.name}</div><div class="bio">${b.bio}</div><div class="lnk">${b.lnk}</div></div>`;
+ stage.innerHTML=`<div class="board">
+   <div class="head"><h2 class="jakarta">Kapibara AI — social brand kit</h2><div class="kick">VOLAURA design system</div></div>
+   <div class="body">
+     <div class="left">
+       <div class="avmock"><div class="glow"></div>${capy('happy')}</div>
+       <div class="idblock"><div class="name jakarta">Kapibara AI</div><div class="handle">@volaura.kapibara</div><div class="tag">Daily AI news · made by VOLAURA</div>
+         <div class="swatches"><div class="sw" style="background:#0d0d15"></div><div class="sw" style="background:#13131b"></div><div class="sw" style="background:#8083ff"></div><div class="sw" style="background:#c0c1ff"></div><div class="sw" style="background:#e9c400"></div></div>
+       </div>
+     </div>
+     <div class="right">${card(BIOS.ig)}${card(BIOS.tt)}${card(BIOS.yt)}</div>
+   </div>
+ </div>`;
+}
+document.title='ready-'+t;
+</script>
+</body>
+</html>
