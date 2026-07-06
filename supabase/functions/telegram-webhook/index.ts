@@ -41,7 +41,6 @@
 // ---------------------------------------------------------------------------------
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { checkDbRateLimit } from '../_shared/rateLimit.ts'
 
 // -- Constants --------------------------------------------------------------------
 
@@ -538,12 +537,16 @@ Or just send me any message — I'll figure out if it's a task, idea, reminder, 
         return new Response('ok', { status: 200 })
       }
 
-      // -- Rate limit /link attempts (max 5 per 10 min, DB-backed — survives cold starts) --
-      const { allowed: linkAllowed } = await checkDbRateLimit(supabase, `tg-${chatId}`, false, {
-        fnName: 'telegram-link',
-        limitFree: 5,
-        windowMs: LINK_RATE_WINDOW_MS,
-      })
+      // -- Rate limit /link attempts (max 5 per 10 min, text-keyed — survives cold starts) --
+      // Must use the FK-free funnel limiter (migration 032). The shared checkDbRateLimit
+      // routes the key into increment_rate_limit(p_user_id uuid); a text key like
+      // `tg-<chatId>` throws Postgres 22P02 (invalid uuid) and the caller fails OPEN,
+      // silently disabling the limit — the same defect fixed on the mid-quiz path in
+      // commit c56db48. Keying by chatId (== telegramId in a private chat) throttles
+      // link-code brute-force attempts. CEO spend/abuse guard.
+      const linkAllowed = await checkFunnelRateLimit(
+        supabase, `link-${chatId}`, 5, LINK_RATE_WINDOW_MS,
+      )
       if (!linkAllowed) {
         const msg = lang === 'ru'
           ? 'Слишком много попыток. Подожди немного и попробуй снова.'
