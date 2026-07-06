@@ -9,9 +9,9 @@ const MODEL = 'gemini-2.5-flash-preview-tts'
 
 // Factory Law 7 — ONE frozen style directive for every line (was two: B anchor + F punchline,
 // which made lines sound like different speakers). Punchline flavor now comes from the TEXT,
-// not a different voice directive. Same warm, energetic, charismatic Russian news-anchor
+// not a different voice directive. Same warm, energetic, charismatic English news-anchor
 // delivery that also lands jokes with light comedic timing.
-const STYLE = 'Read aloud in one warm, energetic, charismatic Russian TV news-anchor voice — clear, upbeat, and lively, never monotone; keep the same speaker throughout and land the jokes with light comedic timing:'
+const STYLE = 'Read aloud in one warm, energetic, charismatic English TV news-anchor voice — clear, upbeat, and lively, never monotone; keep the same speaker throughout and land the jokes with light comedic timing:'
 
 // 11-line template → [scene-item index, pause(s) after]. One STYLE for all lines.
 // [0] title, [1] hook(item0), [2-4] news1, [5-6] news2, [7-8] news3, [9] title, [10] signoff
@@ -25,24 +25,24 @@ const TPL = [
 
 // FALLBACK content — used ONLY if today.json is missing/invalid (preserves the proven path). Hook de-shamed (Constitution Law 3).
 const FALLBACK_ITEMS = [
-  { key: 'news',    title: 'КАПИБАРА НОВОСТИ', sub: 'Главное про ИИ',     source: 'сегодня',           tint: 'indigo' },
-  { key: 'rocket',  title: 'SpaceX × Cursor',   sub: '$60 млрд',          source: 'крупнейшая сделка', tint: 'teal' },
-  { key: 'chip',    title: 'Gemini 3.5 Pro',    sub: '2 000 000 токенов', source: 'Google',            tint: 'indigo' },
-  { key: 'lock',    title: 'Claude Fable 5',    sub: 'халява закрыта',    source: 'Anthropic',         tint: 'gold' },
-  { key: 'signoff', title: 'КАПИБАРА НОВОСТИ', sub: 'до завтра',         source: 'в эфире',           tint: 'indigo' },
+  { key: 'news',    title: 'KAPIBARA NEWS',   sub: 'Today in AI',       source: 'today',          tint: 'indigo' },
+  { key: 'rocket',  title: 'SpaceX × Cursor', sub: '$60B',              source: 'biggest deal',   tint: 'teal' },
+  { key: 'chip',    title: 'Gemini 3.5 Pro',  sub: '2,000,000 tokens',  source: 'Google',         tint: 'indigo' },
+  { key: 'lock',    title: 'Claude Fable 5',  sub: 'free tier closed',  source: 'Anthropic',      tint: 'gold' },
+  { key: 'signoff', title: 'KAPIBARA NEWS',   sub: 'see you tomorrow',  source: 'live',           tint: 'indigo' },
 ]
 const FALLBACK_TEXT = [
-  'Капибара Новости!',
-  'Три новости из мира ИИ — пока мир спал.',
-  'SpaceX купил Cursor за шестьдесят миллиардов долларов.',
-  'Да, твой редактор кода теперь часть ракетной компании.',
-  'Автокомплит официально улетел в космос.',
-  'Новый Gemini держит в голове два миллиона токенов.',
-  'Два миллиона! А я захожу на кухню и забываю зачем.',
-  'А бесплатный Claude Fable пять прикрыли уже через пару недель.',
-  'Халява, как всегда, помахала лапкой.',
-  'Это была Капибара Новости.',
-  'Мир сходит с ума — а мы держим лапу на пульсе. До завтра!',
+  'Kapibara News!',
+  'Three AI stories — while the world was asleep.',
+  'SpaceX just bought Cursor for sixty billion dollars.',
+  'Yes, your code editor is now part of a rocket company.',
+  'Autocomplete has officially left the atmosphere.',
+  'The new Gemini holds two million tokens in its head.',
+  'Two million! I walk into the kitchen and forget why.',
+  'And free Claude Fable five got closed after just a couple of weeks.',
+  'The free lunch, as always, waved us goodbye.',
+  'That was Kapibara News.',
+  'The world is going wild — we keep a calm paw on the pulse. See you tomorrow!',
 ]
 
 // CONNECT (fix Kimi disconnect #1): voice the FRESH script from gen_news (today.json). Fallback if absent/invalid.
@@ -109,18 +109,37 @@ function ffprobeDur(f) {
   return parseFloat(execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', f]).toString().trim())
 }
 
-// 1) synth each line, 2) build timeline with pauses, 3) concat -> voice.mp3
+// Per-line checkpoint cache (reliable-execution rule 7 + WORKFLOW-AUDIT item 7).
+// Without this, a 429 mid-run re-spends ALL 11 TTS calls on the next --skip-news rerun,
+// which is what burns the free-tier 100-req/day cap (retryDelay ~18h when hit).
+// A line's wav is reused ONLY when its EXACT text+voice already produced it; if today.json
+// changed (fresh news) the text won't match → regenerate. Never reuses stale/wrong audio.
+const CACHE = 'voice_cache.json'
+let cache = {}
+if (existsSync(CACHE)) { try { cache = JSON.parse(readFileSync(CACHE, 'utf8')) } catch { cache = {} } }
+
+// 1) synth each line (or reuse cached), 2) build timeline with pauses, 3) concat -> voice.mp3
 const inputs = [], meta = []
-let t = 0
+let t = 0, reused = 0
 for (let n = 0; n < LINES.length; n++) {
   const L = LINES[n]
   const wav = `ln_${String(n).padStart(2, '0')}.wav`
-  const dur = await tts(`${L.d} "${L.t}"`, wav)
+  const c = cache[n]
+  let dur
+  if (c && c.text === L.t && c.voice === VOICE && existsSync(wav)) {
+    dur = ffprobeDur(wav); reused++
+    console.log(`line ${n}: ${dur.toFixed(2)}s +${L.p}s pause  [cached] "${L.t.slice(0, 32)}…"`)
+  } else {
+    dur = await tts(`${L.d} "${L.t}"`, wav)
+    cache[n] = { text: L.t, voice: VOICE }        // checkpoint immediately so a later 429 keeps this line
+    writeFileSync(CACHE, JSON.stringify(cache))
+    console.log(`line ${n}: ${dur.toFixed(2)}s +${L.p}s pause  "${L.t.slice(0, 32)}…"`)
+  }
   meta.push({ s: +t.toFixed(3), e: +(t + dur).toFixed(3), text: L.t, item: L.i })
   inputs.push({ wav, dur, pad: L.p })
   t += dur + L.p
-  console.log(`line ${n}: ${dur.toFixed(2)}s +${L.p}s pause  "${L.t.slice(0, 32)}…"`)
 }
+if (reused) console.log(`[gen_voice] reused ${reused}/${LINES.length} cached lines (saved ${reused} TTS calls)`)
 
 // build ffmpeg concat with silence pads via filter_complex
 const args = []

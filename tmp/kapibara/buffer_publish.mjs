@@ -57,11 +57,12 @@ if (existsSync('today.json')) {
   const isFootball = (tj.items || []).some(it => FOOTBALL_KEYS.has(it.key))
   const news = (tj.items || []).slice(1, 4)
   const bullets = news.map(it => `${KEY_EMOJI[it.key] || (isFootball ? '⚽' : '📰')} ${it.title} — ${it.sub}`).join('\n')
-  const opener = isFootball ? 'Что вы пропустили на чемпионате мира 🦫⚽' : 'Пока вы жили свою жизнь, ИИ не сидел без дела 🦫📰'
-  const tags = isFootball
-    ? '#футбол #чемпионатмира #worldcup2026 #football #footballtok #капибара'
-    : '#ии #ai #новости #технологии #капибара #нейросети'
-  caption = `${opener}
+  // Subtitle A/B day-parity must MATCH make-clip.mjs stage 5-6: odd UTC day-of-month = Arabic subs.
+  const arDay = new Date().getUTCDate() % 2 === 1
+  if (isFootball) {
+    // Football branch stays Russian (out of scope of the EN conveyor; never-delete rule keeps it).
+    const tags = '#футбол #чемпионатмира #worldcup2026 #football #footballtok #капибара'
+    caption = `Что вы пропустили на чемпионате мира 🦫⚽
 
 За минуту — что случилось:
 ${bullets}
@@ -72,8 +73,25 @@ ${bullets}
 
 А вас какая новость зацепила? Пишите 👇
 
-сделано ИИ · 🇦🇿 субтитры на азербайджанском
+сделано ИИ
 ${tags}`
+  } else {
+    // English AI-news conveyor. AR-subs days append Arabic hashtags for the Saudi A/B test.
+    const tags = '#ai #ainews #capybara #tech #learnai' + (arDay ? ' #الذكاء_الاصطناعي #تقنية' : '')
+    caption = `While you lived your life, AI didn't sit still 🦫📰
+
+In one minute — what happened:
+${bullets}
+
+The capybara stays calm. The capybara stays in the know 🐾
+
+💬 Try the free AI skills test → link in bio
+
+Which story got you? Drop it below 👇
+
+AI-made${arDay ? ' · 🇸🇦 Arabic subtitles' : ''}
+${tags}`
+  }
 } else {
   console.error('[buffer_publish] today.json missing — refusing to publish with no caption'); process.exit(1)
 }

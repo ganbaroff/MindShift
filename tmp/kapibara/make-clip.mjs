@@ -68,14 +68,25 @@ run('reconcat  →  voice.mp3 (trimmed)', ['reconcat.mjs'])
 // ── Stage 4: Frame envelope ───────────────────────────────────────────────
 run('build-data2  →  data.json', ['build-data2.mjs'])
 
-// ── Stage 5: AZ subtitle auto-translation ────────────────────────────────
-run('translate_az  →  az_final.json', ['translate_az.mjs'])
-
-// ── Stage 6: Merge AZ subs into render data ───────────────────────────────
-run('build_subs_az  →  data_subs_az.json', ['build_subs_az.mjs'])
+// ── Stage 5-6: Subtitle track (A/B day-parity: EN default vs AR variant for the Saudi test) ──
+// Base voice is ENGLISH. Subtitles: even day-of-month = English (the spoken lines themselves, NO
+// translation stage); odd day = Arabic (MSA) over the same EN voice. The chosen render-data file
+// drives stage 7. (The AZ path — translate_az/build_subs_az — stays in the repo, unused: never delete.)
+const dayOfMonth = new Date().getUTCDate()
+const AR_DAY = dayOfMonth % 2 === 1
+let subsData
+if (AR_DAY) {
+  console.log(`[make-clip] subs variant: ARABIC (day ${dayOfMonth} is odd) — EN voice + AR subtitles`)
+  run('translate_ar  →  ar_final.json', ['translate_ar.mjs'])
+  run('build_subs_ar  →  data_subs_ar.json', ['build_subs_ar.mjs'])
+  subsData = 'data_subs_ar.json'
+} else {
+  console.log(`[make-clip] subs variant: ENGLISH (day ${dayOfMonth} is even) — spoken lines as subtitles, no translation stage`)
+  subsData = 'data.json'
+}
 
 // ── Stage 7: Render frames (8 workers) ────────────────────────────────────
-run('render6  →  frames_fast/', ['render6.mjs', 'fast', '8', 'data_subs_az.json'])
+run(`render6  →  frames_fast/ (subs: ${subsData})`, ['render6.mjs', 'fast', '8', subsData])
 
 // ── Stage 8: Outro (static — skip unless --rebuild-outro) ─────────────────
 if (REBUILD_OUTRO || !existsSync('outro.mp4')) {

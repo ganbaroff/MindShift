@@ -29,10 +29,10 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install ffmpeg + fonts (cyrillic / AZ diacritics / brand)
+      - name: Install ffmpeg + fonts (cyrillic / AZ diacritics / Arabic subs / brand)
         run: |
           sudo apt-get update
-          sudo apt-get install -y ffmpeg fonts-noto-core fonts-noto-color-emoji
+          sudo apt-get install -y ffmpeg fonts-noto-core fonts-noto-color-emoji fonts-noto-naskh-arabic
           mkdir -p ~/.fonts
           curl -sL "https://github.com/google/fonts/raw/main/ofl/plusjakartasans/PlusJakartaSans%5Bwght%5D.ttf" -o ~/.fonts/PlusJakartaSans.ttf \
             || echo "[fonts] Jakarta download failed — Noto fallback renders text without tofu"

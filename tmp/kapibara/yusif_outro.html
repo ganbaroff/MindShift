@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<style>
+  :root{ --ob0:#080915; --indigo:#C0C1FF; --indigo2:#7B72FF; --teal:#4ECDC4; --gold:#F2C94C; --ink:#F0F0F8; --muted:#9A9AC0; --wt:#7B72FF; }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{width:1080px;height:1920px;overflow:hidden;background:var(--ob0);font-family:'Plus Jakarta Sans','Inter',system-ui,sans-serif;}
+  #stage{position:relative;width:1080px;height:1920px;overflow:hidden;
+    background:radial-gradient(120% 70% at 50% 22%, #1a1c3c 0%, #0c0d20 52%, #070812 100%);}
+  #glow{position:absolute;left:50%;top:560px;width:880px;height:620px;transform:translateX(-50%);
+    background:radial-gradient(ellipse at center, rgba(123,114,255,.24), transparent 68%);filter:blur(34px);}
+  #floor{position:absolute;left:-8%;right:-8%;bottom:0;height:560px;opacity:.35;
+    background:linear-gradient(0deg, rgba(123,114,255,.10), transparent 70%),
+      repeating-linear-gradient(90deg, rgba(192,193,255,.07) 0 2px, transparent 2px 104px);
+    transform:perspective(900px) rotateX(67deg);transform-origin:bottom;}
+  #particles{position:absolute;inset:0;z-index:1;}
+  .pt{position:absolute;border-radius:50%;}
+  #vig{position:absolute;inset:0;z-index:8;pointer-events:none;box-shadow:inset 0 0 300px 70px rgba(4,5,12,.78);}
+
+  /* brand bug, top-left (title-safe) */
+  #brand{position:absolute;z-index:7;top:54px;left:60px;display:flex;align-items:center;gap:16px;}
+  #brand .badge{width:78px;height:78px;border-radius:20px;background:linear-gradient(160deg,#2b2f57,#181a32);
+    border:2px solid rgba(192,193,255,.32);box-shadow:0 8px 24px rgba(0,0,0,.4), inset 0 0 18px rgba(123,114,255,.22);display:grid;place-items:center;}
+  #brand .wm{display:flex;flex-direction:column;line-height:1;}
+  #brand .wm b{color:#fff;font-weight:900;font-size:36px;letter-spacing:2px;}
+  #brand .wm span{color:var(--teal);font-weight:800;font-size:21px;letter-spacing:7px;margin-top:6px;}
+
+  /* kicker above CTA */
+  #kicker{position:absolute;z-index:7;left:50%;top:430px;transform:translateX(-50%);color:var(--muted);
+    font-size:34px;font-weight:800;letter-spacing:3px;opacity:0;text-transform:uppercase;}
+
+  /* ── primary action: subscribe CTA ── */
+  #cta{position:absolute;z-index:7;left:50%;top:520px;transform:translateX(-50%);
+    display:flex;flex-direction:column;align-items:center;gap:14px;opacity:0;transform-origin:50% 50%;}
+  #ctaPill{display:flex;align-items:center;gap:22px;padding:26px 56px;border-radius:999px;
+    background:linear-gradient(120deg,var(--teal),#3aa9a1);color:#06231f;font-weight:900;font-size:62px;letter-spacing:2px;
+    box-shadow:0 18px 60px rgba(78,205,196,.36), inset 0 2px 0 rgba(255,255,255,.4);}
+  #ctaPill .bell{width:60px;height:60px;display:grid;place-items:center;}
+  #ctaSub{color:var(--indigo);font-size:30px;font-weight:800;letter-spacing:2px;opacity:.92;}
+
+  /* ── duet: capy + Yusif on the desk ── */
+  #pair{position:absolute;z-index:4;left:50%;top:780px;transform:translateX(-50%);
+    width:880px;display:flex;align-items:flex-end;justify-content:center;gap:0;opacity:0;}
+  #pair svg{filter:drop-shadow(0 18px 26px rgba(0,0,0,.45)) drop-shadow(0 0 22px rgba(123,114,255,.20));}
+  #cName,#yName{text-align:center;font-weight:800;font-size:30px;letter-spacing:1px;margin-top:4px;}
+  #cName{color:var(--indigo);} #yName{color:var(--teal);}
+  .who{display:flex;flex-direction:column;align-items:center;}
+
+  /* desk */
+  #desk{position:absolute;z-index:3;left:50%;bottom:330px;transform:translateX(-50%);width:1040px;height:200px;
+    border-radius:38px 38px 0 0;background:linear-gradient(180deg,#2e3257 0%,#1c1e3a 30%,#11132a 100%);
+    border-top:2px solid rgba(192,193,255,.22);box-shadow:0 -14px 60px rgba(123,114,255,.16), inset 0 3px 0 rgba(192,193,255,.16);}
+  #desk:before{content:'';position:absolute;left:0;right:0;top:-3px;height:3px;background:linear-gradient(90deg,transparent,rgba(78,205,196,.85),rgba(192,193,255,.7),transparent);box-shadow:0 0 18px rgba(78,205,196,.45);}
+
+  /* subtitle */
+  #sub{position:absolute;z-index:7;left:64px;right:64px;top:1500px;text-align:center;color:#fff;
+    font-size:60px;line-height:1.18;font-weight:800;min-height:190px;text-shadow:0 4px 22px rgba(0,0,0,.85),0 0 2px rgba(0,0,0,.95);}
+  #sub b{color:var(--gold);}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="glow"></div><div id="floor"></div><div id="particles"></div>
+
+  <div id="brand">
+    <div class="badge">
+      <svg width="58" height="58" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="32" cy="30" rx="10" ry="12" fill="#E9D9B5" stroke="#7A5C3A" stroke-width="2.4"/>
+        <ellipse cx="68" cy="30" rx="10" ry="12" fill="#E9D9B5" stroke="#7A5C3A" stroke-width="2.4"/>
+        <ellipse cx="50" cy="56" rx="33" ry="29" fill="#E9D9B5" stroke="#7A5C3A" stroke-width="2.6"/>
+        <circle cx="40" cy="52" r="3.2" fill="#5A4632"/><circle cx="60" cy="52" r="3.2" fill="#5A4632"/>
+        <ellipse cx="50" cy="60" rx="3" ry="2" fill="#5A4632"/>
+        <path d="M44 66 Q50 71 56 66" stroke="#5A4632" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="wm"><b>KAPIBARA</b><span>NEWS</span></div>
+  </div>
+
+  <div id="kicker">THANKS FOR WATCHING</div>
+
+  <div id="cta">
+    <div id="ctaPill"><span class="bell">
+      <svg width="58" height="58" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M6 9a6 6 0 1 1 12 0c0 5 2 6 2 6H4s2-1 2-6Z" fill="#06231f"/>
+        <path d="M10 19a2 2 0 0 0 4 0" stroke="#06231f" stroke-width="2" stroke-linecap="round"/>
+      </svg></span><span id="ctaTxt">SUBSCRIBE</span></div>
+    <div id="ctaSub">a new episode every day</div>
+  </div>
+
+  <div id="desk"></div>
+
+  <div id="pair">
+    <div class="who">
+      <svg width="430" height="430" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="100" cy="186" rx="52" ry="5" fill="#000" opacity="0.18"/>
+        <g id="cG">
+          <ellipse cx="68" cy="66" rx="12" ry="14" fill="#E9D9B5" stroke="#7A5C3A" stroke-width="2.2"/><ellipse cx="68" cy="67" rx="6" ry="7.5" fill="#CBB488"/>
+          <ellipse cx="132" cy="66" rx="12" ry="14" fill="#E9D9B5" stroke="#7A5C3A" stroke-width="2.2"/><ellipse cx="132" cy="67" rx="6" ry="7.5" fill="#CBB488"/>
+          <ellipse cx="100" cy="112" rx="58" ry="55" fill="#E9D9B5" stroke="#7A5C3A" stroke-width="2.4"/><ellipse cx="100" cy="126" rx="36" ry="26" fill="#F4EBD6" opacity="0.45"/>
+          <ellipse cx="64" cy="116" rx="8" ry="4.5" fill="rgba(231,140,120,0.30)"/><ellipse cx="136" cy="116" rx="8" ry="4.5" fill="rgba(231,140,120,0.30)"/>
+          <g id="cEyesOpen"><circle cx="82" cy="100" r="3.4" fill="#5A4632"/><circle cx="118" cy="100" r="3.4" fill="#5A4632"/><circle cx="83.2" cy="98.8" r="1.1" fill="#fff" opacity=".85"/><circle cx="119.2" cy="98.8" r="1.1" fill="#fff" opacity=".85"/></g>
+          <g id="cEyesBlink" style="display:none"><path d="M 76 100 Q 82 104, 88 100" stroke="#5A4632" stroke-width="2.6" fill="none" stroke-linecap="round"/><path d="M 112 100 Q 118 104, 124 100" stroke="#5A4632" stroke-width="2.6" fill="none" stroke-linecap="round"/></g>
+          <ellipse cx="100" cy="112" rx="4" ry="2.8" fill="#5A4632"/>
+          <path id="cSmile" d="M 91 122 Q 100 128 109 122" stroke="#5A4632" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+          <ellipse id="cMouth" cx="100" cy="123" rx="9" ry="1.6" fill="#3A2A1E" style="display:none"/>
+        </g>
+      </svg>
+      <div id="cName">anchor</div>
+    </div>
+
+    <div class="who">
+      <svg width="430" height="430" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="skinY" cx="42%" cy="34%" r="72%"><stop offset="0%" stop-color="#EAC396"/><stop offset="62%" stop-color="#D4A26D"/><stop offset="100%" stop-color="#B5814D"/></radialGradient>
+          <linearGradient id="beardY" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#332C26"/><stop offset="100%" stop-color="#1C1815"/></linearGradient>
+          <linearGradient id="blzY" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#343D61"/><stop offset="100%" stop-color="#1C2240"/></linearGradient>
+          <linearGradient id="shirtY" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FBFBFD"/><stop offset="100%" stop-color="#DADCE6"/></linearGradient>
+        </defs>
+        <ellipse cx="100" cy="192" rx="82" ry="6" fill="#000" opacity="0.18"/>
+        <g id="yG">
+          <!-- athletic blazer + white shirt -->
+          <path d="M 12 200 Q 10 164 42 146 Q 64 136 84 136 L 116 136 Q 136 136 158 146 Q 190 164 188 200 Z" fill="url(#blzY)" stroke="#11142b" stroke-width="1.6"/>
+          <path d="M 84 136 L 100 184 L 116 136 Q 100 148 84 136 Z" fill="url(#shirtY)"/>
+          <path d="M 84 136 L 100 162 L 90 138 Z" fill="#1A2038"/>
+          <path d="M 116 136 L 100 162 L 110 138 Z" fill="#1A2038"/>
+          <path d="M 97 146 L 100 158 L 103 146 Z" fill="#C9CBD6"/>
+          <path d="M 44 148 Q 34 168 38 200" stroke="#11142b" stroke-width="2.4" fill="none" opacity=".5"/>
+          <path d="M 156 148 Q 166 168 162 200" stroke="#11142b" stroke-width="2.4" fill="none" opacity=".5"/>
+          <ellipse cx="55" cy="152" rx="16" ry="9" fill="#3d477090" /><ellipse cx="145" cy="152" rx="16" ry="9" fill="#3d477090"/>
+          <!-- thick neck + chin shadow -->
+          <path d="M 80 150 Q 84 132 86 122 L 114 122 Q 116 132 120 150 Z" fill="#C68E5C"/>
+          <rect x="85" y="116" width="30" height="20" rx="10" fill="url(#skinY)"/>
+          <ellipse cx="100" cy="124" rx="26" ry="9" fill="#9c6f44" opacity=".35"/>
+          <!-- ears -->
+          <ellipse cx="56" cy="90" rx="8.5" ry="12" fill="url(#skinY)" stroke="#b07a48" stroke-width="1.4"/>
+          <ellipse cx="144" cy="90" rx="8.5" ry="12" fill="url(#skinY)" stroke="#b07a48" stroke-width="1.4"/>
+          <!-- bald head -->
+          <path d="M 55 80 Q 55 36 100 36 Q 145 36 145 80 Q 145 113 122 129 Q 100 141 78 129 Q 55 113 55 80 Z" fill="url(#skinY)" stroke="#b07a48" stroke-width="1.6"/>
+          <ellipse cx="84" cy="52" rx="22" ry="13" fill="#fff" opacity="0.18"/>
+          <ellipse cx="120" cy="56" rx="9" ry="6" fill="#fff" opacity="0.10"/>
+          <!-- eyebrows -->
+          <path d="M 70 72 Q 84 66 98 71 Q 96 76 84 74 Q 73 75 70 77 Z" fill="#1f1a16"/>
+          <path d="M 102 71 Q 116 66 130 72 Q 127 75 116 74 Q 104 76 102 77 Z" fill="#1f1a16"/>
+          <!-- eyes: open + blink groups -->
+          <g id="yEyesOpen">
+            <ellipse cx="84" cy="84" rx="3.8" ry="4.1" fill="#231e1a"/><ellipse cx="116" cy="84" rx="3.8" ry="4.1" fill="#231e1a"/>
+            <circle cx="85.4" cy="82.4" r="1.2" fill="#fff" opacity=".9"/><circle cx="117.4" cy="82.4" r="1.2" fill="#fff" opacity=".9"/>
+          </g>
+          <g id="yEyesBlink" style="display:none">
+            <path d="M 80 84 Q 84 87 88 84" stroke="#231e1a" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+            <path d="M 112 84 Q 116 87 120 84" stroke="#231e1a" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+          </g>
+          <path d="M 78 79 Q 84 76 90 79" stroke="#a9743f" stroke-width="1.4" fill="none" opacity=".5"/>
+          <path d="M 110 79 Q 116 76 122 79" stroke="#a9743f" stroke-width="1.4" fill="none" opacity=".5"/>
+          <!-- cheekbones -->
+          <ellipse cx="71" cy="94" rx="9" ry="5.5" fill="#F3D3AC" opacity="0.5"/><ellipse cx="129" cy="94" rx="9" ry="5.5" fill="#F3D3AC" opacity="0.5"/>
+          <ellipse cx="74" cy="101" rx="5" ry="2.4" fill="rgba(199,120,96,0.13)"/><ellipse cx="126" cy="101" rx="5" ry="2.4" fill="rgba(199,120,96,0.13)"/>
+          <!-- nose -->
+          <path d="M 99 85 Q 96 98 92 105 Q 99 110 108 105 Q 104 98 101 85" stroke="#b27d4c" stroke-width="2.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
+          <ellipse cx="100" cy="106" rx="7.5" ry="3" fill="#b27d4c" opacity=".2"/>
+          <!-- beard (sideburns connected to ears) -->
+          <path d="M 57 84 Q 55 117 80 134 Q 100 144 120 134 Q 145 117 143 84 Q 140 102 126 109 Q 114 114 100 114 Q 86 114 74 109 Q 60 102 57 84 Z" fill="url(#beardY)"/>
+          <path d="M 80 132 Q 100 140 120 132" stroke="#463d34" stroke-width="2" fill="none" opacity=".45"/>
+          <!-- MOUTH SOCKET (driven by env) -->
+          <path d="M 86 108 Q 100 105 114 108" stroke="#7a4f3d" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+          <ellipse id="yMouthInner" cx="100" cy="112" rx="12" ry="2" fill="#3a1f18"/>
+          <rect id="yTeeth" x="90" y="106.5" width="20" height="4.2" rx="2" fill="#f5f1ea" opacity="0"/>
+          <path d="M 86 116 Q 100 119 114 116" stroke="#8a5b46" stroke-width="2" fill="none" stroke-linecap="round" opacity=".7"/>
+        </g>
+      </svg>
+      <div id="yName">founder</div>
+    </div>
+  </div>
+
+  <div id="sub" dir="auto"></div>
+  <div id="vig"></div>
+</div>
+
+<script>
+let DATA=null
+const $=(i)=>document.getElementById(i)
+function esc(s){return s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
+
+// particles
+const P=[],parts=$('particles')
+for(let k=0;k<10;k++){const el=document.createElement('div');el.className='pt';const sz=3+(k*53%4);const teal=k%3===0;el.style.width=el.style.height=sz+'px';el.style.background=teal?'rgba(78,205,196,.4)':'rgba(192,193,255,.36)';el.style.boxShadow=`0 0 ${sz*2}px ${teal?'rgba(78,205,196,.3)':'rgba(123,114,255,.3)'}`;parts.appendChild(el);P.push({el,x0:k*157%1080,y0:k*271%1920,sp:22+k*13%34,ph:k*1.3})}
+
+const yMouthInner=$('yMouthInner'),yTeeth=$('yTeeth'),yG=$('yG'),cG=$('cG'),cSmile=$('cSmile'),cMouth=$('cMouth')
+const yEO=$('yEyesOpen'),yEB=$('yEyesBlink'),cEO=$('cEyesOpen'),cEB=$('cEyesBlink'),subEl=$('sub')
+
+window.loadData=(d)=>{DATA=d
+  if(d.brand){document.querySelector('#brand .wm b').textContent=d.brand.top;document.querySelector('#brand .wm span').textContent=d.brand.bottom}
+  if(d.cta)$('ctaTxt').textContent=d.cta
+  if(d.ctaSub)$('ctaSub').textContent=d.ctaSub
+  if(d.kicker)$('kicker').textContent=d.kicker
+  if(d.names){$('cName').textContent=d.names.capy||'anchor';$('yName').textContent=d.names.yusif||'founder'}
+}
+window.setFrame=(i)=>{
+  if(!DATA)return
+  const t=i/DATA.fps
+  const ix=Math.min(i,DATA.frameCount-1)
+  const oY=(DATA.envYusif&&DATA.envYusif[ix])||0
+  const oC=(DATA.envCapy&&DATA.envCapy[ix])||0
+  // Yusif mouth socket (drives on his lines)
+  yMouthInner.setAttribute('ry',(2+oY*7).toFixed(2))
+  yMouthInner.setAttribute('cy',(112+oY*2.2).toFixed(2))
+  yTeeth.setAttribute('opacity',(oY>0.30?Math.min(1,(oY-0.30)*1.8):0).toFixed(2))
+  // Mochi mouth: smile when quiet, open ellipse when he speaks
+  if(oC>0.06){cSmile.style.display='none';cMouth.style.display='block';cMouth.setAttribute('ry',(1.6+oC*8).toFixed(2));cMouth.setAttribute('rx',(9-oC*1.2).toFixed(2))}
+  else{cSmile.style.display='block';cMouth.style.display='none'}
+  // idle floats (phase-offset so they don't move in lockstep)
+  const yb=Math.sin(t*2*Math.PI*0.5)*4, ytl=Math.sin(t*2*Math.PI*0.8)*0.5+oY*0.6
+  yG.setAttribute('transform',`translate(0 ${yb.toFixed(2)}) rotate(${ytl.toFixed(2)} 100 120)`)
+  const cb=Math.sin(t*2*Math.PI*0.42+1.5)*4, ctl=Math.sin(t*2*Math.PI*0.9+1.0)*0.6+oC*0.5
+  cG.setAttribute('transform',`translate(0 ${cb.toFixed(2)}) rotate(${ctl.toFixed(2)} 100 120)`)
+  // blinks (offset half-cycle)
+  const ybl=(i%96)<4; yEO.style.display=ybl?'none':'block'; yEB.style.display=ybl?'block':'none'
+  const cbl=((i+48)%96)<4; cEO.style.display=cbl?'none':'block'; cEB.style.display=cbl?'block':'none'
+  // entrance of the pair
+  const ent=Math.min(1,t/0.5), ee=1-Math.pow(1-ent,3)
+  $('pair').style.opacity=ee.toFixed(3); $('pair').style.transform=`translateX(-50%) translateY(${((1-ee)*46).toFixed(1)}px)`
+  // CTA reveal + gentle pulse
+  const cr=Math.min(1,Math.max(0,(t-0.45)/0.55)), cre=1-Math.pow(1-cr,3)
+  const pulse=1+Math.sin(t*2*Math.PI*0.8)*0.028
+  $('cta').style.opacity=cre.toFixed(3); $('cta').style.transform=`translateX(-50%) scale(${(0.92+cre*0.08*pulse).toFixed(3)})`
+  $('kicker').style.opacity=(cre*0.9).toFixed(3)
+  // subtitle (current spoken line)
+  let line=DATA.lines[0]
+  for(const L of DATA.lines){ if(t>=L.s) line=L }
+  const active=t>=line.s && t<(line.e+0.4)
+  if(active){ subEl.innerHTML=esc(line.text); subEl.style.opacity=Math.min(1,(t-line.s)/0.15).toFixed(2) } else { subEl.style.opacity='0' }
+  // particles
+  for(const p of P){ const y=((p.y0-t*p.sp)%1980+1980)%1980-30; const x=p.x0+Math.sin(t*0.5+p.ph)*18; p.el.style.transform=`translate(${x.toFixed(1)}px,${y.toFixed(1)}px)` }
+}
+</script>
+</body>
+</html>
