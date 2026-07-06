@@ -1,5 +1,5 @@
 import { chromium } from '@playwright/test'
-import { readFileSync, mkdirSync } from 'node:fs'
+import { readFileSync, mkdirSync, rmSync } from 'node:fs'
 import { pathToFileURL } from 'node:url'
 const mode = process.argv[2] || 'preview'
 const WORKERS = parseInt(process.argv[3] || '8', 10)
@@ -13,6 +13,10 @@ if (mode === 'preview') {
   for (const tt of [9, 22, 31]) { await p.evaluate((f) => window.setFrame(f), Math.round(tt * data.fps)); await p.waitForTimeout(40); await p.screenshot({ path: `prev6/t_${tt}.png` }) }
   await b.close(); console.log('v6 preview ok')
 } else {
+  // purge stale frames from any previous (possibly longer) render — else f_NNNNN.jpg
+  // from an old run survive and ffmpeg's f_%05d.jpg sequence reads them too.
+  // CI-safe: in cloud the dir is empty/absent, so this is a no-op there.
+  rmSync('frames_fast', { recursive: true, force: true })
   mkdirSync('frames_fast', { recursive: true })
   async function w(wid) { const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: 1080, height: 1920 }, deviceScaleFactor: 1 }); await p.goto(url); await p.evaluate((d) => window.loadData(d), data); for (let i = wid; i < N; i += WORKERS) { await p.evaluate((f) => window.setFrame(f), i); await p.screenshot({ path: `frames_fast/f_${String(i).padStart(5, '0')}.jpg`, type: 'jpeg', quality: 90, animations: 'disabled' }) } await b.close() }
   await Promise.all(Array.from({ length: WORKERS }, (_, i) => w(i))); console.log('v6 rendered', N)

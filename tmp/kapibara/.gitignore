@@ -36,3 +36,7 @@ voiceline_meta.json
 # news script snapshots (regenerated daily)
 today.json
 today_*.json
+.env
+.env.*
+*.key
+.secrets.env
