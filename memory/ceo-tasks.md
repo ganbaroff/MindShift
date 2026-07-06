@@ -20,8 +20,8 @@
 
 | # | Task | Owner | Status | Impact |
 |---|------|-------|--------|--------|
-| S1 | **creator-pult**: `supabase secrets set PULT_WEBHOOK_SECRET=<rand 32+ch>` → re-register @CreatorBy_bot webhook with that `secret_token` → deploy | CEO (then live) | Code **DONE** (commit `2e9ab1e`); **NOT deployed** — fail-closes until the secret is set. Exact steps in the file header. | 🟠 HIGH: burned URL key in public repo → anyone can flood render/publish queue + burn compute |
-| S2 | **earn_focus_crystals (CRITICAL)**: greenlight the phased fix — session-validated RPC + UNIQUE idempotency + source_event CHECK, paired with a `useFocusSession.ts` client change | CEO decide → Atlas ships | Design ready in report; Phase-1 migration is additive/safe — Atlas ships on «го» | 🔴 CRITICAL: any signed-in user mints unlimited FOCUS crystals + can suppress the dividend payout for all shareholders |
+| S1 | **creator-pult**: `supabase secrets set PULT_WEBHOOK_SECRET=<rand 32+ch>` → re-register @CreatorBy_bot webhook with that `secret_token` (steps in file header) | CEO (restores pult) | ✅ **HARDENED + DEPLOYED** (v3; live curl: burned `?k=` key now returns 500 — key **DEAD**). Pult is safely **offline** until you set the secret + re-register. | 🟠 HIGH — now closed at the code layer; only your secret restores service |
+| S2 | **earn_focus_crystals (CRITICAL)** | Atlas | ✅ **FIXED in prod** — migration `035` applied + verified. RPC ignores client amount, server-derives from `focus_sessions` (duration_ms×5, clamped), idempotent per session. No client change needed. | 🔴 CRITICAL — closed |
 | S3 | **Enable leaked-password protection** (Supabase → Auth → HaveIBeenPwned) — still OFF | CEO | ~2 min dashboard toggle | Breached passwords accepted at signup |
 | S4 | subscriptions latent self-grant + agent-chat prompt-injection guard | Atlas | Queued (low sev, safe standalone edits) | Billing foot-gun; brand-surface guardrail bypass |
 
