@@ -46,7 +46,7 @@ const PULT_URL_KEY = 'HPKaWGb6sjdGIG-5c1NXtnMOP9NEXKmQ'
 // is 0, we ALLOW ALL senders but log each one (so a stranger who guesses the URL can
 // enqueue — bounded by the worker's own gates, but pin this ASAP). When non-zero, only
 // that chat_id may issue commands; everyone else gets a polite refusal.
-const ALLOWED_CHAT_ID = 0
+const ALLOWED_CHAT_ID = 5150355926 // CEO — pinned 2026-07-06 from his live /news command
 
 // -- Telegram types (minimal) -----------------------------------------------------
 
