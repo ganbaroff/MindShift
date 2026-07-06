@@ -3,6 +3,10 @@ name: Kapibara Daily
 on:
   schedule:
     - cron: '25 4 * * *'   # 04:25 UTC = 08:25 Baku (UTC+4)
+    # GH drops/throttles crons on quiet repos (live miss 2026-07-06: nothing fired by 07:40Z).
+    # Backup slots are SAFE: state.json lastRan + published.json idempotency make re-runs no-ops.
+    - cron: '10 6 * * *'   # 10:10 Baku backup
+    - cron: '0 9 * * *'    # 13:00 Baku last-chance backup
   workflow_dispatch:        # manual trigger (test button in GitHub UI)
     inputs:
       dry_run:
