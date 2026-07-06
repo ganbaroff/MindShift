@@ -49,6 +49,24 @@ revoke execute on function public.validate_ledger_balance_after()               
 grant execute on function public.get_crystal_balance(uuid, text)          to authenticated;
 grant execute on function public.earn_focus_crystals(integer, text, uuid) to authenticated;
 
+-- ── RLS-POLICY DEPENDENCY GUARD (verified live 2026-07-05, wf) ──────────────────
+-- is_community_member(uuid) is invoked INSIDE the RLS policy USING() expressions of
+-- three tables (pg_policies receipts):
+--   agents               "Agents visible to public or community members"
+--   communities          "OPEN communities visible to all"
+--   community_memberships "Members can see co-members"
+-- Those policies target role {public} and are evaluated AS THE QUERYING ROLE. The
+-- client reads these tables for BOTH anon and authenticated:
+--   - useCommunity.fetchOpenCommunities()  -> communities  (no userId guard = runs for anon)
+--   - useCommunity.fetchPublicAgents()     -> agents       (no userId guard = runs for anon)
+--   - useCommunity.fetchMemberships()      -> community_memberships (authenticated)
+-- Postgres OR short-circuits `tier='OPEN'`, but any non-OPEN row forces evaluation of
+-- is_community_member(); if the querying role lacks EXECUTE the whole SELECT errors.
+-- => is_community_member MUST keep EXECUTE for anon AND authenticated.
+-- This migration deliberately does NOT revoke it above. These GRANTs are idempotent
+-- intent-documentation + drift-correction; they no-op if the grant already exists.
+grant execute on function public.is_community_member(uuid) to anon, authenticated;
+
 -- service_role retains EXECUTE on everything (it is a superuser-like role and is
 -- not affected by these REVOKEs); edge functions that use the service role keep
 -- working. Trigger functions run as the table owner and keep firing.

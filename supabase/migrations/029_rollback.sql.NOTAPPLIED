@@ -1,0 +1,24 @@
+-- 029 ROLLBACK — restore pre-029 EXECUTE grants (NOT APPLIED; emergency use only)
+--
+-- 029 revoked the default PUBLIC EXECUTE grant on 10 SECURITY DEFINER functions and
+-- re-granted only get_crystal_balance + earn_focus_crystals to authenticated.
+-- This rollback re-GRANTs EXECUTE to PUBLIC on those 10, returning each function to
+-- its original (Postgres-default) callable-by-everyone state. Run ONLY if the
+-- lockdown breaks a legitimate flow that cannot be fixed forward.
+--
+-- is_community_member is intentionally NOT listed here: 029 never revoked it, so it
+-- keeps its existing grants either way. (029 only ADDS an idempotent grant-back.)
+--
+-- Apply with: supabase db execute / MCP execute_sql (NOT apply_migration — this is a
+-- manual revert, not a forward migration).
+
+grant execute on function public.get_crystal_balance(uuid, text)                     to public;
+grant execute on function public.earn_focus_crystals(integer, text, uuid)            to public;
+grant execute on function public.activate_trial(uuid)                                to public;
+grant execute on function public.join_community(uuid, text)                          to public;
+grant execute on function public.get_latest_dividend()                               to public;
+grant execute on function public.get_pending_dividend(uuid, uuid)                    to public;
+grant execute on function public.increment_rate_limit(uuid, text, timestamptz)       to public;
+grant execute on function public.handle_new_user()                                   to public;
+grant execute on function public.update_community_member_count()                     to public;
+grant execute on function public.validate_ledger_balance_after()                     to public;
