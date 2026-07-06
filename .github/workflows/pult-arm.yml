@@ -1,0 +1,104 @@
+name: Pult Arm
+
+# Arms the CEO's Telegram control panel («пульт») end-to-end, inside CI, zero human hands.
+# The creator-pult edge function is fail-closed: it refuses all traffic (500) until the
+# Supabase secret PULT_WEBHOOK_SECRET is set, and 403s any update whose
+# X-Telegram-Bot-Api-Secret-Token header doesn't match it. This workflow:
+#   1. mints a fresh random secret,
+#   2. sets it as the Supabase secret PULT_WEBHOOK_SECRET,
+#   3. registers the Telegram webhook with that same value as secret_token,
+#   4. proves it works (positive probe) and proves it's locked (negative probe),
+#   5. prints only safe health fields.
+# Re-runnable: each run rotates the secret + re-registers. drop_pending_updates ensures
+# stale commands queued while the pult was offline are discarded, not suddenly executed.
+#
+# workflow_dispatch ONLY — never on a schedule (arming is a deliberate act).
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  arm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Generate webhook secret (masked before it touches env)
+        run: |
+          SECRET=$(openssl rand -hex 24)
+          echo "::add-mask::$SECRET"
+          echo "PULT_SECRET=$SECRET" >> "$GITHUB_ENV"
+
+      - name: Set Supabase secret PULT_WEBHOOK_SECRET
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          supabase secrets set PULT_WEBHOOK_SECRET="$PULT_SECRET" --project-ref awfoqycoltvhamtrsvxk
+
+      - name: Wait for edge function env propagation
+        run: sleep 30
+
+      - name: Register Telegram webhook with secret_token
+        run: |
+          RESP=$(curl -sS -X POST \
+            "https://api.telegram.org/bot${{ secrets.TELEGRAM_CREATORBOT_TOKEN }}/setWebhook" \
+            -H 'Content-Type: application/json' \
+            -d "{\"url\":\"https://awfoqycoltvhamtrsvxk.supabase.co/functions/v1/creator-pult\",\"secret_token\":\"$PULT_SECRET\",\"drop_pending_updates\":true,\"allowed_updates\":[\"message\"]}")
+          # RESP echoes the description but never the secret_token — safe to print.
+          echo "setWebhook response: $RESP"
+          if ! echo "$RESP" | grep -q '"ok":true'; then
+            echo "::error::setWebhook did not return ok:true"
+            exit 1
+          fi
+
+      - name: Positive e2e probe (with secret header — expect 200 + sendMessage)
+        run: |
+          CODE=$(curl -sS -o resp.json -w '%{http_code}' -X POST \
+            "https://awfoqycoltvhamtrsvxk.supabase.co/functions/v1/creator-pult" \
+            -H 'Content-Type: application/json' \
+            -H "X-Telegram-Bot-Api-Secret-Token: $PULT_SECRET" \
+            -d '{"update_id":1,"message":{"message_id":1,"date":0,"from":{"id":5150355926},"chat":{"id":5150355926,"type":"private"},"text":"/status"}}')
+          echo "positive probe http_code: $CODE"
+          echo "resp.json:"
+          cat resp.json
+          echo ""
+          if [ "$CODE" != "200" ]; then
+            echo "::error::positive probe expected 200, got $CODE"
+            exit 1
+          fi
+          if ! grep -q 'sendMessage' resp.json; then
+            echo "::error::positive probe response missing sendMessage envelope"
+            exit 1
+          fi
+
+      - name: Negative probe (no header — expect NOT 2xx, proves fail-closed)
+        run: |
+          CODE=$(curl -sS -o /dev/null -w '%{http_code}' -X POST \
+            "https://awfoqycoltvhamtrsvxk.supabase.co/functions/v1/creator-pult" \
+            -H 'Content-Type: application/json' \
+            -d '{"update_id":2,"message":{"message_id":2,"date":0,"from":{"id":5150355926},"chat":{"id":5150355926,"type":"private"},"text":"/status"}}')
+          echo "negative probe http_code: $CODE"
+          case "$CODE" in
+            2*)
+              echo "::error::negative probe returned 2xx ($CODE) — auth is NOT fail-closed!"
+              exit 1
+              ;;
+            *)
+              echo "negative probe correctly refused (non-2xx: $CODE)"
+              ;;
+          esac
+
+      - name: Webhook health summary (safe fields only)
+        run: |
+          curl -sS "https://api.telegram.org/bot${{ secrets.TELEGRAM_CREATORBOT_TOKEN }}/getWebhookInfo" -o info.json
+          PENDING=$(jq -r '.result.pending_update_count // 0' info.json)
+          ENDS_CORRECT=$(jq -r '(.result.url // "") | endswith("/creator-pult")' info.json)
+          echo "pending_update_count : $PENDING"
+          echo "url ends with /creator-pult : $ENDS_CORRECT"

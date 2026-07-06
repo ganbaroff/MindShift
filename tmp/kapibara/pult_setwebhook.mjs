@@ -14,6 +14,21 @@
 
 import { requireEnv } from './env.mjs'
 
+// -- DISARMED 2026-07-06 ----------------------------------------------------------
+// This script registers the webhook WITHOUT a secret_token (the old ?k= scheme), which
+// would SILENTLY DE-ARM the creator-pult auth and kill the Пульт (the fail-closed edge
+// function 403s any update whose X-Telegram-Bot-Api-Secret-Token header is missing).
+// Webhook arming now lives in CI: .github/workflows/pult-arm.yml (mints the secret, sets
+// PULT_WEBHOOK_SECRET, and registers setWebhook with secret_token — zero human hands).
+// The old code is preserved below (never-delete rule) but unreachable unless you pass an
+// explicit override flag AND know it will break auth.
+if (!process.argv.includes('--i-know-what-im-doing')) {
+  console.error(
+    'DISARMED 2026-07-06: webhook auth moved to secret_token — use GitHub Actions workflow pult-arm.yml instead',
+  )
+  process.exit(1)
+}
+
 const tok = requireEnv('TELEGRAM_CREATORBOT_TOKEN')
 const SUPA_URL = requireEnv('VITE_SUPABASE_URL') // e.g. https://<ref>.supabase.co
 
