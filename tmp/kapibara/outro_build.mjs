@@ -2,7 +2,7 @@
 // Factory Law 6: one voice per CHARACTER, constants — no CLI overrides.
 // Capy = LOCKED_VOICE (must match the show body, else a jarring speaker-switch — critic catch 2026-07-05).
 // Yusif = second CHARACTER (his avatar on screen) → legitimate distinct voice, pinned.
-import { readFileSync, writeFileSync } from 'node:fs'
+import { readFileSync, writeFileSync, renameSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
 import { requireEnv, LOCKED_VOICE } from './env.mjs'
 const key = requireEnv('GEMINI_API_KEY')
@@ -17,10 +17,12 @@ const FPS = 30, SR = 16000
 // at the body→outro boundary (critic evidence 2026-07-05 at 00:31). Sign-off warmth comes from the text.
 const DN = 'Read aloud in one warm, energetic, charismatic English TV news-anchor voice — clear, upbeat, and lively, never monotone; keep the same speaker throughout and land the jokes with light comedic timing:'
 const DY = 'Read aloud in a deep, low baritone male voice — resonant chest tone, warm and energetic like a charismatic founder talking straight to camera in English, lively and confident, never flat or monotone:'
+// sp = per-line audio speed-up (atempo, pitch-preserving). CEO 2026-07-07: the Yusif part
+// ("I'm Yusif — I make the news") drags — speed his two lines only, keep Mochi natural.
 const LINES = [
-  { who: 'capy',  voice: CAPY_VOICE,  t: 'That was Kapibara News. Thanks for watching!',   p: 0.34, d: DN },
-  { who: 'yusif', voice: YUSIF_VOICE, t: "I'm Yusif — I make Kapibara News.",               p: 0.26, d: DY },
-  { who: 'yusif', voice: YUSIF_VOICE, t: 'Enjoyed it? Subscribe — see you tomorrow!',        p: 0.30, d: DY },
+  { who: 'capy',  voice: CAPY_VOICE,  t: 'That was Kapibara News. Thanks for watching!',   p: 0.34, d: DN, sp: 1.0 },
+  { who: 'yusif', voice: YUSIF_VOICE, t: "I'm Yusif — I make Kapibara News.",               p: 0.22, d: DY, sp: 1.3 },
+  { who: 'yusif', voice: YUSIF_VOICE, t: 'Enjoyed it? Subscribe — see you tomorrow!',        p: 0.26, d: DY, sp: 1.3 },
 ]
 
 async function tts(text, voice, outWav) {
@@ -71,11 +73,17 @@ let t = 0
 for (let n = 0; n < LINES.length; n++) {
   const L = LINES[n]
   const wav = `octa_${n}.wav`
-  const dur = await tts(`${L.d} "${L.t}"`, L.voice, wav)
+  let dur = await tts(`${L.d} "${L.t}"`, L.voice, wav)
+  if (L.sp && L.sp !== 1) {                 // pitch-preserving speed-up for this speaker's line
+    const fast = `octa_${n}_f.wav`
+    execFileSync('ffmpeg', ['-y', '-i', wav, '-filter:a', `atempo=${L.sp}`, fast], { stdio: 'ignore' })
+    renameSync(fast, wav)
+    dur = ffprobeDur(wav)                   // envelope + timeline derive from the sped file → lip-sync stays aligned
+  }
   lineMeta.push({ s: +t.toFixed(3), e: +(t + dur).toFixed(3), text: L.t, who: L.who, raw: rawFromWav(wav) })
   inputs.push({ wav, pad: L.p })
   t += dur + L.p
-  console.log(`line ${n} [${L.who}/${L.voice}]: ${dur.toFixed(2)}s +${L.p}s  "${L.t.slice(0, 36)}"`)
+  console.log(`line ${n} [${L.who}/${L.voice}]${L.sp !== 1 ? ` x${L.sp}` : ''}: ${dur.toFixed(2)}s +${L.p}s  "${L.t.slice(0, 36)}"`)
 }
 
 // 2) concat (in order) with silence pads + loudnorm -> voice_outro.mp3
@@ -102,7 +110,7 @@ const out = {
   lines: lineMeta.map(({ s, e, text, who }) => ({ s, e, text, who })),
   brand: { top: 'KAPIBARA', bottom: 'NEWS' },
   kicker: 'THANKS FOR WATCHING',
-  cta: 'SUBSCRIBE', ctaSub: 'a new episode every day',
+  cta: 'SUBSCRIBE', ctaSub: '@volaura.kapibara · new episode daily',
   names: { capy: 'anchor', yusif: 'Yusif · founder' },
   voices: { capy: CAPY_VOICE, yusif: YUSIF_VOICE },
 }

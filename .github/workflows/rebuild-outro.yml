@@ -1,0 +1,69 @@
+name: Rebuild Outro
+
+# The outro is a static artifact (Mochi + Yusif duet end-card) committed as tmp/kapibara/outro.mp4
+# and reused by the daily pipeline. Rebuild it here (needs GEMINI_API_KEY for TTS) when the outro
+# text/voice/speed/CTA changes, then commit the new binary back to main. Dispatch-only.
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: tmp/kapibara
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install ffmpeg + fonts
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg fonts-noto-core fonts-noto-color-emoji
+          mkdir -p ~/.fonts
+          curl -sL "https://github.com/google/fonts/raw/main/ofl/plusjakartasans/PlusJakartaSans%5Bwght%5D.ttf" -o ~/.fonts/PlusJakartaSans.ttf || true
+          fc-cache -f
+
+      - name: Install Playwright + Chromium
+        run: |
+          npm init -y >/dev/null 2>&1 || true
+          npm install @playwright/test
+          npx playwright install chromium --with-deps
+
+      - name: Write env from secrets
+        run: |
+          cat > .env <<'ENVEOF'
+          GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
+          ENVEOF
+
+      - name: Rebuild outro
+        run: node rebuild_outro.mjs
+
+      - name: Commit outro.mp4 back to main
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          git config user.name "kapibara-ci"
+          git config user.email "ci@kapibara.local"
+          git add -f tmp/kapibara/outro.mp4 tmp/kapibara/outro.json
+          if git diff --cached --quiet; then
+            echo "outro unchanged — nothing to commit"
+          else
+            git commit -m "chore(outro): rebuild — Yusif lines sped 1.3x + @volaura.kapibara CTA [skip ci]"
+            git push origin HEAD:main
+          fi
+
+      - name: Upload outro artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: outro-${{ github.run_id }}
+          path: tmp/kapibara/outro.mp4
+          retention-days: 14
