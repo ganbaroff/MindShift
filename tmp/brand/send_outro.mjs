@@ -1,0 +1,11 @@
+import { readFileSync } from 'node:fs'
+const env = readFileSync('C:/Users/user/Downloads/videos/.secrets.env', 'utf8')
+const tok = (env.match(/^TELEGRAM_CREATORBOT_TOKEN=(.*)$/m) || [])[1]?.trim().replace(/^["']|["']$/g, '')
+const fd = new FormData()
+fd.append('chat_id', '5150355926')
+fd.append('caption', 'Новый outro: часть Юсифа ускорена ×1.3 (12.0→10.1с), на карточке теперь @volaura.kapibara. Послушай темп — ок?')
+fd.append('supports_streaming', 'true')
+fd.append('video', new Blob([readFileSync('C:/Projects/mindshift/tmp/kapibara/outro.mp4')], { type: 'video/mp4' }), 'outro-v2.mp4')
+const r = await fetch(`https://api.telegram.org/bot${tok}/sendVideo`, { method: 'POST', body: fd })
+const j = await r.json()
+console.log('outro sent ok=', j.ok, j.ok ? '' : JSON.stringify(j).slice(0, 160))
