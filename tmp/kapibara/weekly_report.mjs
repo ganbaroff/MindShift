@@ -6,8 +6,14 @@
 //   1. Supabase publish_journal  → posts/day, per svc, EN/AR caption mix (the A/B experiment).
 //   2. Buffer per-post stats      → views/reach/reactions/comments/shares (missing → '—').
 //   3. gh run list (kapibara-daily.yml) → per-day cron-vs-manual + success/failure counts.
-// Then composes a SHORT Russian message (ADHD-safe: ~14 lines, plain lines, no tables)
-// and either prints it (--dry, default) or sends it to the CEO chat (--send).
+//   4. published.json + Buffer    → per-POST breakdown for the week + top-1/bottom-1 post.
+//   5. EXPERIMENTS.md             → surfaces RUNNING experiments + flags verdicts due this Sunday.
+// Then composes a SHORT Russian message (ADHD-safe: total ≤ 25 lines, plain lines, no tables)
+// and either prints it (--dry, DEFAULT — no side effects) or sends it to the CEO chat (--send).
+//
+// FEEDBACK→DECISION LOOP: sections 4-5 close the gap where numbers existed but no decision was
+// ever born from them. The report now names the best/worst post of the week AND reminds the CEO
+// which experiment owes a verdict — so every Sunday ends in a call, not just a chart.
 //
 // RESILIENCE (Factory-Law spirit — a dead pipeline is worse than a missing number):
 // every data source is wrapped so a single failure (journal 404, Buffer down, gh missing)
@@ -29,7 +35,9 @@
 //   node weekly_report.mjs --send     # POST the message to CEO chat 5150355926 via bot
 
 import { execFileSync } from 'node:child_process'
-import { getEnv, hasEnv } from './env.mjs'
+import { readFileSync, existsSync } from 'node:fs'
+import { join } from 'node:path'
+import { getEnv, hasEnv, PROJECT_ROOT } from './env.mjs'
 
 // ── Config ───────────────────────────────────────────────────────────────────────
 const CEO_CHAT_ID = 5150355926 // Yusif — hardcoded per brief (pult_worker uses row.chat_id; this report is fixed-recipient)
@@ -68,7 +76,7 @@ async function fetchJournal(dates) {
   const q = `${url}/rest/v1/publish_journal?episode_date=gte.${encodeURIComponent(since)}` +
     `&select=episode_date,format,svc,post_id,caption_lang,run_id&order=episode_date.asc`
   try {
-    const r = await fetch(q, { headers: { apikey: key, Authorization: `Bearer ${key}` } })
+    const r = await fetch(q, { headers: { apikey: key, Authorization: `Bearer ${key}` }, signal: AbortSignal.timeout(10000) })
     if (!r.ok) { console.warn(`[weekly] journal HTTP ${r.status} — degrading to —`); return empty }
     const rows = await r.json()
     if (!Array.isArray(rows)) { console.warn('[weekly] journal non-array body — degrading to —'); return empty }
@@ -103,6 +111,7 @@ async function bufferStats(postId, tok) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${tok}` },
       body: JSON.stringify({ query: POST_Q, variables: { input: { id: postId } } }),
+      signal: AbortSignal.timeout(10000),
     })
     if (!r.ok) return null
     const j = await r.json()
@@ -113,6 +122,7 @@ async function bufferStats(postId, tok) {
       error: p.error?.__typename || null,
       views: pickMetric(p.metrics, 'Views'),
       reach: pickMetric(p.metrics, 'Reach'),
+      eng: pickMetric(p.metrics, 'Eng. Rate'), // engagement rate (%) — same metric name metrics.mjs uses
       reactions: pickMetric(p.metrics, 'Reactions'),
       comments: pickMetric(p.metrics, 'Comments'),
       shares: pickMetric(p.metrics, 'Shares'),
@@ -162,6 +172,95 @@ function svcTag(svc) {
 }
 // One number or '—'. Buffer often has 0 for hours after "sent" — 0 is a real value, keep it.
 const num = (v) => (v == null ? '—' : String(v))
+
+// ── 4. Per-post breakdown for the week (published.json + Buffer) ─────────────────────
+// EXP-001 variant tag is DERIVED from the UTC day parity (even day = EN subs, odd = AR subs) —
+// published.json carries no caption_lang, so the experiment's own rule is the source of truth.
+const abTag = (isoDate) => (Number(isoDate.slice(8, 10)) % 2 === 0 ? 'EN' : 'AR')
+
+// One post → one caveman line. reach / engagement only shown when Buffer actually has them.
+function fmtPost(pp) {
+  const parts = [`${mmdd(pp.date)} ${svcTag(pp.svc)} [${pp.ab}]`, `${num(pp.views)} просм`]
+  if (pp.reach != null) parts.push(`reach ${pp.reach}`)
+  if (pp.eng != null) parts.push(`eng ${Number(pp.eng).toFixed(1)}%`)
+  return parts.join(' · ')
+}
+
+// Returns { lines[], top|null, bottom|null }. Reads published.json relative to the script
+// (never cwd), filters to the 7-day window, fetches Buffer stats per post. Degrades to a
+// single explanatory line on any failure — never throws, never blocks the report.
+// `langByPost` (post_id → caption_lang, from the journal) is authoritative for the variant
+// tag; day-parity (EXP-001's rule) is the fallback only for posts the journal hasn't recorded.
+async function postBreakdown(dates, tok, langByPost) {
+  const p = join(PROJECT_ROOT, 'published.json')
+  if (!existsSync(p)) return { lines: ['посты за неделю: published.json нет'], top: null, bottom: null }
+  let eps
+  try { eps = JSON.parse(readFileSync(p, 'utf8')) } catch { return { lines: ['посты за неделю: published.json битый'], top: null, bottom: null } }
+  if (!Array.isArray(eps)) return { lines: ['посты за неделю: published.json не массив'], top: null, bottom: null }
+
+  const lo = dates[0], hi = dates[dates.length - 1]
+  const posts = []
+  for (const ep of eps) {
+    if (!ep.date || ep.date < lo || ep.date > hi) continue
+    for (const post of (ep.posts || [])) {
+      const s = await bufferStats(post.id, tok)
+      const recorded = langByPost && langByPost.get(post.id)
+      const ab = recorded ? recorded.toUpperCase() : abTag(ep.date)
+      posts.push({ date: ep.date, svc: post.svc, views: s ? s.views : null, reach: s ? s.reach : null, eng: s ? s.eng : null, ab })
+    }
+  }
+  if (posts.length === 0) return { lines: ['посты за неделю: в окне публикаций нет'], top: null, bottom: null }
+
+  const lines = []
+  const shown = posts.slice(0, 8) // cap keeps the whole report ≤ 25 lines even at full 1/day cadence
+  for (const pp of shown) lines.push(fmtPost(pp))
+  if (posts.length > 8) lines.push(`…ещё ${posts.length - 8}`)
+
+  // top-1 / bottom-1 by views (only posts that actually have a number can be ranked).
+  const ranked = posts.filter(pp => typeof pp.views === 'number').sort((a, b) => b.views - a.views)
+  const top = ranked.length ? ranked[0] : null
+  const bottom = ranked.length > 1 ? ranked[ranked.length - 1] : null
+  return { lines, top, bottom }
+}
+
+// ── 5. Experiments — surface RUNNING rows, flag verdicts due (feedback→decision) ─────
+// Parses the EXPERIMENTS.md markdown table by header name (robust to column reordering).
+// Returns [{ id, hyp, due }] for RUNNING rows only.
+function runningExperiments() {
+  const p = join(PROJECT_ROOT, 'EXPERIMENTS.md')
+  if (!existsSync(p)) return []
+  let rows
+  try { rows = readFileSync(p, 'utf8').split(/\r?\n/).filter(l => l.trim().startsWith('|')) } catch { return [] }
+  if (rows.length < 2) return []
+  const cells = (l) => l.split('|').slice(1, -1).map(c => c.trim())
+  const header = cells(rows[0]).map(h => h.toLowerCase())
+  const idxId = header.indexOf('id')
+  const idxHyp = header.findIndex(h => h.includes('hypothesis'))
+  const idxDue = header.findIndex(h => h.includes('verdict due'))
+  const idxStatus = header.indexOf('status')
+  if (idxStatus < 0) return []
+  const out = []
+  for (const line of rows.slice(1)) {
+    const c = cells(line)
+    if (c.every(x => x === '' || /^:?-+:?$/.test(x))) continue // markdown separator row
+    if ((c[idxStatus] || '').toUpperCase() !== 'RUNNING') continue
+    out.push({ id: idxId >= 0 ? c[idxId] : '?', hyp: idxHyp >= 0 ? c[idxHyp] : '', due: idxDue >= 0 ? c[idxDue] : '' })
+  }
+  return out
+}
+
+// Build the experiment lines. todayIso = the report's Sunday (last date in window).
+function experimentLines(todayIso) {
+  const exps = runningExperiments()
+  const lines = []
+  for (const e of exps) {
+    const hyp = e.hyp.length > 44 ? e.hyp.slice(0, 44) + '…' : e.hyp
+    const name = hyp ? `${e.id}: ${hyp}` : e.id
+    lines.push(`🧪 ЭКСПЕРИМЕНТ: ${name} — вердикт к ${e.due || '?'}`)
+    if (e.due && e.due <= todayIso) lines.push('❗ ТРЕБУЕТ ВЕРДИКТА в это воскресенье')
+  }
+  return lines
+}
 
 async function compose() {
   const dates = lastNDates(DAYS)
@@ -235,11 +334,28 @@ async function compose() {
   const summary = `Итого за 7 дней: ${totalPosts} постов · подписи EN ${enCount} / AR ${arCount}`
   const counter = `Автопубликация: день ${dayN} из ${AUTOPUBLISH_TOTAL} (старт ${mmdd(AUTOPUBLISH_START)})`
 
+  // Sections 4 + 5 — per-post breakdown, best/worst, and experiment verdicts (the decision layer).
+  // Map post_id → caption_lang from the journal so the per-post variant tag stays consistent with
+  // the day-section above (day-parity is only the fallback for posts the journal hasn't logged).
+  const langByPost = new Map()
+  for (const rows of journal.rowsByDate.values()) {
+    for (const row of rows) if (row.post_id && row.caption_lang) langByPost.set(row.post_id, row.caption_lang)
+  }
+  const pb = await postBreakdown(dates, tok, langByPost)
+  const topBottom = []
+  if (pb.top) topBottom.push(`🔝 лучший: ${fmtPost(pb.top)}`)
+  if (pb.bottom) topBottom.push(`🔻 слабее всех: ${fmtPost(pb.bottom)}`)
+  const expLines = experimentLines(todayIso)
+
   const msg = [
     header,
     ...lines,
     summary,
     ...(degraded.length ? [`⚠️ нет данных: ${degraded.join(', ')}`] : []),
+    '— посты за неделю —',
+    ...pb.lines,
+    ...topBottom,
+    ...(expLines.length ? ['— эксперименты —', ...expLines] : []),
     counter,
   ].join('\n')
 

@@ -2,7 +2,9 @@
 
 > **Назначение (RU):** Это единая точка входа. Какой бы инструмент ты ни открыл — Claude Code, Codex, Antigravity, Gemini CLI, Cursor — прочитай этот файл первым. Он говорит: что это за репозиторий, что где лежит, что работает, что сломано, что мусор, что делать дальше. Глубокие детали — по ссылкам, не здесь.
 >
-> **Last verified:** 2026-06-29 by ground-truth survey (git status + file reads, not memory).
+> **Last verified:** 2026-07-07 by ground-truth survey (git status + file reads, not memory).
+>
+> **🗺️ Two companion maps:** [docs/HARNESS-MAP.md](docs/HARNESS-MAP.md) — the 13 agentic-engineering primitives → where each lives (claude md / specs / hooks / gates / retrieval / agentic CI / feedback loop…). [docs/FACTORY-MAP.md](docs/FACTORY-MAP.md) — the daily media line, stage-by-stage, with its quality-gate controllers.
 
 ---
 
@@ -50,6 +52,8 @@ If you only remember one thing: **MindShift needs USERS, not more code. The vide
 ---
 
 ## 3. Видео-пайплайн `tmp/kapibara/` — active, but tangled
+
+> **🏭 UPDATE 2026-07-07 — the content factory is LIVE in the cloud.** The daily **EN news conveyor** runs autonomously (day **3/14** toward the finish line: 14 straight hands-off publishes + a weekly metrics report). GitHub Actions `kapibara-daily.yml` renders → runs the quality gates (`frame_check` per-frame, `content_critic` whole-clip, `cta-guard` bot-exists) → auto-publishes to IG + TikTok via Buffer, idempotent across runners via a **Supabase `publish_journal`** (`journal.mjs`, migration 036). CEO drives it from his phone with the **Пульт `@CreatorBy_bot`** (`/news` `/ladder` `/go` `/status`; `pult-poller.yml` every 10 min). Brand = **Kapibara AI** (VOLAURA design system + Mochi face) on its own accounts **@volaura.kapibara** (kit in `tmp/brand/`). Ladder quiz format is accepted + fact-checked (`ladder_question_bank.json`) but held out of CI until news day-14. Full stage-by-stage map with controllers: **[docs/FACTORY-MAP.md](docs/FACTORY-MAP.md)**. This supersedes the "cloud CANNOT pass" note in §5.1 below (that was true 2026-06-29; the missing scripts + secrets have since landed).
 
 **What it is:** real AI news → Gemini script → Gemini TTS (Russian) → HTML studio scene → Playwright frame render → ffmpeg → publish to Telegram preview, then Instagram + TikTok (via Buffer). AZ subtitles auto-translated. **Free-first** (Gemini free tier, no paid APIs in the daily path).
 
