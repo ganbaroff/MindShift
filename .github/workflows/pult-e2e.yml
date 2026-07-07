@@ -1,0 +1,44 @@
+name: Pult Conveyor E2E Tests
+
+# Hermetic test suite running offline mock tests on push/PR to verify state machines and gates.
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - 'tmp/kapibara/**'
+      - '.github/workflows/pult-e2e.yml'
+  pull_request:
+    paths:
+      - 'tmp/kapibara/**'
+      - '.github/workflows/pult-e2e.yml'
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: tmp/kapibara
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install ffmpeg + fonts
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg fonts-noto-core fonts-noto-color-emoji
+          mkdir -p ~/.fonts
+          fc-cache -f
+
+
+      - name: Run Hermetic E2E Mock Suite
+        env:
+          PULT_MOCK: '1'
+        run: node e2e_mock_test.mjs

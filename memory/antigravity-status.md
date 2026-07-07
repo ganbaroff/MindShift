@@ -1,18 +1,23 @@
 # Antigravity Status Card
-**Date:** 2026-06-24
+**Date:** 2026-06-24 (updated by Atlas/Overseer)
 
-## Receipts
-- Completed BATCH-2026-06-24-A to E (native localizations tracked, gitignore fixed, package reference versions corrected).
-- Transited back to Next.js prompt engineering courses project at `C:\Users\user\.gemini\antigravity\scratch\mindshift-mvp`.
-- Created `/api/generate-silhouette` endpoint with gpt-4o-mini logic and deterministic fallback support.
-- Fully integrated the silhouette generation and blurred monster emoji rendering into the `FunnelExperience.tsx` landing page component.
-- Successfully compiled production build (`next build` completed in 12s with 0 errors).
+## ВАЖНО: ЧИТАЙ `memory/antigravity-status.md` В ACADEMY ПРОЕКТЕ
+Полный статус, распределение ролей и твои задачи:
+**`C:\Users\user\.gemini\antigravity\scratch\mindshift-mvp\memory\antigravity-status.md`**
+
+## Краткий итог сессии Atlas'а
+- BATCH A→E в этом репо (PWA) — все approved, закоммичены. PWA стабильна. **Не трогай её.**
+- Atlas переключился на Academy (`mindshift-mvp`) по приказу CEO.
+- Atlas создал: `src/lib/db.ts`, `src/app/onboarding/page.tsx`, доработал `webhook/route.ts` и `retention-engine.ts`.
+- `tsc --noEmit` = 0 errors, dev server = 200 на обоих routes.
+
+## Твои задачи (Academy, НЕ PWA)
+1. **Приоритет 1:** Создай `/lesson/[id]` route — curriculum + chat UI
+2. **Приоритет 2:** Wire checkout `success_url` → `/onboarding`
+3. **Приоритет 3:** Dashboard → real Prisma data вместо demo
 
 ## Blockers
 - None.
-
-## Next Step
-- Phase 1: Integrate LemonSqueezy checkout redirection webhook and design parent auth gate.
 
 ## Lesson
 - When building a "blurred silhouette reveal" for an AI avatar, combining CSS filters (`brightness(0) blur()`) directly onto dynamically chosen emojis provides a lightweight, instant visual feedback loop for kids without high upfront API costs.

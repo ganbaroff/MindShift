@@ -1,0 +1,65 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "KapibaraBrief",
+  "type": "object",
+  "properties": {
+    "brief_id": { "type": "string" },
+    "created_by": { "type": "string" },
+    "format": { "type": "string", "enum": ["ladder", "news"] },
+    "duration_target_sec": { "type": "integer", "minimum": 10 },
+    "duration_tolerance_sec": { "type": "integer", "minimum": 1 },
+    "voice": { "type": "string", "enum": ["Algieba"] },
+    "style": { "type": "string" },
+    "language": { "type": "string", "enum": ["en", "ru", "az"] },
+    "topic": { "type": "string" },
+    "source_material": { "type": "string" },
+    "cta": { "type": "string" },
+    "n_items": { "type": "integer", "minimum": 1, "maximum": 5 },
+    "state": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "brief_ok",
+        "scripted",
+        "script_ok",
+        "voiced",
+        "voice_ok",
+        "rendered",
+        "qa_pass",
+        "delivered",
+        "published"
+      ]
+    },
+    "rework_reason": { "type": "string" },
+    "episodes": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "approvals": {
+      "type": "object",
+      "properties": {
+        "brief": { "type": ["string", "null"], "enum": ["approved", "rejected", null] },
+        "script": { "type": ["string", "null"], "enum": ["approved", "rejected", null] },
+        "voice_sample": { "type": ["string", "null"], "enum": ["approved", "rejected", null] },
+        "final": { "type": ["string", "null"], "enum": ["approved", "rejected", null] }
+      },
+      "required": ["brief", "script", "voice_sample", "final"]
+    }
+  },
+  "required": [
+    "brief_id",
+    "created_by",
+    "format",
+    "duration_target_sec",
+    "duration_tolerance_sec",
+    "voice",
+    "style",
+    "language",
+    "topic",
+    "source_material",
+    "cta",
+    "n_items",
+    "state",
+    "approvals"
+  ]
+}

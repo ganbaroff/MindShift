@@ -56,7 +56,7 @@
     background:var(--surface2);border-radius:16px;padding:14px 26px;border:1px solid #33374d}
 
   /* Options — sized so all 4 chips end well above the subtitle band (no overlap with option D) */
-  .options{position:absolute;z-index:5;left:56px;right:56px;top:790px;display:grid;gap:24px}
+  .options{position:absolute;z-index:5;left:56px;right:56px;top:770px;display:grid;gap:24px}
   .chip{background:var(--surface);border:3px solid var(--teal);border-radius:26px;
     padding:32px 44px;color:var(--text);font-size:56px;font-weight:700;display:flex;gap:30px;align-items:center;position:relative}
   .chip .lab{color:var(--gold);font-weight:900;min-width:64px}
@@ -81,9 +81,10 @@
   .cta .sec{margin-top:24px;color:var(--muted);font-size:40px}
 
   /* Subtitle band (bottom, dark backing for separation) */
-  .cap{position:absolute;z-index:7;left:56px;right:56px;bottom:150px;text-align:center;color:#fff;
-    font-size:54px;font-weight:800;line-height:1.16;padding:18px 30px;border-radius:24px;
-    background:rgba(8,9,21,.55);text-shadow:0 5px 24px rgba(0,0,0,.9),0 2px 6px rgba(0,0,0,.95)}
+  .cap{position:absolute;z-index:7;left:56px;right:56px;bottom:120px;text-align:center;color:#fff;
+    font-size:48px;font-weight:800;line-height:1.16;padding:16px 28px;border-radius:24px;
+    background:rgba(8,9,21,.55);text-shadow:0 5px 24px rgba(0,0,0,.9),0 2px 6px rgba(0,0,0,.95);
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;max-height:150px}
   .cap:empty{padding:0;background:transparent}
   .cap b{color:var(--gold)}
   .hidden{display:none!important}
@@ -271,27 +272,31 @@ window.setFrame=(i)=>{
   eO.style.display=bl?'none':'block'; eB.style.display=bl?'block':'none';
 
   // ── UI VISIBILITY per beat ──
-  const showHead = state==='hook';
+  const showHead = state==='hook'||state==='bridge';
   const showBan  = state==='question';
   const showOpts = state==='options'||state==='micro'||state==='think'||state==='reveal';
   const showRing = state==='think';
   const showTeach= state==='reveal';
   const showCta  = state==='cta';
-  show('headline',showHead); show('teaser',showHead&&!!EP.teaser);
+  show('headline',showHead); show('teaser',state==='hook'&&!!EP.teaser);
   show('banner',showBan);
   show('options',showOpts);
   show('ring',showRing);
   show('teach',showTeach);
   show('cta',showCta);
 
-  // ── HOOK headline fade+rise ──
+  // ── HOOK/BRIDGE headline fade+rise ──
   if(showHead){
-    if($('headline').innerHTML.indexOf('<br>')<0)
-      $('headline').innerHTML=`You use AI every day —<br>but do you know what a <span class="kw">${EP.keyword}</span> is?`;
+    if(state==='hook'){
+      if($('headline').innerHTML.indexOf('<br>')<0)
+        $('headline').innerHTML=`You use AI every day —<br>but do you know what a <span class="kw">${EP.keyword}</span> is?`;
+    } else {
+      $('headline').innerHTML=b.text;
+    }
     const p=eoc(clamp((t-b.s)/0.5,0,1));
     $('headline').style.opacity=p.toFixed(3);
     $('headline').style.transform=`translateY(${((1-p)*24).toFixed(1)}px)`;
-    if(EP.teaser){$('teaser').textContent=EP.teaser; $('teaser').style.opacity=clamp((t-b.s-0.3)/0.4,0,1).toFixed(3);}
+    if(state==='hook'&&EP.teaser){$('teaser').textContent=EP.teaser; $('teaser').style.opacity=clamp((t-b.s-0.3)/0.4,0,1).toFixed(3);}
   }
 
   // ── QUESTION banner pop ──
@@ -345,6 +350,8 @@ window.setFrame=(i)=>{
       c.querySelector('.lab').style.color=labcol;
       mark.style.opacity=markOp.toFixed(3);
     });
+    // BUGFIX: push options down during reveal so the teach explanation box doesn't overlap the chips
+    $('options').style.top = state==='reveal' ? '840px' : '770px';
   }
 
   // ── COUNTDOWN ring sweeps during 'think' (teal→gold arc, dashoffset from t) ──
@@ -362,11 +369,12 @@ window.setFrame=(i)=>{
 
   // ── XP RUNG lights with a small pulse on reveal ──
   {
-    const litN = (state==='reveal'||state==='cta') ? 1 : 0;
+    const startLit = typeof EP.startLit === 'number' ? EP.startLit : 0;
+    const litN = clamp(startLit + ((state==='reveal'||state==='cta'||state==='bridge') ? 1 : 0), 0, 5);
     for(let r=0;r<5;r++){
       const el=$('rung'+r), on=r<litN;
       let extra=1;
-      if(on&&state==='reveal'){ const p=clamp((t-b.s-0.15)/0.5,0,1); extra=1+Math.sin(eoc(p)*Math.PI)*0.18; }
+      if(on&&(state==='reveal'||(r===(litN-1)&&state==='bridge'))){ const p=clamp((t-b.s-0.15)/0.5,0,1); extra=1+Math.sin(eoc(p)*Math.PI)*0.18; }
       el.style.background=on?'rgba(78,205,196,.25)':'var(--surface)';
       el.style.borderColor=on?'var(--teal)':'#3a3f5c';
       el.style.boxShadow=on?`0 0 ${(40*extra).toFixed(0)}px rgba(78,205,196,${(0.5*extra).toFixed(2)})`:'none';
@@ -391,10 +399,9 @@ window.setFrame=(i)=>{
     $('cta').style.transform=`translateY(${((1-p)*40).toFixed(1)}px)`;
   }
 
-  // ── SUBTITLE (per-beat text, dark band) — suppressed on reveal/cta where the teach/CTA card
-  //    already carries the words (prevents the subtitle band colliding with those cards) ──
+  // ── SUBTITLE (per-beat text, dark band) — suppressed on reveal/cta/bridge where cards/headlines show words ──
   const capEl=$('cap');
-  const capBeat = state!=='reveal' && state!=='cta';
+  const capBeat = state!=='reveal' && state!=='cta' && state!=='bridge';
   if(capBeat && b.text){
     const active=t>=b.s&&t<(b.e+0.3);
     if(active){ capEl.textContent=b.text; capEl.style.opacity=clamp((t-b.s)/0.15,0,1).toFixed(2); }

@@ -73,3 +73,6 @@ jobs:
 
       - name: Drain the Пульт queue
         run: node pult_worker.mjs --drain
+
+      - name: Drain the Пульт briefs queue
+        run: node conveyor_worker.mjs --drain

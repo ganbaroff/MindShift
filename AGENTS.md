@@ -123,3 +123,29 @@ A `tmp/kapibara/.gitignore` now marks these so they stop showing as untracked an
 - **Gemini CLI / Antigravity** → read `GEMINI.md` (a thin pointer to this file).
 
 Whatever you are: this file + the doc it links for your task = enough to start without breaking anything.
+
+---
+
+## 9. Handing the Пульт (video factory) to a DIFFERENT AI (2026-07-07)
+
+> CEO ask: when Claude Code hits its usage limit, a different AI should be able to pick up **maintaining** the daily video factory without re-explaining everything from scratch.
+
+**Already true, no work needed here: the pult does not run on Claude.** The daily publish loop is plain Node + GitHub Actions — `tmp/kapibara/pult_worker.mjs` polls the `pult_commands` Supabase table (claim → run `make-clip.mjs` / `ladder_render.mjs` / `buffer_publish.mjs` → report to Telegram), triggered by `pult-poller.yml` every 10 min. Zero LLM calls in the orchestration itself (Gemini is only called *inside* those scripts, for script-writing / TTS / the critic gate). Confirmed working today (2026-07-07): CI run succeeded, clip published to IG+TikTok, GCS file verified live (`curl -I` → 200). Claude/Atlas's actual job is **maintainer**, not operator: read a failed CI run, diagnose, fix the script, write the lesson down. That's the role that needs to transfer, not the pult.
+
+**To pick up maintenance as a new AI, read in this order:**
+1. This file — orientation, what's real vs stale.
+2. [docs/FACTORY-MAP.md](docs/FACTORY-MAP.md) — the 9-stage line + which gate catches what.
+3. [.claude/rules/content-factory-law.md](.claude/rules/content-factory-law.md) — the 12 binding laws (voice, palette, pace, one CTA, gate-before-ship). Hard constraints, not suggestions.
+4. [memory/marketing-backlog.md](memory/marketing-backlog.md) — the live task list + what's `WAITING-CEO` (don't re-decide a forked question CEO already parked).
+5. `tmp/kapibara/pult_worker.mjs` + `tmp/kapibara/PULT-ANALYSIS-2026-07-04.md` — the pult's own mechanics + the v2 roadmap (edit scenario / duration from the phone, Mini App constructor — not built yet).
+
+**3 health checks any AI can run without asking the CEO anything:**
+- `gh run list --workflow=kapibara-daily.yml --limit 5` — is the daily CI green?
+- Query Supabase table `publish_journal` for today's date — did it actually *publish* (not just run)?
+- `curl -I https://storage.googleapis.com/kapibara-news-pub-0321449510/kapibara-<date>.mp4` — does today's clip file exist and serve?
+
+**Secrets needed (names only — NEVER read or paste values into chat, per the secret-stream guard):** `VITE_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `TELEGRAM_CREATORBOT_TOKEN`, `GEMINI_API_KEY` — already live as GitHub Actions secrets (proven by today's successful publish). A new AI never needs the values, only `gh secret list` to confirm they exist.
+
+**Do NOT, without explicit CEO word:** change publish cadence (1/day is Factory Law 11), touch `LOCKED_VOICE`, merge/abandon the `kapibara-studio` extraction (§4 — CEO-gated structural call), or restart a fork already marked `WAITING-CEO` in the backlog.
+
+**First live handoff task (2026-07-07):** [tmp/kapibara/HANDOFF-antigravity-ladder5-2026-07-07.md](tmp/kapibara/HANDOFF-antigravity-ladder5-2026-07-07.md) — a self-contained capability-proof task for Antigravity/Gemini: build ONE video with 5 quiz questions in the existing Ladder format. If you are Antigravity reading this, go there now.

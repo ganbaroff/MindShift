@@ -81,15 +81,18 @@ function ok(): Response {
 
 const HELP = `🦫 <b>Пульт медиа-завода</b>
 
+/brief &lt;тема&gt; — начать новый бриф (квиз «Лесенка»)
+/ок — одобрить текущий шаг брифа (бриф → сценарий → голос)
+/нет &lt;причина&gt; — отправить бриф на доработку с причиной
 /news — сгенерить ролик «Капибара Новости» (превью придёт сюда, ~15-20 мин)
 /ladder — сгенерить квиз-ролик «Лесенка»
 /go — опубликовать последний прошедший гейты клип
-/status — что в очереди (последние 5)
+/status — статус брифа и очереди
 /stop — очистить очередь
 /whoami — показать твой chat_id
 /help — это меню
 
-Рендер идёт в облаке (GitHub Actions, каждые 10 мин). Превью бросаю сюда, когда готово.`
+Рендер идет в облаке (GitHub Actions, каждые 10 мин). Превью бросаю сюда, когда готово.`
 
 Deno.serve(async (req: Request) => {
   if (req.method !== 'POST') {
@@ -148,8 +151,29 @@ Deno.serve(async (req: Request) => {
   )
 
   try {
-    // -- /status — last 5 queue rows -------------------------------------------
+    // -- /status — brief status + last 5 queue rows -----------------------------
     if (cmd === '/status') {
+      let briefStatus = ''
+      const { data: briefs, error: briefErr } = await supabase
+        .from('pult_briefs')
+        .select('id, state, brief, rework_reason, updated_at')
+        .eq('chat_id', chatId)
+        .order('updated_at', { ascending: false })
+        .limit(1)
+
+      if (!briefErr && briefs && briefs.length > 0) {
+        const b = briefs[0]
+        const approvals = b.brief?.approvals || {}
+        const appText = Object.entries(approvals)
+          .map(([k, v]) => `${k}: ${v === null ? '⏳' : v === 'approved' ? '✅' : '❌'}`)
+          .join(', ')
+        briefStatus = `<b>Активный бриф:</b> <code>${b.id}</code> (тема: ${b.brief?.topic || 'N/A'})\n` +
+          `Статус: <code>${b.state}</code>\n` +
+          `Ворота: { ${appText} }\n` +
+          (b.rework_reason ? `Причина доработки: <i>${b.rework_reason}</i>\n` : '') +
+          `Обновлен: ${new Date(b.updated_at).toISOString().slice(5, 16).replace('T', ' ')}\n\n`
+      }
+
       const { data, error } = await supabase
         .from('pult_commands')
         .select('cmd, args, status, result, created_at')
@@ -158,10 +182,7 @@ Deno.serve(async (req: Request) => {
 
       if (error) {
         console.error('[creator-pult] /status query error:', error.message)
-        return reply(chatId, 'Не смог прочитать очередь. Попробуй ещё раз.')
-      }
-      if (!data || data.length === 0) {
-        return reply(chatId, 'Очередь пуста. /news или /ladder — чтобы что-то запустить.')
+        return reply(chatId, briefStatus + 'Не смог прочитать очередь задач. Попробуй ещё раз.')
       }
 
       const emoji: Record<string, string> = {
@@ -175,7 +196,161 @@ Deno.serve(async (req: Request) => {
         const tail = r.result ? ` — ${String(r.result).slice(0, 60)}` : ''
         return `${emoji[r.status] ?? '•'} <code>${when}</code> ${r.cmd}${fmt} <i>(${r.status})</i>${tail}`
       })
-      return reply(chatId, '<b>Очередь (последние 5):</b>\n' + lines.join('\n'))
+      
+      return reply(chatId, briefStatus + '<b>Очередь задач (последние 5):</b>\n' + lines.join('\n'))
+    }
+
+    // -- /brief <idea> — create a content brief draft --------------------------
+    if (cmd === '/brief') {
+      const idea = text.slice(6).trim()
+      if (!idea) {
+        return reply(chatId, 'Укажите тему/идею брифа. Пример: <code>/brief основы больших языковых моделей</code>')
+      }
+      const briefId = crypto.randomUUID()
+      const topic = idea.toLowerCase().replace(/[^a-zа-я0-9-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '') || 'brief-topic'
+
+      // Topic allowlist — the conveyor sources questions from ladder_question_bank.json, which has
+      // exactly these 8 topics × 5 questions. An unknown topic would crash generateEpisodes later
+      // (Atlas grading find #2, 2026-07-08). Honest reply now beats a silent pipeline crash later.
+      const BANK_TOPICS = ['llm-basics', 'prompting', 'ai-history', 'safety-limits', 'everyday-ai', 'agents-tools', 'multimodal', 'myths']
+      if (!BANK_TOPICS.includes(topic)) {
+        return reply(chatId, `Пока умею только темы из проверенного банка вопросов:\n${BANK_TOPICS.map(t => `• <code>/brief ${t}</code>`).join('\n')}\n\nСвои темы появятся после расширения банка (F4 в бэклоге).`)
+      }
+
+      const brief = {
+        brief_id: briefId,
+        created_by: 'ceo-telegram',
+        format: 'ladder',
+        duration_target_sec: 60,
+        duration_tolerance_sec: 8,
+        voice: 'Algieba',
+        style: 'Read aloud in one warm, energetic, charismatic quiz-host voice — clear, upbeat, and lively, never monotone; keep the same speaker throughout and land the playful lines with light comedic timing:',
+        language: 'en',
+        topic: topic,
+        source_material: `bank:${topic}`,
+        cta: 'subscribe',
+        n_items: 5,
+        state: 'draft',
+        approvals: { brief: null, script: null, voice_sample: null, final: null }
+      }
+
+      const { error } = await supabase
+        .from('pult_briefs')
+        .insert({ id: briefId, chat_id: chatId, state: 'draft', brief })
+
+      if (error) {
+        console.error('[creator-pult] /brief insert error:', error.message)
+        return reply(chatId, 'Не смог создать черновик брифа. Попробуй ещё раз.')
+      }
+
+      return reply(chatId, `📝 Создан черновик брифа для темы <b>${topic}</b>.\nID: <code>${briefId}</code>\nВопросы: формат? длительность? тема? Отправьте /ок чтобы одобрить бриф.`)
+    }
+
+    // -- /ок — approve the current gate stage of the active brief --------------
+    if (cmd === '/ок') {
+      const { data: briefs, error: selectErr } = await supabase
+        .from('pult_briefs')
+        .select('id, state, brief')
+        .eq('chat_id', chatId)
+        .order('updated_at', { ascending: false })
+        .limit(1)
+
+      if (selectErr || !briefs || briefs.length === 0) {
+        return reply(chatId, 'Нет активных брифов для одобрения. Создайте новый через /brief.')
+      }
+
+      const row = briefs[0]
+      const approvals = row.brief.approvals || { brief: null, script: null, voice_sample: null, final: null }
+      let nextState = row.state
+      let stepName = ''
+
+      if (row.state === 'draft') {
+        approvals.brief = 'approved'
+        nextState = 'brief_ok'
+        stepName = 'Бриф'
+      } else if (row.state === 'scripted') {
+        approvals.script = 'approved'
+        nextState = 'script_ok'
+        stepName = 'Сценарий'
+      } else if (row.state === 'voiced') {
+        approvals.voice_sample = 'approved'
+        nextState = 'voice_ok'
+        stepName = 'Голосовые сэмплы'
+      } else {
+        return reply(chatId, `Бриф в состоянии <code>${row.state}</code> не ожидает одобрения ворот.`)
+      }
+
+      const { error: updateErr } = await supabase
+        .from('pult_briefs')
+        .update({
+          state: nextState,
+          brief: { ...row.brief, approvals },
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', row.id)
+
+      if (updateErr) {
+        console.error('[creator-pult] /ок update error:', updateErr.message)
+        return reply(chatId, 'Не смог записать одобрение. Попробуй ещё раз.')
+      }
+
+      return reply(chatId, `✅ Одобрил ворота: <b>${stepName}</b>. Перевожу бриф в состояние <code>${nextState}</code>.`)
+    }
+
+    // -- /нет <причина> — reject/rework the current stage -----------------------
+    if (cmd === '/нет') {
+      const reason = text.slice(4).trim()
+      if (!reason) {
+        return reply(chatId, 'Причина отклонения обязательна. Например: <code>/нет перепиши раскрытие третьего вопроса</code>')
+      }
+
+      const { data: briefs, error: selectErr } = await supabase
+        .from('pult_briefs')
+        .select('id, state, brief')
+        .eq('chat_id', chatId)
+        .order('updated_at', { ascending: false })
+        .limit(1)
+
+      if (selectErr || !briefs || briefs.length === 0) {
+        return reply(chatId, 'Нет активных брифов для отклонения.')
+      }
+
+      const row = briefs[0]
+      const approvals = row.brief.approvals || { brief: null, script: null, voice_sample: null, final: null }
+      let nextState = row.state
+      let stepName = ''
+
+      if (row.state === 'draft') {
+        approvals.brief = 'rejected'
+        stepName = 'Бриф'
+      } else if (row.state === 'scripted') {
+        approvals.script = 'rejected'
+        nextState = 'brief_ok' // reset to brief_ok so worker re-scripts
+        stepName = 'Сценарий'
+      } else if (row.state === 'voiced') {
+        approvals.voice_sample = 'rejected'
+        nextState = 'script_ok' // reset to script_ok so worker re-voices
+        stepName = 'Голосовые сэмплы'
+      } else {
+        return reply(chatId, `Бриф в состоянии <code>${row.state}</code> не ожидает ручного ворота.`)
+      }
+
+      const { error: updateErr } = await supabase
+        .from('pult_briefs')
+        .update({
+          state: nextState,
+          rework_reason: reason,
+          brief: { ...row.brief, approvals },
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', row.id)
+
+      if (updateErr) {
+        console.error('[creator-pult] /нет update error:', updateErr.message)
+        return reply(chatId, 'Не смог записать отклонение. Попробуй ещё раз.')
+      }
+
+      return reply(chatId, `❌ Отклонил ворота: <b>${stepName}</b>. Возвращаю в состояние <code>${nextState}</code>.\nПричина: <i>${reason}</i>`)
     }
 
     // -- /news — enqueue a news render -----------------------------------------

@@ -11,13 +11,13 @@
 //        assert rendered frame count == expected; duration sanity ±2.5s vs voice.
 //
 // Usage: node ladder_render.mjs   (no voice arg — LOCKED_VOICE is law).
-import { readFileSync, writeFileSync, mkdirSync, rmSync, readdirSync } from 'node:fs'
+import { readFileSync, writeFileSync, mkdirSync, rmSync, readdirSync, existsSync, copyFileSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
 import { pathToFileURL } from 'node:url'
 import { chromium } from 'playwright'
-import { requireEnv, LOCKED_VOICE, NEWS_TARGET_WPM } from './env.mjs'
+import { LOCKED_VOICE, NEWS_TARGET_WPM } from './env.mjs'
+import { synthPcm, pcmToWav } from './gemini_tts.mjs'
 
-const key = requireEnv('GEMINI_API_KEY')
 const VOICE = LOCKED_VOICE                 // Factory Law 6 — one voice per character, no CLI override
 
 // CTA guard — the on-screen bot username must EXIST in Telegram before it gets baked into frames.
@@ -34,9 +34,10 @@ async function assertBotExists(handle) {
   console.log(`[cta-guard] ${handle} exists: "${title}" ✓`)
 }
 const TTS_MODEL = 'gemini-2.5-flash-preview-tts'
-const EP = JSON.parse(readFileSync('ladder_ep01_token.json', 'utf8'))
+const EP = JSON.parse(readFileSync(process.argv[2] || 'ladder_ep01_token.json', 'utf8'))
 await assertBotExists(EP.bot) // CTA guard fires before any TTS/render spend
-const OUT = 'ladder_runs/ep01'
+const epSlug = (process.argv[2] || 'ep01').replace(/\.json$/, '').replace(/^.*[\\/]/, '')
+const OUT = `ladder_runs/${epSlug}`
 const FPS = 30, SR = 16000
 mkdirSync(OUT, { recursive: true })
 
@@ -54,49 +55,33 @@ const PAD = 0.28 // seconds of held silence after each VO line
 const V = EP.vo
 // CEO 2026-07-05: NO option may disappear before the viewer's think-time — all 4 chips live
 // through the countdown; the elimination beat comes AFTER 3-2-1 as the reveal warm-up.
-const BEATS = [
-  { state: 'hook',     text: V.hook },
+const BEATS = []
+if (EP.hasHook) {
+  BEATS.push({ state: 'hook', text: V.hook })
+}
+BEATS.push(
   { state: 'question', text: V.question },
-  { state: 'options',  text: 'A: a whole sentence. B: a chunk of text. C: a password. D: a payment coin.' },
+  { state: 'options',  text: EP.options.map(o => `${o.id}: ${o.text}`).join('. ') + '.' },
   { state: 'think',    text: V.think },
-  { state: 'micro',    text: "Not a password — that one's out." },
-  { state: 'reveal',   text: V.reveal },
-  { state: 'cta',      text: V.cta },
-]
+  { state: 'micro',    text: V.micro || `Not that one — ${(EP.options.find(o => o.id === EP.eliminateEarlyId) || {}).text || 'one'} is out.` },
+  { state: 'reveal',   text: V.reveal }
+)
+if (EP.isLast) {
+  BEATS.push({ state: 'cta', text: V.cta })
+} else {
+  BEATS.push({ state: 'bridge', text: V.bridge })
+}
 
 // ── TTS one line → wav, returns duration (seconds) ──
+// Credits-first (gemini_tts.mjs): free AI-Studio key, auto-fallback to Vertex-on-credits on 429.
 async function tts(text, outWav) {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${TTS_MODEL}:generateContent`
-  for (let attempt = 0; attempt < 6; attempt++) {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'x-goog-api-key': key, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: `${STYLE} "${text}"` }] }],
-        generationConfig: { responseModalities: ['AUDIO'], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: VOICE } } } },
-      }),
-    })
-    if (res.ok) {
-      const j = await res.json()
-      const b64 = j.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data
-      if (b64) {
-        const pcm = Buffer.from(b64, 'base64')
-        const sr = 24000, ch = 1, bps = 16, ba = ch * bps / 8, br = sr * ba
-        const h = Buffer.alloc(44)
-        h.write('RIFF', 0); h.writeUInt32LE(36 + pcm.length, 4); h.write('WAVE', 8)
-        h.write('fmt ', 12); h.writeUInt32LE(16, 16); h.writeUInt16LE(1, 20); h.writeUInt16LE(ch, 22)
-        h.writeUInt32LE(sr, 24); h.writeUInt32LE(br, 28); h.writeUInt16LE(ba, 32); h.writeUInt16LE(bps, 34)
-        h.write('data', 36); h.writeUInt32LE(pcm.length, 40)
-        writeFileSync(outWav, Buffer.concat([h, pcm]))
-        return pcm.length / br
-      }
-    } else {
-      console.error(`  tts retry ${attempt} HTTP ${res.status} ${(await res.text()).slice(0, 140)}`)
-      if (res.status !== 429 && res.status >= 400 && res.status < 500) break
-    }
-    await new Promise(r => setTimeout(r, 20000 * (attempt + 1)))
+  if (existsSync(outWav)) {
+    return dur(outWav)
   }
-  throw new Error(`TTS failed for state (${outWav})`)
+  const { pcm, via } = await synthPcm(`${STYLE} "${text}"`, VOICE)
+  if (via !== 'aistudio-free') console.log(`  tts via ${via}`)
+  writeFileSync(outWav, pcmToWav(pcm))
+  return pcm.length / (24000 * 2)
 }
 const dur = f => parseFloat(execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', f]).toString().trim())
 
@@ -105,6 +90,16 @@ const segs = []
 for (let i = 0; i < BEATS.length; i++) {
   const b = BEATS[i]
   const wav = `${OUT}/vo_${i}_${b.state}.wav`
+  
+  // Cache lookup: check if any file ending with _${b.state}.wav exists in OUT
+  if (!existsSync(wav)) {
+    const existing = readdirSync(OUT).find(f => f.endsWith(`_${b.state}.wav`))
+    if (existing && b.state !== 'bridge') {
+      console.log(`[cache] Reusing existing beat audio: copying ${existing} -> ${wav}`)
+      copyFileSync(`${OUT}/${existing}`, wav)
+    }
+  }
+
   const d = await tts(b.text, wav)
   segs.push({ ...b, wav, voDur: d })
   console.log(`beat ${i} [${b.state}] vo=${d.toFixed(2)}s`)
@@ -186,7 +181,7 @@ if (rendered !== frameCount) { console.error(`FATAL: rendered ${rendered} frames
 console.log(`frames rendered: ${rendered}/${frameCount} ✓`)
 
 // ── 6) assemble frames + voice → final mp4 ──
-const finalOut = `${OUT}/kapibara-ladder-ep01-token.mp4`
+const finalOut = `${OUT}/kapibara-ladder-${epSlug}.mp4`
 execFileSync('ffmpeg', [
   '-framerate', String(FPS), '-i', `${FRAMES}/f_%05d.jpg`,
   '-i', `${OUT}/voice.mp3`,

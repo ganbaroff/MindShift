@@ -1,7 +1,7 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
-import { requireEnv, LOCKED_VOICE } from './env.mjs'
-const key = requireEnv('GEMINI_API_KEY')
+import { LOCKED_VOICE } from './env.mjs'
+import { synthPcm, pcmToWav } from './gemini_tts.mjs'
 
 // Factory Law 6 — voice is the LOCKED_VOICE constant, not a CLI flag. No argv override.
 const VOICE = LOCKED_VOICE
@@ -69,40 +69,12 @@ if (process.env.DRY) {
   process.exit(0)
 }
 
+// Credits-first: free AI Studio key, auto-fallback to Vertex-on-credits on 429/quota (gemini_tts.mjs).
 async function tts(text, outWav) {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`
-  for (let attempt = 0; attempt < 6; attempt++) {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'x-goog-api-key': key, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text }] }],
-        generationConfig: { responseModalities: ['AUDIO'], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: VOICE } } } },
-      }),
-    })
-    if (res.ok) {
-      const j = await res.json()
-      const b64 = j.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data
-      if (b64) {
-        const pcm = Buffer.from(b64, 'base64')
-        const sr = 24000, ch = 1, bps = 16, ba = ch * bps / 8, br = sr * ba
-        const h = Buffer.alloc(44)
-        h.write('RIFF', 0); h.writeUInt32LE(36 + pcm.length, 4); h.write('WAVE', 8)
-        h.write('fmt ', 12); h.writeUInt32LE(16, 16); h.writeUInt16LE(1, 20); h.writeUInt16LE(ch, 22)
-        h.writeUInt32LE(sr, 24); h.writeUInt32LE(br, 28); h.writeUInt16LE(ba, 32); h.writeUInt16LE(bps, 34)
-        h.write('data', 36); h.writeUInt32LE(pcm.length, 40)
-        writeFileSync(outWav, Buffer.concat([h, pcm]))
-        return pcm.length / br
-      }
-    } else {
-      const body = (await res.text()).slice(0, 200)
-      console.error(`  retry ${attempt} HTTP ${res.status} ${body}`)
-      if (res.status !== 429 && res.status >= 400 && res.status < 500) break // auth/bad-request — retrying won't help
-    }
-    // free-tier 429 clears in tens of seconds, not 800ms — flat 800ms killed the 06-29..07-02 CI runs
-    await new Promise(r => setTimeout(r, 20000 * (attempt + 1)))
-  }
-  throw new Error('TTS failed after retries')
+  const { pcm, via } = await synthPcm(text, VOICE)
+  if (via !== 'aistudio-free') console.log(`  tts via ${via}`)
+  writeFileSync(outWav, pcmToWav(pcm))
+  return pcm.length / (24000 * 2)
 }
 
 function ffprobeDur(f) {
