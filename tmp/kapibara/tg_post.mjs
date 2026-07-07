@@ -32,7 +32,9 @@ ${bullets}
 
 💬 Попробуй бесплатный AI-тест навыков → ссылка в био
 
-#футбол #чемпионатмира #worldcup2026 #football #капибара`
+сделано ИИ
+
+#футбол #чемпионатмира #worldcup2026 #football #footballtok #капибара`
   } else {
     // English AI-news conveyor — mirrors buffer_publish.mjs caption + day-parity AR note.
     const hook = tj.lines?.[1] || "Three AI stories while the world was asleep"
