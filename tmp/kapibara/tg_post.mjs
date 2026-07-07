@@ -16,33 +16,51 @@ let caption
 if (existsSync('today.json')) {
   const tj = JSON.parse(readFileSync('today.json', 'utf8'))
   const isFootball = (tj.items || []).some(it => FOOTBALL_KEYS.has(it.key))
-  const hook = tj.lines?.[1] || (isFootball ? 'Что вы пропустили на чемпионате мира' : 'Три новости из мира ИИ')
   const news = (tj.items || []).slice(1, 4)
   const bullets = news.map(it => `${KEY_EMOJI[it.key] || (isFootball ? '⚽' : '📰')} ${it.title} — ${it.sub}`).join('\n')
-  const tags = isFootball ? '#футбол #чемпионатмира #worldcup2026 #football #footballtok #капибара' : '#ии #ai #новости #капибара #технологии'
-  caption = `${hook}
+  // Subtitle A/B day-parity must MATCH make-clip.mjs stage 5-6: odd UTC day-of-month = Arabic subs.
+  const arDay = new Date().getUTCDate() % 2 === 1
+  if (isFootball) {
+    // Football branch stays Russian (out of the EN conveyor; never-delete rule keeps it).
+    const hook = tj.lines?.[1] || 'Что вы пропустили на чемпионате мира'
+    caption = `${hook}
 
 За минуту:
 ${bullets}
 
 Капибара держит лапу на пульсе. До завтра 🐾
 
-💬 Попробуй бесплатный AI-тест навыков → https://t.me/volaurabot
+💬 Попробуй бесплатный AI-тест навыков → ссылка в био
 
-🇦🇿 субтитры на азербайджанском · сделано ИИ
+#футбол #чемпионатмира #worldcup2026 #football #капибара`
+  } else {
+    // English AI-news conveyor — mirrors buffer_publish.mjs caption + day-parity AR note.
+    const hook = tj.lines?.[1] || "Three AI stories while the world was asleep"
+    const tags = '#ai #ainews #capybara #tech #learnai' + (arDay ? ' #الذكاء_الاصطناعي #تقنية' : '')
+    caption = `${hook} 🦫📰
+
+In one minute:
+${bullets}
+
+The capybara stays calm. The capybara stays in the know 🐾
+
+💬 Try the free AI skills test → link in bio
+
+AI-made${arDay ? ' · 🇸🇦 Arabic subtitles' : ''}
 
 ${tags}`
+  }
 } else {
-  // static fallback — only if today.json absent
-  caption = `Три новости из мира ИИ — пока мир спал 🦫📰
+  // static fallback — only if today.json absent (EN, neutral CTA)
+  caption = `Three AI stories while the world was asleep 🦫📰
 
-Капибара держит лапу на пульсе. До завтра 🐾
+The capybara stays calm. The capybara stays in the know 🐾
 
-💬 Попробуй бесплатный AI-тест навыков → https://t.me/volaurabot
+💬 Try the free AI skills test → link in bio
 
-🇦🇿 субтитры на азербайджанском · сделано ИИ
+AI-made
 
-#ии #ai #новости #капибара #технологии`
+#ai #ainews #capybara #tech #learnai`
 }
 
 console.log('[tg_post] video:', videoPath)
