@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<style>
+  /* Integronix B2B Promo Explainer template — 1080x1920 vertical video format.
+     Design: IBM Plex Sans/Mono, navy #112239, steel #8B9BB4, teal #4A8FA3, white #FAFBFC.
+     Strict engineering aesthetics: NO rounded corners, NO emojis, utilitarian grids.
+     Deterministic setFrame(i) updates. */
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+  :root {
+    --navy:   #112239;
+    --steel:  #8B9BB4;
+    --grey:   #C5CDD6;
+    --white:  #FAFBFC;
+    --black:  #0A0E14;
+    --teal:   #4A8FA3;
+    --navyalt:#1A2B4A;
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html, body {
+    width: 1080px;
+    height: 1920px;
+    background: var(--navy);
+    color: var(--white);
+    font-family: 'IBM Plex Sans', sans-serif;
+    overflow: hidden;
+  }
+
+  #stage {
+    width: 1080px;
+    height: 1920px;
+    position: relative;
+    padding: 96px 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: linear-gradient(180deg, var(--navy) 0%, #0A1424 100%);
+  }
+
+  /* Grid overlay for utilitarian tech feel */
+  .grid-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.05;
+    background-image: 
+      linear-gradient(to right, var(--white) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--white) 1px, transparent 1px);
+    background-size: 80px 80px;
+  }
+
+  /* Header specs */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 2px solid rgba(255,255,255,0.1);
+    padding-bottom: 32px;
+    z-index: 2;
+  }
+
+  .header-logo {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .logo-mark {
+    width: 24px;
+    height: 48px;
+    fill: var(--teal);
+  }
+
+  .logo-text {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--white);
+  }
+
+  .header-meta {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 18px;
+    color: var(--steel);
+    text-align: right;
+    letter-spacing: 0.05em;
+  }
+
+  /* Content area containing slide content */
+  .content-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    z-index: 2;
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    opacity: 0;
+    transition: none; /* controlled deterministically by setFrame */
+  }
+
+  .slide.active {
+    opacity: 1;
+  }
+
+  .slide-eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 24px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    color: var(--teal);
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+
+  .slide-title {
+    font-size: 72px;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    line-height: 1.15;
+    color: var(--white);
+    margin-bottom: 40px;
+  }
+
+  .slide-body {
+    font-size: 38px;
+    line-height: 1.6;
+    color: var(--grey);
+    font-weight: 400;
+    max-width: 860px;
+  }
+
+  /* Flagship solution visual graphic (QR Code block) */
+  .solution-graphic {
+    margin-top: 56px;
+    background: var(--navyalt);
+    border: 2px solid rgba(255,255,255,0.08);
+    padding: 40px;
+    display: flex;
+    align-items: center;
+    gap: 40px;
+  }
+
+  .qr-box {
+    width: 160px;
+    height: 160px;
+    background: var(--white);
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .qr-tech-spec {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 18px;
+    color: var(--steel);
+    line-height: 1.6;
+  }
+
+  .qr-tech-spec b {
+    color: var(--teal);
+  }
+
+  /* Footer */
+  .footer {
+    border-top: 2px solid rgba(255,255,255,0.1);
+    padding-top: 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 18px;
+    color: var(--steel);
+    z-index: 2;
+  }
+
+  .footer-left {
+    letter-spacing: 0.05em;
+  }
+
+  .footer-right {
+    text-align: right;
+    color: var(--teal);
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* Subtitles backing for narration audio */
+  .subtitles-bar {
+    position: absolute;
+    bottom: 180px;
+    left: 80px;
+    right: 80px;
+    z-index: 3;
+    background: rgba(10, 14, 20, 0.85);
+    border-left: 4px solid var(--teal);
+    padding: 24px 32px;
+    font-size: 32px;
+    line-height: 1.45;
+    color: var(--white);
+  }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="grid-overlay"></div>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-logo">
+      <svg class="logo-mark" viewBox="0 0 20 48" xmlns="http://www.w3.org/2000/svg">
+        <path d="M 0 0 H 20 V 6 H 14 V 42 H 20 V 48 H 0 V 42 H 6 V 6 H 0 Z" />
+      </svg>
+      <div class="logo-text">Integronix</div>
+    </div>
+    <div class="header-meta" id="headerMeta">SYS_STATUS: ACTIVE<br>LOC: BAKU, AZ</div>
+  </div>
+
+  <!-- Dynamic Content area -->
+  <div class="content-area" id="contentArea"></div>
+
+  <!-- Subtitle Narration bar -->
+  <div class="subtitles-bar" id="subtitlesBar"></div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div class="footer-left">INTEGRONIX MMC © 2026</div>
+    <div class="footer-right">ENGINEERED RELIABILITY</div>
+  </div>
+</div>
+
+<script>
+  let data = null;
+
+  window.loadData = function(briefData) {
+    data = briefData;
+    const contentArea = document.getElementById('contentArea');
+    contentArea.innerHTML = '';
+
+    data.beats.forEach((b, idx) => {
+      const slide = document.createElement('div');
+      slide.className = 'slide';
+      slide.id = `slide-${idx}`;
+
+      let html = `
+        <div class="slide-eyebrow">${b.label}</div>
+        <div class="slide-title">${b.heading}</div>
+        <div class="slide-body">${b.body}</div>
+      `;
+
+      // Special graphics for Slide 03 (Solution/Object Passport)
+      if (idx === 2) {
+        html += `
+          <div class="solution-graphic">
+            <div class="qr-box">
+              <svg width="128" height="128" viewBox="0 0 29 29" fill="#112239" xmlns="http://www.w3.org/2000/svg">
+                <!-- Simple abstract QR Code path -->
+                <path d="M0 0h9v9H0zm1 1h7v7H1zm1 1h5v5H2zm11-2h3v1h-3zm3 1h2v2h-2zm-3 2h1v1h-1zm1 1h2v1h-2zm3 0h1v1h-1zm-4 1h1v1h-1zm2 0h2v1h-2zm-12 5h9v9H0zm1 1h7v7H1zm1 1h5v5H2zm18-7h9v9h-9zm1 1h7v7h-7zm1 1h5v5H2" />
+              </svg>
+            </div>
+            <div class="qr-tech-spec">
+              <b>ОБОРУДОВАНИЕ:</b> SEC_SYS_DEV<br>
+              <b>ПАСПОРТ:</b> ACTIVE (#${data.brief_id})<br>
+              <b>СТАТУС:</b> VERIFIED_RELIABILITY
+            </div>
+          </div>
+        </div>
+        `;
+      }
+
+      slide.innerHTML = html;
+      contentArea.appendChild(slide);
+    });
+  };
+
+  window.setFrame = function(frameIndex) {
+    if (!data) return;
+
+    // Total duration: 5 beats * 8 seconds = 40 seconds = 1200 frames @ 30fps
+    const framesPerSlide = 240;
+    const slideIdx = Math.min(Math.floor(frameIndex / framesPerSlide), data.n_items - 1);
+    
+    // Smooth cross-fade calculation
+    // Fade duration = 15 frames (0.5s)
+    const fadeFrames = 15;
+    const localFrame = frameIndex % framesPerSlide;
+
+    data.beats.forEach((b, idx) => {
+      const slide = document.getElementById(`slide-${idx}`);
+      if (!slide) return;
+
+      if (idx === slideIdx) {
+        // Active slide
+        if (localFrame < fadeFrames && slideIdx > 0) {
+          // Fade in
+          slide.style.opacity = (localFrame / fadeFrames).toFixed(2);
+        } else {
+          slide.style.opacity = '1';
+        }
+        slide.style.display = 'flex';
+      } else if (idx === slideIdx - 1 && localFrame < fadeFrames) {
+        // Fade out previous slide
+        slide.style.opacity = (1 - (localFrame / fadeFrames)).toFixed(2);
+        slide.style.display = 'flex';
+      } else {
+        slide.style.opacity = '0';
+        slide.style.display = 'none';
+      }
+    });
+
+    // Update subtitles matching voiceover of current slide
+    const currentBeat = data.beats[slideIdx];
+    document.getElementById('subtitlesBar').innerText = currentBeat.voiceover || currentBeat.body;
+    
+    // Update dynamic header tech stats
+    const uptime = (99.987 + (frameIndex / 50000)).toFixed(3);
+    document.getElementById('headerMeta').innerHTML = `SYS_STATUS: ACTIVE<br>UPTIME: ${uptime}%<br>FRAME: ${String(frameIndex).padStart(4, '0')}`;
+  };
+</script>
+</body>
+</html>

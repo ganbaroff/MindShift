@@ -1,0 +1,7 @@
+# Ignore video and audio render artifacts for Integronix
+runs/
+*.wav
+*.mp3
+*.mp4
+*.hash
+filelist_*.txt
