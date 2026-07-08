@@ -51,13 +51,17 @@ async function run() {
       brief.beats[i].duration = 8.0;
       totalDur += 8.0;
     } else {
-      console.log(`Synthesizing beat ${i} via Gemini TTS...`);
-      // Import the active TTS library from Kapibara
-      const { synthPcm, pcmToWav } = await import('../kapibara/gemini_tts.mjs');
-      const text = beat.voiceover || beat.body;
-      const { pcm: pcmBytes } = await synthPcm(text, brief.voice, brief.style);
-      const wavBytes = pcmToWav(pcmBytes);
-      writeFileSync(wavPath, Buffer.from(wavBytes));
+      if (!existsSync(wavPath)) {
+        console.log(`Synthesizing beat ${i} via Gemini TTS...`);
+        // Import the active TTS library from Kapibara
+        const { synthPcm, pcmToWav } = await import('../kapibara/gemini_tts.mjs');
+        const text = beat.voiceover || beat.body;
+        const { pcm: pcmBytes } = await synthPcm(text, brief.voice, brief.style);
+        const wavBytes = pcmToWav(pcmBytes);
+        writeFileSync(wavPath, Buffer.from(wavBytes));
+      } else {
+        console.log(`Reusing cached audio for beat ${i}: ${wavPath}`);
+      }
 
       const durStr = execFileSync('ffprobe', [
         '-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', wavPath
