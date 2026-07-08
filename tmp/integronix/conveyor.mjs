@@ -34,6 +34,7 @@ async function run() {
   // Step 2: Voice Generation (TTS)
   console.log('Synthesizing voiceovers...');
   const voiceFiles = [];
+  let totalDur = 0;
   
   for (let i = 0; i < brief.beats.length; i++) {
     const beat = brief.beats[i];
@@ -43,10 +44,12 @@ async function run() {
       console.log(`[conveyor:mock] Mocking audio for beat ${i}...`);
       if (!existsSync(wavPath)) {
         execFileSync('ffmpeg', [
-          '-y', '-f', 'lavfi', '-i', 'sine=frequency=1000:duration=1',
+          '-y', '-f', 'lavfi', '-i', 'sine=frequency=1000:duration=8',
           '-ar', '16000', '-ac', '1', wavPath
         ], { stdio: 'ignore' });
       }
+      brief.beats[i].duration = 8.0;
+      totalDur += 8.0;
     } else {
       console.log(`Synthesizing beat ${i} via Gemini TTS...`);
       // Import the active TTS library from Kapibara
@@ -55,9 +58,19 @@ async function run() {
       const { pcm: pcmBytes } = await synthPcm(text, brief.voice, brief.style);
       const wavBytes = pcmToWav(pcmBytes);
       writeFileSync(wavPath, Buffer.from(wavBytes));
+
+      const durStr = execFileSync('ffprobe', [
+        '-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', wavPath
+      ]).toString().trim();
+      const dur = parseFloat(durStr);
+      brief.beats[i].duration = dur;
+      totalDur += dur;
     }
     voiceFiles.push(wavPath);
   }
+
+  // Write updated brief with durations
+  writeFileSync(briefPath, JSON.stringify(brief, null, 2), 'utf8');
 
   // Combine voiceovers into a single soundtrack
   const voiceMp3 = `${outDir}/voice.mp3`;

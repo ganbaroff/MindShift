@@ -295,31 +295,43 @@
   window.setFrame = function(frameIndex) {
     if (!data) return;
 
-    // Total duration: 5 beats * 8 seconds = 40 seconds = 1200 frames @ 30fps
-    const framesPerSlide = 240;
-    const slideIdx = Math.min(Math.floor(frameIndex / framesPerSlide), data.n_items - 1);
-    
+    const t = frameIndex / 30; // current time in seconds
+
+    // Find active slide by cumulative duration
+    let slideIdx = 0;
+    let accumulatedTime = 0;
+    for (let i = 0; i < data.beats.length; i++) {
+      const dur = data.beats[i].duration || 8.0;
+      if (t >= accumulatedTime && t < accumulatedTime + dur) {
+        slideIdx = i;
+        break;
+      }
+      accumulatedTime += dur;
+      if (i === data.beats.length - 1) {
+        slideIdx = i; // fallback for last frame
+      }
+    }
+
+    const currentDur = data.beats[slideIdx].duration || 8.0;
+    const localTime = t - (accumulatedTime - currentDur);
+
     // Smooth cross-fade calculation
-    // Fade duration = 15 frames (0.5s)
-    const fadeFrames = 15;
-    const localFrame = frameIndex % framesPerSlide;
+    // Fade duration = 0.5 seconds
+    const fadeDuration = 0.5;
 
     data.beats.forEach((b, idx) => {
       const slide = document.getElementById(`slide-${idx}`);
       if (!slide) return;
 
       if (idx === slideIdx) {
-        // Active slide
-        if (localFrame < fadeFrames && slideIdx > 0) {
-          // Fade in
-          slide.style.opacity = (localFrame / fadeFrames).toFixed(2);
+        if (localTime < fadeDuration && slideIdx > 0) {
+          slide.style.opacity = (localTime / fadeDuration).toFixed(2);
         } else {
           slide.style.opacity = '1';
         }
         slide.style.display = 'flex';
-      } else if (idx === slideIdx - 1 && localFrame < fadeFrames) {
-        // Fade out previous slide
-        slide.style.opacity = (1 - (localFrame / fadeFrames)).toFixed(2);
+      } else if (idx === slideIdx - 1 && localTime < fadeDuration) {
+        slide.style.opacity = (1 - (localTime / fadeDuration)).toFixed(2);
         slide.style.display = 'flex';
       } else {
         slide.style.opacity = '0';

@@ -15,10 +15,11 @@ async function run() {
   console.log(`Starting Integronix frame render for brief: ${runId}`);
   
   if (process.env.PULT_MOCK === '1') {
-    console.log('[render:mock] Mocking frame output. Creating dummy MP4 video...');
+    const totalDuration = brief.beats.reduce((acc, b) => acc + (b.duration || 8.0), 0);
+    console.log(`[render:mock] Mocking frame output. Creating dummy MP4 video of ${totalDuration}s...`);
     const dummyMp4 = `${outDir}/integronix-${runId}-showcase.mp4`;
     execFileSync('ffmpeg', [
-      '-y', '-f', 'lavfi', '-i', 'color=c=0x112239:s=1080x1920:d=40',
+      '-y', '-f', 'lavfi', '-i', `color=c=0x112239:s=1080x1920:d=${totalDuration}`,
       '-pix_fmt', 'yuv420p', dummyMp4
     ], { stdio: 'ignore' });
     console.log(`Mock video created: ${dummyMp4}`);
@@ -27,6 +28,7 @@ async function run() {
 
   const browser = await chromium.launch();
   const page = await browser.newPage();
+  await page.setViewportSize({ width: 1080, height: 1920 });
   
   const htmlPath = join(process.cwd(), 'integronix_showcase.html');
   await page.goto(`file://${htmlPath}`);
@@ -34,8 +36,9 @@ async function run() {
   // Load data
   await page.evaluate((d) => window.loadData(d), brief);
   
-  const totalFrames = 1200; // 40 seconds @ 30fps
-  console.log(`Rendering ${totalFrames} frames...`);
+  const totalDuration = brief.beats.reduce((acc, b) => acc + (b.duration || 8.0), 0);
+  const totalFrames = Math.ceil(totalDuration * 30);
+  console.log(`Rendering ${totalFrames} frames for total duration of ${totalDuration}s...`);
   
   const frameDir = `${outDir}/frames`;
   mkdirSync(frameDir, { recursive: true });
