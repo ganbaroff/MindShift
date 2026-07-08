@@ -52,8 +52,8 @@ async function run() {
       // Import the active TTS library from Kapibara
       const { synthPcm, pcmToWav } = await import('../kapibara/gemini_tts.mjs');
       const text = beat.voiceover || beat.body;
-      const pcmBytes = await synthPcm(text, brief.voice, brief.style);
-      const wavBytes = pcmToWav(pcmBytes, 16000);
+      const { pcm: pcmBytes } = await synthPcm(text, brief.voice, brief.style);
+      const wavBytes = pcmToWav(pcmBytes);
       writeFileSync(wavPath, Buffer.from(wavBytes));
     }
     voiceFiles.push(wavPath);
