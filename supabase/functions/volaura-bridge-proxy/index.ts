@@ -33,7 +33,11 @@ const VALID_ACTIONS = ['character_event', 'fetch_state', 'fetch_crystals'] as co
 type Action = typeof VALID_ACTIONS[number]
 
 const VALID_EVENT_TYPES = [
-  'xp_earned', 'buff_applied', 'vital_logged', 'stat_changed',
+  // crystal_earned added 2026-07-09: sendCrystalEarned() emitted it but this allowlist
+  // omitted it, so the proxy 400-rejected every crystal event and proxyCall() swallowed the
+  // null, so MindShift crystals never reached VOLAURA. VOLAURA /character/events accepts it
+  // (apps/api/app/schemas/character.py). Keep in sync with sender + VOLAURA schema.
+  'xp_earned', 'buff_applied', 'vital_logged', 'stat_changed', 'crystal_earned',
 ] as const
 
 // -- In-memory JWT cache -------------------------------------------------------
