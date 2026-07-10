@@ -1,0 +1,60 @@
+{
+  "format": "kapibara-ladder",
+  "rung": 2,
+  "startLit": 1,
+  "hasHook": false,
+  "isLast": false,
+  "concept": "at-its-core--ho",
+  "keyword": "LANGUAGE",
+  "lang": "en",
+  "durationSec": 24,
+  "bot": "@mindfocus_mebot",
+  "series": {
+    "top": "Kapibara Ladder",
+    "bottom": "AI · ONE RUNG A DAY"
+  },
+  "teaser": "rung 2 of 5 · this week's ladder",
+  "question": "At its core, how does a language model write its reply?",
+  "options": [
+    {
+      "id": "A",
+      "text": "By copying the closest answer from a database"
+    },
+    {
+      "id": "B",
+      "text": "By searching the live web for text"
+    },
+    {
+      "id": "C",
+      "text": "By predicting one likely next token at a time"
+    },
+    {
+      "id": "D",
+      "text": "By following a fixed script written by humans"
+    }
+  ],
+  "correctId": "C",
+  "eliminateEarlyId": "D",
+  "teachLine": "It builds a reply one token at a time, each time guessing what word-piece most plausibly comes next. String enough good guesses together and you get a sentence.",
+  "callbackFact": "A language model generates text autoregressively, predicting the next token step by step, rather than retrieving stored answers or running a fixed script.",
+  "musicTag": "original rising quiz chime + soft lo-fi bed, 90-100 BPM, no Millionaire heartbeat",
+  "vo": {
+    "hook": "",
+    "question": "Rung 2. At its core, how does a language model write its reply?",
+    "think": "Three, two, one, lock it in.",
+    "micro": "Not By following a fixed script written by humans — that one's out.",
+    "reveal": "It's C — By predicting one likely next token at a time. It builds a reply one token at a time, each time guessing what word-piece most plausibly comes next. String enough good guesses together and you get a sentence.",
+    "bridge": "Ready for rung 3? Let's move up.",
+    "cta": ""
+  },
+  "palette": {
+    "bg": "#0F1117",
+    "teal": "#4ECDC4",
+    "indigo": "#7B72FF",
+    "gold": "#F59E0B",
+    "surface": "#252840",
+    "text": "#E8E8F0",
+    "muted": "#8B8BA7"
+  },
+  "disclosure": "AI-made · Kapibara"
+}

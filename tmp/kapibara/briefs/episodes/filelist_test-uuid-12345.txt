@@ -1,0 +1,5 @@
+file '../../ladder_runs/ladder_q1_test-uuid-12345/kapibara-ladder-ladder_q1_test-uuid-12345.mp4'
+file '../../ladder_runs/ladder_q2_test-uuid-12345/kapibara-ladder-ladder_q2_test-uuid-12345.mp4'
+file '../../ladder_runs/ladder_q3_test-uuid-12345/kapibara-ladder-ladder_q3_test-uuid-12345.mp4'
+file '../../ladder_runs/ladder_q4_test-uuid-12345/kapibara-ladder-ladder_q4_test-uuid-12345.mp4'
+file '../../ladder_runs/ladder_q5_test-uuid-12345/kapibara-ladder-ladder_q5_test-uuid-12345.mp4'

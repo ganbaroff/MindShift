@@ -1,0 +1,60 @@
+{
+  "format": "kapibara-ladder",
+  "rung": 4,
+  "startLit": 3,
+  "hasHook": false,
+  "isLast": false,
+  "concept": "why-might-a-cha",
+  "keyword": "CHATBOT",
+  "lang": "en",
+  "durationSec": 24,
+  "bot": "@mindfocus_mebot",
+  "series": {
+    "top": "Kapibara Ladder",
+    "bottom": "AI · ONE RUNG A DAY"
+  },
+  "teaser": "rung 4 of 5 · this week's ladder",
+  "question": "Why might a chatbot state a made-up fact with full confidence?",
+  "options": [
+    {
+      "id": "A",
+      "text": "It secretly prefers lying to users"
+    },
+    {
+      "id": "B",
+      "text": "It predicts plausible-sounding words, not verified truth"
+    },
+    {
+      "id": "C",
+      "text": "It ran out of memory mid-sentence"
+    },
+    {
+      "id": "D",
+      "text": "It only speaks when 100% certain"
+    }
+  ],
+  "correctId": "B",
+  "eliminateEarlyId": "C",
+  "teachLine": "The model picks words that fit the pattern of a good answer, and a smooth-sounding wrong answer can fit that pattern too. Confidence in tone isn't the same as being right.",
+  "callbackFact": "LLMs can produce fluent, confident-sounding statements that are factually false ('hallucinations') because they optimize for plausible next tokens, not verified accuracy.",
+  "musicTag": "original rising quiz chime + soft lo-fi bed, 90-100 BPM, no Millionaire heartbeat",
+  "vo": {
+    "hook": "",
+    "question": "Rung 4. Why might a chatbot state a made-up fact with full confidence?",
+    "think": "Three, two, one, lock it in.",
+    "micro": "Not It ran out of memory mid-sentence — that one's out.",
+    "reveal": "It's B — It predicts plausible-sounding words, not verified truth. The model picks words that fit the pattern of a good answer, and a smooth-sounding wrong answer can fit that pattern too. Confidence in tone isn't the same as being right.",
+    "bridge": "Ready for rung 5? Let's move up.",
+    "cta": ""
+  },
+  "palette": {
+    "bg": "#0F1117",
+    "teal": "#4ECDC4",
+    "indigo": "#7B72FF",
+    "gold": "#F59E0B",
+    "surface": "#252840",
+    "text": "#E8E8F0",
+    "muted": "#8B8BA7"
+  },
+  "disclosure": "AI-made · Kapibara"
+}

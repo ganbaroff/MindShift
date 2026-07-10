@@ -1,0 +1,21 @@
+{
+  "brief_id": "test-uuid-12345",
+  "created_by": "ceo-telegram",
+  "format": "ladder",
+  "duration_target_sec": 60,
+  "duration_tolerance_sec": 8,
+  "voice": "Algieba",
+  "style": "Read aloud in one warm, energetic, charismatic quiz-host voice — clear, upbeat, and lively, never monotone; keep the same speaker throughout and land the playful lines with light comedic timing:",
+  "language": "en",
+  "topic": "llm-basics",
+  "source_material": "bank:llm-basics",
+  "cta": "subscribe",
+  "n_items": 5,
+  "state": "draft",
+  "approvals": {
+    "brief": null,
+    "script": null,
+    "voice_sample": null,
+    "final": null
+  }
+}

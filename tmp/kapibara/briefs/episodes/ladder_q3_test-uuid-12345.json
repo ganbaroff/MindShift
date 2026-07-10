@@ -1,0 +1,60 @@
+{
+  "format": "kapibara-ladder",
+  "rung": 3,
+  "startLit": 2,
+  "hasHook": false,
+  "isLast": false,
+  "concept": "what-is-a-model",
+  "keyword": "MODELS",
+  "lang": "en",
+  "durationSec": 24,
+  "bot": "@mindfocus_mebot",
+  "series": {
+    "top": "Kapibara Ladder",
+    "bottom": "AI · ONE RUNG A DAY"
+  },
+  "teaser": "rung 3 of 5 · this week's ladder",
+  "question": "What is a model's context window?",
+  "options": [
+    {
+      "id": "A",
+      "text": "How fast it can type a reply"
+    },
+    {
+      "id": "B",
+      "text": "How much text it can consider at once"
+    },
+    {
+      "id": "C",
+      "text": "How large its screen display is"
+    },
+    {
+      "id": "D",
+      "text": "How many languages it knows"
+    }
+  ],
+  "correctId": "B",
+  "eliminateEarlyId": "C",
+  "teachLine": "The context window is the amount of text the model can hold in view while answering — your prompt plus its reply. Beyond that limit, earlier words fall out of sight.",
+  "callbackFact": "A context window is the maximum amount of text (tokens) a model can attend to at one time when generating a response.",
+  "musicTag": "original rising quiz chime + soft lo-fi bed, 90-100 BPM, no Millionaire heartbeat",
+  "vo": {
+    "hook": "",
+    "question": "Rung 3. What is a model's context window?",
+    "think": "Three, two, one, lock it in.",
+    "micro": "Not How large its screen display is — that one's out.",
+    "reveal": "It's B — How much text it can consider at once. The context window is the amount of text the model can hold in view while answering — your prompt plus its reply. Beyond that limit, earlier words fall out of sight.",
+    "bridge": "Ready for rung 4? Let's move up.",
+    "cta": ""
+  },
+  "palette": {
+    "bg": "#0F1117",
+    "teal": "#4ECDC4",
+    "indigo": "#7B72FF",
+    "gold": "#F59E0B",
+    "surface": "#252840",
+    "text": "#E8E8F0",
+    "muted": "#8B8BA7"
+  },
+  "disclosure": "AI-made · Kapibara"
+}
