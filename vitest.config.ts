@@ -16,6 +16,10 @@ export default defineConfig({
       'e2e/**',
       'node_modules/**',
       '.claude/worktrees/**',
+      // Content-factory lodger (tmp/kapibara etc.) has its own standalone test style
+      // (process.exit smoke scripts) — it is NOT part of the PWA unit suite. Broke main
+      // CI at 4209ec0 when validate_brief.test.mjs rode in with the Пульт merge.
+      'tmp/**',
     ],
     coverage: {
       include: ['src/shared/lib/**', 'src/store/**'],
