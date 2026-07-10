@@ -14,15 +14,17 @@
     "rules": ["site moves, not the device", "no tech jargon in proof (business metrics only)", "no dead posters", "one CTA: Bizə yazın — sorğu göndərin"]
   },
   "stations": [
-    { "id": "site",     "producer": "webdemo/flagship/index.html", "watcher": "frame_check.mjs", "needs": [] },
-    { "id": "record",   "producer": "prep_assets.mjs",  "watcher": "frame_check.mjs",  "needs": ["site"] },
-    { "id": "voice",    "producer": "el_voice.mjs",     "watcher": "send_ear_sample.mjs", "human_gate": "ceo_ear", "needs": [] },
-    { "id": "mix",      "producer": "mix_music.mjs",    "watcher": "gates.mjs",        "needs": ["voice"] },
-    { "id": "device",   "producer": "record_3d.mjs",    "watcher": "frame_check.mjs",  "needs": ["record"] },
-    { "id": "assemble", "producer": "build_reel7.mjs",  "watcher": "gates.mjs",        "needs": ["device", "mix"] },
-    { "id": "critic",   "producer": "critic_agency.mjs","watcher": "critic_agency.mjs","needs": ["assemble"] },
-    { "id": "deliver",  "producer": "tg_send.mjs",      "watcher": "tg_send.mjs",      "human_gate": "ceo_ok", "needs": ["critic"] }
+    { "id": "site",       "producer": "webdemo/flagship/index.html", "watcher": "frame_check.mjs", "needs": [] },
+    { "id": "record",     "producer": "prep_assets.mjs", "args": [], "produces": "recm/marks.json", "watcher": "frame_check.mjs", "needs": ["site"] },
+    { "id": "record_enc", "producer": "encode_rec.mjs", "args": ["recm", "demo3.mp4"], "produces": "demo3.mp4", "watcher": "gates.mjs", "needs": ["record"] },
+    { "id": "voice",      "producer": "el_voice.mjs", "args": [], "produces": "agency_voice.mp3", "watcher": "send_ear_sample.mjs", "human_gate": "ceo_ear", "needs": [] },
+    { "id": "mix",        "producer": "mix_music.mjs", "args": [], "produces": "agency_mix.mp3", "watcher": "gates.mjs", "needs": ["voice"] },
+    { "id": "device",     "producer": "record_3d.mjs", "args": [], "produces": "rec3", "watcher": "frame_check.mjs", "needs": ["record_enc"] },
+    { "id": "device_enc", "producer": "encode_rec.mjs", "args": ["rec3", "framed3d.mp4"], "produces": "framed3d.mp4", "watcher": "gates.mjs", "needs": ["device"] },
+    { "id": "assemble",   "producer": "build_reel7.mjs", "args": [], "produces": "reel7.mp4", "watcher": "gates.mjs", "needs": ["device_enc", "mix"] },
+    { "id": "critic",     "producer": "gate_tally.mjs", "args": ["reel7.mp4", "--recipe=recipes/agency.recipe.json", "--subs=reel7.ass"], "watcher": "gate_tally.mjs", "needs": ["assemble"] },
+    { "id": "deliver",    "producer": "tg_send.mjs", "args": ["reel7.mp4", "Integronix promo — conductor live run"], "watcher": "tg_send.mjs", "human_gate": "ceo_ok", "needs": ["critic"] }
   ],
   "human_gates": ["ceo_ear", "ceo_ok"],
-  "critic_bar": { "rule": "no evidenced <=2 AND mean >= 3.5", "escalate_band": [3.3, 3.7], "ceo_directed_exceptions": ["example_variety (one-site canon)", "motion_aliveness device-static (site moves, not device)"] }
+  "critic_bar": { "rule": "no evidenced <=2 AND mean >= 3.5", "escalate_band": [3.3, 3.7], "critic_script": "critic_agency.mjs", "ceo_directed_exceptions": ["example_variety (one-site canon)", "motion_aliveness device-static (site moves, not device)"] }
 }

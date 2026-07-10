@@ -14,6 +14,7 @@ let r
 try { r = JSON.parse(readFileSync(file, 'utf8')) } catch (e) { console.error(`[recipe] unparseable JSON: ${e.message}`); process.exit(1) }
 
 for (const f of ['name', 'version', 'format', 'constants', 'stations', 'human_gates']) if (!(f in r)) errs.push(`missing field: ${f}`)
+if ('stations' in r && !Array.isArray(r.stations)) errs.push('stations is not an array')
 if (Array.isArray(r.stations)) {
   const seen = new Set()
   for (const s of r.stations) {

@@ -168,3 +168,12 @@
 4. Steps: 1) reaper-блок в run() сразу после loadBrief 2) PULT_MOCK-тест stale→reset 3) PULT_MOCK-тест fresh→skip 4) node --check + lint + commit.
 5. DoD: WHEN state='delivering' И updated_at старше TTL (30 мин, env PULT_LEASE_TTL_MIN) SHALL reset→'qa_pass' + rework_reason (receipt: state в mock_db.json флипнулся + лог [reaper]); WHEN lease свежий SHALL пропустить без записи (state остался 'delivering'); node --check exit 0; lint_credit_gate PASS.
 6. Rollback: git revert <sha> (один коммит, чистое добавление блока).
+- 2026-07-10 ~12:00 watchdog: kapibara-daily GREEN (schedule 07:56Z, first run on merged metered engine 6129352) — no action; pult-poller drained as safety.
+
+## SPEC conductor-live+gate_tally (P2) — 2026-07-10
+1. Outcome: conductor исполняет станции рецепта ВЖИВУЮ (skip-if-artifact-exists, park на человеческих гейтах, resume по --approve); gate_tally = трёхслойный гейт (детерм. вето 0 токенов → бар → эскалация 3 сэмплов в полосе 3.3-3.7), exit 0/1 + баллот в studio_votes.jsonl.
+2. Scope: IN: conductor.mjs v2, gate_tally.mjs, recipes +args/produces, тесты-receipts. OUT: Supabase studio_* таблицы (CEO-гейт), input-hash идемпотентность (P3), провайдер-разнообразие судей (P4), notify по умолчанию (флаг --notify).
+3. Constraints: Factory Law 10 (код считает, не модель; вердикты НЕ кэшировать); Law 1 never-red = безусловное вето; кредиты: эскалация только в полосе; 429/timeout = PARK, не REWORK.
+4. Steps: gate_tally → 3 локальных теста (red-вето на lavfi-клипе, shame-вето, reel7-скан чистый) → conductor v2 → mock-регрессия → live-прогон agency (артефакты есть → skip → критик 1 вызов → park deliver) → ревью-воркфлоу → commit+push+CI.
+5. DoD: WHEN клип содержит ≥2% irritating-red пикселей SHALL exit 1 без LLM-вызова; WHEN текст содержит shame-фразу SHALL exit 1; WHEN mean вне полосы SHALL решить одним сэмплом; WHEN станция имеет produces и файл существует SHALL skip; WHEN human_gate в live SHALL park (state в studio_jobs.jsonl) и exit 0; mock-регрессия 6/6+8/8 остаётся зелёной; pult-e2e на CI зелёный после пуша.
+6. Rollback: git revert (новые файлы + один правленый conductor.mjs).

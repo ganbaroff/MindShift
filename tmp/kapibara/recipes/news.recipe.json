@@ -13,13 +13,14 @@
     "cadence": "1/day"
   },
   "stations": [
-    { "id": "brief",    "producer": "brief_store.mjs",   "watcher": "validate_brief.mjs", "needs": [] },
-    { "id": "research", "producer": "gen_news.mjs",      "watcher": "validate_brief.mjs", "needs": ["brief"] },
-    { "id": "voice",    "producer": "gen_voice.mjs",     "watcher": "send_ear_sample.mjs", "human_gate": "ceo_ear", "needs": ["research"] },
-    { "id": "assemble", "producer": "make-clip.mjs",     "watcher": "gates.mjs",          "needs": ["voice"] },
-    { "id": "critic",   "producer": "content_critic.mjs","watcher": "content_critic.mjs", "needs": ["assemble"] },
-    { "id": "publish",  "producer": "tg_post.mjs",       "watcher": "make-clip.mjs",      "human_gate": "ceo_ok", "needs": ["critic"] }
+    { "id": "brief",    "producer": "brief_store.mjs",   "produces": "briefs/test-ladder.json", "watcher": "validate_brief.mjs", "needs": [] },
+    { "id": "research", "producer": "gen_news.mjs",      "args": [], "produces": "today.json", "watcher": "validate_brief.mjs", "needs": ["brief"] },
+    { "id": "voice",    "producer": "gen_voice.mjs",     "args": [], "produces": "voice.mp3", "watcher": "send_ear_sample.mjs", "human_gate": "ceo_ear", "needs": ["research"] },
+    { "id": "assemble", "producer": "make-clip.mjs",     "args": ["--skip-news", "--no-preview", "--no-publish"], "produces": "latest_output.json", "watcher": "gates.mjs", "needs": ["voice"] },
+    { "id": "critic",   "producer": "gate_tally.mjs",    "args": ["latest_output.json", "--recipe=recipes/news.recipe.json"], "watcher": "gate_tally.mjs", "needs": ["assemble"] },
+    { "id": "publish",  "producer": "tg_post.mjs",       "args": [], "watcher": "make-clip.mjs", "human_gate": "ceo_ok", "needs": ["critic"] }
   ],
+  "notes": "Live-exec caveats (panel wf_4f13ffa5): the SHIPPING news path stays cron→make-clip (Law 0); this recipe is conductor-walkable with make-clip in dry-run flags (no publish before ceo_ok). brief station artifact-skips — briefs come from Пульт /brief, not the conductor.",
   "human_gates": ["ceo_ear", "ceo_ok"],
-  "critic_bar": { "rule": "no evidenced <=2 AND mean >= 3.5", "escalate_band": [3.3, 3.7] }
+  "critic_bar": { "rule": "no evidenced <=2 AND mean >= 3.5", "escalate_band": [3.3, 3.7], "critic_script": "content_critic.mjs" }
 }

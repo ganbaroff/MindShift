@@ -6,7 +6,10 @@ import { readFileSync, statSync } from 'node:fs'
 import { requireEnv } from './env.mjs'
 const key = requireEnv('GEMINI_API_KEY')
 const MODEL = process.env.CRITIC_MODEL || 'gemini-3.5-flash'
-const file = process.argv[2] || 'ladder_runs/ep01/kapibara-ladder-ep01-token.mp4'
+// No default clip: a wiring miss must fail LOUD, not silently judge (and pay Gemini quota for) a
+// stale file — review panel wf_4f13ffa5 caught the old ep01 fallback doing exactly that.
+const file = process.argv[2]
+if (!file) { console.error('usage: node content_critic.mjs <video.mp4>'); process.exit(1) }
 const bytes = readFileSync(file)
 const size = statSync(file).size
 const base = 'https://generativelanguage.googleapis.com'
