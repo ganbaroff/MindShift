@@ -1,0 +1,25 @@
+{
+  "name": "news",
+  "version": 1,
+  "format": "kapibara-news-daily",
+  "aspect": "9:16",
+  "description": "Daily AZ football-news clip (Factory Law 0: THE shipping engine, cron kapibara-daily.yml -> make-clip.mjs)",
+  "constants": {
+    "wpm": 135,
+    "voice": { "engine": "gemini", "locked_voice": "Algieba", "character": "capybara", "tts_model": "gemini-2.5-flash-preview-tts" },
+    "audio_norm": "loudnorm=I=-16:TP=-1.5:LRA=11, 24kHz, 192k",
+    "duration_band_sec": [28, 35],
+    "palette": { "teal": "#4ECDC4", "indigo": "#7B72FF", "gold": "#F59E0B", "surface": "#1E2136", "never": "red" },
+    "cadence": "1/day"
+  },
+  "stations": [
+    { "id": "brief",    "producer": "brief_store.mjs",   "watcher": "validate_brief.mjs", "needs": [] },
+    { "id": "research", "producer": "gen_news.mjs",      "watcher": "validate_brief.mjs", "needs": ["brief"] },
+    { "id": "voice",    "producer": "gen_voice.mjs",     "watcher": "send_ear_sample.mjs", "human_gate": "ceo_ear", "needs": ["research"] },
+    { "id": "assemble", "producer": "make-clip.mjs",     "watcher": "gates.mjs",          "needs": ["voice"] },
+    { "id": "critic",   "producer": "content_critic.mjs","watcher": "content_critic.mjs", "needs": ["assemble"] },
+    { "id": "publish",  "producer": "tg_post.mjs",       "watcher": "make-clip.mjs",      "human_gate": "ceo_ok", "needs": ["critic"] }
+  ],
+  "human_gates": ["ceo_ear", "ceo_ok"],
+  "critic_bar": { "rule": "no evidenced <=2 AND mean >= 3.5", "escalate_band": [3.3, 3.7] }
+}
