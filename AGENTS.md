@@ -5,6 +5,8 @@
 > **Last verified:** 2026-07-07 by ground-truth survey (git status + file reads, not memory).
 >
 > **🗺️ Two companion maps:** [docs/HARNESS-MAP.md](docs/HARNESS-MAP.md) — the 13 agentic-engineering primitives → where each lives (claude md / specs / hooks / gates / retrieval / agentic CI / feedback loop…). [docs/FACTORY-MAP.md](docs/FACTORY-MAP.md) — the daily media line, stage-by-stage, with its quality-gate controllers.
+>
+> **🔍 External audit in progress (2026-07-10):** [HANDOFF-CURSOR-AUDIT-2026-07-10.md](HANDOFF-CURSOR-AUDIT-2026-07-10.md) — current state, product goal (paid TG video-format subscription), honest bug/debt list, receipts to re-run. Any tool auditing the studio starts THERE.
 
 ---
 
