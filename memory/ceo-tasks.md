@@ -24,6 +24,7 @@
 | S2 | **earn_focus_crystals (CRITICAL)** | Atlas | ✅ **FIXED in prod** — migration `035` applied + verified. RPC ignores client amount, server-derives from `focus_sessions` (duration_ms×5, clamped), idempotent per session. No client change needed. | 🔴 CRITICAL — closed |
 | S3 | **Enable leaked-password protection** (Supabase → Auth → HaveIBeenPwned) — still OFF | CEO | ~2 min dashboard toggle | Breached passwords accepted at signup |
 | S4 | subscriptions latent self-grant + agent-chat prompt-injection guard | Atlas | Queued (low sev, safe standalone edits) | Billing foot-gun; brand-surface guardrail bypass |
+| S5 | **ZEUS `/event` — жив или в утиль?** Воркфлоу `sync-to-zeus.yml` починен (был красным с апреля, причина в самом воркфлоу), но живой ZEUS (Claw3D WS-гейтвей) не имеет HTTP `/event` — события уходят в 401-пустоту. Развилка: (а) скажи «го» — Atlas добавит `/event` ingest в Claw3D server + Railway env + GH secret, интеграция оживёт; (б) скажи «в утиль» — воркфлоу удаляется. | CEO (одно слово) | Диагноз 2026-07-10, детали в `AGENTS.md` §5.5 | Ecosystem event flow MindShift→ZEUS |
 
 ## 🟡 DISTRIBUTION (first 20 users)
 

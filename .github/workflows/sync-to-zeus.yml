@@ -46,4 +46,9 @@ jobs:
             -d "$PAYLOAD") || HTTP_CODE=000
           echo "ZEUS responded HTTP ${HTTP_CODE}"
           cat /tmp/zeus_resp.txt 2>/dev/null || true
-          # non-blocking by design: gateway downtime must not redden MindShift CI
+          # non-blocking by design: gateway downtime must not redden MindShift CI,
+          # but a non-2xx delivery must stay visible, not silently swallowed
+          case "$HTTP_CODE" in
+            2*) echo "::notice::ZEUS accepted the event (HTTP ${HTTP_CODE})" ;;
+            *)  echo "::warning::ZEUS did NOT accept the event (HTTP ${HTTP_CODE}). The live gateway (Claw3D WS server) has no /event HTTP route — see AGENTS.md §5 BROKEN." ;;
+          esac
