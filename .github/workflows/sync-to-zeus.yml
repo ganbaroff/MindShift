@@ -3,6 +3,7 @@ name: Sync to ZEUS Gateway
 on:
   push:
     branches: [main]
+  workflow_dispatch:
 
 jobs:
   notify-zeus:
@@ -15,26 +16,34 @@ jobs:
 
       - name: Build change summary
         id: summary
+        env:
+          ACTOR: ${{ github.actor }}
         run: |
-          COMMITS=$(git log --oneline -5 --format="%h %s" | head -5)
-          FILES_CHANGED=$(git diff --name-only HEAD~1 HEAD 2>/dev/null | head -20 | tr '\n' ', ')
-          SUMMARY="MindShift push to main by ${{ github.actor }}. Commits: ${COMMITS}. Files: ${FILES_CHANGED}"
-          echo "summary=${SUMMARY:0:500}" >> "$GITHUB_OUTPUT"
+          # GITHUB_OUTPUT is line-based: the value must contain no newlines
+          COMMITS=$(git log --oneline -5 --format="%h %s" | tr '\n' ';')
+          FILES_CHANGED=$(git diff --name-only HEAD~1 HEAD 2>/dev/null | head -20 | tr '\n' ',')
+          SUMMARY="MindShift push to main by ${ACTOR}. Commits: ${COMMITS} Files: ${FILES_CHANGED}"
+          SUMMARY=$(printf '%s' "${SUMMARY:0:500}" | tr -d '\r\n')
+          echo "summary=${SUMMARY}" >> "$GITHUB_OUTPUT"
 
       - name: POST to ZEUS /event
         if: ${{ vars.ZEUS_GATEWAY_URL != '' }}
+        env:
+          ZEUS_URL: ${{ vars.ZEUS_GATEWAY_URL }}
+          GATEWAY_SECRET: ${{ secrets.GATEWAY_SECRET }}
+          ACTOR: ${{ github.actor }}
+          SHA: ${{ github.sha }}
+          SUMMARY: ${{ steps.summary.outputs.summary }}
         run: |
-          curl -s -X POST "${{ vars.ZEUS_GATEWAY_URL }}/event" \
+          # jq guarantees valid JSON even when commit messages contain quotes
+          PAYLOAD=$(jq -n --arg actor "$ACTOR" --arg sha "$SHA" --arg summary "$SUMMARY" \
+            '{source: "github-mindshift", event: "push.main", severity: "P2",
+              payload: {repo: "MindShift", actor: $actor, sha: $sha, summary: $summary}}')
+          HTTP_CODE=$(curl -sS --max-time 15 -o /tmp/zeus_resp.txt -w '%{http_code}' \
+            -X POST "$ZEUS_URL/event" \
             -H "Content-Type: application/json" \
-            -H "Authorization: Bearer ${{ secrets.GATEWAY_SECRET }}" \
-            -d '{
-              "source": "github-mindshift",
-              "event": "push.main",
-              "severity": "P2",
-              "payload": {
-                "repo": "MindShift",
-                "actor": "${{ github.actor }}",
-                "sha": "${{ github.sha }}",
-                "summary": "${{ steps.summary.outputs.summary }}"
-              }
-            }' || echo "ZEUS unreachable — non-blocking"
+            -H "Authorization: Bearer $GATEWAY_SECRET" \
+            -d "$PAYLOAD") || HTTP_CODE=000
+          echo "ZEUS responded HTTP ${HTTP_CODE}"
+          cat /tmp/zeus_resp.txt 2>/dev/null || true
+          # non-blocking by design: gateway downtime must not redden MindShift CI
