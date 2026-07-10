@@ -1,0 +1,26 @@
+{
+  "name": "greeting",
+  "version": 1,
+  "format": "personalized-greeting",
+  "aspect": "9:16",
+  "description": "THE product pilot (CEO 2026-07-10): subscriber picks occasion+style+language → IMAGE preview (control point, approve/reroll) → i2v VIDEO from the approved image → TTS greeting in the target language → delivered in TG. Formats = styles (minecraft/lego/watercolor/papercut) — data, not code.",
+  "constants": {
+    "styles": ["minecraft", "lego", "watercolor", "papercut"],
+    "occasions": ["birthday", "newyear", "wedding", "anniversary"],
+    "palette": { "teal": "#63B4C7", "indigo": "#7B72FF", "gold": "#F59E0B", "never": "red" },
+    "disclosure": "AI · preview badge on-frame (Factory Law 5)",
+    "duration_band_sec": [6, 12],
+    "image_model": "gemini-3-pro-image-preview (credit-gated, free)",
+    "video_model": "veo-3.1-lite (i2v from approved image)"
+  },
+  "stations": [
+    { "id": "brief",  "producer": "brief_store.mjs",          "produces": "greeting_brief.json", "watcher": "validate_brief.mjs", "needs": [] },
+    { "id": "image",  "producer": "gen_greeting_preview.mjs", "args": ["--brief=greeting_brief.json"], "produces": "preview_g001.png", "watcher": "frame_check.mjs", "human_gate": "user_ok", "needs": ["brief"] },
+    { "id": "video",  "producer": "gen_veo_i2v.mjs",          "args": [], "produces": "veo_i2v/i2v_00.mp4", "watcher": "frame_check.mjs", "needs": ["image"] },
+    { "id": "critic", "producer": "gate_tally.mjs",           "args": ["veo_i2v/i2v_00.mp4", "--recipe=recipes/greeting.recipe.json"], "watcher": "gate_tally.mjs", "needs": ["video"] },
+    { "id": "deliver","producer": "tg_send.mjs",              "args": ["veo_i2v/i2v_00.mp4", "Sizin təbrikiniz hazırdır"], "watcher": "tg_send.mjs", "human_gate": "ceo_ok", "needs": ["critic"] }
+  ],
+  "notes": "STATUS 2026-07-10: image station is LIVE-PROVEN (preview_g001.png generated + frame_check pass, 1 metered call). user_ok = the SUBSCRIBER approves the preview (new human-gate kind; conductor parks/approves it like any gate). VIDEO half (gen_veo_i2v) reads football_today.json today — needs a greeting i2v adapter (feed it the approved preview + a gentle motion prompt); that + a greeting TTS/assemble is the next build. Payments (TG Stars vs Dodo) = research-then-CEO.",
+  "human_gates": ["user_ok", "ceo_ok"],
+  "critic_bar": { "rule": "no evidenced <=2 AND mean >= 3.5", "escalate_band": [3.3, 3.7], "critic_script": "critic_agency.mjs" }
+}
