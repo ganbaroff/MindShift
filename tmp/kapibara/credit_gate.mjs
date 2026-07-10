@@ -21,7 +21,9 @@ export function pickTextTier() {
   for (const t of TEXT_TIERS) if (process.env[t.env]) return t.name
   return 'gemini'
 }
-function todayKey() { return new Date().toISOString().slice(0, 10) }
+function todayKey() {
+  return new Intl.DateTimeFormat('sv-SE', { timeZone: 'America/Los_Angeles' }).format(new Date())
+}
 export function todayCount() {
   if (!existsSync(LEDGER)) return 0
   const day = todayKey()

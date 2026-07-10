@@ -3,7 +3,7 @@
 // (the exact thing CEO rejected), are the examples genuinely varied, premium, readable, is the AZ
 // voice natural. Same code-computed bar as Factory Law 10: no evidenced ≤2 AND mean ≥3.5 → exit 0.
 // Usage: node critic_agency.mjs agency_v6.mp4
-import { readFileSync, statSync } from 'node:fs'
+import { readFileSync, statSync, writeFileSync } from 'node:fs'
 import { requireEnv } from './env.mjs'
 import { geminiGenerate } from './credit_gate.mjs'
 const key = requireEnv('GEMINI_API_KEY')
@@ -43,7 +43,7 @@ if (fileInfo.state !== 'ACTIVE') { console.error('file not ACTIVE:', fileInfo.st
 const rubric = `You are a BRUTAL, specific short-form video QA critic reviewing a VERTICAL B2B PROMO AD for a web-development agency (it builds and updates websites; region Azerbaijan). The ad shows premium device mockups (laptops/phones) displaying different website designs, over an AZERBAIJANI voiceover with on-screen AZERBAIJANI subtitles. There is NO mascot and NO cartoon character in this format — do NOT expect or ask for one. The bilingual/mascot conventions of other channels DO NOT apply here.
 WATCH the video AND LISTEN to the audio. Be harsh but EVIDENCE-BASED: judge only what is actually visible/audible.
 EVIDENCE RULE (hard): for ANY score of 1 or 2 you MUST include "at":"mm:ss" — the exact timestamp of the defect. No timestamp = you may not score below 3.
-Score each dimension 1-5 (1=broken, 5=ship-grade) with ONE concrete fix:
+Score each dimension 1-5 (1=broken, 5=ship-grade) with ONE concrete fix. BREVITY IS MANDATORY: "issue" and "fix" each ≤12 words (the response gets hard-truncated otherwise and the whole verdict is discarded):
 - motion_aliveness: THE KEY TEST. Does EVERY shot genuinely move — device floating, camera pushing in, parallax, screen light shifting — so it reads as living video? If ANY shot is a static/frozen image or just a slow flat zoom on a still photo (Ken-Burns), that is a FAIL for that shot: score ≤2 and cite its timestamp. A slow zoom on a flat picture is NOT alive.
 - example_variety: are there MANY genuinely DIFFERENT website designs shown (distinct layouts/industries/colors), or is it the same few frames repeated/re-zoomed? Fake variety (same asset shown again) = low score with timestamp.
 - premium_feel: does it look like a high-end studio-grade agency reel (clean, cinematic, confident), or cheap/amateur?
@@ -80,6 +80,9 @@ try {
   console.log(`  SHIP_READY: ${shipReady} (bar: no evidenced ≤2 AND mean ≥3.5)`)
   console.log(`  TOP FIX: ${c.top_fix}`)
   console.log(`  VERDICT: ${c.one_line_verdict}`)
+  if (process.env.CRITIC_VERDICT_FILE) {
+    try { writeFileSync(process.env.CRITIC_VERDICT_FILE, JSON.stringify(c)) } catch (err) { console.error('failed to write verdict file:', err.message) }
+  }
 } catch {
   console.log(txt.slice(0, 1500))
   console.error('  (could not parse critic JSON → fail-closed, exit 1)')

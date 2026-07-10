@@ -2,7 +2,7 @@
 // (prep_assets → recm/, record_3d → rec3/) leave webm; every consumer needs mp4. Was ad-hoc bash —
 // a recipe station must be executable, so it lives as a script (Studio Conductor P2).
 // Usage: node encode_rec.mjs <recordings-dir> <out.mp4>
-import { readdirSync, statSync } from 'node:fs'
+import { readdirSync, statSync, renameSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
 import { join } from 'node:path'
 
@@ -16,6 +16,14 @@ try {
 } catch (e) {
   // missing ffmpeg binary = infra (exit 3 → conductor parks); a real encode failure = rework (exit 1)
   if (e.code === 'ENOENT') { console.error('[encode] ffmpeg not found (infra) → PARK'); process.exit(3) }
-  console.error(`[encode] ffmpeg failed on ${webm.f}`); process.exit(1)
+  const badFile = join(dir, webm.f)
+  const corruptFile = badFile + '.corrupt'
+  try {
+    renameSync(badFile, corruptFile)
+    console.error(`[encode] ffmpeg failed on ${webm.f} (renamed to ${webm.f}.corrupt to avoid loops)`)
+  } catch (err) {
+    console.error(`[encode] ffmpeg failed on ${webm.f} (failed to rename: ${err.message})`)
+  }
+  process.exit(1)
 }
 console.log(`[encode] ${dir}/${webm.f} → ${out}`)

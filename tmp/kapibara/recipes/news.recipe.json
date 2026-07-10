@@ -16,7 +16,7 @@
     { "id": "brief",    "producer": "brief_store.mjs",   "produces": "briefs/test-ladder.json", "watcher": "validate_brief.mjs", "needs": [] },
     { "id": "research", "producer": "gen_news.mjs",      "args": [], "produces": "today.json", "watcher": "validate_brief.mjs", "needs": ["brief"] },
     { "id": "voice",    "producer": "gen_voice.mjs",     "args": [], "produces": "voice.mp3", "watcher": "send_ear_sample.mjs", "human_gate": "ceo_ear", "needs": ["research"] },
-    { "id": "assemble", "producer": "make-clip.mjs",     "args": ["--skip-news", "--no-preview", "--no-publish"], "produces": "latest_output.json", "watcher": "gates.mjs", "needs": ["voice"] },
+    { "id": "assemble", "producer": "make-clip.mjs",     "args": ["--skip-news", "--skip-voice", "--no-preview", "--no-publish"], "produces": "latest_output.json", "watcher": "gates.mjs", "needs": ["voice"] },
     { "id": "critic",   "producer": "gate_tally.mjs",    "args": ["latest_output.json", "--recipe=recipes/news.recipe.json"], "watcher": "gate_tally.mjs", "needs": ["assemble"] },
     { "id": "publish",  "producer": "tg_post.mjs",       "args": [], "watcher": "make-clip.mjs", "human_gate": "ceo_ok", "needs": ["critic"] }
   ],

@@ -11,7 +11,7 @@
 //   final mean = average. Every ballot lands in studio_votes.jsonl (prototype of the studio_votes table).
 // Infra faults (upload/API failure) exit 3 = PARK, never masquerade as REWORK (spec: fail-open-to-human).
 // Usage: node gate_tally.mjs <clip.mp4> --recipe=recipes/agency.recipe.json [--subs=reel7.ass] [--skip-critic]
-import { readFileSync, appendFileSync, mkdtempSync, rmSync, readdirSync } from 'node:fs'
+import { readFileSync, appendFileSync, mkdtempSync, rmSync, readdirSync, unlinkSync, existsSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -35,7 +35,7 @@ const VOTES = join(DIR, 'studio_votes.jsonl')
 const ballot = (layer, verdict, detail) => appendFileSync(VOTES, JSON.stringify({ ts: new Date().toISOString(), clip, recipe: recipe.name, layer, verdict, ...detail }) + '\n')
 
 // ── Layer 1a: never-red HSV histogram over sampled frames ──────────────────
-const RED_MAX_FRAC = 0.02            // >2% irritating-red pixels on a frame = dominant, veto
+const RED_MAX_FRAC = recipe.constants?.red_max_frac !== undefined ? Number(recipe.constants.red_max_frac) : 0.02 // override via recipe if specified
 const rgb2redness = (r, g, b) => {   // irritating red = hue in 0-15/345-360, sat>0.55, val>0.35
   const mx = Math.max(r, g, b) / 255, mn = Math.min(r, g, b) / 255
   if (mx < 0.35) return false
@@ -103,16 +103,48 @@ let criticScript = recipe.critic_bar?.critic_script || 'critic_agency.mjs'
 if (/gate_tally/i.test(criticScript)) { console.error('[tally] refusing self-recursion: critic_script resolves to gate_tally — falling back to critic_agency.mjs'); criticScript = 'critic_agency.mjs' }
 const BAND = recipe.critic_bar?.escalate_band || [3.3, 3.7]
 function criticSampleOnce(n) {
+  const verdictPath = join(tmpdir(), `tally-verdict-${n}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}.json`)
   let out
-  try { out = execFileSync('node', [criticScript, clip], { cwd: DIR, env: { ...process.env, CRITIC_NONBLOCKING: '1' } }).toString() }
-  catch (e) { return { park: true, error: (e.stdout || e.message || '').toString().slice(0, 200) } }
-  // evidence extraction must be NO STRICTER than the critic's own rule (any digit in "at") —
-  // a lazy-dot optional group missed "(at ...)" suffixes and range timestamps (panel finding #5).
-  const dims = [...out.matchAll(/\[(\d)\/5\] (\w+):(.*)\n/g)].map(m => {
-    const at = (m[3].match(/\(at ([^)]+)\)\s*$/) || [])[1] || ''
-    return { score: +m[1], name: m[2], at }
-  })
-  const mean = +(out.match(/MEAN: ([\d.]+)/)?.[1] || 0)
+  try {
+    out = execFileSync('node', [criticScript, clip], {
+      cwd: DIR,
+      env: { ...process.env, CRITIC_NONBLOCKING: '1', CRITIC_VERDICT_FILE: verdictPath }
+    }).toString()
+  } catch (e) {
+    if (existsSync(verdictPath)) { try { unlinkSync(verdictPath) } catch {} }
+    return { park: true, error: (e.stdout || e.message || '').toString().slice(0, 200) }
+  }
+
+  let dims = []
+  let mean = 0
+  let parsedJson = false
+
+  if (existsSync(verdictPath)) {
+    try {
+      const c = JSON.parse(readFileSync(verdictPath, 'utf8'))
+      dims = (c.dimensions || []).map(d => ({
+        score: +d.score,
+        name: d.name,
+        at: d.at || ''
+      }))
+      mean = dims.length ? dims.reduce((sum, d) => sum + d.score, 0) / dims.length : 0
+      parsedJson = true
+    } catch (e) {
+      console.warn('[tally] failed to parse critic JSON verdict file:', e.message)
+    } finally {
+      try { unlinkSync(verdictPath) } catch {}
+    }
+  }
+
+  if (!parsedJson) {
+    // Fallback to regex parsing of stdout
+    dims = [...out.matchAll(/\[(\d)\/5\] (\w+):(.*)\n/g)].map(m => {
+      const at = (m[3].match(/\(at ([^)]+)\)\s*$/) || [])[1] || ''
+      return { score: +m[1], name: m[2], at }
+    })
+    mean = +(out.match(/MEAN: ([\d.]+)/)?.[1] || 0)
+  }
+
   return { out, dims, mean }
 }
 function criticSample(n) {

@@ -20,6 +20,7 @@ import { isPublished, closeJournal } from './journal.mjs'
 const A = process.argv
 const FORCE = A.includes('--force')
 const SKIP_NEWS = A.includes('--skip-news')
+const SKIP_VOICE = A.includes('--skip-voice')
 const UPLOAD = A.includes('--upload')
 const NO_PREVIEW = A.includes('--no-preview')
 const NO_PUBLISH = A.includes('--no-publish')
@@ -76,10 +77,18 @@ if (SKIP_NEWS) {
 }
 
 // ── Stage 2: TTS synthesis ────────────────────────────────────────────────
-run('gen_voice  →  voice.mp3 + ln_*.wav', ['gen_voice.mjs'])
+if (SKIP_VOICE) {
+  console.log('[make-clip] --skip-voice: reusing voice.mp3')
+} else {
+  run('gen_voice  →  voice.mp3 + ln_*.wav', ['gen_voice.mjs'])
+}
 
 // ── Stage 3: Silence trim + re-sync ──────────────────────────────────────
-run('reconcat  →  voice.mp3 (trimmed)', ['reconcat.mjs'])
+if (SKIP_VOICE) {
+  console.log('[make-clip] --skip-voice: skipping reconcat')
+} else {
+  run('reconcat  →  voice.mp3 (trimmed)', ['reconcat.mjs'])
+}
 
 // ── Stage 4: Frame envelope ───────────────────────────────────────────────
 run('build-data2  →  data.json', ['build-data2.mjs'])

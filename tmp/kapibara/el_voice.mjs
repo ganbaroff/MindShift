@@ -13,6 +13,10 @@ const LINES = [
   'Bizə yazın — sorğu göndərin.',
 ]
 const SUB = ['Saytınız 3 saniyədə tutmalıdır.','Yavaş sayt = itirilmiş müştəri.','Sürətli saytlar — mağaza, panel, analitika.','Daha çox müştəri, daha çox satış 📈','Bizə yazın — sorğu göndərin']
+if (LINES.length !== SUB.length) {
+  console.error(`[el] ERROR: LINES count (${LINES.length}) does not match SUB count (${SUB.length})`);
+  process.exit(1);
+}
 const dur = f => parseFloat(execFileSync('ffprobe', ['-v','error','-show_entries','format=duration','-of','csv=p=0', f]).toString().trim())
 const durs = []
 for (let i = 0; i < LINES.length; i++) {
@@ -28,6 +32,9 @@ for (let i = 0; i < LINES.length; i++) {
 writeFileSync(`${OUT}/list.txt`, LINES.map((_,i)=>`file 'p${i}.wav'`).join('\n'))
 execFileSync('ffmpeg', ['-y','-f','concat','-safe','0','-i',`${OUT}/list.txt`,'-c','copy',`${OUT}/raw.wav`], {stdio:'ignore'})
 let total = dur(`${OUT}/raw.wav`), tempo = total > MAXTOTAL ? Math.min(1.25, +(total/MAXTOTAL).toFixed(4)) : 1.0
+if (tempo > 1.1) {
+  console.warn(`[el] WARN: tempo is ${tempo.toFixed(2)} (>${MAXTOTAL}s total) — voiceover might sound rushed!`);
+}
 execFileSync('ffmpeg', ['-y','-i',`${OUT}/raw.wav`,'-af',`atempo=${tempo},loudnorm=I=-16:TP=-1.5:LRA=11`,'-c:a','libmp3lame','-b:a','192k','agency_voice.mp3'], {stdio:'ignore'})
 let t=0; const meta=[]
 LINES.forEach((_,i)=>{ const d=durs[i]/tempo; meta.push({ text:SUB[i], start:+t.toFixed(2), end:+(t+d).toFixed(2) }); t += d + GAP/tempo })

@@ -2,7 +2,7 @@ import './credit_gate_auto.mjs'
 // content_critic.mjs — automated multimodal QA: a SECOND model (Gemini 3 Pro) WATCHES the video
 // and HEARS the audio, scores it against a strict rubric, and returns feedback BEFORE handoff to CEO.
 // Usage: node content_critic.mjs <video.mp4>
-import { readFileSync, statSync } from 'node:fs'
+import { readFileSync, statSync, writeFileSync } from 'node:fs'
 import { requireEnv } from './env.mjs'
 const key = requireEnv('GEMINI_API_KEY')
 const MODEL = process.env.CRITIC_MODEL || 'gemini-3.5-flash'
@@ -93,6 +93,9 @@ try {
   console.log(`  SHIP_READY: ${shipReady} (bar: no evidenced ≤2 AND mean ≥3.5)`)
   console.log(`  TOP FIX: ${c.top_fix}`)
   console.log(`  VERDICT: ${c.one_line_verdict}`)
+  if (process.env.CRITIC_VERDICT_FILE) {
+    try { writeFileSync(process.env.CRITIC_VERDICT_FILE, JSON.stringify(c)) } catch (err) { console.error('failed to write verdict file:', err.message) }
+  }
 } catch {
   console.log(txt.slice(0, 1500))
   console.error('  (could not parse critic JSON → fail-closed, exit 1)')

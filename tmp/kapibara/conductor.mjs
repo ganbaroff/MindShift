@@ -13,7 +13,7 @@
 //   · re-running the same --job resumes: skips green artifacts, re-parks at the open gate
 // MOCK (--mock): walk + journal only, 0 spend, auto-pass human gates (CI-provable).
 // Usage: node conductor.mjs <recipe.json> [--mock] [--job=ID] [--approve=<gate>] [--force]
-import { readFileSync, appendFileSync, existsSync } from 'node:fs'
+import { readFileSync, appendFileSync, existsSync, statSync, readdirSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { execFileSync } from 'node:child_process'
@@ -33,14 +33,23 @@ if (!recipePath) { console.error('usage: node conductor.mjs <recipe.json> [--moc
 execFileSync('node', [join(DIR, 'validate_recipe.mjs'), recipePath], { stdio: 'inherit' })
 const recipe = JSON.parse(readFileSync(recipePath, 'utf8'))
 const STEPS = join(DIR, 'studio_steps.jsonl'), JOBS = join(DIR, 'studio_jobs.jsonl')
-const step = (stage, status, extra = {}) =>
-  appendFileSync(STEPS, JSON.stringify({ job_id: jobId, recipe: recipe.name, v: recipe.version, stage, status, ts: new Date().toISOString(), ...extra }) + '\n')
-const jobState = (state, extra = {}) =>
-  appendFileSync(JOBS, JSON.stringify({ job_id: jobId, recipe: recipe.name, state, ts: new Date().toISOString(), ...extra }) + '\n')
+const JOB_STEPS = join(DIR, `studio_steps_${jobId}.jsonl`), JOB_JOBS = join(DIR, `studio_jobs_${jobId}.jsonl`)
+
+const step = (stage, status, extra = {}) => {
+  const data = JSON.stringify({ job_id: jobId, recipe: recipe.name, v: recipe.version, stage, status, ts: new Date().toISOString(), ...extra }) + '\n'
+  appendFileSync(STEPS, data)
+  appendFileSync(JOB_STEPS, data)
+}
+const jobState = (state, extra = {}) => {
+  const data = JSON.stringify({ job_id: jobId, recipe: recipe.name, state, ts: new Date().toISOString(), ...extra }) + '\n'
+  appendFileSync(JOBS, data)
+  appendFileSync(JOB_JOBS, data)
+}
 const approvals = new Set()
 // --force regenerates gated artifacts → prior approvals are STALE (the ear approved the OLD sample;
 // Law 7 demands a fresh ear on a fresh voice — panel #14). Force starts approvals from scratch.
-if (!FORCE && existsSync(JOBS)) for (const line of readFileSync(JOBS, 'utf8').split('\n')) {
+const approvalsSourceFile = existsSync(JOB_JOBS) ? JOB_JOBS : (existsSync(JOBS) ? JOBS : null)
+if (!FORCE && approvalsSourceFile) for (const line of readFileSync(approvalsSourceFile, 'utf8').split('\n')) {
   if (!line.trim()) continue
   try { const r = JSON.parse(line); if (r.job_id === jobId && r.state?.startsWith('approved_')) approvals.add(r.state.slice(9)) } catch {}
 }
@@ -48,7 +57,8 @@ if (approveGate) { approvals.add(approveGate); jobState(`approved_${approveGate}
 // journal-based resume: stages already green for THIS job are not re-run (a critic re-run on resume
 // would re-upload the clip to Gemini every tick — panel #6/#11). --force overrides.
 const greenStages = new Set(), infraCount = {}
-if (!FORCE && existsSync(STEPS)) for (const line of readFileSync(STEPS, 'utf8').split('\n')) {
+const stepsSourceFile = existsSync(JOB_STEPS) ? JOB_STEPS : (existsSync(STEPS) ? STEPS : null)
+if (!FORCE && stepsSourceFile) for (const line of readFileSync(stepsSourceFile, 'utf8').split('\n')) {
   if (!line.trim()) continue
   try {
     const r = JSON.parse(line); if (r.job_id !== jobId) continue
@@ -92,12 +102,26 @@ for (const s of recipe.stations) {
     step(s.id, 'skipped-journal', {}); console.log(`  ↷ ${s.id} (journal: already green this job)`)
     done.add(s.id); continue
   }
-  if (isAsset(s.producer)) {
-    if (!existsSync(join(DIR, s.producer))) { step(s.id, 'fail', { missing: s.producer }); console.error(`  ✗ ${s.id}: asset missing ${s.producer}`); process.exit(1) }
-    step(s.id, 'asset-ok', { producer: s.producer }); console.log(`  ✓ ${s.id} (asset ${s.producer})`)
-  } else if (artifact && existsSync(artifact) && !FORCE) {
-    step(s.id, 'skipped-exists', { artifact: s.produces }); console.log(`  ↷ ${s.id} (exists: ${s.produces})`)
-  } else {
+    let artifactExistsAndNonEmpty = false
+    if (artifact && existsSync(artifact)) {
+      try {
+        const stat = statSync(artifact)
+        if (stat.isDirectory()) {
+          artifactExistsAndNonEmpty = readdirSync(artifact).length > 0
+        } else {
+          artifactExistsAndNonEmpty = stat.size > 0
+        }
+      } catch (e) {
+        console.warn(`[conductor] failed to inspect artifact ${s.produces}:`, e.message)
+      }
+    }
+
+    if (isAsset(s.producer)) {
+      if (!existsSync(join(DIR, s.producer))) { step(s.id, 'fail', { missing: s.producer }); console.error(`  ✗ ${s.id}: asset missing ${s.producer}`); process.exit(1) }
+      step(s.id, 'asset-ok', { producer: s.producer }); console.log(`  ✓ ${s.id} (asset ${s.producer})`)
+    } else if (artifactExistsAndNonEmpty && !FORCE) {
+      step(s.id, 'skipped-exists', { artifact: s.produces }); console.log(`  ↷ ${s.id} (exists: ${s.produces})`)
+    } else {
     console.log(`  ▶ ${s.id} — node ${s.producer} ${(s.args || []).join(' ')}`)
     const r = runProducer(s)
     if (!r.ok && r.code === 3) {

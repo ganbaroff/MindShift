@@ -22,7 +22,8 @@ if (!globalThis.__CREDIT_GATE_PATCHED) {
         : u.includes('/upload/') ? 'upload' : 'other'
       const model = (u.match(/models\/([^:/?]+)/) || [])[1] || '?'
       const ts = new Date().toISOString()
-      try { appendFileSync(LEDGER, JSON.stringify({ day: ts.slice(0, 10), ts, kind, model, tier: 'gemini', via: 'auto' }) + '\n') } catch {}
+      const day = new Intl.DateTimeFormat('sv-SE', { timeZone: 'America/Los_Angeles' }).format(new Date())
+      try { appendFileSync(LEDGER, JSON.stringify({ day, ts, kind, model, tier: 'gemini', via: 'auto' }) + '\n') } catch {}
     }
     return orig(url, opts)
   }
