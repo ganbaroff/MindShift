@@ -46,6 +46,7 @@ jobs:
             -d "$PAYLOAD") || HTTP_CODE=000
           echo "ZEUS responded HTTP ${HTTP_CODE}"
           cat /tmp/zeus_resp.txt 2>/dev/null || true
+          echo ""  # response body may lack a trailing newline; ::commands:: must start a line
           # non-blocking by design: gateway downtime must not redden MindShift CI,
           # but a non-2xx delivery must stay visible, not silently swallowed
           case "$HTTP_CODE" in
