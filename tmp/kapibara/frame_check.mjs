@@ -1,3 +1,4 @@
+import './credit_gate_auto.mjs'
 // frame_check.mjs — PER-FRAME visual QA module (the "next module checks the previous, sends back for rework").
 // A generation stage produces a still/shot-frame; THIS module inspects it for artifacts BEFORE it advances.
 // Catches exactly the reputation bugs: stray smoke/objects from the body, extra limbs, wrong props,

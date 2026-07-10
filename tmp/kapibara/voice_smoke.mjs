@@ -1,3 +1,4 @@
+import './credit_gate_auto.mjs'
 // voice_smoke.mjs — one-line TTS smoke: does LOCKED_VOICE exist on the pinned TTS model?
 import { writeFileSync } from 'node:fs'
 import { requireEnv, LOCKED_VOICE } from './env.mjs'

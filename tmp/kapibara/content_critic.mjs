@@ -1,3 +1,4 @@
+import './credit_gate_auto.mjs'
 // content_critic.mjs — automated multimodal QA: a SECOND model (Gemini 3 Pro) WATCHES the video
 // and HEARS the audio, scores it against a strict rubric, and returns feedback BEFORE handoff to CEO.
 // Usage: node content_critic.mjs <video.mp4>

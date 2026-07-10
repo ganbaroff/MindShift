@@ -35,6 +35,28 @@ async function run() {
     brief = JSON.parse(readFileSync(briefPath, 'utf8'));
   }
 
+  // ── Lease-expiry reaper (Studio Conductor P0 §5; SPEC reaper-delivering 2026-07-10) ──
+  // A runner that crashes between claimBrief('qa_pass'→'delivering') and delivery strands the row:
+  // 'delivering' has no branch below, so every later tick exits 0 looking healthy while the pipeline
+  // is dead. Stale lease → reap back to the last green state; fresh lease → a runner is genuinely
+  // mid-flight, do not steal it.
+  const TRANSITIONAL = { delivering: 'qa_pass' };
+  const LEASE_TTL_MIN = Number(process.env.PULT_LEASE_TTL_MIN || 30);
+  if (useDb && TRANSITIONAL[brief.state]) {
+    const ageMin = (Date.now() - new Date(dbRow.updated_at).getTime()) / 60000;
+    if (ageMin >= LEASE_TTL_MIN) {
+      const green = TRANSITIONAL[brief.state];
+      const reason = `reaper: stale '${brief.state}' lease (${ageMin.toFixed(0)}min ≥ TTL ${LEASE_TTL_MIN}) → reset to '${green}'`;
+      console.log(`[reaper] ${reason}`);
+      await saveBrief(briefId, { state: green, rework_reason: reason });
+      brief.state = green;
+      brief.rework_reason = reason;
+    } else {
+      console.log(`[reaper] state='${brief.state}' lease fresh (${ageMin.toFixed(0)}min < ${LEASE_TTL_MIN}) — another runner mid-flight, skipping.`);
+      return;
+    }
+  }
+
   // Always validate brief structure first
   const validation = validateBrief(brief);
   if (!validation.valid) {

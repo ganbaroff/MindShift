@@ -1,3 +1,4 @@
+import './credit_gate_auto.mjs'
 import { readFileSync, writeFileSync } from 'node:fs'
 import { requireEnv } from './env.mjs'
 const key = requireEnv('GEMINI_API_KEY')

@@ -1,3 +1,4 @@
+import './credit_gate_auto.mjs'
 // Outro duet: Mochi (capy) + Yusif low baritone, per-speaker lip-sync.
 // Factory Law 6: one voice per CHARACTER, constants — no CLI overrides.
 // Capy = LOCKED_VOICE (must match the show body, else a jarring speaker-switch — critic catch 2026-07-05).

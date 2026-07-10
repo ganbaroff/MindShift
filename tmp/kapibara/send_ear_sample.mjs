@@ -1,3 +1,4 @@
+import './credit_gate_auto.mjs'
 // send_ear_sample.mjs — synth ONE English line with LOCKED_VOICE and send it to the CEO's chat
 // via the pult bot (Law 7: CEO's ear approves before a full-language switch). No secrets printed.
 import { writeFileSync, readFileSync } from 'node:fs'
