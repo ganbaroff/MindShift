@@ -16,6 +16,7 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
 import { isPublished, closeJournal } from './journal.mjs'
+import { shouldAlert } from './publish_watchdog.mjs'
 
 const A = process.argv
 const FORCE = A.includes('--force')
@@ -172,6 +173,21 @@ if (!NO_PUBLISH) {
   }
 } else {
   console.log('\n[make-clip] --no-publish: skipping IG/TikTok publish')
+}
+
+// ── Stage 10.6: PUBLISH WATCHDOG (FIX 2, 2026-07-20) — preview went out but IG/TikTok got nothing ──
+// A green run that previews to Telegram yet leaves publish_journal empty (e.g. content_critic
+// fail-closed — incident 2026-07-13) must ALERT the CEO, not pass silently. Fail-soft by design:
+// wrapped + placed after publishing so the alert can NEVER break the pipeline or a gate.
+if (!NO_PREVIEW && !NO_PUBLISH) {
+  try {
+    const published = await isPublished(dateStr, 'ai-news') // true | false | null(journal unreachable)
+    if (shouldAlert({ previewPosted: true, published })) {
+      const msg = `⚠️ Kapibara ${dateStr}: превью ушло в Telegram, но в IG/TikTok НЕ опубликовано (publish_journal пуст) — вероятно critic fail-closed. Клип: kapibara-${dateStr}.mp4`
+      execFileSync('node', ['tg_notify.mjs', msg], { stdio: 'inherit', cwd: CWD })
+      console.warn('[make-clip] ⚠ preview-but-no-publish → CEO alerted (watchdog)')
+    }
+  } catch (e) { console.warn(`[make-clip] publish-watchdog skipped (fail-soft): ${e.message}`) }
 }
 
 // ── Done ──────────────────────────────────────────────────────────────────

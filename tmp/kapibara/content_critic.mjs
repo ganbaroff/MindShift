@@ -4,6 +4,7 @@ import './credit_gate_auto.mjs'
 // Usage: node content_critic.mjs <video.mp4>
 import { readFileSync, statSync, writeFileSync } from 'node:fs'
 import { requireEnv } from './env.mjs'
+import { repairJsonObject } from './json_repair.mjs'
 const key = requireEnv('GEMINI_API_KEY')
 const MODEL = process.env.CRITIC_MODEL || 'gemini-3.5-flash'
 // No default clip: a wiring miss must fail LOUD, not silently judge (and pay Gemini quota for) a
@@ -54,7 +55,7 @@ const today = new Date().toISOString().slice(0, 10)
 const revealDim = FORMAT === 'quiz'
   ? `- reveal_clarity: at the answer reveal, is the correct option unmistakable and are wrong options clearly de-emphasized? Any moment a WRONG option looks selected?`
   : `- transitions_clarity: are transitions between news items clear and visually distinct (card change, graphics)? Is the key fact of each item visually highlighted?`
-const rubric = `You are a BRUTAL, specific short-form video QA critic for a solo founder's AI-education channel (audience: curious teens/adults, ADHD-aware brand). This is a ${FORMAT === 'quiz' ? 'QUIZ' : 'NEWS-DIGEST'} format video. IMPORTANT CONTEXT: today's REAL date is ${today} — dates in/around this year in the video are CURRENT news, not fiction; do NOT flag them as misleading. PRODUCT DESIGN CONTEXT: a RUSSIAN voiceover with AZERBAIJANI subtitles is the INTENDED bilingual format for the Azerbaijani market (viewers hear RU, read AZ; the post caption advertises this) — the language PAIR is never a defect; judge only whether each layer is legible and correctly rendered. The OUTRO is an intentional two-character duet sign-off: the capybara hands off to the FOUNDER'S AVATAR (a visibly different on-screen character) who speaks in his own deeper voice — this character voice change is BY DESIGN, not a defect; judge only whether each voice is clear. WATCH this vertical video AND LISTEN to the audio. Do not be polite, but be EVIDENCE-BASED: judge only what is actually visible/audible.
+const rubric = `You are a BRUTAL, specific short-form video QA critic for a solo founder's AI-education channel (audience: curious teens/adults, ADHD-aware brand). This is a ${FORMAT === 'quiz' ? 'QUIZ' : 'NEWS-DIGEST'} format video. IMPORTANT CONTEXT: today's REAL date is ${today} — dates in/around this year in the video are CURRENT news, not fiction; do NOT flag them as misleading. PRODUCT DESIGN CONTEXT: the voiceover is ENGLISH (an unflappable capybara news anchor). Subtitles alternate by UTC day-of-month as an intentional market A/B — EVEN days show ENGLISH subtitles (the spoken lines verbatim), ODD days show ARABIC (MSA) over the same English voice; NEITHER is a defect, and RUSSIAN/AZERBAIJANI is NOT expected (that pairing was retired 2026-07-07, EXP-000). The language layer is never a defect in itself; judge only whether each layer is legible and correctly rendered. The OUTRO is an intentional two-character duet sign-off: the capybara hands off to the FOUNDER'S AVATAR (a visibly different on-screen character) who speaks in his own deeper voice — this character voice change is BY DESIGN, not a defect; judge only whether each voice is clear. WATCH this vertical video AND LISTEN to the audio. Do not be polite, but be EVIDENCE-BASED: judge only what is actually visible/audible.
 EVIDENCE RULE (hard): for ANY score of 1 or 2 you MUST include "at":"mm:ss" — the timestamp where the defect is clearly visible. No timestamp = you may not score below 3. For overlap claims specifically: only report overlap if TEXT PIXELS actually intersect another element; a dark subtitle panel sitting ABOVE the ticker with a visible gap is NOT overlap.
 Score each dimension 1-5 (1=broken, 5=ship-grade) with ONE concrete fix:
 - voice_quality: tone, energy, pacing, naturalness. Judge against a DAILY AUTOMATED show bar (clear, lively, not grating), not a Hollywood VO bar.
@@ -71,7 +72,9 @@ const genRes = await fetch(`${base}/v1beta/models/${MODEL}:generateContent`, {
   headers: { 'x-goog-api-key': key, 'Content-Type': 'application/json' },
   body: JSON.stringify({
     contents: [{ parts: [{ fileData: { mimeType: 'video/mp4', fileUri: fileInfo.uri } }, { text: rubric }] }],
-    generationConfig: { responseMimeType: 'application/json', temperature: 0 },
+    // maxOutputTokens raised (FIX 1, 2026-07-20): gemini-3.x burns tokens on "thinking" before it
+    // emits text; without headroom the JSON answer gets truncated → fail-closed (incident 07-13).
+    generationConfig: { responseMimeType: 'application/json', temperature: 0, maxOutputTokens: 16384 },
   }),
 })
 const gj = await genRes.json()
@@ -80,7 +83,7 @@ if (!txt) { console.error('no critique:', JSON.stringify(gj).slice(0, 400)); pro
 console.log(`\n=== CRITIC VERDICT (${MODEL}, independent, format=${FORMAT}) ===`)
 let shipReady = false
 try {
-  const c = JSON.parse(txt)
+  const c = repairJsonObject(txt) // FIX 1 (2026-07-20): repair truncated/fenced JSON before fail-closing (incident 07-13)
   // Law 10 threshold is computed by CODE, not the model's mood (its own ship_ready oscillated
   // run-to-run on identical quality). Bar: no dimension ≤2 (evidence rule applies) AND mean ≥3.5.
   const dims = c.dimensions || []
