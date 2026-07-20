@@ -52,6 +52,7 @@ const ALLOWED_CHAT_ID = 5150355926 // CEO — pinned 2026-07-06 from his live /n
 interface TgUpdate {
   update_id?: number
   message?: TgMessage
+  callback_query?: TgCallbackQuery
 }
 
 interface TgMessage {
@@ -60,6 +61,14 @@ interface TgMessage {
   chat: { id: number; type: string }
   text?: string
   date: number
+  reply_to_message?: TgMessage
+}
+
+interface TgCallbackQuery {
+  id: string
+  from?: { id: number }
+  message?: TgMessage
+  data?: string
 }
 
 // deno-lint-ignore no-explicit-any
@@ -87,12 +96,63 @@ const HELP = `🦫 <b>Пульт медиа-завода</b>
 /news — сгенерить ролик «Капибара Новости» (превью придёт сюда, ~15-20 мин)
 /ladder — сгенерить квиз-ролик «Лесенка»
 /go — опубликовать последний прошедший гейты клип
-/status — статус брифа и очереди
+/pult — 🎛 пульт: пауза / жанр / сценарий (кнопки)
+/pause /resume — постинг ВЫКЛ / ВКЛ
+/genre news|quiz — выбрать жанр дня
+/script &lt;текст&gt; — свой сценарий на следующий выпуск
+/status — статус фабрики, брифа и очереди
 /stop — очистить очередь
 /whoami — показать твой chat_id
 /help — это меню
 
 Рендер идет в облаке (GitHub Actions, каждые 10 мин). Превью бросаю сюда, когда готово.`
+
+// -- Ф2 factory_control (Пульт panel) helpers ------------------------------------
+const GENRE_LABEL: Record<string, string> = { news: 'AI News', quiz: 'Quiz / Ladder' }
+const FC_DEFAULT = { posting_enabled: true, active_genre: 'news', queued_script: null, updated_by: 'default', updated_at: null }
+
+// deno-lint-ignore no-explicit-any
+async function fcGet(sb: Sb): Promise<any> {
+  try {
+    const { data, error } = await sb.from('factory_control').select('*').eq('id', 1).maybeSingle()
+    return (error || !data) ? { ...FC_DEFAULT } : data
+  } catch { return { ...FC_DEFAULT } }
+}
+
+// deno-lint-ignore no-explicit-any
+async function fcSet(sb: Sb, patch: Record<string, unknown>, by: string): Promise<any> {
+  const clean: Record<string, unknown> = { updated_by: by, updated_at: new Date().toISOString() }
+  if ('posting_enabled' in patch) clean.posting_enabled = patch.posting_enabled !== false
+  if ('active_genre' in patch) clean.active_genre = patch.active_genre
+  if ('queued_script' in patch) clean.queued_script = (patch.queued_script as string) || null
+  const { data, error } = await sb.from('factory_control').update(clean).eq('id', 1).select().maybeSingle()
+  if (error) throw new Error(error.message)
+  return data
+}
+
+// deno-lint-ignore no-explicit-any
+function fcDescribe(s: any): string {
+  return `📊 Фабрика: постинг ${s.posting_enabled ? '🟢 ВКЛ' : '🔴 ВЫКЛ'} · жанр «${GENRE_LABEL[s.active_genre] || s.active_genre}»`
+    + (s.queued_script ? ` · 📝 твой сценарий в очереди (${String(s.queued_script).length} симв.)` : ' · сценарий: авто')
+    + (s.updated_at ? `\nизменено: ${String(s.updated_at).slice(0, 16)} (${s.updated_by})` : '')
+}
+
+const PANEL_KB = {
+  inline_keyboard: [
+    [{ text: '⏸ Пауза', callback_data: 'fc:pause' }, { text: '▶️ Возобновить', callback_data: 'fc:resume' }],
+    [{ text: '📰 Новости', callback_data: 'fc:g:news' }, { text: '❓ Квиз', callback_data: 'fc:g:quiz' }],
+    [{ text: '📝 Мой сценарий', callback_data: 'fc:script' }, { text: '📊 Обновить', callback_data: 'fc:refresh' }],
+  ],
+}
+const SCRIPT_PROMPT = '📝 Пришли текст следующего выпуска ОТВЕТОМ на это сообщение (или командой /script &lt;текст&gt;).'
+
+// Пульт panel = a sendMessage carrying the control keyboard (webhook-response method, no bot token).
+function panel(chatId: number, text: string): Response {
+  return new Response(
+    JSON.stringify({ method: 'sendMessage', chat_id: chatId, text, parse_mode: 'HTML', reply_markup: PANEL_KB }),
+    { status: 200, headers: { 'Content-Type': 'application/json' } },
+  )
+}
 
 Deno.serve(async (req: Request) => {
   if (req.method !== 'POST') {
@@ -115,6 +175,41 @@ Deno.serve(async (req: Request) => {
     update = await req.json() as TgUpdate
   } catch {
     return ok()
+  }
+
+  // -- callback_query (inline-button taps) — the core of "buttons in hand" (Ф2). This function
+  // handled ZERO callbacks before. Auth: the secret-token header above already proved the update is
+  // a genuine Telegram delivery, so callback_query.message.chat.id is trustworthy (same as messages). --
+  if (update.callback_query) {
+    const cbq = update.callback_query
+    const cbChatId = cbq.message?.chat?.id ?? 0
+    const cbData = cbq.data ?? ''
+    if (ALLOWED_CHAT_ID === 0 || cbChatId !== ALLOWED_CHAT_ID) return ok()
+    const sbcb: Sb = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!)
+    try {
+      if (cbData === 'fc:script') {
+        // "Мой сценарий" → prompt; the CEO's reply becomes queued_script (handled as a reply below).
+        return new Response(
+          JSON.stringify({ method: 'sendMessage', chat_id: cbChatId, text: SCRIPT_PROMPT, parse_mode: 'HTML', reply_markup: { force_reply: true } }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } },
+        )
+      }
+      let patch: Record<string, unknown> | null = null
+      if (cbData === 'fc:pause') patch = { posting_enabled: false }
+      else if (cbData === 'fc:resume') patch = { posting_enabled: true }
+      else if (cbData === 'fc:g:news') patch = { active_genre: 'news' }
+      else if (cbData === 'fc:g:quiz') patch = { active_genre: 'quiz' }
+      // 'fc:refresh' or anything else → no write, just re-render the current state.
+      const state = patch ? await fcSet(sbcb, patch, 'ceo-button') : await fcGet(sbcb)
+      // Edit the panel in place to show the new state (webhook-response method; no bot token needed).
+      return new Response(
+        JSON.stringify({ method: 'editMessageText', chat_id: cbChatId, message_id: cbq.message?.message_id, text: fcDescribe(state), parse_mode: 'HTML', reply_markup: PANEL_KB }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      )
+    } catch (err) {
+      console.error('[creator-pult] callback error:', err instanceof Error ? err.message : err)
+      return ok()
+    }
   }
 
   const message = update.message
@@ -151,6 +246,38 @@ Deno.serve(async (req: Request) => {
   )
 
   try {
+    // -- Script via ForceReply: a reply to the script prompt carries the CEO's own script text. --
+    if (message.reply_to_message?.text?.startsWith('📝 Пришли текст') && text && !text.startsWith('/')) {
+      try {
+        await fcSet(supabase, { queued_script: text }, 'ceo-forcereply')
+        return reply(chatId, `📝 Принял твой сценарий (${text.length} симв.) — уйдёт в следующем выпуске. /pult — статус.`)
+      } catch (_e) {
+        return reply(chatId, 'Не смог сохранить сценарий. Попробуй ещё раз.')
+      }
+    }
+
+    // -- Пульт control panel (Ф2): buttons + typed equivalents ------------------
+    if (cmd === '/pult') {
+      return panel(chatId, fcDescribe(await fcGet(supabase)))
+    }
+    if (cmd === '/pause') {
+      return panel(chatId, fcDescribe(await fcSet(supabase, { posting_enabled: false }, 'ceo-cmd')))
+    }
+    if (cmd === '/resume') {
+      return panel(chatId, fcDescribe(await fcSet(supabase, { posting_enabled: true }, 'ceo-cmd')))
+    }
+    if (cmd === '/genre') {
+      const g = text.split(/\s+/)[1]
+      if (g !== 'news' && g !== 'quiz') return reply(chatId, 'Жанр: <code>/genre news</code> или <code>/genre quiz</code>')
+      return panel(chatId, fcDescribe(await fcSet(supabase, { active_genre: g }, 'ceo-cmd')))
+    }
+    if (cmd === '/script') {
+      const sc = text.slice(7).trim()
+      if (!sc) return reply(chatId, 'Пришли текст: <code>/script &lt;твой сценарий&gt;</code> (или кнопка «📝 Мой сценарий»).')
+      await fcSet(supabase, { queued_script: sc }, 'ceo-cmd')
+      return reply(chatId, `📝 Принял сценарий (${sc.length} симв.) — уйдёт в следующем выпуске.`)
+    }
+
     // -- /status — brief status + last 5 queue rows -----------------------------
     if (cmd === '/status') {
       let briefStatus = ''
@@ -197,7 +324,7 @@ Deno.serve(async (req: Request) => {
         return `${emoji[r.status] ?? '•'} <code>${when}</code> ${r.cmd}${fmt} <i>(${r.status})</i>${tail}`
       })
       
-      return reply(chatId, briefStatus + '<b>Очередь задач (последние 5):</b>\n' + lines.join('\n'))
+      return panel(chatId, fcDescribe(await fcGet(supabase)) + '\n\n' + briefStatus + '<b>Очередь задач (последние 5):</b>\n' + lines.join('\n'))
     }
 
     // -- /brief <idea> — create a content brief draft --------------------------

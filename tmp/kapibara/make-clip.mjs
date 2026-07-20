@@ -17,6 +17,7 @@ import { readFileSync, writeFileSync, existsSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
 import { isPublished, closeJournal } from './journal.mjs'
 import { shouldAlert } from './publish_watchdog.mjs'
+import { getControl, setControl } from './factory_control.mjs'
 
 const A = process.argv
 const FORCE = A.includes('--force')
@@ -69,10 +70,39 @@ function runSoft(label, args, env) {
   catch { console.warn(`[make-clip] ${label}: failed/blocked — non-blocking, pipeline continues (hard gate lives inside buffer_publish)`) }
 }
 
+// ── Ф2 CONTROL — read the CEO's factory_control state ONCE. FAIL-OPEN: getControl() never throws;
+// unreachable/error → {posting on, news, no script} = exactly today's behavior. Control can only ADD
+// control, never subtract reliability. ──
+const control = await getControl()
+const postingPaused = control.posting_enabled === false
+if (postingPaused) console.log('[make-clip] ⏸ posting_enabled=false (пульт) — will generate + preview but SKIP publish.')
+if (control.active_genre && control.active_genre !== 'news') {
+  console.log(`[make-clip] active_genre='${control.active_genre}' picked in Пульт — daily-path wiring is a follow-up; running NEWS this run (fail-open).`)
+}
+// queued_script: only a FULL today.json shape {lines[],items[],ticker[]} is injected (validated + safe);
+// raw text is acknowledged + deferred (a malformed today.json would break the render). Cleared either
+// way so it fires at most once and never loops.
+let useQueuedScript = false
+if (control.queued_script) {
+  try {
+    const q = JSON.parse(control.queued_script)
+    if (Array.isArray(q.lines) && q.lines.length && Array.isArray(q.items) && Array.isArray(q.ticker)) {
+      writeFileSync('today.json', JSON.stringify(q, null, 2))
+      useQueuedScript = true
+      console.log(`[make-clip] 📝 using CEO queued_script (today.json shape, ${q.lines.length} lines) — overriding gen_news this run.`)
+    } else {
+      console.warn('[make-clip] queued_script present but not a full today.json {lines[],items[],ticker[]} — ignoring, running gen_news (raw-text→today.json is a follow-up).')
+    }
+  } catch {
+    console.warn('[make-clip] queued_script is raw text, not today.json JSON — ignoring for safety, running gen_news (raw-text path is a follow-up).')
+  }
+  try { await setControl({ queued_script: null }, 'make-clip') } catch (e) { console.warn(`[make-clip] could not clear queued_script (fail-soft): ${e.message}`) }
+}
+
 // ── Stage 1: Fresh news script ────────────────────────────────────────────
-if (SKIP_NEWS) {
-  if (!existsSync('today.json')) { console.error('[make-clip] --skip-news but today.json missing'); process.exit(1) }
-  console.log('[make-clip] --skip-news: reusing today.json')
+if (SKIP_NEWS || useQueuedScript) {
+  if (!existsSync('today.json')) { console.error('[make-clip] no today.json to reuse (skip-news / queued_script)'); process.exit(1) }
+  console.log(`[make-clip] ${useQueuedScript ? 'queued_script' : '--skip-news'}: reusing today.json`)
 } else {
   run('gen_news  →  today.json', ['gen_news.mjs', dateStr]) // pass real date — default was frozen at 2026-06-28
 }
@@ -155,7 +185,7 @@ if (!NO_PREVIEW) {
 // ── Stage 10.5: AUTO-PUBLISH (Вариант Б, CEO 2026-07-05: «всё публикуй, но только после проверок») ──
 // buffer_publish.mjs enforces the HARD gates itself: content_critic ship_ready + published.json idempotency.
 // Opt-out: --no-publish (used by CI dry_run).
-if (!NO_PUBLISH) {
+if (!NO_PUBLISH && !postingPaused) {
   let out = {}
   try { out = JSON.parse(readFileSync('latest_output.json', 'utf8')) } catch {}
   if (!out.gcsUrl && out.file) {
@@ -171,6 +201,9 @@ if (!NO_PUBLISH) {
   if (out.gcsUrl) {
     runSoft('buffer_publish  →  IG+TikTok (auto, QA-gated)', ['buffer_publish.mjs'])
   }
+} else if (postingPaused) {
+  console.log('\n[make-clip] ⏸ posting paused (пульт) — skipping IG/TikTok publish')
+  try { execFileSync('node', ['tg_notify.mjs', `⏸ Kapibara ${dateStr}: постинг на паузе (пульт) — превью отправил, в IG/TikTok НЕ публикую. /resume чтобы включить.`], { stdio: 'inherit', cwd: CWD }) } catch { console.warn('[make-clip] pause-note failed (fail-soft)') }
 } else {
   console.log('\n[make-clip] --no-publish: skipping IG/TikTok publish')
 }
@@ -179,7 +212,7 @@ if (!NO_PUBLISH) {
 // A green run that previews to Telegram yet leaves publish_journal empty (e.g. content_critic
 // fail-closed — incident 2026-07-13) must ALERT the CEO, not pass silently. Fail-soft by design:
 // wrapped + placed after publishing so the alert can NEVER break the pipeline or a gate.
-if (!NO_PREVIEW && !NO_PUBLISH) {
+if (!NO_PREVIEW && !NO_PUBLISH && !postingPaused) {
   try {
     const published = await isPublished(dateStr, 'ai-news') // true | false | null(journal unreachable)
     if (shouldAlert({ previewPosted: true, published })) {

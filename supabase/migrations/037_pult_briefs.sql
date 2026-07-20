@@ -5,7 +5,8 @@
 --
 -- Security model: RLS ON, NO policies → deny-all for anon/authenticated. Accessible only
 -- by the service role (edge function / CI poller).
--
+-- (fixed 2026-07-20: line 8 had a stray single '-' → 42601 syntax error → this migration never
+--  applied, which is why pult_briefs was 404 in prod the whole time.)
 create table if not exists public.pult_briefs (
   id             uuid        primary key default gen_random_uuid(),
   chat_id        bigint      not null,
