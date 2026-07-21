@@ -238,28 +238,38 @@ window.setFrame=(i)=>{
 
   // ── BREATHING: stronger bob with counter-phase squash-stretch ──
   // bob amplitude slowly modulated ±25% over ~9s so the loop never feels mechanical
-  const bobAmp=6.5*(1+0.25*Math.sin(t*TP*(1/9)))
-  const breathe=Math.sin(t*TP*0.42)
-  let bobY=breathe*bobAmp                        // vertical bob
-  const sy=1-breathe*0.015                      // scaleY 1±0.015, tallest when bob is lowest (counterphase)
-  const sx=1+breathe*0.015                      // conserve area: widen as it squashes
+  // LIVELIER MASCOT (2026-07-20, CEO-approved before/after): bigger breath + a gesture library so it
+  // never reads as one static sine (the critic's recurring "repetitive/static mascot" note).
+  const bobAmp=11*(1+0.25*Math.sin(t*TP*(1/9)))
+  const breathe=Math.sin(t*TP*0.5)
+  let bobY=breathe*bobAmp                        // vertical bob (was 6.5 → 11)
+  const sy=1-breathe*0.03                        // deeper squash-stretch (was 0.015)
+  const sx=1+breathe*0.03
 
-  // ── HEAD NOD at each new line: a 0.4s eased dip of ~4.5° from line.s ──
+  // ── HEAD NOD at each new line: bigger eased dip from line.s ──
   const nprog=(t-line.s)/0.40
   let nod=0
-  if(nprog>=0&&nprog<=1){const e=Math.sin(eoc(nprog)*Math.PI);nod=-4.5*e; bobY+=2.4*e}
+  if(nprog>=0&&nprog<=1){const e=Math.sin(eoc(nprog)*Math.PI);nod=-7*e; bobY+=3.5*e}
 
-  // ── EXCITED DOUBLE-BOB on item change: two quick hops over ~0.6s ──
+  // ── EXCITED DOUBLE-BOB on item change: two quick hops (bigger) ──
   const dprog=(t-itemChangedAt)/0.60
-  if(dprog>=0&&dprog<=1){bobY-=Math.abs(Math.sin(dprog*TP*2))*(1-dprog)*7}
+  if(dprog>=0&&dprog<=1){bobY-=Math.abs(Math.sin(dprog*TP*2))*(1-dprog)*16}
 
-  // ── base sway tilt (as before) + open-mouth lean + the nod ──
-  const tilt=Math.sin(t*TP*0.9)*0.6+open*0.4+nod
-  capyG.setAttribute('transform',`translate(0 ${bobY.toFixed(2)}) rotate(${tilt.toFixed(2)} 100 120) scale(${sx.toFixed(4)} ${sy.toFixed(4)}) translate(0 ${((1-sy)*120).toFixed(2)})`)
+  // ── IDLE GESTURE LIBRARY: every ~3.2s a DISTINCT move (lean-to-look / curious head-cock /
+  //    lean-right / ears-perk), eased in-out — deterministic from t so the render is reproducible ──
+  let gdx=0, gtilt=0, earBoost=0
+  const GES=['lean','cock','leanR','perk']
+  const gk=GES[Math.floor(t/3.2)%GES.length], gp=(t%3.2)/3.2, ge=Math.sin(eoc(Math.min(gp/0.55,1))*Math.PI)
+  if(gk==='lean'){gdx=-10*ge;gtilt=-4*ge} else if(gk==='leanR'){gdx=10*ge;gtilt=4*ge}
+  else if(gk==='cock'){gtilt=8*ge;bobY-=2*ge} else if(gk==='perk'){earBoost=6*ge;bobY-=5*ge}
 
-  // ── EAR micro-wiggle: ±2° at ~1.3Hz, phase-offset per ear, pivot at each ear base ──
-  const ew=1.3
-  const eL=Math.sin(t*TP*ew)*2.0, eR=Math.sin(t*TP*ew+1.7)*2.0
+  // ── base sway (bigger) + open-mouth lean + nod + gesture ──
+  const tilt=Math.sin(t*TP*0.85)*1.8+open*0.5+nod+gtilt
+  capyG.setAttribute('transform',`translate(${gdx.toFixed(2)} ${bobY.toFixed(2)}) rotate(${tilt.toFixed(2)} 100 120) scale(${sx.toFixed(4)} ${sy.toFixed(4)}) translate(0 ${((1-sy)*120).toFixed(2)})`)
+
+  // ── EAR wiggle (bigger) + perk on the 'perk' gesture ──
+  const ew=1.6
+  const eL=Math.sin(t*TP*ew)*4.0-earBoost, eR=Math.sin(t*TP*ew+1.7)*4.0+earBoost
   earL.setAttribute('transform',`rotate(${eL.toFixed(2)} 68 78)`)
   earR.setAttribute('transform',`rotate(${eR.toFixed(2)} 132 78)`)
 

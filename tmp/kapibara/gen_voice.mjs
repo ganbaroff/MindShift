@@ -1,11 +1,17 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
-import { LOCKED_VOICE } from './env.mjs'
+import { LOCKED_VOICE, getEnv } from './env.mjs'
 import { synthPcm, pcmToWav } from './gemini_tts.mjs'
 
-// Factory Law 6 — voice is the LOCKED_VOICE constant, not a CLI flag. No argv override.
-const VOICE = LOCKED_VOICE
-const MODEL = 'gemini-2.5-flash-preview-tts'
+// Factory Law 6 (updated 2026-07-20, CEO ear-verdict) — NEWS voice = ElevenLabs Brian, NOT Gemini/Algieba.
+// The critic flagged Algieba "robotic" daily; a 4-way ear test picked Brian. One voice per character still
+// holds — the ENGINE is now ElevenLabs. Algieba (Gemini TTS) stays the FALLBACK so a bad EL day (401/quota)
+// never leaves the daily silent. (The outro still voices via LOCKED_VOICE in outro_build.mjs — unchanged here.)
+const EL_KEY = getEnv('ELEVENLABS_API_KEY')
+const EL_VOICE = 'nPczCjzI2devNBz1zQrb'                  // Brian — CEO ear-verdict 2026-07-20
+const EL_MODEL = 'eleven_multilingual_v2'
+const EL_SETTINGS = { stability: 0.4, similarity_boost: 0.75, style: 0.3, use_speaker_boost: true }  // CEO-approved sample — do not retune
+const VOICE = LOCKED_VOICE                                // Gemini fallback voice (Algieba)
 
 // Factory Law 7 — ONE frozen style directive for every line (was two: B anchor + F punchline,
 // which made lines sound like different speakers). Punchline flavor now comes from the TEXT,
@@ -58,7 +64,7 @@ if (existsSync('today.json')) {
   } catch (e) { console.warn('[gen_voice] today.json parse failed → fallback:', e.message) }
 }
 const LINES = texts.map((t, n) => ({ t, i: TPL[n].i, p: TPL[n].p, d: TPL[n].d }))
-console.log(`[gen_voice] script source: ${srcTag} (${LINES.length} lines, voice=${VOICE} [LOCKED], single STYLE for all lines)`)
+console.log(`[gen_voice] script source: ${srcTag} (${LINES.length} lines, voice=ElevenLabs Brian [primary] / ${VOICE} [fallback])`)
 
 // DRY=1 → print the mapped script and exit, no TTS (cheap connection check)
 if (process.env.DRY) {
@@ -69,12 +75,46 @@ if (process.env.DRY) {
   process.exit(0)
 }
 
-// Credits-first: free AI Studio key, auto-fallback to Vertex-on-credits on 429/quota (gemini_tts.mjs).
-async function tts(text, outWav) {
+// Gemini/Algieba synth — the FALLBACK path. Credits-first: free AI Studio key, auto-Vertex on 429 (gemini_tts.mjs).
+async function ttsGemini(text, outWav) {
   const { pcm, via } = await synthPcm(text, VOICE)
   if (via !== 'aistudio-free') console.log(`  tts via ${via}`)
   writeFileSync(outWav, pcmToWav(pcm))
   return pcm.length / (24000 * 2)
+}
+
+// ElevenLabs Brian synth — PRIMARY (modeled on el_voice.mjs). Fetches mp3, normalizes to the SAME 24kHz mono
+// WAV the Gemini path produced → build-data2 + render stay byte-compatible (only the audio SOURCE changes).
+// EL is driven by voice_settings, NOT a text style directive, so it gets the BARE line text (else Brian would
+// literally speak the directive). Throws on 401/quota/any !ok so the dispatcher can fall back to Algieba.
+async function ttsEL(text, outWav) {
+  if (!EL_KEY) throw new Error('no ELEVENLABS_API_KEY')
+  const r = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${EL_VOICE}?output_format=mp3_44100_128`, {
+    method: 'POST', headers: { 'xi-api-key': EL_KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text, model_id: EL_MODEL, voice_settings: EL_SETTINGS }),
+  })
+  if (!r.ok) { const b = await r.text().catch(() => ''); const e = new Error(`EL HTTP ${r.status} ${b.slice(0, 120)}`); e.status = r.status; throw e }
+  writeFileSync('_el_tmp.mp3', Buffer.from(await r.arrayBuffer()))
+  execFileSync('ffmpeg', ['-y', '-i', '_el_tmp.mp3', '-ar', '24000', '-ac', '1', outWav], { stdio: 'ignore' })
+  return ffprobeDur(outWav)
+}
+
+// Dispatcher: EL Brian primary; on ANY EL failure flip to Algieba for the REST of this run + alert once,
+// so a 401/quota never leaves the daily silent. `engine` reflects what the run is actually using.
+let engine = 'el', elAlerted = false
+async function synthLine(L, outWav) {
+  if (engine === 'el') {
+    try { return await ttsEL(L.t, outWav) }
+    catch (e) {
+      engine = 'gemini'
+      console.warn(`[gen_voice] ⚠ ElevenLabs Brian failed (${e.message}) → Algieba fallback for THIS run`)
+      if (!elAlerted) {
+        elAlerted = true
+        try { execFileSync('node', ['tg_notify.mjs', `⚠️ Kapibara: ElevenLabs Brian недоступен (${e.status || e.message}) — озвучил Algieba этим прогоном. Проверь квоту/ключ EL.`], { stdio: 'ignore' }) } catch {}
+      }
+    }
+  }
+  return await ttsGemini(`${L.d} "${L.t}"`, outWav)   // Algieba: the STYLE directive is part of the Gemini prompt
 }
 
 function ffprobeDur(f) {
@@ -93,19 +133,20 @@ if (existsSync(CACHE)) { try { cache = JSON.parse(readFileSync(CACHE, 'utf8')) }
 // 1) synth each line (or reuse cached), 2) build timeline with pauses, 3) concat -> voice.mp3
 const inputs = [], meta = []
 let t = 0, reused = 0
+const vtag = () => engine === 'el' ? 'el-brian' : `gemini-${VOICE}`   // cache is engine-aware (EL wav ≠ Algieba wav)
 for (let n = 0; n < LINES.length; n++) {
   const L = LINES[n]
   const wav = `ln_${String(n).padStart(2, '0')}.wav`
   const c = cache[n]
   let dur
-  if (c && c.text === L.t && c.voice === VOICE && existsSync(wav)) {
+  if (c && c.text === L.t && c.voice === vtag() && existsSync(wav)) {
     dur = ffprobeDur(wav); reused++
     console.log(`line ${n}: ${dur.toFixed(2)}s +${L.p}s pause  [cached] "${L.t.slice(0, 32)}…"`)
   } else {
-    dur = await tts(`${L.d} "${L.t}"`, wav)
-    cache[n] = { text: L.t, voice: VOICE }        // checkpoint immediately so a later 429 keeps this line
+    dur = await synthLine(L, wav)
+    cache[n] = { text: L.t, voice: vtag() }        // tag with the engine ACTUALLY used (post-dispatch)
     writeFileSync(CACHE, JSON.stringify(cache))
-    console.log(`line ${n}: ${dur.toFixed(2)}s +${L.p}s pause  "${L.t.slice(0, 32)}…"`)
+    console.log(`line ${n}: ${dur.toFixed(2)}s +${L.p}s pause  [${engine}] "${L.t.slice(0, 32)}…"`)
   }
   meta.push({ s: +t.toFixed(3), e: +(t + dur).toFixed(3), text: L.t, item: L.i })
   inputs.push({ wav, dur, pad: L.p })
@@ -127,5 +168,6 @@ args.push('-filter_complex', fc, '-map', '[out]', '-ar', '24000', '-b:a', '192k'
 execFileSync('ffmpeg', args, { stdio: ['ignore', 'ignore', 'ignore'] })
 
 const total = ffprobeDur('voice.mp3')
-writeFileSync('voiceline_meta.json', JSON.stringify({ total, voice: VOICE, lines: meta, items }))
-console.log(`\nvoice.mp3 ready: ${total.toFixed(2)}s, ${meta.length} lines, voice=${VOICE}`)
+const voiceLabel = engine === 'el' ? 'ElevenLabs Brian' : `Gemini ${VOICE} (EL fallback)`
+writeFileSync('voiceline_meta.json', JSON.stringify({ total, voice: voiceLabel, lines: meta, items }))
+console.log(`\nvoice.mp3 ready: ${total.toFixed(2)}s, ${meta.length} lines, voice=${voiceLabel}`)
