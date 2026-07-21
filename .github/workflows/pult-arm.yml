@@ -50,7 +50,7 @@ jobs:
           RESP=$(curl -sS -X POST \
             "https://api.telegram.org/bot${{ secrets.TELEGRAM_CREATORBOT_TOKEN }}/setWebhook" \
             -H 'Content-Type: application/json' \
-            -d "{\"url\":\"https://awfoqycoltvhamtrsvxk.supabase.co/functions/v1/creator-pult\",\"secret_token\":\"$PULT_SECRET\",\"drop_pending_updates\":true,\"allowed_updates\":[\"message\"]}")
+            -d "{\"url\":\"https://awfoqycoltvhamtrsvxk.supabase.co/functions/v1/creator-pult\",\"secret_token\":\"$PULT_SECRET\",\"drop_pending_updates\":true,\"allowed_updates\":[\"message\",\"callback_query\"]}")
           # RESP echoes the description but never the secret_token — safe to print.
           echo "setWebhook response: $RESP"
           if ! echo "$RESP" | grep -q '"ok":true'; then
